@@ -51,14 +51,46 @@ void wz_window_destroy(struct wzWindow *window)
 	free(window);
 }
 
-void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton)
+void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
+	size_t i;
+	struct wzWidget *widget;
+
 	assert(window);
+
+	for (i = 0; i < window->nWidgets; i++)
+	{
+		widget = window->widgets[i];
+
+		if (widget == NULL)
+			continue;
+	
+		if (widget->hover && widget->vtable.mouseButtonDown)
+		{
+			widget->vtable.mouseButtonDown(widget, mouseButton, mouseX, mouseY);
+		}
+	}
 }
 
-void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton)
+void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
+	size_t i;
+	struct wzWidget *widget;
+
 	assert(window);
+
+	for (i = 0; i < window->nWidgets; i++)
+	{
+		widget = window->widgets[i];
+
+		if (widget == NULL)
+			continue;
+	
+		if (widget->vtable.mouseButtonUp)
+		{
+			widget->vtable.mouseButtonUp(widget, mouseButton, mouseX, mouseY);
+		}
+	}
 }
 
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)

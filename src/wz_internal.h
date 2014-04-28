@@ -33,6 +33,13 @@ struct wzContext
 	const wzWidgetBehavior *behaviors[WZ_MAX_WIDGET_TYPES];
 };
 
+typedef struct
+{
+	void (*mouseButtonDown)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
+	void (*mouseButtonUp)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
+}
+wzWidgetVtable;
+
 struct wzWidget
 {
 	wzWidgetType type;
@@ -40,6 +47,7 @@ struct wzWidget
 	void *metadata;
 	struct wzWindow *window;
 	bool hover;
+	wzWidgetVtable vtable;
 };
 
 struct wzWindow

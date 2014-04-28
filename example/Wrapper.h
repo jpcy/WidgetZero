@@ -42,6 +42,8 @@ public:
 	~Window();
 	wzWindow *get() const { return window_; }
 	void mouseMove(int x, int y);
+	void mouseButtonDown(int button, int x, int y);
+	void mouseButtonUp(int button, int x, int y);
 	void draw();
 
 private:

@@ -231,6 +231,14 @@ int main(int argc, char **argv)
 			{
 				guiWindow.mouseMove(e.motion.x, e.motion.y);
 			}
+			else if (e.type == SDL_MOUSEBUTTONDOWN)
+			{
+				guiWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
+			}
+			else if (e.type == SDL_MOUSEBUTTONUP)
+			{
+				guiWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
+			}
 		}
 
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);

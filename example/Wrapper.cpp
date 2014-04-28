@@ -61,6 +61,16 @@ void Window::mouseMove(int x, int y)
 	wz_window_mouse_move(window_, x, y);
 }
 
+void Window::mouseButtonDown(int button, int x, int y)
+{
+	wz_window_mouse_button_down(window_, button, x, y);
+}
+
+void Window::mouseButtonUp(int button, int x, int y)
+{
+	wz_window_mouse_button_up(window_, button, x, y);
+}
+
 void Window::draw()
 {
 	wz_window_draw(window_);
@@ -94,10 +104,13 @@ wzSize Button::autosize()
 void Button::draw()
 {
 	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
-	bool hover = wz_widget_get_hover((struct wzWidget *)button_);
 	
 	// Background.
-	if (hover)
+	if (wz_button_is_pressed(button_))
+	{
+		SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
+	}
+	else if (wz_widget_get_hover((struct wzWidget *)button_))
 	{
 		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
 	}
@@ -109,7 +122,15 @@ void Button::draw()
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
 
 	// Border.
-	SDL_SetRenderDrawColor(g_renderer, 112, 112, 112, 255);
+	if (wz_button_is_pressed(button_))
+	{
+		SDL_SetRenderDrawColor(g_renderer, 44, 98, 139, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(g_renderer, 112, 112, 112, 255);
+	}
+
 	SDL_RenderDrawRect(g_renderer, (SDL_Rect *)&rect);
 
 	// Label.

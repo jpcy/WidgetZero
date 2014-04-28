@@ -83,8 +83,8 @@ const wzWidgetBehavior *wz_context_get_widget_behavior(struct wzContext *context
 
 struct wzWindow *wz_window_create(struct wzContext *context);
 void wz_window_destroy(struct wzWindow *window);
-void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton);
-void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton);
+void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
+void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY);
 void wz_window_draw(struct wzWindow *window);
 
@@ -104,6 +104,7 @@ typedef struct
 wzButtonBehavior;
 
 struct wzButton *wz_button_create(struct wzWindow *window);
+bool wz_button_is_pressed(struct wzButton *button);
 
 #ifdef __cplusplus
 } // extern "C"
