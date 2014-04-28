@@ -24,17 +24,21 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <memory>
 #include <SDL.h>
-#include <widgetzero/wz.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 
-static SDL_Renderer *renderer;
+#include "Example.h"
+#include "Wrapper.h"
+
+SDL_Renderer *g_renderer;
 
 static char fontFilename[] = "../example/data/DejaVuSans.ttf";
 static stbtt_fontinfo font;
 static uint8_t *fontFileBuffer;
+static const float fontHeight = 16.0f;
 static const size_t nGlyphs = 256;
 static stbtt_bakedchar glyphs[nGlyphs];
 static SDL_Surface *glyphAtlasSurface;
@@ -61,7 +65,7 @@ void ErrorAndExit(const char *format, ...)
 	exit(1);
 }
 
-void TextPrintf(int x, int y, const char *format, ...)
+void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...)
 {
 	static char buffer[2048];
 
@@ -70,7 +74,40 @@ void TextPrintf(int x, int y, const char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
-	float currentX = (float)x;
+	SDL_SetTextureColorMod(glyphAtlasTexture, r, g, b);
+	float cursorX = (float)x;
+	float cursorY = (float)y;
+
+	if (halign == TA_CENTER || halign == TA_RIGHT)
+	{
+		int width, height;
+		MeasureText(buffer, &width, &height);
+
+		if (halign == TA_CENTER)
+		{
+			cursorX -= width / 2.0f;
+		}
+		else if (halign == TA_RIGHT)
+		{
+			cursorX -= width;
+		}
+	}
+
+	if (valign == TA_TOP || valign == TA_CENTER)
+	{
+		float scale = stbtt_ScaleForMappingEmToPixels(&font, fontHeight);
+		int ascent, descent, lineGap;
+		stbtt_GetFontVMetrics(&font, &ascent, &descent, &lineGap);
+
+		if (valign == TA_TOP)
+		{
+			cursorY += ascent * scale;
+		}
+		else if (valign == TA_CENTER)
+		{
+			cursorY += (ascent + descent) * scale / 2.0f;
+		}
+	}
 
 	for (size_t i = 0; i < strlen(buffer); i++)
 	{
@@ -83,14 +120,28 @@ void TextPrintf(int x, int y, const char *format, ...)
 		src.h = g->y1 - g->y0;
 
 		SDL_Rect dest;
-		dest.x = (int)(currentX + g->xoff);
-		dest.y = (int)((float)y + g->yoff);
+		dest.x = (int)(cursorX + g->xoff);
+		dest.y = (int)(cursorY + g->yoff);
 		dest.w = src.w;
 		dest.h = src.h;
 
-		SDL_RenderCopy(renderer, glyphAtlasTexture, &src, &dest);
-		currentX += g->xadvance;
+		SDL_RenderCopy(g_renderer, glyphAtlasTexture, &src, &dest);
+		cursorX += g->xadvance;
 	}
+}
+
+void MeasureText(const char *text, int *width, int *height)
+{
+	float total = 0;
+
+	for (size_t i = 0; i < strlen(text); i++)
+	{
+		stbtt_bakedchar *g = &glyphs[text[i]];
+		total += g->xadvance;
+	}
+
+	*width = (int)total;
+	*height = (int)fontHeight;
 }
 
 int main(int argc, char **argv)
@@ -105,7 +156,7 @@ int main(int argc, char **argv)
 
 	SDL_Window *window;
 
-	if (SDL_CreateWindowAndRenderer(1024, 768, 0, &window, &renderer) < 0)
+	if (SDL_CreateWindowAndRenderer(1024, 768, 0, &window, &g_renderer) < 0)
 	{
 		ShowSdlError();
 		return 1;
@@ -149,11 +200,10 @@ int main(int argc, char **argv)
 
 	// Create font and bake glyphs to the atlas.
 	stbtt_InitFont(&font, fontFileBuffer, stbtt_GetFontOffsetForIndex(fontFileBuffer, 0));
-	stbtt_BakeFontBitmap(fontFileBuffer, 0, 32.0f, (unsigned char *)glyphAtlasSurface->pixels, glyphAtlasSurface->w, glyphAtlasSurface->h, 0, nGlyphs, glyphs);
-	free(fontFileBuffer);
+	stbtt_BakeFontBitmap(fontFileBuffer, 0, fontHeight, (unsigned char *)glyphAtlasSurface->pixels, glyphAtlasSurface->w, glyphAtlasSurface->h, 0, nGlyphs, glyphs);
 
 	// Create a texture from the glyph atlas.
-	glyphAtlasTexture = SDL_CreateTextureFromSurface(renderer, glyphAtlasSurface);
+	glyphAtlasTexture = SDL_CreateTextureFromSurface(g_renderer, glyphAtlasSurface);
 
 	if (!glyphAtlasTexture)
 	{
@@ -162,6 +212,12 @@ int main(int argc, char **argv)
 	}
 
 	SDL_SetTextureBlendMode(glyphAtlasTexture, SDL_BLENDMODE_BLEND);
+
+	// Create wz objects.
+	Context guiContext;
+	Window guiWindow(&guiContext);
+	Button guiButton(&guiWindow, "Test Button");
+	guiButton.setPosition(100, 100);
 
 	for (;;)
 	{
@@ -173,16 +229,10 @@ int main(int argc, char **argv)
 				break;
 		}
 
-		SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
-		SDL_RenderClear(renderer);
-		
-		SDL_SetTextureColorMod(glyphAtlasTexture, 128, 0, 0);
-		TextPrintf(50, 50, "Testing (red)");
-
-		SDL_SetTextureColorMod(glyphAtlasTexture, 0, 0, 192);
-		TextPrintf(50, 100, "Another test (blue)");
-
-		SDL_RenderPresent(renderer);
+		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+		SDL_RenderClear(g_renderer);
+		guiWindow.draw();
+		SDL_RenderPresent(g_renderer);
 	}
 
 	return 0;

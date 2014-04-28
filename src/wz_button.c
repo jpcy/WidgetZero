@@ -21,25 +21,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "wz_internal.h"
 
-#include <stdint.h>
-
-struct SDL_Renderer;
-
-extern SDL_Renderer *g_renderer;
-
-typedef enum
+struct wzButton
 {
-	TA_NONE = 0,
-	TA_LEFT = 1,
-	TA_TOP = 1,
-	TA_CENTER = 2,
-	TA_RIGHT = 3,
-	TA_BOTTOM = 3
-}
-TextAlignment;
+	struct wzWidget base;
+	wzButtonBehavior *behavior;
+};
 
-void ErrorAndExit(const char *format, ...);
-void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-void MeasureText(const char *text, int *width, int *height);
+struct wzButton *wz_button_create(struct wzWindow *window)
+{
+	struct wzButton *button;
+
+	assert(window);
+	button = (struct wzButton *)malloc(sizeof(struct wzButton));
+	memset(button, 0, sizeof(struct wzButton));
+	button->base.type = WZ_TYPE_BUTTON;
+	button->base.window = window;
+	button->behavior = (wzButtonBehavior *)wz_context_get_widget_behavior(window->context, WZ_TYPE_BUTTON);
+
+	// Add ourselves to the window.
+	wz_window_add_widget(window, (struct wzWidget *)button);
+
+	return button;
+}

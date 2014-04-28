@@ -8,12 +8,8 @@ solution "WidgetZero"
 		"_CRT_SECURE_NO_DEPRECATE"
 	}
 
-	platforms { "native", "x32", "x64" }
 	configurations { "Debug", "Release" }
 	
-	configuration "x64"
-		defines { "_WIN64", "__WIN64__" }
-			
 	configuration "Debug"
 		optimize "Debug"
 		defines "_DEBUG"
@@ -35,8 +31,10 @@ project "libwz"
 		"include/widgetzero/wz.h"
 	}
 	
-	configuration "x64"
-		defines { "_WIN64", "__WIN64__" }
+	includedirs
+	{
+		"include"
+	}
 	
 	configuration "Debug"
 		targetdir "build/libwz_debug"
@@ -92,6 +90,11 @@ project "example"
 		}
 	end
 	
+	links
+	{
+		"libwz"
+	}
+	
 	linkoptions
 	{
 		"/SAFESEH:NO" -- for MSVC2012
@@ -100,7 +103,7 @@ project "example"
 	configuration "Debug"
 		targetdir "build/bin"
 		objdir "build/example_debug"
-				
+		
 	configuration "Release"
 		targetdir "build/bin"
 		objdir "build/example_release"

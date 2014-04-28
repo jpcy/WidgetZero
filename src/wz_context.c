@@ -21,25 +21,38 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#include <assert.h>
+#include <stdlib.h>
+#include <memory.h>
+#include "wz_internal.h"
 
-#include <stdint.h>
-
-struct SDL_Renderer;
-
-extern SDL_Renderer *g_renderer;
-
-typedef enum
+struct wzContext *wz_context_create(void)
 {
-	TA_NONE = 0,
-	TA_LEFT = 1,
-	TA_TOP = 1,
-	TA_CENTER = 2,
-	TA_RIGHT = 3,
-	TA_BOTTOM = 3
-}
-TextAlignment;
+	int i;
+	struct wzContext *context = (struct wzContext *)malloc(sizeof(struct wzContext));
+	
+	for (i = 0; i < WZ_MAX_WIDGET_TYPES; i++)
+	{
+		context->behaviors[i] = NULL;
+	}
 
-void ErrorAndExit(const char *format, ...);
-void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-void MeasureText(const char *text, int *width, int *height);
+	return context;
+}
+
+void wz_context_destroy(struct wzContext *context)
+{
+	free(context);
+}
+
+void wz_context_set_widget_behavior(struct wzContext *context, wzWidgetType widgetType, const wzWidgetBehavior *behavior)
+{
+	assert(context);
+	assert(behavior);
+	context->behaviors[widgetType] = behavior;
+}
+
+const wzWidgetBehavior *wz_context_get_widget_behavior(struct wzContext *context, wzWidgetType widgetType)
+{
+	assert(context);
+	return context->behaviors[widgetType];
+}

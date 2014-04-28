@@ -21,25 +21,56 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#include <assert.h>
+#include "wz_internal.h"
 
-#include <stdint.h>
-
-struct SDL_Renderer;
-
-extern SDL_Renderer *g_renderer;
-
-typedef enum
+wzWidgetType wz_widget_get_type(struct wzWidget *widget)
 {
-	TA_NONE = 0,
-	TA_LEFT = 1,
-	TA_TOP = 1,
-	TA_CENTER = 2,
-	TA_RIGHT = 3,
-	TA_BOTTOM = 3
+	assert(widget);
+	return widget->type;
 }
-TextAlignment;
 
-void ErrorAndExit(const char *format, ...);
-void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-void MeasureText(const char *text, int *width, int *height);
+void wz_widget_set_position(struct wzWidget *widget, int x, int y)
+{
+	assert(widget);
+	widget->rect.x = x;
+	widget->rect.y = y;
+}
+
+wzPosition wz_widget_get_position(struct wzWidget *widget)
+{
+	wzPosition pos;
+
+	assert(widget);
+	pos.x = widget->rect.x;
+	pos.y = widget->rect.y;
+	return pos;
+}
+
+wzSize wz_widget_get_size(struct wzWidget *widget)
+{
+	wzSize size;
+
+	assert(widget);
+	size.w = widget->rect.w;
+	size.h = widget->rect.h;
+	return size;
+}
+
+wzRect wz_widget_get_rect(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->rect;
+}
+
+void wz_widget_set_metadata(struct wzWidget *widget, void *metadata)
+{
+	assert(widget);
+	widget->metadata = metadata;
+}
+
+void *wz_widget_get_metadata(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->metadata;
+}

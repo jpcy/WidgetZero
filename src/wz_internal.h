@@ -21,25 +21,33 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#ifndef _WZ_INTERNAL_H_
+#define _WZ_INTERNAL_H_
 
-#include <stdint.h>
+#include <widgetzero/wz.h>
 
-struct SDL_Renderer;
+#define WZ_MAX_WINDOW_WIDGETS 1024
 
-extern SDL_Renderer *g_renderer;
-
-typedef enum
+struct wzContext
 {
-	TA_NONE = 0,
-	TA_LEFT = 1,
-	TA_TOP = 1,
-	TA_CENTER = 2,
-	TA_RIGHT = 3,
-	TA_BOTTOM = 3
-}
-TextAlignment;
+	const wzWidgetBehavior *behaviors[WZ_MAX_WIDGET_TYPES];
+};
 
-void ErrorAndExit(const char *format, ...);
-void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-void MeasureText(const char *text, int *width, int *height);
+struct wzWidget
+{
+	wzWidgetType type;
+	wzRect rect;
+	void *metadata;
+	struct wzWindow *window;
+};
+
+struct wzWindow
+{
+	struct wzContext *context;
+	struct wzWidget *widgets[WZ_MAX_WINDOW_WIDGETS];
+	size_t nWidgets;
+};
+
+void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
+
+#endif

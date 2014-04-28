@@ -21,25 +21,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
+#include <widgetzero/wz.h>
 
-#include <stdint.h>
-
-struct SDL_Renderer;
-
-extern SDL_Renderer *g_renderer;
-
-typedef enum
+class Context
 {
-	TA_NONE = 0,
-	TA_LEFT = 1,
-	TA_TOP = 1,
-	TA_CENTER = 2,
-	TA_RIGHT = 3,
-	TA_BOTTOM = 3
-}
-TextAlignment;
+public:
+	Context();
+	~Context();
+	wzContext *get() const { return context_; }
 
-void ErrorAndExit(const char *format, ...);
-void TextPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-void MeasureText(const char *text, int *width, int *height);
+private:
+	wzContext *context_;
+	wzButtonBehavior buttonBehavior_;
+};
+
+class Window
+{
+public:
+	Window(Context *context);
+	~Window();
+	wzWindow *get() const { return window_; }
+	void draw();
+
+private:
+	wzWindow *window_;
+};
+
+class Button
+{
+public:
+	Button(Window *window, const char *label);
+	void setPosition(int x, int y);
+	wzSize autosize();
+	void draw();
+
+private:
+	wzButton *button_;
+	char label_[64];
+};
