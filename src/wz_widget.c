@@ -63,6 +63,12 @@ wzRect wz_widget_get_rect(struct wzWidget *widget)
 	return widget->rect;
 }
 
+bool wz_widget_get_hover(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->hover;
+}
+
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata)
 {
 	assert(widget);

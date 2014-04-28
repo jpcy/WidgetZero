@@ -56,6 +56,11 @@ Window::~Window()
 	wz_window_destroy(window_);
 }
 
+void Window::mouseMove(int x, int y)
+{
+	wz_window_mouse_move(window_, x, y);
+}
+
 void Window::draw()
 {
 	wz_window_draw(window_);
@@ -89,9 +94,18 @@ wzSize Button::autosize()
 void Button::draw()
 {
 	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
+	bool hover = wz_widget_get_hover((struct wzWidget *)button_);
 	
 	// Background.
-	SDL_SetRenderDrawColor(g_renderer, 218, 218, 218, 255);
+	if (hover)
+	{
+		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(g_renderer, 218, 218, 218, 255);
+	}
+
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
 
 	// Border.

@@ -63,7 +63,22 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton)
 
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 {
+	size_t i;
+	struct wzWidget *widget;
+	wzRect rect;
+
 	assert(window);
+
+	for (i = 0; i < window->nWidgets; i++)
+	{
+		widget = window->widgets[i];
+
+		if (widget == NULL)
+			continue;
+	
+		rect = wz_widget_get_rect(widget);
+		widget->hover = (mouseX >= rect.x && mouseX < rect.x + rect.w && mouseY >= rect.y && mouseY < rect.y + rect.h);
+	}
 }
 
 void wz_window_draw(struct wzWindow *window)

@@ -39,6 +39,7 @@ struct wzWidget
 	wzRect rect;
 	void *metadata;
 	struct wzWindow *window;
+	bool hover;
 };
 
 struct wzWindow

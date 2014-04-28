@@ -93,6 +93,7 @@ void wz_widget_set_position(struct wzWidget *widget, int x, int y);
 wzPosition wz_widget_get_position(struct wzWidget *widget);
 wzSize wz_widget_get_size(struct wzWidget *widget);
 wzRect wz_widget_get_rect(struct wzWidget *widget);
+bool wz_widget_get_hover(struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 

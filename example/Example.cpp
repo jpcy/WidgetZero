@@ -227,6 +227,10 @@ int main(int argc, char **argv)
 		{
 			if (e.type == SDL_QUIT)
 				break;
+			else if (e.type == SDL_MOUSEMOTION)
+			{
+				guiWindow.mouseMove(e.motion.x, e.motion.y);
+			}
 		}
 
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);

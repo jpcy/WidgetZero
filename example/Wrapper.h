@@ -41,6 +41,7 @@ public:
 	Window(Context *context);
 	~Window();
 	wzWindow *get() const { return window_; }
+	void mouseMove(int x, int y);
 	void draw();
 
 private:
