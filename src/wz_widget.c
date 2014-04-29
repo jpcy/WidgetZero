@@ -92,3 +92,36 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 	assert(widget);
 	widget->vtable.draw = draw;
 }
+
+bool wz_widget_can_have_child_widgets(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->canHaveChildWidgets;
+}
+
+void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
+{
+	assert(widget);
+	assert(child);
+
+	if (!widget->canHaveChildWidgets)
+		return;
+
+	if (!widget->firstChild)
+	{
+		widget->firstChild = child;
+		widget->firstChild->prev = widget->firstChild;
+		widget->firstChild->next = widget->firstChild;
+	}
+	else
+	{
+		struct wzWidget *prev, *next;
+
+		prev = widget->firstChild->prev;
+		next = widget->firstChild;
+		child->next = next;
+		child->prev = prev;
+		next->prev = child;
+		prev->next = child;
+	}
+}

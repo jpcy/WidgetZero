@@ -21,56 +21,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <widgetzero/wz.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include "wz_internal.h"
 
-class Context
+struct wzGroupBox
 {
-public:
-	Context();
-	~Context();
-	wzContext *get() const { return context_; }
-
-private:
-	wzContext *context_;
+	struct wzWidget base;
 };
 
-class Window
+struct wzGroupBox *wz_groupbox_create(struct wzWindow *window)
 {
-public:
-	Window(Context *context);
-	~Window();
-	wzWindow *get() const { return window_; }
-	void mouseMove(int x, int y);
-	void mouseButtonDown(int button, int x, int y);
-	void mouseButtonUp(int button, int x, int y);
-	void draw();
+	struct wzGroupBox *groupbox;
 
-private:
-	wzWindow *window_;
-};
+	assert(window);
+	groupbox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
+	memset(groupbox, 0, sizeof(struct wzGroupBox));
+	groupbox->base.type = WZ_TYPE_GROUPBOX;
+	groupbox->base.window = window;
 
-class Button
-{
-public:
-	Button(Window *window, const char *label);
-	void setPosition(int x, int y);
-	wzSize autosize();
-	void draw();
+	// Add ourselves to the window.
+	wz_window_add_widget(window, (struct wzWidget *)groupbox);
 
-private:
-	wzButton *button_;
-	char label_[64];
-};
-
-class GroupBox
-{
-public:
-	GroupBox(Window *window, const char *label);
-	void setPosition(int x, int y);
-	wzSize autosize();
-	void draw();
-
-private:
-	wzGroupBox *groupBox_;
-	char label_[64];
-};
+	return groupbox;
+}

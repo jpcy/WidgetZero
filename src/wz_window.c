@@ -106,28 +106,44 @@ void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 	}
 }
 
+static wz_widget_draw_recursive(struct wzWidget *widget)
+{
+	wzSize size;
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->vtable.autosize)
+	{
+		size = widget->vtable.autosize(widget);
+		widget->rect.w = size.w;
+		widget->rect.h = size.h;
+	}
+
+	if (widget->vtable.draw)
+	{
+		widget->vtable.draw(widget);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_widget_draw_recursive(child);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
 void wz_window_draw(struct wzWindow *window)
 {
 	struct wzWidget *widget;
-	wzSize size;
-
+	
 	assert(window);
 	widget = window->firstChild;
 
 	while (widget)
 	{
-		if (widget->vtable.autosize)
-		{
-			size = widget->vtable.autosize(widget);
-			widget->rect.w = size.w;
-			widget->rect.h = size.h;
-		}
-
-		if (widget->vtable.draw)
-		{
-			widget->vtable.draw(widget);
-		}
-
+		wz_widget_draw_recursive(widget);
 		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }

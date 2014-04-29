@@ -218,6 +218,8 @@ int main(int argc, char **argv)
 	Window guiWindow(&guiContext);
 	Button guiButton(&guiWindow, "Test Button");
 	guiButton.setPosition(100, 100);
+	GroupBox guiGroupBox(&guiWindow, "Test GroupBox");
+	guiGroupBox.setPosition(100, 300);
 
 	for (;;)
 	{

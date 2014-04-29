@@ -48,6 +48,8 @@ struct wzWidget
 	struct wzWindow *window;
 	bool hover;
 	wzWidgetVtable vtable;
+	bool canHaveChildWidgets;
+	struct wzWidget *firstChild;
 	struct wzWidget *prev;
 	struct wzWidget *next;
 };

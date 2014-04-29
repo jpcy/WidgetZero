@@ -146,3 +146,67 @@ void Button::draw()
 	// Label.
 	TextPrintf(rect.x + rect.w / 2, rect.y + rect.h / 2, TA_CENTER, TA_CENTER, 0, 0, 0, label_);
 }
+
+//------------------------------------------------------------------------------
+
+wzSize GroupBoxAutosize(struct wzWidget *widget)
+{
+	GroupBox *groupBox = (GroupBox *)wz_widget_get_metadata(widget);
+	return groupBox->autosize();
+}
+
+void GroupBoxDraw(struct wzWidget *widget)
+{
+	GroupBox *groupBox = (GroupBox *)wz_widget_get_metadata(widget);
+	groupBox->draw();
+}
+
+GroupBox::GroupBox(Window *window, const char *label)
+{
+	struct wzWidget *widget;
+
+	strcpy(label_, label);
+	groupBox_ = wz_groupbox_create(window->get());
+	widget = (struct wzWidget *)groupBox_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_autosize_function(widget, GroupBoxAutosize);
+	wz_widget_set_draw_function(widget, GroupBoxDraw);
+}
+
+void GroupBox::setPosition(int x, int y)
+{
+	wz_widget_set_position((struct wzWidget *)groupBox_, x, y);
+}
+
+wzSize GroupBox::autosize()
+{
+	wzSize size;
+	size.w = 200;
+	size.h = 200;
+	return size;
+}
+
+void GroupBox::draw()
+{
+	const int textLeftMargin = 20;
+	const int textBorderSpacing = 5;
+
+	wzRect rect = wz_widget_get_rect((struct wzWidget *)groupBox_);
+	
+	// Background.
+	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Border - left, bottom, right, top left, top right.
+	int textWidth, textHeight;
+	MeasureText(label_, &textWidth, &textHeight);
+	SDL_SetRenderDrawColor(g_renderer, 98, 135, 157, 255);
+	SDL_RenderDrawLine(g_renderer, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h);
+	SDL_RenderDrawLine(g_renderer, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h);
+	SDL_RenderDrawLine(g_renderer, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h);
+	SDL_RenderDrawLine(g_renderer, rect.x, rect.y + textHeight / 2, rect.x + textLeftMargin - textBorderSpacing, rect.y + textHeight / 2);
+	SDL_RenderDrawLine(g_renderer, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2);
+
+	// Label.
+	TextPrintf(rect.x + textLeftMargin, rect.y, TA_LEFT, TA_TOP, 0, 0, 0, label_);
+}

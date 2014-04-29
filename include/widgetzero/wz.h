@@ -42,11 +42,13 @@ struct wzContext;
 struct wzWindow;
 struct wzWidget;
 struct wzButton;
+struct wzGroupBox;
 
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_BUTTON,
+	WZ_TYPE_GROUPBOX,
 	WZ_MAX_WIDGET_TYPES = 64
 }
 wzWidgetType;
@@ -89,9 +91,13 @@ void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_autosize_function(struct wzWidget *widget, wzSize (*autosize)(struct wzWidget *));
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
+bool wz_widget_can_have_child_widgets(struct wzWidget *widget);
+void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 struct wzButton *wz_button_create(struct wzWindow *window);
 bool wz_button_is_pressed(struct wzButton *button);
+
+struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 
 #ifdef __cplusplus
 } // extern "C"
