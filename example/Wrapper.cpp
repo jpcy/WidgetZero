@@ -71,12 +71,6 @@ void Window::draw()
 
 //------------------------------------------------------------------------------
 
-wzSize ButtonAutosize(struct wzWidget *widget)
-{
-	Button *button = (Button *)wz_widget_get_metadata(widget);
-	return button->autosize();
-}
-
 void ButtonDraw(struct wzWidget *widget)
 {
 	Button *button = (Button *)wz_widget_get_metadata(widget);
@@ -86,29 +80,24 @@ void ButtonDraw(struct wzWidget *widget)
 Button::Button(Window *window, const char *label)
 {
 	struct wzWidget *widget;
+	wzSize size;
 
 	strcpy(label_, label);
 	button_ = wz_button_create(window->get());
 	widget = (struct wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_autosize_function(widget, ButtonAutosize);
 	wz_widget_set_draw_function(widget, ButtonDraw);
+
+	// Calculate size based on label text plus padding.
+	MeasureText(label_, &size.w, &size.h);
+	size.w += 16;
+	size.h += 8;
+	wz_widget_set_size(widget, size);
 }
 
 void Button::setPosition(int x, int y)
 {
 	wz_widget_set_position((struct wzWidget *)button_, x, y);
-}
-
-wzSize Button::autosize()
-{
-	wzSize size;
-	MeasureText(label_, &size.w, &size.h);
-
-	// Add padding.
-	size.w += 16;
-	size.h += 8;
-	return size;
 }
 
 void Button::draw()
@@ -149,12 +138,6 @@ void Button::draw()
 
 //------------------------------------------------------------------------------
 
-wzSize GroupBoxAutosize(struct wzWidget *widget)
-{
-	GroupBox *groupBox = (GroupBox *)wz_widget_get_metadata(widget);
-	return groupBox->autosize();
-}
-
 void GroupBoxDraw(struct wzWidget *widget)
 {
 	GroupBox *groupBox = (GroupBox *)wz_widget_get_metadata(widget);
@@ -164,26 +147,22 @@ void GroupBoxDraw(struct wzWidget *widget)
 GroupBox::GroupBox(Window *window, const char *label)
 {
 	struct wzWidget *widget;
+	wzSize size;
 
 	strcpy(label_, label);
 	groupBox_ = wz_groupbox_create(window->get());
 	widget = (struct wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_autosize_function(widget, GroupBoxAutosize);
 	wz_widget_set_draw_function(widget, GroupBoxDraw);
+
+	size.w = 200;
+	size.h = 200;
+	wz_widget_set_size(widget, size);
 }
 
 void GroupBox::setPosition(int x, int y)
 {
 	wz_widget_set_position((struct wzWidget *)groupBox_, x, y);
-}
-
-wzSize GroupBox::autosize()
-{
-	wzSize size;
-	size.w = 200;
-	size.h = 200;
-	return size;
 }
 
 void GroupBox::draw()

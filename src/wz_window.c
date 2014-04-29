@@ -108,17 +108,9 @@ void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 
 static wz_widget_draw_recursive(struct wzWidget *widget)
 {
-	wzSize size;
 	struct wzWidget *child;
 
 	assert(widget);
-
-	if (widget->vtable.autosize)
-	{
-		size = widget->vtable.autosize(widget);
-		widget->rect.w = size.w;
-		widget->rect.h = size.h;
-	}
 
 	if (widget->vtable.draw)
 	{

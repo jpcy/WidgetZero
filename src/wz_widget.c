@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <assert.h>
+#include <string.h>
 #include "wz_internal.h"
 
 wzWidgetType wz_widget_get_type(struct wzWidget *widget)
@@ -47,6 +48,13 @@ wzPosition wz_widget_get_position(struct wzWidget *widget)
 	return pos;
 }
 
+void wz_widget_set_size(struct wzWidget *widget, wzSize size)
+{
+	assert(widget);
+	widget->rect.w = size.w;
+	widget->rect.h = size.h;
+}
+
 wzSize wz_widget_get_size(struct wzWidget *widget)
 {
 	wzSize size;
@@ -55,6 +63,12 @@ wzSize wz_widget_get_size(struct wzWidget *widget)
 	size.w = widget->rect.w;
 	size.h = widget->rect.h;
 	return size;
+}
+
+void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	assert(widget);
+	memcpy(&widget->rect, &rect, sizeof(wzRect));
 }
 
 wzRect wz_widget_get_rect(struct wzWidget *widget)
@@ -79,12 +93,6 @@ void *wz_widget_get_metadata(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->metadata;
-}
-
-void wz_widget_set_autosize_function(struct wzWidget *widget, wzSize (*autosize)(struct wzWidget *))
-{
-	assert(widget);
-	widget->vtable.autosize = autosize;
 }
 
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *))

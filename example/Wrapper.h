@@ -54,7 +54,6 @@ class Button
 public:
 	Button(Window *window, const char *label);
 	void setPosition(int x, int y);
-	wzSize autosize();
 	void draw();
 
 private:
@@ -67,7 +66,6 @@ class GroupBox
 public:
 	GroupBox(Window *window, const char *label);
 	void setPosition(int x, int y);
-	wzSize autosize();
 	void draw();
 
 private:

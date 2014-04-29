@@ -33,7 +33,6 @@ struct wzContext
 
 typedef struct
 {
-	wzSize (*autosize)(struct wzWidget *);
 	void (*draw)(struct wzWidget *);
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
