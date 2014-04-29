@@ -102,6 +102,12 @@ void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 	{
 		rect = wz_widget_get_rect(widget);
 		widget->hover = (mouseX >= rect.x && mouseX < rect.x + rect.w && mouseY >= rect.y && mouseY < rect.y + rect.h);
+
+		if (widget->vtable.mouse_move)
+		{
+			widget->vtable.mouse_move(widget, mouseX, mouseY);
+		}
+
 		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }

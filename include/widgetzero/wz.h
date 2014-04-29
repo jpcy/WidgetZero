@@ -96,7 +96,9 @@ bool wz_widget_can_have_child_widgets(struct wzWidget *widget);
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 struct wzButton *wz_button_create(struct wzWindow *window);
+void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(struct wzButton *button);
+bool wz_button_is_set(struct wzButton *button);
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 

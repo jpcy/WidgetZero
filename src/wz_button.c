@@ -29,7 +29,9 @@ SOFTWARE.
 struct wzButton
 {
 	struct wzWidget base;
+	bool toggleBehavior;
 	bool isPressed;
+	bool isSet;
 };
 
 static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -50,9 +52,31 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	struct wzButton *button;
 
 	assert(widget);
+
+	if (!widget->hover)
+		return;
+
 	button = (struct wzButton *)widget;
 
 	if (mouseButton == 1)
+	{
+		button->isPressed = false;
+
+		if (button->toggleBehavior)
+		{
+			button->isSet = !button->isSet;
+		}
+	}
+}
+
+static void wz_button_mouse_move(struct wzWidget *widget, int mouseX, int mouseY)
+{
+	struct wzButton *button;
+
+	assert(widget);
+	button = (struct wzButton *)widget;
+
+	if (!button->base.hover)
 	{
 		button->isPressed = false;
 	}
@@ -69,6 +93,7 @@ struct wzButton *wz_button_create(struct wzWindow *window)
 	button->base.window = window;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
+	button->base.vtable.mouse_move = wz_button_mouse_move;
 
 	// Add ourselves to the window.
 	wz_window_add_widget(window, (struct wzWidget *)button);
@@ -76,8 +101,20 @@ struct wzButton *wz_button_create(struct wzWindow *window)
 	return button;
 }
 
+void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled)
+{
+	assert(button);
+	button->toggleBehavior = enabled;
+}
+
 bool wz_button_is_pressed(struct wzButton *button)
 {
 	assert(button);
 	return button->isPressed;
+}
+
+bool wz_button_is_set(struct wzButton *button)
+{
+	assert(button);
+	return button->isSet;
 }

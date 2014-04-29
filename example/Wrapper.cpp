@@ -100,6 +100,11 @@ void Button::setPosition(int x, int y)
 	wz_widget_set_position((struct wzWidget *)button_, x, y);
 }
 
+wzRect Button::getRect()
+{
+	return wz_widget_get_rect((struct wzWidget *)button_);
+}
+
 void Button::draw()
 {
 	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
@@ -134,6 +139,81 @@ void Button::draw()
 
 	// Label.
 	TextPrintf(rect.x + rect.w / 2, rect.y + rect.h / 2, TA_CENTER, TA_CENTER, 0, 0, 0, label_);
+}
+
+//------------------------------------------------------------------------------
+
+void CheckboxDraw(struct wzWidget *widget)
+{
+	Checkbox *checkbox = (Checkbox *)wz_widget_get_metadata(widget);
+	checkbox->draw();
+}
+
+Checkbox::Checkbox(Window *window, const char *label)
+{
+	struct wzWidget *widget;
+	wzSize size;
+
+	strcpy(label_, label);
+	button_ = wz_button_create(window->get());
+	widget = (struct wzWidget *)button_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, CheckboxDraw);
+	wz_button_set_toggle_behavior(button_, true);
+
+	// Calculate size.
+	MeasureText(label_, &size.w, &size.h);
+	size.w += boxSize + boxRightMargin;
+	size.w += 16;
+	size.h += 8;
+	wz_widget_set_size(widget, size);
+}
+
+void Checkbox::setPosition(int x, int y)
+{
+	wz_widget_set_position((struct wzWidget *)button_, x, y);
+}
+
+void Checkbox::draw()
+{
+	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
+	
+	// Box.
+	SDL_Rect boxRect;
+	boxRect.x = rect.x;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - boxSize / 2.0f);
+	boxRect.w = boxSize;
+	boxRect.h = boxSize;
+
+	// Box background.
+	if (wz_button_is_pressed(button_))
+	{
+		SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
+		SDL_RenderFillRect(g_renderer, &boxRect);
+	}
+	else if (wz_widget_get_hover((struct wzWidget *)button_))
+	{
+		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
+		SDL_RenderFillRect(g_renderer, &boxRect);
+	}
+
+	// Box border.
+	SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
+	SDL_RenderDrawRect(g_renderer, &boxRect);
+
+	// Box checkmark.
+	if (wz_button_is_set(button_))
+	{
+		boxRect.x = rect.x + 4;
+		boxRect.y = (int)(rect.y + rect.h / 2.0f - boxSize / 2.0f) + 4;
+		boxRect.w = boxSize - 8;
+		boxRect.h = boxSize - 8;
+		SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(g_renderer, &boxRect);
+	}
+
+	// Label.
+	TextPrintf(rect.x + boxSize + boxRightMargin, rect.y + rect.h / 2, TA_LEFT, TA_CENTER, 0, 0, 0, label_);
 }
 
 //------------------------------------------------------------------------------

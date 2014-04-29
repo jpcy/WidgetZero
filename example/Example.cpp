@@ -216,8 +216,14 @@ int main(int argc, char **argv)
 	// Create wz objects.
 	Context guiContext;
 	Window guiWindow(&guiContext);
+
 	Button guiButton(&guiWindow, "Test Button");
 	guiButton.setPosition(100, 100);
+
+	wzRect buttonRect = guiButton.getRect();
+	Checkbox guiCheckbox(&guiWindow, "Toggle me!");
+	guiCheckbox.setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
+
 	GroupBox guiGroupBox(&guiWindow, "Test GroupBox");
 	guiGroupBox.setPosition(100, 300);
 

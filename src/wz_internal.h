@@ -36,6 +36,7 @@ typedef struct
 	void (*draw)(struct wzWidget *);
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
+	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY);
 }
 wzWidgetVtable;
 

@@ -54,11 +54,27 @@ class Button
 public:
 	Button(Window *window, const char *label);
 	void setPosition(int x, int y);
+	wzRect getRect();
 	void draw();
 
 private:
 	wzButton *button_;
 	char label_[64];
+};
+
+class Checkbox
+{
+public:
+	Checkbox(Window *window, const char *label);
+	void setPosition(int x, int y);
+	void draw();
+
+private:
+	wzButton *button_;
+	char label_[64];
+
+	static const int boxSize = 16;
+	static const int boxRightMargin = 8;
 };
 
 class GroupBox
