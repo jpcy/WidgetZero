@@ -25,7 +25,7 @@ SOFTWARE.
 #include <string.h>
 #include "wz_internal.h"
 
-wzWidgetType wz_widget_get_type(struct wzWidget *widget)
+wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->type;
@@ -38,7 +38,7 @@ void wz_widget_set_position(struct wzWidget *widget, int x, int y)
 	widget->rect.y = y;
 }
 
-wzPosition wz_widget_get_position(struct wzWidget *widget)
+wzPosition wz_widget_get_position(const struct wzWidget *widget)
 {
 	wzPosition pos;
 
@@ -55,7 +55,7 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 	widget->rect.h = size.h;
 }
 
-wzSize wz_widget_get_size(struct wzWidget *widget)
+wzSize wz_widget_get_size(const struct wzWidget *widget)
 {
 	wzSize size;
 
@@ -71,13 +71,13 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	memcpy(&widget->rect, &rect, sizeof(wzRect));
 }
 
-wzRect wz_widget_get_rect(struct wzWidget *widget)
+wzRect wz_widget_get_rect(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->rect;
 }
 
-bool wz_widget_get_hover(struct wzWidget *widget)
+bool wz_widget_get_hover(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->hover;
@@ -101,7 +101,7 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 	widget->vtable.draw = draw;
 }
 
-bool wz_widget_can_have_child_widgets(struct wzWidget *widget)
+bool wz_widget_can_have_child_widgets(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->canHaveChildWidgets;

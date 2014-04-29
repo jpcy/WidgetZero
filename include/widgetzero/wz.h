@@ -81,24 +81,24 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mou
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY);
 void wz_window_draw(struct wzWindow *window);
 
-wzWidgetType wz_widget_get_type(struct wzWidget *widget);
+wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 void wz_widget_set_position(struct wzWidget *widget, int x, int y);
-wzPosition wz_widget_get_position(struct wzWidget *widget);
+wzPosition wz_widget_get_position(const struct wzWidget *widget);
 void wz_widget_set_size(struct wzWidget *widget, wzSize size);
-wzSize wz_widget_get_size(struct wzWidget *widget);
+wzSize wz_widget_get_size(const struct wzWidget *widget);
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
-wzRect wz_widget_get_rect(struct wzWidget *widget);
-bool wz_widget_get_hover(struct wzWidget *widget);
+wzRect wz_widget_get_rect(const struct wzWidget *widget);
+bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
-bool wz_widget_can_have_child_widgets(struct wzWidget *widget);
+bool wz_widget_can_have_child_widgets(const struct wzWidget *widget);
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 struct wzButton *wz_button_create(struct wzWindow *window);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
-bool wz_button_is_pressed(struct wzButton *button);
-bool wz_button_is_set(struct wzButton *button);
+bool wz_button_is_pressed(const struct wzButton *button);
+bool wz_button_is_set(const struct wzButton *button);
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 

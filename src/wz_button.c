@@ -107,13 +107,13 @@ void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled)
 	button->toggleBehavior = enabled;
 }
 
-bool wz_button_is_pressed(struct wzButton *button)
+bool wz_button_is_pressed(const struct wzButton *button)
 {
 	assert(button);
 	return button->isPressed;
 }
 
-bool wz_button_is_set(struct wzButton *button)
+bool wz_button_is_set(const struct wzButton *button)
 {
 	assert(button);
 	return button->isSet;
