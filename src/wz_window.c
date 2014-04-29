@@ -33,19 +33,22 @@ struct wzWindow *wz_window_create(struct wzContext *context)
 	assert(context);
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	window->context = context;
-	memset(window->widgets, 0, sizeof(struct wzWidget *) * WZ_MAX_WINDOW_WIDGETS);
-	window->nWidgets = 0;
+	window->firstChild = NULL;
 	return window;
 }
 
 void wz_window_destroy(struct wzWindow *window)
 {
-	size_t i;
+	struct wzWidget *widget;
+	
+	assert(window);
+	widget = window->firstChild;
 
-	for (i = 0; i < window->nWidgets; i++)
+	while (widget)
 	{
-		if (window->widgets[i] != NULL)
-			free(window->widgets[i]);
+		struct wzWidget *f = widget;
+		widget = widget->next == window->firstChild ? NULL : widget->next;
+		free(f);
 	}
 
 	free(window);
@@ -53,81 +56,66 @@ void wz_window_destroy(struct wzWindow *window)
 
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
-	size_t i;
 	struct wzWidget *widget;
 
 	assert(window);
+	widget = window->firstChild;
 
-	for (i = 0; i < window->nWidgets; i++)
+	while (widget)
 	{
-		widget = window->widgets[i];
-
-		if (widget == NULL)
-			continue;
-	
 		if (widget->hover && widget->vtable.mouse_button_down)
 		{
 			widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
 		}
+
+		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }
 
 void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
-	size_t i;
 	struct wzWidget *widget;
 
 	assert(window);
+	widget = window->firstChild;
 
-	for (i = 0; i < window->nWidgets; i++)
+	while (widget)
 	{
-		widget = window->widgets[i];
-
-		if (widget == NULL)
-			continue;
-	
 		if (widget->vtable.mouse_button_up)
 		{
 			widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
 		}
+
+		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }
 
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 {
-	size_t i;
 	struct wzWidget *widget;
 	wzRect rect;
 
 	assert(window);
+	widget = window->firstChild;
 
-	for (i = 0; i < window->nWidgets; i++)
+	while (widget)
 	{
-		widget = window->widgets[i];
-
-		if (widget == NULL)
-			continue;
-	
 		rect = wz_widget_get_rect(widget);
 		widget->hover = (mouseX >= rect.x && mouseX < rect.x + rect.w && mouseY >= rect.y && mouseY < rect.y + rect.h);
+		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }
 
 void wz_window_draw(struct wzWindow *window)
 {
-	size_t i;
 	struct wzWidget *widget;
 	wzSize size;
 
 	assert(window);
+	widget = window->firstChild;
 
-	for (i = 0; i < window->nWidgets; i++)
+	while (widget)
 	{
-		widget = window->widgets[i];
-
-		if (widget == NULL)
-			continue;
-	
 		if (widget->vtable.autosize)
 		{
 			size = widget->vtable.autosize(widget);
@@ -139,26 +127,31 @@ void wz_window_draw(struct wzWindow *window)
 		{
 			widget->vtable.draw(widget);
 		}
+
+		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }
 
 void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget)
 {
-	size_t i;
-
 	assert(window);
 	assert(widget);
 
-	for (i = 0; i < WZ_MAX_WINDOW_WIDGETS; i++)
+	if (window->firstChild == NULL)
 	{
-		if (window->widgets[i] == NULL)
-		{
-			window->widgets[i] = widget;
-			
-			if (i + 1 > window->nWidgets)
-				window->nWidgets = i + 1;
+		window->firstChild = widget;
+		window->firstChild->prev = window->firstChild;
+		window->firstChild->next = window->firstChild;
+	}
+	else
+	{
+		struct wzWidget *prev, *next;
 
-			return;
-		}
+		prev = window->firstChild->prev;
+		next = window->firstChild;
+		widget->next = next;
+		widget->prev = prev;
+		next->prev = widget;
+		prev->next = widget;
 	}
 }

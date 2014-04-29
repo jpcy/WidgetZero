@@ -26,8 +26,6 @@ SOFTWARE.
 
 #include <widgetzero/wz.h>
 
-#define WZ_MAX_WINDOW_WIDGETS 1024
-
 struct wzContext
 {
 	int dummy;
@@ -50,13 +48,14 @@ struct wzWidget
 	struct wzWindow *window;
 	bool hover;
 	wzWidgetVtable vtable;
+	struct wzWidget *prev;
+	struct wzWidget *next;
 };
 
 struct wzWindow
 {
 	struct wzContext *context;
-	struct wzWidget *widgets[WZ_MAX_WINDOW_WIDGETS];
-	size_t nWidgets;
+	struct wzWidget *firstChild;
 };
 
 void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
