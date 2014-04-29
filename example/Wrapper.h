@@ -32,7 +32,6 @@ public:
 
 private:
 	wzContext *context_;
-	wzButtonBehavior buttonBehavior_;
 };
 
 class Window

@@ -30,13 +30,15 @@ SOFTWARE.
 
 struct wzContext
 {
-	const wzWidgetBehavior *behaviors[WZ_MAX_WIDGET_TYPES];
+	int dummy;
 };
 
 typedef struct
 {
-	void (*mouseButtonDown)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
-	void (*mouseButtonUp)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
+	wzSize (*autosize)(struct wzWidget *);
+	void (*draw)(struct wzWidget *);
+	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
+	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 }
 wzWidgetVtable;
 

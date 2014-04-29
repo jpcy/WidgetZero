@@ -69,17 +69,8 @@ typedef struct
 }
 wzRect;
 
-typedef struct
-{
-	void (*draw)(struct wzWidget *);
-	wzSize (*autosize)(struct wzWidget *);
-}
-wzWidgetBehavior;
-
 struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
-void wz_context_set_widget_behavior(struct wzContext *context, wzWidgetType widgetType, const wzWidgetBehavior *behavior);
-const wzWidgetBehavior *wz_context_get_widget_behavior(struct wzContext *context, wzWidgetType widgetType);
 
 struct wzWindow *wz_window_create(struct wzContext *context);
 void wz_window_destroy(struct wzWindow *window);
@@ -96,12 +87,8 @@ wzRect wz_widget_get_rect(struct wzWidget *widget);
 bool wz_widget_get_hover(struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
-
-typedef struct
-{
-	wzWidgetBehavior base;
-}
-wzButtonBehavior;
+void wz_widget_set_autosize_function(struct wzWidget *widget, wzSize (*autosize)(struct wzWidget *));
+void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
 
 struct wzButton *wz_button_create(struct wzWindow *window);
 bool wz_button_is_pressed(struct wzButton *button);

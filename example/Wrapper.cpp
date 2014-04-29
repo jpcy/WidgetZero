@@ -27,16 +27,9 @@ SOFTWARE.
 #include "Wrapper.h"
 #include "Example.h"
 
-wzSize ButtonAutosize(struct wzWidget *widget);
-void ButtonDraw(struct wzWidget *widget);
-
 Context::Context()
 {
 	context_ = wz_context_create();
-
-	buttonBehavior_.base.autosize = ButtonAutosize;
-	buttonBehavior_.base.draw = ButtonDraw;
-	wz_context_set_widget_behavior(context_, WZ_TYPE_BUTTON, (const wzWidgetBehavior *)&buttonBehavior_);
 }
 
 Context::~Context()
@@ -78,11 +71,28 @@ void Window::draw()
 
 //------------------------------------------------------------------------------
 
+wzSize ButtonAutosize(struct wzWidget *widget)
+{
+	Button *button = (Button *)wz_widget_get_metadata(widget);
+	return button->autosize();
+}
+
+void ButtonDraw(struct wzWidget *widget)
+{
+	Button *button = (Button *)wz_widget_get_metadata(widget);
+	button->draw();
+}
+
 Button::Button(Window *window, const char *label)
 {
+	struct wzWidget *widget;
+
 	strcpy(label_, label);
 	button_ = wz_button_create(window->get());
-	wz_widget_set_metadata((struct wzWidget *)button_, this);
+	widget = (struct wzWidget *)button_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_autosize_function(widget, ButtonAutosize);
+	wz_widget_set_draw_function(widget, ButtonDraw);
 }
 
 void Button::setPosition(int x, int y)
@@ -135,16 +145,4 @@ void Button::draw()
 
 	// Label.
 	TextPrintf(rect.x + rect.w / 2, rect.y + rect.h / 2, TA_CENTER, TA_CENTER, 0, 0, 0, label_);
-}
-
-wzSize ButtonAutosize(struct wzWidget *widget)
-{
-	Button *button = (Button *)wz_widget_get_metadata(widget);
-	return button->autosize();
-}
-
-void ButtonDraw(struct wzWidget *widget)
-{
-	Button *button = (Button *)wz_widget_get_metadata(widget);
-	button->draw();
 }

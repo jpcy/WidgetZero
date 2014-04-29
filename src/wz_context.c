@@ -28,31 +28,10 @@ SOFTWARE.
 
 struct wzContext *wz_context_create(void)
 {
-	int i;
-	struct wzContext *context = (struct wzContext *)malloc(sizeof(struct wzContext));
-	
-	for (i = 0; i < WZ_MAX_WIDGET_TYPES; i++)
-	{
-		context->behaviors[i] = NULL;
-	}
-
-	return context;
+	return (struct wzContext *)malloc(sizeof(struct wzContext));
 }
 
 void wz_context_destroy(struct wzContext *context)
 {
 	free(context);
-}
-
-void wz_context_set_widget_behavior(struct wzContext *context, wzWidgetType widgetType, const wzWidgetBehavior *behavior)
-{
-	assert(context);
-	assert(behavior);
-	context->behaviors[widgetType] = behavior;
-}
-
-const wzWidgetBehavior *wz_context_get_widget_behavior(struct wzContext *context, wzWidgetType widgetType)
-{
-	assert(context);
-	return context->behaviors[widgetType];
 }

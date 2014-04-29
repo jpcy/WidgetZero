@@ -80,3 +80,15 @@ void *wz_widget_get_metadata(struct wzWidget *widget)
 	assert(widget);
 	return widget->metadata;
 }
+
+void wz_widget_set_autosize_function(struct wzWidget *widget, wzSize (*autosize)(struct wzWidget *))
+{
+	assert(widget);
+	widget->vtable.autosize = autosize;
+}
+
+void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *))
+{
+	assert(widget);
+	widget->vtable.draw = draw;
+}

@@ -29,7 +29,6 @@ SOFTWARE.
 struct wzButton
 {
 	struct wzWidget base;
-	wzButtonBehavior *behavior;
 	bool isPressed;
 };
 
@@ -68,9 +67,8 @@ struct wzButton *wz_button_create(struct wzWindow *window)
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
 	button->base.window = window;
-	button->base.vtable.mouseButtonDown = wz_button_mouse_button_down;
-	button->base.vtable.mouseButtonUp = wz_button_mouse_button_up;
-	button->behavior = (wzButtonBehavior *)wz_context_get_widget_behavior(window->context, WZ_TYPE_BUTTON);
+	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
+	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 
 	// Add ourselves to the window.
 	wz_window_add_widget(window, (struct wzWidget *)button);

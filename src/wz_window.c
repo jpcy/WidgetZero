@@ -65,9 +65,9 @@ void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int m
 		if (widget == NULL)
 			continue;
 	
-		if (widget->hover && widget->vtable.mouseButtonDown)
+		if (widget->hover && widget->vtable.mouse_button_down)
 		{
-			widget->vtable.mouseButtonDown(widget, mouseButton, mouseX, mouseY);
+			widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
 		}
 	}
 }
@@ -86,9 +86,9 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mou
 		if (widget == NULL)
 			continue;
 	
-		if (widget->vtable.mouseButtonUp)
+		if (widget->vtable.mouse_button_up)
 		{
-			widget->vtable.mouseButtonUp(widget, mouseButton, mouseX, mouseY);
+			widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
 		}
 	}
 }
@@ -117,7 +117,6 @@ void wz_window_draw(struct wzWindow *window)
 {
 	size_t i;
 	struct wzWidget *widget;
-	const wzWidgetBehavior *behavior;
 	wzSize size;
 
 	assert(window);
@@ -129,11 +128,17 @@ void wz_window_draw(struct wzWindow *window)
 		if (widget == NULL)
 			continue;
 	
-		behavior = window->context->behaviors[widget->type];
-		size = behavior->autosize(widget);
-		widget->rect.w = size.w;
-		widget->rect.h = size.h;
-		behavior->draw(widget);
+		if (widget->vtable.autosize)
+		{
+			size = widget->vtable.autosize(widget);
+			widget->rect.w = size.w;
+			widget->rect.h = size.h;
+		}
+
+		if (widget->vtable.draw)
+		{
+			widget->vtable.draw(widget);
+		}
 	}
 }
 
