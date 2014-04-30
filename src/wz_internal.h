@@ -33,7 +33,11 @@ struct wzContext
 
 typedef struct
 {
-	void (*draw)(struct wzWidget *);
+	void (*draw)(struct wzWidget *widget);
+
+	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
+	void (*set_rect)(struct wzWidget *widget, wzRect rect);
+
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY);
@@ -48,7 +52,6 @@ struct wzWidget
 	struct wzWindow *window;
 	bool hover;
 	wzWidgetVtable vtable;
-	bool canHaveChildWidgets;
 	struct wzWidget *firstChild;
 	struct wzWidget *prev;
 	struct wzWidget *next;
@@ -59,7 +62,5 @@ struct wzWindow
 	struct wzContext *context;
 	struct wzWidget *firstChild;
 };
-
-void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
 
 #endif

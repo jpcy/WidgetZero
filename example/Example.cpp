@@ -227,6 +227,9 @@ int main(int argc, char **argv)
 	GroupBox guiGroupBox(&guiWindow, "Test GroupBox");
 	guiGroupBox.setPosition(100, 300);
 
+	Scroller guiScroller(&guiWindow, 20, 10, 100);
+	guiScroller.setRect(300, 50, 16, 200);
+
 	for (;;)
 	{
 		SDL_Event e;

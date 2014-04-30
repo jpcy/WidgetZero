@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <memory>
 #include <widgetzero/wz.h>
 
 class Context
@@ -53,6 +54,7 @@ class Button
 {
 public:
 	Button(Window *window, const char *label);
+	Button(wzButton *button, const char *label);
 	void setPosition(int x, int y);
 	wzRect getRect();
 	void draw();
@@ -87,4 +89,17 @@ public:
 private:
 	wzGroupBox *groupBox_;
 	char label_[64];
+};
+
+class Scroller
+{
+public:
+	Scroller(Window *window, int value, int stepValue, int maxValue);
+	void setRect(int x, int y, int w, int h);
+	void draw();
+
+private:
+	wzScroller *scroller_;
+	std::auto_ptr<Button> decrementButton;
+	std::auto_ptr<Button> incrementButton;
 };

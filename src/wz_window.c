@@ -37,6 +37,30 @@ struct wzWindow *wz_window_create(struct wzContext *context)
 	return window;
 }
 
+void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget)
+{
+	assert(window);
+	assert(widget);
+
+	if (window->firstChild == NULL)
+	{
+		window->firstChild = widget;
+		window->firstChild->prev = window->firstChild;
+		window->firstChild->next = window->firstChild;
+	}
+	else
+	{
+		struct wzWidget *prev, *next;
+
+		prev = window->firstChild->prev;
+		next = window->firstChild;
+		widget->next = next;
+		widget->prev = prev;
+		next->prev = widget;
+		prev->next = widget;
+	}
+}
+
 void wz_window_destroy(struct wzWindow *window)
 {
 	struct wzWidget *widget;
@@ -90,29 +114,45 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mou
 	}
 }
 
+static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY)
+{
+	struct wzWidget *child;
+	wzRect rect;
+
+	assert(widget);
+
+	rect = wz_widget_get_rect(widget);
+	widget->hover = WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+
+	if (widget->vtable.mouse_move)
+	{
+		widget->vtable.mouse_move(widget, mouseX, mouseY);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_widget_mouse_move_recursive(child, mouseX, mouseY);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 {
 	struct wzWidget *widget;
-	wzRect rect;
 
 	assert(window);
 	widget = window->firstChild;
 
 	while (widget)
 	{
-		rect = wz_widget_get_rect(widget);
-		widget->hover = (mouseX >= rect.x && mouseX < rect.x + rect.w && mouseY >= rect.y && mouseY < rect.y + rect.h);
-
-		if (widget->vtable.mouse_move)
-		{
-			widget->vtable.mouse_move(widget, mouseX, mouseY);
-		}
-
+		wz_widget_mouse_move_recursive(widget, mouseX, mouseY);
 		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }
 
-static wz_widget_draw_recursive(struct wzWidget *widget)
+static void wz_widget_draw_recursive(struct wzWidget *widget)
 {
 	struct wzWidget *child;
 
@@ -143,29 +183,5 @@ void wz_window_draw(struct wzWindow *window)
 	{
 		wz_widget_draw_recursive(widget);
 		widget = widget->next == window->firstChild ? NULL : widget->next;
-	}
-}
-
-void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget)
-{
-	assert(window);
-	assert(widget);
-
-	if (window->firstChild == NULL)
-	{
-		window->firstChild = widget;
-		window->firstChild->prev = window->firstChild;
-		window->firstChild->next = window->firstChild;
-	}
-	else
-	{
-		struct wzWidget *prev, *next;
-
-		prev = window->firstChild->prev;
-		next = window->firstChild;
-		widget->next = next;
-		widget->prev = prev;
-		next->prev = widget;
-		prev->next = widget;
 	}
 }

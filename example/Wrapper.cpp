@@ -93,6 +93,17 @@ Button::Button(Window *window, const char *label)
 	size.w += 16;
 	size.h += 8;
 	wz_widget_set_size(widget, size);
+
+	wz_window_add_widget(window->get(), widget);
+}
+
+Button::Button(wzButton *button, const char *label)
+{
+	strcpy(label_, label);
+	button_ = button;
+	struct wzWidget *widget = (struct wzWidget *)button_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ButtonDraw);
 }
 
 void Button::setPosition(int x, int y)
@@ -167,6 +178,8 @@ Checkbox::Checkbox(Window *window, const char *label)
 	size.w += 16;
 	size.h += 8;
 	wz_widget_set_size(widget, size);
+
+	wz_window_add_widget(window->get(), widget);
 }
 
 void Checkbox::setPosition(int x, int y)
@@ -238,6 +251,8 @@ GroupBox::GroupBox(Window *window, const char *label)
 	size.w = 200;
 	size.h = 200;
 	wz_widget_set_size(widget, size);
+
+	wz_window_add_widget(window->get(), widget);
 }
 
 void GroupBox::setPosition(int x, int y)
@@ -268,4 +283,61 @@ void GroupBox::draw()
 
 	// Label.
 	TextPrintf(rect.x + textLeftMargin, rect.y, TA_LEFT, TA_TOP, 0, 0, 0, label_);
+}
+
+//------------------------------------------------------------------------------
+
+static void ScrollerDraw(struct wzWidget *widget)
+{
+	Scroller *scroller = (Scroller *)wz_widget_get_metadata(widget);
+	scroller->draw();
+}
+
+Scroller::Scroller(Window *window, int value, int stepValue, int maxValue)
+{
+	scroller_ = wz_scroller_create(window->get());
+	wz_scroller_set_value(scroller_, value);
+	wz_scroller_set_step_value(scroller_, stepValue);
+	wz_scroller_set_max_value(scroller_, maxValue);
+	struct wzWidget *widget = (struct wzWidget *)scroller_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ScrollerDraw);
+	wz_scroller_set_nub_size(scroller_, 16);
+
+	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
+	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
+
+	wzSize buttonSize;
+	buttonSize.w = 0;
+	buttonSize.h = 16;
+	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
+	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
+
+	wz_window_add_widget(window->get(), widget);
+}
+
+void Scroller::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect((struct wzWidget *)scroller_, rect);
+}
+
+void Scroller::draw()
+{
+	wzRect rect = wz_widget_get_rect((struct wzWidget *)scroller_);
+	
+	// Background.
+	SDL_SetRenderDrawColor(g_renderer, 192, 192, 192, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Nub.
+	wzRect nubRect = wz_scroller_get_nub_rect(scroller_);
+	SDL_SetRenderDrawColor(g_renderer, 218, 218, 218, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&nubRect);
+	SDL_SetRenderDrawColor(g_renderer, 112, 112, 112, 255);
+	SDL_RenderDrawRect(g_renderer, (SDL_Rect *)&nubRect);
 }

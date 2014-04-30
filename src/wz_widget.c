@@ -33,9 +33,13 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 
 void wz_widget_set_position(struct wzWidget *widget, int x, int y)
 {
+	wzRect rect;
+
 	assert(widget);
-	widget->rect.x = x;
-	widget->rect.y = y;
+	rect = widget->rect;
+	rect.x = x;
+	rect.y = y;
+	wz_widget_set_rect(widget, rect);
 }
 
 wzPosition wz_widget_get_position(const struct wzWidget *widget)
@@ -50,9 +54,13 @@ wzPosition wz_widget_get_position(const struct wzWidget *widget)
 
 void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 {
+	wzRect rect;
+
 	assert(widget);
-	widget->rect.w = size.w;
-	widget->rect.h = size.h;
+	rect = widget->rect;
+	rect.w = size.w;
+	rect.h = size.h;
+	wz_widget_set_rect(widget, rect);
 }
 
 wzSize wz_widget_get_size(const struct wzWidget *widget)
@@ -68,7 +76,15 @@ wzSize wz_widget_get_size(const struct wzWidget *widget)
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	assert(widget);
-	memcpy(&widget->rect, &rect, sizeof(wzRect));
+
+	if (widget->vtable.set_rect)
+	{
+		widget->vtable.set_rect(widget, rect);
+	}
+	else
+	{
+		memcpy(&widget->rect, &rect, sizeof(wzRect));
+	}
 }
 
 wzRect wz_widget_get_rect(const struct wzWidget *widget)
@@ -101,19 +117,10 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 	widget->vtable.draw = draw;
 }
 
-bool wz_widget_can_have_child_widgets(const struct wzWidget *widget)
-{
-	assert(widget);
-	return widget->canHaveChildWidgets;
-}
-
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
 	assert(widget);
 	assert(child);
-
-	if (!widget->canHaveChildWidgets)
-		return;
 
 	if (!widget->firstChild)
 	{

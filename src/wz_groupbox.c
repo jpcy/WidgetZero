@@ -40,9 +40,5 @@ struct wzGroupBox *wz_groupbox_create(struct wzWindow *window)
 	memset(groupbox, 0, sizeof(struct wzGroupBox));
 	groupbox->base.type = WZ_TYPE_GROUPBOX;
 	groupbox->base.window = window;
-
-	// Add ourselves to the window.
-	wz_window_add_widget(window, (struct wzWidget *)groupbox);
-
 	return groupbox;
 }

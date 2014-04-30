@@ -94,10 +94,6 @@ struct wzButton *wz_button_create(struct wzWindow *window)
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 	button->base.vtable.mouse_move = wz_button_mouse_move;
-
-	// Add ourselves to the window.
-	wz_window_add_widget(window, (struct wzWidget *)button);
-
 	return button;
 }
 

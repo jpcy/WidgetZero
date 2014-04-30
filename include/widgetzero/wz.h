@@ -42,6 +42,7 @@ struct wzContext;
 struct wzWindow;
 struct wzWidget;
 struct wzButton;
+struct wzScroller;
 struct wzGroupBox;
 
 typedef enum
@@ -49,6 +50,7 @@ typedef enum
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
+	WZ_TYPE_SCROLLER,
 	WZ_MAX_WIDGET_TYPES = 64
 }
 wzWidgetType;
@@ -71,10 +73,13 @@ typedef struct
 }
 wzRect;
 
+#define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
+
 struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
 struct wzWindow *wz_window_create(struct wzContext *context);
+void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
 void wz_window_destroy(struct wzWindow *window);
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
 void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
@@ -92,7 +97,6 @@ bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
-bool wz_widget_can_have_child_widgets(const struct wzWidget *widget);
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 struct wzButton *wz_button_create(struct wzWindow *window);
@@ -101,6 +105,17 @@ bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
+
+struct wzScroller *wz_scroller_create(struct wzWindow *window);
+int wz_scroller_get_value(const struct wzScroller *scroller);
+void wz_scroller_set_value(struct wzScroller *scroller, int value);
+void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
+void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
+struct wzButton *wz_scroller_get_decrement_button(struct wzScroller *scroller);
+struct wzButton *wz_scroller_get_increment_button(struct wzScroller *scroller);
+int wz_scroller_get_nub_size(struct wzScroller *scroller);
+void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
+wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
 
 #ifdef __cplusplus
 } // extern "C"
