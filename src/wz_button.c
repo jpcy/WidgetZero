@@ -69,7 +69,7 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static void wz_button_mouse_move(struct wzWidget *widget, int mouseX, int mouseY)
+static void wz_button_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzButton *button;
 

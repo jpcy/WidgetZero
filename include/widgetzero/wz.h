@@ -83,7 +83,7 @@ void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
 void wz_window_destroy(struct wzWindow *window);
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
 void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
-void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY);
+void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 void wz_window_draw(struct wzWindow *window);
 
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);

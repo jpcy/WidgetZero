@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 				break;
 			else if (e.type == SDL_MOUSEMOTION)
 			{
-				guiWindow.mouseMove(e.motion.x, e.motion.y);
+				guiWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{

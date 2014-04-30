@@ -114,7 +114,7 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mou
 	}
 }
 
-static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY)
+static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWidget *child;
 	wzRect rect;
@@ -126,19 +126,19 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 
 	if (widget->vtable.mouse_move)
 	{
-		widget->vtable.mouse_move(widget, mouseX, mouseY);
+		widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 
 	child = widget->firstChild;
 
 	while (child)
 	{
-		wz_widget_mouse_move_recursive(child, mouseX, mouseY);
+		wz_widget_mouse_move_recursive(child, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
-void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
+void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWidget *widget;
 
@@ -147,7 +147,7 @@ void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY)
 
 	while (widget)
 	{
-		wz_widget_mouse_move_recursive(widget, mouseX, mouseY);
+		wz_widget_mouse_move_recursive(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }

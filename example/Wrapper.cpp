@@ -49,9 +49,9 @@ Window::~Window()
 	wz_window_destroy(window_);
 }
 
-void Window::mouseMove(int x, int y)
+void Window::mouseMove(int x, int y, int dx, int dy)
 {
-	wz_window_mouse_move(window_, x, y);
+	wz_window_mouse_move(window_, x, y, dx, dy);
 }
 
 void Window::mouseButtonDown(int button, int x, int y)
