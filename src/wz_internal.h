@@ -52,6 +52,7 @@ struct wzWidget
 	struct wzWindow *window;
 	bool hover;
 	wzWidgetVtable vtable;
+	struct wzWidget *parent;
 	struct wzWidget *firstChild;
 	struct wzWidget *prev;
 	struct wzWidget *next;

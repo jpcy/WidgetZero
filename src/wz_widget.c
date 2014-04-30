@@ -122,6 +122,8 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	assert(widget);
 	assert(child);
 
+	child->parent = widget;
+
 	if (!widget->firstChild)
 	{
 		widget->firstChild = child;

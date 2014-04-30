@@ -32,6 +32,7 @@ struct wzButton
 	bool toggleBehavior;
 	bool isPressed;
 	bool isSet;
+	void (*pressed_callback)(struct wzButton *button);
 };
 
 static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -65,6 +66,11 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 		if (button->toggleBehavior)
 		{
 			button->isSet = !button->isSet;
+		}
+
+		if (button->pressed_callback)
+		{
+			button->pressed_callback(button);
 		}
 	}
 }
@@ -113,4 +119,10 @@ bool wz_button_is_set(const struct wzButton *button)
 {
 	assert(button);
 	return button->isSet;
+}
+
+void wz_button_add_callback_pressed(struct wzButton *button, void (*pressed)(struct wzButton *button))
+{
+	assert(button);
+	button->pressed_callback = pressed;
 }

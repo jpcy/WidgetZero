@@ -78,6 +78,30 @@ void wz_window_destroy(struct wzWindow *window)
 	free(window);
 }
 
+static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->vtable.mouse_button_down)
+	{
+		widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		if (child->hover)
+		{
+			wz_widget_mouse_button_down_recursive(child, mouseButton, mouseX, mouseY);
+		}
+
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzWidget *widget;
@@ -87,12 +111,32 @@ void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int m
 
 	while (widget)
 	{
-		if (widget->hover && widget->vtable.mouse_button_down)
+		if (widget->hover)
 		{
-			widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
+			wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
 		}
 
 		widget = widget->next == window->firstChild ? NULL : widget->next;
+	}
+}
+
+static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->vtable.mouse_button_up)
+	{
+		widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_widget_mouse_button_up_recursive(child, mouseButton, mouseX, mouseY);
+		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
@@ -105,11 +149,7 @@ void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mou
 
 	while (widget)
 	{
-		if (widget->vtable.mouse_button_up)
-		{
-			widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
-		}
-
+		wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
 		widget = widget->next == window->firstChild ? NULL : widget->next;
 	}
 }

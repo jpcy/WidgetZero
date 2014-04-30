@@ -103,12 +103,15 @@ struct wzButton *wz_button_create(struct wzWindow *window);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
+void wz_button_add_callback_pressed(struct wzButton *button, void (*pressed)(struct wzButton *button));
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 
 struct wzScroller *wz_scroller_create(struct wzWindow *window);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
+void wz_scroller_decrement_value(struct wzScroller *scroller);
+void wz_scroller_increment_value(struct wzScroller *scroller);
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
 struct wzButton *wz_scroller_get_decrement_button(struct wzScroller *scroller);
