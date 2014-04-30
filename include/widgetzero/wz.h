@@ -99,11 +99,13 @@ void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
+typedef void (*wzButtonPressedCallback)(struct wzButton *);
+
 struct wzButton *wz_button_create(struct wzWindow *window);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
-void wz_button_add_callback_pressed(struct wzButton *button, void (*pressed)(struct wzButton *button));
+void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 
