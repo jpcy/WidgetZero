@@ -257,7 +257,7 @@ int wz_scroller_get_value(const struct wzScroller *scroller)
 void wz_scroller_set_value(struct wzScroller *scroller, int value)
 {
 	assert(scroller);
-	scroller->value = value;
+	scroller->value = WZ_MIN(value, scroller->maxValue);
 	wz_scroller_update_nub_rect(scroller);
 }
 
@@ -285,7 +285,11 @@ void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue)
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue)
 {
 	assert(scroller);
-	scroller->maxValue = maxValue;
+	scroller->maxValue = WZ_MAX(0, maxValue);
+
+	// Keep value in 0 to maxValue range.
+	scroller->value = WZ_MIN(scroller->value, scroller->maxValue);
+
 	wz_scroller_update_nub_rect(scroller);
 }
 

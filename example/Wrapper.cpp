@@ -296,9 +296,9 @@ static void ScrollerDraw(struct wzWidget *widget)
 Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue, bool addToWindow)
 {
 	scroller_ = wz_scroller_create(window->get(), type);
+	wz_scroller_set_max_value(scroller_, maxValue);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
-	wz_scroller_set_max_value(scroller_, maxValue);
 	struct wzWidget *widget = (struct wzWidget *)scroller_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ScrollerDraw);
