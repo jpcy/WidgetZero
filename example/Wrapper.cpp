@@ -293,7 +293,7 @@ static void ScrollerDraw(struct wzWidget *widget)
 	scroller->draw();
 }
 
-Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue)
+Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue, bool addToWindow)
 {
 	scroller_ = wz_scroller_create(window->get(), type);
 	wz_scroller_set_value(scroller_, value);
@@ -314,7 +314,8 @@ Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 
-	wz_window_add_widget(window->get(), widget);
+	if (addToWindow)
+		wz_window_add_widget(window->get(), widget);
 }
 
 void Scroller::setRect(int x, int y, int w, int h)
@@ -346,4 +347,82 @@ void Scroller::draw()
 int Scroller::getValue() const
 {
 	return wz_scroller_get_value(scroller_);
+}
+
+//------------------------------------------------------------------------------
+
+static void ListDraw(struct wzWidget *widget)
+{
+	List *list = (List *)wz_widget_get_metadata(widget);
+	list->draw();
+}
+
+List::List(Window *window, char **items, int nItems)
+{
+	list_ = wz_list_create(window->get());
+	wz_list_set_num_items(list_, nItems);
+	struct wzWidget *widget = (struct wzWidget *)list_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ListDraw);
+	wz_window_add_widget(window->get(), widget);
+	items_ = items;
+	scroller_.reset(new Scroller(window, WZ_SCROLLER_VERTICAL, 0, 1, 0, false));
+
+	wzSize scrollerSize;
+	scrollerSize.w = 16;
+	scrollerSize.h = 0;
+
+	wz_widget_set_size((struct wzWidget *)scroller_->get(), scrollerSize);
+	wz_list_set_scroller(list_, scroller_->get());
+}
+
+void List::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect((struct wzWidget *)list_, rect);
+
+	wzRect itemsRect;
+	itemsRect.x = x + itemsMargin;
+	itemsRect.y = y + itemsMargin;
+	itemsRect.w = w - itemsMargin * 2;
+	itemsRect.h = h - itemsMargin * 2;
+	wz_list_set_items_rect(list_, itemsRect);
+}
+
+void List::draw()
+{
+	wzRect rect = wz_widget_get_rect((struct wzWidget *)list_);
+	
+	// Background.
+	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Border.
+	SDL_SetRenderDrawColor(g_renderer, 130, 135, 144, 255);
+	SDL_RenderDrawRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Items.
+	int nItems = wz_list_get_num_items(list_);
+	wzRect itemsRect = wz_list_get_items_rect(list_);
+	int y = itemsRect.y;
+
+	SDL_Rect oldClipRect;
+	SDL_RenderGetClipRect(g_renderer, &oldClipRect);
+	SDL_RenderSetClipRect(g_renderer, (SDL_Rect *)&itemsRect);
+
+	for (int i = 0; i < nItems; i++)
+	{
+		// Outside widget?
+		if (y > itemsRect.y + itemsRect.h)
+			break;
+
+		TextPrintf(itemsRect.x + itemLeftPadding, y + itemHeight / 2, TA_LEFT, TA_CENTER, 0, 0, 0, items_[i]);
+		y += itemHeight;
+	}
+
+	SDL_RenderSetClipRect(g_renderer, &oldClipRect);
 }

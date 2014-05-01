@@ -233,6 +233,30 @@ int main(int argc, char **argv)
 	Scroller guiScrollerHorizontal(&guiWindow, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
 	guiScrollerHorizontal.setRect(500, 50, 200, 16);
 
+	char *listData[17] =
+	{
+		"Monday",
+		"Tuesday",
+		"Wednesday",
+		"Thursday",
+		"Friday",
+		"Saturday",
+		"Sunday",
+		"One",
+		"Two",
+		"Three",
+		"Four",
+		"Five",
+		"Six",
+		"Seven",
+		"Eight",
+		"Nine",
+		"Ten"
+	};
+
+	List guiList(&guiWindow, listData, 17);
+	guiList.setRect(400, 300, 150, 150);
+
 	for (;;)
 	{
 		SDL_Event e;

@@ -56,14 +56,34 @@ static void wz_scroller_update_nub_rect(struct wzScroller *scroller)
 	{
 		scrollSpace = scroller->base.rect.h - decrementButtonSize.h - incrementButtonSize.h - scroller->nubSize;
 		scroller->nubRect.x = scroller->base.rect.x;
-		scroller->nubRect.y = (int)(scroller->base.rect.y + decrementButtonSize.h + scrollSpace * (scroller->value / (float)scroller->maxValue));
+
+		if (scroller->maxValue == 0)
+		{
+			// Max value not set, just display at the top.
+			scroller->nubRect.y = scroller->base.rect.y;
+		}
+		else
+		{
+			scroller->nubRect.y = (int)(scroller->base.rect.y + decrementButtonSize.h + scrollSpace * (scroller->value / (float)scroller->maxValue));
+		}
+
 		scroller->nubRect.w = scroller->base.rect.w;
 		scroller->nubRect.h = scroller->nubSize;
 	}
 	else
 	{
 		scrollSpace = scroller->base.rect.w - decrementButtonSize.w - incrementButtonSize.w - scroller->nubSize;
-		scroller->nubRect.x = (int)(scroller->base.rect.x + decrementButtonSize.w + scrollSpace * (scroller->value / (float)scroller->maxValue));
+
+		if (scroller->maxValue == 0)
+		{
+			// Max value not set, just display at the left.
+			scroller->nubRect.x = scroller->base.rect.x;
+		}
+		else
+		{
+			scroller->nubRect.x = (int)(scroller->base.rect.x + decrementButtonSize.w + scrollSpace * (scroller->value / (float)scroller->maxValue));
+		}
+
 		scroller->nubRect.y = scroller->base.rect.y;
 		scroller->nubRect.w = scroller->nubSize;
 		scroller->nubRect.h = scroller->base.rect.h;
@@ -215,6 +235,7 @@ struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType sc
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_move = wz_scroller_mouse_move;
 	scroller->scrollerType = scrollerType;
+	scroller->stepValue = 1;
 
 	scroller->decrementButton = wz_button_create(window);
 	wz_button_add_callback_pressed(scroller->decrementButton, wz_scroller_decrement_button_pressed);
@@ -257,7 +278,7 @@ void wz_scroller_increment_value(struct wzScroller *scroller)
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue)
 {
 	assert(scroller);
-	scroller->stepValue = stepValue;
+	scroller->stepValue = WZ_MAX(1, stepValue);
 	wz_scroller_update_nub_rect(scroller);
 }
 

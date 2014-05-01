@@ -44,12 +44,14 @@ struct wzWidget;
 struct wzButton;
 struct wzScroller;
 struct wzGroupBox;
+struct wzList;
 
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
+	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
 	WZ_MAX_WIDGET_TYPES = 64
 }
@@ -112,6 +114,18 @@ bool wz_button_is_set(const struct wzButton *button);
 void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
+
+struct wzList *wz_list_create(struct wzWindow *window);
+void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller);
+void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
+wzRect wz_list_get_items_rect(struct wzList *list);
+void wz_list_set_item_height(struct wzList *list, int itemHeight);
+int wz_list_get_item_height(struct wzList *list);
+void wz_list_set_num_items(struct wzList *list, int nItems);
+int wz_list_get_num_items(struct wzList *list);
+void wz_list_set_selected_item(struct wzList *list, int selectedItem);
+int wz_list_get_selected_item(struct wzList *list);
+int wz_list_get_hovered_item(struct wzList *list);
 
 typedef enum
 {

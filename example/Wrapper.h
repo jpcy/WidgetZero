@@ -94,13 +94,31 @@ private:
 class Scroller
 {
 public:
-	Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue);
+	Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue, bool addToWindow = true);
 	void setRect(int x, int y, int w, int h);
 	void draw();
 	int getValue() const;
+	wzScroller *get() { return scroller_; }
 
 private:
 	wzScroller *scroller_;
 	std::auto_ptr<Button> decrementButton;
 	std::auto_ptr<Button> incrementButton;
+};
+
+class List
+{
+public:
+	List(Window *window, char **items, int nItems);
+	void setRect(int x, int y, int w, int h);
+	void draw();
+
+private:
+	wzList *list_;
+	char **items_;
+	std::auto_ptr<Scroller> scroller_;
+
+	static const int itemsMargin = 2;
+	static const int itemHeight = 18;
+	static const int itemLeftPadding = 4;
 };
