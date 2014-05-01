@@ -255,6 +255,7 @@ int main(int argc, char **argv)
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 		SDL_RenderClear(g_renderer);
 		guiWindow.draw();
+		TextPrintf(350, 50, TA_LEFT, TA_TOP, 255, 128, 128, "Scroll value: %d", guiScroller.getValue());
 		SDL_RenderPresent(g_renderer);
 	}
 

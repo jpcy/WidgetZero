@@ -341,3 +341,8 @@ void Scroller::draw()
 	SDL_SetRenderDrawColor(g_renderer, 112, 112, 112, 255);
 	SDL_RenderDrawRect(g_renderer, (SDL_Rect *)&nubRect);
 }
+
+int Scroller::getValue() const
+{
+	return wz_scroller_get_value(scroller_);
+}

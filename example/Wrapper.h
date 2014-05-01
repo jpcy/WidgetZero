@@ -97,6 +97,7 @@ public:
 	Scroller(Window *window, int value, int stepValue, int maxValue);
 	void setRect(int x, int y, int w, int h);
 	void draw();
+	int getValue() const;
 
 private:
 	wzScroller *scroller_;
