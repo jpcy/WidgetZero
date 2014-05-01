@@ -124,13 +124,7 @@ static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mous
 		scrollSpace = scroller->base.rect.h - decrementButtonHeight - incrementButtonHeight - scroller->nubSize;
 		minY = (int)(scroller->base.rect.y + decrementButtonHeight + scroller->nubSize / 2.0f);
 		maxY = (int)(scroller->base.rect.y + scroller->base.rect.h - decrementButtonHeight - scroller->nubSize / 2.0f);
-		scrollPercent = (mouseY - minY) / (float)(maxY - minY);
-
-		if (scrollPercent < 0)
-			scrollPercent = 0;
-		else if (scrollPercent > 1.0f)
-			scrollPercent = 1.0f;
-
+		scrollPercent = WZ_CLAMPED(0, (mouseY - minY) / (float)(maxY - minY), 1.0f);
 		scroller->value = (int)(scroller->maxValue * scrollPercent);
 		wz_scroller_update_nub_rect(scroller);
 	}
@@ -197,22 +191,14 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 void wz_scroller_decrement_value(struct wzScroller *scroller)
 {
 	assert(scroller);
-	scroller->value -= scroller->stepValue;
-
-	if (scroller->value < 0)
-		scroller->value = 0;
-
+	scroller->value = WZ_MAX(scroller->value - scroller->stepValue, 0);
 	wz_scroller_update_nub_rect(scroller);
 }
 
 void wz_scroller_increment_value(struct wzScroller *scroller)
 {
 	assert(scroller);
-	scroller->value += scroller->stepValue;
-
-	if (scroller->value > scroller->maxValue)
-		scroller->value = scroller->maxValue;
-
+	scroller->value = WZ_MIN(scroller->value + scroller->stepValue, scroller->maxValue);
 	wz_scroller_update_nub_rect(scroller);
 }
 

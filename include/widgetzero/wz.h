@@ -73,6 +73,9 @@ typedef struct
 }
 wzRect;
 
+#define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 
 struct wzContext *wz_context_create(void);
