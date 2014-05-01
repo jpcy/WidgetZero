@@ -34,6 +34,8 @@ struct wzScroller
 	struct wzButton *incrementButton;
 	int nubSize;
 	wzRect nubRect;
+	bool nubHover;
+	bool isNubPressed;
 };
 
 static void wz_scroller_update_nub_rect(struct wzScroller *scroller)
@@ -76,14 +78,62 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 
 static void wz_scroller_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
+	struct wzScroller *scroller;
+
+	assert(widget);
+	scroller = (struct wzScroller *)widget;
+
+	if (mouseButton == 1 && scroller->nubHover)
+	{
+		scroller->isNubPressed = true;
+	}
 }
 
 static void wz_scroller_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
+	struct wzScroller *scroller;
+
+	assert(widget);
+	scroller = (struct wzScroller *)widget;
+
+	if (mouseButton == 1)
+	{
+		scroller->isNubPressed = false;
+	}
 }
 
 static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
+	struct wzScroller *scroller;
+
+	assert(widget);
+	scroller = (struct wzScroller *)widget;
+	scroller->nubHover = WZ_POINT_IN_RECT(mouseX, mouseY, scroller->nubRect);
+
+	// Handle nub dragging.
+	if (scroller->isNubPressed && mouseDeltaY != 0)
+	{
+		int decrementButtonHeight;
+		int incrementButtonHeight;
+		int scrollSpace; // Space left when button size and nub size are subtracted.
+		int minY, maxY; // Min & max possible y coordinates for nub center.
+		float scrollPercent;
+
+		decrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->decrementButton).h;
+		incrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->incrementButton).h;
+		scrollSpace = scroller->base.rect.h - decrementButtonHeight - incrementButtonHeight - scroller->nubSize;
+		minY = (int)(scroller->base.rect.y + decrementButtonHeight + scroller->nubSize / 2.0f);
+		maxY = (int)(scroller->base.rect.y + scroller->base.rect.h - decrementButtonHeight - scroller->nubSize / 2.0f);
+		scrollPercent = (mouseY - minY) / (float)(maxY - minY);
+
+		if (scrollPercent < 0)
+			scrollPercent = 0;
+		else if (scrollPercent > 1.0f)
+			scrollPercent = 1.0f;
+
+		scroller->value = (int)(scroller->maxValue * scrollPercent);
+		wz_scroller_update_nub_rect(scroller);
+	}
 }
 
 static void wz_scroller_decrement_button_pressed(struct wzButton *button)
