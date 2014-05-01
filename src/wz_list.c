@@ -38,6 +38,30 @@ struct wzList
 	struct wzScroller *scroller;
 };
 
+static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	struct wzList *list;
+	int delta;
+
+	assert(widget);
+	widget->rect = rect;
+
+	// Clip itemsRect to rect. itemsRect should always be equal/smaller.
+	list = (struct wzList *)widget;
+	list->itemsRect.x = WZ_MAX(rect.x, list->itemsRect.x);
+	list->itemsRect.y = WZ_MAX(rect.y, list->itemsRect.y);
+
+	delta = (list->itemsRect.x + list->itemsRect.w) - (rect.x + rect.w);
+
+	if (delta > 0)
+		list->itemsRect.w -= delta;
+
+	delta = (list->itemsRect.y + list->itemsRect.h) - (rect.y + rect.h);
+
+	if (delta > 0)
+		list->itemsRect.h -= delta;
+}
+
 static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 }
@@ -59,6 +83,7 @@ struct wzList *wz_list_create(struct wzWindow *window)
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
 	list->base.window = window;
+	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
 	list->base.vtable.mouse_move = wz_list_mouse_move;
