@@ -73,6 +73,37 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 
 static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
+	struct wzList *list;
+	wzRect itemsRect, rect;
+	int i;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+	
+	// Check for item hover.
+	list->hoveredItem = -1;
+
+	// Call wz_list_get_items_rect instead of using list->itemsRect so the scroller size is excluded.
+	itemsRect = wz_list_get_items_rect(list);
+	rect.x = itemsRect.x;
+	rect.y = itemsRect.y;
+	rect.w = itemsRect.w;
+	rect.h = list->itemHeight;
+
+	for (i = 0; i < list->nItems; i++)
+	{
+		// Outside widget?
+		if (rect.y > itemsRect.y + itemsRect.h)
+			break;
+
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
+		{
+			list->hoveredItem = list->firstItem + i;
+			break;
+		}
+
+		rect.y += list->itemHeight;
+	}
 }
 
 static void wz_list_scroller_value_changed(struct wzScroller *scroller, int value)

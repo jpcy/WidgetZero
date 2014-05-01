@@ -361,6 +361,7 @@ List::List(Window *window, char **items, int nItems)
 {
 	list_ = wz_list_create(window->get());
 	wz_list_set_num_items(list_, nItems);
+	wz_list_set_item_height(list_, itemHeight);
 	struct wzWidget *widget = (struct wzWidget *)list_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ListDraw);
@@ -419,6 +420,18 @@ void List::draw()
 		// Outside widget?
 		if (y > itemsRect.y + itemsRect.h)
 			break;
+
+		// Hover.
+		if (i == wz_list_get_hovered_item(list_))
+		{
+			SDL_Rect hoverRect;
+			hoverRect.x = itemsRect.x;
+			hoverRect.y = y;
+			hoverRect.w = itemsRect.w;
+			hoverRect.h = itemHeight;
+			SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
+			SDL_RenderFillRect(g_renderer, &hoverRect);
+		}
 
 		TextPrintf(itemsRect.x + itemLeftPadding, y + itemHeight / 2, TA_LEFT, TA_CENTER, 0, 0, 0, items_[i]);
 		y += itemHeight;
