@@ -227,8 +227,11 @@ int main(int argc, char **argv)
 	GroupBox guiGroupBox(&guiWindow, "Test GroupBox");
 	guiGroupBox.setPosition(100, 300);
 
-	Scroller guiScroller(&guiWindow, 20, 10, 100);
+	Scroller guiScroller(&guiWindow, WZ_SCROLLER_VERTICAL, 20, 10, 100);
 	guiScroller.setRect(300, 50, 16, 200);
+
+	Scroller guiScrollerHorizontal(&guiWindow, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
+	guiScrollerHorizontal.setRect(500, 50, 200, 16);
 
 	for (;;)
 	{
@@ -256,6 +259,7 @@ int main(int argc, char **argv)
 		SDL_RenderClear(g_renderer);
 		guiWindow.draw();
 		TextPrintf(350, 50, TA_LEFT, TA_TOP, 255, 128, 128, "Scroll value: %d", guiScroller.getValue());
+		TextPrintf(500, 100, TA_LEFT, TA_TOP, 128, 128, 255, "Scroll value: %d", guiScrollerHorizontal.getValue());
 		SDL_RenderPresent(g_renderer);
 	}
 

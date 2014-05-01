@@ -293,9 +293,9 @@ static void ScrollerDraw(struct wzWidget *widget)
 	scroller->draw();
 }
 
-Scroller::Scroller(Window *window, int value, int stepValue, int maxValue)
+Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue)
 {
-	scroller_ = wz_scroller_create(window->get());
+	scroller_ = wz_scroller_create(window->get(), type);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
 	wz_scroller_set_max_value(scroller_, maxValue);
@@ -307,8 +307,9 @@ Scroller::Scroller(Window *window, int value, int stepValue, int maxValue)
 	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
 	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
 
+	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
 	wzSize buttonSize;
-	buttonSize.w = 0;
+	buttonSize.w = 16;
 	buttonSize.h = 16;
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);

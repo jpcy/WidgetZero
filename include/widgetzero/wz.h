@@ -112,7 +112,14 @@ void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCall
 
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 
-struct wzScroller *wz_scroller_create(struct wzWindow *window);
+typedef enum
+{
+	WZ_SCROLLER_VERTICAL,
+	WZ_SCROLLER_HORIZONTAL
+}
+wzScrollerType;
+
+struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
 void wz_scroller_decrement_value(struct wzScroller *scroller);

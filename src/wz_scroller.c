@@ -29,10 +29,14 @@ SOFTWARE.
 struct wzScroller
 {
 	struct wzWidget base;
+	wzScrollerType scrollerType;
 	int value, stepValue, maxValue;
 	struct wzButton *decrementButton;
 	struct wzButton *incrementButton;
+
+	// Height for vertical, width for horizontal.
 	int nubSize;
+
 	wzRect nubRect;
 	bool nubHover;
 	bool isNubPressed;
@@ -40,17 +44,30 @@ struct wzScroller
 
 static void wz_scroller_update_nub_rect(struct wzScroller *scroller)
 {
-	int decrementButtonHeight;
-	int incrementButtonHeight;
-	int scrollSpace; // Space left when button size and nub size are subtracted.
+	wzSize decrementButtonSize, incrementButtonSize;
 
-	decrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->decrementButton).h;
-	incrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->incrementButton).h;
-	scrollSpace = scroller->base.rect.h - decrementButtonHeight - incrementButtonHeight - scroller->nubSize;
-	scroller->nubRect.x = scroller->base.rect.x;
-	scroller->nubRect.y = (int)(scroller->base.rect.y + decrementButtonHeight + scrollSpace * (scroller->value / (float)scroller->maxValue));
-	scroller->nubRect.w = scroller->base.rect.w;
-	scroller->nubRect.h = scroller->nubSize;
+	// Space left when button size and nub size are subtracted.
+	int scrollSpace;
+
+	decrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->decrementButton);
+	incrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->incrementButton);
+
+	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+	{
+		scrollSpace = scroller->base.rect.h - decrementButtonSize.h - incrementButtonSize.h - scroller->nubSize;
+		scroller->nubRect.x = scroller->base.rect.x;
+		scroller->nubRect.y = (int)(scroller->base.rect.y + decrementButtonSize.h + scrollSpace * (scroller->value / (float)scroller->maxValue));
+		scroller->nubRect.w = scroller->base.rect.w;
+		scroller->nubRect.h = scroller->nubSize;
+	}
+	else
+	{
+		scrollSpace = scroller->base.rect.w - decrementButtonSize.w - incrementButtonSize.w - scroller->nubSize;
+		scroller->nubRect.x = (int)(scroller->base.rect.x + decrementButtonSize.w + scrollSpace * (scroller->value / (float)scroller->maxValue));
+		scroller->nubRect.y = scroller->base.rect.y;
+		scroller->nubRect.w = scroller->nubSize;
+		scroller->nubRect.h = scroller->base.rect.h;
+	}
 }
 
 static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
@@ -65,14 +82,32 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	// Set button rects.
 	buttonRect.x = rect.x;
 	buttonRect.y = rect.y;
-	buttonRect.w = rect.w;
-	buttonRect.h = ((struct wzWidget *)scroller->decrementButton)->rect.h;
+
+	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+	{
+		buttonRect.w = rect.w;
+		buttonRect.h = ((struct wzWidget *)scroller->decrementButton)->rect.h;
+	}
+	else
+	{
+		buttonRect.w = ((struct wzWidget *)scroller->decrementButton)->rect.w;
+		buttonRect.h = rect.h;
+	}
+
 	wz_widget_set_rect((struct wzWidget *)scroller->decrementButton, buttonRect);
 
-	buttonRect.y = rect.y + rect.h - buttonRect.h;
-	buttonRect.h = ((struct wzWidget *)scroller->incrementButton)->rect.h;
-	wz_widget_set_rect((struct wzWidget *)scroller->incrementButton, buttonRect);
+	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+	{
+		buttonRect.y = rect.y + rect.h - buttonRect.h;
+		buttonRect.h = ((struct wzWidget *)scroller->incrementButton)->rect.h;
+	}
+	else
+	{
+		buttonRect.x = rect.x + rect.w - buttonRect.w;
+		buttonRect.w = ((struct wzWidget *)scroller->incrementButton)->rect.w;
+	}
 
+	wz_widget_set_rect((struct wzWidget *)scroller->incrementButton, buttonRect);
 	wz_scroller_update_nub_rect(scroller);
 }
 
@@ -111,20 +146,36 @@ static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mous
 	scroller->nubHover = WZ_POINT_IN_RECT(mouseX, mouseY, scroller->nubRect);
 
 	// Handle nub dragging.
-	if (scroller->isNubPressed && mouseDeltaY != 0)
+	if (scroller->isNubPressed)
 	{
-		int decrementButtonHeight;
-		int incrementButtonHeight;
-		int scrollSpace; // Space left when button size and nub size are subtracted.
-		int minY, maxY; // Min & max possible y coordinates for nub center.
+		wzSize decrementButtonSize, incrementButtonSize;
+
+		// Space left when button size and nub size are subtracted.
+		int scrollSpace;
+
+		// Min & max possible positions for nub center. Y for vertical, X for horizontal.
+		int minPos, maxPos;
+
 		float scrollPercent;
 
-		decrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->decrementButton).h;
-		incrementButtonHeight = wz_widget_get_size((struct wzWidget *)scroller->incrementButton).h;
-		scrollSpace = scroller->base.rect.h - decrementButtonHeight - incrementButtonHeight - scroller->nubSize;
-		minY = (int)(scroller->base.rect.y + decrementButtonHeight + scroller->nubSize / 2.0f);
-		maxY = (int)(scroller->base.rect.y + scroller->base.rect.h - decrementButtonHeight - scroller->nubSize / 2.0f);
-		scrollPercent = WZ_CLAMPED(0, (mouseY - minY) / (float)(maxY - minY), 1.0f);
+		decrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->decrementButton);
+		incrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->incrementButton);
+
+		if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+		{
+			scrollSpace = scroller->base.rect.h - decrementButtonSize.h - incrementButtonSize.h - scroller->nubSize;
+			minPos = (int)(scroller->base.rect.y + decrementButtonSize.h + scroller->nubSize / 2.0f);
+			maxPos = (int)(scroller->base.rect.y + scroller->base.rect.h - decrementButtonSize.h - scroller->nubSize / 2.0f);
+			scrollPercent = WZ_CLAMPED(0, (mouseY - minPos) / (float)(maxPos - minPos), 1.0f);
+		}
+		else
+		{
+			scrollSpace = scroller->base.rect.w - decrementButtonSize.w - incrementButtonSize.w - scroller->nubSize;
+			minPos = (int)(scroller->base.rect.x + decrementButtonSize.w + scroller->nubSize / 2.0f);
+			maxPos = (int)(scroller->base.rect.x + scroller->base.rect.w - decrementButtonSize.w - scroller->nubSize / 2.0f);
+			scrollPercent = WZ_CLAMPED(0, (mouseX - minPos) / (float)(maxPos - minPos), 1.0f);
+		}
+
 		scroller->value = (int)(scroller->maxValue * scrollPercent);
 		wz_scroller_update_nub_rect(scroller);
 	}
@@ -150,7 +201,7 @@ static void wz_scroller_increment_button_pressed(struct wzButton *button)
 	wz_scroller_increment_value((struct wzScroller *)buttonWidget->parent);
 }
 
-struct wzScroller *wz_scroller_create(struct wzWindow *window)
+struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType)
 {
 	struct wzScroller *scroller;
 
@@ -163,6 +214,7 @@ struct wzScroller *wz_scroller_create(struct wzWindow *window)
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_move = wz_scroller_mouse_move;
+	scroller->scrollerType = scrollerType;
 
 	scroller->decrementButton = wz_button_create(window);
 	wz_button_add_callback_pressed(scroller->decrementButton, wz_scroller_decrement_button_pressed);
