@@ -93,10 +93,13 @@ void wz_window_draw(struct wzWindow *window);
 
 void wz_widget_destroy(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
-void wz_widget_set_position(struct wzWidget *widget, int x, int y);
+void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
+void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
 wzPosition wz_widget_get_position(const struct wzWidget *widget);
+void wz_widget_set_size_args(struct wzWidget *widget, int w, int h);
 void wz_widget_set_size(struct wzWidget *widget, wzSize size);
 wzSize wz_widget_get_size(const struct wzWidget *widget);
+void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h);
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
 wzRect wz_widget_get_rect(const struct wzWidget *widget);
 bool wz_widget_get_hover(const struct wzWidget *widget);

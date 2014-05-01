@@ -108,7 +108,7 @@ Button::Button(wzButton *button, const char *label)
 
 void Button::setPosition(int x, int y)
 {
-	wz_widget_set_position((struct wzWidget *)button_, x, y);
+	wz_widget_set_position_args((struct wzWidget *)button_, x, y);
 }
 
 wzRect Button::getRect()
@@ -184,7 +184,7 @@ Checkbox::Checkbox(Window *window, const char *label)
 
 void Checkbox::setPosition(int x, int y)
 {
-	wz_widget_set_position((struct wzWidget *)button_, x, y);
+	wz_widget_set_position_args((struct wzWidget *)button_, x, y);
 }
 
 void Checkbox::draw()
@@ -257,7 +257,7 @@ GroupBox::GroupBox(Window *window, const char *label)
 
 void GroupBox::setPosition(int x, int y)
 {
-	wz_widget_set_position((struct wzWidget *)groupBox_, x, y);
+	wz_widget_set_position_args((struct wzWidget *)groupBox_, x, y);
 }
 
 void GroupBox::draw()

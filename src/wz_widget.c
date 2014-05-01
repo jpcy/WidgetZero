@@ -56,14 +56,22 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 	return widget->type;
 }
 
-void wz_widget_set_position(struct wzWidget *widget, int x, int y)
+void wz_widget_set_position_args(struct wzWidget *widget, int x, int y)
+{
+	wzPosition position;
+	position.x = x;
+	position.y = y;
+	wz_widget_set_position(widget, position);
+}
+
+void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
 {
 	wzRect rect;
 
 	assert(widget);
 	rect = widget->rect;
-	rect.x = x;
-	rect.y = y;
+	rect.x = position.x;
+	rect.y = position.y;
 	wz_widget_set_rect(widget, rect);
 }
 
@@ -75,6 +83,14 @@ wzPosition wz_widget_get_position(const struct wzWidget *widget)
 	pos.x = widget->rect.x;
 	pos.y = widget->rect.y;
 	return pos;
+}
+
+void wz_widget_set_size_args(struct wzWidget *widget, int w, int h)
+{
+	wzSize size;
+	size.w = w;
+	size.h = h;
+	wz_widget_set_size(widget, size);
 }
 
 void wz_widget_set_size(struct wzWidget *widget, wzSize size)
@@ -96,6 +112,16 @@ wzSize wz_widget_get_size(const struct wzWidget *widget)
 	size.w = widget->rect.w;
 	size.h = widget->rect.h;
 	return size;
+}
+
+void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect(widget, rect);
 }
 
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
