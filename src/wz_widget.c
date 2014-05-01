@@ -22,8 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 #include "wz_internal.h"
+
+void wz_widget_destroy(struct wzWidget *widget)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	// Destroy children.
+	child = widget->firstChild;
+
+	while (child)
+	{
+		struct wzWidget *d = child;
+		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_widget_destroy(d);
+	}
+
+	if (widget->vtable.destroy)
+	{
+		widget->vtable.destroy(widget);
+	}
+
+	free(widget);
+}
 
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 {

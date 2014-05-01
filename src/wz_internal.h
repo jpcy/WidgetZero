@@ -33,6 +33,8 @@ struct wzContext
 
 typedef struct
 {
+	void (*destroy)(struct wzWidget *widget);
+
 	void (*draw)(struct wzWidget *widget);
 
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.

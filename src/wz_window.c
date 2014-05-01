@@ -70,9 +70,9 @@ void wz_window_destroy(struct wzWindow *window)
 
 	while (widget)
 	{
-		struct wzWidget *f = widget;
+		struct wzWidget *d = widget;
 		widget = widget->next == window->firstChild ? NULL : widget->next;
-		free(f);
+		wz_widget_destroy(d);
 	}
 
 	free(window);
