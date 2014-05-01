@@ -100,7 +100,7 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	
 	assert(widget);
 	scroller = (struct wzScroller *)widget;
-	memcpy(&widget->rect, &rect, sizeof(wzRect));
+	widget->rect = rect;
 	
 	// Set button rects.
 	buttonRect.x = rect.x;

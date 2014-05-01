@@ -134,7 +134,7 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 	else
 	{
-		memcpy(&widget->rect, &rect, sizeof(wzRect));
+		widget->rect = rect;
 	}
 }
 

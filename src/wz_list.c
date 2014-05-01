@@ -133,7 +133,7 @@ void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller)
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect)
 {
 	assert(list);
-	memcpy(&list->itemsRect, &itemsRect, sizeof(wzRect));
+	list->itemsRect = itemsRect;
 	wz_list_update_scroller_size(list);
 }
 
@@ -142,7 +142,7 @@ wzRect wz_list_get_items_rect(const struct wzList *list)
 	wzRect rect;
 
 	assert(list);
-	memcpy(&rect, &list->itemsRect, sizeof(wzRect));
+	rect = list->itemsRect;
 
 	// Subtract the scroller width.
 	if (list->scroller)
