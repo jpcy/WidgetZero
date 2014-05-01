@@ -33,6 +33,7 @@ struct wzList
 	wzRect itemsRect;
 	int itemHeight;
 	int nItems;
+	int firstItem;
 	int selectedItem;
 	int hoveredItem;
 	struct wzScroller *scroller;
@@ -72,6 +73,15 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 
 static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
+}
+
+static void wz_list_scroller_value_changed(struct wzScroller *scroller, int value)
+{
+	struct wzList *list;
+
+	assert(scroller);
+	list = (struct wzList *)((struct wzWidget *)scroller)->parent;
+	list->firstItem = value;
 }
 
 struct wzList *wz_list_create(struct wzWindow *window)
@@ -117,6 +127,7 @@ void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller)
 	list->scroller = scroller;
 	wz_list_update_scroller_size(list);
 	wz_scroller_set_max_value(list->scroller, list->nItems);
+	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
 }
 
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect)
@@ -126,7 +137,7 @@ void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect)
 	wz_list_update_scroller_size(list);
 }
 
-wzRect wz_list_get_items_rect(struct wzList *list)
+wzRect wz_list_get_items_rect(const struct wzList *list)
 {
 	wzRect rect;
 
@@ -148,7 +159,7 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 	list->itemHeight = itemHeight;
 }
 
-int wz_list_get_item_height(struct wzList *list)
+int wz_list_get_item_height(const struct wzList *list)
 {
 	assert(list);
 	return list->itemHeight;
@@ -163,10 +174,16 @@ void wz_list_set_num_items(struct wzList *list, int nItems)
 		wz_scroller_set_max_value(list->scroller, list->nItems);
 }
 
-int wz_list_get_num_items(struct wzList *list)
+int wz_list_get_num_items(const struct wzList *list)
 {
 	assert(list);
 	return list->nItems;
+}
+
+int wz_list_get_first_item(const struct wzList *list)
+{
+	assert(list);
+	return list->firstItem;
 }
 
 void wz_list_set_selected_item(struct wzList *list, int selectedItem)
@@ -175,13 +192,13 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 	list->selectedItem = selectedItem;
 }
 
-int wz_list_get_selected_item(struct wzList *list)
+int wz_list_get_selected_item(const struct wzList *list)
 {
 	assert(list);
 	return list->selectedItem;
 }
 
-int wz_list_get_hovered_item(struct wzList *list)
+int wz_list_get_hovered_item(const struct wzList *list)
 {
 	assert(list);
 	return list->hoveredItem;

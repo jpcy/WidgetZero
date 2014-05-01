@@ -121,14 +121,15 @@ struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 struct wzList *wz_list_create(struct wzWindow *window);
 void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller);
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
-wzRect wz_list_get_items_rect(struct wzList *list);
+wzRect wz_list_get_items_rect(const struct wzList *list);
 void wz_list_set_item_height(struct wzList *list, int itemHeight);
-int wz_list_get_item_height(struct wzList *list);
+int wz_list_get_item_height(const struct wzList *list);
 void wz_list_set_num_items(struct wzList *list, int nItems);
-int wz_list_get_num_items(struct wzList *list);
+int wz_list_get_num_items(const struct wzList *list);
+int wz_list_get_first_item(const struct wzList *list);
 void wz_list_set_selected_item(struct wzList *list, int selectedItem);
-int wz_list_get_selected_item(struct wzList *list);
-int wz_list_get_hovered_item(struct wzList *list);
+int wz_list_get_selected_item(const struct wzList *list);
+int wz_list_get_hovered_item(const struct wzList *list);
 
 typedef enum
 {
@@ -136,6 +137,8 @@ typedef enum
 	WZ_SCROLLER_HORIZONTAL
 }
 wzScrollerType;
+
+typedef void (*wzScrollerValueChangedCallback)(struct wzScroller *, int value);
 
 struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
@@ -149,6 +152,7 @@ struct wzButton *wz_scroller_get_increment_button(struct wzScroller *scroller);
 int wz_scroller_get_nub_size(struct wzScroller *scroller);
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
+void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzScrollerValueChangedCallback callback);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -24,6 +24,7 @@ SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "stb_arr.h"
 #include "wz_internal.h"
 
 struct wzScroller
@@ -40,6 +41,8 @@ struct wzScroller
 	wzRect nubRect;
 	bool nubHover;
 	bool isNubPressed;
+
+	wzScrollerValueChangedCallback *value_changed_callbacks;
 };
 
 static void wz_scroller_update_nub_rect(struct wzScroller *scroller)
@@ -196,8 +199,7 @@ static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mous
 			scrollPercent = WZ_CLAMPED(0, (mouseX - minPos) / (float)(maxPos - minPos), 1.0f);
 		}
 
-		scroller->value = (int)(scroller->maxValue * scrollPercent);
-		wz_scroller_update_nub_rect(scroller);
+		wz_scroller_set_value(scroller, (int)(scroller->maxValue * scrollPercent));
 	}
 }
 
@@ -221,6 +223,15 @@ static void wz_scroller_increment_button_pressed(struct wzButton *button)
 	wz_scroller_increment_value((struct wzScroller *)buttonWidget->parent);
 }
 
+static void wz_scroller_destroy(struct wzWidget *widget)
+{
+	struct wzScroller *scroller;
+
+	assert(widget);
+	scroller = (struct wzScroller *)widget;
+	stb_arr_free(scroller->value_changed_callbacks);
+}
+
 struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType)
 {
 	struct wzScroller *scroller;
@@ -230,6 +241,7 @@ struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType sc
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
 	scroller->base.window = window;
+	scroller->base.vtable.destroy = wz_scroller_destroy;
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
@@ -254,25 +266,38 @@ int wz_scroller_get_value(const struct wzScroller *scroller)
 	return scroller->value;
 }
 
+// This is the only place wzScroller value should be set.
 void wz_scroller_set_value(struct wzScroller *scroller, int value)
 {
+	int i;
+	int oldValue;
+
 	assert(scroller);
-	scroller->value = WZ_MIN(value, scroller->maxValue);
+	oldValue = scroller->value;
+	scroller->value = WZ_CLAMPED(0, value, scroller->maxValue);
+
+	// Don't fire callbacks or update the nub rect if the value hasn't changed.
+	if (oldValue == scroller->value)
+		return;
+
+	for (i = 0; i < stb_arr_len(scroller->value_changed_callbacks); i++)
+	{
+		scroller->value_changed_callbacks[i](scroller, scroller->value);
+	}
+
 	wz_scroller_update_nub_rect(scroller);
 }
 
 void wz_scroller_decrement_value(struct wzScroller *scroller)
 {
 	assert(scroller);
-	scroller->value = WZ_MAX(scroller->value - scroller->stepValue, 0);
-	wz_scroller_update_nub_rect(scroller);
+	wz_scroller_set_value(scroller, scroller->value - scroller->stepValue);
 }
 
 void wz_scroller_increment_value(struct wzScroller *scroller)
 {
 	assert(scroller);
-	scroller->value = WZ_MIN(scroller->value + scroller->stepValue, scroller->maxValue);
-	wz_scroller_update_nub_rect(scroller);
+	wz_scroller_set_value(scroller, scroller->value + scroller->stepValue);
 }
 
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue)
@@ -288,8 +313,10 @@ void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue)
 	scroller->maxValue = WZ_MAX(0, maxValue);
 
 	// Keep value in 0 to maxValue range.
-	scroller->value = WZ_MIN(scroller->value, scroller->maxValue);
+	// wz_scroller_set_value does the sanity check, just pass in the current value.
+	wz_scroller_set_value(scroller, scroller->value);
 
+	// wz_scroller_set_value calls this, but only if the value has changed. We need to call it because of the maxValue change.
 	wz_scroller_update_nub_rect(scroller);
 }
 
@@ -322,4 +349,10 @@ wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller)
 {
 	assert(scroller);
 	return scroller->nubRect;
+}
+
+void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzScrollerValueChangedCallback callback)
+{
+	assert(scroller);
+	stb_arr_push(scroller->value_changed_callbacks, callback);
 }

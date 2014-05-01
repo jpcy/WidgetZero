@@ -414,7 +414,7 @@ void List::draw()
 	SDL_RenderGetClipRect(g_renderer, &oldClipRect);
 	SDL_RenderSetClipRect(g_renderer, (SDL_Rect *)&itemsRect);
 
-	for (int i = 0; i < nItems; i++)
+	for (int i = wz_list_get_first_item(list_); i < nItems; i++)
 	{
 		// Outside widget?
 		if (y > itemsRect.y + itemsRect.h)
