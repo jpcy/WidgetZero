@@ -119,7 +119,7 @@ void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCall
 struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
 
 struct wzList *wz_list_create(struct wzWindow *window);
-void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller);
+struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 void wz_list_set_item_height(struct wzList *list, int itemHeight);

@@ -115,24 +115,6 @@ static void wz_list_scroller_value_changed(struct wzScroller *scroller, int valu
 	list->firstItem = value;
 }
 
-struct wzList *wz_list_create(struct wzWindow *window)
-{
-	struct wzList *list;
-
-	assert(window);
-	list = (struct wzList *)malloc(sizeof(struct wzList));
-	memset(list, 0, sizeof(struct wzList));
-	list->base.type = WZ_TYPE_LIST;
-	list->base.window = window;
-	list->base.vtable.set_rect = wz_list_set_rect;
-	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
-	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
-	list->base.vtable.mouse_move = wz_list_mouse_move;
-	list->selectedItem = -1;
-	list->hoveredItem = -1;
-	return list;
-}
-
 static void wz_list_update_scroller_size(struct wzList *list)
 {
 	wzRect rect;
@@ -150,15 +132,35 @@ static void wz_list_update_scroller_size(struct wzList *list)
 	wz_widget_set_rect((struct wzWidget *)list->scroller, rect);
 }
 
-void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller)
+struct wzList *wz_list_create(struct wzWindow *window)
 {
-	assert(list);
-	assert(scroller);
-	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)scroller);
-	list->scroller = scroller;
+	struct wzList *list;
+
+	assert(window);
+	list = (struct wzList *)malloc(sizeof(struct wzList));
+	memset(list, 0, sizeof(struct wzList));
+	list->base.type = WZ_TYPE_LIST;
+	list->base.window = window;
+	list->base.vtable.set_rect = wz_list_set_rect;
+	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
+	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
+	list->base.vtable.mouse_move = wz_list_mouse_move;
+	list->selectedItem = -1;
+	list->hoveredItem = -1;
+
+	list->scroller = wz_scroller_create(window, WZ_SCROLLER_VERTICAL);
+	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller_size(list);
 	wz_scroller_set_max_value(list->scroller, list->nItems);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
+
+	return list;
+}
+
+struct wzScroller *wz_list_get_scroller(struct wzList *list)
+{
+	assert(list);
+	return list->scroller;
 }
 
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect)

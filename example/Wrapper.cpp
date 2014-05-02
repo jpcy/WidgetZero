@@ -293,7 +293,7 @@ static void ScrollerDraw(struct wzWidget *widget)
 	scroller->draw();
 }
 
-Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue, bool addToWindow)
+Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue)
 {
 	scroller_ = wz_scroller_create(window->get(), type);
 	wz_scroller_set_max_value(scroller_, maxValue);
@@ -314,8 +314,26 @@ Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 
-	if (addToWindow)
-		wz_window_add_widget(window->get(), widget);
+	wz_window_add_widget(window->get(), widget);
+}
+
+Scroller::Scroller(wzScroller *scroller)
+{
+	scroller_ = scroller;
+	struct wzWidget *widget = (struct wzWidget *)scroller_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ScrollerDraw);
+	wz_scroller_set_nub_size(scroller_, 16);
+
+	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
+	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
+
+	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
+	wzSize buttonSize;
+	buttonSize.w = 16;
+	buttonSize.h = 16;
+	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
+	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 }
 
 void Scroller::setRect(int x, int y, int w, int h)
@@ -367,14 +385,12 @@ List::List(Window *window, char **items, int nItems)
 	wz_widget_set_draw_function(widget, ListDraw);
 	wz_window_add_widget(window->get(), widget);
 	items_ = items;
-	scroller_.reset(new Scroller(window, WZ_SCROLLER_VERTICAL, 0, 1, 0, false));
+	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 
 	wzSize scrollerSize;
 	scrollerSize.w = 16;
 	scrollerSize.h = 0;
-
 	wz_widget_set_size((struct wzWidget *)scroller_->get(), scrollerSize);
-	wz_list_set_scroller(list_, scroller_->get());
 }
 
 void List::setRect(int x, int y, int w, int h)
