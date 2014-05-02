@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include "stb_arr.h"
@@ -43,6 +44,17 @@ struct wzList
 
 	struct wzScroller *scroller;
 };
+
+static void wz_list_update_scroller_max_value(struct wzList *list)
+{
+	assert(list);
+	
+	if (list->scroller)
+	{
+		int max = list->nItems - (int)(list->itemsRect.h / (float)list->itemHeight);
+		wz_scroller_set_max_value(list->scroller, max);
+	}
+}
 
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
@@ -66,6 +78,8 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 
 	if (delta > 0)
 		list->itemsRect.h -= delta;
+
+	wz_list_update_scroller_max_value(list);
 }
 
 static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int mouseY)
@@ -82,7 +96,7 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 	rect.w = itemsRect.w;
 	rect.h = list->itemHeight;
 
-	for (i = 0; i < list->nItems; i++)
+	for (i = list->firstItem; i < list->nItems; i++)
 	{
 		// Outside widget?
 		if (rect.y > itemsRect.y + itemsRect.h)
@@ -90,7 +104,7 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
-			list->mouseOverItem = list->firstItem + i;
+			list->mouseOverItem = i;
 			break;
 		}
 
@@ -200,7 +214,7 @@ struct wzList *wz_list_create(struct wzWindow *window)
 	list->scroller = wz_scroller_create(window, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller_size(list);
-	wz_scroller_set_max_value(list->scroller, list->nItems);
+	wz_list_update_scroller_max_value(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
 
 	return list;
@@ -217,6 +231,7 @@ void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect)
 	assert(list);
 	list->itemsRect = itemsRect;
 	wz_list_update_scroller_size(list);
+	wz_list_update_scroller_max_value(list);
 }
 
 wzRect wz_list_get_items_rect(const struct wzList *list)
@@ -239,6 +254,7 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
 	assert(list);
 	list->itemHeight = itemHeight;
+	wz_list_update_scroller_max_value(list);
 }
 
 int wz_list_get_item_height(const struct wzList *list)
@@ -251,9 +267,7 @@ void wz_list_set_num_items(struct wzList *list, int nItems)
 {
 	assert(list);
 	list->nItems = WZ_MAX(0, nItems);
-
-	if (list->scroller)
-		wz_scroller_set_max_value(list->scroller, list->nItems);
+	wz_list_update_scroller_max_value(list);
 }
 
 int wz_list_get_num_items(const struct wzList *list)
