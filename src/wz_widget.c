@@ -50,6 +50,12 @@ void wz_widget_destroy(struct wzWidget *widget)
 	free(widget);
 }
 
+struct wzContext *wz_widget_get_context(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->context;
+}
+
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 {
 	assert(widget);

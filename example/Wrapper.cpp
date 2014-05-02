@@ -46,7 +46,7 @@ Window::Window(Context *context)
 
 Window::~Window()
 {
-	wz_window_destroy(window_);
+	wz_widget_destroy((struct wzWidget *)window_);
 }
 
 void Window::mouseMove(int x, int y, int dx, int dy)
@@ -83,7 +83,7 @@ Button::Button(Window *window, const char *label)
 	wzSize size;
 
 	strcpy(label_, label);
-	button_ = wz_button_create(window->get());
+	button_ = wz_button_create(window->getContext());
 	widget = (struct wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ButtonDraw);
@@ -94,7 +94,7 @@ Button::Button(Window *window, const char *label)
 	size.h += 8;
 	wz_widget_set_size(widget, size);
 
-	wz_window_add_widget(window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
 }
 
 Button::Button(wzButton *button, const char *label)
@@ -166,7 +166,7 @@ Checkbox::Checkbox(Window *window, const char *label)
 	wzSize size;
 
 	strcpy(label_, label);
-	button_ = wz_button_create(window->get());
+	button_ = wz_button_create(window->getContext());
 	widget = (struct wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, CheckboxDraw);
@@ -179,7 +179,7 @@ Checkbox::Checkbox(Window *window, const char *label)
 	size.h += 8;
 	wz_widget_set_size(widget, size);
 
-	wz_window_add_widget(window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
 }
 
 void Checkbox::setPosition(int x, int y)
@@ -243,7 +243,7 @@ GroupBox::GroupBox(Window *window, const char *label)
 	wzSize size;
 
 	strcpy(label_, label);
-	groupBox_ = wz_groupbox_create(window->get());
+	groupBox_ = wz_groupbox_create(window->getContext());
 	widget = (struct wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, GroupBoxDraw);
@@ -252,7 +252,7 @@ GroupBox::GroupBox(Window *window, const char *label)
 	size.h = 200;
 	wz_widget_set_size(widget, size);
 
-	wz_window_add_widget(window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
 }
 
 void GroupBox::setPosition(int x, int y)
@@ -295,7 +295,7 @@ static void ScrollerDraw(struct wzWidget *widget)
 
 Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue)
 {
-	scroller_ = wz_scroller_create(window->get(), type);
+	scroller_ = wz_scroller_create(window->getContext(), type);
 	wz_scroller_set_max_value(scroller_, maxValue);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
@@ -314,7 +314,7 @@ Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 
-	wz_window_add_widget(window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
 }
 
 Scroller::Scroller(wzScroller *scroller)
@@ -377,13 +377,13 @@ static void ListDraw(struct wzWidget *widget)
 
 List::List(Window *window, char **items, int nItems)
 {
-	list_ = wz_list_create(window->get());
+	list_ = wz_list_create(window->getContext());
 	wz_list_set_num_items(list_, nItems);
 	wz_list_set_item_height(list_, itemHeight);
 	struct wzWidget *widget = (struct wzWidget *)list_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ListDraw);
-	wz_window_add_widget(window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
 	items_ = items;
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 

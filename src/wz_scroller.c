@@ -232,15 +232,15 @@ static void wz_scroller_destroy(struct wzWidget *widget)
 	stb_arr_free(scroller->value_changed_callbacks);
 }
 
-struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType)
+struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType scrollerType)
 {
 	struct wzScroller *scroller;
 
-	assert(window);
+	assert(context);
 	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
-	scroller->base.window = window;
+	scroller->base.context = context;
 	scroller->base.vtable.destroy = wz_scroller_destroy;
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
@@ -249,11 +249,11 @@ struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType sc
 	scroller->scrollerType = scrollerType;
 	scroller->stepValue = 1;
 
-	scroller->decrementButton = wz_button_create(window);
+	scroller->decrementButton = wz_button_create(context);
 	wz_button_add_callback_pressed(scroller->decrementButton, wz_scroller_decrement_button_pressed);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	
-	scroller->incrementButton = wz_button_create(window);
+	scroller->incrementButton = wz_button_create(context);
 	wz_button_add_callback_pressed(scroller->incrementButton, wz_scroller_increment_button_pressed);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 

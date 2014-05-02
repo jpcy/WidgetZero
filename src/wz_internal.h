@@ -48,22 +48,16 @@ wzWidgetVtable;
 
 struct wzWidget
 {
+	struct wzContext *context;
 	wzWidgetType type;
 	wzRect rect;
 	void *metadata;
-	struct wzWindow *window;
 	bool hover;
 	wzWidgetVtable vtable;
 	struct wzWidget *parent;
 	struct wzWidget *firstChild;
 	struct wzWidget *prev;
 	struct wzWidget *next;
-};
-
-struct wzWindow
-{
-	struct wzContext *context;
-	struct wzWidget *firstChild;
 };
 
 #endif

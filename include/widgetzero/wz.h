@@ -49,6 +49,7 @@ struct wzList;
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
+	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
 	WZ_TYPE_LIST,
@@ -84,14 +85,13 @@ struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
 struct wzWindow *wz_window_create(struct wzContext *context);
-void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget);
-void wz_window_destroy(struct wzWindow *window);
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
 void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 void wz_window_draw(struct wzWindow *window);
 
 void wz_widget_destroy(struct wzWidget *widget);
+struct wzContext *wz_widget_get_context(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
@@ -110,15 +110,15 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 
 typedef void (*wzButtonPressedCallback)(struct wzButton *);
 
-struct wzButton *wz_button_create(struct wzWindow *window);
+struct wzButton *wz_button_create(struct wzContext *context);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
 
-struct wzGroupBox *wz_groupbox_create(struct wzWindow *window);
+struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
 
-struct wzList *wz_list_create(struct wzWindow *window);
+struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
 wzRect wz_list_get_items_rect(const struct wzList *list);
@@ -141,7 +141,7 @@ wzScrollerType;
 
 typedef void (*wzScrollerValueChangedCallback)(struct wzScroller *, int value);
 
-struct wzScroller *wz_scroller_create(struct wzWindow *window, wzScrollerType scrollerType);
+struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
 void wz_scroller_decrement_value(struct wzScroller *scroller);

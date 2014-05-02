@@ -193,15 +193,15 @@ static void wz_list_update_scroller_size(struct wzList *list)
 	wz_widget_set_rect((struct wzWidget *)list->scroller, rect);
 }
 
-struct wzList *wz_list_create(struct wzWindow *window)
+struct wzList *wz_list_create(struct wzContext *context)
 {
 	struct wzList *list;
 
-	assert(window);
+	assert(context);
 	list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
-	list->base.window = window;
+	list->base.context = context;
 	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
@@ -211,7 +211,7 @@ struct wzList *wz_list_create(struct wzWindow *window)
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
 
-	list->scroller = wz_scroller_create(window, WZ_SCROLLER_VERTICAL);
+	list->scroller = wz_scroller_create(context, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);

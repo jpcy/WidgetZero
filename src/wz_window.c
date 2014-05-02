@@ -26,56 +26,21 @@ SOFTWARE.
 #include <assert.h>
 #include "wz_internal.h"
 
+struct wzWindow
+{
+	struct wzWidget base;
+};
+
 struct wzWindow *wz_window_create(struct wzContext *context)
 {
 	struct wzWindow *window;
 
 	assert(context);
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
-	window->context = context;
-	window->firstChild = NULL;
+	memset(window, 0, sizeof(struct wzWindow));
+	window->base.type = WZ_TYPE_WINDOW;
+	window->base.context = context;
 	return window;
-}
-
-void wz_window_add_widget(struct wzWindow *window, struct wzWidget *widget)
-{
-	assert(window);
-	assert(widget);
-
-	if (window->firstChild == NULL)
-	{
-		window->firstChild = widget;
-		window->firstChild->prev = window->firstChild;
-		window->firstChild->next = window->firstChild;
-	}
-	else
-	{
-		struct wzWidget *prev, *next;
-
-		prev = window->firstChild->prev;
-		next = window->firstChild;
-		widget->next = next;
-		widget->prev = prev;
-		next->prev = widget;
-		prev->next = widget;
-	}
-}
-
-void wz_window_destroy(struct wzWindow *window)
-{
-	struct wzWidget *widget;
-	
-	assert(window);
-	widget = window->firstChild;
-
-	while (widget)
-	{
-		struct wzWidget *d = widget;
-		widget = widget->next == window->firstChild ? NULL : widget->next;
-		wz_widget_destroy(d);
-	}
-
-	free(window);
 }
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -104,20 +69,8 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 
 void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzWidget *widget;
-
 	assert(window);
-	widget = window->firstChild;
-
-	while (widget)
-	{
-		if (widget->hover)
-		{
-			wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
-		}
-
-		widget = widget->next == window->firstChild ? NULL : widget->next;
-	}
+	wz_widget_mouse_button_down_recursive((struct wzWidget *)window, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -142,16 +95,8 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 
 void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzWidget *widget;
-
 	assert(window);
-	widget = window->firstChild;
-
-	while (widget)
-	{
-		wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
-		widget = widget->next == window->firstChild ? NULL : widget->next;
-	}
+	wz_widget_mouse_button_up_recursive((struct wzWidget *)window, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
@@ -180,16 +125,8 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 
 void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	struct wzWidget *widget;
-
 	assert(window);
-	widget = window->firstChild;
-
-	while (widget)
-	{
-		wz_widget_mouse_move_recursive(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-		widget = widget->next == window->firstChild ? NULL : widget->next;
-	}
+	wz_widget_mouse_move_recursive((struct wzWidget *)window, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
 static void wz_widget_draw_recursive(struct wzWidget *widget)
@@ -214,14 +151,6 @@ static void wz_widget_draw_recursive(struct wzWidget *widget)
 
 void wz_window_draw(struct wzWindow *window)
 {
-	struct wzWidget *widget;
-	
 	assert(window);
-	widget = window->firstChild;
-
-	while (widget)
-	{
-		wz_widget_draw_recursive(widget);
-		widget = widget->next == window->firstChild ? NULL : widget->next;
-	}
+	wz_widget_draw_recursive((struct wzWidget *)window);
 }

@@ -31,14 +31,14 @@ struct wzGroupBox
 	struct wzWidget base;
 };
 
-struct wzGroupBox *wz_groupbox_create(struct wzWindow *window)
+struct wzGroupBox *wz_groupbox_create(struct wzContext *context)
 {
 	struct wzGroupBox *groupbox;
 
-	assert(window);
+	assert(context);
 	groupbox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
 	memset(groupbox, 0, sizeof(struct wzGroupBox));
 	groupbox->base.type = WZ_TYPE_GROUPBOX;
-	groupbox->base.window = window;
+	groupbox->base.context = context;
 	return groupbox;
 }

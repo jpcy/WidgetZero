@@ -41,6 +41,7 @@ public:
 	Window(Context *context);
 	~Window();
 	wzWindow *get() const { return window_; }
+	wzContext *getContext() { return wz_widget_get_context((struct wzWidget *)window_); }
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
