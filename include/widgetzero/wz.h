@@ -129,6 +129,7 @@ int wz_list_get_num_items(const struct wzList *list);
 int wz_list_get_first_item(const struct wzList *list);
 void wz_list_set_selected_item(struct wzList *list, int selectedItem);
 int wz_list_get_selected_item(const struct wzList *list);
+int wz_list_get_pressed_item(const struct wzList *list);
 int wz_list_get_hovered_item(const struct wzList *list);
 
 typedef enum

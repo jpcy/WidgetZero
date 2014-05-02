@@ -35,7 +35,12 @@ struct wzList
 	int nItems;
 	int firstItem;
 	int selectedItem;
+	int pressedItem;
 	int hoveredItem;
+
+	// The same as hoveredItem, except when pressedItem != -1.
+	int mouseOverItem;
+
 	struct wzScroller *scroller;
 };
 
@@ -63,25 +68,12 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 		list->itemsRect.h -= delta;
 }
 
-static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int mouseY)
 {
-}
-
-static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
-{
-}
-
-static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct wzList *list;
 	wzRect itemsRect, rect;
 	int i;
 
-	assert(widget);
-	list = (struct wzList *)widget;
-	
-	// Check for item hover.
-	list->hoveredItem = -1;
+	list->mouseOverItem = -1;
 
 	// Call wz_list_get_items_rect instead of using list->itemsRect so the scroller size is excluded.
 	itemsRect = wz_list_get_items_rect(list);
@@ -98,11 +90,66 @@ static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, 
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
-			list->hoveredItem = list->firstItem + i;
+			list->mouseOverItem = list->firstItem + i;
 			break;
 		}
 
 		rect.y += list->itemHeight;
+	}
+}
+
+static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+{
+	struct wzList *list;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+
+	if (mouseButton == 1 && list->hoveredItem != -1)
+	{
+		list->pressedItem = list->hoveredItem;
+		list->selectedItem = -1;
+		list->hoveredItem = -1;
+	}
+}
+
+static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+{
+	struct wzList *list;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+
+	if (mouseButton == 1)
+	{
+		if (list->pressedItem != -1)
+		{
+			list->selectedItem = list->pressedItem;
+			list->pressedItem = -1;
+		}
+
+		// Refresh hovered item.
+		wz_list_update_mouse_over_item(list, mouseX, mouseY);
+		list->hoveredItem = list->mouseOverItem;
+	}
+}
+
+static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	struct wzList *list;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+	wz_list_update_mouse_over_item(list, mouseX, mouseY);
+	
+	if (list->pressedItem != -1)
+	{
+		if (list->mouseOverItem != -1)
+			list->pressedItem = list->mouseOverItem;
+	}
+	else
+	{
+		list->hoveredItem = list->mouseOverItem;
 	}
 }
 
@@ -146,7 +193,9 @@ struct wzList *wz_list_create(struct wzWindow *window)
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
 	list->base.vtable.mouse_move = wz_list_mouse_move;
 	list->selectedItem = -1;
+	list->pressedItem = -1;
 	list->hoveredItem = -1;
+	list->mouseOverItem = -1;
 
 	list->scroller = wz_scroller_create(window, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
@@ -229,6 +278,12 @@ int wz_list_get_selected_item(const struct wzList *list)
 {
 	assert(list);
 	return list->selectedItem;
+}
+
+int wz_list_get_pressed_item(const struct wzList *list)
+{
+	assert(list);
+	return list->pressedItem;
 }
 
 int wz_list_get_hovered_item(const struct wzList *list)

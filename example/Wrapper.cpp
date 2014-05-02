@@ -437,16 +437,21 @@ void List::draw()
 		if (y > itemsRect.y + itemsRect.h)
 			break;
 
-		// Hover.
-		if (i == wz_list_get_hovered_item(list_))
+		SDL_Rect itemRect;
+		itemRect.x = itemsRect.x;
+		itemRect.y = y;
+		itemRect.w = itemsRect.w;
+		itemRect.h = itemHeight;
+
+		if (i == wz_list_get_pressed_item(list_) || i == wz_list_get_selected_item(list_))
 		{
-			SDL_Rect hoverRect;
-			hoverRect.x = itemsRect.x;
-			hoverRect.y = y;
-			hoverRect.w = itemsRect.w;
-			hoverRect.h = itemHeight;
+			SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
+			SDL_RenderFillRect(g_renderer, &itemRect);
+		}
+		else if (i == wz_list_get_hovered_item(list_))
+		{
 			SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
-			SDL_RenderFillRect(g_renderer, &hoverRect);
+			SDL_RenderFillRect(g_renderer, &itemRect);
 		}
 
 		TextPrintf(itemsRect.x + itemLeftPadding, y + itemHeight / 2, TA_LEFT, TA_CENTER, 0, 0, 0, items_[i]);
