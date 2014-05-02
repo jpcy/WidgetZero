@@ -214,24 +214,24 @@ int main(int argc, char **argv)
 	SDL_SetTextureBlendMode(glyphAtlasTexture, SDL_BLENDMODE_BLEND);
 
 	// Create wz objects.
-	Context guiContext;
-	Window guiWindow(&guiContext);
+	Context context;
+	Desktop desktop(&context);
 
-	Button guiButton(&guiWindow, "Test Button");
-	guiButton.setPosition(100, 100);
+	Button button(&desktop, "Test Button");
+	button.setPosition(100, 100);
 
-	wzRect buttonRect = guiButton.getRect();
-	Checkbox guiCheckbox(&guiWindow, "Toggle me!");
-	guiCheckbox.setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
+	wzRect buttonRect = button.getRect();
+	Checkbox checkbox(&desktop, "Toggle me!");
+	checkbox.setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
 
-	GroupBox guiGroupBox(&guiWindow, "Test GroupBox");
-	guiGroupBox.setPosition(100, 300);
+	GroupBox groupBox(&desktop, "Test GroupBox");
+	groupBox.setPosition(100, 300);
 
-	Scroller guiScroller(&guiWindow, WZ_SCROLLER_VERTICAL, 20, 10, 100);
-	guiScroller.setRect(300, 50, 16, 200);
+	Scroller scroller(&desktop, WZ_SCROLLER_VERTICAL, 20, 10, 100);
+	scroller.setRect(300, 50, 16, 200);
 
-	Scroller guiScrollerHorizontal(&guiWindow, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
-	guiScrollerHorizontal.setRect(500, 50, 200, 16);
+	Scroller scrollerHorizontal(&desktop, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
+	scrollerHorizontal.setRect(500, 50, 200, 16);
 
 	char *listData[17] =
 	{
@@ -254,8 +254,8 @@ int main(int argc, char **argv)
 		"Ten"
 	};
 
-	List guiList(&guiWindow, listData, 17);
-	guiList.setRect(400, 300, 150, 150);
+	List list(&desktop, listData, 17);
+	list.setRect(400, 300, 150, 150);
 
 	for (;;)
 	{
@@ -267,23 +267,23 @@ int main(int argc, char **argv)
 				break;
 			else if (e.type == SDL_MOUSEMOTION)
 			{
-				guiWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+				desktop.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{
-				guiWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
+				desktop.mouseButtonDown(e.button.button, e.button.x, e.button.y);
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
-				guiWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
+				desktop.mouseButtonUp(e.button.button, e.button.x, e.button.y);
 			}
 		}
 
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 		SDL_RenderClear(g_renderer);
-		guiWindow.draw();
-		TextPrintf(350, 50, TA_LEFT, TA_TOP, 255, 128, 128, "Scroll value: %d", guiScroller.getValue());
-		TextPrintf(500, 100, TA_LEFT, TA_TOP, 128, 128, 255, "Scroll value: %d", guiScrollerHorizontal.getValue());
+		desktop.draw();
+		TextPrintf(350, 50, TA_LEFT, TA_TOP, 255, 128, 128, "Scroll value: %d", scroller.getValue());
+		TextPrintf(500, 100, TA_LEFT, TA_TOP, 128, 128, 255, "Scroll value: %d", scrollerHorizontal.getValue());
 		SDL_RenderPresent(g_renderer);
 	}
 

@@ -35,26 +35,26 @@ private:
 	wzContext *context_;
 };
 
-class Window
+class Desktop
 {
 public:
-	Window(Context *context);
-	~Window();
-	wzWindow *get() const { return window_; }
-	wzContext *getContext() { return wz_widget_get_context((struct wzWidget *)window_); }
+	Desktop(Context *context);
+	~Desktop();
+	wzDesktop *get() const { return desktop_; }
+	wzContext *getContext() { return wz_widget_get_context((struct wzWidget *)desktop_); }
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
 	void draw();
 
 private:
-	wzWindow *window_;
+	wzDesktop *desktop_;
 };
 
 class Button
 {
 public:
-	Button(Window *window, const char *label);
+	Button(Desktop *desktop, const char *label);
 	Button(wzButton *button, const char *label);
 	void setPosition(int x, int y);
 	wzRect getRect();
@@ -68,7 +68,7 @@ private:
 class Checkbox
 {
 public:
-	Checkbox(Window *window, const char *label);
+	Checkbox(Desktop *desktop, const char *label);
 	void setPosition(int x, int y);
 	void draw();
 
@@ -83,7 +83,7 @@ private:
 class GroupBox
 {
 public:
-	GroupBox(Window *window, const char *label);
+	GroupBox(Desktop *desktop, const char *label);
 	void setPosition(int x, int y);
 	void draw();
 
@@ -95,7 +95,7 @@ private:
 class Scroller
 {
 public:
-	Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue);
+	Scroller(Desktop *desktop, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
 	void setRect(int x, int y, int w, int h);
 	void draw();
@@ -111,7 +111,7 @@ private:
 class List
 {
 public:
-	List(Window *window, char **items, int nItems);
+	List(Desktop *desktop, char **items, int nItems);
 	void setRect(int x, int y, int w, int h);
 	void draw();
 

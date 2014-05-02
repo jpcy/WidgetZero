@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 struct wzContext;
-struct wzWindow;
+struct wzDesktop;
 struct wzWidget;
 struct wzButton;
 struct wzScroller;
@@ -49,7 +49,7 @@ struct wzList;
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
-	WZ_TYPE_WINDOW,
+	WZ_TYPE_DESKTOP,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
 	WZ_TYPE_LIST,
@@ -84,11 +84,11 @@ wzRect;
 struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
-struct wzWindow *wz_window_create(struct wzContext *context);
-void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
-void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY);
-void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-void wz_window_draw(struct wzWindow *window);
+struct wzDesktop *wz_desktop_create(struct wzContext *context);
+void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
+void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
+void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+void wz_desktop_draw(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
 struct wzContext *wz_widget_get_context(struct wzWidget *widget);

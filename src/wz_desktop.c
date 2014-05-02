@@ -26,21 +26,21 @@ SOFTWARE.
 #include <assert.h>
 #include "wz_internal.h"
 
-struct wzWindow
+struct wzDesktop
 {
 	struct wzWidget base;
 };
 
-struct wzWindow *wz_window_create(struct wzContext *context)
+struct wzDesktop *wz_desktop_create(struct wzContext *context)
 {
-	struct wzWindow *window;
+	struct wzDesktop *desktop;
 
 	assert(context);
-	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
-	memset(window, 0, sizeof(struct wzWindow));
-	window->base.type = WZ_TYPE_WINDOW;
-	window->base.context = context;
-	return window;
+	desktop = (struct wzDesktop *)malloc(sizeof(struct wzDesktop));
+	memset(desktop, 0, sizeof(struct wzDesktop));
+	desktop->base.type = WZ_TYPE_DESKTOP;
+	desktop->base.context = context;
+	return desktop;
 }
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -67,10 +67,10 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 	}
 }
 
-void wz_window_mouse_button_down(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
+void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
-	assert(window);
-	wz_widget_mouse_button_down_recursive((struct wzWidget *)window, mouseButton, mouseX, mouseY);
+	assert(desktop);
+	wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -93,10 +93,10 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 	}
 }
 
-void wz_window_mouse_button_up(struct wzWindow *window, int mouseButton, int mouseX, int mouseY)
+void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
-	assert(window);
-	wz_widget_mouse_button_up_recursive((struct wzWidget *)window, mouseButton, mouseX, mouseY);
+	assert(desktop);
+	wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
@@ -123,10 +123,10 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 	}
 }
 
-void wz_window_mouse_move(struct wzWindow *window, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	assert(window);
-	wz_widget_mouse_move_recursive((struct wzWidget *)window, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	assert(desktop);
+	wz_widget_mouse_move_recursive((struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
 static void wz_widget_draw_recursive(struct wzWidget *widget)
@@ -149,8 +149,8 @@ static void wz_widget_draw_recursive(struct wzWidget *widget)
 	}
 }
 
-void wz_window_draw(struct wzWindow *window)
+void wz_desktop_draw(struct wzDesktop *desktop)
 {
-	assert(window);
-	wz_widget_draw_recursive((struct wzWidget *)window);
+	assert(desktop);
+	wz_widget_draw_recursive((struct wzWidget *)desktop);
 }

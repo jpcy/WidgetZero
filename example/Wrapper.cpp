@@ -39,34 +39,34 @@ Context::~Context()
 
 //------------------------------------------------------------------------------
 
-Window::Window(Context *context)
+Desktop::Desktop(Context *context)
 {
-	window_ = wz_window_create(context->get());
+	desktop_ = wz_desktop_create(context->get());
 }
 
-Window::~Window()
+Desktop::~Desktop()
 {
-	wz_widget_destroy((struct wzWidget *)window_);
+	wz_widget_destroy((struct wzWidget *)desktop_);
 }
 
-void Window::mouseMove(int x, int y, int dx, int dy)
+void Desktop::mouseMove(int x, int y, int dx, int dy)
 {
-	wz_window_mouse_move(window_, x, y, dx, dy);
+	wz_desktop_mouse_move(desktop_, x, y, dx, dy);
 }
 
-void Window::mouseButtonDown(int button, int x, int y)
+void Desktop::mouseButtonDown(int button, int x, int y)
 {
-	wz_window_mouse_button_down(window_, button, x, y);
+	wz_desktop_mouse_button_down(desktop_, button, x, y);
 }
 
-void Window::mouseButtonUp(int button, int x, int y)
+void Desktop::mouseButtonUp(int button, int x, int y)
 {
-	wz_window_mouse_button_up(window_, button, x, y);
+	wz_desktop_mouse_button_up(desktop_, button, x, y);
 }
 
-void Window::draw()
+void Desktop::draw()
 {
-	wz_window_draw(window_);
+	wz_desktop_draw(desktop_);
 }
 
 //------------------------------------------------------------------------------
@@ -77,13 +77,13 @@ void ButtonDraw(struct wzWidget *widget)
 	button->draw();
 }
 
-Button::Button(Window *window, const char *label)
+Button::Button(Desktop *desktop, const char *label)
 {
 	struct wzWidget *widget;
 	wzSize size;
 
 	strcpy(label_, label);
-	button_ = wz_button_create(window->getContext());
+	button_ = wz_button_create(desktop->getContext());
 	widget = (struct wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ButtonDraw);
@@ -94,7 +94,7 @@ Button::Button(Window *window, const char *label)
 	size.h += 8;
 	wz_widget_set_size(widget, size);
 
-	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
 }
 
 Button::Button(wzButton *button, const char *label)
@@ -160,13 +160,13 @@ void CheckboxDraw(struct wzWidget *widget)
 	checkbox->draw();
 }
 
-Checkbox::Checkbox(Window *window, const char *label)
+Checkbox::Checkbox(Desktop *desktop, const char *label)
 {
 	struct wzWidget *widget;
 	wzSize size;
 
 	strcpy(label_, label);
-	button_ = wz_button_create(window->getContext());
+	button_ = wz_button_create(desktop->getContext());
 	widget = (struct wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, CheckboxDraw);
@@ -179,7 +179,7 @@ Checkbox::Checkbox(Window *window, const char *label)
 	size.h += 8;
 	wz_widget_set_size(widget, size);
 
-	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
 }
 
 void Checkbox::setPosition(int x, int y)
@@ -237,13 +237,13 @@ void GroupBoxDraw(struct wzWidget *widget)
 	groupBox->draw();
 }
 
-GroupBox::GroupBox(Window *window, const char *label)
+GroupBox::GroupBox(Desktop *desktop, const char *label)
 {
 	struct wzWidget *widget;
 	wzSize size;
 
 	strcpy(label_, label);
-	groupBox_ = wz_groupbox_create(window->getContext());
+	groupBox_ = wz_groupbox_create(desktop->getContext());
 	widget = (struct wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, GroupBoxDraw);
@@ -252,7 +252,7 @@ GroupBox::GroupBox(Window *window, const char *label)
 	size.h = 200;
 	wz_widget_set_size(widget, size);
 
-	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
 }
 
 void GroupBox::setPosition(int x, int y)
@@ -293,9 +293,9 @@ static void ScrollerDraw(struct wzWidget *widget)
 	scroller->draw();
 }
 
-Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue, int maxValue)
+Scroller::Scroller(Desktop *desktop, wzScrollerType type, int value, int stepValue, int maxValue)
 {
-	scroller_ = wz_scroller_create(window->getContext(), type);
+	scroller_ = wz_scroller_create(desktop->getContext(), type);
 	wz_scroller_set_max_value(scroller_, maxValue);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
@@ -314,7 +314,7 @@ Scroller::Scroller(Window *window, wzScrollerType type, int value, int stepValue
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
 	wz_widget_set_size((struct wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 
-	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
 }
 
 Scroller::Scroller(wzScroller *scroller)
@@ -375,15 +375,15 @@ static void ListDraw(struct wzWidget *widget)
 	list->draw();
 }
 
-List::List(Window *window, char **items, int nItems)
+List::List(Desktop *desktop, char **items, int nItems)
 {
-	list_ = wz_list_create(window->getContext());
+	list_ = wz_list_create(desktop->getContext());
 	wz_list_set_num_items(list_, nItems);
 	wz_list_set_item_height(list_, itemHeight);
 	struct wzWidget *widget = (struct wzWidget *)list_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ListDraw);
-	wz_widget_add_child_widget((struct wzWidget *)window->get(), widget);
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
 	items_ = items;
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 
