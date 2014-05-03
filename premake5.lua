@@ -1,13 +1,19 @@
+local sdlPath = ""
+	
+if os.get() == "windows" then
+    sdlPath = os.getenv("SDL2_DEV_PATH")
+
+    if sdlPath == nil then
+    	printf("Error: SDL2_DEV_PATH environment variable not set")
+	    os.exit(1)
+    end
+end
+
 solution "WidgetZero"
 	language "C"
 	location "build"
 	startproject "example"
 	
-	defines
-	{
-		"_CRT_SECURE_NO_DEPRECATE"
-	}
-
 	configurations { "Debug", "Release" }
 	
 	configuration "Debug"
@@ -18,6 +24,12 @@ solution "WidgetZero"
 	configuration "Release"
 		optimize "Full"
 		defines "NDEBUG"
+		
+	configuration "vs*"
+		defines
+		{
+			"_CRT_SECURE_NO_DEPRECATE"
+		}
 	
 -----------------------------------------------------------------------------
 
@@ -50,18 +62,12 @@ project "example"
 	language "C++"
 	kind "WindowedApp"
 	targetname "example"
-	
-	defines
-	{
-		"_WIN32",
-		"WIN32"
-	}
 
 	files
 	{
 		"include/widgetzero/wz.h",
 		"example/*.cpp",
-		"example/*.h",
+		"example/*.h"
 	}
 	
 	includedirs
@@ -69,36 +75,29 @@ project "example"
 		"include"
 	}
 	
-	local sdlPath = os.getenv("SDL2_DEV_PATH")
-	
-	if sdlPath == nil then
-		printf("Error: SDL2_DEV_PATH environment variable not set")
-		os.exit(1)
-	else
-		includedirs(sdlPath .. "/include")
-		
-		configuration "not x64"
-			libdirs(sdlPath .. "/lib/x86")
-		configuration "x64"
-			libdirs(sdlPath .. "/lib/x64")
-		configuration {}
-		
-		links
-		{
-			"SDL2",
-			"SDL2main"
-		}
-	end
+	configuration "linux"
+		buildoptions { "`pkg-config --cflags sdl2`" }
+		linkoptions { "`pkg-config --libs sdl2`" }
+    configuration "vs*"
+	    includedirs(sdlPath .. "/include")
+	configuration { "vs*", "not x64" }
+		libdirs(sdlPath .. "/lib/x86")
+	configuration { "vs*",  "x64" }
+		libdirs(sdlPath .. "/lib/x64")
+	configuration {}
 	
 	links
 	{
+		"SDL2",
+		"SDL2main",
 		"libwz"
 	}
 	
-	linkoptions
-	{
-		"/SAFESEH:NO" -- for MSVC2012
-	}
+	configuration "vs2012"
+		linkoptions
+		{
+			"/SAFESEH:NO"
+		}
 	
 	configuration "Debug"
 		targetdir "build/bin"

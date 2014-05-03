@@ -174,8 +174,13 @@ int main(int argc, char **argv)
 	size_t length = (size_t)ftell(f);
 	fseek(f, 0, SEEK_SET);
 	fontFileBuffer = (uint8_t *)malloc(length);
-	fread(fontFileBuffer, length, 1, f);
+	size_t bytesRead = fread(fontFileBuffer, 1, length, f);
 	fclose(f);
+
+    if (bytesRead != length)
+    {
+        ErrorAndExit("Error reading font file '%s'. Tried to read %u bytes, got %u.", fontFilename, length, bytesRead);
+    }
 
 	// Create glyph atlas and set a greyscale palette.	
 	glyphAtlasSurface = SDL_CreateRGBSurface(0, 512, 512, 8, 0, 0, 0, 0);
@@ -233,7 +238,7 @@ int main(int argc, char **argv)
 	Scroller scrollerHorizontal(&desktop, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
 	scrollerHorizontal.setRect(500, 50, 200, 16);
 
-	char *listData[17] =
+	const char *listData[17] =
 	{
 		"Monday",
 		"Tuesday",

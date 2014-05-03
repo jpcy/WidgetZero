@@ -111,13 +111,13 @@ private:
 class List
 {
 public:
-	List(Desktop *desktop, char **items, int nItems);
+	List(Desktop *desktop, const char **items, int nItems);
 	void setRect(int x, int y, int w, int h);
 	void draw();
 
 private:
 	wzList *list_;
-	char **items_;
+	const char **items_;
 	std::auto_ptr<Scroller> scroller_;
 
 	static const int itemsMargin = 2;

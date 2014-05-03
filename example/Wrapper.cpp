@@ -375,7 +375,7 @@ static void ListDraw(struct wzWidget *widget)
 	list->draw();
 }
 
-List::List(Desktop *desktop, char **items, int nItems)
+List::List(Desktop *desktop, const char **items, int nItems)
 {
 	list_ = wz_list_create(desktop->getContext());
 	wz_list_set_num_items(list_, nItems);
