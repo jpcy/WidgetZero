@@ -40,6 +40,7 @@ extern "C" {
 
 struct wzContext;
 struct wzDesktop;
+struct wzWindow;
 struct wzWidget;
 struct wzButton;
 struct wzScroller;
@@ -50,6 +51,7 @@ typedef enum
 {
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_DESKTOP,
+	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
 	WZ_TYPE_LIST,
@@ -81,6 +83,9 @@ wzRect;
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 
+// clip the child rect to the parent
+wzRect wzClippedRect(wzRect parent, wzRect child);
+
 struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
@@ -107,6 +112,13 @@ void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
+
+struct wzWindow *wz_window_create(struct wzContext *context);
+void wz_window_set_header_height(struct wzWindow *window, int height);
+int wz_window_get_header_height(struct wzWindow *window);
+void wz_window_set_border_size(struct wzWindow *window, int size);
+int wz_window_get_border_size(struct wzWindow *window);
+wzRect wz_window_get_header_rect(struct wzWindow *window);
 
 typedef void (*wzButtonPressedCallback)(struct wzButton *);
 

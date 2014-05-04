@@ -71,6 +71,82 @@ void Desktop::draw()
 
 //------------------------------------------------------------------------------
 
+void WindowDraw(struct wzWidget *widget)
+{
+	Window *window = (Window *)wz_widget_get_metadata(widget);
+	window->draw();
+}
+
+Window::Window(Desktop *desktop, char *title)
+{
+	struct wzWidget *widget;
+	wzSize size;
+
+	strcpy(title_, title);
+	window_ = wz_window_create(desktop->getContext());
+	widget = (struct wzWidget *)window_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, WindowDraw);
+	wz_window_set_border_size(window_, 4);
+
+	// Calculate header height based on label text plus padding.
+	MeasureText(title_, &size.w, &size.h);
+	size.h += 6;
+	wz_window_set_header_height(window_, size.h);
+
+	wz_widget_add_child_widget((struct wzWidget *)desktop->get(), widget);
+}
+
+void Window::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	wz_widget_set_rect((struct wzWidget *)window_, rect);
+}
+
+void Window::draw()
+{
+	wzRect rect = wz_widget_get_rect((struct wzWidget *)window_);
+	
+	// Background.
+	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Border.
+	const int borderSize = wz_window_get_border_size(window_);
+	SDL_SetRenderDrawColor(g_renderer, 128, 128, 128, 255);
+
+	// Border top.
+	wzRect borderRect = rect;
+	borderRect.h = borderSize;
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&borderRect);
+
+	// Border bottom.
+	borderRect.y = rect.y + rect.h - borderSize;
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&borderRect);
+
+	// Border left.
+	borderRect = rect;
+	borderRect.w = borderSize;
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&borderRect);
+
+	// Border right.
+	borderRect.x = rect.x + rect.w - borderSize;
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&borderRect);
+
+	// Header.
+	wzRect headerRect = wz_window_get_header_rect(window_);
+	SDL_SetRenderDrawColor(g_renderer, 255, 232, 166, 255);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&headerRect);
+	TextPrintf(headerRect.x + 10, headerRect.y + headerRect.h / 2, TA_LEFT, TA_CENTER, 0, 0, 0, title_);
+}
+
+//------------------------------------------------------------------------------
+
 void ButtonDraw(struct wzWidget *widget)
 {
 	Button *button = (Button *)wz_widget_get_metadata(widget);

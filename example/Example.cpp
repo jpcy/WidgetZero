@@ -262,6 +262,9 @@ int main(int argc, char **argv)
 	List list(&desktop, listData, 17);
 	list.setRect(400, 300, 150, 150);
 
+	Window childWindow(&desktop, "Test Window");
+	childWindow.setRect(650, 300, 300, 300);
+
 	for (;;)
 	{
 		SDL_Event e;

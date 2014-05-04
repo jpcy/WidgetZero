@@ -59,26 +59,13 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
-	int delta;
 
 	assert(widget);
 	widget->rect = rect;
 
 	// Clip itemsRect to rect. itemsRect should always be equal/smaller.
 	list = (struct wzList *)widget;
-	list->itemsRect.x = WZ_MAX(rect.x, list->itemsRect.x);
-	list->itemsRect.y = WZ_MAX(rect.y, list->itemsRect.y);
-
-	delta = (list->itemsRect.x + list->itemsRect.w) - (rect.x + rect.w);
-
-	if (delta > 0)
-		list->itemsRect.w -= delta;
-
-	delta = (list->itemsRect.y + list->itemsRect.h) - (rect.y + rect.h);
-
-	if (delta > 0)
-		list->itemsRect.h -= delta;
-
+	list->itemsRect = wzClippedRect(rect, list->itemsRect);
 	wz_list_update_scroller_max_value(list);
 }
 

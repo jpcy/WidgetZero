@@ -51,6 +51,18 @@ private:
 	wzDesktop *desktop_;
 };
 
+class Window
+{
+public:
+	Window(Desktop *desktop, char *title);
+	void setRect(int x, int y, int w, int h);
+	void draw();
+	
+private:
+	wzWindow *window_;
+	char title_[64];
+};
+
 class Button
 {
 public:
