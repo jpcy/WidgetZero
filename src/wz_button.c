@@ -46,6 +46,7 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 	if (mouseButton == 1)
 	{
 		button->isPressed = true;
+		wz_desktop_lock_input(widget->desktop, widget);
 	}
 }
 
@@ -60,6 +61,7 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	if (mouseButton == 1 && button->isPressed)
 	{
 		button->isPressed = false;
+		wz_desktop_unlock_input(widget->desktop);
 
 		if (widget->hover)
 		{

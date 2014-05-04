@@ -58,6 +58,8 @@ struct wzWidget
 	bool hover;
 	wzWidgetVtable vtable;
 
+	struct wzDesktop *desktop;
+
 	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget.
 	struct wzWindow *window;
 
@@ -66,5 +68,12 @@ struct wzWidget
 	struct wzWidget *prev;
 	struct wzWidget *next;
 };
+
+// Lock input to this widget.
+void wz_desktop_lock_input(struct wzDesktop *desktop, struct wzWidget *widget);
+
+void wz_desktop_unlock_input(struct wzDesktop *desktop);
+
+struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
 #endif

@@ -30,6 +30,8 @@ struct wzDesktop
 {
 	struct wzWidget base;
 
+	struct wzWidget *lockInputWidget;
+
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
 	struct wzWindow *lockInputWindow;
 };
@@ -91,16 +93,24 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 
 void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
+	struct wzWidget *widget;
+
 	assert(desktop);
 
-	if (desktop->lockInputWindow)
+	if (desktop->lockInputWidget)
 	{
-		wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop->lockInputWindow, mouseButton, mouseX, mouseY);
+		widget = desktop->lockInputWidget;
+	}
+	else if (desktop->lockInputWindow)
+	{
+		widget = (struct wzWidget *)desktop->lockInputWindow;
 	}
 	else
 	{
-		wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+		widget = (struct wzWidget *)desktop;
 	}
+
+	wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -125,16 +135,24 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
+	struct wzWidget *widget;
+
 	assert(desktop);
 
-	if (desktop->lockInputWindow)
+	if (desktop->lockInputWidget)
 	{
-		wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop->lockInputWindow, mouseButton, mouseX, mouseY);
+		widget = desktop->lockInputWidget;
+	}
+	else if (desktop->lockInputWindow)
+	{
+		widget = (struct wzWidget *)desktop->lockInputWindow;
 	}
 	else
 	{
-		wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+		widget = (struct wzWidget *)desktop;
 	}
+
+	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
 }
 
 static void wz_widget_clear_input_state_recursive(struct wzWidget *widget)
@@ -186,6 +204,13 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	struct wzWindow *focusWindow;
 
 	assert(desktop);
+
+	if (desktop->lockInputWidget)
+	{
+		wz_widget_mouse_move_recursive(desktop->lockInputWidget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		return;
+	}
+
 	focusWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
 	if (focusWindow != desktop->lockInputWindow)
@@ -253,4 +278,15 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 
 		child = child->next == desktop->base.firstChild ? NULL : child->next;
 	}
+}
+
+void wz_desktop_lock_input(struct wzDesktop *desktop, struct wzWidget *widget)
+{
+	assert(desktop);
+	desktop->lockInputWidget = widget;
+}
+
+void wz_desktop_unlock_input(struct wzDesktop *desktop)
+{
+	desktop->lockInputWidget = NULL;
 }
