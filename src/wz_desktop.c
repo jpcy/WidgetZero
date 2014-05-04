@@ -29,6 +29,9 @@ SOFTWARE.
 struct wzDesktop
 {
 	struct wzWidget base;
+
+	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
+	struct wzWindow *lockInputWindow;
 };
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context)
@@ -41,6 +44,25 @@ struct wzDesktop *wz_desktop_create(struct wzContext *context)
 	desktop->base.type = WZ_TYPE_DESKTOP;
 	desktop->base.context = context;
 	return desktop;
+}
+
+// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
+static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
+{
+	struct wzWidget *widget;
+
+	assert(desktop);
+	widget = desktop->base.firstChild;
+
+	while (widget)
+	{
+		if (widget->type == WZ_TYPE_WINDOW && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
+			return (struct wzWindow *)widget;
+
+		widget = widget->next == desktop->base.firstChild ? NULL : widget->next;
+	}
+
+	return NULL;
 }
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -70,7 +92,15 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
 	assert(desktop);
-	wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+
+	if (desktop->lockInputWindow)
+	{
+		wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop->lockInputWindow, mouseButton, mouseX, mouseY);
+	}
+	else
+	{
+		wz_widget_mouse_button_down_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+	}
 }
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -96,7 +126,15 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
 {
 	assert(desktop);
-	wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+
+	if (desktop->lockInputWindow)
+	{
+		wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop->lockInputWindow, mouseButton, mouseX, mouseY);
+	}
+	else
+	{
+		wz_widget_mouse_button_up_recursive((struct wzWidget *)desktop, mouseButton, mouseX, mouseY);
+	}
 }
 
 static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
@@ -125,8 +163,24 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
+	struct wzWindow *focusWindow;
+
 	assert(desktop);
-	wz_widget_mouse_move_recursive((struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	focusWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
+
+	if (focusWindow != desktop->lockInputWindow)
+	{
+		desktop->lockInputWindow = focusWindow;
+	}
+
+	if (desktop->lockInputWindow)
+	{
+		wz_widget_mouse_move_recursive((struct wzWidget *)desktop->lockInputWindow, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	}
+	else
+	{
+		wz_widget_mouse_move_recursive((struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	}
 }
 
 static void wz_widget_draw_recursive(struct wzWidget *widget)
