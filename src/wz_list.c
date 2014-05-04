@@ -154,6 +154,17 @@ static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, 
 	}
 }
 
+static void wz_list_clear_input_state(struct wzWidget *widget)
+{
+	struct wzList *list;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+	list->pressedItem = -1;
+	list->hoveredItem = -1;
+	list->mouseOverItem = -1;
+}
+
 static void wz_list_scroller_value_changed(struct wzScroller *scroller, int value)
 {
 	struct wzList *list;
@@ -193,6 +204,7 @@ struct wzList *wz_list_create(struct wzContext *context)
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
 	list->base.vtable.mouse_move = wz_list_mouse_move;
+	list->base.vtable.clear_input_state = wz_list_clear_input_state;
 	list->selectedItem = -1;
 	list->pressedItem = -1;
 	list->hoveredItem = -1;

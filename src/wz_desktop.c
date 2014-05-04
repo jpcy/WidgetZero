@@ -137,6 +137,26 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	}
 }
 
+static void wz_widget_clear_input_state_recursive(struct wzWidget *widget)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->vtable.clear_input_state)
+	{
+		widget->vtable.clear_input_state(widget);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_widget_clear_input_state_recursive(child);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
 static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWidget *child;
@@ -171,6 +191,9 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	if (focusWindow != desktop->lockInputWindow)
 	{
 		desktop->lockInputWindow = focusWindow;
+
+		// Lock window has changed, clear all temporary widget input state.
+		wz_widget_clear_input_state_recursive((struct wzWidget *)desktop);
 	}
 
 	if (desktop->lockInputWindow)

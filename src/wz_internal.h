@@ -43,6 +43,9 @@ typedef struct
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+
+	// Clear temporary input state, e.g. wzWidget.hover or wzButton.isPressed
+	void (*clear_input_state)(struct wzWidget *widget);
 }
 wzWidgetVtable;
 
