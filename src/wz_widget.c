@@ -150,6 +150,24 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget)
 	return widget->rect;
 }
 
+wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+
+	// Adjust for window position.
+	if (widget->window)
+	{
+		wzRect windowContentRect = wz_window_get_content_rect(widget->window);
+		rect.x += windowContentRect.x;
+		rect.y += windowContentRect.y;
+	}
+
+	return rect;
+}
+
 bool wz_widget_get_hover(const struct wzWidget *widget)
 {
 	assert(widget);
@@ -176,8 +194,36 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
+	struct wzWidget *temp;
+
 	assert(widget);
 	assert(child);
+
+	// Desktops cannot be added as children.
+	if (child->type == WZ_TYPE_DESKTOP)
+		return;
+
+	// Windows can only be children of desktop.
+	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_DESKTOP)
+		return;
+
+	// Find the closest ancestor window of the child.
+	child->window = NULL;
+	temp = widget;
+
+	for (;;)
+	{
+		if (temp == NULL)
+			break;
+
+		if (temp->type == WZ_TYPE_WINDOW)
+		{
+			child->window = (struct wzWindow *)temp;
+			break;
+		}
+
+		temp = widget->parent;
+	}
 
 	child->parent = widget;
 

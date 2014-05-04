@@ -106,7 +106,7 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 
 	assert(widget);
 
-	rect = wz_widget_get_rect(widget);
+	rect = wz_widget_get_absolute_rect(widget);
 	widget->hover = WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	if (widget->vtable.mouse_move)
@@ -151,6 +151,29 @@ static void wz_widget_draw_recursive(struct wzWidget *widget)
 
 void wz_desktop_draw(struct wzDesktop *desktop)
 {
+	struct wzWidget *child;
+
 	assert(desktop);
-	wz_widget_draw_recursive((struct wzWidget *)desktop);
+
+	// Skip window children.
+	child = desktop->base.firstChild;
+
+	while (child)
+	{
+		if (child->type != WZ_TYPE_WINDOW)
+			wz_widget_draw_recursive(child);
+
+		child = child->next == desktop->base.firstChild ? NULL : child->next;
+	}
+
+	// Now draw window children.
+	child = desktop->base.firstChild;
+
+	while (child)
+	{
+		if (child->type == WZ_TYPE_WINDOW)
+			wz_widget_draw_recursive(child);
+
+		child = child->next == desktop->base.firstChild ? NULL : child->next;
+	}
 }

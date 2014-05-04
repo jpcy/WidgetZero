@@ -265,6 +265,9 @@ int main(int argc, char **argv)
 	Window childWindow(&desktop, "Test Window");
 	childWindow.setRect(650, 300, 300, 300);
 
+	Button childWindowButton(&childWindow, "Another Button");
+	childWindowButton.setPosition(20, 20);
+
 	for (;;)
 	{
 		SDL_Event e;

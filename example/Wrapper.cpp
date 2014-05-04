@@ -110,7 +110,7 @@ void Window::setRect(int x, int y, int w, int h)
 
 void Window::draw()
 {
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)window_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)window_);
 	
 	// Background.
 	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
@@ -189,12 +189,12 @@ void Button::setPosition(int x, int y)
 
 wzRect Button::getRect()
 {
-	return wz_widget_get_rect((struct wzWidget *)button_);
+	return wz_widget_get_absolute_rect((struct wzWidget *)button_);
 }
 
 void Button::draw()
 {
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
 	
 	// Background.
 	if (wz_button_is_pressed(button_))
@@ -265,7 +265,7 @@ void Checkbox::setPosition(int x, int y)
 
 void Checkbox::draw()
 {
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)button_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
 	
 	// Box.
 	SDL_Rect boxRect;
@@ -341,7 +341,7 @@ void GroupBox::draw()
 	const int textLeftMargin = 20;
 	const int textBorderSpacing = 5;
 
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)groupBox_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)groupBox_);
 	
 	// Background.
 	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
@@ -424,7 +424,7 @@ void Scroller::setRect(int x, int y, int w, int h)
 
 void Scroller::draw()
 {
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)scroller_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)scroller_);
 	
 	// Background.
 	SDL_SetRenderDrawColor(g_renderer, 192, 192, 192, 255);
@@ -488,7 +488,7 @@ void List::setRect(int x, int y, int w, int h)
 
 void List::draw()
 {
-	wzRect rect = wz_widget_get_rect((struct wzWidget *)list_);
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)list_);
 	
 	// Background.
 	SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);

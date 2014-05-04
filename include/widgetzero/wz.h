@@ -107,6 +107,10 @@ wzSize wz_widget_get_size(const struct wzWidget *widget);
 void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h);
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
 wzRect wz_widget_get_rect(const struct wzWidget *widget);
+
+// rect will be absolute - ancestor window position is taken into account.
+wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
+
 bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
@@ -119,6 +123,7 @@ int wz_window_get_header_height(struct wzWindow *window);
 void wz_window_set_border_size(struct wzWindow *window, int size);
 int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
+wzRect wz_window_get_content_rect(struct wzWindow *window);
 
 typedef void (*wzButtonPressedCallback)(struct wzButton *);
 

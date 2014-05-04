@@ -54,6 +54,10 @@ struct wzWidget
 	void *metadata;
 	bool hover;
 	wzWidgetVtable vtable;
+
+	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget.
+	struct wzWindow *window;
+
 	struct wzWidget *parent;
 	struct wzWidget *firstChild;
 	struct wzWidget *prev;
