@@ -195,13 +195,15 @@ wzRect Button::getRect()
 void Button::draw()
 {
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
-	
+	const bool hover = wz_widget_get_hover((struct wzWidget *)button_);
+	const bool pressed = wz_button_is_pressed(button_);
+
 	// Background.
-	if (wz_button_is_pressed(button_))
+	if (pressed && hover)
 	{
 		SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
 	}
-	else if (wz_widget_get_hover((struct wzWidget *)button_))
+	else if (hover)
 	{
 		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
 	}
@@ -213,7 +215,7 @@ void Button::draw()
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
 
 	// Border.
-	if (wz_button_is_pressed(button_))
+	if (pressed && hover)
 	{
 		SDL_SetRenderDrawColor(g_renderer, 44, 98, 139, 255);
 	}
@@ -266,7 +268,8 @@ void Checkbox::setPosition(int x, int y)
 void Checkbox::draw()
 {
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
-	
+	const bool hover = wz_widget_get_hover((struct wzWidget *)button_);
+
 	// Box.
 	SDL_Rect boxRect;
 	boxRect.x = rect.x;
@@ -275,12 +278,12 @@ void Checkbox::draw()
 	boxRect.h = boxSize;
 
 	// Box background.
-	if (wz_button_is_pressed(button_))
+	if (wz_button_is_pressed(button_) && hover)
 	{
 		SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
 		SDL_RenderFillRect(g_renderer, &boxRect);
 	}
-	else if (wz_widget_get_hover((struct wzWidget *)button_))
+	else if (hover)
 	{
 		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
 		SDL_RenderFillRect(g_renderer, &boxRect);

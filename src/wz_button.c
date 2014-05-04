@@ -55,38 +55,24 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	int i;
 
 	assert(widget);
-
-	if (!widget->hover)
-		return;
-
 	button = (struct wzButton *)widget;
 
-	if (mouseButton == 1)
+	if (mouseButton == 1 && button->isPressed)
 	{
 		button->isPressed = false;
 
-		if (button->toggleBehavior)
+		if (widget->hover)
 		{
-			button->isSet = !button->isSet;
+			if (button->toggleBehavior)
+			{
+				button->isSet = !button->isSet;
+			}
+
+			for (i = 0; i < stb_arr_len(button->pressed_callbacks); i++)
+			{
+				button->pressed_callbacks[i](button);
+			}
 		}
-
-		for (i = 0; i < stb_arr_len(button->pressed_callbacks); i++)
-		{
-			button->pressed_callbacks[i](button);
-		}
-	}
-}
-
-static void wz_button_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct wzButton *button;
-
-	assert(widget);
-	button = (struct wzButton *)widget;
-
-	if (!button->base.hover)
-	{
-		button->isPressed = false;
 	}
 }
 
@@ -121,7 +107,6 @@ struct wzButton *wz_button_create(struct wzContext *context)
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
-	button->base.vtable.mouse_move = wz_button_mouse_move;
 	button->base.vtable.clear_input_state = wz_button_clear_input_state;
 	return button;
 }
