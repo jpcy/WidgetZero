@@ -35,13 +35,24 @@ private:
 	wzContext *context_;
 };
 
-class Desktop
+class Widget
+{
+public:
+	virtual ~Widget() {}
+	virtual wzWidget *getWidget() = 0;
+	
+	wzContext *getContext()
+	{
+		return wz_widget_get_context(getWidget());
+	}
+};
+
+class Desktop : public Widget
 {
 public:
 	Desktop(Context *context);
 	~Desktop();
-	wzDesktop *get() const { return desktop_; }
-	wzContext *getContext() { return wz_widget_get_context((struct wzWidget *)desktop_); }
+	virtual wzWidget *getWidget() { return (struct wzWidget *)desktop_; }
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
@@ -51,10 +62,11 @@ private:
 	wzDesktop *desktop_;
 };
 
-class Window
+class Window : public Widget
 {
 public:
-	Window(Desktop *desktop, char *title);
+	Window(Widget *parent, char *title);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)window_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 	
@@ -63,11 +75,12 @@ private:
 	char title_[64];
 };
 
-class Button
+class Button : public Widget
 {
 public:
-	Button(Desktop *desktop, const char *label);
+	Button(Widget *parent, const char *label);
 	Button(wzButton *button, const char *label);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)button_; }
 	void setPosition(int x, int y);
 	wzRect getRect();
 	void draw();
@@ -77,10 +90,11 @@ private:
 	char label_[64];
 };
 
-class Checkbox
+class Checkbox : public Widget
 {
 public:
-	Checkbox(Desktop *desktop, const char *label);
+	Checkbox(Widget *parent, const char *label);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)button_; }
 	void setPosition(int x, int y);
 	void draw();
 
@@ -92,10 +106,11 @@ private:
 	static const int boxRightMargin = 8;
 };
 
-class GroupBox
+class GroupBox : public Widget
 {
 public:
-	GroupBox(Desktop *desktop, const char *label);
+	GroupBox(Widget *parent, const char *label);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)groupBox_; }
 	void setPosition(int x, int y);
 	void draw();
 
@@ -104,15 +119,15 @@ private:
 	char label_[64];
 };
 
-class Scroller
+class Scroller : public Widget
 {
 public:
-	Scroller(Desktop *desktop, wzScrollerType type, int value, int stepValue, int maxValue);
+	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)scroller_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 	int getValue() const;
-	wzScroller *get() { return scroller_; }
 
 private:
 	wzScroller *scroller_;
@@ -120,10 +135,11 @@ private:
 	std::auto_ptr<Button> incrementButton;
 };
 
-class List
+class List : public Widget
 {
 public:
-	List(Desktop *desktop, const char **items, int nItems);
+	List(Widget *parent, const char **items, int nItems);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)list_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 
