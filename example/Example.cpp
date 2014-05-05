@@ -268,6 +268,9 @@ int main(int argc, char **argv)
 	Button childWindowButton(&childWindow, "Another Button");
 	childWindowButton.setPosition(20, 20);
 
+	List childList(&childWindow, listData, 17);
+	childList.setRect(20, 70, 150, 150);
+
 	for (;;)
 	{
 		SDL_Event e;

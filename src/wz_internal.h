@@ -45,6 +45,8 @@ typedef struct
 	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	void (*mouse_hover_on)(struct wzWidget *widget);
 	void (*mouse_hover_off)(struct wzWidget *widget);
+
+	void (*parent_window_move)(struct wzWidget *widget);
 }
 wzWidgetVtable;
 

@@ -189,9 +189,30 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
+static void wz_window_call_parent_window_move_recursive(struct wzWidget *widget)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->vtable.parent_window_move)
+	{
+		widget->vtable.parent_window_move(widget);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_window_call_parent_window_move_recursive(child);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
 static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWindow *window;
+	struct wzWidget *child;
 
 	assert(widget);
 	window = (struct wzWindow *)widget;
@@ -236,6 +257,17 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		widget->rect.w -= mouseDeltaX;
 		widget->rect.h -= mouseDeltaY;
 		break;
+	default:
+		return; // Not dragging, don't call parent_window_move.
+	}
+
+	// Dragging: call parent_window_move on child and ancestor widgets.
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_window_call_parent_window_move_recursive(child);
+		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 

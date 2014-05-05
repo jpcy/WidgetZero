@@ -76,8 +76,8 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 
 	list->mouseOverItem = -1;
 
-	// Call wz_list_get_items_rect instead of using list->itemsRect so the scroller size is excluded.
-	itemsRect = wz_list_get_items_rect(list);
+	// Call wz_list_get_absolute_items_rect instead of using list->itemsRect so the scroller size is excluded and the window position taken into account.
+	itemsRect = wz_list_get_absolute_items_rect(list);
 	rect.x = itemsRect.x;
 	rect.y = itemsRect.y;
 	rect.w = itemsRect.w;
@@ -246,6 +246,21 @@ wzRect wz_list_get_items_rect(const struct wzList *list)
 	if (list->scroller)
 	{
 		rect.w -= wz_widget_get_size((struct wzWidget *)list->scroller).w;
+	}
+
+	return rect;
+}
+
+wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
+{
+	wzRect rect = wz_list_get_items_rect(list);
+
+	// Adjust for window position.
+	if (list->base.window)
+	{
+		wzRect windowContentRect = wz_window_get_content_rect(list->base.window);
+		rect.x += windowContentRect.x;
+		rect.y += windowContentRect.y;
 	}
 
 	return rect;

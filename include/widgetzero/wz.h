@@ -139,6 +139,10 @@ struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
 wzRect wz_list_get_items_rect(const struct wzList *list);
+
+// rect will be absolute - ancestor window position is taken into account.
+wzRect wz_list_get_absolute_items_rect(const struct wzList *list);
+
 void wz_list_set_item_height(struct wzList *list, int itemHeight);
 int wz_list_get_item_height(const struct wzList *list);
 void wz_list_set_num_items(struct wzList *list, int nItems);

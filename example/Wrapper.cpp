@@ -503,7 +503,7 @@ void List::draw()
 
 	// Items.
 	int nItems = wz_list_get_num_items(list_);
-	wzRect itemsRect = wz_list_get_items_rect(list_);
+	wzRect itemsRect = wz_list_get_absolute_items_rect(list_);
 	int y = itemsRect.y;
 
 	SDL_Rect oldClipRect;
