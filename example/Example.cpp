@@ -273,12 +273,16 @@ int main(int argc, char **argv)
 
 	for (;;)
 	{
+		bool quit = false;
 		SDL_Event e;
 
-		if (SDL_PollEvent(&e))
+		while (SDL_PollEvent(&e))
 		{
 			if (e.type == SDL_QUIT)
+			{
+				quit = true;
 				break;
+			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{
 				desktop.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
@@ -292,6 +296,9 @@ int main(int argc, char **argv)
 				desktop.mouseButtonUp(e.button.button, e.button.x, e.button.y);
 			}
 		}
+
+		if (quit)
+			break;
 
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 		SDL_RenderClear(g_renderer);
