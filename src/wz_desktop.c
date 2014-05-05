@@ -155,37 +155,31 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
 }
 
-static void wz_widget_clear_input_state_recursive(struct wzWidget *widget)
+// If window is not NULL, only call mouse_move in widgets that are children of the window and the window itself.
+static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	struct wzWidget *child;
-
-	assert(widget);
-
-	if (widget->vtable.clear_input_state)
-	{
-		widget->vtable.clear_input_state(widget);
-	}
-
-	child = widget->firstChild;
-
-	while (child)
-	{
-		wz_widget_clear_input_state_recursive(child);
-		child = child->next == widget->firstChild ? NULL : child->next;
-	}
-}
-
-static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct wzWidget *child;
 	wzRect rect;
+	bool widgetIsChildOfWindow;
+	bool oldHover;
+	struct wzWidget *child;
 
 	assert(widget);
 
 	rect = wz_widget_get_absolute_rect(widget);
-	widget->hover = WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+	widgetIsChildOfWindow = !window || (window && widget->window == window);
+	oldHover = widget->hover;
+	widget->hover = widgetIsChildOfWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
-	if (widget->vtable.mouse_move)
+	if (!oldHover && widget->hover && widget->vtable.mouse_hover_on)
+	{
+		widget->vtable.mouse_hover_on(widget);
+	}
+	else if (oldHover && !widget->hover && widget->vtable.mouse_hover_off)
+	{
+		widget->vtable.mouse_hover_off(widget);
+	}
+
+	if (widgetIsChildOfWindow && widget->vtable.mouse_move)
 	{
 		widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
@@ -194,41 +188,23 @@ static void wz_widget_mouse_move_recursive(struct wzWidget *widget, int mouseX, 
 
 	while (child)
 	{
-		wz_widget_mouse_move_recursive(child, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		wz_widget_mouse_move_recursive(window, child, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	struct wzWindow *focusWindow;
-
 	assert(desktop);
 
 	if (desktop->lockInputWidget)
 	{
-		wz_widget_mouse_move_recursive(desktop->lockInputWidget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		wz_widget_mouse_move_recursive(NULL, desktop->lockInputWidget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		return;
 	}
 
-	focusWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
-
-	if (focusWindow != desktop->lockInputWindow)
-	{
-		desktop->lockInputWindow = focusWindow;
-
-		// Lock window has changed, clear all temporary widget input state.
-		wz_widget_clear_input_state_recursive((struct wzWidget *)desktop);
-	}
-
-	if (desktop->lockInputWindow)
-	{
-		wz_widget_mouse_move_recursive((struct wzWidget *)desktop->lockInputWindow, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-	}
-	else
-	{
-		wz_widget_mouse_move_recursive((struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-	}
+	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
+	wz_widget_mouse_move_recursive(desktop->lockInputWindow, (struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
 static void wz_widget_draw_recursive(struct wzWidget *widget)

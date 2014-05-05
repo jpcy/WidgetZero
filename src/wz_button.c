@@ -78,16 +78,6 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static void wz_button_clear_input_state(struct wzWidget *widget)
-{
-	struct wzButton *button;
-
-	assert(widget);
-	button = (struct wzButton *)widget;
-	widget->hover = false;
-	button->isPressed = false;
-}
-
 static void wz_button_destroy(struct wzWidget *widget)
 {
 	struct wzButton *button;
@@ -109,7 +99,6 @@ struct wzButton *wz_button_create(struct wzContext *context)
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
-	button->base.vtable.clear_input_state = wz_button_clear_input_state;
 	return button;
 }
 

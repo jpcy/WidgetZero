@@ -205,16 +205,6 @@ static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mous
 	}
 }
 
-static void wz_scroller_clear_input_state(struct wzWidget *widget)
-{
-	struct wzScroller *scroller;
-
-	assert(widget);
-	scroller = (struct wzScroller *)widget;
-	scroller->nubHover = false;
-	scroller->isNubPressed = false;
-}
-
 static void wz_scroller_decrement_button_pressed(struct wzButton *button)
 {
 	struct wzWidget *buttonWidget;
@@ -258,7 +248,6 @@ struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType 
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_move = wz_scroller_mouse_move;
-	scroller->base.vtable.clear_input_state = wz_scroller_clear_input_state;
 	scroller->scrollerType = scrollerType;
 	scroller->stepValue = 1;
 
