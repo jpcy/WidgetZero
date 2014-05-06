@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
 #include <SDL.h>
@@ -444,6 +445,54 @@ void Scroller::draw()
 int Scroller::getValue() const
 {
 	return wz_scroller_get_value(scroller_);
+}
+
+//------------------------------------------------------------------------------
+
+void LabelDraw(struct wzWidget *widget)
+{
+	Label *label = (Label *)wz_widget_get_metadata(widget);
+	label->draw();
+}
+
+Label::Label(Widget *parent)
+{
+	text_[0] = r = g = b = 0;
+	label_ = wz_label_create(parent->getContext());
+	struct wzWidget *widget = (struct wzWidget *)label_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, LabelDraw);
+	wz_widget_add_child_widget(parent->getWidget(), widget);
+}
+
+void Label::setPosition(int x, int y)
+{
+	wz_widget_set_position_args((struct wzWidget *)label_, x, y);
+}
+
+void Label::setText(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	vsnprintf(text_, sizeof(text_), format, args);
+	va_end(args);
+
+	wzSize size;
+	MeasureText(text_, &size.w, &size.h);
+	wz_widget_set_size((struct wzWidget *)label_, size);
+}
+
+void Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
+{
+	this->r = r;
+	this->g = g;
+	this->b = b;
+}
+
+void Label::draw()
+{
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)label_);
+	TextPrintf(rect.x, rect.y, TA_LEFT, TA_TOP, r, g, b, text_);
 }
 
 //------------------------------------------------------------------------------

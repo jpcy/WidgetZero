@@ -135,6 +135,22 @@ private:
 	std::auto_ptr<Button> incrementButton;
 };
 
+class Label : public Widget
+{
+public:
+	Label(Widget *parent);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)label_; }
+	void setPosition(int x, int y);
+	void setText(const char *format, ...);
+	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
+	void draw();
+
+private:
+	wzLabel *label_;
+	char text_[256];
+	uint8_t r, g, b;
+};
+
 class List : public Widget
 {
 public:

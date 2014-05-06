@@ -45,6 +45,7 @@ struct wzWidget;
 struct wzButton;
 struct wzScroller;
 struct wzGroupBox;
+struct wzLabel;
 struct wzList;
 
 typedef enum
@@ -54,6 +55,7 @@ typedef enum
 	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_GROUPBOX,
+	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
 	WZ_MAX_WIDGET_TYPES = 64
@@ -134,6 +136,8 @@ bool wz_button_is_set(const struct wzButton *button);
 void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
 
 struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
+
+struct wzLabel *wz_label_create(struct wzContext *context);
 
 struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);

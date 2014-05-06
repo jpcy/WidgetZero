@@ -235,8 +235,16 @@ int main(int argc, char **argv)
 	Scroller scroller(&desktop, WZ_SCROLLER_VERTICAL, 20, 10, 100);
 	scroller.setRect(300, 50, 16, 200);
 
+	Label scrollerLabel(&desktop);
+	scrollerLabel.setTextColor(255, 128, 128);
+	scrollerLabel.setPosition(350, 50);
+
 	Scroller scrollerHorizontal(&desktop, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
 	scrollerHorizontal.setRect(500, 50, 200, 16);
+
+	Label scrollerHorizontalLabel(&desktop);
+	scrollerHorizontalLabel.setTextColor(128, 128, 255);
+	scrollerHorizontalLabel.setPosition(500, 100);
 
 	const char *listData[17] =
 	{
@@ -303,9 +311,10 @@ int main(int argc, char **argv)
 		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
 		SDL_RenderClear(g_renderer);
 		desktop.draw();
-		TextPrintf(350, 50, TA_LEFT, TA_TOP, 255, 128, 128, "Scroll value: %d", scroller.getValue());
-		TextPrintf(500, 100, TA_LEFT, TA_TOP, 128, 128, 255, "Scroll value: %d", scrollerHorizontal.getValue());
 		SDL_RenderPresent(g_renderer);
+
+		scrollerLabel.setText("Scroll value: %d", scroller.getValue());
+		scrollerHorizontalLabel.setText("Scroll value: %d", scrollerHorizontal.getValue());
 	}
 
 	return 0;
