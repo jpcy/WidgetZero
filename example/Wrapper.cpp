@@ -311,6 +311,72 @@ void Checkbox::draw()
 
 //------------------------------------------------------------------------------
 
+static void ComboDraw(struct wzWidget *widget)
+{
+	Combo *combo = (Combo *)wz_widget_get_metadata(widget);
+	combo->draw();
+}
+
+Combo::Combo(Widget *parent, const char **items, int nItems)
+{
+	items_ = items;
+	combo_ = wz_combo_create(parent->getContext());
+	struct wzWidget *widget = (struct wzWidget *)combo_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ComboDraw);
+	wz_widget_add_child_widget(parent->getWidget(), widget);
+	
+	list_.reset(new List(wz_combo_get_list(combo_), items, nItems));
+}
+
+void Combo::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect((struct wzWidget *)combo_, rect);
+}
+
+void Combo::draw()
+{
+	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)combo_);
+	const bool hover = wz_widget_get_hover((struct wzWidget *)combo_);
+
+	// Background.
+	if (hover)
+	{
+		SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(g_renderer, 218, 218, 218, 255);
+	}
+
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Border.
+	if (hover)
+	{
+		SDL_SetRenderDrawColor(g_renderer, 44, 98, 139, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(g_renderer, 112, 112, 112, 255);
+	}
+
+	SDL_RenderDrawRect(g_renderer, (SDL_Rect *)&rect);
+
+	// Label.
+	int itemIndex = wz_list_get_selected_item((const wzList *)list_->getWidget());
+
+	if (itemIndex >= 0)
+		TextPrintf(rect.x + 10, rect.y + rect.h / 2, TA_LEFT, TA_CENTER, 0, 0, 0, items_[itemIndex]);
+}
+
+//------------------------------------------------------------------------------
+
 void GroupBoxDraw(struct wzWidget *widget)
 {
 	GroupBox *groupBox = (GroupBox *)wz_widget_get_metadata(widget);
@@ -512,6 +578,23 @@ List::List(Widget *parent, const char **items, int nItems)
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, ListDraw);
 	wz_widget_add_child_widget(parent->getWidget(), widget);
+	items_ = items;
+	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
+
+	wzSize scrollerSize;
+	scrollerSize.w = 16;
+	scrollerSize.h = 0;
+	wz_widget_set_size(scroller_->getWidget(), scrollerSize);
+}
+
+List::List(wzList *list, const char **items, int nItems)
+{
+	list_ = list;
+	wz_list_set_num_items(list_, nItems);
+	wz_list_set_item_height(list_, itemHeight);
+	struct wzWidget *widget = (struct wzWidget *)list_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, ListDraw);
 	items_ = items;
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 

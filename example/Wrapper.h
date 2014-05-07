@@ -24,6 +24,8 @@ SOFTWARE.
 #include <memory>
 #include <widgetzero/wz.h>
 
+class List;
+
 class Context
 {
 public:
@@ -106,6 +108,20 @@ private:
 	static const int boxRightMargin = 8;
 };
 
+class Combo : public Widget
+{
+public:
+	Combo(Widget *parent, const char **items, int nItems);
+	virtual wzWidget *getWidget() { return (struct wzWidget *)combo_; }
+	void setRect(int x, int y, int w, int h);
+	void draw();
+
+private:
+	wzCombo *combo_;
+	const char **items_;
+	std::auto_ptr<List> list_;
+};
+
 class GroupBox : public Widget
 {
 public:
@@ -155,6 +171,7 @@ class List : public Widget
 {
 public:
 	List(Widget *parent, const char **items, int nItems);
+	List(wzList *list, const char **items, int nItems);
 	virtual wzWidget *getWidget() { return (struct wzWidget *)list_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();

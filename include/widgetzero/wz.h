@@ -43,6 +43,7 @@ struct wzDesktop;
 struct wzWindow;
 struct wzWidget;
 struct wzButton;
+struct wzCombo;
 struct wzScroller;
 struct wzGroupBox;
 struct wzLabel;
@@ -54,6 +55,7 @@ typedef enum
 	WZ_TYPE_DESKTOP,
 	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
+	WZ_TYPE_COMBO,
 	WZ_TYPE_GROUPBOX,
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
@@ -136,6 +138,10 @@ void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
+
+struct wzCombo *wz_combo_create(struct wzContext *context);
+struct wzList *wz_combo_get_list(struct wzCombo *combo);
+bool wz_combo_is_open(struct wzCombo *combo);
 
 struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
 

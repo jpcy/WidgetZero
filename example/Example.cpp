@@ -270,6 +270,9 @@ int main(int argc, char **argv)
 	List list(&desktop, listData, 17);
 	list.setRect(400, 300, 150, 150);
 
+	Combo combo(&desktop, listData, 17);
+	combo.setRect(800, 50, 150, 20);
+
 	Window childWindow(&desktop, "Test Window");
 	childWindow.setRect(650, 300, 300, 300);
 
