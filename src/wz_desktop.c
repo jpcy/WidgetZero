@@ -73,6 +73,9 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 
 	assert(widget);
 
+	if (widget->hidden)
+		return;
+
 	if (widget->vtable.mouse_button_down)
 	{
 		widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
@@ -119,6 +122,9 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 
 	assert(widget);
 
+	if (widget->hidden)
+		return;
+
 	if (widget->vtable.mouse_button_up)
 	{
 		widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
@@ -164,6 +170,9 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	struct wzWidget *child;
 
 	assert(widget);
+
+	if (widget->hidden)
+		return;
 
 	rect = wz_widget_get_absolute_rect(widget);
 	widgetIsChildOfWindow = !window || (window && widget->window == window);
@@ -212,6 +221,9 @@ static void wz_widget_draw_recursive(struct wzWidget *widget)
 	struct wzWidget *child;
 
 	assert(widget);
+
+	if (widget->hidden)
+		return;
 
 	if (widget->vtable.draw)
 	{

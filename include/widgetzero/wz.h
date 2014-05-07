@@ -114,6 +114,8 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget);
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
 
 bool wz_widget_get_hover(const struct wzWidget *widget);
+void wz_widget_set_visible(struct wzWidget *widget, bool visible);
+bool wz_widget_get_visible(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));

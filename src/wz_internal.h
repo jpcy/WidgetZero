@@ -57,6 +57,7 @@ struct wzWidget
 	wzRect rect;
 	void *metadata;
 	bool hover;
+	bool hidden;
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;

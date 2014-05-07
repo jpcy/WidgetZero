@@ -174,6 +174,18 @@ bool wz_widget_get_hover(const struct wzWidget *widget)
 	return widget->hover;
 }
 
+void wz_widget_set_visible(struct wzWidget *widget, bool visible)
+{
+	assert(widget);
+	widget->hidden = !visible;
+}
+
+bool wz_widget_get_visible(const struct wzWidget *widget)
+{
+	assert(widget);
+	return !widget->hidden;
+}
+
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata)
 {
 	assert(widget);
