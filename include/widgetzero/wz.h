@@ -153,6 +153,8 @@ struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
 
 struct wzLabel *wz_label_create(struct wzContext *context);
 
+typedef void (*wzListItemSelectedCallback)(struct wzList *);
+
 struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
@@ -170,6 +172,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem);
 int wz_list_get_selected_item(const struct wzList *list);
 int wz_list_get_pressed_item(const struct wzList *list);
 int wz_list_get_hovered_item(const struct wzList *list);
+void wz_list_add_callback_item_selected(struct wzList *list, wzListItemSelectedCallback callback);
 
 typedef enum
 {

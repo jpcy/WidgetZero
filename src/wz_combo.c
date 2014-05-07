@@ -90,6 +90,22 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 	}
 }
 
+static void wz_combo_list_item_selected(struct wzList *list)
+{
+	struct wzCombo *combo;
+
+	assert(list);
+	combo = (struct wzCombo *)((struct wzWidget *)list)->parent;
+
+	// Unlock input.
+	wz_desktop_pop_lock_input_widget(combo->base.desktop, (struct wzWidget *)combo);
+
+	// Hide dropdown list.
+	wz_widget_set_visible((struct wzWidget *)combo->list, false);
+
+	combo->isOpen = false;
+}
+
 struct wzCombo *wz_combo_create(struct wzContext *context)
 {
 	struct wzCombo *combo;
@@ -105,6 +121,7 @@ struct wzCombo *wz_combo_create(struct wzContext *context)
 	combo->list = wz_list_create(context);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
+	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
 
 	return combo;
 }

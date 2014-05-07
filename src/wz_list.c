@@ -44,6 +44,8 @@ struct wzList
 	int mouseOverItem;
 
 	struct wzScroller *scroller;
+
+	wzListItemSelectedCallback *item_selected_callbacks;
 };
 
 static void wz_list_update_scroller_size(struct wzList *list)
@@ -95,6 +97,19 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_list_update_scroller_max_value(list);
 }
 
+static void wz_list_set_visible(struct wzWidget *widget, bool visible)
+{
+	assert(widget);
+	widget->hidden = !visible;
+
+	// Clear some additional state when hidden.
+	if (widget->hidden)
+	{
+		struct wzList *list = (struct wzList *)widget;
+		list->hoveredItem = -1;
+	}
+}
+
 static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int mouseY)
 {
 	wzRect itemsRect, rect;
@@ -143,6 +158,8 @@ static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, 
 static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzList *list;
+	bool selectedItemAssignedTo = false;
+	int i;
 
 	assert(widget);
 	list = (struct wzList *)widget;
@@ -152,6 +169,7 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 		if (list->pressedItem != -1)
 		{
 			list->selectedItem = list->pressedItem;
+			selectedItemAssignedTo = true;
 			list->pressedItem = -1;
 		}
 
@@ -160,6 +178,14 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 		list->hoveredItem = list->mouseOverItem;
 
 		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
+	}
+
+	if (selectedItemAssignedTo)
+	{
+		for (i = 0; i < stb_arr_len(list->item_selected_callbacks); i++)
+		{
+			list->item_selected_callbacks[i](list);
+		}
 	}
 }
 
@@ -201,6 +227,15 @@ static void wz_list_scroller_value_changed(struct wzScroller *scroller, int valu
 	list->firstItem = value;
 }
 
+static void wz_list_destroy(struct wzWidget *widget)
+{
+	struct wzList *list;
+
+	assert(widget);
+	list = (struct wzList *)widget;
+	stb_arr_free(list->item_selected_callbacks);
+}
+
 struct wzList *wz_list_create(struct wzContext *context)
 {
 	struct wzList *list;
@@ -210,7 +245,9 @@ struct wzList *wz_list_create(struct wzContext *context)
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
 	list->base.context = context;
+	list->base.vtable.destroy = wz_list_destroy;
 	list->base.vtable.set_rect = wz_list_set_rect;
+	list->base.vtable.set_visible = wz_list_set_visible;
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
 	list->base.vtable.mouse_move = wz_list_mouse_move;
@@ -309,8 +346,15 @@ int wz_list_get_first_item(const struct wzList *list)
 
 void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 {
+	int i;
+
 	assert(list);
 	list->selectedItem = selectedItem;
+
+	for (i = 0; i < stb_arr_len(list->item_selected_callbacks); i++)
+	{
+		list->item_selected_callbacks[i](list);
+	}
 }
 
 int wz_list_get_selected_item(const struct wzList *list)
@@ -329,4 +373,10 @@ int wz_list_get_hovered_item(const struct wzList *list)
 {
 	assert(list);
 	return list->hoveredItem;
+}
+
+void wz_list_add_callback_item_selected(struct wzList *list, wzListItemSelectedCallback callback)
+{
+	assert(list);
+	stb_arr_push(list->item_selected_callbacks, callback);
 }

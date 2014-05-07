@@ -177,7 +177,15 @@ bool wz_widget_get_hover(const struct wzWidget *widget)
 void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 {
 	assert(widget);
-	widget->hidden = !visible;
+
+	if (widget->vtable.set_visible)
+	{
+		widget->vtable.set_visible(widget, visible);
+	}
+	else
+	{
+		widget->hidden = !visible;
+	}
 }
 
 bool wz_widget_get_visible(const struct wzWidget *widget)
