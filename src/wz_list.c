@@ -111,7 +111,7 @@ static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, 
 		list->pressedItem = list->hoveredItem;
 		list->selectedItem = -1;
 		list->hoveredItem = -1;
-		wz_desktop_lock_input(widget->desktop, widget);
+		wz_desktop_push_lock_input_widget(widget->desktop, widget);
 	}
 }
 
@@ -134,7 +134,7 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 		wz_list_update_mouse_over_item(list, mouseX, mouseY);
 		list->hoveredItem = list->mouseOverItem;
 
-		wz_desktop_unlock_input(widget->desktop);
+		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
 	}
 }
 

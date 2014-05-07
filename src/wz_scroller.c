@@ -146,7 +146,7 @@ static void wz_scroller_mouse_button_down(struct wzWidget *widget, int mouseButt
 	if (mouseButton == 1 && scroller->nubHover)
 	{
 		scroller->isNubPressed = true;
-		wz_desktop_lock_input(widget->desktop, widget);
+		wz_desktop_push_lock_input_widget(widget->desktop, widget);
 	}
 }
 
@@ -160,7 +160,7 @@ static void wz_scroller_mouse_button_up(struct wzWidget *widget, int mouseButton
 	if (mouseButton == 1)
 	{
 		scroller->isNubPressed = false;
-		wz_desktop_unlock_input(widget->desktop);
+		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
 	}
 }
 

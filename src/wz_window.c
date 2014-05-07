@@ -63,7 +63,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_HEADER;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -76,7 +76,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_N;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -89,7 +89,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_NE;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -103,7 +103,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_E;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -117,7 +117,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_SE;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -131,7 +131,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_S;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -144,7 +144,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_SW;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -157,7 +157,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_W;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 
@@ -169,7 +169,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
 		{
 			window->drag = WZ_DRAG_RESIZE_NW;
-			wz_desktop_lock_input(widget->desktop, widget);
+			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 			return;
 		}
 	}
@@ -185,7 +185,7 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	if (mouseButton == 1)
 	{
 		window->drag = WZ_DRAG_NONE;
-		wz_desktop_unlock_input(widget->desktop);
+		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
 	}
 }
 
