@@ -581,6 +581,10 @@ List::List(Widget *parent, const char **items, int nItems)
 	items_ = items;
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 
+	wzBorder border;
+	border.left = border.right = border.top = border.bottom = itemsMargin;
+	wz_list_set_items_border(list_, border);
+
 	wzSize scrollerSize;
 	scrollerSize.w = 16;
 	scrollerSize.h = 0;
@@ -598,6 +602,10 @@ List::List(wzList *list, const char **items, int nItems)
 	items_ = items;
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
 
+	wzBorder border;
+	border.left = border.right = border.top = border.bottom = itemsMargin;
+	wz_list_set_items_border(list_, border);
+
 	wzSize scrollerSize;
 	scrollerSize.w = 16;
 	scrollerSize.h = 0;
@@ -612,13 +620,6 @@ void List::setRect(int x, int y, int w, int h)
 	rect.w = w;
 	rect.h = h;
 	wz_widget_set_rect((struct wzWidget *)list_, rect);
-
-	wzRect itemsRect;
-	itemsRect.x = x + itemsMargin;
-	itemsRect.y = y + itemsMargin;
-	itemsRect.w = w - itemsMargin * 2;
-	itemsRect.h = h - itemsMargin * 2;
-	wz_list_set_items_rect(list_, itemsRect);
 }
 
 void List::draw()

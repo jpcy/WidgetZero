@@ -46,13 +46,6 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	listRect.w = rect.w;
 	listRect.h = 200; // FIXME
 	wz_widget_set_rect((struct wzWidget *)combo->list, listRect);
-
-	// FIXME
-	listRect.x += 2;
-	listRect.y += 2;
-	listRect.w -= 4;
-	listRect.h -= 4;
-	wz_list_set_items_rect(combo->list, listRect);
 }
 
 static void wz_combo_set_rect(struct wzWidget *widget, wzRect rect)

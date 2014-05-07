@@ -82,6 +82,12 @@ typedef struct
 }
 wzRect;
 
+typedef struct
+{
+	int top, right, bottom, left;
+}
+wzBorder;
+
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
@@ -149,7 +155,7 @@ struct wzLabel *wz_label_create(struct wzContext *context);
 
 struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
-void wz_list_set_items_rect(struct wzList *list, wzRect itemsRect);
+void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 
 // rect will be absolute - ancestor window position is taken into account.
