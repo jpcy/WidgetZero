@@ -655,12 +655,12 @@ void List::draw()
 		itemRect.w = itemsRect.w;
 		itemRect.h = itemHeight;
 
-		if (i == wz_list_get_pressed_item(list_) || i == wz_list_get_selected_item(list_))
+		if (i == wz_list_get_selected_item(list_))
 		{
 			SDL_SetRenderDrawColor(g_renderer, 127, 194, 229, 255);
 			SDL_RenderFillRect(g_renderer, &itemRect);
 		}
-		else if (i == wz_list_get_hovered_item(list_))
+		else if (i == wz_list_get_pressed_item(list_) || i == wz_list_get_hovered_item(list_))
 		{
 			SDL_SetRenderDrawColor(g_renderer, 188, 229, 252, 255);
 			SDL_RenderFillRect(g_renderer, &itemRect);

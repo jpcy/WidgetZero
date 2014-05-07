@@ -135,7 +135,6 @@ static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, 
 	if (mouseButton == 1 && list->hoveredItem != -1)
 	{
 		list->pressedItem = list->hoveredItem;
-		list->selectedItem = -1;
 		list->hoveredItem = -1;
 		wz_desktop_push_lock_input_widget(widget->desktop, widget);
 	}
