@@ -642,7 +642,8 @@ void List::draw()
 	// Items.
 	int nItems = wz_list_get_num_items(list_);
 	wzRect itemsRect = wz_list_get_absolute_items_rect(list_);
-	int y = itemsRect.y;
+	int scrollerValue = wz_scroller_get_value(wz_list_get_scroller(list_));
+	int y = itemsRect.y - (scrollerValue % itemHeight);
 
 	SDL_Rect oldClipRect;
 	SDL_RenderGetClipRect(g_renderer, &oldClipRect);

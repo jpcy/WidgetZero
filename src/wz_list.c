@@ -72,7 +72,7 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 	// Avoid divide by zero.
 	if (list->itemHeight != 0)
 	{
-		max = list->nItems - (int)(list->itemsRect.h / (float)list->itemHeight);
+		max = list->nItems * list->itemHeight - list->itemsRect.h;
 
 		// Hide/show scroller depending on if it's needed.
 		if (max <= 0)
@@ -129,10 +129,13 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 
 	list->mouseOverItem = -1;
 
+	if (!list->base.hover)
+		return;
+
 	// Call wz_list_get_absolute_items_rect instead of using list->itemsRect so the scroller size is excluded and the window position taken into account.
 	itemsRect = wz_list_get_absolute_items_rect(list);
 	rect.x = itemsRect.x;
-	rect.y = itemsRect.y;
+	rect.y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
 	rect.w = itemsRect.w;
 	rect.h = list->itemHeight;
 
@@ -236,7 +239,7 @@ static void wz_list_scroller_value_changed(struct wzScroller *scroller, int valu
 
 	assert(scroller);
 	list = (struct wzList *)((struct wzWidget *)scroller)->parent;
-	list->firstItem = value;
+	list->firstItem = value / list->itemHeight;
 }
 
 static void wz_list_destroy(struct wzWidget *widget)
@@ -334,6 +337,7 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
 	assert(list);
 	list->itemHeight = itemHeight;
+	wz_scroller_set_step_value(list->scroller, itemHeight);
 	wz_list_update_scroller_max_value(list);
 }
 
