@@ -288,6 +288,9 @@ int main(int argc, char **argv)
 	List childList(&childWindow, listData, 17);
 	childList.setRect(20, 70, 150, 150);
 
+	Combo childCombo(&childWindow, listData, 17);
+	childCombo.setRect(20, 240, 150, 20);
+
 	for (;;)
 	{
 		bool quit = false;

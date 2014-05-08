@@ -36,11 +36,12 @@ struct wzCombo
 
 static void wz_combo_update_list_rect(struct wzCombo *combo)
 {
-	wzRect rect, listRect;
+	wzRect rect, absRect, listRect;
 	wzBorder listItemsBorder;
 	int listItemHeight, listNumItems, over;
 
-	rect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
+	rect = wz_widget_get_rect((struct wzWidget *)combo);
+	absRect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 
 	// Set list rect.
 	listRect.x = rect.x;
@@ -54,7 +55,8 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	listRect.h = listItemsBorder.top + listItemHeight * listNumItems + listItemsBorder.bottom;
 
 	// Clip the height to the desktop.
-	over = listRect.y + listRect.h - wz_desktop_get_size(combo->base.desktop).h;
+	// Need to use absolute widget rect y coord to take into account parent window position.
+	over = absRect.y + rect.h + listRect.h - wz_desktop_get_size(combo->base.desktop).h;
 	
 	if (over > 0)
 	{
