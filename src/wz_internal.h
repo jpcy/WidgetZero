@@ -80,6 +80,9 @@ void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidge
 // Stop locking input to this widget.
 void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
 
+// widget can be NULL
+void wz_desktop_set_draw_last_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
 #endif

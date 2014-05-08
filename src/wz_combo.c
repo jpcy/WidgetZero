@@ -69,9 +69,10 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 			// Lock input.
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 
-			// Show dropdown list.
+			// Show dropdown list and set it to draw last.
 			wz_widget_set_visible((struct wzWidget *)combo->list, true);
 			wz_combo_update_list_rect(combo);
+			wz_desktop_set_draw_last_widget(widget->desktop, (struct wzWidget *)combo->list);
 
 			combo->isOpen = true;
 		}
@@ -84,6 +85,7 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 
 			// Hide dropdown list.
 			wz_widget_set_visible((struct wzWidget *)combo->list, false);
+			wz_desktop_set_draw_last_widget(widget->desktop, NULL);
 
 			combo->isOpen = false;
 		}

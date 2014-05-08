@@ -35,6 +35,9 @@ struct wzDesktop
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
 	struct wzWindow *lockInputWindow;
+
+	// Draw this widget (and it's children) last.
+	struct wzWidget *drawLastWidget;
 };
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context)
@@ -220,13 +223,14 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	wz_widget_mouse_move_recursive(desktop->lockInputWindow, (struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
-static void wz_widget_draw_recursive(struct wzWidget *widget)
+// Don't draw skipWidget.
+static void wz_widget_draw_recursive(struct wzWidget *widget, struct wzWidget *skipWidget)
 {
 	struct wzWidget *child;
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (widget->hidden || widget == skipWidget)
 		return;
 
 	if (widget->vtable.draw)
@@ -238,7 +242,7 @@ static void wz_widget_draw_recursive(struct wzWidget *widget)
 
 	while (child)
 	{
-		wz_widget_draw_recursive(child);
+		wz_widget_draw_recursive(child, skipWidget);
 		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
@@ -255,7 +259,7 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	while (child)
 	{
 		if (child->type != WZ_TYPE_WINDOW)
-			wz_widget_draw_recursive(child);
+			wz_widget_draw_recursive(child, desktop->drawLastWidget);
 
 		child = child->next == desktop->base.firstChild ? NULL : child->next;
 	}
@@ -266,9 +270,15 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	while (child)
 	{
 		if (child->type == WZ_TYPE_WINDOW)
-			wz_widget_draw_recursive(child);
+			wz_widget_draw_recursive(child, desktop->drawLastWidget);
 
 		child = child->next == desktop->base.firstChild ? NULL : child->next;
+	}
+
+	// Now draw the "draw last" widget.
+	if (desktop->drawLastWidget)
+	{
+		wz_widget_draw_recursive(desktop->drawLastWidget, NULL);
 	}
 }
 
@@ -288,4 +298,10 @@ void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget
 	{	
 		stb_arr_pop(desktop->lockInputWidgetStack);
 	}
+}
+
+void wz_desktop_set_draw_last_widget(struct wzDesktop *desktop, struct wzWidget *widget)
+{
+	assert(desktop);
+	desktop->drawLastWidget = widget;
 }
