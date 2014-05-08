@@ -53,9 +53,7 @@ static void wz_list_update_scroller_size(struct wzList *list)
 	wzRect rect;
 
 	assert(list);
-
-	if (!list->scroller)
-		return;
+	assert(list->scroller);
 
 	// Fit into items rect. Width doesn't change.
 	rect = wz_widget_get_rect((struct wzWidget *)list->scroller);
@@ -67,13 +65,27 @@ static void wz_list_update_scroller_size(struct wzList *list)
 
 static void wz_list_update_scroller_max_value(struct wzList *list)
 {
+	int max = 0;
+
 	assert(list);
-	
-	if (list->scroller)
+
+	// Avoid divide by zero.
+	if (list->itemHeight != 0)
 	{
-		int max = list->nItems - (int)(list->itemsRect.h / (float)list->itemHeight);
-		wz_scroller_set_max_value(list->scroller, max);
+		max = list->nItems - (int)(list->itemsRect.h / (float)list->itemHeight);
+
+		// Hide/show scroller depending on if it's needed.
+		if (max <= 0)
+		{
+			wz_widget_set_visible((struct wzWidget *)list->scroller, false);
+		}
+		else
+		{
+			wz_widget_set_visible((struct wzWidget *)list->scroller, true);
+		}
 	}
+
+	wz_scroller_set_max_value(list->scroller, max);
 }
 
 static void wz_list_update_items_rect(struct wzList *list)
@@ -295,7 +307,7 @@ wzRect wz_list_get_items_rect(const struct wzList *list)
 	rect = list->itemsRect;
 
 	// Subtract the scroller width.
-	if (list->scroller)
+	if (wz_widget_get_visible((struct wzWidget *)list->scroller))
 	{
 		rect.w -= wz_widget_get_size((struct wzWidget *)list->scroller).w;
 	}
