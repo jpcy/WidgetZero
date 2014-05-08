@@ -75,12 +75,15 @@ static void wz_combo_set_rect(struct wzWidget *widget, wzRect rect)
 static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzCombo *combo;
+	wzRect listRect;
 
 	assert(widget);
 	combo = (struct wzCombo *)widget;
 
 	if (mouseButton == 1)
 	{
+		listRect = wz_widget_get_absolute_rect((struct wzWidget *)combo->list);
+
 		// Open dropdown.
 		if (!combo->isOpen)
 		{
@@ -95,8 +98,8 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 			combo->isOpen = true;
 		}
 		// Close dropdown.
-		// Don't do it if hovering over the dropdown list.
-		else if (!((struct wzWidget *)combo->list)->hover)
+		// Don't do it if the mouse cursor is over the dropdown list.
+		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
 		{
 			// Unlock input.
 			wz_desktop_pop_lock_input_widget(widget->desktop, widget);
