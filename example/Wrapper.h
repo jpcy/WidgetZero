@@ -55,6 +55,7 @@ public:
 	Desktop(Context *context);
 	~Desktop();
 	virtual wzWidget *getWidget() { return (struct wzWidget *)desktop_; }
+	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);

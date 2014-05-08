@@ -50,6 +50,11 @@ Desktop::~Desktop()
 	wz_widget_destroy((struct wzWidget *)desktop_);
 }
 
+void Desktop::setSize(int w, int h)
+{
+	wz_desktop_set_size_args(desktop_, w, h);
+}
+
 void Desktop::mouseMove(int x, int y, int dx, int dy)
 {
 	wz_desktop_mouse_move(desktop_, x, y, dx, dy);

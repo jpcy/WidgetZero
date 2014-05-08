@@ -52,6 +52,30 @@ struct wzDesktop *wz_desktop_create(struct wzContext *context)
 	return desktop;
 }
 
+void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size)
+{
+	assert(desktop);
+	desktop->base.rect.w = size.w;
+	desktop->base.rect.h = size.h;
+}
+
+void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
+{
+	assert(desktop);
+	desktop->base.rect.w = width;
+	desktop->base.rect.h = height;
+}
+
+wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
+{
+	wzSize size;
+
+	assert(desktop);
+	size.w = desktop->base.rect.w;
+	size.h = desktop->base.rect.h;
+	return size;
+}
+
 // Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
 static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
 {

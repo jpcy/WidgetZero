@@ -100,6 +100,9 @@ struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context);
+void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size);
+void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height);
+wzSize wz_desktop_get_size(const struct wzDesktop *desktop);
 void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -158,6 +161,7 @@ typedef void (*wzListItemSelectedCallback)(struct wzList *);
 struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
+wzBorder wz_list_get_items_border(const struct wzList *list);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 
 // rect will be absolute - ancestor window position is taken into account.

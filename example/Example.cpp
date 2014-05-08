@@ -221,6 +221,9 @@ int main(int argc, char **argv)
 	// Create wz objects.
 	Context context;
 	Desktop desktop(&context);
+	int windowWidth, windowHeight;
+	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+	desktop.setSize(windowWidth, windowHeight);
 
 	Button button(&desktop, "Test Button");
 	button.setPosition(100, 100);
@@ -272,6 +275,9 @@ int main(int argc, char **argv)
 
 	Combo combo(&desktop, listData, 17);
 	combo.setRect(800, 50, 150, 20);
+
+	Combo combo2(&desktop, listData, 17);
+	combo2.setRect(20, 600, 150, 20);
 
 	Window childWindow(&desktop, "Test Window");
 	childWindow.setRect(650, 300, 300, 300);
