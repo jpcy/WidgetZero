@@ -106,6 +106,7 @@ wzSize wz_desktop_get_size(const struct wzDesktop *desktop);
 void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
 void wz_desktop_draw(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
@@ -193,6 +194,7 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value);
 void wz_scroller_decrement_value(struct wzScroller *scroller);
 void wz_scroller_increment_value(struct wzScroller *scroller);
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
+int wz_scroller_get_step_value(struct wzScroller *scroller);
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
 struct wzButton *wz_scroller_get_decrement_button(struct wzScroller *scroller);
 struct wzButton *wz_scroller_get_increment_button(struct wzScroller *scroller);

@@ -46,6 +46,7 @@ typedef struct
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	void (*mouse_wheel_move)(struct wzWidget *widget, int x, int y);
 	void (*mouse_hover_on)(struct wzWidget *widget);
 	void (*mouse_hover_off)(struct wzWidget *widget);
 

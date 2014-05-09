@@ -247,6 +247,56 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	wz_widget_mouse_move_recursive(desktop->lockInputWindow, (struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
+static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x, int y)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->hidden)
+		return;
+
+	if (widget->vtable.mouse_wheel_move)
+	{
+		widget->vtable.mouse_wheel_move(widget, x, y);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		if (child->hover)
+		{
+			wz_widget_mouse_wheel_move_recursive(child, x, y);
+		}
+
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
+void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
+{
+	struct wzWidget *widget;
+
+	assert(desktop);
+
+	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
+	{
+		// Lock input to the top/last item on the stack.
+		widget = desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)];
+	}
+	else if (desktop->lockInputWindow)
+	{
+		widget = (struct wzWidget *)desktop->lockInputWindow;
+	}
+	else
+	{
+		widget = (struct wzWidget *)desktop;
+	}
+
+	wz_widget_mouse_wheel_move_recursive(widget, x, y);
+}
+
 // Don't draw skipWidget.
 static void wz_widget_draw_recursive(struct wzWidget *widget, struct wzWidget *skipWidget)
 {

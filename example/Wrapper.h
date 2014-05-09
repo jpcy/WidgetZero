@@ -59,6 +59,7 @@ public:
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
+	void mouseWheelMove(int x, int y);
 	void draw();
 
 private:

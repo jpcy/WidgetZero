@@ -70,6 +70,11 @@ void Desktop::mouseButtonUp(int button, int x, int y)
 	wz_desktop_mouse_button_up(desktop_, button, x, y);
 }
 
+void Desktop::mouseWheelMove(int x, int y)
+{
+	wz_desktop_mouse_wheel_move(desktop_, x, y);
+}
+
 void Desktop::draw()
 {
 	wz_desktop_draw(desktop_);

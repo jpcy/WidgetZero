@@ -209,6 +209,15 @@ static void wz_scroller_mouse_move(struct wzWidget *widget, int mouseX, int mous
 	}
 }
 
+static void wz_scroller_mouse_wheel_move(struct wzWidget *widget, int x, int y)
+{
+	struct wzScroller *scroller;
+
+	assert(widget);
+	scroller = (struct wzScroller *)widget;
+	wz_scroller_set_value(scroller, scroller->value - y * scroller->stepValue);
+}
+
 static void wz_scroller_parent_window_move(struct wzWidget *widget)
 {
 	assert(widget);
@@ -258,6 +267,7 @@ struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType 
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_move = wz_scroller_mouse_move;
+	scroller->base.vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
 	scroller->base.vtable.parent_window_move = wz_scroller_parent_window_move;
 	scroller->scrollerType = scrollerType;
 	scroller->stepValue = 1;
@@ -318,6 +328,12 @@ void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue)
 	assert(scroller);
 	scroller->stepValue = WZ_MAX(1, stepValue);
 	wz_scroller_update_nub_rect(scroller);
+}
+
+int wz_scroller_get_step_value(struct wzScroller *scroller)
+{
+	assert(scroller);
+	return scroller->stepValue;
 }
 
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue)

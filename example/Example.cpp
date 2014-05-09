@@ -315,6 +315,10 @@ int main(int argc, char **argv)
 			{
 				desktop.mouseButtonUp(e.button.button, e.button.x, e.button.y);
 			}
+			else if (e.type == SDL_MOUSEWHEEL)
+			{
+				desktop.mouseWheelMove(e.wheel.x, e.wheel.y);
+			}
 		}
 
 		if (quit)
