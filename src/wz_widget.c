@@ -290,3 +290,15 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 
 	return NULL;
 }
+
+void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority)
+{
+	assert(widget);
+	widget->drawPriority = drawPriority;
+}
+
+int wz_widget_get_draw_priority(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->drawPriority;
+}

@@ -54,10 +54,20 @@ typedef struct
 }
 wzWidgetVtable;
 
+enum
+{
+	WZ_DRAW_PRIORITY_DEFAULT,
+	WZ_DRAW_PRIORITY_WINDOW_START,
+	WZ_DRAW_PRIORITY_WINDOW_END = 256,
+	WZ_DRAW_PRIORITY_COMBO_DROPDOWN,
+	WZ_DRAW_PRIORITY_MAX = 1024
+};
+
 struct wzWidget
 {
 	struct wzContext *context;
 	wzWidgetType type;
+	int drawPriority;
 	wzRect rect;
 	void *metadata;
 	bool hover;
@@ -81,9 +91,9 @@ void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidge
 // Stop locking input to this widget.
 void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
 
-// widget can be NULL
-void wz_desktop_set_draw_last_widget(struct wzDesktop *desktop, struct wzWidget *widget);
-
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
+
+void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
+int wz_widget_get_draw_priority(const struct wzWidget *widget);
 
 #endif

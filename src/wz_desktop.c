@@ -35,9 +35,6 @@ struct wzDesktop
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
 	struct wzWindow *lockInputWindow;
-
-	// Draw this widget (and it's children) last.
-	struct wzWidget *drawLastWidget;
 };
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context)
@@ -297,17 +294,53 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 	wz_widget_mouse_wheel_move_recursive(widget, x, y);
 }
 
-// Don't draw skipWidget.
-static void wz_widget_draw_recursive(struct wzWidget *widget, struct wzWidget *skipWidget)
+static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget)
+{
+	struct wzWidget *child;
+	int i;
+
+	assert(widget);
+
+	if (widget->hidden)
+		return;
+
+	// Add the draw priority if it doesn't exist.
+	for (i = 0; i < *nDrawPriorities; i++)
+	{
+		if (drawPriorities[i] == widget->drawPriority)
+			break;
+	}
+
+	if (i == *nDrawPriorities)
+	{
+		drawPriorities[*nDrawPriorities] = widget->drawPriority;
+		(*nDrawPriorities)++;
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, child);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
+static int wz_compare_draw_priorities(const void *a, const void *b)
+{
+	return *(const int *)a - *(const int *)b;
+}
+
+static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priority, struct wzWidget *widget)
 {
 	struct wzWidget *child;
 
 	assert(widget);
 
-	if (widget->hidden || widget == skipWidget)
+	if (widget->hidden)
 		return;
 
-	if (widget->vtable.draw)
+	if (widget->drawPriority <= priority && widget->vtable.draw)
 	{
 		widget->vtable.draw(widget);
 	}
@@ -316,43 +349,62 @@ static void wz_widget_draw_recursive(struct wzWidget *widget, struct wzWidget *s
 
 	while (child)
 	{
-		wz_widget_draw_recursive(child, skipWidget);
+		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, child);
+		child = child->next == widget->firstChild ? NULL : child->next;
+	}
+}
+
+static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *widget)
+{
+	struct wzWidget *child;
+
+	assert(widget);
+
+	if (widget->hidden)
+		return;
+
+	if (widget->drawPriority == priority && widget->vtable.draw)
+	{
+		widget->vtable.draw(widget);
+	}
+
+	child = widget->firstChild;
+
+	while (child)
+	{
+		// If the priority is a match, draw children with <= priority.
+		if (widget->drawPriority == priority)
+		{
+			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, child);
+		}
+		else
+		{
+			wz_widget_draw_by_priority_recursive(priority, child);
+		}
+
 		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
 void wz_desktop_draw(struct wzDesktop *desktop)
 {
-	struct wzWidget *child;
+	int drawPriorities[WZ_DRAW_PRIORITY_MAX];
+	int nDrawPriorities;
+	int i;
 
 	assert(desktop);
 
-	// Skip window children.
-	child = desktop->base.firstChild;
+	// Calculate unique draw priorities.
+	nDrawPriorities = 0;
+	wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, &nDrawPriorities, (struct wzWidget *)desktop);
 
-	while (child)
+	// Sort draw priorities in ascending order.
+	qsort(drawPriorities, nDrawPriorities, sizeof(int), wz_compare_draw_priorities);
+
+	// Do one draw pass per draw priority.
+	for (i = 0; i < nDrawPriorities; i++)
 	{
-		if (child->type != WZ_TYPE_WINDOW)
-			wz_widget_draw_recursive(child, desktop->drawLastWidget);
-
-		child = child->next == desktop->base.firstChild ? NULL : child->next;
-	}
-
-	// Now draw window children.
-	child = desktop->base.firstChild;
-
-	while (child)
-	{
-		if (child->type == WZ_TYPE_WINDOW)
-			wz_widget_draw_recursive(child, desktop->drawLastWidget);
-
-		child = child->next == desktop->base.firstChild ? NULL : child->next;
-	}
-
-	// Now draw the "draw last" widget.
-	if (desktop->drawLastWidget)
-	{
-		wz_widget_draw_recursive(desktop->drawLastWidget, NULL);
+		wz_widget_draw_by_priority_recursive(drawPriorities[i], (struct wzWidget *)desktop);
 	}
 }
 
@@ -374,8 +426,3 @@ void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget
 	}
 }
 
-void wz_desktop_set_draw_last_widget(struct wzDesktop *desktop, struct wzWidget *widget)
-{
-	assert(desktop);
-	desktop->drawLastWidget = widget;
-}

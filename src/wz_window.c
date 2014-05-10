@@ -279,6 +279,7 @@ struct wzWindow *wz_window_create(struct wzContext *context)
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
+	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
 	window->base.context = context;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;

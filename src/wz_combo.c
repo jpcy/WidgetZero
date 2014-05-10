@@ -93,7 +93,6 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 			// Show dropdown list and set it to draw last.
 			wz_widget_set_visible((struct wzWidget *)combo->list, true);
 			wz_combo_update_list_rect(combo);
-			wz_desktop_set_draw_last_widget(widget->desktop, (struct wzWidget *)combo->list);
 
 			combo->isOpen = true;
 		}
@@ -106,7 +105,6 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 
 			// Hide dropdown list.
 			wz_widget_set_visible((struct wzWidget *)combo->list, false);
-			wz_desktop_set_draw_last_widget(widget->desktop, NULL);
 
 			combo->isOpen = false;
 		}
@@ -142,6 +140,7 @@ struct wzCombo *wz_combo_create(struct wzContext *context)
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
 
 	combo->list = wz_list_create(context);
+	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
 	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
