@@ -77,19 +77,72 @@ wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
 static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
 {
 	struct wzWidget *widget;
+	struct wzWindow *result;
+	int drawPriority;
 
 	assert(desktop);
 	widget = desktop->base.firstChild;
+	result = NULL;
+	drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
 
 	while (widget)
 	{
-		if (widget->type == WZ_TYPE_WINDOW && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
-			return (struct wzWindow *)widget;
+		if (widget->type == WZ_TYPE_WINDOW && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && widget->drawPriority >= drawPriority)
+		{
+			drawPriority = widget->drawPriority;
+			result = (struct wzWindow *)widget;
+		}
 
 		widget = widget->next == desktop->base.firstChild ? NULL : widget->next;
 	}
 
-	return NULL;
+	return result;
+}
+
+static int wz_compare_widget_draw_priorities(const void *a, const void *b)
+{
+	return ((struct wzWidget *)a)->drawPriority - ((struct wzWidget *)b)->drawPriority;
+}
+
+// top can be NULL
+static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, struct wzWindow *top)
+{
+	struct wzWidget *widget;
+	struct wzWidget *windows[WZ_DRAW_PRIORITY_WINDOW_END];
+	int nWindows;
+	int i;
+
+	assert(desktop);
+
+	// Get a list of windows (excluding top).
+	widget = desktop->base.firstChild;
+	nWindows = 0;
+
+	while (widget)
+	{
+		if (widget->type == WZ_TYPE_WINDOW && widget != (struct wzWidget *)top)
+		{
+			windows[nWindows] = widget;
+			nWindows++;
+		}
+
+		widget = widget->next == desktop->base.firstChild ? NULL : widget->next;
+	}
+
+	// Sort them in ascending order by draw priority.
+	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_widget_draw_priorities);
+
+	// Assign each window a new draw priority starting at WZ_DRAW_PRIORITY_WINDOW_START and ascending.
+	for (i = 0; i < nWindows; i++)
+	{
+		windows[i]->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START + i;
+	}
+
+	// Give the top window the highest priority.
+	if (top)
+	{
+		((struct wzWidget *)top)->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START + i;
+	}
 }
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -124,6 +177,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 	struct wzWidget *widget;
 
 	assert(desktop);
+	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
 	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -132,6 +186,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 	}
 	else if (desktop->lockInputWindow)
 	{
+		wz_desktop_update_window_draw_priorities(desktop, desktop->lockInputWindow);
 		widget = (struct wzWidget *)desktop->lockInputWindow;
 	}
 	else

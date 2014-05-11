@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 	combo2.setRect(20, 600, 150, 20);
 
 	Window childWindow(&desktop, "Test Window");
-	childWindow.setRect(650, 300, 300, 300);
+	childWindow.setRect(650, 100, 300, 300);
 
 	Button childWindowButton(&childWindow, "Another Button");
 	childWindowButton.setPosition(20, 20);
@@ -290,6 +290,9 @@ int main(int argc, char **argv)
 
 	Combo childCombo(&childWindow, listData, 17);
 	childCombo.setRect(20, 240, 150, 20);
+
+	Window childWindow2(&desktop, "Window #2");
+	childWindow2.setRect(650, 500, 200, 200);
 
 	for (;;)
 	{
