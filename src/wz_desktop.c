@@ -687,17 +687,3 @@ void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *wi
 		wz_widget_set_visible((struct wzWidget *)desktop->dockIcons[i], desktop->movingWindow != NULL);
 	}
 }
-
-/*
-void wz_desktop_set_dock_preview_visible(struct wzDesktop *desktop, bool visible)
-{
-	assert(desktop);
-	wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, visible);
-}
-
-void wz_desktop_set_dock_preview_rect(struct wzDesktop *desktop, wzRect rect)
-{
-	assert(desktop);
-	wz_widget_set_rect((struct wzWidget *)desktop->dockPreview, rect);
-}
-*/
