@@ -64,7 +64,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		{
 			window->drag = WZ_DRAG_HEADER;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			wz_desktop_set_dock_icons_visible(widget->desktop, true);
+			wz_desktop_set_moving_window(widget->desktop, window);
 			return;
 		}
 
@@ -187,7 +187,7 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	{
 		if (window->drag == WZ_DRAG_HEADER)
 		{
-			wz_desktop_set_dock_icons_visible(widget->desktop, false);
+			wz_desktop_set_moving_window(widget->desktop, NULL);
 		}
 
 		window->drag = WZ_DRAG_NONE;

@@ -100,9 +100,11 @@ struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
 
 typedef void (*wzDesktopDrawDockIconCallback)(wzRect rect, void *metadata);
+typedef void (*wzDesktopDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context);
 void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata);
+void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata);
 void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size);
 void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h);
 void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size);

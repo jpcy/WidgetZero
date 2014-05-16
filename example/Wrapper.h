@@ -62,6 +62,7 @@ public:
 	void mouseWheelMove(int x, int y);
 	void draw();
 	void drawDockIcon(wzRect rect);
+	void drawDockPreview(wzRect rect);
 
 private:
 	wzDesktop *desktop_;

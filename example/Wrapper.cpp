@@ -46,10 +46,17 @@ static void DrawDockIcon(wzRect rect, void *metadata)
 	desktop->drawDockIcon(rect);
 }
 
+static void DrawDockPreview(wzRect rect, void *metadata)
+{
+	Desktop *desktop = (Desktop *)metadata;
+	desktop->drawDockPreview(rect);
+}
+
 Desktop::Desktop(Context *context)
 {
 	desktop_ = wz_desktop_create(context->get());
 	wz_desktop_set_draw_dock_icon_callback(desktop_, DrawDockIcon, this);
+	wz_desktop_set_draw_dock_preview_callback(desktop_, DrawDockPreview, this);
 }
 
 Desktop::~Desktop()
@@ -89,8 +96,18 @@ void Desktop::draw()
 
 void Desktop::drawDockIcon(wzRect rect)
 {
+	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(g_renderer, 64, 64, 64, 128);
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_NONE);
+}
+
+void Desktop::drawDockPreview(wzRect rect)
+{
+	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(g_renderer, 0, 0, 128, 64);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
+	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_NONE);
 }
 
 //------------------------------------------------------------------------------
