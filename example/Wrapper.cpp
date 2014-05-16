@@ -40,9 +40,16 @@ Context::~Context()
 
 //------------------------------------------------------------------------------
 
+static void DrawDockIcon(wzRect rect, void *metadata)
+{
+	Desktop *desktop = (Desktop *)metadata;
+	desktop->drawDockIcon(rect);
+}
+
 Desktop::Desktop(Context *context)
 {
 	desktop_ = wz_desktop_create(context->get());
+	wz_desktop_set_draw_dock_icon_callback(desktop_, DrawDockIcon, this);
 }
 
 Desktop::~Desktop()
@@ -78,6 +85,12 @@ void Desktop::mouseWheelMove(int x, int y)
 void Desktop::draw()
 {
 	wz_desktop_draw(desktop_);
+}
+
+void Desktop::drawDockIcon(wzRect rect)
+{
+	SDL_SetRenderDrawColor(g_renderer, 64, 64, 64, 128);
+	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
 }
 
 //------------------------------------------------------------------------------

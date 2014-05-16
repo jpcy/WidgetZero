@@ -27,6 +27,12 @@ SOFTWARE.
 #include "stb_arr.h"
 #include "wz_internal.h"
 
+#define WZ_NUM_DOCK_ICONS 4
+#define WZ_DOCK_ICON_NORTH 0
+#define WZ_DOCK_ICON_SOUTH 1
+#define WZ_DOCK_ICON_EAST 2
+#define WZ_DOCK_ICON_WEST 3
+
 struct wzDesktop
 {
 	struct wzWidget base;
@@ -35,18 +41,107 @@ struct wzDesktop
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
 	struct wzWindow *lockInputWindow;
+
+	wzDesktopDrawDockIconCallback draw_dock_icon;
+
+	// Hidden from the consumer.
+	struct wzLabel *dockIcons[WZ_NUM_DOCK_ICONS];
 };
+
+static void wz_desktop_draw_dock_icon(struct wzWidget *widget)
+{
+	assert(widget);
+
+	if (widget->desktop->draw_dock_icon)
+	{
+		int i;
+
+		for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+		{
+			widget->desktop->draw_dock_icon(wz_widget_get_rect((struct wzWidget *)widget->desktop->dockIcons[i]), wz_widget_get_metadata((struct wzWidget *)widget->desktop->dockIcons[i]));
+		}
+	}
+}
+
+static void wz_desktop_update_dock_icon_positions(struct wzDesktop *desktop)
+{
+	// Push icons out this percent/100 from desktop edges.
+	const float percent = 0.04f;
+	wzSize ds, dis;
+	int centerW, centerH;
+
+	assert(desktop);
+	ds = wz_widget_get_size((struct wzWidget *)desktop);
+	dis = wz_widget_get_size((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_NORTH]);
+	centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
+	centerH = (int)(ds.h / 2.0f - dis.h / 2.0f);
+
+	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_NORTH], centerW, (int)(ds.h * percent));
+	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_SOUTH], centerW, (int)(ds.h * (1.0f - percent) - dis.h));
+	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_EAST], (int)(ds.w * percent), centerH);
+	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_WEST], (int)(ds.w * (1.0f - percent) - dis.h), centerH);
+}
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context)
 {
 	struct wzDesktop *desktop;
+	int i;
 
 	assert(context);
 	desktop = (struct wzDesktop *)malloc(sizeof(struct wzDesktop));
 	memset(desktop, 0, sizeof(struct wzDesktop));
 	desktop->base.type = WZ_TYPE_DESKTOP;
 	desktop->base.context = context;
+
+	// Create dock icon widgets.
+	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+	{
+		struct wzWidget *widget;
+
+		desktop->dockIcons[i] = wz_label_create(context);
+		widget = (struct wzWidget *)desktop->dockIcons[i];
+		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
+		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
+		wz_widget_set_visible(widget, false);
+		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+	}
+
+	wz_desktop_set_dock_icon_size_args(desktop, 48, 48);
+	wz_desktop_update_dock_icon_positions(desktop);
+
 	return desktop;
+}
+
+void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata)
+{
+	int i;
+
+	assert(desktop);
+	desktop->draw_dock_icon = callback;
+
+	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+	{
+		wz_widget_set_metadata((struct wzWidget *)desktop->dockIcons[i], metadata);
+	}
+}
+
+void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size)
+{
+	wz_desktop_set_dock_icon_size_args(desktop, size.w, size.h);
+}
+
+void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
+{
+	int i;
+
+	assert(desktop);
+
+	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+	{
+		wz_widget_set_size_args((struct wzWidget *)desktop->dockIcons[i], w, h);
+	}
+
+	wz_desktop_update_dock_icon_positions(desktop);
 }
 
 void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size)
@@ -54,6 +149,7 @@ void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size)
 	assert(desktop);
 	desktop->base.rect.w = size.w;
 	desktop->base.rect.h = size.h;
+	wz_desktop_update_dock_icon_positions(desktop);
 }
 
 void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
@@ -61,6 +157,7 @@ void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
 	assert(desktop);
 	desktop->base.rect.w = width;
 	desktop->base.rect.h = height;
+	wz_desktop_update_dock_icon_positions(desktop);
 }
 
 wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
@@ -481,3 +578,13 @@ void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget
 	}
 }
 
+void wz_desktop_set_dock_icons_visible(struct wzDesktop *desktop, bool visible)
+{
+	int i;
+	assert(desktop);
+
+	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+	{
+		wz_widget_set_visible((struct wzWidget *)desktop->dockIcons[i], visible);
+	}
+}

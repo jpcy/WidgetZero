@@ -60,6 +60,7 @@ enum
 	WZ_DRAW_PRIORITY_WINDOW_START,
 	WZ_DRAW_PRIORITY_WINDOW_END = 256,
 	WZ_DRAW_PRIORITY_COMBO_DROPDOWN,
+	WZ_DRAW_PRIORITY_DOCK_ICON,
 	WZ_DRAW_PRIORITY_MAX = 1024
 };
 
@@ -90,6 +91,8 @@ void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidge
 
 // Stop locking input to this widget.
 void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+
+void wz_desktop_set_dock_icons_visible(struct wzDesktop *desktop, bool visible);
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
