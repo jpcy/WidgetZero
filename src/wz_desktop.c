@@ -142,6 +142,31 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, int in
 	wz_widget_set_rect((struct wzWidget *)desktop->dockPreview, rect);
 }
 
+static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop, int mouseX, int mouseY)
+{
+	int i;
+	bool showDockPreview = false;
+
+	assert(desktop);
+
+	if (!desktop->movingWindow)
+		return;
+
+	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
+	{
+		wzRect rect = wz_widget_get_rect((struct wzWidget *)desktop->dockIcons[i]);
+
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
+		{
+			wz_widget_update_dock_preview_rect(desktop, i);
+			showDockPreview = true;
+			break;
+		}
+	}
+
+	wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, showDockPreview);
+}
+
 struct wzDesktop *wz_desktop_create(struct wzContext *context)
 {
 	struct wzDesktop *desktop;
@@ -348,6 +373,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 	struct wzWidget *widget;
 
 	assert(desktop);
+
 	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
 	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
@@ -366,6 +392,9 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 	}
 
 	wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
+
+	// Need a special case for dock icons.
+	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
 }
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -396,6 +425,12 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	struct wzWidget *widget;
 
 	assert(desktop);
+
+	// Need a special case for dock icons.
+	if (desktop->movingWindow)
+	{
+		wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, false);
+	}
 
 	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -457,29 +492,10 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	int i;
-
 	assert(desktop);
 
 	// Need a special case for dock icons.
-	if (desktop->movingWindow)
-	{
-		bool showDockPreview = false;
-
-		for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
-		{
-			wzRect rect = wz_widget_get_rect((struct wzWidget *)desktop->dockIcons[i]);
-
-			if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
-			{
-				wz_widget_update_dock_preview_rect(desktop, i);
-				showDockPreview = true;
-				break;
-			}
-		}
-
-		wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, showDockPreview);
-	}
+	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
 
 	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
