@@ -65,6 +65,16 @@ enum
 	WZ_DRAW_PRIORITY_MAX = 1024
 };
 
+typedef enum
+{
+	WZ_DOCK_NONE,
+	WZ_DOCK_NORTH,
+	WZ_DOCK_SOUTH,
+	WZ_DOCK_EAST,
+	WZ_DOCK_WEST
+}
+wzDock;
+
 struct wzWidget
 {
 	struct wzContext *context;
@@ -99,5 +109,7 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
 int wz_widget_get_draw_priority(const struct wzWidget *widget);
+
+void wz_window_set_dock(struct wzWindow *window, wzDock dock);
 
 #endif

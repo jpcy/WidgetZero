@@ -47,6 +47,7 @@ struct wzWindow
 	int headerHeight;
 	int borderSize;
 	wzWindowDrag drag;
+	wzDock dock;
 };
 
 static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -74,7 +75,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w -= window->borderSize * 2;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_SOUTH))
 		{
 			window->drag = WZ_DRAG_RESIZE_N;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -87,7 +88,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
 		{
 			window->drag = WZ_DRAG_RESIZE_NE;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -101,7 +102,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h -= window->borderSize * 2;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_WEST))
 		{
 			window->drag = WZ_DRAG_RESIZE_E;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -115,7 +116,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
 		{
 			window->drag = WZ_DRAG_RESIZE_SE;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -129,7 +130,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w -= window->borderSize * 2;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_NORTH))
 		{
 			window->drag = WZ_DRAG_RESIZE_S;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -142,7 +143,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
 		{
 			window->drag = WZ_DRAG_RESIZE_SW;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -155,7 +156,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h -= window->borderSize * 2;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_EAST))
 		{
 			window->drag = WZ_DRAG_RESIZE_W;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -167,7 +168,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		r.w = window->borderSize;
 		r.h = window->borderSize;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
 		{
 			window->drag = WZ_DRAG_RESIZE_NW;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -340,4 +341,10 @@ wzRect wz_window_get_content_rect(struct wzWindow *window)
 	rect.w -= window->borderSize * 2;
 	rect.h -= window->headerHeight;
 	return rect;
+}
+
+void wz_window_set_dock(struct wzWindow *window, wzDock dock)
+{
+	assert(window);
+	window->dock = dock;
 }

@@ -51,6 +51,8 @@ struct wzDesktop
 	// Hidden from the consumer.
 	struct wzLabel *dockIcons[WZ_NUM_DOCK_ICONS];
 	struct wzLabel *dockPreview;
+
+	wzDock windowDock;
 };
 
 static void wz_desktop_draw_dock_icon(struct wzWidget *widget)
@@ -102,6 +104,9 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, int in
 	wzRect rect;
 	wzSize windowSize;
 
+	// e.g. north dock max height is desktop height * maxPreviewSizeMultiplier.
+	const float maxPreviewSizeMultiplier = 0.3f;
+
 	assert(desktop);
 	assert(desktop->movingWindow);
 
@@ -113,11 +118,11 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, int in
 		rect.x = 0;
 		rect.y = 0;
 		rect.w = desktop->base.rect.w;
-		rect.h = WZ_MIN(windowSize.h, desktop->base.rect.h / 2);
+		rect.h = WZ_MIN(windowSize.h, (int)(desktop->base.rect.h * maxPreviewSizeMultiplier));
 	}
 	else if (index == WZ_DOCK_ICON_SOUTH)
 	{
-		const int h = WZ_MIN(windowSize.h, desktop->base.rect.h / 2);
+		const int h = WZ_MIN(windowSize.h, (int)(desktop->base.rect.h * maxPreviewSizeMultiplier));
 		rect.x = 0;
 		rect.y = desktop->base.rect.h - h;
 		rect.w = desktop->base.rect.w;
@@ -125,7 +130,7 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, int in
 	}
 	else if (index == WZ_DOCK_ICON_EAST)
 	{
-		const int w = WZ_MIN(windowSize.w, desktop->base.rect.w / 2);
+		const int w = WZ_MIN(windowSize.w, (int)(desktop->base.rect.w * maxPreviewSizeMultiplier));
 		rect.x = desktop->base.rect.w - w;
 		rect.y = 0;
 		rect.w = w;
@@ -135,7 +140,7 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, int in
 	{
 		rect.x = 0;
 		rect.y = 0;
-		rect.w = WZ_MIN(windowSize.w, desktop->base.rect.w / 2);
+		rect.w = WZ_MIN(windowSize.w, (int)(desktop->base.rect.w * maxPreviewSizeMultiplier));
 		rect.h = desktop->base.rect.h;
 	}
 
@@ -158,6 +163,7 @@ static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop,
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
+			desktop->windowDock = i + 1;
 			wz_widget_update_dock_preview_rect(desktop, i);
 			showDockPreview = true;
 			break;
@@ -429,6 +435,13 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	// Need a special case for dock icons.
 	if (desktop->movingWindow)
 	{
+		if (wz_widget_get_visible((struct wzWidget *)desktop->dockPreview))
+		{
+			// Dock the window.
+			wz_widget_set_rect((struct wzWidget *)desktop->movingWindow, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
+			wz_window_set_dock(desktop->movingWindow, desktop->windowDock);
+		}
+
 		wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, false);
 	}
 
