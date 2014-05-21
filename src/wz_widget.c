@@ -38,6 +38,8 @@ void wz_widget_destroy(struct wzWidget *widget)
 		wz_widget_destroy(widget->children[i]);
 	}
 
+	wz_arr_free(widget->children);
+
 	if (widget->vtable.destroy)
 	{
 		widget->vtable.destroy(widget);
