@@ -24,7 +24,6 @@ SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stb_arr.h"
 #include "wz_internal.h"
 
 struct wzCombo

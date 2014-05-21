@@ -24,7 +24,6 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "stb_arr.h"
 #include "wz_internal.h"
 
 #define WZ_NUM_DOCK_ICONS 4
@@ -382,10 +381,10 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 
 	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
-	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
 		// Lock input to the top/last item on the stack.
-		widget = desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)];
+		widget = desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)];
 	}
 	else if (desktop->lockInputWindow)
 	{
@@ -445,10 +444,10 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 		wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, false);
 	}
 
-	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
 		// Lock input to the top/last item on the stack.
-		widget = desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)];
+		widget = desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)];
 	}
 	else if (desktop->lockInputWindow)
 	{
@@ -510,10 +509,10 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	// Need a special case for dock icons.
 	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
 
-	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
 		// Lock input to the top/last item on the stack.
-		wz_widget_mouse_move_recursive(NULL, desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)], mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		wz_widget_mouse_move_recursive(NULL, desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)], mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		return;
 	}
 
@@ -554,10 +553,10 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 
 	assert(desktop);
 
-	if (stb_arr_len(desktop->lockInputWidgetStack) > 0)
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
 		// Lock input to the top/last item on the stack.
-		widget = desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)];
+		widget = desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)];
 	}
 	else if (desktop->lockInputWindow)
 	{
@@ -688,18 +687,18 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget)
 {
 	assert(desktop);
-	stb_arr_push(desktop->lockInputWidgetStack, widget);
+	wz_arr_push(desktop->lockInputWidgetStack, widget);
 }
 
 void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget)
 {
 	// Only pop if the widget is on the top of the stack.
-	if (stb_arr_len(desktop->lockInputWidgetStack) == 0)
+	if (wz_arr_len(desktop->lockInputWidgetStack) == 0)
 		return;
 
-	if (widget == desktop->lockInputWidgetStack[stb_arr_lastn(desktop->lockInputWidgetStack)])
+	if (widget == desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)])
 	{	
-		stb_arr_pop(desktop->lockInputWidgetStack);
+		wz_arr_pop(desktop->lockInputWidgetStack);
 	}
 }
 

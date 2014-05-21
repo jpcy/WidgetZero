@@ -24,7 +24,6 @@ SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stb_arr.h"
 #include "wz_internal.h"
 
 struct wzButton
@@ -70,7 +69,7 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 				button->isSet = !button->isSet;
 			}
 
-			for (i = 0; i < stb_arr_len(button->pressed_callbacks); i++)
+			for (i = 0; i < wz_arr_len(button->pressed_callbacks); i++)
 			{
 				button->pressed_callbacks[i](button);
 			}
@@ -84,7 +83,7 @@ static void wz_button_destroy(struct wzWidget *widget)
 
 	assert(widget);
 	button = (struct wzButton *)widget;
-	stb_arr_free(button->pressed_callbacks);
+	wz_arr_free(button->pressed_callbacks);
 }
 
 struct wzButton *wz_button_create(struct wzContext *context)
@@ -123,5 +122,5 @@ bool wz_button_is_set(const struct wzButton *button)
 void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback)
 {
 	assert(button);
-	stb_arr_push(button->pressed_callbacks, callback);
+	wz_arr_push(button->pressed_callbacks, callback);
 }

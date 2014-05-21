@@ -25,7 +25,6 @@ SOFTWARE.
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stb_arr.h"
 #include "wz_internal.h"
 
 struct wzList
@@ -197,7 +196,7 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 
 	if (selectedItemAssignedTo)
 	{
-		for (i = 0; i < stb_arr_len(list->item_selected_callbacks); i++)
+		for (i = 0; i < wz_arr_len(list->item_selected_callbacks); i++)
 		{
 			list->item_selected_callbacks[i](list);
 		}
@@ -265,7 +264,7 @@ static void wz_list_destroy(struct wzWidget *widget)
 
 	assert(widget);
 	list = (struct wzList *)widget;
-	stb_arr_free(list->item_selected_callbacks);
+	wz_arr_free(list->item_selected_callbacks);
 }
 
 struct wzList *wz_list_create(struct wzContext *context)
@@ -391,7 +390,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 	assert(list);
 	list->selectedItem = selectedItem;
 
-	for (i = 0; i < stb_arr_len(list->item_selected_callbacks); i++)
+	for (i = 0; i < wz_arr_len(list->item_selected_callbacks); i++)
 	{
 		list->item_selected_callbacks[i](list);
 	}
@@ -418,5 +417,5 @@ int wz_list_get_hovered_item(const struct wzList *list)
 void wz_list_add_callback_item_selected(struct wzList *list, wzListItemSelectedCallback callback)
 {
 	assert(list);
-	stb_arr_push(list->item_selected_callbacks, callback);
+	wz_arr_push(list->item_selected_callbacks, callback);
 }

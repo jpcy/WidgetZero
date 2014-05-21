@@ -24,7 +24,6 @@ SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stb_arr.h"
 #include "wz_internal.h"
 
 struct wzScrollerNub
@@ -303,7 +302,7 @@ static void wz_scroller_destroy(struct wzWidget *widget)
 
 	assert(widget);
 	scroller = (struct wzScroller *)widget;
-	stb_arr_free(scroller->value_changed_callbacks);
+	wz_arr_free(scroller->value_changed_callbacks);
 }
 
 struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType scrollerType)
@@ -358,7 +357,7 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 	if (oldValue == scroller->value)
 		return;
 
-	for (i = 0; i < stb_arr_len(scroller->value_changed_callbacks); i++)
+	for (i = 0; i < wz_arr_len(scroller->value_changed_callbacks); i++)
 	{
 		scroller->value_changed_callbacks[i](scroller, scroller->value);
 	}
@@ -438,5 +437,5 @@ wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller)
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzScrollerValueChangedCallback callback)
 {
 	assert(scroller);
-	stb_arr_push(scroller->value_changed_callbacks, callback);
+	wz_arr_push(scroller->value_changed_callbacks, callback);
 }
