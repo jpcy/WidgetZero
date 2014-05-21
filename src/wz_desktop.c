@@ -277,24 +277,23 @@ wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
 // Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
 static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
 {
-	struct wzWidget *widget;
 	struct wzWindow *result;
 	int drawPriority;
+	int i;
 
 	assert(desktop);
-	widget = desktop->base.firstChild;
 	result = NULL;
 	drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
 
-	while (widget)
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
 	{
+		struct wzWidget *widget = desktop->base.children[i];
+
 		if (widget->type == WZ_TYPE_WINDOW && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && widget->drawPriority >= drawPriority)
 		{
 			drawPriority = widget->drawPriority;
 			result = (struct wzWindow *)widget;
 		}
-
-		widget = widget->next == desktop->base.firstChild ? NULL : widget->next;
 	}
 
 	return result;
@@ -308,7 +307,6 @@ static int wz_compare_widget_draw_priorities(const void *a, const void *b)
 // top can be NULL
 static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, struct wzWindow *top)
 {
-	struct wzWidget *widget;
 	struct wzWidget *windows[WZ_DRAW_PRIORITY_WINDOW_END];
 	int nWindows;
 	int i;
@@ -316,18 +314,17 @@ static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, 
 	assert(desktop);
 
 	// Get a list of windows (excluding top).
-	widget = desktop->base.firstChild;
 	nWindows = 0;
 
-	while (widget)
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
 	{
+		struct wzWidget *widget = desktop->base.children[i];
+	
 		if (widget->type == WZ_TYPE_WINDOW && widget != (struct wzWidget *)top)
 		{
 			windows[nWindows] = widget;
 			nWindows++;
 		}
-
-		widget = widget->next == desktop->base.firstChild ? NULL : widget->next;
 	}
 
 	// Sort them in ascending order by draw priority.
@@ -348,7 +345,7 @@ static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, 
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -360,16 +357,12 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 		widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		if (child->hover)
+		if (widget->children[i]->hover)
 		{
-			wz_widget_mouse_button_down_recursive(child, mouseButton, mouseX, mouseY);
+			wz_widget_mouse_button_down_recursive(widget->children[i], mouseButton, mouseX, mouseY);
 		}
-
-		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
@@ -404,7 +397,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -416,12 +409,9 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 		widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_mouse_button_up_recursive(child, mouseButton, mouseX, mouseY);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_widget_mouse_button_up_recursive(widget->children[i], mouseButton, mouseX, mouseY);
 	}
 }
 
@@ -467,7 +457,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	wzRect rect;
 	bool widgetIsChildOfWindow;
 	bool oldHover;
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -493,12 +483,9 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 		widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_mouse_move_recursive(window, child, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_widget_mouse_move_recursive(window, widget->children[i], mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 }
 
@@ -522,7 +509,7 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 
 static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x, int y)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -534,16 +521,12 @@ static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x,
 		widget->vtable.mouse_wheel_move(widget, x, y);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		if (child->hover)
+		if (widget->children[i]->hover)
 		{
-			wz_widget_mouse_wheel_move_recursive(child, x, y);
+			wz_widget_mouse_wheel_move_recursive(widget->children[i], x, y);
 		}
-
-		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
@@ -572,7 +555,6 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 
 static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget)
 {
-	struct wzWidget *child;
 	int i;
 
 	assert(widget);
@@ -593,12 +575,9 @@ static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriori
 		(*nDrawPriorities)++;
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, child);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, widget->children[i]);
 	}
 }
 
@@ -609,7 +588,7 @@ static int wz_compare_draw_priorities(const void *a, const void *b)
 
 static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priority, struct wzWidget *widget)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -621,18 +600,15 @@ static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priorit
 		widget->vtable.draw(widget);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, child);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i]);
 	}
 }
 
 static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *widget)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -644,21 +620,17 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 		widget->vtable.draw(widget);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		// If the priority is a match, draw children with <= priority.
 		if (widget->drawPriority == priority)
 		{
-			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, child);
+			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i]);
 		}
 		else
 		{
-			wz_widget_draw_by_priority_recursive(priority, child);
+			wz_widget_draw_by_priority_recursive(priority, widget->children[i]);
 		}
-
-		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 

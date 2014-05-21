@@ -198,7 +198,7 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 
 static void wz_window_call_parent_window_move_recursive(struct wzWidget *widget)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
@@ -207,19 +207,16 @@ static void wz_window_call_parent_window_move_recursive(struct wzWidget *widget)
 		widget->vtable.parent_window_move(widget);
 	}
 
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_window_call_parent_window_move_recursive(child);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_window_call_parent_window_move_recursive(widget->children[i]);
 	}
 }
 
 static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWindow *window;
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 	window = (struct wzWindow *)widget;
@@ -269,12 +266,9 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	}
 
 	// Dragging: call parent_window_move on child and ancestor widgets.
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_window_call_parent_window_move_recursive(child);
-		child = child->next == widget->firstChild ? NULL : child->next;
+		wz_window_call_parent_window_move_recursive(widget->children[i]);
 	}
 }
 

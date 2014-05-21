@@ -28,18 +28,14 @@ SOFTWARE.
 
 void wz_widget_destroy(struct wzWidget *widget)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
 
 	// Destroy children.
-	child = widget->firstChild;
-
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		struct wzWidget *d = child;
-		child = child->next == widget->firstChild ? NULL : child->next;
-		wz_widget_destroy(d);
+		wz_widget_destroy(widget->children[i]);
 	}
 
 	if (widget->vtable.destroy)
@@ -216,17 +212,16 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 // Example: scroller does this with it's button children.
 static void wz_widget_set_ancestors_recursive(struct wzWidget *widget, struct wzDesktop *desktop, struct wzWindow *window)
 {
-	struct wzWidget *child;
+	int i;
 
 	assert(widget);
-	child = widget->firstChild;
 
-	while (child)
+	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
+		struct wzWidget *child = widget->children[i];
 		child->desktop = desktop;
 		child->window = window;
 		wz_widget_set_ancestors_recursive(child, desktop, window);
-		child = child->next == widget->firstChild ? NULL : child->next;
 	}
 }
 
@@ -251,24 +246,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 
 	wz_widget_set_ancestors_recursive(child, child->desktop, child->window);
 	child->parent = widget;
-
-	if (!widget->firstChild)
-	{
-		widget->firstChild = child;
-		widget->firstChild->prev = widget->firstChild;
-		widget->firstChild->next = widget->firstChild;
-	}
-	else
-	{
-		struct wzWidget *prev, *next;
-
-		prev = widget->firstChild->prev;
-		next = widget->firstChild;
-		child->next = next;
-		child->prev = prev;
-		next->prev = child;
-		prev->next = child;
-	}
+	wz_arr_push(widget->children, child);
 }
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)

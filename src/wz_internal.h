@@ -104,9 +104,7 @@ struct wzWidget
 	struct wzWindow *window;
 
 	struct wzWidget *parent;
-	struct wzWidget *firstChild;
-	struct wzWidget *prev;
-	struct wzWidget *next;
+	struct wzWidget **children;
 };
 
 // Lock input to this widget.
