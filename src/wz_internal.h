@@ -120,6 +120,8 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
 int wz_widget_get_draw_priority(const struct wzWidget *widget);
 
+bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
+
 void wz_window_set_dock(struct wzWindow *window, wzDock dock);
 
 //////////////////////////////////////////////////////////////////////////////

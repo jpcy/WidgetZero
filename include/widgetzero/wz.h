@@ -92,6 +92,7 @@ wzBorder;
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
+#define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
 
 // clip the child rect to the parent
 wzRect wzClippedRect(wzRect parent, wzRect child);

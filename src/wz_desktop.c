@@ -574,6 +574,10 @@ static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriori
 	if (widget->hidden)
 		return;
 
+	// Don't include the widget if it's outside its parent window.
+	if (!wz_widget_overlaps_parent_window(widget))
+		return;
+
 	// Add the draw priority if it doesn't exist.
 	for (i = 0; i < *nDrawPriorities; i++)
 	{
@@ -607,6 +611,10 @@ static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priorit
 	if (widget->hidden)
 		return;
 
+	// Don't render the widget if it's outside its parent window.
+	if (!wz_widget_overlaps_parent_window(widget))
+		return;
+
 	if (widget->drawPriority <= priority && widget->vtable.draw)
 	{
 		widget->vtable.draw(widget);
@@ -625,6 +633,10 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 	assert(widget);
 
 	if (widget->hidden)
+		return;
+
+	// Don't render the widget if it's outside its parent window.
+	if (!wz_widget_overlaps_parent_window(widget))
 		return;
 
 	if (widget->drawPriority == priority && widget->vtable.draw)

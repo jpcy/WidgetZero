@@ -282,3 +282,11 @@ int wz_widget_get_draw_priority(const struct wzWidget *widget)
 	assert(widget);
 	return widget->drawPriority;
 }
+
+bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
+{
+	if (!widget->window)
+		return true;
+
+	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
+}
