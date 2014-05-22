@@ -110,12 +110,12 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 	}
 }
 
-static void wz_combo_list_item_selected(struct wzList *list)
+static void wz_combo_list_item_selected(wzEvent e)
 {
 	struct wzCombo *combo;
 
-	assert(list);
-	combo = (struct wzCombo *)((struct wzWidget *)list)->parent;
+	assert(e.base.widget);
+	combo = (struct wzCombo *)e.base.widget->parent;
 
 	// Unlock input.
 	wz_desktop_pop_lock_input_widget(combo->base.desktop, (struct wzWidget *)combo);

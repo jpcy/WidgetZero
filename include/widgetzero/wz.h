@@ -88,6 +88,57 @@ typedef struct
 }
 wzBorder;
 
+typedef enum
+{
+	WZ_EVENT_UNKNOWN,
+	WZ_EVENT_BUTTON_PRESSED,
+	WZ_EVENT_LIST_ITEM_SELECTED,
+	WZ_EVENT_SCROLLER_VALUE_CHANGED
+}
+wzWidgetEventType;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzWidget *widget;
+}
+wzEventBase;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzButton *button;
+}
+wzButtonEvent;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzList *list;
+	int selectedItem;
+}
+wzListEvent;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzScroller *scroller;
+	int oldValue;
+	int value;
+}
+wzScrollerEvent;
+
+typedef union
+{
+	wzEventBase base;
+	wzButtonEvent button;
+	wzListEvent list;
+	wzScrollerEvent scroller;
+}
+wzEvent;
+
+typedef void (*wzEventCallback)(wzEvent e);
+
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
@@ -149,13 +200,11 @@ int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
 wzRect wz_window_get_content_rect(struct wzWindow *window);
 
-typedef void (*wzButtonPressedCallback)(struct wzButton *);
-
 struct wzButton *wz_button_create(struct wzContext *context);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
-void wz_button_add_callback_pressed(struct wzButton *button, wzButtonPressedCallback callback);
+void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 
 struct wzCombo *wz_combo_create(struct wzContext *context);
 struct wzList *wz_combo_get_list(struct wzCombo *combo);
@@ -164,8 +213,6 @@ bool wz_combo_is_open(struct wzCombo *combo);
 struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
 
 struct wzLabel *wz_label_create(struct wzContext *context);
-
-typedef void (*wzListItemSelectedCallback)(struct wzList *);
 
 struct wzList *wz_list_create(struct wzContext *context);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
@@ -185,7 +232,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem);
 int wz_list_get_selected_item(const struct wzList *list);
 int wz_list_get_pressed_item(const struct wzList *list);
 int wz_list_get_hovered_item(const struct wzList *list);
-void wz_list_add_callback_item_selected(struct wzList *list, wzListItemSelectedCallback callback);
+void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback);
 
 typedef enum
 {
@@ -193,8 +240,6 @@ typedef enum
 	WZ_SCROLLER_HORIZONTAL
 }
 wzScrollerType;
-
-typedef void (*wzScrollerValueChangedCallback)(struct wzScroller *, int value);
 
 struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
@@ -209,7 +254,7 @@ struct wzButton *wz_scroller_get_increment_button(struct wzScroller *scroller);
 int wz_scroller_get_nub_size(struct wzScroller *scroller);
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
-void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzScrollerValueChangedCallback callback);
+void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
 
 #ifdef __cplusplus
 } // extern "C"

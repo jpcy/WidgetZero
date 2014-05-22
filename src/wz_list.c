@@ -44,7 +44,7 @@ struct wzList
 
 	struct wzScroller *scroller;
 
-	wzListItemSelectedCallback *item_selected_callbacks;
+	wzEventCallback *item_selected_callbacks;
 };
 
 static void wz_list_update_scroller_size(struct wzList *list)
@@ -173,7 +173,6 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 {
 	struct wzList *list;
 	bool selectedItemAssignedTo = false;
-	int i;
 
 	assert(widget);
 	list = (struct wzList *)widget;
@@ -196,10 +195,11 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 
 	if (selectedItemAssignedTo)
 	{
-		for (i = 0; i < wz_arr_len(list->item_selected_callbacks); i++)
-		{
-			list->item_selected_callbacks[i](list);
-		}
+		wzEvent e;
+		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+		e.list.list = list;
+		e.list.selectedItem = list->selectedItem;
+		wz_invoke_event(e, list->item_selected_callbacks);
 	}
 }
 
@@ -249,13 +249,10 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
-static void wz_list_scroller_value_changed(struct wzScroller *scroller, int value)
+static void wz_list_scroller_value_changed(wzEvent e)
 {
-	struct wzList *list;
-
-	assert(scroller);
-	list = (struct wzList *)((struct wzWidget *)scroller)->parent;
-	list->firstItem = value / list->itemHeight;
+	struct wzList *list = (struct wzList *)e.base.widget->parent;
+	list->firstItem = e.scroller.value / list->itemHeight;
 }
 
 static void wz_list_destroy(struct wzWidget *widget)
@@ -385,15 +382,15 @@ int wz_list_get_first_item(const struct wzList *list)
 
 void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 {
-	int i;
+	wzEvent e;
 
 	assert(list);
 	list->selectedItem = selectedItem;
-
-	for (i = 0; i < wz_arr_len(list->item_selected_callbacks); i++)
-	{
-		list->item_selected_callbacks[i](list);
-	}
+	
+	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+	e.list.list = list;
+	e.list.selectedItem = list->selectedItem;
+	wz_invoke_event(e, list->item_selected_callbacks);
 }
 
 int wz_list_get_selected_item(const struct wzList *list)
@@ -414,7 +411,7 @@ int wz_list_get_hovered_item(const struct wzList *list)
 	return list->hoveredItem;
 }
 
-void wz_list_add_callback_item_selected(struct wzList *list, wzListItemSelectedCallback callback)
+void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback)
 {
 	assert(list);
 	wz_arr_push(list->item_selected_callbacks, callback);

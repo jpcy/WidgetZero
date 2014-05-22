@@ -60,6 +60,16 @@ wzRect wzClippedRect(wzRect parent, wzRect child)
 	return rect;
 }
 
+void wz_invoke_event(wzEvent e, wzEventCallback *callbacks)
+{
+	int i;
+
+	for (i = 0; i < wz_arr_len(callbacks); i++)
+	{
+		callbacks[i](e);
+	}
+}
+
 static void * wz__arr_malloc(int size)
 {
    return malloc(size);

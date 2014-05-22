@@ -46,7 +46,7 @@ struct wzScroller
 
 	struct wzScrollerNub *nub;
 
-	wzScrollerValueChangedCallback *value_changed_callbacks;
+	wzEventCallback *value_changed_callbacks;
 };
 
 /*
@@ -276,24 +276,18 @@ static void wz_scroller_parent_window_move(struct wzWidget *widget)
 	wz_nub_update_rect(((struct wzScroller *)widget)->nub);
 }
 
-static void wz_scroller_decrement_button_pressed(struct wzButton *button)
+static void wz_scroller_decrement_button_pressed(wzEvent e)
 {
-	struct wzWidget *buttonWidget;
-	
-	assert(button);
-	buttonWidget = (struct wzWidget *)button;
-	assert(buttonWidget->parent);
-	wz_scroller_decrement_value((struct wzScroller *)buttonWidget->parent);
+	assert(e.base.widget);
+	assert(e.base.widget->parent);
+	wz_scroller_decrement_value((struct wzScroller *)e.base.widget->parent);
 }
 
-static void wz_scroller_increment_button_pressed(struct wzButton *button)
+static void wz_scroller_increment_button_pressed(wzEvent e)
 {
-	struct wzWidget *buttonWidget;
-	
-	assert(button);
-	buttonWidget = (struct wzWidget *)button;
-	assert(buttonWidget->parent);
-	wz_scroller_increment_value((struct wzScroller *)buttonWidget->parent);
+	assert(e.base.widget);
+	assert(e.base.widget->parent);
+	wz_scroller_increment_value((struct wzScroller *)e.base.widget->parent);
 }
 
 static void wz_scroller_destroy(struct wzWidget *widget)
@@ -346,8 +340,8 @@ int wz_scroller_get_value(const struct wzScroller *scroller)
 // This is the only place wzScroller value should be set.
 void wz_scroller_set_value(struct wzScroller *scroller, int value)
 {
-	int i;
 	int oldValue;
+	wzEvent e;
 
 	assert(scroller);
 	oldValue = scroller->value;
@@ -357,10 +351,11 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 	if (oldValue == scroller->value)
 		return;
 
-	for (i = 0; i < wz_arr_len(scroller->value_changed_callbacks); i++)
-	{
-		scroller->value_changed_callbacks[i](scroller, scroller->value);
-	}
+	e.scroller.type = WZ_EVENT_SCROLLER_VALUE_CHANGED;
+	e.scroller.scroller = scroller;
+	e.scroller.oldValue = oldValue;
+	e.scroller.value = scroller->value;
+	wz_invoke_event(e, scroller->value_changed_callbacks);
 
 	wz_nub_update_rect(scroller->nub);
 }
@@ -434,7 +429,7 @@ wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller)
 	return wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
 }
 
-void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzScrollerValueChangedCallback callback)
+void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback)
 {
 	assert(scroller);
 	wz_arr_push(scroller->value_changed_callbacks, callback);

@@ -122,6 +122,8 @@ int wz_widget_get_draw_priority(const struct wzWidget *widget);
 
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
 
+void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
+
 void wz_window_set_dock(struct wzWindow *window, wzDock dock);
 
 //////////////////////////////////////////////////////////////////////////////
