@@ -455,6 +455,7 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	wzRect rect;
+	bool hoverWindow;
 	bool widgetIsChildOfWindow;
 	bool oldHover;
 	int i;
@@ -464,10 +465,21 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	if (widget->hidden)
 		return;
 
+	// Determine whether the mouse is hovering over the widget's parent window.
+	if (widget->window)
+	{
+		rect = wz_widget_get_absolute_rect((struct wzWidget *)widget->window);
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+	}
+	else
+	{
+		hoverWindow = true;
+	}
+
 	rect = wz_widget_get_absolute_rect(widget);
 	widgetIsChildOfWindow = !window || (window && widget->window == window);
 	oldHover = widget->hover;
-	widget->hover = widgetIsChildOfWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+	widget->hover = widgetIsChildOfWindow && hoverWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	if (!oldHover && widget->hover && widget->vtable.mouse_hover_on)
 	{
