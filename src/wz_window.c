@@ -22,9 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <assert.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_internal.h"
+
+#define WZ_WINDOW_UNDOCK_DISTANCE 16
 
 typedef enum
 {
@@ -48,6 +51,9 @@ struct wzWindow
 	int borderSize;
 	wzWindowDrag drag;
 	wzDock dock;
+
+	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
+	wzPosition undockStartPosition;
 };
 
 static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -65,7 +71,18 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		{
 			window->drag = WZ_DRAG_HEADER;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			wz_desktop_set_moving_window(widget->desktop, window);
+
+			// Don't actually move the window yet if it's docked.
+			if (window->dock == WZ_DOCK_NONE)
+			{
+				wz_desktop_set_moving_window(widget->desktop, window);
+			}
+			else
+			{
+				window->undockStartPosition.x = mouseX;
+				window->undockStartPosition.y = mouseY;
+			}
+
 			return;
 		}
 
@@ -220,6 +237,31 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 
 	assert(widget);
 	window = (struct wzWindow *)widget;
+
+	// Don't actually move the window yet if it's docked.
+	if (window->drag == WZ_DRAG_HEADER && window->dock != WZ_DOCK_NONE)
+	{
+		wzPosition delta;
+		wzRect rect;
+
+		delta.x = mouseX - window->undockStartPosition.x;
+		delta.y = mouseY - window->undockStartPosition.y;
+
+		// Undock and start moving if the mouse has moved far enough.
+		if (sqrt(delta.x * delta.x + delta.y * delta.y) < WZ_WINDOW_UNDOCK_DISTANCE)
+			return;
+
+		window->dock = WZ_DOCK_NONE;
+		wz_desktop_set_moving_window(widget->desktop, window);
+
+		// Re-position and resize the window.
+		rect = wz_widget_get_rect(widget);
+		rect.x += delta.x;
+		rect.y += delta.y;
+		rect.w = 200;
+		rect.h = 200;
+		wz_widget_set_rect(widget, rect);
+	}
 
 	switch (window->drag)
 	{
