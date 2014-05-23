@@ -36,6 +36,9 @@ struct wzDesktop
 {
 	struct wzWidget base;
 
+	// Centralized event handler.
+	wzEventCallback handle_event;
+
 	struct wzWidget **lockInputWidgetStack;
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
@@ -207,6 +210,12 @@ struct wzDesktop *wz_desktop_create(struct wzContext *context)
 	wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
 
 	return desktop;
+}
+
+void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback)
+{
+	assert(desktop);
+	desktop->handle_event = callback;
 }
 
 void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata)
@@ -710,5 +719,20 @@ void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *wi
 	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
 	{
 		wz_widget_set_visible((struct wzWidget *)desktop->dockIcons[i], desktop->movingWindow != NULL);
+	}
+}
+
+void wz_invoke_event(wzEvent e, wzEventCallback *callbacks)
+{
+	int i;
+
+	if (e.base.widget->desktop && e.base.widget->desktop->handle_event)
+	{
+		e.base.widget->desktop->handle_event(e);
+	}
+
+	for (i = 0; i < wz_arr_len(callbacks); i++)
+	{
+		callbacks[i](e);
 	}
 }

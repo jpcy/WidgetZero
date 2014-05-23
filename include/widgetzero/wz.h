@@ -155,6 +155,10 @@ typedef void (*wzDesktopDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzDesktopDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
 struct wzDesktop *wz_desktop_create(struct wzContext *context);
+
+// Set the centralized event handler. All events invoked by the ancestor widgets of this desktop will call the callback function.
+void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback);
+
 void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata);
 void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata);
 void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size);
