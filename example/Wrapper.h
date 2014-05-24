@@ -47,6 +47,13 @@ public:
 	{
 		return wz_widget_get_context(getWidget());
 	}
+
+protected:
+	void clipReset();
+	void clipToParentWindow();
+
+	// Clip to the intersection of the parent window content rect and the rect parameter.
+	void clipToParentWindow(wzRect rect);
 };
 
 class Desktop : public Widget

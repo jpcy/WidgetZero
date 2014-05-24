@@ -196,6 +196,11 @@ void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
+// Determine whether the widget is an descendant of a widget with the provided type.
+bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
+
+struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
+
 struct wzWindow *wz_window_create(struct wzContext *context);
 void wz_window_set_header_height(struct wzWindow *window, int height);
 int wz_window_get_header_height(struct wzWindow *window);

@@ -375,7 +375,7 @@ wzRect wz_window_get_content_rect(struct wzWindow *window)
 	rect.x += window->borderSize;
 	rect.y += window->borderSize + window->headerHeight;
 	rect.w -= window->borderSize * 2;
-	rect.h -= window->headerHeight;
+	rect.h -= (window->headerHeight + window->borderSize * 2);
 	return rect;
 }
 

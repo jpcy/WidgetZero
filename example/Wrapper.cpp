@@ -40,6 +40,67 @@ Context::~Context()
 
 //------------------------------------------------------------------------------
 
+void Widget::clipReset()
+{
+	SDL_Rect rect;
+	rect.x = rect.y = rect.w = rect.h = 0;
+	SDL_RenderSetClipRect(g_renderer, &rect);
+}
+
+void Widget::clipToParentWindow()
+{
+	// Don't clip combo widget children.
+	if (wz_widget_is_descendant_of(getWidget(), WZ_TYPE_COMBO))
+	{
+		clipReset();
+		return;
+	}
+
+	wzWindow *window = wz_widget_get_parent_window(getWidget());
+
+	if (window)
+	{
+		wzRect windowRect = wz_window_get_content_rect(window);
+		SDL_RenderSetClipRect(g_renderer, (const SDL_Rect *)&windowRect);
+	}
+	else
+	{
+		clipReset();
+	}
+}
+
+void Widget::clipToParentWindow(wzRect rect)
+{
+	// Don't clip combo widget children.
+	if (wz_widget_is_descendant_of(getWidget(), WZ_TYPE_COMBO))
+	{
+		clipReset();
+		return;
+	}
+
+	wzWindow *window = wz_widget_get_parent_window(getWidget());
+
+	if (window)
+	{
+		wzRect windowRect = wz_window_get_content_rect(window);
+		wzRect intersection;
+
+		if (!SDL_IntersectRect((const SDL_Rect *)&rect, (const SDL_Rect *)&windowRect, (SDL_Rect *)&intersection))
+		{
+			intersection = windowRect;
+		}
+
+		SDL_RenderSetClipRect(g_renderer, (const SDL_Rect *)&intersection);
+	}
+	else
+	{
+		// No window, just clip to the rect parameter.
+		SDL_RenderSetClipRect(g_renderer, (const SDL_Rect *)&rect);
+	}
+}
+
+//------------------------------------------------------------------------------
+
 static void DrawDockIcon(wzRect rect, void *metadata)
 {
 	Desktop *desktop = (Desktop *)metadata;
@@ -92,10 +153,12 @@ void Desktop::mouseWheelMove(int x, int y)
 void Desktop::draw()
 {
 	wz_desktop_draw(desktop_);
+	clipReset();
 }
 
 void Desktop::drawDockIcon(wzRect rect)
 {
+	clipReset();
 	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(g_renderer, 64, 64, 64, 128);
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
@@ -104,6 +167,7 @@ void Desktop::drawDockIcon(wzRect rect)
 
 void Desktop::drawDockPreview(wzRect rect)
 {
+	clipReset();
 	SDL_SetRenderDrawBlendMode(g_renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(g_renderer, 0, 0, 128, 64);
 	SDL_RenderFillRect(g_renderer, (SDL_Rect *)&rect);
@@ -151,6 +215,7 @@ void Window::setRect(int x, int y, int w, int h)
 
 void Window::draw()
 {
+	clipReset();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)window_);
 	
 	// Background.
@@ -235,6 +300,7 @@ wzRect Button::getRect()
 
 void Button::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((struct wzWidget *)button_);
 	const bool pressed = wz_button_is_pressed(button_);
@@ -308,6 +374,7 @@ void Checkbox::setPosition(int x, int y)
 
 void Checkbox::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((struct wzWidget *)button_);
 
@@ -381,6 +448,7 @@ void Combo::setRect(int x, int y, int w, int h)
 
 void Combo::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)combo_);
 	const bool hover = wz_widget_get_hover((struct wzWidget *)combo_);
 
@@ -451,6 +519,7 @@ void GroupBox::draw()
 	const int textLeftMargin = 20;
 	const int textBorderSpacing = 5;
 
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)groupBox_);
 	
 	// Background.
@@ -534,6 +603,7 @@ void Scroller::setRect(int x, int y, int w, int h)
 
 void Scroller::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)scroller_);
 	
 	// Background.
@@ -597,6 +667,7 @@ void Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 
 void Label::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)label_);
 	TextPrintf(rect.x, rect.y, TA_LEFT, TA_TOP, r, g, b, text_);
 }
@@ -664,6 +735,7 @@ void List::setRect(int x, int y, int w, int h)
 
 void List::draw()
 {
+	clipToParentWindow();
 	wzRect rect = wz_widget_get_absolute_rect((struct wzWidget *)list_);
 	
 	// Background.
@@ -680,9 +752,7 @@ void List::draw()
 	int scrollerValue = wz_scroller_get_value(wz_list_get_scroller(list_));
 	int y = itemsRect.y - (scrollerValue % itemHeight);
 
-	SDL_Rect oldClipRect;
-	SDL_RenderGetClipRect(g_renderer, &oldClipRect);
-	SDL_RenderSetClipRect(g_renderer, (SDL_Rect *)&itemsRect);
+	clipToParentWindow(itemsRect);
 
 	for (int i = wz_list_get_first_item(list_); i < nItems; i++)
 	{
@@ -710,6 +780,4 @@ void List::draw()
 		TextPrintf(itemsRect.x + itemLeftPadding, y + itemHeight / 2, TA_LEFT, TA_CENTER, 0, 0, 0, items_[i]);
 		y += itemHeight;
 	}
-
-	SDL_RenderSetClipRect(g_renderer, &oldClipRect);
 }

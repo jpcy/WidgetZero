@@ -251,6 +251,30 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	wz_arr_push(widget->children, child);
 }
 
+bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
+{
+	assert(widget);
+
+	for (;;)
+	{
+		if (!widget->parent)
+			break;
+
+		if (widget->parent->type == type)
+			return true;
+
+		widget = widget->parent;
+	}
+
+	return false;
+}
+
+struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->window;
+}
+
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)
 {
 	struct wzWidget *temp = widget;
