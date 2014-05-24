@@ -139,14 +139,22 @@ wzEvent;
 
 typedef void (*wzEventCallback)(wzEvent e);
 
+typedef enum
+{
+	WZ_CURSOR_DEFAULT,
+	WZ_CURSOR_RESIZE_N_S,
+	WZ_CURSOR_RESIZE_E_W,
+	WZ_CURSOR_RESIZE_NE_SW,
+	WZ_CURSOR_RESIZE_NW_SE,
+	WZ_NUM_CURSORS
+}
+wzCursor;
+
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
-
-// clip the child rect to the parent
-wzRect wzClippedRect(wzRect parent, wzRect child);
 
 struct wzContext *wz_context_create(void);
 void wz_context_destroy(struct wzContext *context);
@@ -171,6 +179,7 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
 void wz_desktop_draw(struct wzDesktop *desktop);
+wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
 struct wzContext *wz_widget_get_context(struct wzWidget *widget);

@@ -218,6 +218,14 @@ int main(int argc, char **argv)
 
 	SDL_SetTextureBlendMode(glyphAtlasTexture, SDL_BLENDMODE_BLEND);
 
+	// Setup cursors.
+	SDL_Cursor *cursors[WZ_NUM_CURSORS];
+	cursors[WZ_CURSOR_DEFAULT] = SDL_GetDefaultCursor();
+	cursors[WZ_CURSOR_RESIZE_N_S] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
+	cursors[WZ_CURSOR_RESIZE_E_W] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
+	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
+	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+
 	// Create wz objects.
 	Context context;
 	Desktop desktop(&context);
@@ -331,6 +339,7 @@ int main(int argc, char **argv)
 		SDL_RenderClear(g_renderer);
 		desktop.draw();
 		SDL_RenderPresent(g_renderer);
+		SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)desktop.getWidget())]);
 
 		scrollerLabel.setText("Scroll value: %d", scroller.getValue());
 		scrollerHorizontalLabel.setText("Scroll value: %d", scrollerHorizontal.getValue());

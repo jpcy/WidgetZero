@@ -39,6 +39,8 @@ struct wzDesktop
 	// Centralized event handler.
 	wzEventCallback handle_event;
 
+	wzCursor cursor;
+
 	struct wzWidget **lockInputWidgetStack;
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
@@ -487,7 +489,10 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	}
 
 	rect = wz_widget_get_absolute_rect(widget);
-	widgetIsChildOfWindow = !window || (window && widget->window == window);
+
+	// Or the window itself.
+	widgetIsChildOfWindow = !window || (window && (widget->window == window || widget == (struct wzWidget *)window));
+
 	oldHover = widget->hover;
 	widget->hover = widgetIsChildOfWindow && hoverWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
@@ -514,6 +519,9 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	assert(desktop);
+
+	// Reset the mouse cursor to default.
+	desktop->cursor = WZ_CURSOR_DEFAULT;
 
 	// Need a special case for dock icons.
 	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
@@ -688,6 +696,18 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	{
 		wz_widget_draw_by_priority_recursive(drawPriorities[i], (struct wzWidget *)desktop);
 	}
+}
+
+wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop)
+{
+	assert(desktop);
+	return desktop->cursor;
+}
+
+void wz_desktop_set_cursor(struct wzDesktop *desktop, wzCursor cursor)
+{
+	assert(desktop);
+	desktop->cursor = cursor;
 }
 
 void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget)

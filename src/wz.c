@@ -37,29 +37,6 @@ SOFTWARE.
 #include <string.h>
 #include "wz_internal.h"
 
-wzRect wzClippedRect(wzRect parent, wzRect child)
-{
-	wzRect rect;
-	int delta;
-
-	rect.x = WZ_MAX(parent.x, child.x);
-	rect.y = WZ_MAX(parent.y, child.y);
-	rect.w = child.w;
-	rect.h = child.h;
-
-	delta = (child.x + child.w) - (parent.x + parent.w);
-
-	if (delta > 0)
-		rect.w -= delta;
-
-	delta = (child.y + child.h) - (parent.y + parent.h);
-
-	if (delta > 0)
-		rect.h -= delta;
-
-	return rect;
-}
-
 static void * wz__arr_malloc(int size)
 {
    return malloc(size);

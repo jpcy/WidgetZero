@@ -107,6 +107,21 @@ struct wzWidget
 	struct wzWidget **children;
 };
 
+enum
+{
+	WZ_COMPASS_N,
+	WZ_COMPASS_NE,
+	WZ_COMPASS_E,
+	WZ_COMPASS_SE,
+	WZ_COMPASS_S,
+	WZ_COMPASS_SW,
+	WZ_COMPASS_W,
+	WZ_COMPASS_NW,
+	WZ_NUM_COMPASS_POINTS
+};
+
+void wz_desktop_set_cursor(struct wzDesktop *desktop, wzCursor cursor);
+
 // Lock input to this widget.
 void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
 

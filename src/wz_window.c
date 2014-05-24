@@ -56,18 +56,84 @@ struct wzWindow
 	wzPosition undockStartPosition;
 };
 
+// rects parameter size should be WZ_NUM_COMPASS_POINTS
+static void wz_window_calculate_border_rects(struct wzWindow *window, wzRect *rects)
+{
+	assert(window);
+	assert(rects);
+
+	rects[WZ_COMPASS_N] = window->base.rect;
+	rects[WZ_COMPASS_N].x += window->borderSize;
+	rects[WZ_COMPASS_N].w -= window->borderSize * 2;
+	rects[WZ_COMPASS_N].h = window->borderSize;
+
+	rects[WZ_COMPASS_NE] = window->base.rect;
+	rects[WZ_COMPASS_NE].x += rects[WZ_COMPASS_NE].w - window->borderSize;
+	rects[WZ_COMPASS_NE].w = window->borderSize;
+	rects[WZ_COMPASS_NE].h = window->borderSize;
+
+	rects[WZ_COMPASS_E] = window->base.rect;
+	rects[WZ_COMPASS_E].x += rects[WZ_COMPASS_E].w - window->borderSize;
+	rects[WZ_COMPASS_E].y += window->borderSize;
+	rects[WZ_COMPASS_E].w = window->borderSize;
+	rects[WZ_COMPASS_E].h -= window->borderSize * 2;
+
+	rects[WZ_COMPASS_SE] = window->base.rect;
+	rects[WZ_COMPASS_SE].x += rects[WZ_COMPASS_SE].w - window->borderSize;
+	rects[WZ_COMPASS_SE].y += rects[WZ_COMPASS_SE].h - window->borderSize;
+	rects[WZ_COMPASS_SE].w = window->borderSize;
+	rects[WZ_COMPASS_SE].h = window->borderSize;
+
+	rects[WZ_COMPASS_S] = window->base.rect;
+	rects[WZ_COMPASS_S].x += window->borderSize;
+	rects[WZ_COMPASS_S].y += rects[WZ_COMPASS_S].h - window->borderSize;
+	rects[WZ_COMPASS_S].w -= window->borderSize * 2;
+	rects[WZ_COMPASS_S].h = window->borderSize;
+
+	rects[WZ_COMPASS_SW] = window->base.rect;
+	rects[WZ_COMPASS_SW].y += rects[WZ_COMPASS_SW].h - window->borderSize;
+	rects[WZ_COMPASS_SW].w = window->borderSize;
+	rects[WZ_COMPASS_SW].h = window->borderSize;
+
+	rects[WZ_COMPASS_W] = window->base.rect;
+	rects[WZ_COMPASS_W].y += window->borderSize;
+	rects[WZ_COMPASS_W].w = window->borderSize;
+	rects[WZ_COMPASS_W].h -= window->borderSize * 2;
+
+	rects[WZ_COMPASS_NW] = window->base.rect;
+	rects[WZ_COMPASS_NW].w = window->borderSize;
+	rects[WZ_COMPASS_NW].h = window->borderSize;
+}
+
+// borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
+static void wz_window_calculate_mouse_over_border_rects(struct wzWindow *window, int mouseX, int mouseY, wzRect *borderRects, bool *mouseOverBorderRects)
+{
+	// Take into account docking, e.g. north docked window can only be resized south.
+	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_SOUTH));
+	mouseOverBorderRects[WZ_COMPASS_NE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NE]) && window->dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_E] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_E]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_WEST));
+	mouseOverBorderRects[WZ_COMPASS_SE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SE]) && window->dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_S] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_S]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_NORTH));
+	mouseOverBorderRects[WZ_COMPASS_SW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SW]) && window->dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_W] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_W]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_EAST));
+	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && window->dock == WZ_DOCK_NONE);
+}
+
 static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzWindow *window;
-
+	
 	assert(widget);
 	window = (struct wzWindow *)widget;
 
 	if (mouseButton == 1)
 	{
-		wzRect r = wz_window_get_header_rect(window);
+		wzRect borderRects[WZ_NUM_COMPASS_POINTS];
+		bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+		int i;
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r))
+		// Drag the header.
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, wz_window_get_header_rect(window)))
 		{
 			window->drag = WZ_DRAG_HEADER;
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
@@ -86,110 +152,18 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 			return;
 		}
 
-		// N
-		r = widget->rect;
-		r.x += window->borderSize;
-		r.w -= window->borderSize * 2;
-		r.h = window->borderSize;
+		// Resize by dragging the border.
+		wz_window_calculate_border_rects(window, borderRects);
+		wz_window_calculate_mouse_over_border_rects(window, mouseX, mouseY, borderRects, mouseOverBorderRects);
 
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_SOUTH))
+		for (i = 0; i < WZ_NUM_COMPASS_POINTS; i++)
 		{
-			window->drag = WZ_DRAG_RESIZE_N;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// NE
-		r = widget->rect;
-		r.x += r.w - window->borderSize;
-		r.w = window->borderSize;
-		r.h = window->borderSize;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
-		{
-			window->drag = WZ_DRAG_RESIZE_NE;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// E
-		r = widget->rect;
-		r.x += r.w - window->borderSize;
-		r.y += window->borderSize;
-		r.w = window->borderSize;
-		r.h -= window->borderSize * 2;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_WEST))
-		{
-			window->drag = WZ_DRAG_RESIZE_E;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// SE
-		r = widget->rect;
-		r.x += r.w - window->borderSize;
-		r.y += r.h - window->borderSize;
-		r.w = window->borderSize;
-		r.h = window->borderSize;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
-		{
-			window->drag = WZ_DRAG_RESIZE_SE;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// S
-		r = widget->rect;
-		r.x += window->borderSize;
-		r.y += r.h - window->borderSize;
-		r.w -= window->borderSize * 2;
-		r.h = window->borderSize;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_NORTH))
-		{
-			window->drag = WZ_DRAG_RESIZE_S;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// SW
-		r = widget->rect;
-		r.y += r.h - window->borderSize;
-		r.w = window->borderSize;
-		r.h = window->borderSize;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
-		{
-			window->drag = WZ_DRAG_RESIZE_SW;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// W
-		r = widget->rect;
-		r.y += window->borderSize;
-		r.w = window->borderSize;
-		r.h -= window->borderSize * 2;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_EAST))
-		{
-			window->drag = WZ_DRAG_RESIZE_W;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
-		}
-
-		// NW
-		r = widget->rect;
-		r.w = window->borderSize;
-		r.h = window->borderSize;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, r) && window->dock == WZ_DOCK_NONE)
-		{
-			window->drag = WZ_DRAG_RESIZE_NW;
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
-			return;
+			if (mouseOverBorderRects[i])
+			{
+				window->drag = WZ_DRAG_RESIZE_N + i;
+				wz_desktop_push_lock_input_widget(widget->desktop, widget);
+				return;
+			}
 		}
 	}
 }
@@ -233,10 +207,33 @@ static void wz_window_call_parent_window_move_recursive(struct wzWidget *widget)
 static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWindow *window;
+	wzRect borderRects[WZ_NUM_COMPASS_POINTS];
+	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
 	int i;
 
 	assert(widget);
 	window = (struct wzWindow *)widget;
+
+	// Set the mouse cursor.
+	wz_window_calculate_border_rects(window, borderRects);
+	wz_window_calculate_mouse_over_border_rects(window, mouseX, mouseY, borderRects, mouseOverBorderRects);
+
+	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || window->drag == WZ_DRAG_RESIZE_N || window->drag == WZ_DRAG_RESIZE_S)
+	{
+		wz_desktop_set_cursor(widget->desktop, WZ_CURSOR_RESIZE_N_S);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || window->drag == WZ_DRAG_RESIZE_E || window->drag == WZ_DRAG_RESIZE_W)
+	{
+		wz_desktop_set_cursor(widget->desktop, WZ_CURSOR_RESIZE_E_W);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || window->drag == WZ_DRAG_RESIZE_NE || window->drag == WZ_DRAG_RESIZE_SW)
+	{
+		wz_desktop_set_cursor(widget->desktop, WZ_CURSOR_RESIZE_NE_SW);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || window->drag == WZ_DRAG_RESIZE_NW || window->drag == WZ_DRAG_RESIZE_SE)
+	{
+		wz_desktop_set_cursor(widget->desktop, WZ_CURSOR_RESIZE_NW_SE);
+	}
 
 	// Don't actually move the window yet if it's docked.
 	if (window->drag == WZ_DRAG_HEADER && window->dock != WZ_DOCK_NONE)
