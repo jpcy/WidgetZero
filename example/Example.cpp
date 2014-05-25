@@ -44,6 +44,8 @@ static stbtt_bakedchar glyphs[nGlyphs];
 static SDL_Surface *glyphAtlasSurface;
 static SDL_Texture *glyphAtlasTexture;
 
+static const float frameTime = 1000 / 60.0f;
+
 static void ShowSdlError()
 {
 	fprintf(stderr, "%s\n", SDL_GetError());
@@ -302,6 +304,9 @@ int main(int argc, char **argv)
 	Window childWindow2(&desktop, "Window #2");
 	childWindow2.setRect(650, 500, 200, 200);
 
+	uint32_t lastTime = SDL_GetTicks();
+	float accumulatedTime = 0;
+
 	for (;;)
 	{
 		bool quit = false;
@@ -335,14 +340,23 @@ int main(int argc, char **argv)
 		if (quit)
 			break;
 
-		SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
-		SDL_RenderClear(g_renderer);
-		desktop.draw();
-		SDL_RenderPresent(g_renderer);
-		SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)desktop.getWidget())]);
+		uint32_t currentTime = SDL_GetTicks();
+		accumulatedTime += (float)(currentTime - lastTime);
+		lastTime = currentTime;
 
-		scrollerLabel.setText("Scroll value: %d", scroller.getValue());
-		scrollerHorizontalLabel.setText("Scroll value: %d", scrollerHorizontal.getValue());
+		while (accumulatedTime > frameTime)
+		{
+			SDL_SetRenderDrawColor(g_renderer, 255, 255, 255, 255);
+			SDL_RenderClear(g_renderer);
+			desktop.draw();
+			SDL_RenderPresent(g_renderer);
+			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)desktop.getWidget())]);
+
+			scrollerLabel.setText("Scroll value: %d", scroller.getValue());
+			scrollerHorizontalLabel.setText("Scroll value: %d", scrollerHorizontal.getValue());
+
+			accumulatedTime -= frameTime;
+		}
 	}
 
 	return 0;
