@@ -86,15 +86,15 @@ static void wz_button_destroy(struct wzWidget *widget)
 	wz_arr_free(button->pressed_callbacks);
 }
 
-struct wzButton *wz_button_create(struct wzContext *context)
+struct wzButton *wz_button_create(struct wzDesktop *desktop)
 {
 	struct wzButton *button;
 
-	assert(context);
+	assert(desktop);
 	button = (struct wzButton *)malloc(sizeof(struct wzButton));
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
-	button->base.context = context;
+	button->base.desktop = desktop;
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;

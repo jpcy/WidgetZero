@@ -21,34 +21,64 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <stdint.h>
 #include <memory>
+#include <string>
 #include <widgetzero/wz.h>
+#include "../../src/stb_truetype.h"
 
-class List;
+struct SDL_Renderer;
 
-class Context
+namespace wz {
+
+class Renderer
 {
 public:
-	Context();
-	~Context();
-	wzContext *get() const { return context_; }
+	typedef enum
+	{
+		TA_NONE = 0,
+		TA_LEFT = 1,
+		TA_TOP = 1,
+		TA_CENTER = 2,
+		TA_RIGHT = 3,
+		TA_BOTTOM = 3
+	}
+	TextAlignment;
+
+	Renderer(SDL_Renderer *renderer);
+	SDL_Renderer *get() { return renderer_; }
+	std::string initialize(const char *fontFilename, float fontHeight);
+	void textPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
+	void measureText(const char *text, int *width, int *height);
 
 private:
-	wzContext *context_;
+	SDL_Renderer *renderer_;
+	stbtt_fontinfo font_;
+	float fontHeight_;
+	uint8_t *fontFileBuffer_;
+	static const size_t nGlyphs_ = 256;
+	stbtt_bakedchar glyphs_[nGlyphs_];
+	SDL_Surface *glyphAtlasSurface_;
+	SDL_Texture *glyphAtlasTexture_;
 };
+
+class List;
 
 class Widget
 {
 public:
 	virtual ~Widget() {}
 	virtual wzWidget *getWidget() = 0;
+	virtual void draw() = 0;
 	
-	wzContext *getContext()
+	Renderer *getRenderer()
 	{
-		return wz_widget_get_context(getWidget());
+		return renderer_;
 	}
 
 protected:
+	Renderer *renderer_;
+
 	void clipReset();
 	void clipToParentWindow();
 
@@ -59,9 +89,9 @@ protected:
 class Desktop : public Widget
 {
 public:
-	Desktop(Context *context);
+	Desktop(Renderer *renderer);
 	~Desktop();
-	virtual wzWidget *getWidget() { return (struct wzWidget *)desktop_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)desktop_; }
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
@@ -79,7 +109,7 @@ class Window : public Widget
 {
 public:
 	Window(Widget *parent, char *title);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)window_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 	
@@ -93,7 +123,7 @@ class Button : public Widget
 public:
 	Button(Widget *parent, const char *label);
 	Button(wzButton *button, const char *label);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)button_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void setPosition(int x, int y);
 	wzRect getRect();
 	void draw();
@@ -107,7 +137,7 @@ class Checkbox : public Widget
 {
 public:
 	Checkbox(Widget *parent, const char *label);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)button_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void setPosition(int x, int y);
 	void draw();
 
@@ -123,7 +153,7 @@ class Combo : public Widget
 {
 public:
 	Combo(Widget *parent, const char **items, int nItems);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)combo_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)combo_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 
@@ -137,7 +167,7 @@ class GroupBox : public Widget
 {
 public:
 	GroupBox(Widget *parent, const char *label);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)groupBox_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
 	void setPosition(int x, int y);
 	void draw();
 
@@ -151,7 +181,7 @@ class Scroller : public Widget
 public:
 	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)scroller_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)scroller_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 	int getValue() const;
@@ -166,7 +196,7 @@ class Label : public Widget
 {
 public:
 	Label(Widget *parent);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)label_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)label_; }
 	void setPosition(int x, int y);
 	void setText(const char *format, ...);
 	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
@@ -183,7 +213,7 @@ class List : public Widget
 public:
 	List(Widget *parent, const char **items, int nItems);
 	List(wzList *list, const char **items, int nItems);
-	virtual wzWidget *getWidget() { return (struct wzWidget *)list_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)list_; }
 	void setRect(int x, int y, int w, int h);
 	void draw();
 
@@ -196,3 +226,5 @@ private:
 	static const int itemHeight = 18;
 	static const int itemLeftPadding = 4;
 };
+
+} // namespace wz

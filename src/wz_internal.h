@@ -38,11 +38,6 @@ SOFTWARE.
 
 #include <widgetzero/wz.h>
 
-struct wzContext
-{
-	int dummy;
-};
-
 typedef struct
 {
 	void (*destroy)(struct wzWidget *widget);
@@ -89,7 +84,6 @@ wzDock;
 
 struct wzWidget
 {
-	struct wzContext *context;
 	wzWidgetType type;
 	int drawPriority;
 	wzRect rect;

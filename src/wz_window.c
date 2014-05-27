@@ -311,16 +311,16 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	}
 }
 
-struct wzWindow *wz_window_create(struct wzContext *context)
+struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 {
 	struct wzWindow *window;
 
-	assert(context);
+	assert(desktop);
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
 	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
-	window->base.context = context;
+	window->base.desktop = desktop;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
 	window->base.vtable.mouse_move = wz_window_mouse_move;

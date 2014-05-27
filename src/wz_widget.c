@@ -48,10 +48,11 @@ void wz_widget_destroy(struct wzWidget *widget)
 	free(widget);
 }
 
-struct wzContext *wz_widget_get_context(struct wzWidget *widget)
+struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget)
 {
 	assert(widget);
-	return widget->context;
+	assert(widget->desktop);
+	return widget->desktop;
 }
 
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
@@ -221,7 +222,6 @@ static void wz_widget_set_ancestors_recursive(struct wzWidget *widget, struct wz
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		struct wzWidget *child = widget->children[i];
-		child->desktop = desktop;
 		child->window = window;
 		wz_widget_set_ancestors_recursive(child, desktop, window);
 	}
@@ -239,9 +239,6 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	// Windows can only be children of desktop.
 	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_DESKTOP)
 		return;
-
-	// Find the ancestor desktop .
-	child->desktop = (struct wzDesktop *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_DESKTOP);
 
 	// Find the closest ancestor window.
 	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);

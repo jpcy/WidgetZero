@@ -177,22 +177,21 @@ static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop,
 	wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, showDockPreview);
 }
 
-struct wzDesktop *wz_desktop_create(struct wzContext *context)
+struct wzDesktop *wz_desktop_create()
 {
 	struct wzDesktop *desktop;
 	int i;
 	struct wzWidget *widget;
 
-	assert(context);
 	desktop = (struct wzDesktop *)malloc(sizeof(struct wzDesktop));
 	memset(desktop, 0, sizeof(struct wzDesktop));
 	desktop->base.type = WZ_TYPE_DESKTOP;
-	desktop->base.context = context;
+	desktop->base.desktop = desktop;
 
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
 	{
-		desktop->dockIcons[i] = wz_label_create(context);
+		desktop->dockIcons[i] = wz_label_create(desktop);
 		widget = (struct wzWidget *)desktop->dockIcons[i];
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
 		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
@@ -204,7 +203,7 @@ struct wzDesktop *wz_desktop_create(struct wzContext *context)
 	wz_desktop_update_dock_icon_positions(desktop);
 
 	// Create dock preview widget.
-	desktop->dockPreview = wz_label_create(context);
+	desktop->dockPreview = wz_label_create(desktop);
 	widget = (struct wzWidget *)desktop->dockPreview;
 	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
 	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);

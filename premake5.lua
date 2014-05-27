@@ -55,6 +55,48 @@ project "libwz"
 	configuration "Release"
 		targetdir "build/libwz_release"
 		objdir "build/libwz_release"
+		
+-----------------------------------------------------------------------------
+
+project "libwzsdl2"
+	language "C++"
+	kind "StaticLib"
+
+	files
+	{
+		"addons/wzsdl2/src/*.*",
+		"addons/wzsdl2/include/widgetzero/*.*"
+	}
+	
+	includedirs
+	{
+		"include",
+		"addons/wzsdl2/include"
+	}
+	
+	configuration "vs2012"
+		linkoptions
+		{
+			"/SAFESEH:NO"
+		}
+	
+	configuration "linux"
+		buildoptions { "`pkg-config --cflags sdl2`" }
+    configuration "vs*"
+	    includedirs(sdlPath .. "/include")
+	configuration { "vs*", "not x64" }
+		libdirs(sdlPath .. "/lib/x86")
+	configuration { "vs*",  "x64" }
+		libdirs(sdlPath .. "/lib/x64")
+	configuration {}
+	
+	configuration "Debug"
+		targetdir "build/libwzsdl2_debug"
+		objdir "build/libwzsdl2_debug"
+				
+	configuration "Release"
+		targetdir "build/libwzsdl2_release"
+		objdir "build/libwzsdl2_release"
 
 -----------------------------------------------------------------------------
 
@@ -65,14 +107,13 @@ project "example"
 
 	files
 	{
-		"include/widgetzero/wz.h",
-		"example/*.cpp",
-		"example/*.h"
+		"example/*.*"
 	}
 	
 	includedirs
 	{
-		"include"
+		"include",
+		"addons/wzsdl2/include"
 	}
 	
 	configuration "linux"
@@ -90,7 +131,8 @@ project "example"
 	{
 		"SDL2",
 		"SDL2main",
-		"libwz"
+		"libwz",
+		"libwzsdl2"
 	}
 	
 	configuration "vs2012"

@@ -38,7 +38,6 @@ typedef int bool;
 extern "C" {
 #endif
 
-struct wzContext;
 struct wzDesktop;
 struct wzWindow;
 struct wzWidget;
@@ -156,13 +155,10 @@ wzCursor;
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
 
-struct wzContext *wz_context_create(void);
-void wz_context_destroy(struct wzContext *context);
-
 typedef void (*wzDesktopDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzDesktopDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
-struct wzDesktop *wz_desktop_create(struct wzContext *context);
+struct wzDesktop *wz_desktop_create();
 
 // Set the centralized event handler. All events invoked by the ancestor widgets of this desktop will call the callback function.
 void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback);
@@ -182,7 +178,7 @@ void wz_desktop_draw(struct wzDesktop *desktop);
 wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
-struct wzContext *wz_widget_get_context(struct wzWidget *widget);
+struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
@@ -210,7 +206,7 @@ bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
 
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
-struct wzWindow *wz_window_create(struct wzContext *context);
+struct wzWindow *wz_window_create(struct wzDesktop *desktop);
 void wz_window_set_header_height(struct wzWindow *window, int height);
 int wz_window_get_header_height(struct wzWindow *window);
 void wz_window_set_border_size(struct wzWindow *window, int size);
@@ -218,21 +214,21 @@ int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
 wzRect wz_window_get_content_rect(struct wzWindow *window);
 
-struct wzButton *wz_button_create(struct wzContext *context);
+struct wzButton *wz_button_create(struct wzDesktop *desktop);
 void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 
-struct wzCombo *wz_combo_create(struct wzContext *context);
+struct wzCombo *wz_combo_create(struct wzDesktop *desktop);
 struct wzList *wz_combo_get_list(struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
-struct wzGroupBox *wz_groupbox_create(struct wzContext *context);
+struct wzGroupBox *wz_groupbox_create(struct wzDesktop *desktop);
 
-struct wzLabel *wz_label_create(struct wzContext *context);
+struct wzLabel *wz_label_create(struct wzDesktop *desktop);
 
-struct wzList *wz_list_create(struct wzContext *context);
+struct wzList *wz_list_create(struct wzDesktop *desktop);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 wzBorder wz_list_get_items_border(const struct wzList *list);
@@ -259,7 +255,7 @@ typedef enum
 }
 wzScrollerType;
 
-struct wzScroller *wz_scroller_create(struct wzContext *context, wzScrollerType scrollerType);
+struct wzScroller *wz_scroller_create(struct wzDesktop *desktop, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
 void wz_scroller_decrement_value(struct wzScroller *scroller);

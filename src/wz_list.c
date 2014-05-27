@@ -264,15 +264,15 @@ static void wz_list_destroy(struct wzWidget *widget)
 	wz_arr_free(list->item_selected_callbacks);
 }
 
-struct wzList *wz_list_create(struct wzContext *context)
+struct wzList *wz_list_create(struct wzDesktop *desktop)
 {
 	struct wzList *list;
 
-	assert(context);
+	assert(desktop);
 	list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
-	list->base.context = context;
+	list->base.desktop = desktop;
 	list->base.vtable.destroy = wz_list_destroy;
 	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.set_visible = wz_list_set_visible;
@@ -286,7 +286,7 @@ struct wzList *wz_list_create(struct wzContext *context)
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
 
-	list->scroller = wz_scroller_create(context, WZ_SCROLLER_VERTICAL);
+	list->scroller = wz_scroller_create(desktop, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);

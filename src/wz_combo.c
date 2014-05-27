@@ -126,19 +126,19 @@ static void wz_combo_list_item_selected(wzEvent e)
 	combo->isOpen = false;
 }
 
-struct wzCombo *wz_combo_create(struct wzContext *context)
+struct wzCombo *wz_combo_create(struct wzDesktop *desktop)
 {
 	struct wzCombo *combo;
 
-	assert(context);
+	assert(desktop);
 	combo = (struct wzCombo *)malloc(sizeof(struct wzCombo));
 	memset(combo, 0, sizeof(struct wzCombo));
 	combo->base.type = WZ_TYPE_COMBO;
-	combo->base.context = context;
+	combo->base.desktop = desktop;
 	combo->base.vtable.set_rect = wz_combo_set_rect;
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
 
-	combo->list = wz_list_create(context);
+	combo->list = wz_list_create(desktop);
 	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
