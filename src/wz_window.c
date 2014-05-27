@@ -54,6 +54,9 @@ struct wzWindow
 
 	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
 	wzPosition undockStartPosition;
+
+	wzPosition resizeStartPosition;
+	wzRect resizeStartRect;
 };
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
@@ -161,6 +164,9 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 			if (mouseOverBorderRects[i])
 			{
 				window->drag = WZ_DRAG_RESIZE_N + i;
+				window->resizeStartPosition.x = mouseX;
+				window->resizeStartPosition.y = mouseY;
+				window->resizeStartRect = window->base.rect;
 				wz_desktop_push_lock_input_widget(widget->desktop, widget);
 				return;
 			}
@@ -209,6 +215,8 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	struct wzWindow *window;
 	wzRect borderRects[WZ_NUM_COMPASS_POINTS];
 	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+	wzSize minimumWindowSize;
+	wzPosition resizeDelta;
 	int i;
 
 	assert(widget);
@@ -260,6 +268,17 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		wz_widget_set_rect(widget, rect);
 	}
 
+	// Calculate the minimum allowed window size.
+	minimumWindowSize.w = window->borderSize * 2;
+	minimumWindowSize.h = window->headerHeight + window->borderSize * 2;
+
+	// Calculate mouse deltas for dragging. Deltas are relative to the dragging start position (mouseDeltaX and mouseDeltaY are relative to the last mouse position).
+	if (window->drag >= WZ_DRAG_RESIZE_N)
+	{
+		resizeDelta.x = mouseX - window->resizeStartPosition.x;
+		resizeDelta.y = mouseY - window->resizeStartPosition.y;
+	}
+
 	switch (window->drag)
 	{
 	case WZ_DRAG_HEADER:
@@ -267,41 +286,63 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		widget->rect.y += mouseDeltaY;
 		break;
 	case WZ_DRAG_RESIZE_N:
-		widget->rect.y += mouseDeltaY;
-		widget->rect.h -= mouseDeltaY;
+		{
+			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
+			widget->rect.y = window->resizeStartRect.y + delta;
+			widget->rect.h = window->resizeStartRect.h - delta;
+		}
 		break;
 	case WZ_DRAG_RESIZE_NE:
-		widget->rect.y += mouseDeltaY;
-		widget->rect.w += mouseDeltaX;
-		widget->rect.h -= mouseDeltaY;
+		{
+			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
+			widget->rect.y = window->resizeStartRect.y + delta;
+			widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
+			widget->rect.h = window->resizeStartRect.h - delta;
+		}
 		break;
 	case WZ_DRAG_RESIZE_E:
-		widget->rect.w += mouseDeltaX;
+		widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
 		break;
 	case WZ_DRAG_RESIZE_SE:
-		widget->rect.w += mouseDeltaX;
-		widget->rect.h += mouseDeltaY;
+		widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
+		widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_S:
-		widget->rect.h += mouseDeltaY;
+		widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_SW:
-		widget->rect.x += mouseDeltaX;
-		widget->rect.w -= mouseDeltaX;
-		widget->rect.h += mouseDeltaY;
+		{
+			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
+			widget->rect.x = window->resizeStartRect.x + delta;
+			widget->rect.w = window->resizeStartRect.w - delta;
+			widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
+		}
 		break;
 	case WZ_DRAG_RESIZE_W:
-		widget->rect.x += mouseDeltaX;
-		widget->rect.w -= mouseDeltaX;
+		{
+			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
+			widget->rect.x = window->resizeStartRect.x + delta;
+			widget->rect.w = window->resizeStartRect.w - delta;
+		}
 		break;
 	case WZ_DRAG_RESIZE_NW:
-		widget->rect.x += mouseDeltaX;
-		widget->rect.y += mouseDeltaY;
-		widget->rect.w -= mouseDeltaX;
-		widget->rect.h -= mouseDeltaY;
+		{
+			int deltaX, deltaY;
+			deltaX = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
+			deltaY = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
+			widget->rect.x = window->resizeStartRect.x + deltaX;
+			widget->rect.y = window->resizeStartRect.y + deltaY;
+			widget->rect.w = window->resizeStartRect.w - deltaX;
+			widget->rect.h = window->resizeStartRect.h - deltaY;
+		}
 		break;
 	default:
 		return; // Not dragging, don't call parent_window_move.
+	}
+
+	// Constrain the window size.
+	if (window->drag >= WZ_DRAG_RESIZE_N)
+	{
 	}
 
 	// Dragging: call parent_window_move on child and ancestor widgets.
