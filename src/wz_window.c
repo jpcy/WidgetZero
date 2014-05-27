@@ -422,3 +422,9 @@ void wz_window_set_dock(struct wzWindow *window, wzDock dock)
 	assert(window);
 	window->dock = dock;
 }
+
+wzDock wz_window_get_dock(struct wzWindow *window)
+{
+	assert(window);
+	return window->dock;
+}

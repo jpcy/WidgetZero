@@ -134,6 +134,7 @@ bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
 void wz_window_set_dock(struct wzWindow *window, wzDock dock);
+wzDock wz_window_get_dock(struct wzWindow *window);
 
 //////////////////////////////////////////////////////////////////////////////
 //

@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	if (SDL_CreateWindowAndRenderer(1024, 768, 0, &window, &renderer) < 0)
+	if (SDL_CreateWindowAndRenderer(1024, 768, SDL_WINDOW_RESIZABLE, &window, &renderer) < 0)
 	{
 		ShowError(SDL_GetError());
 		SDL_ClearError();
@@ -166,6 +166,10 @@ int main(int argc, char **argv)
 			{
 				quit = true;
 				break;
+			}
+			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
+			{
+				desktop.setSize(e.window.data1, e.window.data2);
 			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{

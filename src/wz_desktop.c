@@ -260,18 +260,56 @@ void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
 
 void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size)
 {
-	assert(desktop);
-	desktop->base.rect.w = size.w;
-	desktop->base.rect.h = size.h;
-	wz_desktop_update_dock_icon_positions(desktop);
+	wz_desktop_set_size_args(desktop, size.w, size.h);
 }
 
 void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
 {
+	int i;
+
 	assert(desktop);
 	desktop->base.rect.w = width;
 	desktop->base.rect.h = height;
 	wz_desktop_update_dock_icon_positions(desktop);
+
+	// Move docked windows.
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
+	{
+		struct wzWidget *widget = desktop->base.children[i];
+
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			wzDock dock;
+			wzRect rect;
+			
+			dock = wz_window_get_dock((struct wzWindow *)widget);
+
+			if (dock == WZ_DOCK_NONE)
+				continue;
+
+			rect = wz_widget_get_rect(widget);
+
+			switch (dock)
+			{
+			case WZ_DOCK_NORTH:
+				rect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_SOUTH:
+				rect.y = desktop->base.rect.h - rect.h;
+				rect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_EAST:
+				rect.x = desktop->base.rect.w - rect.w;
+				rect.h = desktop->base.rect.h;
+				break;
+			case WZ_DOCK_WEST:
+				rect.h = desktop->base.rect.h;
+				break;
+			}
+
+			wz_widget_set_rect(widget, rect);
+		}
+	}
 }
 
 wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
