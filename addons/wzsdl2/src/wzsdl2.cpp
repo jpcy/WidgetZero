@@ -390,9 +390,14 @@ void Window::draw()
 
 	// Header.
 	wzRect headerRect = wz_window_get_header_rect(window_);
-	SDL_SetRenderDrawColor(renderer_->get(), 255, 232, 166, 255);
-	SDL_RenderFillRect(renderer_->get(), (SDL_Rect *)&headerRect);
-	renderer_->textPrintf(headerRect.x + 10, headerRect.y + headerRect.h / 2, Renderer::TA_LEFT, Renderer::TA_CENTER, 0, 0, 0, title_);
+
+	if (headerRect.w > 0 && headerRect.h > 0)
+	{
+		clipToParentWindow(headerRect);
+		SDL_SetRenderDrawColor(renderer_->get(), 255, 232, 166, 255);
+		SDL_RenderFillRect(renderer_->get(), (SDL_Rect *)&headerRect);
+		renderer_->textPrintf(headerRect.x + 10, headerRect.y + headerRect.h / 2, Renderer::TA_LEFT, Renderer::TA_CENTER, 0, 0, 0, title_);
+	}
 }
 
 //------------------------------------------------------------------------------

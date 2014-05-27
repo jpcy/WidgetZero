@@ -83,6 +83,7 @@ protected:
 	void clipToParentWindow();
 
 	// Clip to the intersection of the parent window content rect and the rect parameter.
+	// NOTE: SDL turns off clipping if the rect width and height are 0.
 	void clipToParentWindow(wzRect rect);
 };
 
