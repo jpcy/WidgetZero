@@ -475,8 +475,8 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 		if (wz_widget_get_visible((struct wzWidget *)desktop->dockPreview))
 		{
 			// Dock the window.
-			wz_widget_set_rect((struct wzWidget *)desktop->movingWindow, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
 			wz_window_set_dock(desktop->movingWindow, desktop->windowDock);
+			wz_widget_set_rect((struct wzWidget *)desktop->movingWindow, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
 		}
 
 		wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, false);

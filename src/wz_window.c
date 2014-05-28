@@ -57,6 +57,9 @@ struct wzWindow
 
 	wzPosition resizeStartPosition;
 	wzRect resizeStartRect;
+
+	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
+	wzSize sizeWhenDocked;
 };
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
@@ -263,8 +266,15 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		rect = wz_widget_get_rect(widget);
 		rect.x += delta.x;
 		rect.y += delta.y;
-		rect.w = 200;
-		rect.h = 200;
+		rect.w = WZ_MAX(200, window->sizeWhenDocked.w);
+		rect.h = WZ_MAX(200, window->sizeWhenDocked.h);
+
+		// If the mouse cursor would be outside the window, center the window on the mouse cursor.
+		if (mouseX < rect.x + window->borderSize || mouseX > rect.x + rect.w - window->borderSize)
+		{
+			rect.x = mouseX - rect.w / 2;
+		}
+
 		wz_widget_set_rect(widget, rect);
 	}
 
@@ -421,6 +431,12 @@ void wz_window_set_dock(struct wzWindow *window, wzDock dock)
 {
 	assert(window);
 	window->dock = dock;
+
+	if (dock != WZ_DOCK_NONE)
+	{
+		window->sizeWhenDocked.w = window->base.rect.w;
+		window->sizeWhenDocked.h = window->base.rect.h;
+	}
 }
 
 wzDock wz_window_get_dock(struct wzWindow *window)
