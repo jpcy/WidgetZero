@@ -275,7 +275,7 @@ Desktop::~Desktop()
 
 void Desktop::setSize(int w, int h)
 {
-	wz_desktop_set_size_args(desktop_, w, h);
+	wz_widget_set_size_args((wzWidget *)desktop_, w, h);
 }
 
 void Desktop::mouseMove(int x, int y, int dx, int dy)

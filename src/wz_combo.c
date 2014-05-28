@@ -55,7 +55,7 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 
 	// Clip the height to the desktop.
 	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - wz_desktop_get_size(combo->base.desktop).h;
+	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct wzWidget *)combo->base.desktop).h;
 	
 	if (over > 0)
 	{

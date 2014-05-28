@@ -179,6 +179,59 @@ static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop,
 	wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, showDockPreview);
 }
 
+static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	struct wzDesktop *desktop;
+	int i;
+
+	assert(widget);
+	desktop = (struct wzDesktop *)widget;
+	desktop->base.rect.w = rect.w;
+	desktop->base.rect.h = rect.h;
+	wz_desktop_update_dock_icon_positions(desktop);
+
+	// Move docked windows.
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
+	{
+		struct wzWidget *widget = desktop->base.children[i];
+
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			wzDock dock;
+			wzRect windowRect;
+			
+			dock = wz_window_get_dock((struct wzWindow *)widget);
+
+			if (dock == WZ_DOCK_NONE)
+				continue;
+
+			windowRect = wz_widget_get_rect(widget);
+
+			switch (dock)
+			{
+			case WZ_DOCK_NORTH:
+				windowRect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_SOUTH:
+				windowRect.y = desktop->base.rect.h - windowRect.h;
+				windowRect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_EAST:
+				windowRect.x = desktop->base.rect.w - windowRect.w;
+				windowRect.h = desktop->base.rect.h;
+				break;
+			case WZ_DOCK_WEST:
+				windowRect.h = desktop->base.rect.h;
+				break;
+			}
+
+			wz_widget_set_rect(widget, windowRect);
+		}
+	}
+
+	wz_desktop_update_content_rect(desktop);
+}
+
 struct wzDesktop *wz_desktop_create()
 {
 	struct wzDesktop *desktop;
@@ -189,6 +242,7 @@ struct wzDesktop *wz_desktop_create()
 	memset(desktop, 0, sizeof(struct wzDesktop));
 	desktop->base.type = WZ_TYPE_DESKTOP;
 	desktop->base.desktop = desktop;
+	desktop->base.vtable.set_rect = wz_desktop_set_rect;
 
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_ICONS; i++)
@@ -258,72 +312,6 @@ void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
 	}
 
 	wz_desktop_update_dock_icon_positions(desktop);
-}
-
-void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size)
-{
-	wz_desktop_set_size_args(desktop, size.w, size.h);
-}
-
-void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
-{
-	int i;
-
-	assert(desktop);
-	desktop->base.rect.w = width;
-	desktop->base.rect.h = height;
-	wz_desktop_update_dock_icon_positions(desktop);
-
-	// Move docked windows.
-	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
-	{
-		struct wzWidget *widget = desktop->base.children[i];
-
-		if (widget->type == WZ_TYPE_WINDOW)
-		{
-			wzDock dock;
-			wzRect rect;
-			
-			dock = wz_window_get_dock((struct wzWindow *)widget);
-
-			if (dock == WZ_DOCK_NONE)
-				continue;
-
-			rect = wz_widget_get_rect(widget);
-
-			switch (dock)
-			{
-			case WZ_DOCK_NORTH:
-				rect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_SOUTH:
-				rect.y = desktop->base.rect.h - rect.h;
-				rect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_EAST:
-				rect.x = desktop->base.rect.w - rect.w;
-				rect.h = desktop->base.rect.h;
-				break;
-			case WZ_DOCK_WEST:
-				rect.h = desktop->base.rect.h;
-				break;
-			}
-
-			wz_widget_set_rect(widget, rect);
-		}
-	}
-
-	wz_desktop_update_content_rect(desktop);
-}
-
-wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
-{
-	wzSize size;
-
-	assert(desktop);
-	size.w = desktop->base.rect.w;
-	size.h = desktop->base.rect.h;
-	return size;
 }
 
 // Returns the window that the mouse cursor is hovering over. NULL if there isn't one.

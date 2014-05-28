@@ -167,9 +167,6 @@ void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktop
 void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata);
 void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size);
 void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h);
-void wz_desktop_set_size(struct wzDesktop *desktop, wzSize size);
-void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height);
-wzSize wz_desktop_get_size(const struct wzDesktop *desktop);
 void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
