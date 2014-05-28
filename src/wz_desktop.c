@@ -36,6 +36,8 @@ struct wzDesktop
 {
 	struct wzWidget base;
 
+	wzRect contentRect;
+
 	// Centralized event handler.
 	wzEventCallback handle_event;
 
@@ -310,6 +312,8 @@ void wz_desktop_set_size_args(struct wzDesktop *desktop, int width, int height)
 			wz_widget_set_rect(widget, rect);
 		}
 	}
+
+	wz_desktop_update_content_rect(desktop);
 }
 
 wzSize wz_desktop_get_size(const struct wzDesktop *desktop)
@@ -790,5 +794,55 @@ void wz_invoke_event(wzEvent e, wzEventCallback *callbacks)
 	for (i = 0; i < wz_arr_len(callbacks); i++)
 	{
 		callbacks[i](e);
+	}
+}
+
+wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop)
+{
+	assert(desktop);
+	return desktop->contentRect;
+}
+
+void wz_desktop_update_content_rect(struct wzDesktop *desktop)
+{
+	int i;
+
+	desktop->contentRect = desktop->base.rect;
+
+	// Adjust the content rect based on docked windows.
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
+	{
+		struct wzWidget *widget = desktop->base.children[i];
+
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			wzDock dock;
+			wzRect rect;
+			
+			dock = wz_window_get_dock((struct wzWindow *)widget);
+
+			if (dock == WZ_DOCK_NONE)
+				continue;
+
+			rect = wz_widget_get_rect(widget);
+
+			switch (dock)
+			{
+			case WZ_DOCK_NORTH:
+				desktop->contentRect.y += rect.h;
+				desktop->contentRect.h -= rect.h;
+				break;
+			case WZ_DOCK_SOUTH:
+				desktop->contentRect.h -= rect.h;
+				break;
+			case WZ_DOCK_EAST:
+				desktop->contentRect.w -= rect.w;
+				break;
+			case WZ_DOCK_WEST:
+				desktop->contentRect.x += rect.w;
+				desktop->contentRect.w -= rect.w;
+				break;
+			}
+		}
 	}
 }

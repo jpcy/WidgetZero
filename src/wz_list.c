@@ -343,6 +343,12 @@ wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 		rect.x += windowContentRect.x;
 		rect.y += windowContentRect.y;
 	}
+	else
+	{
+		wzRect desktopContentRect = wz_desktop_get_content_rect(list->base.desktop);	
+		rect.x += desktopContentRect.x;
+		rect.y += desktopContentRect.y;
+	}
 
 	return rect;
 }

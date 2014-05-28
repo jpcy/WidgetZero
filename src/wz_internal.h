@@ -124,6 +124,10 @@ void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget
 
 void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *window);
 
+wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop);
+
+void wz_desktop_update_content_rect(struct wzDesktop *desktop);
+
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);

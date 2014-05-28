@@ -151,18 +151,25 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget)
 
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 {
-	wzRect rect;
+	wzRect rect, contentRect;
 
 	assert(widget);
 	rect = widget->rect;
 
-	// Adjust for window position.
+	// Adjust for desktop or window content rects.
+	memset(&contentRect, 0, sizeof(contentRect));
+
 	if (widget->window)
 	{
-		wzRect windowContentRect = wz_window_get_content_rect(widget->window);
-		rect.x += windowContentRect.x;
-		rect.y += windowContentRect.y;
+		contentRect = wz_window_get_content_rect(widget->window);
 	}
+	else if (widget->type != WZ_TYPE_WINDOW)
+	{
+		contentRect = wz_desktop_get_content_rect(widget->desktop);		
+	}
+
+	rect.x += contentRect.x;
+	rect.y += contentRect.y;
 
 	return rect;
 }

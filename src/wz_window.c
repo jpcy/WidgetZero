@@ -276,6 +276,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		}
 
 		wz_widget_set_rect(widget, rect);
+		wz_desktop_update_content_rect(widget->desktop);
 	}
 
 	// Calculate the minimum allowed window size.
@@ -347,12 +348,13 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		}
 		break;
 	default:
-		return; // Not dragging, don't call parent_window_move.
+		return; // Not dragging, don't call wz_desktop_update_content_rect or parent_window_move.
 	}
 
-	// Constrain the window size.
-	if (window->drag >= WZ_DRAG_RESIZE_N)
+	// Resizing a docked window: update the desktop content rect.
+	if (window->dock != WZ_DOCK_NONE)
 	{
+		wz_desktop_update_content_rect(widget->desktop);
 	}
 
 	// Dragging: call parent_window_move on child and ancestor widgets.
@@ -437,6 +439,8 @@ void wz_window_set_dock(struct wzWindow *window, wzDock dock)
 		window->sizeWhenDocked.w = window->base.rect.w;
 		window->sizeWhenDocked.h = window->base.rect.h;
 	}
+
+	wz_desktop_update_content_rect(window->base.desktop);
 }
 
 wzDock wz_window_get_dock(struct wzWindow *window)
