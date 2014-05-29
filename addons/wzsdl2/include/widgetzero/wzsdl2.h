@@ -31,6 +31,8 @@ struct SDL_Renderer;
 
 namespace wz {
 
+struct RendererPrivate;
+
 class Renderer
 {
 public:
@@ -46,20 +48,14 @@ public:
 	TextAlignment;
 
 	Renderer(SDL_Renderer *renderer);
-	SDL_Renderer *get() { return renderer_; }
+	~Renderer();
+	SDL_Renderer *get();
 	std::string initialize(const char *fontFilename, float fontHeight);
 	void textPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
 	void measureText(const char *text, int *width, int *height);
 
 private:
-	SDL_Renderer *renderer_;
-	stbtt_fontinfo font_;
-	float fontHeight_;
-	uint8_t *fontFileBuffer_;
-	static const size_t nGlyphs_ = 256;
-	stbtt_bakedchar glyphs_[nGlyphs_];
-	SDL_Surface *glyphAtlasSurface_;
-	SDL_Texture *glyphAtlasTexture_;
+	RendererPrivate *p;
 };
 
 class List;

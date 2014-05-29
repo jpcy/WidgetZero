@@ -33,8 +33,32 @@ SOFTWARE.
 
 namespace wz {
 
-Renderer::Renderer(SDL_Renderer *renderer) : renderer_(renderer)
+struct RendererPrivate
 {
+	SDL_Renderer *renderer;
+	stbtt_fontinfo font;
+	float fontHeight;
+	uint8_t *fontFileBuffer;
+	static const size_t nGlyphs = 256;
+	stbtt_bakedchar glyphs[nGlyphs];
+	SDL_Surface *glyphAtlasSurface;
+	SDL_Texture *glyphAtlasTexture;
+};
+
+Renderer::Renderer(SDL_Renderer *renderer)
+{
+	p = new RendererPrivate;
+	p->renderer = renderer;
+}
+
+Renderer::~Renderer()
+{
+	delete p;
+}
+
+SDL_Renderer *Renderer::get()
+{
+	return p->renderer;
 }
 
 std::string Renderer::initialize(const char *fontFilename, float fontHeight)
@@ -52,8 +76,8 @@ std::string Renderer::initialize(const char *fontFilename, float fontHeight)
 	fseek(f, 0, SEEK_END);
 	size_t length = (size_t)ftell(f);
 	fseek(f, 0, SEEK_SET);
-	fontFileBuffer_ = (uint8_t *)malloc(length);
-	size_t bytesRead = fread(fontFileBuffer_, 1, length, f);
+	p->fontFileBuffer = (uint8_t *)malloc(length);
+	size_t bytesRead = fread(p->fontFileBuffer, 1, length, f);
 	fclose(f);
 
     if (bytesRead != length)
@@ -64,9 +88,9 @@ std::string Renderer::initialize(const char *fontFilename, float fontHeight)
     }
 
 	// Create glyph atlas and set a greyscale palette.	
-	glyphAtlasSurface_ = SDL_CreateRGBSurface(0, 512, 512, 8, 0, 0, 0, 0);
+	p->glyphAtlasSurface = SDL_CreateRGBSurface(0, 512, 512, 8, 0, 0, 0, 0);
 
-	if (!glyphAtlasSurface_)
+	if (!p->glyphAtlasSurface)
 	{
 		return SDL_GetError();
 	}
@@ -81,22 +105,22 @@ std::string Renderer::initialize(const char *fontFilename, float fontHeight)
 		colors[i].r = colors[i].g = colors[i].b = colors[i].a = i;
 	}
 	
-	SDL_SetSurfacePalette(glyphAtlasSurface_, &palette);
+	SDL_SetSurfacePalette(p->glyphAtlasSurface, &palette);
 
 	// Create font and bake glyphs to the atlas.
-	stbtt_InitFont(&font_, fontFileBuffer_, stbtt_GetFontOffsetForIndex(fontFileBuffer_, 0));
-	stbtt_BakeFontBitmap(fontFileBuffer_, 0, fontHeight, (unsigned char *)glyphAtlasSurface_->pixels, glyphAtlasSurface_->w, glyphAtlasSurface_->h, 0, nGlyphs_, glyphs_);
-	fontHeight_ = fontHeight;
+	stbtt_InitFont(&p->font, p->fontFileBuffer, stbtt_GetFontOffsetForIndex(p->fontFileBuffer, 0));
+	stbtt_BakeFontBitmap(p->fontFileBuffer, 0, fontHeight, (unsigned char *)p->glyphAtlasSurface->pixels, p->glyphAtlasSurface->w, p->glyphAtlasSurface->h, 0, p->nGlyphs, p->glyphs);
+	p->fontHeight = fontHeight;
 
 	// Create a texture from the glyph atlas.
-	glyphAtlasTexture_ = SDL_CreateTextureFromSurface(renderer_, glyphAtlasSurface_);
+	p->glyphAtlasTexture = SDL_CreateTextureFromSurface(p->renderer, p->glyphAtlasSurface);
 
-	if (!glyphAtlasTexture_)
+	if (!p->glyphAtlasTexture)
 	{
 		return SDL_GetError();
 	}
 
-	SDL_SetTextureBlendMode(glyphAtlasTexture_, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureBlendMode(p->glyphAtlasTexture, SDL_BLENDMODE_BLEND);
 	return std::string();
 }
 
@@ -109,7 +133,7 @@ void Renderer::textPrintf(int x, int y, TextAlignment halign, TextAlignment vali
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
-	SDL_SetTextureColorMod(glyphAtlasTexture_, r, g, b);
+	SDL_SetTextureColorMod(p->glyphAtlasTexture, r, g, b);
 	float cursorX = (float)x;
 	float cursorY = (float)y;
 
@@ -130,9 +154,9 @@ void Renderer::textPrintf(int x, int y, TextAlignment halign, TextAlignment vali
 
 	if (valign == TA_TOP || valign == TA_CENTER)
 	{
-		float scale = stbtt_ScaleForMappingEmToPixels(&font_, fontHeight_);
+		float scale = stbtt_ScaleForMappingEmToPixels(&p->font, p->fontHeight);
 		int ascent, descent, lineGap;
-		stbtt_GetFontVMetrics(&font_, &ascent, &descent, &lineGap);
+		stbtt_GetFontVMetrics(&p->font, &ascent, &descent, &lineGap);
 
 		if (valign == TA_TOP)
 		{
@@ -146,7 +170,7 @@ void Renderer::textPrintf(int x, int y, TextAlignment halign, TextAlignment vali
 
 	for (size_t i = 0; i < strlen(buffer); i++)
 	{
-		stbtt_bakedchar *g = &glyphs_[buffer[i]];
+		stbtt_bakedchar *g = &p->glyphs[buffer[i]];
 
 		SDL_Rect src;
 		src.x = g->x0;
@@ -160,7 +184,7 @@ void Renderer::textPrintf(int x, int y, TextAlignment halign, TextAlignment vali
 		dest.w = src.w;
 		dest.h = src.h;
 
-		SDL_RenderCopy(renderer_, glyphAtlasTexture_, &src, &dest);
+		SDL_RenderCopy(p->renderer, p->glyphAtlasTexture, &src, &dest);
 		cursorX += g->xadvance;
 	}
 }
@@ -171,12 +195,12 @@ void Renderer::measureText(const char *text, int *width, int *height)
 
 	for (size_t i = 0; i < strlen(text); i++)
 	{
-		stbtt_bakedchar *g = &glyphs_[text[i]];
+		stbtt_bakedchar *g = &p->glyphs[text[i]];
 		total += g->xadvance;
 	}
 
 	*width = (int)total;
-	*height = (int)fontHeight_;
+	*height = (int)p->fontHeight;
 }
 
 //------------------------------------------------------------------------------
