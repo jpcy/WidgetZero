@@ -59,6 +59,7 @@ typedef enum
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
+	WZ_TYPE_TAB_BAR,
 	WZ_MAX_WIDGET_TYPES = 64
 }
 wzWidgetType;
@@ -91,6 +92,7 @@ typedef enum
 {
 	WZ_EVENT_UNKNOWN,
 	WZ_EVENT_BUTTON_PRESSED,
+	WZ_EVENT_BUTTON_CLICKED,
 	WZ_EVENT_LIST_ITEM_SELECTED,
 	WZ_EVENT_SCROLLER_VALUE_CHANGED
 }
@@ -180,6 +182,8 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
 wzPosition wz_widget_get_position(const struct wzWidget *widget);
+void wz_widget_set_width(struct wzWidget *widget, int w);
+void wz_widget_set_height(struct wzWidget *widget, int h);
 void wz_widget_set_size_args(struct wzWidget *widget, int w, int h);
 void wz_widget_set_size(struct wzWidget *widget, wzSize size);
 wzSize wz_widget_get_size(const struct wzWidget *widget);
@@ -211,11 +215,37 @@ int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
 wzRect wz_window_get_content_rect(struct wzWindow *window);
 
+typedef enum
+{
+	// Click the button on mouse up (default).
+	WZ_BUTTON_CLICK_BEHAVIOR_UP,
+
+	// Click the button on mouse down
+	WZ_BUTTON_CLICK_BEHAVIOR_DOWN
+}
+wzButtonClickBehavior;
+
+typedef enum
+{
+	// Button is never set.
+	WZ_BUTTON_SET_BEHAVIOR_DEFAULT,
+
+	// Click to toggle whether the button is set.
+	WZ_BUTTON_SET_BEHAVIOR_TOGGLE,
+
+	// Click to set the button. Clicking again does nothing.
+	WZ_BUTTON_SET_BEHAVIOR_STICKY
+}
+wzButtonSetBehavior;
+
 struct wzButton *wz_button_create(struct wzDesktop *desktop);
-void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled);
+void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
+void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
+void wz_button_set(struct wzButton *button, bool value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
+void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 
 struct wzCombo *wz_combo_create(struct wzDesktop *desktop);
 struct wzList *wz_combo_get_list(struct wzCombo *combo);
@@ -266,6 +296,9 @@ int wz_scroller_get_nub_size(struct wzScroller *scroller);
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
+
+struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
+struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
 
 #ifdef __cplusplus
 } // extern "C"

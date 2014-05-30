@@ -276,14 +276,14 @@ static void wz_scroller_parent_window_move(struct wzWidget *widget)
 	wz_nub_update_rect(((struct wzScroller *)widget)->nub);
 }
 
-static void wz_scroller_decrement_button_pressed(wzEvent e)
+static void wz_scroller_decrement_button_clicked(wzEvent e)
 {
 	assert(e.base.widget);
 	assert(e.base.widget->parent);
 	wz_scroller_decrement_value((struct wzScroller *)e.base.widget->parent);
 }
 
-static void wz_scroller_increment_button_pressed(wzEvent e)
+static void wz_scroller_increment_button_clicked(wzEvent e)
 {
 	assert(e.base.widget);
 	assert(e.base.widget->parent);
@@ -318,11 +318,11 @@ struct wzScroller *wz_scroller_create(struct wzDesktop *desktop, wzScrollerType 
 	scroller->stepValue = 1;
 
 	scroller->decrementButton = wz_button_create(desktop);
-	wz_button_add_callback_pressed(scroller->decrementButton, wz_scroller_decrement_button_pressed);
+	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	
 	scroller->incrementButton = wz_button_create(desktop);
-	wz_button_add_callback_pressed(scroller->incrementButton, wz_scroller_increment_button_pressed);
+	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 
 	scroller->nub = wz_scroller_nub_create(scroller);

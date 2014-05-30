@@ -29,11 +29,35 @@ SOFTWARE.
 struct wzButton
 {
 	struct wzWidget base;
-	bool toggleBehavior;
+	wzButtonClickBehavior clickBehavior;
+	wzButtonSetBehavior setBehavior;
 	bool isPressed;
 	bool isSet;
 	wzEventCallback *pressed_callbacks;
+	wzEventCallback *clicked_callbacks;
 };
+
+static void wz_button_click(struct wzButton *button)
+{
+	wzEvent e;
+
+	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
+	{
+		button->isSet = !button->isSet;
+	}
+	else if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_STICKY)
+	{
+		// Don't invoke the clicked event if already set.
+		if (button->isSet)
+			return;
+
+		button->isSet = true;
+	}
+
+	e.button.type = WZ_EVENT_BUTTON_CLICKED;
+	e.button.button = button;
+	wz_invoke_event(e, button->clicked_callbacks);
+}
 
 static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
@@ -44,8 +68,19 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 
 	if (mouseButton == 1)
 	{
+		wzEvent e;
+
 		button->isPressed = true;
 		wz_desktop_push_lock_input_widget(widget->desktop, widget);
+
+		e.button.type = WZ_EVENT_BUTTON_PRESSED;
+		e.button.button = button;
+		wz_invoke_event(e, button->pressed_callbacks);
+
+		if (button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
+		{
+			wz_button_click(button);
+		}
 	}
 }
 
@@ -61,18 +96,9 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 		button->isPressed = false;
 		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
 
-		if (widget->hover)
+		if (widget->hover && button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
 		{
-			wzEvent e;
-
-			if (button->toggleBehavior)
-			{
-				button->isSet = !button->isSet;
-			}
-
-			e.button.type = WZ_EVENT_BUTTON_PRESSED;
-			e.button.button = button;
-			wz_invoke_event(e, button->pressed_callbacks);
+			wz_button_click(button);
 		}
 	}
 }
@@ -84,6 +110,7 @@ static void wz_button_destroy(struct wzWidget *widget)
 	assert(widget);
 	button = (struct wzButton *)widget;
 	wz_arr_free(button->pressed_callbacks);
+	wz_arr_free(button->clicked_callbacks);
 }
 
 struct wzButton *wz_button_create(struct wzDesktop *desktop)
@@ -101,10 +128,16 @@ struct wzButton *wz_button_create(struct wzDesktop *desktop)
 	return button;
 }
 
-void wz_button_set_toggle_behavior(struct wzButton *button, bool enabled)
+void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
 {
 	assert(button);
-	button->toggleBehavior = enabled;
+	button->clickBehavior = clickBehavior;
+}
+
+void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior setBehavior)
+{
+	assert(button);
+	button->setBehavior = setBehavior;
 }
 
 bool wz_button_is_pressed(const struct wzButton *button)
@@ -119,8 +152,39 @@ bool wz_button_is_set(const struct wzButton *button)
 	return button->isSet;
 }
 
+void wz_button_set(struct wzButton *button, bool value)
+{
+	assert(button);
+
+	// No such thing as setting a button if using the default behavior.
+	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
+		return;
+
+	if (value && button->isSet)
+	{
+		// Already set, don't invoke click event.
+		return;
+	}
+
+	button->isSet = value;
+
+	if (button->isSet)
+	{
+		wzEvent e;
+		e.button.type = WZ_EVENT_BUTTON_CLICKED;
+		e.button.button = button;
+		wz_invoke_event(e, button->clicked_callbacks);
+	}
+}
+
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback)
 {
 	assert(button);
 	wz_arr_push(button->pressed_callbacks, callback);
+}
+
+void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback)
+{
+	assert(button);
+	wz_arr_push(button->clicked_callbacks, callback);
 }

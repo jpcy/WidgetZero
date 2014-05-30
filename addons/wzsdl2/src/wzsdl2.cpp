@@ -199,8 +199,15 @@ void Renderer::measureText(const char *text, int *width, int *height)
 		total += g->xadvance;
 	}
 
-	*width = (int)total;
-	*height = (int)p->fontHeight;
+	if (width)
+	{
+		*width = (int)total;
+	}
+
+	if (height)
+	{
+		*height = (int)p->fontHeight;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -524,7 +531,7 @@ Checkbox::Checkbox(Widget *parent, const char *label)
 	widget = (wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_button_set_toggle_behavior(button_, true);
+	wz_button_set_set_behavior(button_, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 
 	// Calculate size.
 	renderer_->measureText(label_, &size.w, &size.h);
@@ -939,6 +946,107 @@ void List::draw()
 		renderer_->textPrintf(itemsRect.x + itemLeftPadding, y + itemHeight / 2, Renderer::TA_LEFT, Renderer::TA_CENTER, 0, 0, 0, items_[i]);
 		y += itemHeight;
 	}
+}
+
+//------------------------------------------------------------------------------
+
+TabButton::TabButton(wzButton *button, const char *label)
+{
+	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop((wzWidget *)button));
+	renderer_ = desktop->getRenderer();
+
+	button_ = button;
+	strcpy(label_, label);
+	wz_widget_set_metadata((wzWidget *)button_, this);
+	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
+
+	// Calculate width based on label text plus padding.
+	int width;
+	renderer_->measureText(label_, &width, NULL);
+	width += 16;
+	wz_widget_set_width((wzWidget *)button_, width);
+}
+
+void TabButton::draw()
+{
+	clipToParentWindow();
+	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)button_);
+	const bool hover = wz_widget_get_hover((wzWidget *)button_);
+	const bool set = wz_button_is_set(button_);
+
+	// Background.
+	if (set)
+	{
+		SDL_SetRenderDrawColor(renderer_->get(), 127, 194, 229, 255);
+	}
+	else if (hover)
+	{
+		SDL_SetRenderDrawColor(renderer_->get(), 188, 229, 252, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(renderer_->get(), 218, 218, 218, 255);
+	}
+
+	SDL_RenderFillRect(renderer_->get(), (SDL_Rect *)&rect);
+
+	// Border.
+	if (set)
+	{
+		SDL_SetRenderDrawColor(renderer_->get(), 44, 98, 139, 255);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(renderer_->get(), 112, 112, 112, 255);
+	}
+
+	SDL_RenderDrawRect(renderer_->get(), (SDL_Rect *)&rect);
+
+	// Label.
+	renderer_->textPrintf(rect.x + rect.w / 2, rect.y + rect.h / 2, Renderer::TA_CENTER, Renderer::TA_CENTER, 0, 0, 0, label_);
+}
+
+//------------------------------------------------------------------------------
+
+TabBar::TabBar(Widget *parent)
+{
+	renderer_ = parent->getRenderer();
+	tabBar_ = wz_tab_bar_create(wz_widget_get_desktop(parent->getWidget()));
+
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
+	wz_widget_set_draw_function((wzWidget *)tabBar_, DrawWidget);
+	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabBar_);
+}
+
+TabBar::~TabBar()
+{
+	for (size_t i = 0; i < tabs_.size(); i++)
+	{
+		delete tabs_[i];
+	}
+}
+
+void TabBar::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect((wzWidget *)tabBar_, rect);
+}
+
+void TabBar::draw()
+{
+	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)tabBar_);
+	SDL_SetRenderDrawColor(renderer_->get(), 112, 112, 112, 255);
+	SDL_RenderDrawRect(renderer_->get(), (SDL_Rect *)&rect);
+}
+
+void TabBar::addTab(const char *label)
+{
+	wzButton *tab = wz_tab_bar_add_tab(tabBar_);
+	tabs_.push_back(new TabButton(tab, label));
 }
 
 } // namespace wz

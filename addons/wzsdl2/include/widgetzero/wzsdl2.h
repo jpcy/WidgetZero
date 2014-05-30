@@ -24,6 +24,7 @@ SOFTWARE.
 #include <stdint.h>
 #include <memory>
 #include <string>
+#include <vector>
 #include <widgetzero/wz.h>
 #include "../../src/stb_truetype.h"
 
@@ -52,6 +53,8 @@ public:
 	SDL_Renderer *get();
 	std::string initialize(const char *fontFilename, float fontHeight);
 	void textPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
+
+	// width or height can be NULL.
 	void measureText(const char *text, int *width, int *height);
 
 private:
@@ -222,6 +225,33 @@ private:
 	static const int itemsMargin = 2;
 	static const int itemHeight = 18;
 	static const int itemLeftPadding = 4;
+};
+
+class TabButton : public Widget
+{
+public:
+	TabButton(wzButton *button, const char *label);
+	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
+	void draw();
+
+private:
+	wzButton *button_;
+	char label_[64];
+};
+
+class TabBar : public Widget
+{
+public:
+	TabBar(Widget *parent);
+	~TabBar();
+	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
+	void setRect(int x, int y, int w, int h);
+	void draw();
+	void addTab(const char *label);
+
+private:
+	wzTabBar *tabBar_;
+	std::vector<TabButton *> tabs_;
 };
 
 } // namespace wz

@@ -90,6 +90,26 @@ wzPosition wz_widget_get_position(const struct wzWidget *widget)
 	return pos;
 }
 
+void wz_widget_set_width(struct wzWidget *widget, int w)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.w = w;
+	wz_widget_set_rect(widget, rect);
+}
+
+void wz_widget_set_height(struct wzWidget *widget, int h)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.h = h;
+	wz_widget_set_rect(widget, rect);
+}
+
 void wz_widget_set_size_args(struct wzWidget *widget, int w, int h)
 {
 	wzSize size;
@@ -293,7 +313,7 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 			return temp;
 		}
 
-		temp = widget->parent;
+		temp = temp->parent;
 	}
 
 	return NULL;
