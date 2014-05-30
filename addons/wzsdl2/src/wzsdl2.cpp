@@ -217,6 +217,22 @@ static void DrawWidget(wzWidget *widget)
 	((Widget *)wz_widget_get_metadata(widget))->draw();
 }
 
+void Widget::setPosition(int x, int y)
+{
+	wz_widget_set_position_args(getWidget(), x, y);
+}
+
+void Widget::setRect(int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	wz_widget_set_rect(getWidget(), rect);
+}
+
 void Widget::clipReset()
 {
 	SDL_Rect rect;
@@ -377,17 +393,6 @@ Window::Window(Widget *parent, char *title)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-void Window::setRect(int x, int y, int w, int h)
-{
-	wzRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-
-	wz_widget_set_rect((wzWidget *)window_, rect);
-}
-
 void Window::draw()
 {
 	clipReset();
@@ -468,11 +473,6 @@ Button::Button(wzButton *button, const char *label)
 	wz_widget_set_draw_function(widget, DrawWidget);
 }
 
-void Button::setPosition(int x, int y)
-{
-	wz_widget_set_position_args((wzWidget *)button_, x, y);
-}
-
 wzRect Button::getRect()
 {
 	return wz_widget_get_absolute_rect((wzWidget *)button_);
@@ -543,11 +543,6 @@ Checkbox::Checkbox(Widget *parent, const char *label)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-void Checkbox::setPosition(int x, int y)
-{
-	wz_widget_set_position_args((wzWidget *)button_, x, y);
-}
-
 void Checkbox::draw()
 {
 	clipToParentWindow();
@@ -613,16 +608,6 @@ Combo::Combo(Widget *parent, const char **items, int nItems)
 	list_.reset(new List(wz_combo_get_list(combo_), items, nItems));
 }
 
-void Combo::setRect(int x, int y, int w, int h)
-{
-	wzRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect((wzWidget *)combo_, rect);
-}
-
 void Combo::draw()
 {
 	clipToParentWindow();
@@ -680,11 +665,6 @@ GroupBox::GroupBox(Widget *parent, const char *label)
 	wz_widget_set_size(widget, size);
 
 	wz_widget_add_child_widget(parent->getWidget(), widget);
-}
-
-void GroupBox::setPosition(int x, int y)
-{
-	wz_widget_set_position_args((wzWidget *)groupBox_, x, y);
 }
 
 void GroupBox::draw()
@@ -763,16 +743,6 @@ Scroller::Scroller(wzScroller *scroller)
 	wz_widget_set_size((wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 }
 
-void Scroller::setRect(int x, int y, int w, int h)
-{
-	wzRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect((wzWidget *)scroller_, rect);
-}
-
 void Scroller::draw()
 {
 	clipToParentWindow();
@@ -806,11 +776,6 @@ Label::Label(Widget *parent)
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_add_child_widget(parent->getWidget(), widget);
-}
-
-void Label::setPosition(int x, int y)
-{
-	wz_widget_set_position_args((wzWidget *)label_, x, y);
 }
 
 void Label::setText(const char *format, ...)
@@ -887,16 +852,6 @@ List::List(wzList *list, const char **items, int nItems)
 	scrollerSize.w = 16;
 	scrollerSize.h = 0;
 	wz_widget_set_size(scroller_->getWidget(), scrollerSize);
-}
-
-void List::setRect(int x, int y, int w, int h)
-{
-	wzRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect((wzWidget *)list_, rect);
 }
 
 void List::draw()
@@ -1024,16 +979,6 @@ TabBar::~TabBar()
 	{
 		delete tabs_[i];
 	}
-}
-
-void TabBar::setRect(int x, int y, int w, int h)
-{
-	wzRect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect((wzWidget *)tabBar_, rect);
 }
 
 void TabBar::draw()

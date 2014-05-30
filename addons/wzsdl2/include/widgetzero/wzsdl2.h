@@ -69,6 +69,8 @@ public:
 	virtual ~Widget() {}
 	virtual wzWidget *getWidget() = 0;
 	virtual void draw() = 0;
+	void setPosition(int x, int y);
+	void setRect(int x, int y, int w, int h);
 	
 	Renderer *getRenderer()
 	{
@@ -110,7 +112,6 @@ class Window : public Widget
 public:
 	Window(Widget *parent, char *title);
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
-	void setRect(int x, int y, int w, int h);
 	void draw();
 	
 private:
@@ -124,7 +125,6 @@ public:
 	Button(Widget *parent, const char *label);
 	Button(wzButton *button, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void setPosition(int x, int y);
 	wzRect getRect();
 	void draw();
 
@@ -138,7 +138,6 @@ class Checkbox : public Widget
 public:
 	Checkbox(Widget *parent, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void setPosition(int x, int y);
 	void draw();
 
 private:
@@ -154,7 +153,6 @@ class Combo : public Widget
 public:
 	Combo(Widget *parent, const char **items, int nItems);
 	virtual wzWidget *getWidget() { return (wzWidget *)combo_; }
-	void setRect(int x, int y, int w, int h);
 	void draw();
 
 private:
@@ -168,7 +166,6 @@ class GroupBox : public Widget
 public:
 	GroupBox(Widget *parent, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
-	void setPosition(int x, int y);
 	void draw();
 
 private:
@@ -182,7 +179,6 @@ public:
 	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller_; }
-	void setRect(int x, int y, int w, int h);
 	void draw();
 	int getValue() const;
 
@@ -197,7 +193,6 @@ class Label : public Widget
 public:
 	Label(Widget *parent);
 	virtual wzWidget *getWidget() { return (wzWidget *)label_; }
-	void setPosition(int x, int y);
 	void setText(const char *format, ...);
 	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
 	void draw();
@@ -214,7 +209,6 @@ public:
 	List(Widget *parent, const char **items, int nItems);
 	List(wzList *list, const char **items, int nItems);
 	virtual wzWidget *getWidget() { return (wzWidget *)list_; }
-	void setRect(int x, int y, int w, int h);
 	void draw();
 
 private:
@@ -245,7 +239,6 @@ public:
 	TabBar(Widget *parent);
 	~TabBar();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void setRect(int x, int y, int w, int h);
 	void draw();
 	void addTab(const char *label);
 
