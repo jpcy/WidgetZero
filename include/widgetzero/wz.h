@@ -205,6 +205,8 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 // Determine whether the widget is an descendant of a widget with the provided type.
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
 
+struct wzWidget *wz_widget_get_parent(struct wzWidget *widget);
+
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
 struct wzWindow *wz_window_create(struct wzDesktop *desktop);

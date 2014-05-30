@@ -293,6 +293,12 @@ bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
 	return false;
 }
 
+struct wzWidget *wz_widget_get_parent(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->parent;
+}
+
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 {
 	assert(widget);

@@ -924,8 +924,12 @@ TabButton::TabButton(wzButton *button, const char *label)
 
 void TabButton::draw()
 {
-	clipToParentWindow();
-	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)button_);
+	// Clip to the intersection of parent widget and parent window rects.
+	wzWidget *parent = wz_widget_get_parent((wzWidget *)button_);
+	wzRect rect = wz_widget_get_absolute_rect(parent);
+	clipToParentWindow(rect);
+
+	rect = wz_widget_get_absolute_rect((wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((wzWidget *)button_);
 	const bool set = wz_button_is_set(button_);
 
@@ -969,7 +973,6 @@ TabBar::TabBar(Widget *parent)
 	tabBar_ = wz_tab_bar_create(wz_widget_get_desktop(parent->getWidget()));
 
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-	wz_widget_set_draw_function((wzWidget *)tabBar_, DrawWidget);
 	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabBar_);
 }
 
@@ -983,9 +986,6 @@ TabBar::~TabBar()
 
 void TabBar::draw()
 {
-	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)tabBar_);
-	SDL_SetRenderDrawColor(renderer_->get(), 112, 112, 112, 255);
-	SDL_RenderDrawRect(renderer_->get(), (SDL_Rect *)&rect);
 }
 
 void TabBar::addTab(const char *label)
