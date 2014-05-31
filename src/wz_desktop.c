@@ -516,14 +516,15 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 		hoverWindow = true;
 	}
 
-	rect = wz_widget_get_absolute_rect(widget);
-
 	// Or the window itself.
 	widgetIsChildOfWindow = !window || (window && (widget->window == window || widget == (struct wzWidget *)window));
 
+	// Set widget hover.
 	oldHover = widget->hover;
+	rect = wz_widget_get_absolute_rect(widget);
 	widget->hover = widgetIsChildOfWindow && hoverWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
+	// Run callbacks if hover has changed.
 	if (!oldHover && widget->hover && widget->vtable.mouse_hover_on)
 	{
 		widget->vtable.mouse_hover_on(widget);
@@ -533,9 +534,14 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 		widget->vtable.mouse_hover_off(widget);
 	}
 
-	if (widgetIsChildOfWindow && widget->vtable.mouse_move)
+	// Run mouse move callback.
+	if (widget->vtable.mouse_move)
 	{
-		widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		// If the mouse is hovering over the widget, or if input is locked to the widget.
+		if (widget->hover || (widgetIsChildOfWindow && wz_arr_len(widget->desktop->lockInputWidgetStack) > 0 && widget == widget->desktop->lockInputWidgetStack[wz_arr_lastn(widget->desktop->lockInputWidgetStack)]))
+		{
+			widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		}
 	}
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
