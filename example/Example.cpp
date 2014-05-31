@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	list.setRect(400, 300, 150, 150);
 
 	wz::TabBar tabBar(&desktop);
-	tabBar.setRect(350, 500, 200, 20);
+	tabBar.setRect(350, 500, 300, 20);
 	tabBar.addTab("Tab 1");
 	tabBar.addTab("Another Tab");
 	tabBar.addTab("TabTabTab");
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 	childCombo.setRect(20, 240, 150, 20);
 
 	wz::Window childWindow2(&desktop, "Window #2");
-	childWindow2.setRect(650, 500, 200, 200);
+	childWindow2.setRect(800, 500, 200, 200);
 
 	uint32_t lastTime = SDL_GetTicks();
 	float accumulatedTime = 0;

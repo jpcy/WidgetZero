@@ -245,6 +245,8 @@ public:
 private:
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
+	std::auto_ptr<Button> decrementButton;
+	std::auto_ptr<Button> incrementButton;
 };
 
 } // namespace wz

@@ -974,6 +974,11 @@ TabBar::TabBar(Widget *parent)
 
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabBar_);
+
+	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
+	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
+	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
+	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
 }
 
 TabBar::~TabBar()

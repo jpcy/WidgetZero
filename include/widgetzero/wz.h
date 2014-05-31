@@ -301,6 +301,8 @@ void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEvent
 
 struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
 struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
+struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
+struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
 
 #ifdef __cplusplus
 } // extern "C"
