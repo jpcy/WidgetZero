@@ -360,3 +360,9 @@ bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
 
 	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
 }
+
+void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value)
+{
+	assert(widget);
+	widget->inputNotClippedToParent = !value;
+}

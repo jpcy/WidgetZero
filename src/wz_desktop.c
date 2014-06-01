@@ -531,6 +531,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 {
 	wzRect rect;
 	bool hoverWindow;
+	bool hoverParent;
 	bool widgetIsChildOfWindow;
 	bool oldHover;
 	int i;
@@ -568,13 +569,23 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 		hoverWindow = true;
 	}
 
+	// Determine whether the mouse is hovering over the widget's parent.
+	if (!widget->inputNotClippedToParent && widget->parent && widget->parent != (struct wzWidget *)widget->desktop && widget->parent != (struct wzWidget *)widget->window)
+	{
+		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(widget->parent));
+	}
+	else
+	{
+		hoverParent = true;
+	}
+
 	// Or the window itself.
 	widgetIsChildOfWindow = !window || (window && (widget->window == window || widget == (struct wzWidget *)window));
 
 	// Set widget hover.
 	oldHover = widget->hover;
 	rect = wz_widget_get_absolute_rect(widget);
-	widget->hover = widgetIsChildOfWindow && hoverWindow && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+	widget->hover = widgetIsChildOfWindow && hoverWindow && hoverParent && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	// Run callbacks if hover has changed.
 	if (!oldHover && widget->hover && widget->vtable.mouse_hover_on)

@@ -101,6 +101,9 @@ struct wzWidget
 	// Used internally to ignore siblings that overlap at the mouse cursor.
 	bool ignore;
 
+	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
+	bool inputNotClippedToParent;
+
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;
@@ -147,6 +150,8 @@ void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
 int wz_widget_get_draw_priority(const struct wzWidget *widget);
 
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
+
+void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 

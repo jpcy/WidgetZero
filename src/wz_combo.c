@@ -142,6 +142,7 @@ struct wzCombo *wz_combo_create(struct wzDesktop *desktop)
 	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
+	wz_widget_set_clip_input_to_parent((struct wzWidget *)combo->list, false);
 	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
 
 	return combo;
