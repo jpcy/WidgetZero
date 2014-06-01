@@ -94,7 +94,13 @@ struct wzWidget
 	wzRect rect;
 	void *metadata;
 	bool hover;
+
+	// Don't draw this widget.
 	bool hidden;
+
+	// Used internally to ignore siblings that overlap at the mouse cursor.
+	bool ignore;
+
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;

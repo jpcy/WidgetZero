@@ -491,6 +491,41 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
 }
 
+// Sets wzWidget.ignore
+static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int mouseX, int mouseY)
+{
+	int i, j;
+
+	assert(widget);
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		widget->children[i]->ignore = false;
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		for (j = 0; j < wz_arr_len(widget->children); j++)
+		{
+			wzRect intersection;
+
+			if (i == j)
+				continue;
+
+			// If the mouse cursor is in the intersection of the two widget rects.
+			if (wz_intersect_rects(widget->children[i]->rect, widget->children[j]->rect, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
+			{
+				// Ignore the one with lower draw priority.
+				if (widget->children[i]->drawPriority < widget->children[j]->drawPriority)
+				{
+					widget->children[i]->ignore = true;
+					break;
+				}
+			}
+		}
+	}
+}
+
 // If window is not NULL, only call mouse_move in widgets that are children of the window and the window itself.
 static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
@@ -504,6 +539,23 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 
 	if (widget->hidden)
 		return;
+
+	// Don't process mouse move if the widget is ignored.
+	if (widget->ignore)
+	{
+		if (widget->hover)
+		{
+			// Stop hovering.
+			widget->hover = false;
+
+			if (widget->vtable.mouse_hover_off)
+			{
+				widget->vtable.mouse_hover_off(widget);
+			}
+		}
+
+		return;
+	}
 
 	// Determine whether the mouse is hovering over the widget's parent window.
 	// Don't do this if the widget draw priority is higher than the highest possible window draw priority.
@@ -543,6 +595,8 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 			widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		}
 	}
+
+	wz_widget_ignore_overlapping_children(widget, mouseX, mouseY);
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{

@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 	list.setRect(400, 300, 150, 150);
 
 	wz::TabBar tabBar(&desktop);
-	tabBar.setRect(350, 500, 300, 20);
+	tabBar.setRect(350, 500, 200, 20);
 	tabBar.addTab("Tab 1");
 	tabBar.addTab("Another Tab");
 	tabBar.addTab("TabTabTab");
