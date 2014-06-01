@@ -135,7 +135,9 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop);
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
+// Also sets all ancestor widgets to the same draw priority.
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
+
 int wz_widget_get_draw_priority(const struct wzWidget *widget);
 
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
