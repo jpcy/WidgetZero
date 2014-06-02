@@ -57,8 +57,7 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 
 	// Show/hide the scroll buttons and set their rects.
 	wereScrollButtonsVisible = wz_widget_get_visible((struct wzWidget *)tabBar->decrementButton);
-	//showScrollButtons = totalTabWidth > tabBar->base.rect.w;
-	showScrollButtons = true;
+	showScrollButtons = totalTabWidth > tabBar->base.rect.w;
 
 	rect = tabBar->base.rect;
 	rect.w = wz_widget_get_size((struct wzWidget *)tabBar->decrementButton).w;
