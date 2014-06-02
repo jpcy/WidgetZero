@@ -512,6 +512,9 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 			if (i == j)
 				continue;
 
+			if (widget->children[j]->hidden)
+				continue;
+
 			// If the mouse cursor is in the intersection of the two widget rects.
 			if (wz_intersect_rects(widget->children[i]->rect, widget->children[j]->rect, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
