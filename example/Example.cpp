@@ -131,11 +131,14 @@ int main(int argc, char **argv)
 	wz::List list(&desktop, listData, 17);
 	list.setRect(400, 300, 150, 150);
 
-	wz::TabBar tabBar(&desktop);
-	tabBar.setRect(350, 500, 300, 20);
-	tabBar.addTab("Tab 1");
-	tabBar.addTab("Another Tab");
-	tabBar.addTab("TabTabTab");
+	wz::Tabbed tabbed(&desktop);
+	tabbed.setRect(350, 500, 300, 250);
+	tabbed.addTab("Tab 1");
+	wz::TabPage *secondTabPage = tabbed.addTab("Another Tab");
+	tabbed.addTab("TabTabTab");
+
+	wz::Button secondTabPageButton(secondTabPage, "Button Button Button");
+	secondTabPageButton.setPosition(10, 10);
 
 	wz::Combo combo(&desktop, listData, 17);
 	combo.setRect(800, 50, 150, 20);

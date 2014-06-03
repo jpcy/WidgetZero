@@ -35,6 +35,8 @@ struct wzTabBar
 	int scrollValue;
 	struct wzButton *decrementButton;
 	struct wzButton *incrementButton;
+
+	wzEventCallback *tab_changed_callbacks;
 };
 
 // Show the scroll buttons if they're required, hides them if they're not.
@@ -110,6 +112,17 @@ static void wz_tab_bar_set_scroll_value(struct wzTabBar *tabBar, int value)
 	}
 }
 
+static void wz_tab_bar_invoke_tab_changed(struct wzTabBar *tabBar)
+{
+	wzEvent e;
+
+	assert(tabBar);
+	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
+	e.tabBar.tabBar = tabBar;
+	e.tabBar.selectedTab = tabBar->selectedTab;
+	wz_invoke_event(e, tabBar->tab_changed_callbacks);
+}
+
 // Sets the tab bar (the button's parent) selected tab.
 static void wz_tab_bar_button_pressed(wzEvent e)
 {
@@ -129,12 +142,18 @@ static void wz_tab_bar_button_pressed(wzEvent e)
 			wz_button_set(tabBar->tabs[i], false);
 		}
 	}
+	
+	wz_tab_bar_invoke_tab_changed(tabBar);
 }
 
 static void wz_tab_bar_destroy(struct wzWidget *widget)
 {
+	struct wzTabBar *tabBar;
+
 	assert(widget);
-	wz_arr_free(((struct wzTabBar *)widget)->tabs);
+	tabBar = (struct wzTabBar *)widget;
+	wz_arr_free(tabBar->tabs);
+	wz_arr_free(tabBar->tab_changed_callbacks);
 }
 
 static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
@@ -234,6 +253,7 @@ struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar)
 	{
 		wz_button_set(button, true);
 		tabBar->selectedTab = button;
+		wz_tab_bar_invoke_tab_changed(tabBar);
 	}
 
 	wz_tab_bar_update_scroll_buttons(tabBar);
@@ -250,4 +270,16 @@ struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar)
 {
 	assert(tabBar);
 	return tabBar->incrementButton;
+}
+
+struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar)
+{
+	assert(tabBar);
+	return tabBar->selectedTab;
+}
+
+void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback)
+{
+	assert(tabBar);
+	wz_arr_push(tabBar->tab_changed_callbacks, callback);
 }

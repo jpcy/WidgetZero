@@ -191,6 +191,14 @@ wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 	rect.x += contentRect.x;
 	rect.y += contentRect.y;
 
+	// HACK: adjust for tab page rect.
+	if (widget->parent && widget->parent->type == WZ_TYPE_TAB_PAGE)
+	{
+		contentRect = wz_widget_get_absolute_rect(widget->parent);
+		rect.x += contentRect.x;
+		rect.y += contentRect.y;
+	}
+
 	return rect;
 }
 

@@ -237,16 +237,44 @@ class TabBar : public Widget
 {
 public:
 	TabBar(Widget *parent);
+	TabBar(wzTabBar *tabBar);
 	~TabBar();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
 	void draw();
 	void addTab(const char *label);
+	void addTab(wzButton *button, const char *label);
 
 private:
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
 	std::auto_ptr<Button> decrementButton;
 	std::auto_ptr<Button> incrementButton;
+};
+
+class TabPage : public Widget
+{
+public:
+	TabPage(wzWidget *widget);
+	virtual wzWidget *getWidget() { return widget_; }
+	void draw();
+
+private:
+	wzWidget *widget_;
+};
+
+class Tabbed : public Widget
+{
+public:
+	Tabbed(Widget *parent);
+	~Tabbed();
+	virtual wzWidget *getWidget() { return (wzWidget *)tabbed_; }
+	void draw();
+	TabPage *addTab(const char *label);
+
+private:
+	wzTabbed *tabbed_;
+	std::auto_ptr<TabBar> tabBar_;
+	std::vector<TabPage *> tabs_;
 };
 
 } // namespace wz

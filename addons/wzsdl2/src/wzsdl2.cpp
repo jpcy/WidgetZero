@@ -981,6 +981,21 @@ TabBar::TabBar(Widget *parent)
 	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
 }
 
+TabBar::TabBar(wzTabBar *tabBar)
+{
+	tabBar_ = tabBar;
+
+	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop((wzWidget *)tabBar));
+	renderer_ = desktop->getRenderer();
+
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
+
+	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
+	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
+	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
+	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
+}
+
 TabBar::~TabBar()
 {
 	for (size_t i = 0; i < tabs_.size(); i++)
@@ -997,6 +1012,71 @@ void TabBar::addTab(const char *label)
 {
 	wzButton *tab = wz_tab_bar_add_tab(tabBar_);
 	tabs_.push_back(new TabButton(tab, label));
+}
+
+void TabBar::addTab(wzButton *button, const char *label)
+{
+	tabs_.push_back(new TabButton(button, label));
+}
+
+//------------------------------------------------------------------------------
+
+TabPage::TabPage(wzWidget *widget)
+{
+	widget_ = widget;
+	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
+	renderer_ = desktop->getRenderer();
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget_, DrawWidget);
+}
+
+void TabPage::draw()
+{
+	clipReset();
+	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)widget_);
+
+	SDL_SetRenderDrawColor(renderer_->get(), 224, 224, 224, 255);
+	SDL_RenderFillRect(renderer_->get(), (SDL_Rect *)&rect);
+
+	SDL_SetRenderDrawColor(renderer_->get(), 112, 112, 112, 255);
+	SDL_RenderDrawRect(renderer_->get(), (SDL_Rect *)&rect);
+}
+
+//------------------------------------------------------------------------------
+
+Tabbed::Tabbed(Widget *parent)
+{
+	renderer_ = parent->getRenderer();
+	tabbed_ = wz_tabbed_create(wz_widget_get_desktop(parent->getWidget()));
+	wz_widget_set_metadata((wzWidget *)tabbed_, this);
+	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabbed_);
+	tabBar_.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed_)));
+	tabBar_->setRect(0, 0, 0, 20);
+}
+
+Tabbed::~Tabbed()
+{
+	for (size_t i = 0; i < tabs_.size(); i++)
+	{
+		delete tabs_[i];
+	}
+}
+
+void Tabbed::draw()
+{
+}
+
+TabPage *Tabbed::addTab(const char *label)
+{
+	wzButton *button;
+	wzWidget *widget;
+	wz_tabbed_add_tab(tabbed_, &button, &widget);
+	tabBar_->addTab(button, label);
+	
+	TabPage *tab = new TabPage(widget);
+	tabs_.push_back(tab);
+	
+	return tab;
 }
 
 } // namespace wz

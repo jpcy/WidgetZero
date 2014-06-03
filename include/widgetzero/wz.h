@@ -60,6 +60,8 @@ typedef enum
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
 	WZ_TYPE_TAB_BAR,
+	WZ_TYPE_TAB_PAGE,
+	WZ_TYPE_TABBED,
 	WZ_MAX_WIDGET_TYPES = 64
 }
 wzWidgetType;
@@ -94,7 +96,8 @@ typedef enum
 	WZ_EVENT_BUTTON_PRESSED,
 	WZ_EVENT_BUTTON_CLICKED,
 	WZ_EVENT_LIST_ITEM_SELECTED,
-	WZ_EVENT_SCROLLER_VALUE_CHANGED
+	WZ_EVENT_SCROLLER_VALUE_CHANGED,
+	WZ_EVENT_TAB_BAR_TAB_CHANGED
 }
 wzWidgetEventType;
 
@@ -129,12 +132,21 @@ typedef struct
 }
 wzScrollerEvent;
 
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzTabBar *tabBar;
+	struct wzButton *selectedTab;
+}
+wzTabBarEvent;
+
 typedef union
 {
 	wzEventBase base;
 	wzButtonEvent button;
 	wzListEvent list;
 	wzScrollerEvent scroller;
+	wzTabBarEvent tabBar;
 }
 wzEvent;
 
@@ -306,6 +318,12 @@ struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
 struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
+struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
+void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
+
+struct wzTabbed *wz_tabbed_create(struct wzDesktop *desktop);
+void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
+struct wzTabBar *wz_tabbed_get_tab_bar(struct wzTabbed *tabbed);
 
 #ifdef __cplusplus
 } // extern "C"
