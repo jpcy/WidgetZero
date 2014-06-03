@@ -170,6 +170,11 @@ static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 }
 
+static wzRect wz_tab_bar_get_children_clip_rect(struct wzWidget *widget)
+{
+	return wz_widget_get_absolute_rect(widget);
+}
+
 static void wz_tab_bar_decrement_button_clicked(wzEvent e)
 {
 	struct wzTabBar *tabBar;
@@ -202,6 +207,7 @@ struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop)
 	tabBar->base.desktop = desktop;
 	tabBar->base.vtable.destroy = wz_tab_bar_destroy;
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
+	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Create scroll buttons.
 	// Set the draw priority above default so the scroll buttons always overlap the tabs.
