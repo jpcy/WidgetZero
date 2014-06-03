@@ -110,6 +110,14 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 	}
 }
 
+static wzRect wz_combo_get_children_clip_rect(struct wzWidget *widget)
+{
+	// Don't clip children.
+	wzRect zero;
+	zero.x = zero.y = zero.w = zero.h = 0;
+	return zero;
+}
+
 static void wz_combo_list_item_selected(wzEvent e)
 {
 	struct wzCombo *combo;
@@ -137,6 +145,7 @@ struct wzCombo *wz_combo_create(struct wzDesktop *desktop)
 	combo->base.desktop = desktop;
 	combo->base.vtable.set_rect = wz_combo_set_rect;
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
+	combo->base.vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	combo->list = wz_list_create(desktop);
 	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);

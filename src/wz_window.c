@@ -364,6 +364,11 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	}
 }
 
+static wzRect wz_window_get_children_clip_rect(struct wzWidget *widget)
+{
+	return wz_window_get_content_rect((struct wzWindow *)widget);
+}
+
 struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 {
 	struct wzWindow *window;
@@ -377,6 +382,7 @@ struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
 	window->base.vtable.mouse_move = wz_window_mouse_move;
+	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	return window;
 }
 

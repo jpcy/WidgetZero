@@ -42,7 +42,7 @@ typedef struct
 {
 	void (*destroy)(struct wzWidget *widget);
 
-	void (*draw)(struct wzWidget *widget);
+	void (*draw)(struct wzWidget *widget, wzRect clip);
 
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
@@ -58,6 +58,9 @@ typedef struct
 	void (*mouse_hover_off)(struct wzWidget *widget);
 
 	void (*parent_window_move)(struct wzWidget *widget);
+
+	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
+	wzRect (*get_children_clip_rect)(struct wzWidget *widget);
 }
 wzWidgetVtable;
 

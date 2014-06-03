@@ -61,9 +61,10 @@ struct wzDesktop
 	wzDock windowDock;
 };
 
-static void wz_desktop_draw_dock_icon(struct wzWidget *widget)
+static void wz_desktop_draw_dock_icon(struct wzWidget *widget, wzRect clip)
 {
 	assert(widget);
+	clip = clip; // Never clipped, so just ignore that parameter.
 
 	if (widget->desktop->draw_dock_icon)
 	{
@@ -95,9 +96,10 @@ static void wz_desktop_update_dock_icon_positions(struct wzDesktop *desktop)
 	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_ICON_WEST], (int)(ds.w * percent), centerH);
 }
 
-static void wz_desktop_draw_dock_preview(struct wzWidget *widget)
+static void wz_desktop_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 {
 	assert(widget);
+	clip = clip; // Never clipped, so just ignore that parameter.
 
 	if (widget->desktop->draw_dock_preview)
 	{
@@ -722,10 +724,11 @@ static int wz_compare_draw_priorities(const void *a, const void *b)
 	return *(const int *)a - *(const int *)b;
 }
 
-static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priority, struct wzWidget *widget)
+static void wz_widget_draw_by_less_than_or_equals_priority_recursive(struct wzDesktop *desktop, int priority, struct wzWidget *widget, wzRect clip)
 {
 	int i;
 
+	assert(desktop);
 	assert(widget);
 
 	if (widget->hidden)
@@ -737,19 +740,30 @@ static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priorit
 
 	if (widget->drawPriority <= priority && widget->vtable.draw)
 	{
-		widget->vtable.draw(widget);
+		widget->vtable.draw(widget, clip);
+	}
+
+	// Update clip rect.
+	if (widget->vtable.get_children_clip_rect)
+	{
+		if (!wz_intersect_rects(clip, widget->vtable.get_children_clip_rect(widget), &clip))
+		{
+			// Reset to desktop clip rect.
+			clip = desktop->base.rect;
+		}
 	}
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i]);
+		wz_widget_draw_by_less_than_or_equals_priority_recursive(desktop, priority, widget->children[i], clip);
 	}
 }
 
-static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *widget)
+static void wz_widget_draw_by_priority_recursive(struct wzDesktop *desktop, int priority, struct wzWidget *widget, wzRect clip)
 {
 	int i;
 
+	assert(desktop);
 	assert(widget);
 
 	if (widget->hidden)
@@ -761,7 +775,17 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 
 	if (widget->drawPriority == priority && widget->vtable.draw)
 	{
-		widget->vtable.draw(widget);
+		widget->vtable.draw(widget, clip);
+	}
+
+	// Update clip rect.
+	if (widget->vtable.get_children_clip_rect)
+	{
+		if (!wz_intersect_rects(clip, widget->vtable.get_children_clip_rect(widget), &clip))
+		{
+			// Reset to desktop clip rect.
+			clip = desktop->base.rect;
+		}
 	}
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
@@ -769,11 +793,11 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 		// If the priority is a match, draw children with <= priority.
 		if (widget->drawPriority == priority)
 		{
-			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i]);
+			wz_widget_draw_by_less_than_or_equals_priority_recursive(desktop, priority, widget->children[i], clip);
 		}
 		else
 		{
-			wz_widget_draw_by_priority_recursive(priority, widget->children[i]);
+			wz_widget_draw_by_priority_recursive(desktop, priority, widget->children[i], clip);
 		}
 	}
 }
@@ -782,6 +806,7 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 {
 	int drawPriorities[WZ_DRAW_PRIORITY_MAX];
 	int nDrawPriorities;
+	wzRect clip;
 	int i;
 
 	assert(desktop);
@@ -794,9 +819,11 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	qsort(drawPriorities, nDrawPriorities, sizeof(int), wz_compare_draw_priorities);
 
 	// Do one draw pass per draw priority.
+	clip = desktop->base.rect;
+
 	for (i = 0; i < nDrawPriorities; i++)
 	{
-		wz_widget_draw_by_priority_recursive(drawPriorities[i], (struct wzWidget *)desktop);
+		wz_widget_draw_by_priority_recursive(desktop, drawPriorities[i], (struct wzWidget *)desktop, clip);
 	}
 }
 

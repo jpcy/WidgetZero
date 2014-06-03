@@ -221,7 +221,7 @@ void *wz_widget_get_metadata(struct wzWidget *widget)
 	return widget->metadata;
 }
 
-void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *))
+void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect))
 {
 	assert(widget);
 	widget->vtable.draw = draw;

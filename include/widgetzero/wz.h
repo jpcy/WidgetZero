@@ -214,7 +214,7 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible);
 bool wz_widget_get_visible(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
-void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *));
+void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 // Determine whether the widget is an descendant of a widget with the provided type.

@@ -212,9 +212,9 @@ void Renderer::measureText(const char *text, int *width, int *height)
 
 //------------------------------------------------------------------------------
 
-static void DrawWidget(wzWidget *widget)
+static void DrawWidget(wzWidget *widget, wzRect clip)
 {
-	((Widget *)wz_widget_get_metadata(widget))->draw();
+	((Widget *)wz_widget_get_metadata(widget))->draw(clip);
 }
 
 void Widget::setPosition(int x, int y)
@@ -240,56 +240,22 @@ void Widget::clipReset()
 	SDL_RenderSetClipRect(renderer_->get(), &rect);
 }
 
-void Widget::clipToParentWindow()
+void Widget::clipToRect(wzRect rect)
 {
-	// Don't clip combo widget children.
-	if (wz_widget_is_descendant_of(getWidget(), WZ_TYPE_COMBO))
-	{
-		clipReset();
-		return;
-	}
-
-	wzWindow *window = wz_widget_get_parent_window(getWidget());
-
-	if (window)
-	{
-		wzRect windowRect = wz_window_get_content_rect(window);
-		SDL_RenderSetClipRect(renderer_->get(), (const SDL_Rect *)&windowRect);
-	}
-	else
-	{
-		clipReset();
-	}
+	SDL_RenderSetClipRect(renderer_->get(), (const SDL_Rect *)&rect);
 }
 
-void Widget::clipToParentWindow(wzRect rect)
+bool Widget::clipToRectIntersection(wzRect rect1, wzRect rect2)
 {
-	// Don't clip combo widget children.
-	if (wz_widget_is_descendant_of(getWidget(), WZ_TYPE_COMBO))
+	wzRect intersection;
+
+	if (!SDL_IntersectRect((const SDL_Rect *)&rect1, (const SDL_Rect *)&rect2, (SDL_Rect *)&intersection))
 	{
-		clipReset();
-		return;
+		return false;
 	}
 
-	wzWindow *window = wz_widget_get_parent_window(getWidget());
-
-	if (window)
-	{
-		wzRect windowRect = wz_window_get_content_rect(window);
-		wzRect intersection;
-
-		if (!SDL_IntersectRect((const SDL_Rect *)&rect, (const SDL_Rect *)&windowRect, (SDL_Rect *)&intersection))
-		{
-			intersection = windowRect;
-		}
-
-		SDL_RenderSetClipRect(renderer_->get(), (const SDL_Rect *)&intersection);
-	}
-	else
-	{
-		// No window, just clip to the rect parameter.
-		SDL_RenderSetClipRect(renderer_->get(), (const SDL_Rect *)&rect);
-	}
+	SDL_RenderSetClipRect(renderer_->get(), (const SDL_Rect *)&intersection);
+	return true;
 }
 
 //------------------------------------------------------------------------------
@@ -393,7 +359,7 @@ Window::Window(Widget *parent, char *title)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-void Window::draw()
+void Window::draw(wzRect clip)
 {
 	clipReset();
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)window_);
@@ -429,7 +395,7 @@ void Window::draw()
 
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
-		clipToParentWindow(headerRect);
+		clipToRect(headerRect);
 		SDL_SetRenderDrawColor(renderer_->get(), 255, 232, 166, 255);
 		SDL_RenderFillRect(renderer_->get(), (SDL_Rect *)&headerRect);
 		renderer_->textPrintf(headerRect.x + 10, headerRect.y + headerRect.h / 2, Renderer::TA_LEFT, Renderer::TA_CENTER, 0, 0, 0, title_);
@@ -478,9 +444,10 @@ wzRect Button::getRect()
 	return wz_widget_get_absolute_rect((wzWidget *)button_);
 }
 
-void Button::draw()
+void Button::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
+
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((wzWidget *)button_);
 	const bool pressed = wz_button_is_pressed(button_);
@@ -543,9 +510,10 @@ Checkbox::Checkbox(Widget *parent, const char *label)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-void Checkbox::draw()
+void Checkbox::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
+
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((wzWidget *)button_);
 
@@ -589,12 +557,6 @@ void Checkbox::draw()
 
 //------------------------------------------------------------------------------
 
-static void ComboDraw(wzWidget *widget)
-{
-	Combo *combo = (Combo *)wz_widget_get_metadata(widget);
-	combo->draw();
-}
-
 Combo::Combo(Widget *parent, const char **items, int nItems)
 {
 	renderer_ = parent->getRenderer();
@@ -608,9 +570,10 @@ Combo::Combo(Widget *parent, const char **items, int nItems)
 	list_.reset(new List(wz_combo_get_list(combo_), items, nItems));
 }
 
-void Combo::draw()
+void Combo::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
+
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)combo_);
 	const bool hover = wz_widget_get_hover((wzWidget *)combo_);
 
@@ -667,12 +630,12 @@ GroupBox::GroupBox(Widget *parent, const char *label)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-void GroupBox::draw()
+void GroupBox::draw(wzRect clip)
 {
 	const int textLeftMargin = 20;
 	const int textBorderSpacing = 5;
 
-	clipToParentWindow();
+	clipToRect(clip);
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)groupBox_);
 	
 	// Background.
@@ -743,9 +706,9 @@ Scroller::Scroller(wzScroller *scroller)
 	wz_widget_set_size((wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
 }
 
-void Scroller::draw()
+void Scroller::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)scroller_);
 	
 	// Background.
@@ -797,9 +760,9 @@ void Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 	this->b = b;
 }
 
-void Label::draw()
+void Label::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)label_);
 	renderer_->textPrintf(rect.x, rect.y, Renderer::TA_LEFT, Renderer::TA_TOP, r, g, b, text_);
 }
@@ -854,9 +817,9 @@ List::List(wzList *list, const char **items, int nItems)
 	wz_widget_set_size(scroller_->getWidget(), scrollerSize);
 }
 
-void List::draw()
+void List::draw(wzRect clip)
 {
-	clipToParentWindow();
+	clipToRect(clip);
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)list_);
 	
 	// Background.
@@ -868,12 +831,14 @@ void List::draw()
 	SDL_RenderDrawRect(renderer_->get(), (SDL_Rect *)&rect);
 
 	// Items.
-	int nItems = wz_list_get_num_items(list_);
 	wzRect itemsRect = wz_list_get_absolute_items_rect(list_);
+
+	if (!clipToRectIntersection(clip, itemsRect))
+		return;
+
+	int nItems = wz_list_get_num_items(list_);
 	int scrollerValue = wz_scroller_get_value(wz_list_get_scroller(list_));
 	int y = itemsRect.y - (scrollerValue % itemHeight);
-
-	clipToParentWindow(itemsRect);
 
 	for (int i = wz_list_get_first_item(list_); i < nItems; i++)
 	{
@@ -922,14 +887,11 @@ TabButton::TabButton(wzButton *button, const char *label)
 	wz_widget_set_width((wzWidget *)button_, width);
 }
 
-void TabButton::draw()
+void TabButton::draw(wzRect clip)
 {
-	// Clip to the intersection of parent widget and parent window rects.
-	wzWidget *parent = wz_widget_get_parent((wzWidget *)button_);
-	wzRect rect = wz_widget_get_absolute_rect(parent);
-	clipToParentWindow(rect);
+	clipToRect(clip);
 
-	rect = wz_widget_get_absolute_rect((wzWidget *)button_);
+	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)button_);
 	const bool hover = wz_widget_get_hover((wzWidget *)button_);
 	const bool set = wz_button_is_set(button_);
 
@@ -1004,7 +966,7 @@ TabBar::~TabBar()
 	}
 }
 
-void TabBar::draw()
+void TabBar::draw(wzRect clip)
 {
 }
 
@@ -1030,9 +992,9 @@ TabPage::TabPage(wzWidget *widget)
 	wz_widget_set_draw_function(widget_, DrawWidget);
 }
 
-void TabPage::draw()
+void TabPage::draw(wzRect clip)
 {
-	clipReset();
+	clipToRect(clip);
 	wzRect rect = wz_widget_get_absolute_rect((wzWidget *)widget_);
 
 	SDL_SetRenderDrawColor(renderer_->get(), 224, 224, 224, 255);
@@ -1062,7 +1024,7 @@ Tabbed::~Tabbed()
 	}
 }
 
-void Tabbed::draw()
+void Tabbed::draw(wzRect clip)
 {
 }
 

@@ -68,7 +68,7 @@ class Widget
 public:
 	virtual ~Widget() {}
 	virtual wzWidget *getWidget() = 0;
-	virtual void draw() = 0;
+	virtual void draw(wzRect clip) {};
 	void setPosition(int x, int y);
 	void setRect(int x, int y, int w, int h);
 	
@@ -81,11 +81,8 @@ protected:
 	Renderer *renderer_;
 
 	void clipReset();
-	void clipToParentWindow();
-
-	// Clip to the intersection of the parent window content rect and the rect parameter.
-	// NOTE: SDL turns off clipping if the rect width and height are 0.
-	void clipToParentWindow(wzRect rect);
+	void clipToRect(wzRect rect);
+	bool clipToRectIntersection(wzRect rect1, wzRect rect2);
 };
 
 class Desktop : public Widget
@@ -112,7 +109,7 @@ class Window : public Widget
 public:
 	Window(Widget *parent, char *title);
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
-	void draw();
+	void draw(wzRect clip);
 	
 private:
 	wzWindow *window_;
@@ -126,7 +123,7 @@ public:
 	Button(wzButton *button, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	wzRect getRect();
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
@@ -138,7 +135,7 @@ class Checkbox : public Widget
 public:
 	Checkbox(Widget *parent, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
@@ -153,7 +150,7 @@ class Combo : public Widget
 public:
 	Combo(Widget *parent, const char **items, int nItems);
 	virtual wzWidget *getWidget() { return (wzWidget *)combo_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzCombo *combo_;
@@ -166,7 +163,7 @@ class GroupBox : public Widget
 public:
 	GroupBox(Widget *parent, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzGroupBox *groupBox_;
@@ -179,7 +176,7 @@ public:
 	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller_; }
-	void draw();
+	void draw(wzRect clip);
 	int getValue() const;
 
 private:
@@ -195,7 +192,7 @@ public:
 	virtual wzWidget *getWidget() { return (wzWidget *)label_; }
 	void setText(const char *format, ...);
 	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzLabel *label_;
@@ -209,7 +206,7 @@ public:
 	List(Widget *parent, const char **items, int nItems);
 	List(wzList *list, const char **items, int nItems);
 	virtual wzWidget *getWidget() { return (wzWidget *)list_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzList *list_;
@@ -226,7 +223,7 @@ class TabButton : public Widget
 public:
 	TabButton(wzButton *button, const char *label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
@@ -240,7 +237,7 @@ public:
 	TabBar(wzTabBar *tabBar);
 	~TabBar();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void draw();
+	void draw(wzRect clip);
 	void addTab(const char *label);
 	void addTab(wzButton *button, const char *label);
 
@@ -256,7 +253,7 @@ class TabPage : public Widget
 public:
 	TabPage(wzWidget *widget);
 	virtual wzWidget *getWidget() { return widget_; }
-	void draw();
+	void draw(wzRect clip);
 
 private:
 	wzWidget *widget_;
@@ -268,7 +265,7 @@ public:
 	Tabbed(Widget *parent);
 	~Tabbed();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed_; }
-	void draw();
+	void draw(wzRect clip);
 	TabPage *addTab(const char *label);
 
 private:
