@@ -171,33 +171,14 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget)
 
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 {
-	wzRect rect, contentRect;
+	wzRect rect;
+	wzPosition offset;
 
 	assert(widget);
 	rect = widget->rect;
-
-	// Adjust for desktop or window content rects.
-	memset(&contentRect, 0, sizeof(contentRect));
-
-	if (widget->window)
-	{
-		contentRect = wz_window_get_content_rect(widget->window);
-	}
-	else if (widget->type != WZ_TYPE_WINDOW)
-	{
-		contentRect = wz_desktop_get_content_rect(widget->desktop);		
-	}
-
-	rect.x += contentRect.x;
-	rect.y += contentRect.y;
-
-	// HACK: adjust for tab page rect.
-	if (widget->parent && widget->parent->type == WZ_TYPE_TAB_PAGE)
-	{
-		contentRect = wz_widget_get_absolute_rect(widget->parent);
-		rect.x += contentRect.x;
-		rect.y += contentRect.y;
-	}
+	offset = wz_widget_get_offset(widget);
+	rect.x += offset.x;
+	rect.y += offset.y;
 
 	return rect;
 }
@@ -311,6 +292,59 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->window;
+}
+
+wzPosition wz_widget_get_offset(const struct wzWidget *widget)
+{
+	wzPosition offset;
+	const struct wzWidget *ancestor;
+
+	assert(widget);
+
+	// Adjust for desktop or window content rects.
+	if (widget->window)
+	{
+		wzRect rect = wz_window_get_content_rect(widget->window);
+		offset.x = rect.x;
+		offset.y = rect.y;
+	}
+	else if (widget->type != WZ_TYPE_WINDOW)
+	{
+		wzRect rect = wz_desktop_get_content_rect(widget->desktop);		
+		offset.x = rect.x;
+		offset.y = rect.y;
+	}
+	else
+	{
+		offset.x = offset.y = 0;
+	}
+
+	// Adjust for any container widget ancestors.
+	ancestor = widget->parent;
+
+	for (;;)
+	{
+		// Stop when we hit the desktop or window.
+		if (ancestor == NULL || ancestor->type == WZ_TYPE_WINDOW || ancestor->type == WZ_TYPE_DESKTOP)
+			break;
+
+		if (wz_widget_is_container(ancestor))
+		{
+			wzPosition p = wz_widget_get_position(ancestor);
+			offset.x += p.x;
+			offset.y += p.y;
+		}
+
+		ancestor = ancestor->parent;
+	}
+
+	return offset;
+}
+
+bool wz_widget_is_container(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->isContainer;
 }
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)

@@ -104,6 +104,9 @@ struct wzWidget
 	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
 	bool inputNotClippedToParent;
 
+	// If true, the absolute positions of any widget ancestors are offset by this widgets position. See wz_widget_get_offset. Used by tabbed widget pages.
+	bool isContainer;
+
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;
@@ -141,6 +144,11 @@ void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *wi
 wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop);
 
 void wz_desktop_update_content_rect(struct wzDesktop *desktop);
+
+// Get the widget position offset based on window or desktop content rects, and the position of any container widget ancestors.
+wzPosition wz_widget_get_offset(const struct wzWidget *widget);
+
+bool wz_widget_is_container(const struct wzWidget *widget);
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 

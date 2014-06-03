@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 
 	wz::Tabbed tabbed(&desktop);
 	tabbed.setRect(350, 500, 300, 250);
-	tabbed.addTab("Tab 1");
+	wz::TabPage *firstTabPage = tabbed.addTab("Tab 1");
 	wz::TabPage *secondTabPage = tabbed.addTab("Another Tab");
 	tabbed.addTab("TabTabTab");
 
@@ -143,8 +143,8 @@ int main(int argc, char **argv)
 	wz::Combo combo(&desktop, listData, 17);
 	combo.setRect(800, 50, 150, 20);
 
-	wz::Combo combo2(&desktop, listData, 17);
-	combo2.setRect(20, 600, 150, 20);
+	wz::Combo combo2(firstTabPage, listData, 17);
+	combo2.setRect(50, 50, 150, 20);
 
 	wz::Window childWindow(&desktop, "Test Window");
 	childWindow.setRect(650, 100, 300, 300);

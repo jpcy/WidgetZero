@@ -334,22 +334,15 @@ wzRect wz_list_get_items_rect(const struct wzList *list)
 
 wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 {
-	wzRect rect = wz_list_get_items_rect(list);
-
-	// Adjust for window position.
-	if (list->base.window)
-	{
-		wzRect windowContentRect = wz_window_get_content_rect(list->base.window);
-		rect.x += windowContentRect.x;
-		rect.y += windowContentRect.y;
-	}
-	else
-	{
-		wzRect desktopContentRect = wz_desktop_get_content_rect(list->base.desktop);	
-		rect.x += desktopContentRect.x;
-		rect.y += desktopContentRect.y;
-	}
-
+	wzRect rect;
+	wzPosition offset;
+	
+	assert(list);
+	rect = wz_list_get_items_rect(list);
+	offset = wz_widget_get_offset((const struct wzWidget *)list);
+	rect.x += offset.x;
+	rect.y += offset.y;
+	
 	return rect;
 }
 
