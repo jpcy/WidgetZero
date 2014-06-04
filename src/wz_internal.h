@@ -82,13 +82,14 @@ enum
 
 typedef enum
 {
-	WZ_DOCK_NONE,
-	WZ_DOCK_NORTH,
-	WZ_DOCK_SOUTH,
-	WZ_DOCK_EAST,
-	WZ_DOCK_WEST
+	WZ_DOCK_POSITION_NONE = -1,
+	WZ_DOCK_POSITION_NORTH,
+	WZ_DOCK_POSITION_SOUTH,
+	WZ_DOCK_POSITION_EAST,
+	WZ_DOCK_POSITION_WEST,
+	WZ_NUM_DOCK_POSITIONS
 }
-wzDock;
+wzDockPosition;
 
 struct wzWidget
 {
@@ -148,7 +149,7 @@ wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop);
 
 void wz_desktop_update_content_rect(struct wzDesktop *desktop);
 
-wzDock wz_desktop_get_window_dock(struct wzDesktop *desktop, struct wzWindow *window);
+wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window);
 
 void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
 

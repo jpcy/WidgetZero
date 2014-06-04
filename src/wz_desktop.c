@@ -26,17 +26,6 @@ SOFTWARE.
 #include <assert.h>
 #include "wz_internal.h"
 
-// See also: wzDock
-typedef enum
-{
-	WZ_DOCK_POSITION_NORTH,
-	WZ_DOCK_POSITION_SOUTH,
-	WZ_DOCK_POSITION_EAST,
-	WZ_DOCK_POSITION_WEST,
-	WZ_NUM_DOCK_POSITIONS
-}
-wzDockPosition;
-
 struct wzDesktop
 {
 	struct wzWidget base;
@@ -207,30 +196,30 @@ static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 
 		if (widget->type == WZ_TYPE_WINDOW)
 		{
-			wzDock dock;
+			wzDockPosition dockPosition;
 			wzRect windowRect;
 			
-			dock = wz_desktop_get_window_dock(desktop, (struct wzWindow *)widget);
+			dockPosition = wz_desktop_get_window_dock_position(desktop, (struct wzWindow *)widget);
 
-			if (dock == WZ_DOCK_NONE)
+			if (dockPosition == WZ_DOCK_POSITION_NONE)
 				continue;
 
 			windowRect = wz_widget_get_rect(widget);
 
-			switch (dock)
+			switch (dockPosition)
 			{
-			case WZ_DOCK_NORTH:
+			case WZ_DOCK_POSITION_NORTH:
 				windowRect.w = desktop->base.rect.w;
 				break;
-			case WZ_DOCK_SOUTH:
+			case WZ_DOCK_POSITION_SOUTH:
 				windowRect.y = desktop->base.rect.h - windowRect.h;
 				windowRect.w = desktop->base.rect.w;
 				break;
-			case WZ_DOCK_EAST:
+			case WZ_DOCK_POSITION_EAST:
 				windowRect.x = desktop->base.rect.w - windowRect.w;
 				windowRect.h = desktop->base.rect.h;
 				break;
-			case WZ_DOCK_WEST:
+			case WZ_DOCK_POSITION_WEST:
 				windowRect.h = desktop->base.rect.h;
 				break;
 			}
@@ -926,29 +915,29 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 
 		if (widget->type == WZ_TYPE_WINDOW)
 		{
-			wzDock dock;
+			wzDockPosition dockPosition;
 			wzRect rect;
 			
-			dock = wz_desktop_get_window_dock(desktop, (struct wzWindow *)widget);
+			dockPosition = wz_desktop_get_window_dock_position(desktop, (struct wzWindow *)widget);
 
-			if (dock == WZ_DOCK_NONE)
+			if (dockPosition == WZ_DOCK_POSITION_NONE)
 				continue;
 
 			rect = wz_widget_get_rect(widget);
 
-			switch (dock)
+			switch (dockPosition)
 			{
-			case WZ_DOCK_NORTH:
+			case WZ_DOCK_POSITION_NORTH:
 				desktop->contentRect.y += rect.h;
 				desktop->contentRect.h -= rect.h;
 				break;
-			case WZ_DOCK_SOUTH:
+			case WZ_DOCK_POSITION_SOUTH:
 				desktop->contentRect.h -= rect.h;
 				break;
-			case WZ_DOCK_EAST:
+			case WZ_DOCK_POSITION_EAST:
 				desktop->contentRect.w -= rect.w;
 				break;
-			case WZ_DOCK_WEST:
+			case WZ_DOCK_POSITION_WEST:
 				desktop->contentRect.x += rect.w;
 				desktop->contentRect.w -= rect.w;
 				break;
@@ -957,7 +946,7 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 	}
 }
 
-wzDock wz_desktop_get_window_dock(struct wzDesktop *desktop, struct wzWindow *window)
+wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window)
 {
 	wzDockPosition i;
 	int j;
@@ -971,12 +960,12 @@ wzDock wz_desktop_get_window_dock(struct wzDesktop *desktop, struct wzWindow *wi
 		{
 			if (desktop->dockedWindows[i][j] == window)
 			{
-				return i + 1;
+				return i;
 			}
 		}
 	}
 
-	return WZ_DOCK_NONE;
+	return WZ_DOCK_POSITION_NONE;
 }
 
 void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window)
