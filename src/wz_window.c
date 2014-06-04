@@ -50,7 +50,6 @@ struct wzWindow
 	int headerHeight;
 	int borderSize;
 	wzWindowDrag drag;
-	wzDock dock;
 
 	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
 	wzPosition undockStartPosition;
@@ -59,7 +58,7 @@ struct wzWindow
 	wzRect resizeStartRect;
 
 	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
-	wzSize sizeWhenDocked;
+	wzSize sizeBeforeDocking;
 };
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
@@ -114,15 +113,20 @@ static void wz_window_calculate_border_rects(struct wzWindow *window, wzRect *re
 // borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
 static void wz_window_calculate_mouse_over_border_rects(struct wzWindow *window, int mouseX, int mouseY, wzRect *borderRects, bool *mouseOverBorderRects)
 {
+	wzDock dock;
+
+	assert(window);
+	dock = wz_desktop_get_window_dock(window->base.desktop, window);
+
 	// Take into account docking, e.g. north docked window can only be resized south.
-	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_SOUTH));
-	mouseOverBorderRects[WZ_COMPASS_NE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NE]) && window->dock == WZ_DOCK_NONE);
-	mouseOverBorderRects[WZ_COMPASS_E] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_E]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_WEST));
-	mouseOverBorderRects[WZ_COMPASS_SE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SE]) && window->dock == WZ_DOCK_NONE);
-	mouseOverBorderRects[WZ_COMPASS_S] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_S]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_NORTH));
-	mouseOverBorderRects[WZ_COMPASS_SW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SW]) && window->dock == WZ_DOCK_NONE);
-	mouseOverBorderRects[WZ_COMPASS_W] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_W]) && (window->dock == WZ_DOCK_NONE || window->dock == WZ_DOCK_EAST));
-	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && window->dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (dock == WZ_DOCK_NONE || dock == WZ_DOCK_SOUTH));
+	mouseOverBorderRects[WZ_COMPASS_NE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NE]) && dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_E] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_E]) && (dock == WZ_DOCK_NONE || dock == WZ_DOCK_WEST));
+	mouseOverBorderRects[WZ_COMPASS_SE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SE]) && dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_S] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_S]) && (dock == WZ_DOCK_NONE || dock == WZ_DOCK_NORTH));
+	mouseOverBorderRects[WZ_COMPASS_SW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SW]) && dock == WZ_DOCK_NONE);
+	mouseOverBorderRects[WZ_COMPASS_W] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_W]) && (dock == WZ_DOCK_NONE || dock == WZ_DOCK_EAST));
+	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && dock == WZ_DOCK_NONE);
 }
 
 static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -145,7 +149,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 			wz_desktop_push_lock_input_widget(widget->desktop, widget);
 
 			// Don't actually move the window yet if it's docked.
-			if (window->dock == WZ_DOCK_NONE)
+			if (wz_desktop_get_window_dock(window->base.desktop, window) == WZ_DOCK_NONE)
 			{
 				wz_desktop_set_moving_window(widget->desktop, window);
 			}
@@ -218,6 +222,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	struct wzWindow *window;
 	wzRect borderRects[WZ_NUM_COMPASS_POINTS];
 	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+	wzDock dock;
 	wzSize minimumWindowSize;
 	wzPosition resizeDelta;
 	int i;
@@ -247,7 +252,9 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	}
 
 	// Don't actually move the window yet if it's docked.
-	if (window->drag == WZ_DRAG_HEADER && window->dock != WZ_DOCK_NONE)
+	dock = wz_desktop_get_window_dock(widget->desktop, window);
+
+	if (window->drag == WZ_DRAG_HEADER && dock != WZ_DOCK_NONE)
 	{
 		wzPosition delta;
 		wzRect rect;
@@ -259,15 +266,15 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		if (sqrt(delta.x * delta.x + delta.y * delta.y) < WZ_WINDOW_UNDOCK_DISTANCE)
 			return;
 
-		window->dock = WZ_DOCK_NONE;
+		wz_desktop_undock_window(widget->desktop, window);
 		wz_desktop_set_moving_window(widget->desktop, window);
 
 		// Re-position and resize the window.
 		rect = wz_widget_get_rect(widget);
 		rect.x += delta.x;
 		rect.y += delta.y;
-		rect.w = WZ_MAX(200, window->sizeWhenDocked.w);
-		rect.h = WZ_MAX(200, window->sizeWhenDocked.h);
+		rect.w = WZ_MAX(200, window->sizeBeforeDocking.w);
+		rect.h = WZ_MAX(200, window->sizeBeforeDocking.h);
 
 		// If the mouse cursor would be outside the window, center the window on the mouse cursor.
 		if (mouseX < rect.x + window->borderSize || mouseX > rect.x + rect.w - window->borderSize)
@@ -352,7 +359,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	}
 
 	// Resizing a docked window: update the desktop content rect.
-	if (window->dock != WZ_DOCK_NONE)
+	if (dock != WZ_DOCK_NONE)
 	{
 		wz_desktop_update_content_rect(widget->desktop);
 	}
@@ -435,22 +442,10 @@ wzRect wz_window_get_content_rect(struct wzWindow *window)
 	return rect;
 }
 
-void wz_window_set_dock(struct wzWindow *window, wzDock dock)
+// Save the window size before docking so it can be restored if the window is undocked later.
+void wz_window_dock(struct wzWindow *window)
 {
 	assert(window);
-	window->dock = dock;
-
-	if (dock != WZ_DOCK_NONE)
-	{
-		window->sizeWhenDocked.w = window->base.rect.w;
-		window->sizeWhenDocked.h = window->base.rect.h;
-	}
-
-	wz_desktop_update_content_rect(window->base.desktop);
-}
-
-wzDock wz_window_get_dock(struct wzWindow *window)
-{
-	assert(window);
-	return window->dock;
+	window->sizeBeforeDocking.w = window->base.rect.w;
+	window->sizeBeforeDocking.h = window->base.rect.h;
 }

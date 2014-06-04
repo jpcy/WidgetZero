@@ -148,6 +148,10 @@ wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop);
 
 void wz_desktop_update_content_rect(struct wzDesktop *desktop);
 
+wzDock wz_desktop_get_window_dock(struct wzDesktop *desktop, struct wzWindow *window);
+
+void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
+
 // Get the widget position offset based on window or desktop content rects, and the position of any container widget ancestors.
 wzPosition wz_widget_get_offset(const struct wzWidget *widget);
 
@@ -166,8 +170,8 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
-void wz_window_set_dock(struct wzWindow *window, wzDock dock);
-wzDock wz_window_get_dock(struct wzWindow *window);
+// Tell the window it's being docked.
+void wz_window_dock(struct wzWindow *window);
 
 //////////////////////////////////////////////////////////////////////////////
 //
