@@ -358,9 +358,13 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		return; // Not dragging, don't call wz_desktop_update_content_rect or parent_window_move.
 	}
 
-	// Resizing a docked window: update the desktop content rect.
+	// Resizing a docked window: 
 	if (wz_desktop_get_window_dock_position(widget->desktop, window) != WZ_DOCK_POSITION_NONE)
 	{
+		// Tell the desktop so it can resize other windows docked at the same position too.
+		wz_desktop_update_docked_window_rect(widget->desktop, window);
+
+		// Update the desktop content rect.
 		wz_desktop_update_content_rect(widget->desktop);
 	}
 
