@@ -58,6 +58,163 @@ struct wzDesktop
 	wzDockPosition windowDockPosition;
 };
 
+/*
+================================================================================
+
+MISC. UTILITY FUNCTIONS
+
+================================================================================
+*/
+
+// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
+static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
+{
+	struct wzWindow *result;
+	int drawPriority;
+	int i;
+
+	assert(desktop);
+	result = NULL;
+	drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
+
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
+	{
+		struct wzWidget *widget = desktop->base.children[i];
+
+		if (widget->type == WZ_TYPE_WINDOW && wz_widget_get_visible(widget) && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && widget->drawPriority >= drawPriority)
+		{
+			drawPriority = widget->drawPriority;
+			result = (struct wzWindow *)widget;
+		}
+	}
+
+	return result;
+}
+
+/*
+================================================================================
+
+DOCKING
+
+================================================================================
+*/
+
+static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *window)
+{
+	int i;
+
+	assert(desktop);
+	assert(window);
+
+	// Hide any other windows docked at the same position.
+	for (i = 0; i < wz_arr_len(desktop->dockedWindows[desktop->windowDockPosition]); i++)
+	{
+		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[desktop->windowDockPosition][i], false);
+	}
+
+	// Dock the window.
+	wz_arr_push(desktop->dockedWindows[desktop->windowDockPosition], window);
+
+	// Inform the window it is being docked.
+	wz_window_dock(window);
+
+	// Resize the window to match the dock preview.
+	wz_widget_set_rect((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
+
+	// Docked windows affect the desktop content rect, so update it.
+	wz_desktop_update_content_rect(desktop);
+}
+
+// The docked window "window" has been resized, update the rects of other windows docked at the same position.
+void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window)
+{
+	wzRect rect;
+	wzDockPosition i;
+	int j, k;
+
+	assert(desktop);
+	assert(window);
+	rect = wz_widget_get_rect((const struct wzWidget *)window);
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
+		{
+			if (desktop->dockedWindows[i][j] == window)
+			{
+				for (k = 0; k < wz_arr_len(desktop->dockedWindows[i]); k++)
+				{
+					if (j == k)
+						continue;
+
+					wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][k], rect);
+				}
+
+				return;
+			}
+		}
+	}
+}
+
+wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window)
+{
+	wzDockPosition i;
+	int j;
+
+	assert(desktop);
+	assert(window);
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
+		{
+			if (desktop->dockedWindows[i][j] == window)
+			{
+				return i;
+			}
+		}
+	}
+
+	return WZ_DOCK_POSITION_NONE;
+}
+
+void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window)
+{
+	wzDockPosition i;
+	int j;
+
+	assert(desktop);
+	assert(window);
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
+		{
+			if (desktop->dockedWindows[i][j] == window)
+			{
+				const bool visible = wz_widget_get_visible((const struct wzWidget *)window);
+				wz_arr_delete(desktop->dockedWindows[i], j);
+
+				// If there are other windows docked at this position, make sure one is visible after removing this window.
+				if (visible && wz_arr_len(desktop->dockedWindows[i]) > 0)
+				{
+					wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[i][0], true);
+				}
+
+				return;
+			}
+		}
+	}
+}
+
+/*
+================================================================================
+
+DOCK ICON
+
+================================================================================
+*/
+
 static void wz_desktop_draw_dock_icon(struct wzWidget *widget, wzRect clip)
 {
 	assert(widget);
@@ -92,6 +249,46 @@ static void wz_desktop_update_dock_icon_positions(struct wzDesktop *desktop)
 	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_EAST], (int)(ds.w * (1.0f - percent) - dis.h), centerH);
 	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_WEST], (int)(ds.w * percent), centerH);
 }
+
+void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata)
+{
+	int i;
+
+	assert(desktop);
+	desktop->draw_dock_icon = callback;
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		wz_widget_set_metadata((struct wzWidget *)desktop->dockIcons[i], metadata);
+	}
+}
+
+void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size)
+{
+	wz_desktop_set_dock_icon_size_args(desktop, size.w, size.h);
+}
+
+void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
+{
+	int i;
+
+	assert(desktop);
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		wz_widget_set_size_args((struct wzWidget *)desktop->dockIcons[i], w, h);
+	}
+
+	wz_desktop_update_dock_icon_positions(desktop);
+}
+
+/*
+================================================================================
+
+DOCK PREVIEW
+
+================================================================================
+*/
 
 static void wz_desktop_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 {
@@ -161,7 +358,7 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDock
 	}
 }
 
-static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop, int mouseX, int mouseY)
+static void wz_desktop_update_dock_preview_visible(struct wzDesktop *desktop, int mouseX, int mouseY)
 {
 	wzDockPosition i;
 	bool showDockPreview = false;
@@ -187,115 +384,6 @@ static void wz_desktop_update_desktop_preview_visible(struct wzDesktop *desktop,
 	wz_widget_set_visible((struct wzWidget *)desktop->dockPreview, showDockPreview);
 }
 
-static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
-{
-	struct wzDesktop *desktop;
-	int i;
-
-	assert(widget);
-	desktop = (struct wzDesktop *)widget;
-	desktop->base.rect.w = rect.w;
-	desktop->base.rect.h = rect.h;
-	wz_desktop_update_dock_icon_positions(desktop);
-
-	// Move docked windows.
-	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
-	{
-		struct wzWidget *widget = desktop->base.children[i];
-
-		if (widget->type == WZ_TYPE_WINDOW)
-		{
-			wzDockPosition dockPosition;
-			wzRect windowRect;
-			
-			dockPosition = wz_desktop_get_window_dock_position(desktop, (struct wzWindow *)widget);
-
-			if (dockPosition == WZ_DOCK_POSITION_NONE)
-				continue;
-
-			windowRect = wz_widget_get_rect(widget);
-
-			switch (dockPosition)
-			{
-			case WZ_DOCK_POSITION_NORTH:
-				windowRect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_POSITION_SOUTH:
-				windowRect.y = desktop->base.rect.h - windowRect.h;
-				windowRect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_POSITION_EAST:
-				windowRect.x = desktop->base.rect.w - windowRect.w;
-				windowRect.h = desktop->base.rect.h;
-				break;
-			case WZ_DOCK_POSITION_WEST:
-				windowRect.h = desktop->base.rect.h;
-				break;
-			}
-
-			wz_widget_set_rect(widget, windowRect);
-		}
-	}
-
-	wz_desktop_update_content_rect(desktop);
-}
-
-struct wzDesktop *wz_desktop_create()
-{
-	struct wzDesktop *desktop;
-	int i;
-	struct wzWidget *widget;
-
-	desktop = (struct wzDesktop *)malloc(sizeof(struct wzDesktop));
-	memset(desktop, 0, sizeof(struct wzDesktop));
-	desktop->base.type = WZ_TYPE_DESKTOP;
-	desktop->base.desktop = desktop;
-	desktop->base.vtable.set_rect = wz_desktop_set_rect;
-
-	// Create dock icon widgets.
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		desktop->dockIcons[i] = wz_label_create(desktop);
-		widget = (struct wzWidget *)desktop->dockIcons[i];
-		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
-		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
-		wz_widget_set_visible(widget, false);
-		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
-	}
-
-	wz_desktop_set_dock_icon_size_args(desktop, 48, 48);
-	wz_desktop_update_dock_icon_positions(desktop);
-
-	// Create dock preview widget.
-	desktop->dockPreview = wz_label_create(desktop);
-	widget = (struct wzWidget *)desktop->dockPreview;
-	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
-	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
-	wz_widget_set_visible(widget, false);
-	wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
-
-	return desktop;
-}
-
-void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback)
-{
-	assert(desktop);
-	desktop->handle_event = callback;
-}
-
-void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata)
-{
-	int i;
-
-	assert(desktop);
-	desktop->draw_dock_icon = callback;
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		wz_widget_set_metadata((struct wzWidget *)desktop->dockIcons[i], metadata);
-	}
-}
-
 void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata)
 {
 	assert(desktop);
@@ -303,49 +391,13 @@ void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesk
 	wz_widget_set_metadata((struct wzWidget *)desktop->dockPreview, metadata);
 }
 
-void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size)
-{
-	wz_desktop_set_dock_icon_size_args(desktop, size.w, size.h);
-}
+/*
+================================================================================
 
-void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
-{
-	int i;
+DRAW PRIORITY
 
-	assert(desktop);
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		wz_widget_set_size_args((struct wzWidget *)desktop->dockIcons[i], w, h);
-	}
-
-	wz_desktop_update_dock_icon_positions(desktop);
-}
-
-// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
-static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, int mouseX, int mouseY)
-{
-	struct wzWindow *result;
-	int drawPriority;
-	int i;
-
-	assert(desktop);
-	result = NULL;
-	drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
-
-	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
-	{
-		struct wzWidget *widget = desktop->base.children[i];
-
-		if (widget->type == WZ_TYPE_WINDOW && wz_widget_get_visible(widget) && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && widget->drawPriority >= drawPriority)
-		{
-			drawPriority = widget->drawPriority;
-			result = (struct wzWindow *)widget;
-		}
-	}
-
-	return result;
-}
+================================================================================
+*/
 
 static int wz_compare_widget_draw_priorities(const void *a, const void *b)
 {
@@ -390,6 +442,61 @@ static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, 
 		((struct wzWidget *)top)->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START + i;
 	}
 }
+
+static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget)
+{
+	int i;
+
+	assert(widget);
+
+	if (widget->hidden)
+		return;
+
+	// Don't include the widget if it's outside its parent window.
+	if (!wz_widget_overlaps_parent_window(widget))
+		return;
+
+	// Add the draw priority if it doesn't exist.
+	for (i = 0; i < *nDrawPriorities; i++)
+	{
+		if (drawPriorities[i] == widget->drawPriority)
+			break;
+	}
+
+	if (i == *nDrawPriorities)
+	{
+		drawPriorities[*nDrawPriorities] = widget->drawPriority;
+		(*nDrawPriorities)++;
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, widget->children[i]);
+	}
+}
+
+static int wz_compare_draw_priorities(const void *a, const void *b)
+{
+	return *(const int *)a - *(const int *)b;
+}
+
+static bool wz_draw_priority_less_than_or_equals(int widgetDrawPriority, int drawPriority)
+{
+	return widgetDrawPriority <= drawPriority;
+}
+
+static bool wz_draw_priority_equals(int widgetDrawPriority, int drawPriority)
+{
+	return widgetDrawPriority == drawPriority;
+}
+
+/*
+================================================================================
+
+MOUSE BUTTON DOWN
+
+================================================================================
+*/
 
 static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
@@ -440,8 +547,16 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 	wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
 
 	// Need a special case for dock icons.
-	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
+	wz_desktop_update_dock_preview_visible(desktop, mouseX, mouseY);
 }
+
+/*
+================================================================================
+
+MOUSE BUTTON UP
+
+================================================================================
+*/
 
 static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
@@ -461,32 +576,6 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 	{
 		wz_widget_mouse_button_up_recursive(widget->children[i], mouseButton, mouseX, mouseY);
 	}
-}
-
-static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *window)
-{
-	int i;
-
-	assert(desktop);
-	assert(window);
-
-	// Hide any other windows docked at the same position.
-	for (i = 0; i < wz_arr_len(desktop->dockedWindows[desktop->windowDockPosition]); i++)
-	{
-		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[desktop->windowDockPosition][i], false);
-	}
-
-	// Dock the window.
-	wz_arr_push(desktop->dockedWindows[desktop->windowDockPosition], window);
-
-	// Inform the window it is being docked.
-	wz_window_dock(window);
-
-	// Resize the window to match the dock preview.
-	wz_widget_set_rect((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
-
-	// Docked windows affect the desktop content rect, so update it.
-	wz_desktop_update_content_rect(desktop);
 }
 
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY)
@@ -555,6 +644,14 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dock][i], true);
 	}
 }
+
+/*
+================================================================================
+
+MOUSE MOVE
+
+================================================================================
+*/
 
 // Sets wzWidget.ignore
 static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int mouseX, int mouseY)
@@ -691,7 +788,7 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	desktop->cursor = WZ_CURSOR_DEFAULT;
 
 	// Need a special case for dock icons.
-	wz_desktop_update_desktop_preview_visible(desktop, mouseX, mouseY);
+	wz_desktop_update_dock_preview_visible(desktop, mouseX, mouseY);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -703,6 +800,14 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 	wz_widget_mouse_move_recursive(desktop->lockInputWindow, (struct wzWidget *)desktop, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
+
+/*
+================================================================================
+
+MOUSE WHEEL MOVE
+
+================================================================================
+*/
 
 static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x, int y)
 {
@@ -750,52 +855,13 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 	wz_widget_mouse_wheel_move_recursive(widget, x, y);
 }
 
-static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget)
-{
-	int i;
+/*
+================================================================================
 
-	assert(widget);
+DRAWING
 
-	if (widget->hidden)
-		return;
-
-	// Don't include the widget if it's outside its parent window.
-	if (!wz_widget_overlaps_parent_window(widget))
-		return;
-
-	// Add the draw priority if it doesn't exist.
-	for (i = 0; i < *nDrawPriorities; i++)
-	{
-		if (drawPriorities[i] == widget->drawPriority)
-			break;
-	}
-
-	if (i == *nDrawPriorities)
-	{
-		drawPriorities[*nDrawPriorities] = widget->drawPriority;
-		(*nDrawPriorities)++;
-	}
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, widget->children[i]);
-	}
-}
-
-static int wz_compare_draw_priorities(const void *a, const void *b)
-{
-	return *(const int *)a - *(const int *)b;
-}
-
-static bool wz_draw_priority_less_than_or_equals(int widgetDrawPriority, int drawPriority)
-{
-	return widgetDrawPriority <= drawPriority;
-}
-
-static bool wz_draw_priority_equals(int widgetDrawPriority, int drawPriority)
-{
-	return widgetDrawPriority == drawPriority;
-}
+================================================================================
+*/
 
 static bool wz_widget_draw_internal(struct wzDesktop *desktop, int priority, bool (*draw_priority_compare)(int, int), struct wzWidget *widget, wzRect *clip)
 {
@@ -892,6 +958,110 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	{
 		wz_widget_draw_by_priority_recursive(desktop, drawPriorities[i], (struct wzWidget *)desktop, clip);
 	}
+}
+
+/*
+================================================================================
+
+MISC.
+
+================================================================================
+*/
+
+static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	struct wzDesktop *desktop;
+	int i;
+
+	assert(widget);
+	desktop = (struct wzDesktop *)widget;
+	desktop->base.rect.w = rect.w;
+	desktop->base.rect.h = rect.h;
+	wz_desktop_update_dock_icon_positions(desktop);
+
+	// Move docked windows.
+	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
+	{
+		struct wzWidget *widget = desktop->base.children[i];
+
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			wzDockPosition dockPosition;
+			wzRect windowRect;
+			
+			dockPosition = wz_desktop_get_window_dock_position(desktop, (struct wzWindow *)widget);
+
+			if (dockPosition == WZ_DOCK_POSITION_NONE)
+				continue;
+
+			windowRect = wz_widget_get_rect(widget);
+
+			switch (dockPosition)
+			{
+			case WZ_DOCK_POSITION_NORTH:
+				windowRect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_POSITION_SOUTH:
+				windowRect.y = desktop->base.rect.h - windowRect.h;
+				windowRect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_POSITION_EAST:
+				windowRect.x = desktop->base.rect.w - windowRect.w;
+				windowRect.h = desktop->base.rect.h;
+				break;
+			case WZ_DOCK_POSITION_WEST:
+				windowRect.h = desktop->base.rect.h;
+				break;
+			}
+
+			wz_widget_set_rect(widget, windowRect);
+		}
+	}
+
+	wz_desktop_update_content_rect(desktop);
+}
+
+struct wzDesktop *wz_desktop_create()
+{
+	struct wzDesktop *desktop;
+	int i;
+	struct wzWidget *widget;
+
+	desktop = (struct wzDesktop *)malloc(sizeof(struct wzDesktop));
+	memset(desktop, 0, sizeof(struct wzDesktop));
+	desktop->base.type = WZ_TYPE_DESKTOP;
+	desktop->base.desktop = desktop;
+	desktop->base.vtable.set_rect = wz_desktop_set_rect;
+
+	// Create dock icon widgets.
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		desktop->dockIcons[i] = wz_label_create(desktop);
+		widget = (struct wzWidget *)desktop->dockIcons[i];
+		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
+		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
+		wz_widget_set_visible(widget, false);
+		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+	}
+
+	wz_desktop_set_dock_icon_size_args(desktop, 48, 48);
+	wz_desktop_update_dock_icon_positions(desktop);
+
+	// Create dock preview widget.
+	desktop->dockPreview = wz_label_create(desktop);
+	widget = (struct wzWidget *)desktop->dockPreview;
+	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
+	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
+	wz_widget_set_visible(widget, false);
+	wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+
+	return desktop;
+}
+
+void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback)
+{
+	assert(desktop);
+	desktop->handle_event = callback;
 }
 
 wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop)
@@ -992,88 +1162,6 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 			desktop->contentRect.x += rect.w;
 			desktop->contentRect.w -= rect.w;
 			break;
-		}
-	}
-}
-
-// The docked window "window" has been resized, update the rects of other windows docked at the same position.
-void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window)
-{
-	wzRect rect;
-	wzDockPosition i;
-	int j, k;
-
-	assert(desktop);
-	assert(window);
-	rect = wz_widget_get_rect((const struct wzWidget *)window);
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
-		{
-			if (desktop->dockedWindows[i][j] == window)
-			{
-				for (k = 0; k < wz_arr_len(desktop->dockedWindows[i]); k++)
-				{
-					if (j == k)
-						continue;
-
-					wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][k], rect);
-				}
-
-				return;
-			}
-		}
-	}
-}
-
-wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window)
-{
-	wzDockPosition i;
-	int j;
-
-	assert(desktop);
-	assert(window);
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
-		{
-			if (desktop->dockedWindows[i][j] == window)
-			{
-				return i;
-			}
-		}
-	}
-
-	return WZ_DOCK_POSITION_NONE;
-}
-
-void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window)
-{
-	wzDockPosition i;
-	int j;
-
-	assert(desktop);
-	assert(window);
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
-		{
-			if (desktop->dockedWindows[i][j] == window)
-			{
-				const bool visible = wz_widget_get_visible((const struct wzWidget *)window);
-				wz_arr_delete(desktop->dockedWindows[i], j);
-
-				// If there are other windows docked at this position, make sure one is visible after removing this window.
-				if (visible && wz_arr_len(desktop->dockedWindows[i]) > 0)
-				{
-					wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[i][0], true);
-				}
-
-				return;
-			}
 		}
 	}
 }
