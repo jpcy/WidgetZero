@@ -26,7 +26,8 @@ SOFTWARE.
 #include <stdint.h>
 #include <memory>
 #include <SDL.h>
-#include <widgetzero/wzsdl2.h>
+#include <widgetzero/wz_cpp.h>
+#include <widgetzero/wz_sdl2.h>
 
 static const float frameTime = 1000 / 60.0f;
 
@@ -67,18 +68,17 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
-	// Create wzsdl2 objects.
-	wz::Renderer wzRenderer(renderer);
+	// Create the wzsdl2 renderer.
+	wzRenderer *wzRenderer = wzgl_create_renderer(renderer, "../example/data/DejaVuSans.ttf", 16.0f);
 
-	std::string result = wzRenderer.initialize("../example/data/DejaVuSans.ttf", 16.0f);
-
-	if (!result.empty())
+	if (!wzRenderer)
 	{
-		ShowError(result.c_str());
+		ShowError(wzgl_get_error());
 		return 1;
 	}
 
-	wz::Desktop desktop(&wzRenderer);
+	// Create wzcpp objects.
+	wz::Desktop desktop(wzRenderer);
 	int windowWidth, windowHeight;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 	desktop.setSize(windowWidth, windowHeight);
@@ -220,5 +220,6 @@ int main(int argc, char **argv)
 		}
 	}
 
+	wzgl_destroy_renderer(wzRenderer);
 	return 0;
 }

@@ -21,45 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#pragma once
+
 #include <stdint.h>
 #include <memory>
 #include <string>
 #include <vector>
 #include <widgetzero/wz.h>
-#include "../../src/stb_truetype.h"
-
-struct SDL_Renderer;
+#include <widgetzero/wz_renderer.h>
 
 namespace wz {
-
-struct RendererPrivate;
-
-class Renderer
-{
-public:
-	typedef enum
-	{
-		TA_NONE = 0,
-		TA_LEFT = 1,
-		TA_TOP = 1,
-		TA_CENTER = 2,
-		TA_RIGHT = 3,
-		TA_BOTTOM = 3
-	}
-	TextAlignment;
-
-	Renderer(SDL_Renderer *renderer);
-	~Renderer();
-	SDL_Renderer *get();
-	std::string initialize(const char *fontFilename, float fontHeight);
-	void textPrintf(int x, int y, TextAlignment halign, TextAlignment valign, uint8_t r, uint8_t g, uint8_t b, const char *format, ...);
-
-	// width or height can be NULL.
-	void measureText(const char *text, int *width, int *height);
-
-private:
-	RendererPrivate *p;
-};
 
 class List;
 
@@ -72,23 +43,19 @@ public:
 	void setPosition(int x, int y);
 	void setRect(int x, int y, int w, int h);
 	
-	Renderer *getRenderer()
+	wzRenderer *getRenderer()
 	{
 		return renderer_;
 	}
 
 protected:
-	Renderer *renderer_;
-
-	void clipReset();
-	void clipToRect(wzRect rect);
-	bool clipToRectIntersection(wzRect rect1, wzRect rect2);
+	wzRenderer *renderer_;
 };
 
 class Desktop : public Widget
 {
 public:
-	Desktop(Renderer *renderer);
+	Desktop(wzRenderer *renderer);
 	~Desktop();
 	virtual wzWidget *getWidget() { return (wzWidget *)desktop_; }
 	void setSize(int w, int h);
