@@ -669,7 +669,7 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 	{
 		for (j = 0; j < wz_arr_len(widget->children); j++)
 		{
-			wzRect intersection;
+			wzRect rect1, rect2, intersection;
 
 			if (i == j)
 				continue;
@@ -678,7 +678,10 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 				continue;
 
 			// If the mouse cursor is in the intersection of the two widget rects.
-			if (wz_intersect_rects(widget->children[i]->rect, widget->children[j]->rect, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
+			rect1 = wz_widget_get_absolute_rect(widget->children[i]);
+			rect2 = wz_widget_get_absolute_rect(widget->children[j]);
+
+			if (wz_intersect_rects(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
 				// Ignore the one with lower draw priority.
 				if (widget->children[i]->drawPriority < widget->children[j]->drawPriority)
