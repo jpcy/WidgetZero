@@ -1,12 +1,28 @@
-local sdlPath = ""
-	
-if os.get() == "windows" then
-    sdlPath = os.getenv("SDL2_DEV_PATH")
+wz =
+{
+	sdl2Path = nil
+}
 
-    if sdlPath == nil then
-    	printf("Error: SDL2_DEV_PATH environment variable not set")
-	    os.exit(1)
-    end
+local customFilename = "premake5-custom.lua"
+
+if os.get() == "windows" then
+	if not os.isfile(customFilename) then
+		printf("Error: file premake5-custom.lua doesn't exist")
+		os.exit(1)
+	else
+		dofile(customFilename)
+	end
+
+	if wz.sdl2Path == nil then
+		printf("Error: SDL2 path not set")
+		os.exit(1)
+	end
+
+	-- Copy the SDL2 dlls to the build directory.
+	os.mkdir("build");
+	os.mkdir("build/bin");
+	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin/SDL2.dll");
+	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin/SDL2-64.dll");
 end
 
 solution "WidgetZero"
@@ -116,7 +132,7 @@ project "libwzsdl2"
 	configuration "linux"
 		buildoptions { "`pkg-config --cflags sdl2`" }
     configuration "vs*"
-	    includedirs(sdlPath .. "/include")
+	    includedirs(wz.sdl2Path .. "/include")
 	configuration {}
 	
 	configuration "Debug"
@@ -151,11 +167,11 @@ project "example"
 		buildoptions { "`pkg-config --cflags sdl2`" }
 		linkoptions { "`pkg-config --libs sdl2`" }
     configuration "vs*"
-	    includedirs(sdlPath .. "/include")
+	    includedirs(wz.sdl2Path .. "/include")
 	configuration { "vs*", "not x64" }
-		libdirs(sdlPath .. "/lib/x86")
+		libdirs(wz.sdl2Path .. "/lib/x86")
 	configuration { "vs*",  "x64" }
-		libdirs(sdlPath .. "/lib/x64")
+		libdirs(wz.sdl2Path .. "/lib/x64")
 	configuration {}
 	
 	links
