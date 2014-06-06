@@ -74,39 +74,39 @@ private:
 class Window : public Widget
 {
 public:
-	Window(Widget *parent, char *title);
+	Window(Widget *parent, const std::string &title);
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
 	void draw(wzRect clip);
 	
 private:
 	wzWindow *window_;
-	char title_[64];
+	std::string title_;
 };
 
 class Button : public Widget
 {
 public:
-	Button(Widget *parent, const char *label);
-	Button(wzButton *button, const char *label);
+	Button(Widget *parent, const std::string &label);
+	Button(wzButton *button, const std::string &label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	wzRect getRect();
 	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
-	char label_[64];
+	std::string label_;
 };
 
 class Checkbox : public Widget
 {
 public:
-	Checkbox(Widget *parent, const char *label);
+	Checkbox(Widget *parent, const std::string &label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
-	char label_[64];
+	std::string label_;
 
 	static const int boxSize = 16;
 	static const int boxRightMargin = 8;
@@ -128,13 +128,13 @@ private:
 class GroupBox : public Widget
 {
 public:
-	GroupBox(Widget *parent, const char *label);
+	GroupBox(Widget *parent, const std::string &label);
 	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
 	void draw(wzRect clip);
 
 private:
 	wzGroupBox *groupBox_;
-	char label_[64];
+	std::string label_;
 };
 
 class Scroller : public Widget
@@ -163,7 +163,7 @@ public:
 
 private:
 	wzLabel *label_;
-	char text_[256];
+	std::string text_;
 	uint8_t r, g, b;
 };
 
@@ -188,13 +188,13 @@ private:
 class TabButton : public Widget
 {
 public:
-	TabButton(wzButton *button, const char *label);
+	TabButton(wzButton *button, const std::string &label);
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void draw(wzRect clip);
 
 private:
 	wzButton *button_;
-	char label_[64];
+	std::string label_;
 };
 
 class TabBar : public Widget
@@ -205,8 +205,8 @@ public:
 	~TabBar();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
 	void draw(wzRect clip);
-	void addTab(const char *label);
-	void addTab(wzButton *button, const char *label);
+	void addTab(const std::string &label);
+	void addTab(wzButton *button, const std::string &label);
 
 private:
 	wzTabBar *tabBar_;
@@ -233,7 +233,7 @@ public:
 	~Tabbed();
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed_; }
 	void draw(wzRect clip);
-	TabPage *addTab(const char *label);
+	TabPage *addTab(const std::string &label);
 
 private:
 	wzTabbed *tabbed_;

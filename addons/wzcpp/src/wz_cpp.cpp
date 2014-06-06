@@ -121,14 +121,13 @@ void Desktop::drawDockPreview(wzRect rect)
 
 //------------------------------------------------------------------------------
 
-Window::Window(Widget *parent, char *title)
+Window::Window(Widget *parent, const std::string &title) : title_(title)
 {
 	renderer_ = parent->getRenderer();
 
 	wzWidget *widget;
 	wzSize size;
 
-	strcpy(title_, title);
 	window_ = wz_window_create(wz_widget_get_desktop(parent->getWidget()));
 	widget = (wzWidget *)window_;
 	wz_widget_set_metadata(widget, this);
@@ -136,7 +135,7 @@ Window::Window(Widget *parent, char *title)
 	wz_window_set_border_size(window_, 4);
 
 	// Calculate header height based on label text plus padding.
-	renderer_->measure_text(renderer_, title_, &size.w, &size.h);
+	renderer_->measure_text(renderer_, title_.c_str(), &size.w, &size.h);
 	size.h += 6;
 	wz_window_set_header_height(window_, size.h);
 
@@ -145,26 +144,25 @@ Window::Window(Widget *parent, char *title)
 
 void Window::draw(wzRect clip)
 {
-	renderer_->draw_window(renderer_, clip, window_, title_);
+	renderer_->draw_window(renderer_, clip, window_, title_.c_str());
 }
 
 //------------------------------------------------------------------------------
 
-Button::Button(Widget *parent, const char *label)
+Button::Button(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
 
 	wzWidget *widget;
 	wzSize size;
 
-	strcpy(label_, label);
 	button_ = wz_button_create(wz_widget_get_desktop(parent->getWidget()));
 	widget = (wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 
 	// Calculate size based on label text plus padding.
-	renderer_->measure_text(renderer_, label_, &size.w, &size.h);
+	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
 	size.w += 16;
 	size.h += 8;
 	wz_widget_set_size(widget, size);
@@ -172,14 +170,13 @@ Button::Button(Widget *parent, const char *label)
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-Button::Button(wzButton *button, const char *label)
+Button::Button(wzButton *button, const std::string &label) : label_(label)
 {
 	wzWidget *widget = (wzWidget *)button;
 
 	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
 	renderer_ = desktop->getRenderer();
 
-	strcpy(label_, label);
 	button_ = button;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -192,19 +189,18 @@ wzRect Button::getRect()
 
 void Button::draw(wzRect clip)
 {
-	renderer_->draw_button(renderer_, clip, button_, label_);
+	renderer_->draw_button(renderer_, clip, button_, label_.c_str());
 }
 
 //------------------------------------------------------------------------------
 
-Checkbox::Checkbox(Widget *parent, const char *label)
+Checkbox::Checkbox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
 
 	wzWidget *widget;
 	wzSize size;
 
-	strcpy(label_, label);
 	button_ = wz_button_create(wz_widget_get_desktop(parent->getWidget()));
 	widget = (wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
@@ -212,7 +208,7 @@ Checkbox::Checkbox(Widget *parent, const char *label)
 	wz_button_set_set_behavior(button_, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 
 	// Calculate size.
-	renderer_->measure_text(renderer_, label_, &size.w, &size.h);
+	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
 	size.w += boxSize + boxRightMargin;
 	size.w += 16;
 	size.h += 8;
@@ -223,7 +219,7 @@ Checkbox::Checkbox(Widget *parent, const char *label)
 
 void Checkbox::draw(wzRect clip)
 {
-	renderer_->draw_checkbox(renderer_, clip, button_, label_);
+	renderer_->draw_checkbox(renderer_, clip, button_, label_.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -249,14 +245,13 @@ void Combo::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-GroupBox::GroupBox(Widget *parent, const char *label)
+GroupBox::GroupBox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
 
 	wzWidget *widget;
 	wzSize size;
 
-	strcpy(label_, label);
 	groupBox_ = wz_groupbox_create(wz_widget_get_desktop(parent->getWidget()));
 	widget = (wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
@@ -271,7 +266,7 @@ GroupBox::GroupBox(Widget *parent, const char *label)
 
 void GroupBox::draw(wzRect clip)
 {
-	renderer_->draw_groupbox(renderer_, clip, groupBox_, label_);
+	renderer_->draw_groupbox(renderer_, clip, groupBox_, label_.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -339,7 +334,7 @@ int Scroller::getValue() const
 Label::Label(Widget *parent)
 {
 	renderer_ = parent->getRenderer();
-	text_[0] = r = g = b = 0;
+	r = g = b = 0;
 	label_ = wz_label_create(wz_widget_get_desktop(parent->getWidget()));
 	wzWidget *widget = (wzWidget *)label_;
 	wz_widget_set_metadata(widget, this);
@@ -349,13 +344,16 @@ Label::Label(Widget *parent)
 
 void Label::setText(const char *format, ...)
 {
+	static char buffer[1024];
+
 	va_list args;
 	va_start(args, format);
-	vsnprintf(text_, sizeof(text_), format, args);
+	vsnprintf(buffer, sizeof(text_), format, args);
 	va_end(args);
+	text_ = buffer;
 
 	wzSize size;
-	renderer_->measure_text(renderer_, text_, &size.w, &size.h);
+	renderer_->measure_text(renderer_, text_.c_str(), &size.w, &size.h);
 	wz_widget_set_size((wzWidget *)label_, size);
 }
 
@@ -368,7 +366,7 @@ void Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 
 void Label::draw(wzRect clip)
 {
-	renderer_->draw_label(renderer_, clip, label_, text_, r, g, b);
+	renderer_->draw_label(renderer_, clip, label_, text_.c_str(), r, g, b);
 }
 
 //------------------------------------------------------------------------------
@@ -428,26 +426,25 @@ void List::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-TabButton::TabButton(wzButton *button, const char *label)
+TabButton::TabButton(wzButton *button, const std::string &label) : label_(label)
 {
 	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop((wzWidget *)button));
 	renderer_ = desktop->getRenderer();
 
 	button_ = button;
-	strcpy(label_, label);
 	wz_widget_set_metadata((wzWidget *)button_, this);
 	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
 
 	// Calculate width based on label text plus padding.
 	int width;
-	renderer_->measure_text(renderer_, label_, &width, NULL);
+	renderer_->measure_text(renderer_, label_.c_str(), &width, NULL);
 	width += 16;
 	wz_widget_set_width((wzWidget *)button_, width);
 }
 
 void TabButton::draw(wzRect clip)
 {
-	renderer_->draw_tab_button(renderer_, clip, button_, label_);
+	renderer_->draw_tab_button(renderer_, clip, button_, label_.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -493,13 +490,13 @@ void TabBar::draw(wzRect clip)
 {
 }
 
-void TabBar::addTab(const char *label)
+void TabBar::addTab(const std::string &label)
 {
 	wzButton *tab = wz_tab_bar_add_tab(tabBar_);
 	tabs_.push_back(new TabButton(tab, label));
 }
 
-void TabBar::addTab(wzButton *button, const char *label)
+void TabBar::addTab(wzButton *button, const std::string &label)
 {
 	tabs_.push_back(new TabButton(button, label));
 }
@@ -544,7 +541,7 @@ void Tabbed::draw(wzRect clip)
 {
 }
 
-TabPage *Tabbed::addTab(const char *label)
+TabPage *Tabbed::addTab(const std::string &label)
 {
 	wzButton *button;
 	wzWidget *widget;
