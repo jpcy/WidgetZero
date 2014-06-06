@@ -34,6 +34,11 @@ static void DrawWidget(wzWidget *widget, wzRect clip)
 	((Widget *)wz_widget_get_metadata(widget))->draw(clip);
 }
 
+wzRect Widget::getRect() const
+{
+	return wz_widget_get_absolute_rect(getWidget());
+}
+
 void Widget::setPosition(int x, int y)
 {
 	wz_widget_set_position_args(getWidget(), x, y);
@@ -128,7 +133,7 @@ Window::Window(Widget *parent, const std::string &title) : title_(title)
 	wzWidget *widget;
 	wzSize size;
 
-	window_ = wz_window_create(wz_widget_get_desktop(parent->getWidget()));
+	window_ = wz_window_create(parent->getDesktop());
 	widget = (wzWidget *)window_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -152,39 +157,23 @@ void Window::draw(wzRect clip)
 Button::Button(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
-
-	wzWidget *widget;
-	wzSize size;
-
-	button_ = wz_button_create(wz_widget_get_desktop(parent->getWidget()));
-	widget = (wzWidget *)button_;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	button_ = wz_button_create(parent->getDesktop());
+	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)button_);
 
 	// Calculate size based on label text plus padding.
+	wzSize size;
 	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
 	size.w += 16;
 	size.h += 8;
-	wz_widget_set_size(widget, size);
+	wz_widget_set_size((wzWidget *)button_, size);
 
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	initialize();
 }
 
-Button::Button(wzButton *button, const std::string &label) : label_(label)
+Button::Button(wzButton *button, const std::string &label) : button_(button), label_(label)
 {
-	wzWidget *widget = (wzWidget *)button;
-
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	renderer_ = desktop->getRenderer();
-
-	button_ = button;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
-}
-
-wzRect Button::getRect()
-{
-	return wz_widget_get_absolute_rect((wzWidget *)button_);
+	renderer_ = Desktop::fromWidget((wzWidget *)button_)->getRenderer();
+	initialize();
 }
 
 void Button::draw(wzRect clip)
@@ -192,22 +181,25 @@ void Button::draw(wzRect clip)
 	renderer_->draw_button(renderer_, clip, button_, label_.c_str());
 }
 
+void Button::initialize()
+{
+	wz_widget_set_metadata((wzWidget *)button_, this);
+	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
+}
+
 //------------------------------------------------------------------------------
 
 Checkbox::Checkbox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
-
-	wzWidget *widget;
-	wzSize size;
-
-	button_ = wz_button_create(wz_widget_get_desktop(parent->getWidget()));
-	widget = (wzWidget *)button_;
+	button_ = wz_button_create(parent->getDesktop());
+	wzWidget *widget = (wzWidget *)button_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_button_set_set_behavior(button_, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 
 	// Calculate size.
+	wzSize size;
 	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
 	size.w += boxSize + boxRightMargin;
 	size.w += 16;
@@ -224,11 +216,10 @@ void Checkbox::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-Combo::Combo(Widget *parent, const char **items, int nItems)
+Combo::Combo(Widget *parent, const char **items, int nItems) : items_(items)
 {
 	renderer_ = parent->getRenderer();
-	items_ = items;
-	combo_ = wz_combo_create(wz_widget_get_desktop(parent->getWidget()));
+	combo_ = wz_combo_create(parent->getDesktop());
 	wzWidget *widget = (wzWidget *)combo_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -248,7 +239,7 @@ void Combo::draw(wzRect clip)
 GroupBox::GroupBox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
-	groupBox_ = wz_groupbox_create(wz_widget_get_desktop(parent->getWidget()));
+	groupBox_ = wz_groupbox_create(parent->getDesktop());
 	wzWidget *widget = (wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -266,43 +257,18 @@ void GroupBox::draw(wzRect clip)
 Scroller::Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue)
 {
 	renderer_ = parent->getRenderer();
-	scroller_ = wz_scroller_create(wz_widget_get_desktop(parent->getWidget()), type);
+	scroller_ = wz_scroller_create(parent->getDesktop(), type);
 	wz_scroller_set_max_value(scroller_, maxValue);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
-	wzWidget *widget = (wzWidget *)scroller_;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_scroller_set_nub_size(scroller_, 16);
-
-	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
-	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
-
-	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
-	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller_), 16, 16);
-	wz_widget_set_size_args((wzWidget *)wz_scroller_get_increment_button(scroller_), 16, 16);
-
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)scroller_);
+	initialize();
 }
 
-Scroller::Scroller(wzScroller *scroller)
+Scroller::Scroller(wzScroller *scroller) : scroller_(scroller)
 {
-	wzWidget *widget = (wzWidget *)scroller;
-
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	renderer_ = desktop->getRenderer();
-
-	scroller_ = scroller;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_scroller_set_nub_size(scroller_, 16);
-
-	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
-	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
-
-	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
-	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller_), 16, 16);
-	wz_widget_set_size_args((wzWidget *)wz_scroller_get_increment_button(scroller_), 16, 16);
+	renderer_ = Desktop::fromWidget((wzWidget *)scroller_)->getRenderer();
+	initialize();
 }
 
 void Scroller::draw(wzRect clip)
@@ -315,13 +281,26 @@ int Scroller::getValue() const
 	return wz_scroller_get_value(scroller_);
 }
 
+void Scroller::initialize()
+{
+	wz_widget_set_metadata((wzWidget *)scroller_, this);
+	wz_widget_set_draw_function((wzWidget *)scroller_, DrawWidget);
+	wz_scroller_set_nub_size(scroller_, 16);
+
+	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller_), "-"));
+	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
+
+	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller_), 16, 16);
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_increment_button(scroller_), 16, 16);
+}
+
 //------------------------------------------------------------------------------
 
-Label::Label(Widget *parent)
+Label::Label(Widget *parent) : r_(255), g_(255), b_(255)
 {
 	renderer_ = parent->getRenderer();
-	r = g = b = 0;
-	label_ = wz_label_create(wz_widget_get_desktop(parent->getWidget()));
+	label_ = wz_label_create(parent->getDesktop());
 	wzWidget *widget = (wzWidget *)label_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -345,14 +324,14 @@ void Label::setText(const char *format, ...)
 
 void Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 {
-	this->r = r;
-	this->g = g;
-	this->b = b;
+	r_ = r;
+	g_ = g;
+	b_ = b;
 }
 
 void Label::draw(wzRect clip)
 {
-	renderer_->draw_label(renderer_, clip, label_, text_.c_str(), r, g, b);
+	renderer_->draw_label(renderer_, clip, label_, text_.c_str(), r_, g_, b_);
 }
 
 //------------------------------------------------------------------------------
@@ -360,35 +339,15 @@ void Label::draw(wzRect clip)
 List::List(Widget *parent, const char **items, int nItems) : items_(items)
 {
 	renderer_ = parent->getRenderer();
-	list_ = wz_list_create(wz_widget_get_desktop(parent->getWidget()));
-	wz_list_set_num_items(list_, nItems);
-	wz_list_set_item_height(list_, itemHeight);
-	wz_list_set_items_border_args(list_, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
-
-	wzWidget *widget = (wzWidget *)list_;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getWidget(), widget);
-	
-	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
-	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
+	list_ = wz_list_create(parent->getDesktop());
+	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)list_);
+	initialize(nItems);
 }
 
 List::List(wzList *list, const char **items, int nItems) : list_(list), items_(items)
 {
-	wzWidget *widget = (wzWidget *)list;
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	renderer_ = desktop->getRenderer();
-
-	wz_list_set_num_items(list_, nItems);
-	wz_list_set_item_height(list_, itemHeight);
-	wz_list_set_items_border_args(list_, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
-
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
-
-	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
-	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
+	renderer_ = Desktop::fromWidget((wzWidget *)list_)->getRenderer();
+	initialize(nItems);	
 }
 
 void List::draw(wzRect clip)
@@ -396,12 +355,23 @@ void List::draw(wzRect clip)
 	renderer_->draw_list(renderer_, clip, list_, items_);
 }
 
+void List::initialize(int nItems)
+{
+	wz_list_set_num_items(list_, nItems);
+	wz_list_set_item_height(list_, itemHeight);
+	wz_list_set_items_border_args(list_, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
+	wz_widget_set_metadata((wzWidget *)list_, this);
+	wz_widget_set_draw_function((wzWidget *)list_, DrawWidget);
+
+	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
+	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
+}
+
 //------------------------------------------------------------------------------
 
 TabButton::TabButton(wzButton *button, const std::string &label) : label_(label)
 {
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop((wzWidget *)button));
-	renderer_ = desktop->getRenderer();
+	renderer_ = Desktop::fromWidget((wzWidget *)button)->getRenderer();
 
 	button_ = button;
 	wz_widget_set_metadata((wzWidget *)button_, this);
@@ -424,30 +394,15 @@ void TabButton::draw(wzRect clip)
 TabBar::TabBar(Widget *parent)
 {
 	renderer_ = parent->getRenderer();
-	tabBar_ = wz_tab_bar_create(wz_widget_get_desktop(parent->getWidget()));
-
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
+	tabBar_ = wz_tab_bar_create(parent->getDesktop());
 	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabBar_);
-
-	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
-	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
-	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
-	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
+	initialize();
 }
 
-TabBar::TabBar(wzTabBar *tabBar)
+TabBar::TabBar(wzTabBar *tabBar) : tabBar_(tabBar)
 {
-	tabBar_ = tabBar;
-
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop((wzWidget *)tabBar));
-	renderer_ = desktop->getRenderer();
-
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-
-	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
-	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
-	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
-	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
+	renderer_ = Desktop::fromWidget((wzWidget *)tabBar)->getRenderer();
+	initialize();	
 }
 
 TabBar::~TabBar()
@@ -473,13 +428,22 @@ void TabBar::addTab(wzButton *button, const std::string &label)
 	tabs_.push_back(new TabButton(button, label));
 }
 
+void TabBar::initialize()
+{
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
+
+	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
+	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
+	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
+	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
+}
+
 //------------------------------------------------------------------------------
 
 TabPage::TabPage(wzWidget *widget)
 {
 	widget_ = widget;
-	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	renderer_ = desktop->getRenderer();
+	renderer_ = Desktop::fromWidget(widget)->getRenderer();
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget_, DrawWidget);
 }
@@ -494,7 +458,7 @@ void TabPage::draw(wzRect clip)
 Tabbed::Tabbed(Widget *parent)
 {
 	renderer_ = parent->getRenderer();
-	tabbed_ = wz_tabbed_create(wz_widget_get_desktop(parent->getWidget()));
+	tabbed_ = wz_tabbed_create(parent->getDesktop());
 	wz_widget_set_metadata((wzWidget *)tabbed_, this);
 	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabbed_);
 	tabBar_.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed_)));

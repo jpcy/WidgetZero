@@ -38,14 +38,21 @@ class Widget
 {
 public:
 	virtual ~Widget() {}
+	virtual const wzWidget *getWidget() const = 0;
 	virtual wzWidget *getWidget() = 0;
 	virtual void draw(wzRect clip) {};
+	wzRect getRect() const;
 	void setPosition(int x, int y);
 	void setRect(int x, int y, int w, int h);
 	
 	wzRenderer *getRenderer()
 	{
 		return renderer_;
+	}
+
+	wzDesktop *getDesktop()
+	{
+		return wz_widget_get_desktop(getWidget());
 	}
 
 protected:
@@ -57,6 +64,7 @@ class Desktop : public Widget
 public:
 	Desktop(wzRenderer *renderer);
 	~Desktop();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)desktop_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)desktop_; }
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
@@ -67,6 +75,11 @@ public:
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
 
+	static Desktop *fromWidget(wzWidget *widget)
+	{
+		return (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
+	}
+
 private:
 	wzDesktop *desktop_;
 };
@@ -75,6 +88,7 @@ class Window : public Widget
 {
 public:
 	Window(Widget *parent, const std::string &title);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)window_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
 	void draw(wzRect clip);
 	
@@ -88,11 +102,13 @@ class Button : public Widget
 public:
 	Button(Widget *parent, const std::string &label);
 	Button(wzButton *button, const std::string &label);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	wzRect getRect();
 	void draw(wzRect clip);
 
 private:
+	void initialize();
+
 	wzButton *button_;
 	std::string label_;
 };
@@ -101,6 +117,7 @@ class Checkbox : public Widget
 {
 public:
 	Checkbox(Widget *parent, const std::string &label);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void draw(wzRect clip);
 
@@ -116,6 +133,7 @@ class Combo : public Widget
 {
 public:
 	Combo(Widget *parent, const char **items, int nItems);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo_; }
 	void draw(wzRect clip);
 
@@ -129,6 +147,7 @@ class GroupBox : public Widget
 {
 public:
 	GroupBox(Widget *parent, const std::string &label);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
 	void draw(wzRect clip);
 
@@ -142,11 +161,14 @@ class Scroller : public Widget
 public:
 	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
 	Scroller(wzScroller *scroller);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller_; }
 	void draw(wzRect clip);
 	int getValue() const;
 
 private:
+	void initialize();
+
 	wzScroller *scroller_;
 	std::auto_ptr<Button> decrementButton;
 	std::auto_ptr<Button> incrementButton;
@@ -156,6 +178,7 @@ class Label : public Widget
 {
 public:
 	Label(Widget *parent);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)label_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label_; }
 	void setText(const char *format, ...);
 	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
@@ -164,7 +187,7 @@ public:
 private:
 	wzLabel *label_;
 	std::string text_;
-	uint8_t r, g, b;
+	uint8_t r_, g_, b_;
 };
 
 class List : public Widget
@@ -172,10 +195,13 @@ class List : public Widget
 public:
 	List(Widget *parent, const char **items, int nItems);
 	List(wzList *list, const char **items, int nItems);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)list_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)list_; }
 	void draw(wzRect clip);
 
 private:
+	void initialize(int nItems);
+
 	wzList *list_;
 	const char **items_;
 	std::auto_ptr<Scroller> scroller_;
@@ -189,6 +215,7 @@ class TabButton : public Widget
 {
 public:
 	TabButton(wzButton *button, const std::string &label);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	void draw(wzRect clip);
 
@@ -203,12 +230,15 @@ public:
 	TabBar(Widget *parent);
 	TabBar(wzTabBar *tabBar);
 	~TabBar();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
 	void draw(wzRect clip);
 	void addTab(const std::string &label);
 	void addTab(wzButton *button, const std::string &label);
 
 private:
+	void initialize();
+
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
 	std::auto_ptr<Button> decrementButton;
@@ -219,6 +249,7 @@ class TabPage : public Widget
 {
 public:
 	TabPage(wzWidget *widget);
+	virtual const wzWidget *getWidget() const { return widget_; }
 	virtual wzWidget *getWidget() { return widget_; }
 	void draw(wzRect clip);
 
@@ -231,6 +262,7 @@ class Tabbed : public Widget
 public:
 	Tabbed(Widget *parent);
 	~Tabbed();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed_; }
 	void draw(wzRect clip);
 	TabPage *addTab(const std::string &label);
