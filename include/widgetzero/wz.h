@@ -275,6 +275,7 @@ struct wzLabel *wz_label_create(struct wzDesktop *desktop);
 struct wzList *wz_list_create(struct wzDesktop *desktop);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
+void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
 wzBorder wz_list_get_items_border(const struct wzList *list);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 

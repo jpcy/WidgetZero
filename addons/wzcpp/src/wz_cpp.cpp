@@ -357,45 +357,37 @@ void Label::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-List::List(Widget *parent, const char **items, int nItems)
+List::List(Widget *parent, const char **items, int nItems) : items_(items)
 {
 	renderer_ = parent->getRenderer();
 	list_ = wz_list_create(wz_widget_get_desktop(parent->getWidget()));
 	wz_list_set_num_items(list_, nItems);
 	wz_list_set_item_height(list_, itemHeight);
+	wz_list_set_items_border_args(list_, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
+
 	wzWidget *widget = (wzWidget *)list_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_add_child_widget(parent->getWidget(), widget);
-	items_ = items;
+	
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
-
-	wzBorder border;
-	border.left = border.right = border.top = border.bottom = itemsMargin;
-	wz_list_set_items_border(list_, border);
-
 	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
 }
 
-List::List(wzList *list, const char **items, int nItems)
+List::List(wzList *list, const char **items, int nItems) : list_(list), items_(items)
 {
 	wzWidget *widget = (wzWidget *)list;
-
 	Desktop *desktop = (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
 	renderer_ = desktop->getRenderer();
 
-	list_ = list;
 	wz_list_set_num_items(list_, nItems);
 	wz_list_set_item_height(list_, itemHeight);
+	wz_list_set_items_border_args(list_, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
+
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	items_ = items;
+
 	scroller_.reset(new Scroller(wz_list_get_scroller(list_)));
-
-	wzBorder border;
-	border.left = border.right = border.top = border.bottom = itemsMargin;
-	wz_list_set_items_border(list_, border);
-
 	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
 }
 

@@ -310,6 +310,16 @@ void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
 	wz_list_update_scroller_max_value(list);
 }
 
+void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left)
+{
+	wzBorder border;
+	border.top = top;
+	border.right = right;
+	border.bottom = bottom;
+	border.left = left;
+	wz_list_set_items_border(list, border);
+}
+
 wzBorder wz_list_get_items_border(const struct wzList *list)
 {
 	assert(list);
