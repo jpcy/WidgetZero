@@ -248,19 +248,11 @@ void Combo::draw(wzRect clip)
 GroupBox::GroupBox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
-
-	wzWidget *widget;
-	wzSize size;
-
 	groupBox_ = wz_groupbox_create(wz_widget_get_desktop(parent->getWidget()));
-	widget = (wzWidget *)groupBox_;
+	wzWidget *widget = (wzWidget *)groupBox_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-
-	size.w = 200;
-	size.h = 200;
-	wz_widget_set_size(widget, size);
-
+	wz_widget_set_size_args(widget, 200, 200);
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
@@ -287,11 +279,8 @@ Scroller::Scroller(Widget *parent, wzScrollerType type, int value, int stepValue
 	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
-	wzSize buttonSize;
-	buttonSize.w = 16;
-	buttonSize.h = 16;
-	wz_widget_set_size((wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
-	wz_widget_set_size((wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller_), 16, 16);
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_increment_button(scroller_), 16, 16);
 
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
@@ -312,11 +301,8 @@ Scroller::Scroller(wzScroller *scroller)
 	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller_), "+"));
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
-	wzSize buttonSize;
-	buttonSize.w = 16;
-	buttonSize.h = 16;
-	wz_widget_set_size((wzWidget *)wz_scroller_get_decrement_button(scroller_), buttonSize);
-	wz_widget_set_size((wzWidget *)wz_scroller_get_increment_button(scroller_), buttonSize);
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller_), 16, 16);
+	wz_widget_set_size_args((wzWidget *)wz_scroller_get_increment_button(scroller_), 16, 16);
 }
 
 void Scroller::draw(wzRect clip)
@@ -388,10 +374,7 @@ List::List(Widget *parent, const char **items, int nItems)
 	border.left = border.right = border.top = border.bottom = itemsMargin;
 	wz_list_set_items_border(list_, border);
 
-	wzSize scrollerSize;
-	scrollerSize.w = 16;
-	scrollerSize.h = 0;
-	wz_widget_set_size(scroller_->getWidget(), scrollerSize);
+	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
 }
 
 List::List(wzList *list, const char **items, int nItems)
@@ -413,10 +396,7 @@ List::List(wzList *list, const char **items, int nItems)
 	border.left = border.right = border.top = border.bottom = itemsMargin;
 	wz_list_set_items_border(list_, border);
 
-	wzSize scrollerSize;
-	scrollerSize.w = 16;
-	scrollerSize.h = 0;
-	wz_widget_set_size(scroller_->getWidget(), scrollerSize);
+	wz_widget_set_size_args(scroller_->getWidget(), 16, 0);
 }
 
 void List::draw(wzRect clip)
