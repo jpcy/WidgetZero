@@ -26,8 +26,8 @@ SOFTWARE.
 #include <stdint.h>
 #include <memory>
 #include <SDL.h>
-#include <widgetzero/wz_cpp.h>
-#include <widgetzero/wz_sdl2.h>
+#include <wz_cpp.h>
+#include <wz_sdl2.h>
 
 static const float frameTime = 1000 / 60.0f;
 

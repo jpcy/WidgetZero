@@ -24,7 +24,7 @@ SOFTWARE.
 #ifndef _WZ_RENDERER_H_
 #define _WZ_RENDERER_H_
 
-#include <widgetzero/wz.h>
+#include <wz.h>
 
 struct wzRenderer
 {

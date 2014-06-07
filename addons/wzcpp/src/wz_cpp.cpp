@@ -25,7 +25,7 @@ SOFTWARE.
 #include <stdint.h>
 #include <string>
 #include <sstream>
-#include <widgetzero/wz_cpp.h>
+#include <wz_cpp.h>
 
 namespace wz {
 

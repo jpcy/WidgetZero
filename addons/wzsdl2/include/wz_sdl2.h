@@ -24,8 +24,8 @@ SOFTWARE.
 #ifndef _WZ_SDL2_H_
 #define _WZ_SDL2_H_
 
-#include <widgetzero/wz_renderer.h>
-#include <widgetzero/wz.h>
+#include <wz_renderer.h>
+#include <wz.h>
 
 #ifdef __cplusplus
 extern "C" {

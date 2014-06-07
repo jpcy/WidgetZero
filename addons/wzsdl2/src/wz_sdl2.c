@@ -25,7 +25,7 @@ SOFTWARE.
 #include <stdarg.h>
 #include <stdint.h>
 #include <SDL.h>
-#include <widgetzero/wz_sdl2.h>
+#include <wz_sdl2.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"

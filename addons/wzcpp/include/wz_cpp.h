@@ -27,8 +27,8 @@ SOFTWARE.
 #include <memory>
 #include <string>
 #include <vector>
-#include <widgetzero/wz.h>
-#include <widgetzero/wz_renderer.h>
+#include <wz.h>
+#include <wz_renderer.h>
 
 namespace wz {
 

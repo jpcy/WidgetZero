@@ -56,7 +56,7 @@ project "libwz"
 	{
 		"src/*.c",
 		"src/*.h",
-		"include/widgetzero/wz.h"
+		"include/wz.h"
 	}
 	
 	includedirs
@@ -81,7 +81,7 @@ project "libwzcpp"
 	files
 	{
 		"addons/wzcpp/src/*.*",
-		"addons/wzcpp/include/widgetzero/*.*"
+		"addons/wzcpp/include/*.*"
 	}
 	
 	includedirs
@@ -113,7 +113,7 @@ project "libwzsdl2"
 	files
 	{
 		"addons/wzsdl2/src/*.*",
-		"addons/wzsdl2/include/widgetzero/*.*"
+		"addons/wzsdl2/include/*.*"
 	}
 	
 	includedirs

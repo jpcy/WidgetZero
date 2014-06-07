@@ -36,7 +36,7 @@ SOFTWARE.
 #ifndef _WZ_INTERNAL_H_
 #define _WZ_INTERNAL_H_
 
-#include <widgetzero/wz.h>
+#include <wz.h>
 
 typedef struct
 {
