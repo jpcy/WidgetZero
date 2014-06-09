@@ -26,14 +26,16 @@ if os.get() == "windows" then
 	end
 	
 	os.mkdir("build");
+	os.mkdir("build/bin_x86");
+	os.mkdir("build/bin_x64");
 
 	-- Copy the GLEW dlls to the build directory.
-	os.copyfile(wz.glewPath .. "/bin/Release/Win32/glew32.dll", "build/glew32.dll");
-	os.copyfile(wz.glewPath .. "/bin/Release/x64/glew32.dll", "build/glew64.dll");
+	os.copyfile(wz.glewPath .. "/bin/Release/Win32/glew32.dll", "build/bin_x86/glew32.dll");
+	os.copyfile(wz.glewPath .. "/bin/Release/x64/glew32.dll", "build/bin_x64/glew32.dll");
 	
 	-- Copy the SDL2 dlls to the build directory.
-	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/SDL2.dll");
-	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/SDL2-64.dll");
+	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
+	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
 end
 
 if wz.nanovgPath == nil then
@@ -49,6 +51,7 @@ solution "WidgetZero"
 	startproject "Example"
 	
 	configurations { "Debug", "Release" }
+	platforms { "native", "x64", "x32" }
 	
 	configuration "Debug"
 		optimize "Debug"
@@ -61,6 +64,12 @@ solution "WidgetZero"
 		
 	configuration "vs*"
 		defines { "_CRT_SECURE_NO_DEPRECATE" }
+		
+	configuration { "not x64" }
+		targetdir "build/bin_x86"
+
+	configuration { "x64" }
+		targetdir "build/bin_x64"
 	
 -----------------------------------------------------------------------------
 
@@ -138,10 +147,10 @@ project "Example"
 	configuration "linux"
 		buildoptions { "`pkg-config --cflags sdl2`" }
 		linkoptions { "`pkg-config --libs sdl2`" }
-		links { "GL", "GLU" }
+		links { "GL", "GLU", "GLEW" }
     configuration "vs*"
 	    includedirs(wz.sdl2Path .. "/include")
-		links { "glu32", "opengl32" }
+		links { "glu32", "opengl32", "glew32" }
 	configuration { "vs*", "not x64" }
 		libdirs(wz.sdl2Path .. "/lib/x86")
 		libdirs(wz.glewPath .. "/lib/Release/Win32")
@@ -152,7 +161,6 @@ project "Example"
 	
 	links
 	{
-		"GLEW",
 		"SDL2",
 		"SDL2main",
 		"NanoVG",
