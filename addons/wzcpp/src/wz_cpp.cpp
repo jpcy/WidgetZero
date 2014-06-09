@@ -110,8 +110,10 @@ void Desktop::mouseWheelMove(int x, int y)
 
 void Desktop::draw()
 {
+	wzRect rect = wz_widget_get_rect((const wzWidget *)desktop_);
+	renderer_->begin_frame(renderer_, rect.w, rect.h);
 	wz_desktop_draw(desktop_);
-	renderer_->reset_clipping(renderer_);
+	renderer_->end_frame(renderer_);
 }
 
 void Desktop::drawDockIcon(wzRect rect)

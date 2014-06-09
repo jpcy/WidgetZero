@@ -1,34 +1,52 @@
 wz =
 {
+	glewPath = nil,
+	nanovgPath = nil,
 	sdl2Path = nil
 }
 
 local customFilename = "premake5-custom.lua"
 
+if not os.isfile(customFilename) then
+	printf("Error: file premake5-custom.lua doesn't exist")
+	os.exit(1)
+else
+	dofile(customFilename)
+end
+
 if os.get() == "windows" then
-	if not os.isfile(customFilename) then
-		printf("Error: file premake5-custom.lua doesn't exist")
+	if wz.glewPath == nil then
+		printf("Error: GLEW path not set")
 		os.exit(1)
-	else
-		dofile(customFilename)
 	end
 
 	if wz.sdl2Path == nil then
 		printf("Error: SDL2 path not set")
 		os.exit(1)
 	end
-
-	-- Copy the SDL2 dlls to the build directory.
+	
 	os.mkdir("build");
-	os.mkdir("build/bin");
-	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin/SDL2.dll");
-	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin/SDL2-64.dll");
+
+	-- Copy the GLEW dlls to the build directory.
+	os.copyfile(wz.glewPath .. "/bin/Release/Win32/glew32.dll", "build/glew32.dll");
+	os.copyfile(wz.glewPath .. "/bin/Release/x64/glew32.dll", "build/glew64.dll");
+	
+	-- Copy the SDL2 dlls to the build directory.
+	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/SDL2.dll");
+	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/SDL2-64.dll");
 end
+
+if wz.nanovgPath == nil then
+	printf("Error: NanoVG path not set")
+	os.exit(1)
+end
+
+-----------------------------------------------------------------------------
 
 solution "WidgetZero"
 	language "C"
 	location "build"
-	startproject "example"
+	startproject "Example"
 	
 	configurations { "Debug", "Release" }
 	
@@ -42,46 +60,25 @@ solution "WidgetZero"
 		defines "NDEBUG"
 		
 	configuration "vs*"
-		defines
-		{
-			"_CRT_SECURE_NO_DEPRECATE"
-		}
+		defines { "_CRT_SECURE_NO_DEPRECATE" }
 	
 -----------------------------------------------------------------------------
 
-project "libwz"
+project "WidgetZero"
 	kind "StaticLib"
-
-	files
-	{
-		"src/*.c",
-		"src/*.h",
-		"include/wz.h"
-	}
-	
-	includedirs
-	{
-		"include"
-	}
-	
-	configuration "Debug"
-		targetdir "build/libwz_debug"
-		objdir "build/libwz_debug"
-				
-	configuration "Release"
-		targetdir "build/libwz_release"
-		objdir "build/libwz_release"
+	files { "src/*.*", "include/wz.h" }
+	includedirs { "include" }
 		
 -----------------------------------------------------------------------------
 
-project "libwzcpp"
+project "WidgetZeroCpp"
 	language "C++"
 	kind "StaticLib"
 
 	files
 	{
-		"addons/wzcpp/src/*.*",
-		"addons/wzcpp/include/*.*"
+		"addons/wzcpp/src/*.cpp",
+		"addons/wzcpp/include/*.h"
 	}
 	
 	includedirs
@@ -92,107 +89,77 @@ project "libwzcpp"
 	}
 	
 	configuration "vs2012"
-		linkoptions
-		{
-			"/SAFESEH:NO"
-		}
-	
-	configuration "Debug"
-		targetdir "build/libwzcpp_debug"
-		objdir "build/libwzcpp_debug"
-				
-	configuration "Release"
-		targetdir "build/libwzcpp_release"
-		objdir "build/libwzcpp_release"
+		linkoptions { "/SAFESEH:NO" }
 		
 -----------------------------------------------------------------------------
 
-project "libwzsdl2"
+project "WidgetZeroGL"
 	kind "StaticLib"
 
 	files
 	{
-		"addons/wzsdl2/src/*.*",
-		"addons/wzsdl2/include/*.*"
+		"addons/wzgl/src/*.c",
+		"addons/wzgl/include/*.h"
 	}
 	
 	includedirs
 	{
 		"include",
 		"addons/shared/include",
-		"addons/wzsdl2/include"
+		"addons/wzgl/include",
+		wz.glewPath .. "/include",
+		wz.nanovgPath .. "/src"
 	}
-	
-	configuration "vs2012"
-		linkoptions
-		{
-			"/SAFESEH:NO"
-		}
-	
-	configuration "linux"
-		buildoptions { "`pkg-config --cflags sdl2`" }
-    configuration "vs*"
-	    includedirs(wz.sdl2Path .. "/include")
-	configuration {}
-	
-	configuration "Debug"
-		targetdir "build/libwzsdl2_debug"
-		objdir "build/libwzsdl2_debug"
-				
-	configuration "Release"
-		targetdir "build/libwzsdl2_release"
-		objdir "build/libwzsdl2_release"
-
+		
 -----------------------------------------------------------------------------
 
-project "example"
+project "NanoVG"
+	kind "StaticLib"
+	files { wz.nanovgPath .. "/src/*.*" }
+	includedirs { wz.nanovgPath .. "/src" }
+		
+-----------------------------------------------------------------------------
+
+project "Example"
 	language "C++"
 	kind "WindowedApp"
 	targetname "example"
 
-	files
-	{
-		"example/*.*"
-	}
+	files { "example/*.cpp" }
 	
 	includedirs
 	{
 		"include",
 		"addons/shared/include",
 		"addons/wzcpp/include",
-		"addons/wzsdl2/include"
+		"addons/wzgl/include"
 	}
 	
 	configuration "linux"
 		buildoptions { "`pkg-config --cflags sdl2`" }
 		linkoptions { "`pkg-config --libs sdl2`" }
+		links { "GL", "GLU" }
     configuration "vs*"
 	    includedirs(wz.sdl2Path .. "/include")
+		links { "glu32", "opengl32" }
 	configuration { "vs*", "not x64" }
 		libdirs(wz.sdl2Path .. "/lib/x86")
+		libdirs(wz.glewPath .. "/lib/Release/Win32")
 	configuration { "vs*",  "x64" }
 		libdirs(wz.sdl2Path .. "/lib/x64")
+		libdirs(wz.glewPath .. "/lib/Release/x64")
 	configuration {}
 	
 	links
 	{
+		"GLEW",
 		"SDL2",
 		"SDL2main",
-		"libwz",
-		"libwzcpp",
-		"libwzsdl2"
+		"NanoVG",
+		"WidgetZero",
+		"WidgetZeroCpp",
+		"WidgetZeroGL"
 	}
 	
 	configuration "vs2012"
-		linkoptions
-		{
-			"/SAFESEH:NO"
-		}
-	
-	configuration "Debug"
-		targetdir "build/bin"
-		objdir "build/example_debug"
-		
-	configuration "Release"
-		targetdir "build/bin"
-		objdir "build/example_release"
+		linkoptions { "/SAFESEH:NO" }

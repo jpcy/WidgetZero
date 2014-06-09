@@ -28,6 +28,9 @@ SOFTWARE.
 
 struct wzRenderer
 {
+	void (*begin_frame)(struct wzRenderer *renderer, int windowWidth, int windowHeight);
+	void (*end_frame)(struct wzRenderer *renderer);
+
 	// width or height can be NULL.
 	void (*measure_text)(struct wzRenderer *renderer, const char *text, int *width, int *height);
 
@@ -43,8 +46,6 @@ struct wzRenderer
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items);
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
-
-	void (*reset_clipping)(struct wzRenderer *renderer);
 
 	void *data;
 };

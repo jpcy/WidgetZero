@@ -21,19 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_SDL2_H_
-#define _WZ_SDL2_H_
+#ifndef _WZ_GL_H_
+#define _WZ_GL_H_
 
 #include <wz_renderer.h>
-#include <wz.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct SDL_Renderer;
-
-struct wzRenderer *wzgl_create_renderer(SDL_Renderer *sdl, const char *fontFilename, float fontHeight);
+struct wzRenderer *wzgl_create_renderer();
 void wzgl_destroy_renderer(struct wzRenderer *renderer);
 const char *wzgl_get_error();
 
@@ -41,4 +38,4 @@ const char *wzgl_get_error();
 } // extern "C"
 #endif
 
-#endif // _WZ_SDL2_H_
+#endif // _WZ_GL_H_

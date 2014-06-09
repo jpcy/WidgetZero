@@ -25,9 +25,10 @@ SOFTWARE.
 #include <stdarg.h>
 #include <stdint.h>
 #include <memory>
+#include <GL/glew.h>
 #include <SDL.h>
 #include <wz_cpp.h>
-#include <wz_sdl2.h>
+#include <wz_gl.h>
 
 static const float frameTime = 1000 / 60.0f;
 
@@ -48,17 +49,35 @@ int main(int argc, char **argv)
 
 	atexit(SDL_Quit);
 
-	SDL_Window *window;
-	SDL_Renderer *renderer;
+	SDL_Window *window = SDL_CreateWindow("WidgetZero Example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
-	if (SDL_CreateWindowAndRenderer(1024, 768, SDL_WINDOW_RESIZABLE, &window, &renderer) < 0)
+	if (!window)
 	{
 		ShowError(SDL_GetError());
 		SDL_ClearError();
 		return 1;
 	}
 
-	SDL_SetWindowTitle(window, "WidgetZero Example");
+	SDL_GLContext glContext = SDL_GL_CreateContext(window);
+
+	if (!glContext)
+	{
+		ShowError(SDL_GetError());
+		SDL_ClearError();
+		return 1;
+	}
+
+	if (glewInit() != GLEW_OK)
+	{
+		ShowError("GLEW init failed");
+		return 1;
+	}
+
+	glClearColor(1, 1, 1, 1);
+
+	int windowWidth, windowHeight;
+	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+	glViewport(0, 0, windowWidth, windowHeight);
 
 	// Setup cursors.
 	SDL_Cursor *cursors[WZ_NUM_CURSORS];
@@ -68,8 +87,8 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
-	// Create the wzsdl2 renderer.
-	wzRenderer *wzRenderer = wzgl_create_renderer(renderer, "../example/data/DejaVuSans.ttf", 16.0f);
+	// Create the wzgl renderer.
+	wzRenderer *wzRenderer = wzgl_create_renderer();
 
 	if (!wzRenderer)
 	{
@@ -79,8 +98,6 @@ int main(int argc, char **argv)
 
 	// Create wzcpp objects.
 	wz::Desktop desktop(wzRenderer);
-	int windowWidth, windowHeight;
-	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 	desktop.setSize(windowWidth, windowHeight);
 
 	wz::Button button(&desktop, "Test Button");
@@ -178,6 +195,7 @@ int main(int argc, char **argv)
 			}
 			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
+				glViewport(0, 0, e.window.data1, e.window.data2);
 				desktop.setSize(e.window.data1, e.window.data2);
 			}
 			else if (e.type == SDL_MOUSEMOTION)
@@ -207,10 +225,9 @@ int main(int argc, char **argv)
 
 		while (accumulatedTime > frameTime)
 		{
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			SDL_RenderClear(renderer);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			desktop.draw();
-			SDL_RenderPresent(renderer);
+			SDL_GL_SwapWindow(window);
 			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)desktop.getWidget())]);
 
 			scrollerLabel.setText("Scroll value: %d", scroller.getValue());
