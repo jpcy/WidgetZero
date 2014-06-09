@@ -106,7 +106,7 @@ static void wzgl_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVG
 static void wzgl_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color)
 {
 	nvgBeginPath(vg);
-	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 0.5f, rect.h - 0.5f);
 	nvgStrokeColor(vg, color);
 	nvgStroke(vg);
 }
