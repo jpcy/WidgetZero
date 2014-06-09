@@ -32,6 +32,109 @@ SOFTWARE.
 
 static const float frameTime = 1000 / 60.0f;
 
+static const char *listData[17] =
+{
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday",
+	"One",
+	"Two",
+	"Three",
+	"Four",
+	"Five",
+	"Six",
+	"Seven",
+	"Eight",
+	"Nine",
+	"Ten"
+};
+
+class GUI
+{
+public:
+	GUI(int windowWidth, int windowHeight, wzRenderer *renderer)
+	{
+		desktop.reset(new wz::Desktop(renderer));
+		desktop->setSize(windowWidth, windowHeight);
+
+		button.reset(new wz::Button(desktop.get(), "Test Button"));
+		button->setPosition(100, 100);
+
+		wzRect buttonRect = button->getRect();
+		checkbox.reset(new wz::Checkbox(desktop.get(), "Toggle me!"));
+		checkbox->setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
+
+		groupBox.reset(new wz::GroupBox(desktop.get(), "Test GroupBox"));
+		groupBox->setPosition(100, 300);
+
+		scroller.reset(new wz::Scroller(desktop.get(), WZ_SCROLLER_VERTICAL, 20, 10, 100));
+		scroller->setRect(300, 50, 16, 200);
+
+		label.reset(new wz::Label(desktop.get()));
+		label->setText("Label test");
+		label->setTextColor(255, 128, 128);
+		label->setPosition(350, 50);
+
+		scrollerHorizontal.reset(new wz::Scroller(desktop.get(), WZ_SCROLLER_HORIZONTAL, 50, 10, 100));
+		scrollerHorizontal->setRect(500, 50, 200, 16);
+
+		list.reset(new wz::List(desktop.get(), listData, 17));
+		list->setRect(400, 300, 150, 150);
+
+		tabbed.reset(new wz::Tabbed(desktop.get()));
+		tabbed->setRect(350, 500, 200, 250);
+		wz::TabPage *firstTabPage = tabbed->addTab("Tab 1");
+		wz::TabPage *secondTabPage = tabbed->addTab("Another Tab");
+		tabbed->addTab("TabTabTab");
+
+		secondTabPageButton.reset(new wz::Button(secondTabPage, "Button Button Button"));
+		secondTabPageButton->setPosition(10, 10);
+
+		combo.reset(new wz::Combo(desktop.get(), listData, 17));
+		combo->setRect(800, 50, 150, 20);
+
+		combo2.reset(new wz::Combo(firstTabPage, listData, 17));
+		combo2->setRect(10, 10, 150, 20);
+
+		childWindow.reset(new wz::Window(desktop.get(), "Test Window"));
+		childWindow->setRect(650, 100, 300, 300);
+
+		childWindowButton.reset(new wz::Button(childWindow.get(), "Another Button"));
+		childWindowButton->setPosition(20, 20);
+
+		childList.reset(new wz::List(childWindow.get(), listData, 17));
+		childList->setRect(20, 70, 150, 150);
+
+		childCombo.reset(new wz::Combo(childWindow.get(), listData, 17));
+		childCombo->setRect(20, 240, 150, 20);
+
+		childWindow2.reset(new wz::Window(desktop.get(), "Window #2"));
+		childWindow2->setRect(800, 500, 200, 200);
+	}
+
+	std::auto_ptr<wz::Desktop> desktop;
+	std::auto_ptr<wz::Button> button;
+	std::auto_ptr<wz::Checkbox> checkbox;
+	std::auto_ptr<wz::GroupBox> groupBox;
+	std::auto_ptr<wz::Scroller> scroller;
+	std::auto_ptr<wz::Label> label;
+	std::auto_ptr<wz::Scroller> scrollerHorizontal;
+	std::auto_ptr<wz::List> list;
+	std::auto_ptr<wz::Tabbed> tabbed;
+	std::auto_ptr<wz::Button> secondTabPageButton;
+	std::auto_ptr<wz::Combo> combo;
+	std::auto_ptr<wz::Combo> combo2;
+	std::auto_ptr<wz::Window> childWindow;
+	std::auto_ptr<wz::Button> childWindowButton;
+	std::auto_ptr<wz::List> childList;
+	std::auto_ptr<wz::Combo> childCombo;
+	std::auto_ptr<wz::Window> childWindow2;
+};
+
 static void ShowError(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
@@ -88,96 +191,15 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
 	// Create the wzgl renderer.
-	wzRenderer *wzRenderer = wzgl_create_renderer();
+	wzRenderer *renderer = wzgl_create_renderer();
 
-	if (!wzRenderer)
+	if (!renderer)
 	{
 		ShowError(wzgl_get_error());
 		return 1;
 	}
 
-	// Create wzcpp objects.
-	wz::Desktop desktop(wzRenderer);
-	desktop.setSize(windowWidth, windowHeight);
-
-	wz::Button button(&desktop, "Test Button");
-	button.setPosition(100, 100);
-
-	wzRect buttonRect = button.getRect();
-	wz::Checkbox checkbox(&desktop, "Toggle me!");
-	checkbox.setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
-
-	wz::GroupBox groupBox(&desktop, "Test GroupBox");
-	groupBox.setPosition(100, 300);
-
-	wz::Scroller scroller(&desktop, WZ_SCROLLER_VERTICAL, 20, 10, 100);
-	scroller.setRect(300, 50, 16, 200);
-
-	wz::Label scrollerLabel(&desktop);
-	scrollerLabel.setTextColor(255, 128, 128);
-	scrollerLabel.setPosition(350, 50);
-
-	wz::Scroller scrollerHorizontal(&desktop, WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
-	scrollerHorizontal.setRect(500, 50, 200, 16);
-
-	wz::Label scrollerHorizontalLabel(&desktop);
-	scrollerHorizontalLabel.setTextColor(128, 128, 255);
-	scrollerHorizontalLabel.setPosition(500, 100);
-
-	const char *listData[17] =
-	{
-		"Monday",
-		"Tuesday",
-		"Wednesday",
-		"Thursday",
-		"Friday",
-		"Saturday",
-		"Sunday",
-		"One",
-		"Two",
-		"Three",
-		"Four",
-		"Five",
-		"Six",
-		"Seven",
-		"Eight",
-		"Nine",
-		"Ten"
-	};
-
-	wz::List list(&desktop, listData, 17);
-	list.setRect(400, 300, 150, 150);
-
-	wz::Tabbed tabbed(&desktop);
-	tabbed.setRect(350, 500, 200, 250);
-	wz::TabPage *firstTabPage = tabbed.addTab("Tab 1");
-	wz::TabPage *secondTabPage = tabbed.addTab("Another Tab");
-	tabbed.addTab("TabTabTab");
-
-	wz::Button secondTabPageButton(secondTabPage, "Button Button Button");
-	secondTabPageButton.setPosition(10, 10);
-
-	wz::Combo combo(&desktop, listData, 17);
-	combo.setRect(800, 50, 150, 20);
-
-	wz::Combo combo2(firstTabPage, listData, 17);
-	combo2.setRect(10, 10, 150, 20);
-
-	wz::Window childWindow(&desktop, "Test Window");
-	childWindow.setRect(650, 100, 300, 300);
-
-	wz::Button childWindowButton(&childWindow, "Another Button");
-	childWindowButton.setPosition(20, 20);
-
-	wz::List childList(&childWindow, listData, 17);
-	childList.setRect(20, 70, 150, 150);
-
-	wz::Combo childCombo(&childWindow, listData, 17);
-	childCombo.setRect(20, 240, 150, 20);
-
-	wz::Window childWindow2(&desktop, "Window #2");
-	childWindow2.setRect(800, 500, 200, 200);
-
+	GUI gui(windowWidth, windowHeight, renderer);
 	uint32_t lastTime = SDL_GetTicks();
 	float accumulatedTime = 0;
 
@@ -196,23 +218,23 @@ int main(int argc, char **argv)
 			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
 				glViewport(0, 0, e.window.data1, e.window.data2);
-				desktop.setSize(e.window.data1, e.window.data2);
+				gui.desktop->setSize(e.window.data1, e.window.data2);
 			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{
-				desktop.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+				gui.desktop->mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{
-				desktop.mouseButtonDown(e.button.button, e.button.x, e.button.y);
+				gui.desktop->mouseButtonDown(e.button.button, e.button.x, e.button.y);
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
-				desktop.mouseButtonUp(e.button.button, e.button.x, e.button.y);
+				gui.desktop->mouseButtonUp(e.button.button, e.button.x, e.button.y);
 			}
 			else if (e.type == SDL_MOUSEWHEEL)
 			{
-				desktop.mouseWheelMove(e.wheel.x, e.wheel.y);
+				gui.desktop->mouseWheelMove(e.wheel.x, e.wheel.y);
 			}
 		}
 
@@ -226,17 +248,13 @@ int main(int argc, char **argv)
 		while (accumulatedTime > frameTime)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-			desktop.draw();
+			gui.desktop->draw();
 			SDL_GL_SwapWindow(window);
-			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)desktop.getWidget())]);
-
-			scrollerLabel.setText("Scroll value: %d", scroller.getValue());
-			scrollerHorizontalLabel.setText("Scroll value: %d", scrollerHorizontal.getValue());
-
+			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)gui.desktop->getWidget())]);
 			accumulatedTime -= frameTime;
 		}
 	}
 
-	wzgl_destroy_renderer(wzRenderer);
+	wzgl_destroy_renderer(renderer);
 	return 0;
 }
