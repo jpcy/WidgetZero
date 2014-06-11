@@ -129,6 +129,18 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 	wz_widget_set_rect(widget, rect);
 }
 
+int wz_widget_get_width(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->rect.w;
+}
+
+int wz_widget_get_height(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->rect.h;
+}
+
 wzSize wz_widget_get_size(const struct wzWidget *widget)
 {
 	wzSize size;
@@ -264,6 +276,32 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	wz_arr_push(widget->children, child);
 }
 
+void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
+{
+	int i, deleteIndex;
+
+	assert(widget);
+	assert(child);
+
+	// Ensure the child is actually a child of widget before destroying it.
+	deleteIndex = -1;
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		if (widget->children[i] == child)
+		{
+			deleteIndex = i;
+			break;
+		}
+	}
+
+	if (deleteIndex == -1)
+		return;
+
+	wz_arr_delete(widget->children, deleteIndex);
+	wz_widget_destroy(child);
+}
+
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
 {
 	assert(widget);
@@ -308,7 +346,7 @@ wzPosition wz_widget_get_offset(const struct wzWidget *widget)
 		offset.x = rect.x;
 		offset.y = rect.y;
 	}
-	else if (widget->type != WZ_TYPE_WINDOW)
+	else if (widget->type != WZ_TYPE_WINDOW && !widget->ignoreDesktopContentRect)
 	{
 		wzRect rect = wz_desktop_get_content_rect(widget->desktop);		
 		offset.x = rect.x;
@@ -407,4 +445,22 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value)
 {
 	assert(widget);
 	widget->inputNotClippedToParent = !value;
+}
+
+void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata)
+{
+	assert(widget);
+	widget->internalMetadata = metadata;
+}
+
+void *wz_widget_get_internal_metadata(struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->internalMetadata;
+}
+
+void wz_widget_set_ignore_desktop_content_rect(struct wzWidget *widget, bool value)
+{
+	assert(widget);
+	widget->ignoreDesktopContentRect = value;
 }

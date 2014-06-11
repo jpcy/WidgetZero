@@ -71,7 +71,8 @@ enum
 	// Widgets can use this range to draw on top over widgets with default draw priority.
 	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START,
 	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_END = WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START + 16,
-
+	WZ_DRAW_PRIORITY_DOCK_TAB_BAR,
+	WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON,
 	WZ_DRAW_PRIORITY_WINDOW_START,
 	WZ_DRAW_PRIORITY_WINDOW_END = WZ_DRAW_PRIORITY_WINDOW_START + 256,
 	WZ_DRAW_PRIORITY_COMBO_DROPDOWN,
@@ -80,23 +81,18 @@ enum
 	WZ_DRAW_PRIORITY_MAX = 1024
 };
 
-typedef enum
-{
-	WZ_DOCK_POSITION_NONE = -1,
-	WZ_DOCK_POSITION_NORTH,
-	WZ_DOCK_POSITION_SOUTH,
-	WZ_DOCK_POSITION_EAST,
-	WZ_DOCK_POSITION_WEST,
-	WZ_NUM_DOCK_POSITIONS
-}
-wzDockPosition;
-
 struct wzWidget
 {
 	wzWidgetType type;
 	int drawPriority;
 	wzRect rect;
+
+	// Like metadata, but used internally.
+	void *internalMetadata;
+
+	// User-set metadata.
 	void *metadata;
+
 	bool hover;
 
 	// Don't draw this widget.
@@ -114,6 +110,8 @@ struct wzWidget
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;
+
+	bool ignoreDesktopContentRect;
 
 	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget.
 	struct wzWindow *window;
@@ -170,6 +168,11 @@ int wz_widget_get_draw_priority(const struct wzWidget *widget);
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
 
 void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
+
+void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
+void *wz_widget_get_internal_metadata(struct wzWidget *widget);
+
+void wz_widget_set_ignore_desktop_content_rect(struct wzWidget *widget, bool value);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 

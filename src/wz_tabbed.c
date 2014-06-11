@@ -84,7 +84,7 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent e)
 	// Set the corresponding page to visible, hide all the others.
 	for (i = 0; i < wz_arr_len(tabbed->pages); i++)
 	{
-		wz_widget_set_visible(tabbed->pages[i].page, tabbed->pages[i].tab == e.tabBar.selectedTab);
+		wz_widget_set_visible(tabbed->pages[i].page, tabbed->pages[i].tab == e.tabBar.tab);
 	}
 }
 

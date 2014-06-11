@@ -34,6 +34,16 @@ static void DrawWidget(wzWidget *widget, wzRect clip)
 	((Widget *)wz_widget_get_metadata(widget))->draw(clip);
 }
 
+static void HandleEvent(wzEvent e)
+{
+	void *metadata = wz_widget_get_metadata(e.base.widget);
+
+	if (metadata)
+	{
+		((Widget *)metadata)->handleEvent(e);
+	}
+}
+
 wzRect Widget::getRect() const
 {
 	return wz_widget_get_absolute_rect(getWidget());
@@ -74,12 +84,26 @@ Desktop::Desktop(wzRenderer *renderer)
 	desktop_ = wz_desktop_create();
 	renderer_ = renderer;
 	wz_widget_set_metadata((wzWidget *)desktop_, this);
+	wz_desktop_set_event_callback(desktop_, HandleEvent);
 	wz_desktop_set_draw_dock_icon_callback(desktop_, DrawDockIcon, this);
 	wz_desktop_set_draw_dock_preview_callback(desktop_, DrawDockPreview, this);
+
+	struct wzTabBar **dockTabBars = wz_desktop_get_dock_tab_bars(desktop_);
+
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		dockTabBars_[i] = new DockTabBar(dockTabBars[i]);
+		wz_widget_set_height((wzWidget *)dockTabBars[i], 20);
+	}
 }
 
 Desktop::~Desktop()
 {
+	for (size_t i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		delete dockTabBars_[i];
+	}
+
 	wz_widget_destroy((wzWidget *)desktop_);
 }
 
@@ -143,8 +167,7 @@ Window::Window(Widget *parent, const std::string &title) : title_(title)
 
 	// Calculate header height based on label text plus padding.
 	renderer_->measure_text(renderer_, title_.c_str(), &size.w, &size.h);
-	size.h += 6;
-	wz_window_set_header_height(window_, size.h);
+	wz_window_set_header_height(window_, size.h + 6);
 
 	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
@@ -393,6 +416,55 @@ void TabButton::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
+DockTabBar::DockTabBar(wzTabBar *tabBar) : tabBar_(tabBar)
+{
+	renderer_ = Desktop::fromWidget((wzWidget *)tabBar)->getRenderer();
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
+
+	decrementButton.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_), "<"));
+	wz_widget_set_width((wzWidget *)decrementButton->getWidget(), 14);
+	incrementButton.reset(new Button(wz_tab_bar_get_increment_button(tabBar_), ">"));
+	wz_widget_set_width((wzWidget *)incrementButton->getWidget(), 14);
+}
+
+DockTabBar::~DockTabBar()
+{
+	for (size_t i = 0; i < tabs_.size(); i++)
+	{
+		delete tabs_[i];
+	}
+}
+
+void DockTabBar::draw(wzRect clip)
+{
+}
+
+void DockTabBar::handleEvent(wzEvent e)
+{
+	if (e.base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
+	{
+		// Wrap the added tab (e.tabBar.tab) in a new TabButton instance.
+		Window *window = (Window *)wz_widget_get_metadata((wzWidget *)wz_desktop_get_dock_tab_window(wz_widget_get_desktop((wzWidget *)tabBar_), e.tabBar.tab));
+		tabs_.push_back(new TabButton(e.tabBar.tab, window->getTitle()));
+	}
+	else if (e.base.type == WZ_EVENT_TAB_BAR_TAB_REMOVED)
+	{
+		// Remove the corresponding TabButton instance.
+		for (size_t i = 0; i < tabs_.size(); i++)
+		{
+			if (tabs_[i]->getWidget() == (wzWidget *)e.tabBar.tab)
+			{
+				TabButton *tab = tabs_[i];
+				tabs_.erase(tabs_.begin() + i);
+				delete tab;
+				return;
+			}
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+
 TabBar::TabBar(Widget *parent)
 {
 	renderer_ = parent->getRenderer();
@@ -404,7 +476,7 @@ TabBar::TabBar(Widget *parent)
 TabBar::TabBar(wzTabBar *tabBar) : tabBar_(tabBar)
 {
 	renderer_ = Desktop::fromWidget((wzWidget *)tabBar)->getRenderer();
-	initialize();	
+	initialize();
 }
 
 TabBar::~TabBar()

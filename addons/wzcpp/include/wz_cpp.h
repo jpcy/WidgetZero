@@ -33,6 +33,7 @@ SOFTWARE.
 namespace wz {
 
 class List;
+class DockTabBar;
 
 class Widget
 {
@@ -41,6 +42,7 @@ public:
 	virtual const wzWidget *getWidget() const = 0;
 	virtual wzWidget *getWidget() = 0;
 	virtual void draw(wzRect clip) {};
+	virtual void handleEvent(wzEvent e) {};
 	wzRect getRect() const;
 	void setPosition(int x, int y);
 	void setRect(int x, int y, int w, int h);
@@ -82,6 +84,7 @@ public:
 
 private:
 	wzDesktop *desktop_;
+	DockTabBar *dockTabBars_[WZ_NUM_DOCK_POSITIONS];
 };
 
 class Window : public Widget
@@ -90,6 +93,7 @@ public:
 	Window(Widget *parent, const std::string &title);
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
+	std::string getTitle() const { return title_; }
 	void draw(wzRect clip);
 	
 private:
@@ -222,6 +226,23 @@ public:
 private:
 	wzButton *button_;
 	std::string label_;
+};
+
+class DockTabBar : public Widget
+{
+public:
+	DockTabBar(wzTabBar *tabBar);
+	~DockTabBar();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
+	void draw(wzRect clip);
+	void handleEvent(wzEvent e);
+
+private:
+	wzTabBar *tabBar_;
+	std::vector<TabButton *> tabs_;
+	std::auto_ptr<Button> decrementButton;
+	std::auto_ptr<Button> incrementButton;
 };
 
 class TabBar : public Widget

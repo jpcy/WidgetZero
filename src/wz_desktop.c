@@ -56,6 +56,11 @@ struct wzDesktop
 
 	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
 	wzDockPosition windowDockPosition;
+
+	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
+	struct wzTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
+
+	bool ignoreDockTabBarChangedEvent;
 };
 
 /*
@@ -94,36 +99,126 @@ static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, i
 /*
 ================================================================================
 
-DOCKING
+DOCK TAB BARS
 
 ================================================================================
 */
 
-static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *window)
+struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop)
 {
-	int i;
+	assert(desktop);
+	return desktop->dockTabBars;
+}
+
+struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab)
+{
+	assert(desktop);
+	assert(tab);
+	return (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)tab);
+}
+
+static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockPosition)
+{
+	struct wzTabBar *tabBar;
 
 	assert(desktop);
-	assert(window);
+	tabBar = desktop->dockTabBars[dockPosition];
 
-	// Hide any other windows docked at the same position.
-	for (i = 0; i < wz_arr_len(desktop->dockedWindows[desktop->windowDockPosition]); i++)
+	if (wz_arr_len(desktop->dockedWindows[dockPosition]) < 2)
 	{
-		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[desktop->windowDockPosition][i], false);
+		// Hide the tab bar.
+		wz_widget_set_visible((struct wzWidget *)tabBar, false);
+	}
+	else
+	{
+		wzRect windowRect;
+		int tabBarHeight;
+		int i;
+
+		// Clear the tabs.
+		wz_tab_bar_clear_tabs(tabBar);
+
+		// Resize the tab bar to match the window(s) at this dock position. Just use the first window, doesn't matter which.
+		windowRect = wz_widget_get_rect((struct wzWidget *)desktop->dockedWindows[dockPosition][0]);
+		tabBarHeight = wz_widget_get_height((struct wzWidget *)tabBar);
+
+		// Assume space has already been made for the tab bar below the window.
+		wz_widget_set_rect_args((struct wzWidget *)tabBar, windowRect.x, windowRect.y + windowRect.h, windowRect.w, tabBarHeight);
+
+		// Add one tab for each window.
+		for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
+		{
+			// Create the tab before adding it to the tab bar (i.e. use wz_tab_bar_add_existing_tab instead of wz_tab_bar_add_tab), so we have the opportunity to set tab internal metadata before adding the tab invokes a WZ_EVENT_TAB_BAR_TAB_ADDED event.
+			struct wzButton *tab = wz_button_create(desktop);
+
+			// Set the tab internal metadata to the window, so the consumer can, for example, set the tab label to the window title. See wz_desktop_get_dock_tab_window.
+			wz_widget_set_internal_metadata((struct wzWidget *)tab, desktop->dockedWindows[dockPosition][i]);
+
+			wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)tab, true);
+
+			wz_tab_bar_add_existing_tab(tabBar, tab);
+
+			// If this window is selected (visible), select the corresponding tab.
+			if (wz_widget_get_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][i]))
+			{
+				wz_tab_bar_select_tab(tabBar, tab);
+			}
+		}
+
+		// Show the tab bar.
+		wz_widget_set_visible((struct wzWidget *)tabBar, true);
+	}
+}
+
+// Used by all dock tab bars.
+static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
+{
+	struct wzDesktop *desktop;
+	wzDockPosition dockPosition;
+	int i;
+	struct wzWindow *window;
+
+	desktop = e.base.widget->desktop;
+
+	if (desktop->ignoreDockTabBarChangedEvent)
+		return;
+
+	// Figure out which dock position this tab bar is at.
+	dockPosition = WZ_DOCK_POSITION_NONE;
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		if (desktop->dockTabBars[i] == e.tabBar.tabBar)
+		{
+			dockPosition = i;
+			break;
+		}
 	}
 
-	// Dock the window.
-	wz_arr_push(desktop->dockedWindows[desktop->windowDockPosition], window);
+	assert(dockPosition != WZ_DOCK_POSITION_NONE);
 
-	// Inform the window it is being docked.
-	wz_window_dock(window);
+	// Get the window corresponding to the tab.
+	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e.tabBar.tab);
 
-	// Resize the window to match the dock preview.
-	wz_widget_set_rect((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
+	// Set the window to visible, hide all the other windows at this dock position.
+	wz_widget_set_visible((struct wzWidget *)window, true);
 
-	// Docked windows affect the desktop content rect, so update it.
-	wz_desktop_update_content_rect(desktop);
+	for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
+	{
+		if (desktop->dockedWindows[dockPosition][i] == window)
+			continue;
+
+		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][i], false);
+	}
 }
+
+/*
+================================================================================
+
+DOCKING
+
+================================================================================
+*/
 
 // The docked window "window" has been resized, update the rects of other windows docked at the same position.
 void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window)
@@ -150,10 +245,122 @@ void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWi
 					wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][k], rect);
 				}
 
+				// Update the tab bar too.
+				wz_widget_set_rect_args((struct wzWidget *)desktop->dockTabBars[i], rect.x, rect.y + rect.h, rect.w, wz_widget_get_height((struct wzWidget *)desktop->dockTabBars[i]));
 				return;
 			}
 		}
 	}
+}
+
+// Update the rects of docked windows and dock tab bars.
+static void wz_desktop_update_docking_rects(struct wzDesktop *desktop)
+{
+	wzDockPosition i;
+
+	assert(desktop);
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		int nWindows;
+		wzRect tabBarRect, windowRect;
+		int j;
+
+		nWindows = wz_arr_len(desktop->dockedWindows[i]);
+
+		if (nWindows == 0)
+			continue;
+
+		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
+		windowRect = wz_widget_get_rect((struct wzWidget *)desktop->dockedWindows[i][0]);
+
+		switch (i)
+		{
+		case WZ_DOCK_POSITION_NORTH:
+			windowRect.w = desktop->base.rect.w;
+			break;
+		case WZ_DOCK_POSITION_SOUTH:
+			windowRect.y = desktop->base.rect.h - windowRect.h;
+			windowRect.w = desktop->base.rect.w;
+			break;
+		case WZ_DOCK_POSITION_EAST:
+			windowRect.x = desktop->base.rect.w - windowRect.w;
+			windowRect.h = desktop->base.rect.h;
+			break;
+		case WZ_DOCK_POSITION_WEST:
+			windowRect.h = desktop->base.rect.h;
+			break;
+		}
+
+		// Update tab bar rect. Adjust window rect to make space for the tab bar.
+		if (nWindows > 1)
+		{
+			tabBarRect = wz_widget_get_rect((struct wzWidget *)desktop->dockTabBars[i]);
+
+			switch (i)
+			{
+			case WZ_DOCK_POSITION_NORTH:
+				tabBarRect.w = desktop->base.rect.w;
+				break;
+			case WZ_DOCK_POSITION_SOUTH:
+				tabBarRect.y = desktop->base.rect.h - tabBarRect.h;
+				tabBarRect.w = desktop->base.rect.w;
+				windowRect.h -= tabBarRect.h;
+				break;
+			case WZ_DOCK_POSITION_EAST:
+				tabBarRect.x = desktop->base.rect.w - windowRect.w;
+				tabBarRect.y = desktop->base.rect.h - tabBarRect.h;
+				windowRect.h -= tabBarRect.h;
+				break;
+			case WZ_DOCK_POSITION_WEST:
+				tabBarRect.y = desktop->base.rect.h - tabBarRect.h;
+				windowRect.h -= tabBarRect.h;
+				break;
+			}
+
+			wz_widget_set_rect((struct wzWidget *)desktop->dockTabBars[i], tabBarRect);
+		}
+
+		// Set window rects.
+		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
+		{
+			wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][j], windowRect);
+		}
+	}
+}
+
+static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *window)
+{
+	int i;
+
+	assert(desktop);
+	assert(window);
+
+	// Hide any other windows docked at the same position.
+	for (i = 0; i < wz_arr_len(desktop->dockedWindows[desktop->windowDockPosition]); i++)
+	{
+		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[desktop->windowDockPosition][i], false);
+	}
+
+	// Dock the window.
+	wz_arr_push(desktop->dockedWindows[desktop->windowDockPosition], window);
+
+	// Inform the window it is being docked.
+	wz_window_dock(window);
+
+	// Resize the window to match the dock preview.
+	wz_widget_set_rect((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
+
+	// Resize the other windows docked at this position to match.
+	wz_desktop_update_docked_window_rect(desktop, window);
+
+	// Refresh the tab bar for this dock position.
+	desktop->ignoreDockTabBarChangedEvent = true;
+	wz_desktop_refresh_dock_tab_bar(desktop, desktop->windowDockPosition);
+	desktop->ignoreDockTabBarChangedEvent = false;
+
+	// Docked windows affect the desktop content rect, so update it.
+	wz_desktop_update_content_rect(desktop);
 }
 
 wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window)
@@ -180,11 +387,16 @@ wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, st
 
 void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window)
 {
-	wzDockPosition i;
-	int j;
+	wzDockPosition dockPosition, i;
+	int j, windowIndex;
+	int nDockedWindows;
 
 	assert(desktop);
 	assert(window);
+
+	// Find the dock position for the window, and the window index.
+	dockPosition = WZ_DOCK_POSITION_NONE;
+	windowIndex = -1;
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -192,16 +404,45 @@ void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window
 		{
 			if (desktop->dockedWindows[i][j] == window)
 			{
-				const bool visible = wz_widget_get_visible((const struct wzWidget *)window);
-				wz_arr_delete(desktop->dockedWindows[i], j);
+				dockPosition = i;
+				windowIndex = j;
+				break;
+			}
+		}
 
-				// If there are other windows docked at this position, make sure one is visible after removing this window.
-				if (visible && wz_arr_len(desktop->dockedWindows[i]) > 0)
-				{
-					wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[i][0], true);
-				}
+		if (dockPosition != WZ_DOCK_POSITION_NONE)
+			break;
+	}
 
-				return;
+	if (windowIndex == -1)
+		return;
+
+	wz_arr_delete(desktop->dockedWindows[i], windowIndex);
+	nDockedWindows = wz_arr_len(desktop->dockedWindows[dockPosition]);
+
+	// If there are other windows docked at this position, make sure one is visible after removing this window.
+	if (wz_widget_get_visible((const struct wzWidget *)window) && nDockedWindows > 0)
+	{
+		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][0], true);
+	}
+
+	// Refresh the tab bar for this dock position.
+	wz_desktop_refresh_dock_tab_bar(desktop, dockPosition);
+
+	// If the dock tab bar is hidden, resize the windows at this dock position to reclaim the space it used.
+	if (!wz_widget_get_visible((const struct wzWidget *)desktop->dockTabBars[dockPosition]))
+	{
+		for (j = 0; j < wz_arr_len(desktop->dockedWindows[dockPosition]); j++)
+		{
+			struct wzWidget *widget = (struct wzWidget *)desktop->dockedWindows[dockPosition][j];
+
+			if (dockPosition == WZ_DOCK_POSITION_SOUTH)
+			{
+				wz_widget_set_height(widget, widget->rect.h + (desktop->base.rect.h - (widget->rect.y + widget->rect.h)));
+			}
+			else if (dockPosition == WZ_DOCK_POSITION_EAST || dockPosition == WZ_DOCK_POSITION_WEST)
+			{
+				wz_widget_set_height(widget, desktop->base.rect.h);
 			}
 		}
 	}
@@ -303,6 +544,8 @@ static void wz_desktop_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 
 static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDockPosition dockPosition)
 {
+	int nDockedWindows;
+
 	// e.g. north dock max height is desktop height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
@@ -310,9 +553,18 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDock
 	assert(desktop->movingWindow);
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
-	if (wz_arr_len(desktop->dockedWindows[dockPosition]) > 0)
+	nDockedWindows = wz_arr_len(desktop->dockedWindows[dockPosition]);
+
+	if (nDockedWindows > 0)
 	{
 		wzRect rect = wz_widget_get_rect((struct wzWidget *)desktop->dockedWindows[dockPosition][0]);
+
+		// If there's exactly one window already docked at this position, leave room for the dock tab bar.
+		if (nDockedWindows == 1)
+		{
+			rect.h -= wz_widget_get_height((struct wzWidget *)desktop->dockTabBars[dockPosition]);
+		}
+
 		wz_widget_set_rect((struct wzWidget *)desktop->dockPreview, rect);
 	}
 	else
@@ -612,37 +864,6 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	}
 
 	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
-
-	// TEMP HACK: if the lockInputWindow is docked, and there are other windows docked at the same position, switch to the next window on right click.
-	if (mouseButton == 3 && desktop->lockInputWindow)
-	{
-		wzDockPosition dock;
-		int i;
-
-		dock = wz_desktop_get_window_dock_position(desktop, desktop->lockInputWindow);
-
-		if (dock == WZ_DOCK_POSITION_NONE)
-			return;
-
-		if (wz_arr_len(desktop->dockedWindows[dock]) < 2)
-			return;
-
-		for (i = 0; i < wz_arr_len(desktop->dockedWindows[dock]); i++)
-		{
-			if (wz_widget_get_visible((const struct wzWidget *)desktop->dockedWindows[dock][i]))
-			{
-				wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dock][i], false);
-				break;
-			}
-		}
-
-		i++;
-
-		if (i >= wz_arr_len(desktop->dockedWindows[dock]))
-			i = 0;
-
-		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dock][i], true);
-	}
 }
 
 /*
@@ -974,53 +1195,13 @@ MISC.
 static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzDesktop *desktop;
-	int i;
 
 	assert(widget);
 	desktop = (struct wzDesktop *)widget;
 	desktop->base.rect.w = rect.w;
 	desktop->base.rect.h = rect.h;
 	wz_desktop_update_dock_icon_positions(desktop);
-
-	// Move docked windows.
-	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
-	{
-		struct wzWidget *widget = desktop->base.children[i];
-
-		if (widget->type == WZ_TYPE_WINDOW)
-		{
-			wzDockPosition dockPosition;
-			wzRect windowRect;
-			
-			dockPosition = wz_desktop_get_window_dock_position(desktop, (struct wzWindow *)widget);
-
-			if (dockPosition == WZ_DOCK_POSITION_NONE)
-				continue;
-
-			windowRect = wz_widget_get_rect(widget);
-
-			switch (dockPosition)
-			{
-			case WZ_DOCK_POSITION_NORTH:
-				windowRect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_POSITION_SOUTH:
-				windowRect.y = desktop->base.rect.h - windowRect.h;
-				windowRect.w = desktop->base.rect.w;
-				break;
-			case WZ_DOCK_POSITION_EAST:
-				windowRect.x = desktop->base.rect.w - windowRect.w;
-				windowRect.h = desktop->base.rect.h;
-				break;
-			case WZ_DOCK_POSITION_WEST:
-				windowRect.h = desktop->base.rect.h;
-				break;
-			}
-
-			wz_widget_set_rect(widget, windowRect);
-		}
-	}
-
+	wz_desktop_update_docking_rects(desktop);
 	wz_desktop_update_content_rect(desktop);
 }
 
@@ -1057,6 +1238,27 @@ struct wzDesktop *wz_desktop_create()
 	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
 	wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+
+	// Create dock tab bars.
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		struct wzWidget *widget;
+
+		desktop->dockTabBars[i] = wz_tab_bar_create(desktop);
+		widget = (struct wzWidget *)desktop->dockTabBars[i];
+		wz_widget_set_visible(widget, false);
+		wz_widget_set_ignore_desktop_content_rect(widget, true);
+		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
+		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+		wz_tab_bar_add_callback_tab_changed(desktop->dockTabBars[i], wz_desktop_dock_tab_bar_tab_changed);
+
+		// Override scroll button draw priority.
+		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
+		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
+
+		wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)wz_tab_bar_get_decrement_button(desktop->dockTabBars[i]), true);
+		wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)wz_tab_bar_get_increment_button(desktop->dockTabBars[i]), true);
+	}
 
 	return desktop;
 }

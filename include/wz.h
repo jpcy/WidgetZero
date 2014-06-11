@@ -97,7 +97,9 @@ typedef enum
 	WZ_EVENT_BUTTON_CLICKED,
 	WZ_EVENT_LIST_ITEM_SELECTED,
 	WZ_EVENT_SCROLLER_VALUE_CHANGED,
-	WZ_EVENT_TAB_BAR_TAB_CHANGED
+	WZ_EVENT_TAB_BAR_TAB_CHANGED,
+	WZ_EVENT_TAB_BAR_TAB_ADDED,
+	WZ_EVENT_TAB_BAR_TAB_REMOVED
 }
 wzWidgetEventType;
 
@@ -136,7 +138,7 @@ typedef struct
 {
 	wzWidgetEventType type;
 	struct wzTabBar *tabBar;
-	struct wzButton *selectedTab;
+	struct wzButton *tab;
 }
 wzTabBarEvent;
 
@@ -162,6 +164,17 @@ typedef enum
 	WZ_NUM_CURSORS
 }
 wzCursor;
+
+typedef enum
+{
+	WZ_DOCK_POSITION_NONE = -1,
+	WZ_DOCK_POSITION_NORTH,
+	WZ_DOCK_POSITION_SOUTH,
+	WZ_DOCK_POSITION_EAST,
+	WZ_DOCK_POSITION_WEST,
+	WZ_NUM_DOCK_POSITIONS
+}
+wzDockPosition;
 
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -189,6 +202,8 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
 void wz_desktop_draw(struct wzDesktop *desktop);
+struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop);
+struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
 wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
@@ -201,6 +216,8 @@ void wz_widget_set_width(struct wzWidget *widget, int w);
 void wz_widget_set_height(struct wzWidget *widget, int h);
 void wz_widget_set_size_args(struct wzWidget *widget, int w, int h);
 void wz_widget_set_size(struct wzWidget *widget, wzSize size);
+int wz_widget_get_width(const struct wzWidget *widget);
+int wz_widget_get_height(const struct wzWidget *widget);
 wzSize wz_widget_get_size(const struct wzWidget *widget);
 void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h);
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
@@ -216,6 +233,7 @@ void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 // Determine whether the widget is an descendant of a widget with the provided type.
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
@@ -317,9 +335,13 @@ void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEvent
 
 struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
 struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
+struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzButton *tab);
+void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab);
+void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
+void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
 
 struct wzTabbed *wz_tabbed_create(struct wzDesktop *desktop);

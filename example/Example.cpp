@@ -112,8 +112,11 @@ public:
 		childCombo.reset(new wz::Combo(childWindow.get(), listData, 17));
 		childCombo->setRect(20, 240, 150, 20);
 
-		childWindow2.reset(new wz::Window(desktop.get(), "Window #2"));
-		childWindow2->setRect(800, 500, 200, 200);
+		childWindow2.reset(new wz::Window(desktop.get(), "Window with a long title"));
+		childWindow2->setRect(590, 500, 200, 200);
+
+		childWindow3.reset(new wz::Window(desktop.get(), "Window 3"));
+		childWindow3->setRect(800, 500, 200, 200);
 	}
 
 	std::auto_ptr<wz::Desktop> desktop;
@@ -133,6 +136,7 @@ public:
 	std::auto_ptr<wz::List> childList;
 	std::auto_ptr<wz::Combo> childCombo;
 	std::auto_ptr<wz::Window> childWindow2;
+	std::auto_ptr<wz::Window> childWindow3;
 };
 
 static void ShowError(const char *message)
