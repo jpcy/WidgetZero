@@ -204,6 +204,7 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
 void wz_desktop_draw(struct wzDesktop *desktop);
 struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop);
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
+struct wzWidget *wz_desktop_get_content_widget(struct wzDesktop *desktop);
 wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);

@@ -69,6 +69,7 @@ public:
 	~Desktop();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)desktop_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)desktop_; }
+	virtual wzWidget *getContentWidget() { return wz_desktop_get_content_widget(desktop_); }
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);

@@ -30,7 +30,7 @@ struct wzDesktop
 {
 	struct wzWidget base;
 
-	wzRect contentRect;
+	struct wzWidget *content;
 
 	// Centralized event handler.
 	wzEventCallback handle_event;
@@ -1217,6 +1217,12 @@ struct wzDesktop *wz_desktop_create()
 	desktop->base.desktop = desktop;
 	desktop->base.vtable.set_rect = wz_desktop_set_rect;
 
+	// Create content widget.
+	desktop->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
+	memset(desktop->content, 0, sizeof(struct wzWidget));
+	desktop->content->desktop = desktop;
+	wz_widget_add_child_widget((struct wzWidget *)desktop, desktop->content);
+
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -1267,6 +1273,12 @@ void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback ca
 {
 	assert(desktop);
 	desktop->handle_event = callback;
+}
+
+struct wzWidget *wz_desktop_get_content_widget(struct wzDesktop *desktop)
+{
+	assert(desktop);
+	return desktop->content;
 }
 
 wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop)
@@ -1328,45 +1340,42 @@ void wz_invoke_event(wzEvent e, wzEventCallback *callbacks)
 	}
 }
 
-wzRect wz_desktop_get_content_rect(struct wzDesktop *desktop)
-{
-	assert(desktop);
-	return desktop->contentRect;
-}
-
 void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 {
+	wzRect rect;
 	wzDockPosition i;
 
 	assert(desktop);
-	desktop->contentRect = desktop->base.rect;
+	rect = desktop->base.rect;
 
 	// Adjust the content rect based on docked windows.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		wzRect rect;
+		wzRect windowRect;
 
 		if (wz_arr_len(desktop->dockedWindows[i]) == 0)
 			continue;
 
-		rect = wz_widget_get_rect((struct wzWidget *)desktop->dockedWindows[i][0]);
+		windowRect = wz_widget_get_rect((struct wzWidget *)desktop->dockedWindows[i][0]);
 
 		switch (i)
 		{
 		case WZ_DOCK_POSITION_NORTH:
-			desktop->contentRect.y += rect.h;
-			desktop->contentRect.h -= rect.h;
+			rect.y += windowRect.h;
+			rect.h -= windowRect.h;
 			break;
 		case WZ_DOCK_POSITION_SOUTH:
-			desktop->contentRect.h -= rect.h;
+			rect.h -= windowRect.h;
 			break;
 		case WZ_DOCK_POSITION_EAST:
-			desktop->contentRect.w -= rect.w;
+			rect.w -= windowRect.w;
 			break;
 		case WZ_DOCK_POSITION_WEST:
-			desktop->contentRect.x += rect.w;
-			desktop->contentRect.w -= rect.w;
+			rect.x += windowRect.w;
+			rect.w -= windowRect.w;
 			break;
 		}
 	}
+
+	wz_widget_set_rect(desktop->content, rect);
 }

@@ -358,7 +358,7 @@ wzPosition wz_widget_get_offset(const struct wzWidget *widget)
 	}
 	else if (widget->type != WZ_TYPE_WINDOW && !widget->ignoreDesktopContentRect)
 	{
-		wzRect rect = wz_desktop_get_content_rect(widget->desktop);		
+		wzRect rect = wz_widget_get_rect(wz_desktop_get_content_widget(widget->desktop));
 		offset.x = rect.x;
 		offset.y = rect.y;
 	}
