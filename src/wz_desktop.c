@@ -154,8 +154,6 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 			// Set the tab internal metadata to the window, so the consumer can, for example, set the tab label to the window title. See wz_desktop_get_dock_tab_window.
 			wz_widget_set_internal_metadata((struct wzWidget *)tab, desktop->dockedWindows[dockPosition][i]);
 
-			wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)tab, true);
-
 			wz_tab_bar_add_existing_tab(tabBar, tab);
 
 			// If this window is selected (visible), select the corresponding tab.
@@ -1253,7 +1251,6 @@ struct wzDesktop *wz_desktop_create()
 		desktop->dockTabBars[i] = wz_tab_bar_create(desktop);
 		widget = (struct wzWidget *)desktop->dockTabBars[i];
 		wz_widget_set_visible(widget, false);
-		wz_widget_set_ignore_desktop_content_rect(widget, true);
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
 		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
 		wz_tab_bar_add_callback_tab_changed(desktop->dockTabBars[i], wz_desktop_dock_tab_bar_tab_changed);
@@ -1261,9 +1258,6 @@ struct wzDesktop *wz_desktop_create()
 		// Override scroll button draw priority.
 		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
 		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
-
-		wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)wz_tab_bar_get_decrement_button(desktop->dockTabBars[i]), true);
-		wz_widget_set_ignore_desktop_content_rect((struct wzWidget *)wz_tab_bar_get_increment_button(desktop->dockTabBars[i]), true);
 	}
 
 	return desktop;

@@ -82,11 +82,25 @@ void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
 
 wzPosition wz_widget_get_position(const struct wzWidget *widget)
 {
+	wzRect rect;
 	wzPosition pos;
 
 	assert(widget);
-	pos.x = widget->rect.x;
-	pos.y = widget->rect.y;
+	rect = wz_widget_get_rect(widget);
+	pos.x = rect.x;
+	pos.y = rect.y;
+	return pos;
+}
+
+wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget)
+{
+	wzRect rect;
+	wzPosition pos;
+
+	assert(widget);
+	rect = wz_widget_get_absolute_rect(widget);
+	pos.x = rect.x;
+	pos.y = rect.y;
 	return pos;
 }
 
@@ -131,23 +145,23 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 
 int wz_widget_get_width(const struct wzWidget *widget)
 {
-	assert(widget);
-	return widget->rect.w;
+	return wz_widget_get_rect(widget).w;
 }
 
 int wz_widget_get_height(const struct wzWidget *widget)
 {
-	assert(widget);
-	return widget->rect.h;
+	return wz_widget_get_rect(widget).h;
 }
 
 wzSize wz_widget_get_size(const struct wzWidget *widget)
 {
+	wzRect rect;
 	wzSize size;
 
 	assert(widget);
-	size.w = widget->rect.w;
-	size.h = widget->rect.h;
+	rect = wz_widget_get_rect(widget);
+	size.w = rect.w;
+	size.h = rect.h;
 	return size;
 }
 
@@ -184,13 +198,16 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget)
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 {
 	wzRect rect;
-	wzPosition offset;
 
 	assert(widget);
-	rect = widget->rect;
-	offset = wz_widget_get_offset(widget);
-	rect.x += offset.x;
-	rect.y += offset.y;
+	rect = wz_widget_get_rect(widget);
+
+	if (widget->parent)
+	{
+		const wzPosition parentPosition = wz_widget_get_absolute_position(widget->parent);
+		rect.x += parentPosition.x;
+		rect.y += parentPosition.y;
+	}
 
 	return rect;
 }
@@ -332,69 +349,6 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 	return widget->window;
 }
 
-wzPosition wz_widget_get_offset(const struct wzWidget *widget)
-{
-	wzPosition offset;
-	const struct wzWidget *ancestor;
-
-	assert(widget);
-
-	// Adjust for desktop or window content rects.
-	if (widget->window)
-	{
-		// TEMP HACK for window content widget.
-		if (widget->parent == (struct wzWidget *)widget->window)
-		{
-			wzRect rect = wz_widget_get_rect((struct wzWidget *)widget->window);
-			offset.x = rect.x;
-			offset.y = rect.y;
-		}
-		else
-		{
-			wzRect rect = wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window));
-			offset.x = rect.x;
-			offset.y = rect.y;
-		}
-	}
-	else if (widget->type != WZ_TYPE_WINDOW && !widget->ignoreDesktopContentRect)
-	{
-		wzRect rect = wz_widget_get_rect(wz_desktop_get_content_widget(widget->desktop));
-		offset.x = rect.x;
-		offset.y = rect.y;
-	}
-	else
-	{
-		offset.x = offset.y = 0;
-	}
-
-	// Adjust for any container widget ancestors.
-	ancestor = widget->parent;
-
-	for (;;)
-	{
-		// Stop when we hit the desktop or window.
-		if (ancestor == NULL || ancestor->type == WZ_TYPE_WINDOW || ancestor->type == WZ_TYPE_DESKTOP)
-			break;
-
-		if (wz_widget_is_container(ancestor))
-		{
-			wzPosition p = wz_widget_get_position(ancestor);
-			offset.x += p.x;
-			offset.y += p.y;
-		}
-
-		ancestor = ancestor->parent;
-	}
-
-	return offset;
-}
-
-bool wz_widget_is_container(const struct wzWidget *widget)
-{
-	assert(widget);
-	return widget->isContainer;
-}
-
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)
 {
 	struct wzWidget *temp = widget;
@@ -467,10 +421,4 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->internalMetadata;
-}
-
-void wz_widget_set_ignore_desktop_content_rect(struct wzWidget *widget, bool value)
-{
-	assert(widget);
-	widget->ignoreDesktopContentRect = value;
 }

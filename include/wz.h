@@ -213,6 +213,7 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
 wzPosition wz_widget_get_position(const struct wzWidget *widget);
+wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget);
 void wz_widget_set_width(struct wzWidget *widget, int w);
 void wz_widget_set_height(struct wzWidget *widget, int h);
 void wz_widget_set_size_args(struct wzWidget *widget, int w, int h);
@@ -223,8 +224,6 @@ wzSize wz_widget_get_size(const struct wzWidget *widget);
 void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h);
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
 wzRect wz_widget_get_rect(const struct wzWidget *widget);
-
-// rect will be absolute - ancestor window position is taken into account.
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
 
 bool wz_widget_get_hover(const struct wzWidget *widget);

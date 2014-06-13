@@ -31,7 +31,10 @@ struct wzList
 {
 	struct wzWidget base;
 	wzBorder itemsBorder;
+
+	// Position is relative to list widget.
 	wzRect itemsRect;
+
 	int itemHeight;
 	int nItems;
 	int firstItem;
@@ -90,8 +93,8 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 static void wz_list_update_items_rect(struct wzList *list)
 {
 	assert(list);
-	list->itemsRect.x = list->base.rect.x + list->itemsBorder.left;
-	list->itemsRect.y = list->base.rect.y + list->itemsBorder.top;
+	list->itemsRect.x = list->itemsBorder.left;
+	list->itemsRect.y = list->itemsBorder.top;
 	list->itemsRect.w = list->base.rect.w - (list->itemsBorder.top + list->itemsBorder.bottom);
 	list->itemsRect.h = list->base.rect.h - (list->itemsBorder.left + list->itemsBorder.right);
 }
@@ -131,7 +134,7 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 	if (!list->base.hover)
 		return;
 
-	// Call wz_list_get_absolute_items_rect instead of using list->itemsRect so the scroller size is excluded and the window position taken into account.
+	// Call wz_list_get_absolute_items_rect instead of using list->itemsRect so the scroller size is excluded and the position is absolute.
 	itemsRect = wz_list_get_absolute_items_rect(list);
 	rect.x = itemsRect.x;
 	rect.y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
@@ -349,7 +352,7 @@ wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 	
 	assert(list);
 	rect = wz_list_get_items_rect(list);
-	offset = wz_widget_get_offset((const struct wzWidget *)list);
+	offset = wz_widget_get_absolute_position((const struct wzWidget *)list);
 	rect.x += offset.x;
 	rect.y += offset.y;
 	

@@ -159,16 +159,16 @@ static void wz_nub_update_rect(struct wzScrollerNub *nub)
 	if (nub->scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
 		scrollSpace = rect.h - decrementButtonSize.h - incrementButtonSize.h - nub->scroller->nubSize;
-		nubRect.x = rect.x;
+		nubRect.x = 0;
 
 		if (nub->scroller->maxValue == 0)
 		{
 			// Max value not set, just display at the top.
-			nubRect.y = rect.y;
+			nubRect.y = 0;
 		}
 		else
 		{
-			nubRect.y = (int)(rect.y + decrementButtonSize.h + scrollSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
+			nubRect.y = (int)(decrementButtonSize.h + scrollSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
 		}
 
 		nubRect.w = rect.w;
@@ -181,14 +181,14 @@ static void wz_nub_update_rect(struct wzScrollerNub *nub)
 		if (nub->scroller->maxValue == 0)
 		{
 			// Max value not set, just display at the left.
-			nubRect.x = rect.x;
+			nubRect.x = 0;
 		}
 		else
 		{
-			nubRect.x = (int)(rect.x + decrementButtonSize.w + scrollSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
+			nubRect.x = (int)(decrementButtonSize.w + scrollSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
 		}
 
-		nubRect.y = rect.y;
+		nubRect.y = 0;
 		nubRect.w = nub->scroller->nubSize;
 		nubRect.h = rect.h;
 	}
@@ -214,8 +214,7 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	widget->rect = rect;
 	
 	// Set button rects.
-	buttonRect.x = rect.x;
-	buttonRect.y = rect.y;
+	buttonRect.x = buttonRect.y = 0;
 
 	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
@@ -232,12 +231,12 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 
 	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
-		buttonRect.y = rect.y + rect.h - buttonRect.h;
+		buttonRect.y = rect.h - buttonRect.h;
 		buttonRect.h = ((struct wzWidget *)scroller->incrementButton)->rect.h;
 	}
 	else
 	{
-		buttonRect.x = rect.x + rect.w - buttonRect.w;
+		buttonRect.x = rect.w - buttonRect.w;
 		buttonRect.w = ((struct wzWidget *)scroller->incrementButton)->rect.w;
 	}
 

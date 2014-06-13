@@ -104,14 +104,9 @@ struct wzWidget
 	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
 	bool inputNotClippedToParent;
 
-	// If true, the absolute positions of any widget ancestors are offset by this widgets position. See wz_widget_get_offset. Used by tabbed widget pages.
-	bool isContainer;
-
 	wzWidgetVtable vtable;
 
 	struct wzDesktop *desktop;
-
-	bool ignoreDesktopContentRect;
 
 	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget.
 	struct wzWindow *window;
@@ -151,11 +146,6 @@ wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, st
 
 void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
 
-// Get the widget position offset based on window or desktop content rects, and the position of any container widget ancestors.
-wzPosition wz_widget_get_offset(const struct wzWidget *widget);
-
-bool wz_widget_is_container(const struct wzWidget *widget);
-
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
 // Also sets all ancestor widgets to the same draw priority.
@@ -169,8 +159,6 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct wzWidget *widget);
-
-void wz_widget_set_ignore_desktop_content_rect(struct wzWidget *widget, bool value);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 

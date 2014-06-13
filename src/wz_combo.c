@@ -43,8 +43,8 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	absRect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 
 	// Set list rect.
-	listRect.x = rect.x;
-	listRect.y = rect.y + rect.h;
+	listRect.x = 0;
+	listRect.y = rect.h;
 	listRect.w = rect.w;
 
 	// Make the height large enough to avoid scrolling.

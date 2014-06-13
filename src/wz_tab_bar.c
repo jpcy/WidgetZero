@@ -61,15 +61,17 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 	wereScrollButtonsVisible = wz_widget_get_visible((struct wzWidget *)tabBar->decrementButton);
 	showScrollButtons = totalTabWidth > tabBar->base.rect.w;
 
-	rect = tabBar->base.rect;
 	rect.w = wz_widget_get_size((struct wzWidget *)tabBar->decrementButton).w;
-	rect.x += tabBar->base.rect.w - rect.w * 2;
+	rect.x = tabBar->base.rect.w - rect.w * 2;
+	rect.y = 0;
+	rect.h = tabBar->base.rect.h;
 	wz_widget_set_rect((struct wzWidget *)tabBar->decrementButton, rect);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, showScrollButtons);
 
-	rect = tabBar->base.rect;
 	rect.w = wz_widget_get_size((struct wzWidget *)tabBar->incrementButton).w;
-	rect.x += tabBar->base.rect.w - rect.w;
+	rect.x = tabBar->base.rect.w - rect.w;
+	rect.y = 0;
+	rect.h = tabBar->base.rect.h;
 	wz_widget_set_rect((struct wzWidget *)tabBar->incrementButton, rect);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, showScrollButtons);
 
@@ -86,7 +88,7 @@ static void wz_tab_bar_update_tabs(struct wzTabBar *tabBar)
 	assert(tabBar);
 
 	// Start at the left edge of the tab bar.
-	x = tabBar->base.rect.x;
+	x = 0;
 
 	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
 	{
@@ -103,7 +105,7 @@ static void wz_tab_bar_update_tabs(struct wzTabBar *tabBar)
 			// Reposition and show.
 			wzRect rect;
 			rect.x = x;
-			rect.y = tabBar->base.rect.y;
+			rect.y = 0;
 			rect.w = widget->rect.w;
 			rect.h = tabBar->base.rect.h;
 			wz_widget_set_rect(widget, rect);
@@ -248,8 +250,9 @@ struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzB
 	wz_arr_push(tabBar->tabs, tab);
 
 	// Position to the right of the last tab.
-	rect = tabBar->base.rect;
+	rect.x = rect.y = 0;
 	rect.w = 50; // Default width.
+	rect.h = tabBar->base.rect.h;
 
 	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
 	{
