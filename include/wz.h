@@ -248,7 +248,7 @@ int wz_window_get_header_height(struct wzWindow *window);
 void wz_window_set_border_size(struct wzWindow *window, int size);
 int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
-wzRect wz_window_get_content_rect(struct wzWindow *window);
+struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
 
 typedef enum
 {

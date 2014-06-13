@@ -49,6 +49,9 @@ struct wzWindow
 	struct wzWidget base;
 	int headerHeight;
 	int borderSize;
+	
+	struct wzWidget *content;
+
 	wzWindowDrag drag;
 
 	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
@@ -225,6 +228,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	wzDockPosition dockPosition;
 	wzSize minimumWindowSize;
 	wzPosition resizeDelta;
+	wzRect rect;
 	int i;
 
 	assert(widget);
@@ -257,7 +261,6 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	if (window->drag == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
 	{
 		wzPosition delta;
-		wzRect rect;
 
 		delta.x = mouseX - window->undockStartPosition.x;
 		delta.y = mouseY - window->undockStartPosition.y;
@@ -297,50 +300,52 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		resizeDelta.y = mouseY - window->resizeStartPosition.y;
 	}
 
+	rect = wz_widget_get_rect(widget);
+
 	switch (window->drag)
 	{
 	case WZ_DRAG_HEADER:
-		widget->rect.x += mouseDeltaX;
-		widget->rect.y += mouseDeltaY;
+		rect.x += mouseDeltaX;
+		rect.y += mouseDeltaY;
 		break;
 	case WZ_DRAG_RESIZE_N:
 		{
 			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			widget->rect.y = window->resizeStartRect.y + delta;
-			widget->rect.h = window->resizeStartRect.h - delta;
+			rect.y = window->resizeStartRect.y + delta;
+			rect.h = window->resizeStartRect.h - delta;
 		}
 		break;
 	case WZ_DRAG_RESIZE_NE:
 		{
 			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			widget->rect.y = window->resizeStartRect.y + delta;
-			widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
-			widget->rect.h = window->resizeStartRect.h - delta;
+			rect.y = window->resizeStartRect.y + delta;
+			rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
+			rect.h = window->resizeStartRect.h - delta;
 		}
 		break;
 	case WZ_DRAG_RESIZE_E:
-		widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
+		rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
 		break;
 	case WZ_DRAG_RESIZE_SE:
-		widget->rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
-		widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
+		rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
+		rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_S:
-		widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
+		rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_SW:
 		{
 			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
-			widget->rect.x = window->resizeStartRect.x + delta;
-			widget->rect.w = window->resizeStartRect.w - delta;
-			widget->rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
+			rect.x = window->resizeStartRect.x + delta;
+			rect.w = window->resizeStartRect.w - delta;
+			rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
 		}
 		break;
 	case WZ_DRAG_RESIZE_W:
 		{
 			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
-			widget->rect.x = window->resizeStartRect.x + delta;
-			widget->rect.w = window->resizeStartRect.w - delta;
+			rect.x = window->resizeStartRect.x + delta;
+			rect.w = window->resizeStartRect.w - delta;
 		}
 		break;
 	case WZ_DRAG_RESIZE_NW:
@@ -348,15 +353,17 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 			int deltaX, deltaY;
 			deltaX = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
 			deltaY = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			widget->rect.x = window->resizeStartRect.x + deltaX;
-			widget->rect.y = window->resizeStartRect.y + deltaY;
-			widget->rect.w = window->resizeStartRect.w - deltaX;
-			widget->rect.h = window->resizeStartRect.h - deltaY;
+			rect.x = window->resizeStartRect.x + deltaX;
+			rect.y = window->resizeStartRect.y + deltaY;
+			rect.w = window->resizeStartRect.w - deltaX;
+			rect.h = window->resizeStartRect.h - deltaY;
 		}
 		break;
 	default:
 		return; // Not dragging, don't call wz_desktop_update_content_rect or parent_window_move.
 	}
+
+	wz_widget_set_rect(widget, rect);
 
 	// Resizing a docked window: 
 	if (wz_desktop_get_window_dock_position(widget->desktop, window) != WZ_DOCK_POSITION_NONE)
@@ -377,7 +384,28 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 
 static wzRect wz_window_get_children_clip_rect(struct wzWidget *widget)
 {
-	return wz_window_get_content_rect((struct wzWindow *)widget);
+	struct wzWindow *window;
+
+	assert(widget);
+	window = (struct wzWindow *)widget;
+	return wz_widget_get_absolute_rect(window->content);
+}
+
+static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	struct wzWindow *window;
+	wzRect contentRect;
+
+	assert(widget);
+	window = (struct wzWindow *)widget;
+	window->base.rect = rect;
+
+	contentRect.x = window->borderSize;
+	contentRect.y = window->borderSize + window->headerHeight;
+	contentRect.w = rect.w - window->borderSize * 2;
+	contentRect.h = rect.h - (window->headerHeight + window->borderSize * 2);
+
+	wz_widget_set_rect(window->content, contentRect);
 }
 
 struct wzWindow *wz_window_create(struct wzDesktop *desktop)
@@ -394,6 +422,14 @@ struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
 	window->base.vtable.mouse_move = wz_window_mouse_move;
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
+	window->base.vtable.set_rect = wz_window_set_rect;
+
+	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
+	memset(window->content, 0, sizeof(struct wzWidget));
+	window->content->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
+	window->content->desktop = desktop;
+	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
+
 	return window;
 }
 
@@ -433,17 +469,10 @@ wzRect wz_window_get_header_rect(struct wzWindow *window)
 	return rect;
 }
 
-wzRect wz_window_get_content_rect(struct wzWindow *window)
+struct wzWidget *wz_window_get_content_widget(struct wzWindow *window)
 {
-	wzRect rect;
-
 	assert(window);
-	rect = window->base.rect;
-	rect.x += window->borderSize;
-	rect.y += window->borderSize + window->headerHeight;
-	rect.w -= window->borderSize * 2;
-	rect.h -= (window->headerHeight + window->borderSize * 2);
-	return rect;
+	return window->content;
 }
 
 // Save the window size before docking so it can be restored if the window is undocked later.

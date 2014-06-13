@@ -41,6 +41,7 @@ public:
 	virtual ~Widget() {}
 	virtual const wzWidget *getWidget() const = 0;
 	virtual wzWidget *getWidget() = 0;
+	virtual wzWidget *getContentWidget() { return getWidget(); }
 	virtual void draw(wzRect clip) {};
 	virtual void handleEvent(wzEvent e) {};
 	wzRect getRect() const;
@@ -93,6 +94,7 @@ public:
 	Window(Widget *parent, const std::string &title);
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
+	virtual wzWidget *getContentWidget() { return wz_window_get_content_widget(window_); }
 	std::string getTitle() const { return title_; }
 	void draw(wzRect clip);
 	

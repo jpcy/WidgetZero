@@ -951,7 +951,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	// Don't do this if the widget draw priority is higher than the highest possible window draw priority.
 	if (widget->window && widget->drawPriority <= WZ_DRAW_PRIORITY_WINDOW_END)
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_window_get_content_rect(widget->window));
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}
 	else
 	{

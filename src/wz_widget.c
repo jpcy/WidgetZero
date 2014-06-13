@@ -241,7 +241,7 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 
 // Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
 // Example: scroller does this with it's button children.
-static void wz_widget_set_ancestors_recursive(struct wzWidget *widget, struct wzDesktop *desktop, struct wzWindow *window)
+static void wz_widget_set_window_recursive(struct wzWidget *widget, struct wzWindow *window)
 {
 	int i;
 
@@ -251,7 +251,7 @@ static void wz_widget_set_ancestors_recursive(struct wzWidget *widget, struct wz
 	{
 		struct wzWidget *child = widget->children[i];
 		child->window = window;
-		wz_widget_set_ancestors_recursive(child, desktop, window);
+		wz_widget_set_window_recursive(child, window);
 	}
 }
 
@@ -271,7 +271,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	// Find the closest ancestor window.
 	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
 
-	wz_widget_set_ancestors_recursive(child, child->desktop, child->window);
+	wz_widget_set_window_recursive(child, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
 	child->parent = widget;
 	wz_arr_push(widget->children, child);
 }
@@ -342,9 +342,19 @@ wzPosition wz_widget_get_offset(const struct wzWidget *widget)
 	// Adjust for desktop or window content rects.
 	if (widget->window)
 	{
-		wzRect rect = wz_window_get_content_rect(widget->window);
-		offset.x = rect.x;
-		offset.y = rect.y;
+		// TEMP HACK for window content widget.
+		if (widget->parent == (struct wzWidget *)widget->window)
+		{
+			wzRect rect = wz_widget_get_rect((struct wzWidget *)widget->window);
+			offset.x = rect.x;
+			offset.y = rect.y;
+		}
+		else
+		{
+			wzRect rect = wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window));
+			offset.x = rect.x;
+			offset.y = rect.y;
+		}
 	}
 	else if (widget->type != WZ_TYPE_WINDOW && !widget->ignoreDesktopContentRect)
 	{

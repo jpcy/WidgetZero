@@ -183,7 +183,7 @@ Button::Button(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
 	button_ = wz_button_create(parent->getDesktop());
-	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)button_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button_);
 
 	// Calculate size based on label text plus padding.
 	wzSize size;
@@ -231,7 +231,7 @@ Checkbox::Checkbox(Widget *parent, const std::string &label) : label_(label)
 	size.h += 8;
 	wz_widget_set_size(widget, size);
 
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 }
 
 void Checkbox::draw(wzRect clip)
@@ -248,7 +248,7 @@ Combo::Combo(Widget *parent, const char **items, int nItems) : items_(items)
 	wzWidget *widget = (wzWidget *)combo_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 	
 	list_.reset(new List(wz_combo_get_list(combo_), items, nItems));
 }
@@ -269,7 +269,7 @@ GroupBox::GroupBox(Widget *parent, const std::string &label) : label_(label)
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_set_size_args(widget, 200, 200);
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 }
 
 void GroupBox::draw(wzRect clip)
@@ -286,7 +286,7 @@ Scroller::Scroller(Widget *parent, wzScrollerType type, int value, int stepValue
 	wz_scroller_set_max_value(scroller_, maxValue);
 	wz_scroller_set_value(scroller_, value);
 	wz_scroller_set_step_value(scroller_, stepValue);
-	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)scroller_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)scroller_);
 	initialize();
 }
 
@@ -329,7 +329,7 @@ Label::Label(Widget *parent) : r_(255), g_(255), b_(255)
 	wzWidget *widget = (wzWidget *)label_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getWidget(), widget);
+	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 }
 
 void Label::setText(const char *format, ...)
@@ -365,7 +365,7 @@ List::List(Widget *parent, const char **items, int nItems) : items_(items)
 {
 	renderer_ = parent->getRenderer();
 	list_ = wz_list_create(parent->getDesktop());
-	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)list_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)list_);
 	initialize(nItems);
 }
 
@@ -469,7 +469,7 @@ TabBar::TabBar(Widget *parent)
 {
 	renderer_ = parent->getRenderer();
 	tabBar_ = wz_tab_bar_create(parent->getDesktop());
-	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabBar_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabBar_);
 	initialize();
 }
 
@@ -534,7 +534,7 @@ Tabbed::Tabbed(Widget *parent)
 	renderer_ = parent->getRenderer();
 	tabbed_ = wz_tabbed_create(parent->getDesktop());
 	wz_widget_set_metadata((wzWidget *)tabbed_, this);
-	wz_widget_add_child_widget(parent->getWidget(), (wzWidget *)tabbed_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabbed_);
 	tabBar_.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed_)));
 	tabBar_->setRect(0, 0, 0, 20);
 }
