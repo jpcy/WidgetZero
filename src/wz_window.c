@@ -426,7 +426,6 @@ struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
-	window->content->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
 	window->content->desktop = desktop;
 	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
 
