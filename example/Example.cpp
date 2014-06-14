@@ -106,17 +106,18 @@ public:
 		childWindowButton.reset(new wz::Button(childWindow.get(), "Another Button"));
 		childWindowButton->setPosition(20, 20);
 
-		childList.reset(new wz::List(childWindow.get(), listData, 17));
-		childList->setRect(20, 70, 150, 150);
-
 		childCombo.reset(new wz::Combo(childWindow.get(), listData, 17));
-		childCombo->setRect(20, 240, 150, 20);
+		childCombo->setRect(20, 70, 150, 20);
 
 		childWindow2.reset(new wz::Window(desktop.get(), "Window with a long title"));
 		childWindow2->setRect(590, 500, 200, 200);
 
 		childWindow3.reset(new wz::Window(desktop.get(), "Window 3"));
 		childWindow3->setRect(800, 500, 200, 200);
+
+		childList.reset(new wz::List(childWindow3.get(), listData, 17));
+		childList->setMargin(8);
+		childList->setAutosize(WZ_AUTOSIZE_WIDTH | WZ_AUTOSIZE_HEIGHT);
 	}
 
 	std::auto_ptr<wz::Desktop> desktop;

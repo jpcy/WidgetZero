@@ -90,6 +90,13 @@ typedef struct
 }
 wzBorder;
 
+enum
+{
+	WZ_AUTOSIZE_NONE,
+	WZ_AUTOSIZE_WIDTH = 1,
+	WZ_AUTOSIZE_HEIGHT = 2
+};
+
 typedef enum
 {
 	WZ_EVENT_UNKNOWN,
@@ -226,6 +233,10 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
 wzRect wz_widget_get_rect(const struct wzWidget *widget);
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
 
+void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin);
+wzBorder wz_widget_get_margin(const struct wzWidget *widget);
+void wz_widget_set_autosize(struct wzWidget *widget, int autosize);
+int wz_widget_get_autosize(const struct wzWidget *widget);
 bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_visible(struct wzWidget *widget, bool visible);
 bool wz_widget_get_visible(const struct wzWidget *widget);

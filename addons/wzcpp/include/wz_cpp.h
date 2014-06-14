@@ -46,7 +46,12 @@ public:
 	virtual void handleEvent(wzEvent e) {};
 	wzRect getRect() const;
 	void setPosition(int x, int y);
+	void setSize(int w, int h);
 	void setRect(int x, int y, int w, int h);
+	void setAutosize(int autosize);
+	void setMargin(int margin);
+	void setMargin(int top, int right, int bottom, int left);
+	void setMargin(wzBorder margin);
 	
 	wzRenderer *getRenderer()
 	{

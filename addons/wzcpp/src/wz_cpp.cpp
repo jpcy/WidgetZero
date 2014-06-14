@@ -54,6 +54,11 @@ void Widget::setPosition(int x, int y)
 	wz_widget_set_position_args(getWidget(), x, y);
 }
 
+void Widget::setSize(int w, int h)
+{
+	wz_widget_set_size_args(getWidget(), w, h);
+}
+
 void Widget::setRect(int x, int y, int w, int h)
 {
 	wzRect rect;
@@ -63,6 +68,33 @@ void Widget::setRect(int x, int y, int w, int h)
 	rect.h = h;
 
 	wz_widget_set_rect(getWidget(), rect);
+}
+
+void Widget::setAutosize(int autosize)
+{
+	wz_widget_set_autosize(getWidget(), autosize);
+}
+
+void Widget::setMargin(int margin)
+{
+	wzBorder m;
+	m.top = m.right = m.bottom = m.left = margin;
+	wz_widget_set_margin(getWidget(), m);
+}
+
+void Widget::setMargin(int top, int right, int bottom, int left)
+{
+	wzBorder m;
+	m.top = top;
+	m.right = right;
+	m.bottom = bottom;
+	m.left = left;
+	wz_widget_set_margin(getWidget(), m);
+}
+
+void Widget::setMargin(wzBorder margin)
+{
+	wz_widget_set_margin(getWidget(), margin);
 }
 
 //------------------------------------------------------------------------------

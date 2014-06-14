@@ -191,8 +191,29 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 
 wzRect wz_widget_get_rect(const struct wzWidget *widget)
 {
+	wzRect rect;
+
 	assert(widget);
-	return widget->rect;
+	rect = widget->rect;
+
+	if (widget->parent)
+	{
+		wzSize parentSize = wz_widget_get_size(widget->parent);
+
+		if ((widget->autosize & WZ_AUTOSIZE_WIDTH) != 0)
+		{
+			rect.x = widget->margin.left;
+			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
+		}
+
+		if ((widget->autosize & WZ_AUTOSIZE_HEIGHT) != 0)
+		{
+			rect.y = widget->margin.top;
+			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
+		}
+	}
+
+	return rect;
 }
 
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
@@ -210,6 +231,30 @@ wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 	}
 
 	return rect;
+}
+
+void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
+{
+	assert(widget);
+	widget->margin = margin;
+}
+
+wzBorder wz_widget_get_margin(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->margin;
+}
+
+void wz_widget_set_autosize(struct wzWidget *widget, int autosize)
+{
+	assert(widget);
+	widget->autosize = autosize;
+}
+
+int wz_widget_get_autosize(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->autosize;
 }
 
 bool wz_widget_get_hover(const struct wzWidget *widget)
@@ -421,4 +466,33 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->internalMetadata;
+}
+
+static void wz_widget_autosize_recursive(struct wzWidget *widget)
+{
+	int i;
+
+	assert(widget);
+
+	if (widget->vtable.autosize && (widget->autosize & (WZ_AUTOSIZE_WIDTH | WZ_AUTOSIZE_HEIGHT)) != 0)
+	{
+		widget->vtable.autosize(widget);
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_autosize_recursive(widget->children[i]);
+	}
+}
+
+void wz_widget_autosize_children(struct wzWidget *widget)
+{
+	int i;
+
+	assert(widget);
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_autosize_recursive(widget->children[i]);
+	}
 }

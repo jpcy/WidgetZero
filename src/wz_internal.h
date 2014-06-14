@@ -47,6 +47,8 @@ typedef struct
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
 
+	void (*autosize)(struct wzWidget *widget);
+
 	// Some additional widget state may been to be cleared when a widget is hidden.
 	void (*set_visible)(struct wzWidget *widget, bool visible);
 
@@ -86,6 +88,11 @@ struct wzWidget
 	wzWidgetType type;
 	int drawPriority;
 	wzRect rect;
+
+	int autosize;
+
+	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE.
+	wzBorder margin;
 
 	// Like metadata, but used internally.
 	void *internalMetadata;
@@ -159,6 +166,7 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct wzWidget *widget);
+void wz_widget_autosize_children(struct wzWidget *widget);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 

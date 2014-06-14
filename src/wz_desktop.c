@@ -777,6 +777,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 
 	assert(desktop);
 
+	wz_widget_autosize_children((struct wzWidget *)desktop);
 	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
@@ -833,6 +834,8 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 	struct wzWidget *widget;
 
 	assert(desktop);
+
+	wz_widget_autosize_children((struct wzWidget *)desktop);
 
 	// Need a special case for dock icons.
 	if (desktop->movingWindow)
@@ -1006,6 +1009,8 @@ void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, in
 {
 	assert(desktop);
 
+	wz_widget_autosize_children((struct wzWidget *)desktop);
+
 	// Reset the mouse cursor to default.
 	desktop->cursor = WZ_CURSOR_DEFAULT;
 
@@ -1059,6 +1064,8 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 	struct wzWidget *widget;
 
 	assert(desktop);
+
+	wz_widget_autosize_children((struct wzWidget *)desktop);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -1165,6 +1172,8 @@ void wz_desktop_draw(struct wzDesktop *desktop)
 	int i;
 
 	assert(desktop);
+
+	wz_widget_autosize_children((struct wzWidget *)desktop);
 
 	// Calculate unique draw priorities.
 	nDrawPriorities = 0;
