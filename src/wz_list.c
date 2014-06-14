@@ -31,10 +31,6 @@ struct wzList
 {
 	struct wzWidget base;
 	wzBorder itemsBorder;
-
-	// Position is relative to list widget.
-	wzRect itemsRect;
-
 	int itemHeight;
 	int nItems;
 	int firstItem;
@@ -67,7 +63,7 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 	// Avoid divide by zero.
 	if (list->itemHeight != 0)
 	{
-		max = list->nItems * list->itemHeight - list->itemsRect.h;
+		max = list->nItems * list->itemHeight - wz_list_get_items_rect(list).h;
 
 		// Hide/show scroller depending on if it's needed.
 		if (max <= 0)
@@ -86,16 +82,17 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 static wzRect wz_list_scroller_get_rect(const struct wzWidget *widget)
 {
 	struct wzList *list;
-	wzRect rect;
+	wzRect listRect, rect;
 
 	assert(widget);
 	list = (struct wzList *)widget->parent;
+	listRect = wz_widget_get_rect(widget->parent);
 
-	// Fit into items rect. Width doesn't change.
+	// Fit to the right of items rect. Width doesn't change.
 	rect.w = widget->rect.w;
-	rect.x = list->itemsRect.x + list->itemsRect.w - rect.w;
-	rect.y = list->itemsRect.y;
-	rect.h = list->itemsRect.h;
+	rect.x = listRect.w - list->itemsBorder.right - rect.w;
+	rect.y = list->itemsBorder.top;
+	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
 
 	return rect;
 }
@@ -120,18 +117,6 @@ LIST WIDGET
 ================================================================================
 */
 
-static void wz_list_update_items_rect(struct wzList *list)
-{
-	wzRect listRect;
-
-	assert(list);
-	listRect = wz_widget_get_rect((struct wzWidget *)list);
-	list->itemsRect.x = list->itemsBorder.left;
-	list->itemsRect.y = list->itemsBorder.top;
-	list->itemsRect.w = listRect.w - (list->itemsBorder.top + list->itemsBorder.bottom);
-	list->itemsRect.h = listRect.h - (list->itemsBorder.left + list->itemsBorder.right);
-}
-
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
@@ -139,7 +124,6 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 	assert(widget);
 	list = (struct wzList *)widget;
 	widget->rect = rect;
-	wz_list_update_items_rect(list);
 	wz_list_update_scroller_max_value(list);
 }
 
@@ -149,7 +133,6 @@ static void wz_list_autosize(struct wzWidget *widget)
 
 	assert(widget);
 	list = (struct wzList *)widget;
-	wz_list_update_items_rect(list);
 	wz_list_update_scroller_max_value(list);
 }
 
@@ -176,7 +159,6 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 	if (!list->base.hover)
 		return;
 
-	// Call wz_list_get_absolute_items_rect instead of using list->itemsRect so the scroller size is excluded and the position is absolute.
 	itemsRect = wz_list_get_absolute_items_rect(list);
 	rect.x = itemsRect.x;
 	rect.y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
@@ -339,7 +321,6 @@ void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
 {
 	assert(list);
 	list->itemsBorder = itemsBorder;
-	wz_list_update_items_rect(list);
 	wz_list_update_scroller_max_value(list);
 }
 
@@ -361,10 +342,14 @@ wzBorder wz_list_get_items_border(const struct wzList *list)
 
 wzRect wz_list_get_items_rect(const struct wzList *list)
 {
-	wzRect rect;
+	wzRect listRect, rect;
 
 	assert(list);
-	rect = list->itemsRect;
+	listRect = wz_widget_get_rect((struct wzWidget *)list);
+	rect.x = list->itemsBorder.left;
+	rect.y = list->itemsBorder.top;
+	rect.w = listRect.w - (list->itemsBorder.top + list->itemsBorder.bottom);
+	rect.h = listRect.h - (list->itemsBorder.left + list->itemsBorder.right);
 
 	// Subtract the scroller width.
 	if (wz_widget_get_visible((struct wzWidget *)list->scroller))
