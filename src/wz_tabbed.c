@@ -106,6 +106,11 @@ struct wzTabbed *wz_tabbed_create(struct wzDesktop *desktop)
 	return tabbed;
 }
 
+static wzRect wz_tabbed_page_get_children_clip_rect(struct wzWidget *widget)
+{
+	return wz_widget_get_absolute_rect(widget);
+}
+
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page)
 {
 	wzTabbedPage newPage;
@@ -121,6 +126,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	memset(newPage.page, 0, sizeof(struct wzWidget));
 	newPage.page->type = WZ_TYPE_TAB_PAGE;
 	newPage.page->desktop = tabbed->base.desktop;
+	newPage.page->vtable.get_children_clip_rect = wz_tabbed_page_get_children_clip_rect;
 	wz_widget_set_visible(newPage.page, wz_tab_bar_get_selected_tab(tabbed->tabBar) == newPage.tab);
 	wz_widget_add_child_widget((struct wzWidget *)tabbed, newPage.page);
 

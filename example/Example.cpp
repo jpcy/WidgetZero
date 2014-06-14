@@ -85,20 +85,8 @@ public:
 		list.reset(new wz::List(desktop.get(), listData, 17));
 		list->setRect(400, 300, 150, 150);
 
-		tabbed.reset(new wz::Tabbed(desktop.get()));
-		tabbed->setRect(350, 500, 200, 250);
-		wz::TabPage *firstTabPage = tabbed->addTab("Tab 1");
-		wz::TabPage *secondTabPage = tabbed->addTab("Another Tab");
-		tabbed->addTab("TabTabTab");
-
-		secondTabPageButton.reset(new wz::Button(secondTabPage, "Button Button Button"));
-		secondTabPageButton->setPosition(10, 10);
-
 		combo.reset(new wz::Combo(desktop.get(), listData, 17));
 		combo->setRect(800, 50, 150, 20);
-
-		combo2.reset(new wz::Combo(firstTabPage, listData, 17));
-		combo2->setRect(10, 10, 150, 20);
 
 		childWindow.reset(new wz::Window(desktop.get(), "Test Window"));
 		childWindow->setRect(650, 100, 300, 300);
@@ -111,6 +99,19 @@ public:
 
 		childWindow2.reset(new wz::Window(desktop.get(), "Window with a long title"));
 		childWindow2->setRect(590, 500, 200, 200);
+
+		tabbed.reset(new wz::Tabbed(childWindow2.get()));
+		tabbed->setMargin(8);
+		tabbed->setAutosize(WZ_AUTOSIZE);
+		wz::TabPage *firstTabPage = tabbed->addTab("Tab 1");
+		wz::TabPage *secondTabPage = tabbed->addTab("Another Tab");
+		tabbed->addTab("TabTabTab");
+
+		secondTabPageButton.reset(new wz::Button(secondTabPage, "Button Button Button"));
+		secondTabPageButton->setPosition(10, 10);
+
+		combo2.reset(new wz::Combo(firstTabPage, listData, 17));
+		combo2->setRect(10, 10, 150, 20);
 
 		childWindow3.reset(new wz::Window(desktop.get(), "Window 3"));
 		childWindow3->setRect(800, 500, 200, 200);
