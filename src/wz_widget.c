@@ -26,6 +26,87 @@ SOFTWARE.
 #include <string.h>
 #include "wz_internal.h"
 
+/*
+================================================================================
+
+AUTOSIZING
+
+================================================================================
+*/
+
+// Applies autosizing to the provided rect.
+static wzRect wz_widget_calculate_autosized_rect(const struct wzWidget *widget, wzRect rect)
+{
+	assert(widget);
+
+	if (widget->parent && (widget->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wzSize parentSize = wz_widget_get_size(widget->parent);
+
+		if ((widget->autosize & WZ_AUTOSIZE_WIDTH) != 0)
+		{
+			rect.x = widget->margin.left;
+			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
+		}
+
+		if ((widget->autosize & WZ_AUTOSIZE_HEIGHT) != 0)
+		{
+			rect.y = widget->margin.top;
+			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
+		}
+	}
+
+	return rect;
+}
+
+static void wz_widget_set_autosize_rect_recursive(struct wzWidget *widget)
+{
+	int i;
+	bool recurse;
+
+	assert(widget);
+
+	// Don't do anything to widgets that aren't set to autosize, but still recurse on children.
+	recurse = true;
+
+	if ((widget->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wzRect oldRect, newRect;
+
+		oldRect = wz_widget_get_rect(widget);
+		newRect = wz_widget_calculate_autosized_rect(widget, oldRect);
+
+		if (widget->vtable.set_rect)
+		{
+			widget->vtable.set_rect(widget, newRect);
+			oldRect = wz_widget_get_rect(widget);
+		}
+		else
+		{
+			widget->rect = newRect;
+		}
+
+		// Don't recurse if the rect hasn't changed.
+		recurse = (oldRect.w != newRect.w || oldRect.h != newRect.h);
+	}
+
+	if (recurse)
+	{
+		for (i = 0; i < wz_arr_len(widget->children); i++)
+		{
+			wz_widget_set_autosize_rect_recursive(widget->children[i]);
+		}
+	}
+}
+
+/*
+================================================================================
+
+MISC.
+
+================================================================================
+*/
+
 void wz_widget_destroy(struct wzWidget *widget)
 {
 	int i;
@@ -177,7 +258,12 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 {
+	int i;
+
 	assert(widget);
+
+	// Apply autosizing.
+	rect = wz_widget_calculate_autosized_rect(widget, rect);
 
 	if (widget->vtable.set_rect)
 	{
@@ -187,42 +273,18 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	{
 		widget->rect = rect;
 	}
+
+	// Autosize children too.
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_set_autosize_rect_recursive(widget->children[i]);
+	}
 }
 
 wzRect wz_widget_get_rect(const struct wzWidget *widget)
 {
-	wzRect rect;
-
 	assert(widget);
-
-	if (widget->vtable.get_rect)
-	{
-		rect = widget->vtable.get_rect(widget);
-	}
-	else
-	{
-		rect = widget->rect;
-	}
-
-	// Handle autosizing.
-	if (widget->parent && (widget->autosize & WZ_AUTOSIZE) != 0)
-	{
-		wzSize parentSize = wz_widget_get_size(widget->parent);
-
-		if ((widget->autosize & WZ_AUTOSIZE_WIDTH) != 0)
-		{
-			rect.x = widget->margin.left;
-			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
-		}
-
-		if ((widget->autosize & WZ_AUTOSIZE_HEIGHT) != 0)
-		{
-			rect.y = widget->margin.top;
-			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
-		}
-	}
-
-	return rect;
+	return widget->rect;
 }
 
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
@@ -258,6 +320,11 @@ void wz_widget_set_autosize(struct wzWidget *widget, int autosize)
 {
 	assert(widget);
 	widget->autosize = autosize;
+
+	if ((widget->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wz_widget_set_autosize_rect_recursive(widget);
+	}
 }
 
 int wz_widget_get_autosize(const struct wzWidget *widget)
@@ -475,33 +542,4 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->internalMetadata;
-}
-
-static void wz_widget_update_recursive(struct wzWidget *widget)
-{
-	int i;
-
-	assert(widget);
-
-	if (widget->vtable.update)
-	{
-		widget->vtable.update(widget);
-	}
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_widget_update_recursive(widget->children[i]);
-	}
-}
-
-void wz_widget_update_children(struct wzWidget *widget)
-{
-	int i;
-
-	assert(widget);
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_widget_update_recursive(widget->children[i]);
-	}
 }

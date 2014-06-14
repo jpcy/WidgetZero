@@ -56,9 +56,19 @@ SCROLLER
 
 static void wz_list_update_scroller(struct wzList *list)
 {
+	wzRect listRect, rect;
 	int max;
 
 	assert(list);
+
+	// Fit to the right of items rect. Width doesn't change.
+	listRect = wz_widget_get_rect((struct wzWidget *)list);
+
+	rect.w = ((struct wzWidget *)list->scroller)->rect.w;
+	rect.x = listRect.w - list->itemsBorder.right - rect.w;
+	rect.y = list->itemsBorder.top;
+	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
+	wz_widget_set_rect((struct wzWidget *)list->scroller, rect);
 
 	// Update max value.
 	max = list->nItems * list->itemHeight - wz_list_get_items_rect(list).h;
@@ -73,24 +83,6 @@ static void wz_list_update_scroller(struct wzList *list)
 	{
 		wz_widget_set_visible((struct wzWidget *)list->scroller, true);
 	}
-}
-
-static wzRect wz_list_scroller_get_rect(const struct wzWidget *widget)
-{
-	struct wzList *list;
-	wzRect listRect, rect;
-
-	assert(widget);
-	list = (struct wzList *)widget->parent;
-	listRect = wz_widget_get_rect(widget->parent);
-
-	// Fit to the right of items rect. Width doesn't change.
-	rect.w = widget->rect.w;
-	rect.x = listRect.w - list->itemsBorder.right - rect.w;
-	rect.y = list->itemsBorder.top;
-	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
-
-	return rect;
 }
 
 static void wz_list_scroller_value_changed(wzEvent e)
@@ -113,11 +105,12 @@ LIST WIDGET
 ================================================================================
 */
 
-static void wz_list_update(struct wzWidget *widget)
+static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
 
 	assert(widget);
+	widget->rect = rect;
 	list = (struct wzList *)widget;
 	wz_list_update_scroller(list);
 }
@@ -281,7 +274,7 @@ struct wzList *wz_list_create(struct wzDesktop *desktop)
 	list->base.type = WZ_TYPE_LIST;
 	list->base.desktop = desktop;
 	list->base.vtable.destroy = wz_list_destroy;
-	list->base.vtable.update = wz_list_update;
+	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.set_visible = wz_list_set_visible;
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
@@ -294,7 +287,7 @@ struct wzList *wz_list_create(struct wzDesktop *desktop)
 	list->mouseOverItem = -1;
 
 	list->scroller = wz_scroller_create(desktop, WZ_SCROLLER_VERTICAL);
-	((struct wzWidget *)list->scroller)->vtable.get_rect = wz_list_scroller_get_rect;
+	//((struct wzWidget *)list->scroller)->vtable.get_rect = wz_list_scroller_get_rect;
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
