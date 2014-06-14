@@ -289,12 +289,6 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 bool wz_widget_get_visible(const struct wzWidget *widget)
 {
 	assert(widget);
-
-	if (widget->vtable.is_visible)
-	{
-		return widget->vtable.is_visible(widget);
-	}
-
 	return !widget->hidden;
 }
 
@@ -483,24 +477,24 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 	return widget->internalMetadata;
 }
 
-static void wz_widget_autosize_recursive(struct wzWidget *widget)
+static void wz_widget_update_recursive(struct wzWidget *widget)
 {
 	int i;
 
 	assert(widget);
 
-	if (widget->vtable.autosize && (widget->autosize & (WZ_AUTOSIZE_WIDTH | WZ_AUTOSIZE_HEIGHT)) != 0)
+	if (widget->vtable.update)
 	{
-		widget->vtable.autosize(widget);
+		widget->vtable.update(widget);
 	}
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_autosize_recursive(widget->children[i]);
+		wz_widget_update_recursive(widget->children[i]);
 	}
 }
 
-void wz_widget_autosize_children(struct wzWidget *widget)
+void wz_widget_update_children(struct wzWidget *widget)
 {
 	int i;
 
@@ -508,6 +502,6 @@ void wz_widget_autosize_children(struct wzWidget *widget)
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_autosize_recursive(widget->children[i]);
+		wz_widget_update_recursive(widget->children[i]);
 	}
 }

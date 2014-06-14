@@ -44,14 +44,13 @@ typedef struct
 
 	void (*draw)(struct wzWidget *widget, wzRect clip);
 
-	bool (*is_visible)(const struct wzWidget *widget);
-
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
 
 	wzRect (*get_rect)(const struct wzWidget *widget);
 
-	void (*autosize)(struct wzWidget *widget);
+	// Called at the start of every desktop entry point - wz_desktop_draw, wz_desktop_mouse_button_down, wz_desktop_mouse_button_up, wz_desktop_mouse_move and wz_desktop_mouse_wheel_move.
+	void (*update)(struct wzWidget *widget);
 
 	// Some additional widget state may been to be cleared when a widget is hidden.
 	void (*set_visible)(struct wzWidget *widget, bool visible);
@@ -168,7 +167,7 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct wzWidget *widget);
-void wz_widget_autosize_children(struct wzWidget *widget);
+void wz_widget_update_children(struct wzWidget *widget);
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
