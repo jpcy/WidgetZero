@@ -194,9 +194,18 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget)
 	wzRect rect;
 
 	assert(widget);
-	rect = widget->rect;
 
-	if (widget->parent)
+	if (widget->vtable.get_rect)
+	{
+		rect = widget->vtable.get_rect(widget);
+	}
+	else
+	{
+		rect = widget->rect;
+	}
+
+	// Handle autosizing.
+	if (widget->parent && (widget->autosize & WZ_AUTOSIZE) != 0)
 	{
 		wzSize parentSize = wz_widget_get_size(widget->parent);
 

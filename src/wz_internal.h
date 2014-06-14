@@ -47,6 +47,8 @@ typedef struct
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
 
+	wzRect (*get_rect)(const struct wzWidget *widget);
+
 	void (*autosize)(struct wzWidget *widget);
 
 	// Some additional widget state may been to be cleared when a widget is hidden.
@@ -58,8 +60,6 @@ typedef struct
 	void (*mouse_wheel_move)(struct wzWidget *widget, int x, int y);
 	void (*mouse_hover_on)(struct wzWidget *widget);
 	void (*mouse_hover_off)(struct wzWidget *widget);
-
-	void (*parent_window_move)(struct wzWidget *widget);
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
 	wzRect (*get_children_clip_rect)(struct wzWidget *widget);

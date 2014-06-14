@@ -117,7 +117,7 @@ public:
 
 		childList.reset(new wz::List(childWindow3.get(), listData, 17));
 		childList->setMargin(8);
-		childList->setAutosize(WZ_AUTOSIZE_WIDTH | WZ_AUTOSIZE_HEIGHT);
+		childList->setAutosize(WZ_AUTOSIZE);
 	}
 
 	std::auto_ptr<wz::Desktop> desktop;

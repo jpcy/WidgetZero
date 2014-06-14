@@ -203,23 +203,6 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static void wz_window_call_parent_window_move_recursive(struct wzWidget *widget)
-{
-	int i;
-
-	assert(widget);
-
-	if (widget->vtable.parent_window_move)
-	{
-		widget->vtable.parent_window_move(widget);
-	}
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_window_call_parent_window_move_recursive(widget->children[i]);
-	}
-}
-
 static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	struct wzWindow *window;
@@ -229,7 +212,6 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	wzSize minimumWindowSize;
 	wzPosition resizeDelta;
 	wzRect rect;
-	int i;
 
 	assert(widget);
 	window = (struct wzWindow *)widget;
@@ -360,7 +342,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		}
 		break;
 	default:
-		return; // Not dragging, don't call wz_desktop_update_content_rect or parent_window_move.
+		return; // Not dragging, don't call wz_desktop_update_content_rect.
 	}
 
 	wz_widget_set_rect(widget, rect);
@@ -373,12 +355,6 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 
 		// Update the desktop content rect.
 		wz_desktop_update_content_rect(widget->desktop);
-	}
-
-	// Dragging: call parent_window_move on child and ancestor widgets.
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_window_call_parent_window_move_recursive(widget->children[i]);
 	}
 }
 
