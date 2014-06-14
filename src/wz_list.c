@@ -50,20 +50,13 @@ struct wzList
 	wzEventCallback *item_selected_callbacks;
 };
 
-static void wz_list_update_scroller_size(struct wzList *list)
-{
-	wzRect rect;
+/*
+================================================================================
 
-	assert(list);
-	assert(list->scroller);
+SCROLLER
 
-	// Fit into items rect. Width doesn't change.
-	rect = wz_widget_get_rect((struct wzWidget *)list->scroller);
-	rect.x = list->itemsRect.x + list->itemsRect.w - rect.w;
-	rect.y = list->itemsRect.y;
-	rect.h = list->itemsRect.h;
-	wz_widget_set_rect((struct wzWidget *)list->scroller, rect);
-}
+================================================================================
+*/
 
 static void wz_list_update_scroller_max_value(struct wzList *list)
 {
@@ -90,6 +83,43 @@ static void wz_list_update_scroller_max_value(struct wzList *list)
 	wz_scroller_set_max_value(list->scroller, max);
 }
 
+static wzRect wz_list_scroller_get_rect(const struct wzWidget *widget)
+{
+	struct wzList *list;
+	wzRect rect;
+
+	assert(widget);
+	list = (struct wzList *)widget->parent;
+
+	// Fit into items rect. Width doesn't change.
+	rect.w = widget->rect.w;
+	rect.x = list->itemsRect.x + list->itemsRect.w - rect.w;
+	rect.y = list->itemsRect.y;
+	rect.h = list->itemsRect.h;
+
+	return rect;
+}
+
+static void wz_list_scroller_value_changed(wzEvent e)
+{
+	struct wzList *list = (struct wzList *)e.base.widget->parent;
+	list->firstItem = e.scroller.value / list->itemHeight;
+}
+
+struct wzScroller *wz_list_get_scroller(struct wzList *list)
+{
+	assert(list);
+	return list->scroller;
+}
+
+/*
+================================================================================
+
+LIST WIDGET
+
+================================================================================
+*/
+
 static void wz_list_update_items_rect(struct wzList *list)
 {
 	wzRect listRect;
@@ -110,7 +140,6 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 	list = (struct wzList *)widget;
 	widget->rect = rect;
 	wz_list_update_items_rect(list);
-	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);
 }
 
@@ -121,7 +150,6 @@ static void wz_list_autosize(struct wzWidget *widget)
 	assert(widget);
 	list = (struct wzList *)widget;
 	wz_list_update_items_rect(list);
-	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);
 }
 
@@ -266,12 +294,6 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
-static void wz_list_scroller_value_changed(wzEvent e)
-{
-	struct wzList *list = (struct wzList *)e.base.widget->parent;
-	list->firstItem = e.scroller.value / list->itemHeight;
-}
-
 static void wz_list_destroy(struct wzWidget *widget)
 {
 	struct wzList *list;
@@ -305,18 +327,12 @@ struct wzList *wz_list_create(struct wzDesktop *desktop)
 	list->mouseOverItem = -1;
 
 	list->scroller = wz_scroller_create(desktop, WZ_SCROLLER_VERTICAL);
+	((struct wzWidget *)list->scroller)->vtable.get_rect = wz_list_scroller_get_rect;
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
-	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
 
 	return list;
-}
-
-struct wzScroller *wz_list_get_scroller(struct wzList *list)
-{
-	assert(list);
-	return list->scroller;
 }
 
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
@@ -324,7 +340,6 @@ void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
 	assert(list);
 	list->itemsBorder = itemsBorder;
 	wz_list_update_items_rect(list);
-	wz_list_update_scroller_size(list);
 	wz_list_update_scroller_max_value(list);
 }
 
