@@ -699,7 +699,7 @@ static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriori
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return;
 
 	// Don't include the widget if it's outside its parent window.
@@ -754,7 +754,7 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return;
 
 	if (widget->vtable.mouse_button_down)
@@ -815,7 +815,7 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return;
 
 	if (widget->vtable.mouse_button_up)
@@ -896,7 +896,7 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 			if (i == j)
 				continue;
 
-			if (widget->children[j]->hidden)
+			if (!wz_widget_get_visible(widget->children[j]))
 				continue;
 
 			// If the mouse cursor is in the intersection of the two widget rects.
@@ -928,7 +928,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return;
 
 	// Don't process mouse move if the widget is ignored.
@@ -1042,7 +1042,7 @@ static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x,
 
 	assert(widget);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return;
 
 	if (widget->vtable.mouse_wheel_move)
@@ -1099,7 +1099,7 @@ static bool wz_widget_draw_internal(struct wzDesktop *desktop, int priority, boo
 	assert(widget);
 	assert(clip);
 
-	if (widget->hidden)
+	if (!wz_widget_get_visible(widget))
 		return false;
 
 	// Don't render the widget if it's outside its parent window.

@@ -44,6 +44,8 @@ typedef struct
 
 	void (*draw)(struct wzWidget *widget, wzRect clip);
 
+	bool (*is_visible)(const struct wzWidget *widget);
+
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
 

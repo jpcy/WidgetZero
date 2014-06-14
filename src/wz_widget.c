@@ -289,6 +289,12 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 bool wz_widget_get_visible(const struct wzWidget *widget)
 {
 	assert(widget);
+
+	if (widget->vtable.is_visible)
+	{
+		return widget->vtable.is_visible(widget);
+	}
+
 	return !widget->hidden;
 }
 
