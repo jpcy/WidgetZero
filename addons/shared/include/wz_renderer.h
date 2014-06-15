@@ -47,6 +47,8 @@ struct wzRenderer
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
+	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
+
 	void *data;
 };
 

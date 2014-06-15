@@ -598,6 +598,12 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	nvgRestore(vg);
 }
 
+static void wzgl_debug_draw_text(struct wzRenderer *renderer, const char *text, int x, int y)
+{
+	assert(renderer);
+	wzgl_printf((wzRendererData *)renderer->data, x, y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), text);
+}
+
 /*
 ================================================================================
 
@@ -653,6 +659,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_list = wzgl_draw_list;
 	renderer->draw_tab_button = wzgl_draw_tab_button;
 	renderer->draw_tab_page = wzgl_draw_tab_page;
+	renderer->debug_draw_text = wzgl_debug_draw_text;
 
 	return renderer;
 }

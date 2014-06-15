@@ -32,6 +32,54 @@ SOFTWARE.
 
 static const float frameTime = 1000 / 60.0f;
 
+struct BenchmarkSample
+{
+	BenchmarkSample() : totalMs_(0), num_(0), averageMs_(0), startTime_(0) {}
+
+	void start()
+	{
+		startTime_ = SDL_GetPerformanceCounter();
+	}
+
+	void end()
+	{
+		totalMs_ += SDL_GetPerformanceCounter() - startTime_;
+		num_++;
+	}
+
+	void calculateAverage()
+	{
+		if (totalMs_ == 0)
+		{
+			averageMs_ = 0;
+		}
+		else
+		{
+			averageMs_ = totalMs_ / (float)SDL_GetPerformanceFrequency() * 1000.0f / (float)num_;
+		}
+
+		totalMs_ = 0;
+		num_ = 0;
+	}
+
+	float getAverage() const { return averageMs_; }
+
+private:
+	uint64_t totalMs_;
+	int num_;
+	float averageMs_;
+	uint64_t startTime_;
+};
+
+struct Benchmark
+{
+	BenchmarkSample draw;
+	BenchmarkSample frame;
+	BenchmarkSample input;
+};
+
+static Benchmark benchmark;
+
 static const char *listData[17] =
 {
 	"Monday",
@@ -147,9 +195,27 @@ static void ShowError(const char *message)
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, NULL);
 }
 
+static Uint32 BenchmarkTimerCallback(Uint32 interval, void *param)
+{
+	benchmark.draw.calculateAverage();
+	benchmark.frame.calculateAverage();
+	benchmark.input.calculateAverage();
+    
+	SDL_Event ev;
+    ev.type = SDL_USEREVENT;
+    ev.user.type = SDL_USEREVENT;
+    ev.user.code = 0;
+    ev.user.data1 = NULL;
+    ev.user.data2 = NULL;
+    SDL_PushEvent(&ev);
+
+    return interval;
+}
+
+
 int main(int argc, char **argv)
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		ShowError(SDL_GetError());
 		SDL_ClearError();
@@ -206,6 +272,9 @@ int main(int argc, char **argv)
 	}
 
 	GUI gui(windowWidth, windowHeight, renderer);
+
+	SDL_AddTimer(1000, BenchmarkTimerCallback, NULL);
+	char buffer[1024];
 	uint32_t lastTime = SDL_GetTicks();
 	float accumulatedTime = 0;
 
@@ -228,19 +297,27 @@ int main(int argc, char **argv)
 			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{
+				benchmark.input.start();
 				gui.desktop->mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{
+				benchmark.input.start();
 				gui.desktop->mouseButtonDown(e.button.button, e.button.x, e.button.y);
+				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
+				benchmark.input.start();
 				gui.desktop->mouseButtonUp(e.button.button, e.button.x, e.button.y);
+				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEWHEEL)
 			{
+				benchmark.input.start();
 				gui.desktop->mouseWheelMove(e.wheel.x, e.wheel.y);
+				benchmark.input.end();
 			}
 		}
 
@@ -253,11 +330,26 @@ int main(int argc, char **argv)
 
 		while (accumulatedTime > frameTime)
 		{
+			benchmark.frame.start();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+			benchmark.draw.start();
 			gui.desktop->draw();
+			benchmark.draw.end();
+
+			sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
+			renderer->debug_draw_text(renderer, buffer, 0, 0);
+
+			sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
+			renderer->debug_draw_text(renderer, buffer, 0, 20);
+
+			sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
+			renderer->debug_draw_text(renderer, buffer, 0, 40);
+
 			SDL_GL_SwapWindow(window);
 			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)gui.desktop->getWidget())]);
 			accumulatedTime -= frameTime;
+			benchmark.frame.end();
 		}
 	}
 
