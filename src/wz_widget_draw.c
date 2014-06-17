@@ -26,6 +26,8 @@ SOFTWARE.
 #include <assert.h>
 #include "wz_internal.h"
 
+typedef bool (*wzWidgetPredicate)(const struct wzWidget *);
+
 /*
 ================================================================================
 
@@ -34,7 +36,7 @@ DRAW PRIORITY
 ================================================================================
 */
 
-static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget)
+static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriorities, int *nDrawPriorities, struct wzWidget *widget, wzWidgetPredicate add_draw_priority_predicate, wzWidgetPredicate recurse_predicate)
 {
 	int i;
 
@@ -48,21 +50,27 @@ static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriori
 		return;
 
 	// Add the draw priority if it doesn't exist.
-	for (i = 0; i < *nDrawPriorities; i++)
+	if (add_draw_priority_predicate(widget))
 	{
-		if (drawPriorities[i] == widget->drawPriority)
-			break;
+		for (i = 0; i < *nDrawPriorities; i++)
+		{
+			if (drawPriorities[i] == widget->drawPriority)
+				break;
+		}
+
+		if (i == *nDrawPriorities)
+		{
+			drawPriorities[*nDrawPriorities] = widget->drawPriority;
+			(*nDrawPriorities)++;
+		}
 	}
 
-	if (i == *nDrawPriorities)
-	{
-		drawPriorities[*nDrawPriorities] = widget->drawPriority;
-		(*nDrawPriorities)++;
-	}
+	if (!recurse_predicate(widget))
+		return;
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, widget->children[i]);
+		wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, nDrawPriorities, widget->children[i], add_draw_priority_predicate, recurse_predicate);
 	}
 }
 
@@ -120,7 +128,7 @@ static bool wz_widget_draw_internal(int priority, bool (*draw_priority_compare)(
 	return true;
 }
 
-static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priority, struct wzWidget *widget, wzRect clip)
+static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priority, struct wzWidget *widget, wzRect clip, wzWidgetPredicate recurse_predicate)
 {
 	int i;
 
@@ -129,13 +137,16 @@ static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priorit
 	if (!wz_widget_draw_internal(priority, wz_draw_priority_less_than_or_equals, widget, &clip))
 		return;
 
+	if (!recurse_predicate(widget))
+		return;
+
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i], clip);
+		wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i], clip, recurse_predicate);
 	}
 }
 
-static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *widget, wzRect clip)
+static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *widget, wzRect clip, wzWidgetPredicate recurse_predicate)
 {
 	int i;
 
@@ -144,41 +155,115 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 	if (!wz_widget_draw_internal(priority, wz_draw_priority_equals, widget, &clip))
 		return;
 
+	if (!recurse_predicate(widget))
+		return;
+
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		// If the priority is a match, draw children with <= priority.
 		if (widget->drawPriority == priority)
 		{
-			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i], clip);
+			wz_widget_draw_by_less_than_or_equals_priority_recursive(priority, widget->children[i], clip, recurse_predicate);
 		}
 		else
 		{
-			wz_widget_draw_by_priority_recursive(priority, widget->children[i], clip);
+			wz_widget_draw_by_priority_recursive(priority, widget->children[i], clip, recurse_predicate);
 		}
 	}
 }
 
-void wz_widget_draw_desktop(struct wzDesktop *desktop)
+static void wz_widget_draw(struct wzWidget *widget, wzWidgetPredicate add_draw_priority_predicate, wzWidgetPredicate recurse_predicate)
 {
 	int drawPriorities[WZ_DRAW_PRIORITY_MAX];
 	int nDrawPriorities;
 	wzRect clip;
 	int i;
 
-	assert(desktop);
+	assert(widget);
 
 	// Calculate unique draw priorities.
 	nDrawPriorities = 0;
-	wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, &nDrawPriorities, (struct wzWidget *)desktop);
+	wz_widget_calculate_unique_draw_priorities_recursive(drawPriorities, &nDrawPriorities, widget, add_draw_priority_predicate, recurse_predicate);
 
 	// Sort draw priorities in ascending order.
 	qsort(drawPriorities, nDrawPriorities, sizeof(int), wz_compare_draw_priorities);
 
 	// Do one draw pass per draw priority.
-	clip = wz_widget_get_rect((struct wzWidget *)desktop);
+	clip = wz_widget_get_rect(widget);
 
 	for (i = 0; i < nDrawPriorities; i++)
 	{
-		wz_widget_draw_by_priority_recursive(drawPriorities[i], (struct wzWidget *)desktop, clip);
+		wz_widget_draw_by_priority_recursive(drawPriorities[i], widget, clip, recurse_predicate);
 	}
+}
+
+static bool wz_widget_draw_priority_less_than_window(const struct wzWidget *widget)
+{
+	return widget->drawPriority < WZ_DRAW_PRIORITY_WINDOW;
+}
+
+static bool wz_widget_is_not_window(const struct wzWidget *widget)
+{
+	return widget->type != WZ_TYPE_WINDOW;
+}
+
+static bool wz_widget_draw_priority_greater_than_window(const struct wzWidget *widget)
+{
+	return widget->drawPriority > WZ_DRAW_PRIORITY_WINDOW;
+}
+
+static bool wz_widget_true(const struct wzWidget *widget)
+{
+	widget = widget;
+	return true;
+}
+
+static int wz_compare_window_draw_priorities(const void *a, const void *b)
+{
+	return wz_window_get_draw_priority(*((const struct wzWindow **)a)) - wz_window_get_draw_priority(*((const struct wzWindow **)b));
+}
+
+void wz_widget_draw_desktop(struct wzDesktop *desktop)
+{
+	struct wzWindow *windows[WZ_MAX_WINDOWS];
+	int nWindows;
+	int i;
+
+	assert(desktop);
+
+	// Draw the desktop and ancestors with draw priority < window. Don't recurse into windows.
+	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_less_than_window, wz_widget_is_not_window);
+
+	// Get a list of windows (excluding top).
+	nWindows = 0;
+
+	for (i = 0; i < wz_arr_len(((struct wzWidget *)desktop)->children); i++)
+	{
+		struct wzWidget *widget = ((struct wzWidget *)desktop)->children[i];
+	
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			windows[nWindows] = (struct wzWindow *)widget;
+			nWindows++;
+		}
+	}
+
+	// Sort them in ascending order by draw priority.
+	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_window_draw_priorities);
+
+	// For each window, draw the window and all ancestors with draw priority < window.
+	for (i = 0; i < nWindows; i++)
+	{
+		struct wzWidget *widget = (struct wzWidget *)windows[i];
+
+		if (wz_widget_get_visible(widget) && widget->vtable.draw)
+		{
+			widget->vtable.draw(widget, ((struct wzWidget *)desktop)->rect);
+		}
+
+		wz_widget_draw(widget, wz_widget_draw_priority_less_than_window, wz_widget_true);
+	}
+
+	// Draw all widgets with draw priority > window.
+	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_greater_than_window, wz_widget_true);
 }

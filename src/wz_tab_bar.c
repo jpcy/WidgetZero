@@ -212,20 +212,20 @@ struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop)
 	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Create scroll buttons.
-	// Set the draw priority above default so the scroll buttons always overlap the tabs.
+	// Custom draw priority so the scroll buttons always overlap the tabs.
 	tabBar->decrementButton = wz_button_create(desktop);
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
 	wz_widget_set_width((struct wzWidget *)tabBar->decrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, false);
-	wz_widget_set_draw_priority((struct wzWidget *)tabBar->decrementButton, WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START);
+	wz_widget_set_draw_priority((struct wzWidget *)tabBar->decrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
 	
 	tabBar->incrementButton = wz_button_create(desktop);
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
 	wz_widget_set_width((struct wzWidget *)tabBar->incrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, false);
-	wz_widget_set_draw_priority((struct wzWidget *)tabBar->incrementButton, WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START);
+	wz_widget_set_draw_priority((struct wzWidget *)tabBar->incrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
 
 	return tabBar;
 }

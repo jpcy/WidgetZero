@@ -47,6 +47,7 @@ wzWindowDrag;
 struct wzWindow
 {
 	struct wzWidget base;
+	int drawPriority;
 	int headerHeight;
 	int borderSize;
 	
@@ -392,7 +393,7 @@ struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
-	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
+	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
 	window->base.desktop = desktop;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
@@ -456,4 +457,16 @@ void wz_window_dock(struct wzWindow *window)
 	assert(window);
 	window->sizeBeforeDocking.w = window->base.rect.w;
 	window->sizeBeforeDocking.h = window->base.rect.h;
+}
+
+int wz_window_get_draw_priority(const struct wzWindow *window)
+{
+	assert(window);
+	return window->drawPriority;
+}
+
+void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority)
+{
+	assert(window);
+	window->drawPriority = drawPriority;
 }

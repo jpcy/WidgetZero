@@ -81,15 +81,15 @@ static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, i
 
 	assert(desktop);
 	result = NULL;
-	drawPriority = WZ_DRAW_PRIORITY_WINDOW_START;
+	drawPriority = -1;
 
 	for (i = 0; i < wz_arr_len(desktop->base.children); i++)
 	{
 		struct wzWidget *widget = desktop->base.children[i];
 
-		if (widget->type == WZ_TYPE_WINDOW && wz_widget_get_visible(widget) && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && widget->drawPriority >= drawPriority)
+		if (widget->type == WZ_TYPE_WINDOW && wz_widget_get_visible(widget) && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && wz_window_get_draw_priority((struct wzWindow *)widget) >= drawPriority)
 		{
-			drawPriority = widget->drawPriority;
+			drawPriority = wz_window_get_draw_priority((struct wzWindow *)widget);
 			result = (struct wzWindow *)widget;
 		}
 	}
@@ -650,15 +650,15 @@ DRAW PRIORITY
 ================================================================================
 */
 
-static int wz_compare_widget_draw_priorities(const void *a, const void *b)
+static int wz_compare_window_draw_priorities(const void *a, const void *b)
 {
-	return ((struct wzWidget *)a)->drawPriority - ((struct wzWidget *)b)->drawPriority;
+	return wz_window_get_draw_priority((const struct wzWindow *)a) - wz_window_get_draw_priority((const struct wzWindow *)b);
 }
 
 // top can be NULL
 static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, struct wzWindow *top)
 {
-	struct wzWidget *windows[WZ_DRAW_PRIORITY_WINDOW_END];
+	struct wzWindow *windows[WZ_MAX_WINDOWS];
 	int nWindows;
 	int i;
 
@@ -673,24 +673,24 @@ static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, 
 	
 		if (widget->type == WZ_TYPE_WINDOW && widget != (struct wzWidget *)top)
 		{
-			windows[nWindows] = widget;
+			windows[nWindows] = (struct wzWindow *)widget;
 			nWindows++;
 		}
 	}
 
 	// Sort them in ascending order by draw priority.
-	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_widget_draw_priorities);
+	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_window_draw_priorities);
 
-	// Assign each window a new draw priority starting at WZ_DRAW_PRIORITY_WINDOW_START and ascending.
+	// Assign each window a new draw priority, starting at 0 and ascending by 1.
 	for (i = 0; i < nWindows; i++)
 	{
-		windows[i]->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START + i;
+		wz_window_set_draw_priority(windows[i], i);
 	}
 
 	// Give the top window the highest priority.
 	if (top)
 	{
-		((struct wzWidget *)top)->drawPriority = WZ_DRAW_PRIORITY_WINDOW_START + i;
+		wz_window_set_draw_priority(top, i);
 	}
 }
 
@@ -900,8 +900,8 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent window.
-	// Don't do this if the widget draw priority is higher than the highest possible window draw priority.
-	if (widget->window && widget->drawPriority <= WZ_DRAW_PRIORITY_WINDOW_END)
+	// Don't do this if the widget draw priority is higher than window draw priority.
+	if (widget->window && widget->drawPriority < WZ_DRAW_PRIORITY_WINDOW)
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}

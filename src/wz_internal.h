@@ -69,15 +69,17 @@ enum
 	// Widgets can use this range to draw on top over widgets with default draw priority.
 	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START,
 	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_END = WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START + 16,
+	WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON,
 	WZ_DRAW_PRIORITY_DOCK_TAB_BAR,
 	WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON,
-	WZ_DRAW_PRIORITY_WINDOW_START,
-	WZ_DRAW_PRIORITY_WINDOW_END = WZ_DRAW_PRIORITY_WINDOW_START + 256,
+	WZ_DRAW_PRIORITY_WINDOW,
 	WZ_DRAW_PRIORITY_COMBO_DROPDOWN,
 	WZ_DRAW_PRIORITY_DOCK_ICON,
 	WZ_DRAW_PRIORITY_DOCK_PREVIEW,
-	WZ_DRAW_PRIORITY_MAX = 1024
+	WZ_DRAW_PRIORITY_MAX
 };
+
+#define WZ_MAX_WINDOWS 256
 
 struct wzWidget
 {
@@ -167,6 +169,10 @@ void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
 // Tell the window it's being docked.
 void wz_window_dock(struct wzWindow *window);
+
+int wz_window_get_draw_priority(const struct wzWindow *window);
+void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority);
+
 
 //////////////////////////////////////////////////////////////////////////////
 //

@@ -490,22 +490,10 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 	return NULL;
 }
 
-void wz_widget_set_draw_priority_recursive(struct wzWidget *widget, int drawPriority)
-{
-	int i;
-
-	assert(widget);
-	widget->drawPriority = drawPriority;
-	
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_widget_set_draw_priority_recursive(widget->children[i], drawPriority);
-	}
-}
-
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority)
 {
-	wz_widget_set_draw_priority_recursive(widget, drawPriority);
+	assert(widget);
+	widget->drawPriority = drawPriority;
 }
 
 int wz_widget_get_draw_priority(const struct wzWidget *widget)
@@ -519,8 +507,8 @@ bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
 	if (!widget->window)
 		return true;
 
-	// Always return true if the widget draw priority is higher than any window.
-	if (widget->drawPriority > WZ_DRAW_PRIORITY_WINDOW_END)
+	// Always return true if the widget draw priority is than window.
+	if (widget->drawPriority > WZ_DRAW_PRIORITY_WINDOW)
 		return true;
 
 	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
