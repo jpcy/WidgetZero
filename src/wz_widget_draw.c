@@ -220,7 +220,24 @@ static bool wz_widget_true(const struct wzWidget *widget)
 
 static int wz_compare_window_draw_priorities(const void *a, const void *b)
 {
-	return wz_window_get_draw_priority(*((const struct wzWindow **)a)) - wz_window_get_draw_priority(*((const struct wzWindow **)b));
+	const struct wzWindow *window1, *window2;
+	bool window1Docked, window2Docked;
+
+	window1 = *((const struct wzWindow **)a);
+	window2 = *((const struct wzWindow **)b);
+	window1Docked = wz_desktop_get_window_dock_position(((const struct wzWidget *)window1)->desktop, window1) != WZ_DOCK_POSITION_NONE;
+	window2Docked = wz_desktop_get_window_dock_position(((const struct wzWidget *)window2)->desktop, window2) != WZ_DOCK_POSITION_NONE;
+
+	if (window1Docked && !window2Docked)
+	{
+		return -1;
+	}
+	else if (window2Docked && !window1Docked)
+	{
+		return 1;
+	}
+
+	return wz_window_get_draw_priority(window1) - wz_window_get_draw_priority(window2);
 }
 
 void wz_widget_draw_desktop(struct wzDesktop *desktop)
@@ -267,3 +284,4 @@ void wz_widget_draw_desktop(struct wzDesktop *desktop)
 	// Draw all widgets with draw priority > window.
 	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_greater_than_window, wz_widget_true);
 }
+

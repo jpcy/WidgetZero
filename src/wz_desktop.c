@@ -362,7 +362,7 @@ static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *w
 	wz_desktop_update_content_rect(desktop);
 }
 
-wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window)
+wzDockPosition wz_desktop_get_window_dock_position(const struct wzDesktop *desktop, const struct wzWindow *window)
 {
 	wzDockPosition i;
 	int j;

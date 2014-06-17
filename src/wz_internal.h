@@ -147,7 +147,7 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop);
 
 void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window);
 
-wzDockPosition wz_desktop_get_window_dock_position(struct wzDesktop *desktop, struct wzWindow *window);
+wzDockPosition wz_desktop_get_window_dock_position(const struct wzDesktop *desktop, const struct wzWindow *window);
 
 void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
 
