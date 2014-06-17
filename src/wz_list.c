@@ -44,6 +44,9 @@ struct wzList
 	struct wzScroller *scroller;
 
 	wzEventCallback *item_selected_callbacks;
+
+	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
+	wzPosition lastMousePosition;
 };
 
 /*
@@ -215,6 +218,8 @@ static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, 
 
 	assert(widget);
 	list = (struct wzList *)widget;
+	list->lastMousePosition.x = mouseX;
+	list->lastMousePosition.y = mouseY;
 	wz_list_update_mouse_over_item(list, mouseX, mouseY);
 	
 	if (list->pressedItem != -1)
@@ -242,6 +247,10 @@ static void wz_list_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 		value = wz_scroller_get_value(list->scroller);
 		stepValue = wz_scroller_get_step_value(list->scroller);
 		wz_scroller_set_value(list->scroller, value - y * stepValue);
+
+		// Refresh hovered item.
+		wz_list_update_mouse_over_item(list, list->lastMousePosition.x, list->lastMousePosition.y);
+		list->hoveredItem = list->mouseOverItem;
 	}
 }
 
