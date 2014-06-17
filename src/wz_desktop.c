@@ -900,8 +900,8 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent window.
-	// Don't do this if the widget draw priority is higher than window draw priority.
-	if (widget->window && widget->drawPriority < WZ_DRAW_PRIORITY_WINDOW)
+	// Don't do this if the inherited widget draw priority is higher than window draw priority.
+	if (widget->window && wz_widget_calculate_inherited_draw_priority(widget) < WZ_DRAW_PRIORITY_WINDOW)
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}

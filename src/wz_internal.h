@@ -165,6 +165,10 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct wzWidget *widget);
 
+// Calculate the highest draw priority out of this widget and all it's direct ancestors.
+// Used when widgets need to be seen to inherit the draw priority of their ancestors. e.g. combo descendants: list, scroller, buttons used by scroller.
+int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget);
+
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
 // Tell the window it's being docked.

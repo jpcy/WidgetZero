@@ -531,3 +531,19 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 	assert(widget);
 	return widget->internalMetadata;
 }
+
+int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget)
+{
+	int drawPriority = WZ_DRAW_PRIORITY_DEFAULT;
+
+	for (;;)
+	{
+		if (widget == NULL)
+			break;
+
+		drawPriority = WZ_MAX(drawPriority, widget->drawPriority);
+		widget = widget->parent;
+	}
+
+	return drawPriority;
+}
