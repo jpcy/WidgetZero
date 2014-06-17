@@ -507,8 +507,8 @@ bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
 	if (!widget->window)
 		return true;
 
-	// Always return true if the widget draw priority is than window.
-	if (widget->drawPriority > WZ_DRAW_PRIORITY_WINDOW)
+	// Always return true if the inherited widget draw priority is higher than window.
+	if (wz_widget_calculate_inherited_draw_priority(widget) > WZ_DRAW_PRIORITY_WINDOW)
 		return true;
 
 	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
