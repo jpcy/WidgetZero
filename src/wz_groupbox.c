@@ -24,7 +24,7 @@ SOFTWARE.
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "wz_internal.h"
+#include "wz_widget.h"
 
 struct wzGroupBox
 {

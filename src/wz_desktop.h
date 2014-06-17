@@ -21,24 +21,29 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include "wz_widget.h"
+#ifndef _WZ_DESKTOP_H_
+#define _WZ_DESKTOP_H_
 
-struct wzLabel
-{
-	struct wzWidget base;
-};
+#include <wz.h>
 
-struct wzLabel *wz_label_create(struct wzDesktop *desktop)
-{
-	struct wzLabel *label;
+void wz_desktop_set_cursor(struct wzDesktop *desktop, wzCursor cursor);
 
-	assert(desktop);
-	label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
-	memset(label, 0, sizeof(struct wzLabel));
-	label->base.type = WZ_TYPE_LABEL;
-	label->base.desktop = desktop;
-	return label;
-}
+// Lock input to this widget.
+void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+
+// Stop locking input to this widget.
+void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+
+void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *window);
+
+void wz_desktop_update_content_rect(struct wzDesktop *desktop);
+
+void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window);
+
+wzDockPosition wz_desktop_get_window_dock_position(const struct wzDesktop *desktop, const struct wzWindow *window);
+
+void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
+
+void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
+
+#endif // _WZ_DESKTOP_H_

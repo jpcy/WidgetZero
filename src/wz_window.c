@@ -25,7 +25,8 @@ SOFTWARE.
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "wz_internal.h"
+#include "wz_desktop.h"
+#include "wz_widget.h"
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
 

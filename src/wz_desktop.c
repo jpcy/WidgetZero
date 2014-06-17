@@ -24,8 +24,10 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "wz_internal.h"
+#include "wz_desktop.h"
+#include "wz_widget.h"
 #include "wz_widget_draw.h"
+#include "wz_window.h"
 
 struct wzDesktop
 {

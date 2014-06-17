@@ -21,24 +21,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include "wz_widget.h"
+#ifndef _WZ_WINDOW_H_
+#define _WZ_WINDOW_H_
 
-struct wzLabel
-{
-	struct wzWidget base;
-};
+#define WZ_MAX_WINDOWS 256
 
-struct wzLabel *wz_label_create(struct wzDesktop *desktop)
-{
-	struct wzLabel *label;
+struct wzWindow;
 
-	assert(desktop);
-	label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
-	memset(label, 0, sizeof(struct wzLabel));
-	label->base.type = WZ_TYPE_LABEL;
-	label->base.desktop = desktop;
-	return label;
-}
+// Tell the window it's being docked.
+void wz_window_dock(struct wzWindow *window);
+
+int wz_window_get_draw_priority(const struct wzWindow *window);
+void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority);
+
+#endif // _WZ_WINDOW_H_
