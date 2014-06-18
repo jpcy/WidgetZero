@@ -76,7 +76,7 @@ struct wzWidget
 
 	int autosize;
 
-	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE.
+	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
 	wzBorder margin;
 
 	// Like metadata, but used internally.

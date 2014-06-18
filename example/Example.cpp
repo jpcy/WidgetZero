@@ -139,11 +139,17 @@ public:
 		childWindow.reset(new wz::Window(desktop.get(), "Test Window"));
 		childWindow->setRect(650, 100, 300, 300);
 
-		childWindowButton.reset(new wz::Button(childWindow.get(), "Another Button"));
-		childWindowButton->setPosition(20, 20);
+		childLayout.reset(new wz::VerticalStackLayout(childWindow.get()));
+		childLayout->setMargin(8);
+		childLayout->setAutosize(WZ_AUTOSIZE);
 
-		childCombo.reset(new wz::Combo(childWindow.get(), listData, 17));
-		childCombo->setRect(20, 70, 150, 20);
+		childWindowButton.reset(new wz::Button(childLayout.get(), "Another Button"));
+
+		childWindowCheckbox.reset(new wz::Checkbox(childLayout.get(), "Checkbox"));
+		childWindowCheckbox->setMargin(8, 0, 0, 0);
+
+		childCombo.reset(new wz::Combo(childLayout.get(), listData, 17));
+		childCombo->setMargin(8, 0, 0, 0);
 
 		childWindow2.reset(new wz::Window(desktop.get(), "Window with a long title"));
 		childWindow2->setRect(590, 500, 200, 200);
@@ -182,7 +188,9 @@ public:
 	std::auto_ptr<wz::Combo> combo;
 	std::auto_ptr<wz::Combo> combo2;
 	std::auto_ptr<wz::Window> childWindow;
+	std::auto_ptr<wz::VerticalStackLayout> childLayout;
 	std::auto_ptr<wz::Button> childWindowButton;
+	std::auto_ptr<wz::Checkbox> childWindowCheckbox;
 	std::auto_ptr<wz::List> childList;
 	std::auto_ptr<wz::Combo> childCombo;
 	std::auto_ptr<wz::Window> childWindow2;

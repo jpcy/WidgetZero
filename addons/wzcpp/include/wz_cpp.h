@@ -109,6 +109,17 @@ private:
 	std::string title_;
 };
 
+class VerticalStackLayout : public Widget
+{
+public:
+	VerticalStackLayout(Widget *parent);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)layout_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)layout_; }
+	
+private:
+	wzVerticalStackLayout *layout_;
+};
+
 class Button : public Widget
 {
 public:

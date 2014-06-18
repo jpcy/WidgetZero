@@ -47,12 +47,14 @@ struct wzScroller;
 struct wzGroupBox;
 struct wzLabel;
 struct wzList;
+struct wzVerticalStackLayout;
 
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_DESKTOP,
 	WZ_TYPE_WINDOW,
+	WZ_TYPE_VERTICAL_STACK_LAYOUT,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
 	WZ_TYPE_GROUPBOX,
@@ -218,6 +220,7 @@ wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop);
 void wz_widget_destroy(struct wzWidget *widget);
 struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
+bool wz_widget_is_layout(const struct wzWidget *widget);
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
 wzPosition wz_widget_get_position(const struct wzWidget *widget);
@@ -284,6 +287,8 @@ typedef enum
 	WZ_BUTTON_SET_BEHAVIOR_STICKY
 }
 wzButtonSetBehavior;
+
+struct wzVerticalStackLayout *wz_vertical_stack_layout_create(struct wzDesktop *desktop);
 
 struct wzButton *wz_button_create(struct wzDesktop *desktop);
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);

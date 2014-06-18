@@ -217,6 +217,12 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 	return widget->type;
 }
 
+bool wz_widget_is_layout(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->type == WZ_TYPE_VERTICAL_STACK_LAYOUT;
+}
+
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y)
 {
 	wzPosition position;
@@ -487,6 +493,12 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	wz_widget_set_window_recursive(child, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
 	child->parent = widget;
 	wz_arr_push(widget->children, child);
+
+	// If the parent is a layout widget, call wz_widget_set_size on it, to refresh the layout of it's children.
+	if (wz_widget_is_layout(widget))
+	{
+		wz_widget_set_size(widget, wz_widget_get_size(widget));
+	}
 }
 
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)

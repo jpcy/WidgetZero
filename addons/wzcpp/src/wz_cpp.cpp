@@ -211,6 +211,15 @@ void Window::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
+VerticalStackLayout::VerticalStackLayout(Widget *parent)
+{
+	renderer_ = parent->getRenderer();
+	layout_ = wz_vertical_stack_layout_create(parent->getDesktop());
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)layout_);
+}
+
+//------------------------------------------------------------------------------
+
 Button::Button(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
