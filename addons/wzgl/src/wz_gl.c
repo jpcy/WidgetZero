@@ -250,9 +250,11 @@ static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wz
 	vg = rendererData->vg;
 
 	nvgSave(vg);
-	wzgl_clip_to_rect(vg, clip);
-
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)button);
+
+	if (!wzgl_clip_to_rect_intersection(vg, clip, rect))
+		return;
+
 	hover = wz_widget_get_hover((struct wzWidget *)button);
 	pressed = wz_button_is_pressed(button);
 
