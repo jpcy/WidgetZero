@@ -108,6 +108,21 @@ enum
 	WZ_STRETCH = WZ_STRETCH_HORIZONTAL | WZ_STRETCH_VERTICAL
 };
 
+enum
+{
+	WZ_ALIGN_NONE,
+
+	// Horizontal.
+	WZ_ALIGN_LEFT = 1,
+	WZ_ALIGN_CENTER = 2,
+	WZ_ALIGN_RIGHT = 4,
+
+	// Vertical.
+	WZ_ALIGN_TOP = 8,
+	WZ_ALIGN_MIDDLE = 16,
+	WZ_ALIGN_BOTTOM = 32
+};
+
 typedef enum
 {
 	WZ_EVENT_UNKNOWN,
@@ -251,6 +266,8 @@ void wz_widget_set_autosize(struct wzWidget *widget, int autosize);
 int wz_widget_get_autosize(const struct wzWidget *widget);
 void wz_widget_set_stretch(struct wzWidget *widget, int stretch);
 int wz_widget_get_stretch(const struct wzWidget *widget);
+void wz_widget_set_align(struct wzWidget *widget, int align);
+int wz_widget_get_align(const struct wzWidget *widget);
 bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_visible(struct wzWidget *widget, bool visible);
 bool wz_widget_get_visible(const struct wzWidget *widget);

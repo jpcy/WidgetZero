@@ -50,6 +50,7 @@ public:
 	void setRect(int x, int y, int w, int h);
 	void setAutosize(int autosize);
 	void setStretch(int stretch);
+	void setAlign(int align);
 	void setMargin(int margin);
 	void setMargin(int top, int right, int bottom, int left);
 	void setMargin(wzBorder margin);

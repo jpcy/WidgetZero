@@ -79,6 +79,9 @@ struct wzWidget
 	// Only used if the widget is the child of a layout.
 	int stretch;
 
+	// Only used if the widget is the child of a layout.
+	int align;
+
 	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
 	wzBorder margin;
 

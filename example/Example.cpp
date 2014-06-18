@@ -148,9 +148,11 @@ public:
 
 		childWindowCheckbox.reset(new wz::Checkbox(childLayout.get(), "Checkbox"));
 		childWindowCheckbox->setMargin(8, 0, 0, 0);
+		childWindowCheckbox->setAlign(WZ_ALIGN_CENTER);
 
 		childCombo.reset(new wz::Combo(childLayout.get(), listData, 17));
 		childCombo->setMargin(8, 0, 0, 0);
+		childCombo->setAlign(WZ_ALIGN_RIGHT);
 
 		childWindowButton2.reset(new wz::Button(childLayout.get(), "Yet Another Button"));
 		childWindowButton2->setStretch(WZ_STRETCH);

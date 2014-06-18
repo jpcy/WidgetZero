@@ -80,6 +80,11 @@ void Widget::setStretch(int stretch)
 	wz_widget_set_stretch(getWidget(), stretch);
 }
 
+void Widget::setAlign(int align)
+{
+	wz_widget_set_align(getWidget(), align);
+}
+
 void Widget::setMargin(int margin)
 {
 	wzBorder m;

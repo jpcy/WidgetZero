@@ -456,6 +456,24 @@ int wz_widget_get_stretch(const struct wzWidget *widget)
 	return widget->stretch;
 }
 
+void wz_widget_set_align(struct wzWidget *widget, int align)
+{
+	assert(widget);
+	widget->align = align;
+
+	// If the parent is a layout widget, refresh it.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+	{
+		wz_widget_refresh_rect(widget->parent);
+	}
+}
+
+int wz_widget_get_align(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->align;
+}
+
 bool wz_widget_get_hover(const struct wzWidget *widget)
 {
 	assert(widget);
