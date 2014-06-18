@@ -182,6 +182,12 @@ MISC.
 ================================================================================
 */
 
+static void wz_widget_refresh_rect(struct wzWidget *widget)
+{
+	assert(widget);
+	wz_widget_set_rect(widget, wz_widget_get_rect(widget));
+}
+
 void wz_widget_destroy(struct wzWidget *widget)
 {
 	int i;
@@ -339,9 +345,11 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 {
+	wzRect oldRect;
 	int i;
 
 	assert(widget);
+	oldRect = widget->rect;
 
 	// Apply autosizing.
 	rect = wz_widget_calculate_autosized_rect(widget, rect);
@@ -359,6 +367,16 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		wz_widget_set_autosize_rect_recursive(widget->children[i]);
+	}
+
+	// If the parent is a layout widget, it may need refreshing.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+	{
+		// Refresh if the width or height has changed and stretching is off.
+		if (((widget->stretch & WZ_STRETCH_HORIZONTAL) == 0 && widget->rect.w != oldRect.w) || ((widget->stretch & WZ_STRETCH_VERTICAL) == 0 && widget->rect.h != oldRect.h))
+		{
+			wz_widget_refresh_rect(widget->parent);
+		}
 	}
 }
 
@@ -389,6 +407,12 @@ void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 {
 	assert(widget);
 	widget->margin = margin;
+
+	// If the parent is a layout widget, refresh it.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+	{
+		wz_widget_refresh_rect(widget->parent);
+	}
 }
 
 wzBorder wz_widget_get_margin(const struct wzWidget *widget)
@@ -412,6 +436,24 @@ int wz_widget_get_autosize(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->autosize;
+}
+
+void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
+{
+	assert(widget);
+	widget->stretch = stretch;
+
+	// If the parent is a layout widget, refresh it.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+	{
+		wz_widget_refresh_rect(widget->parent);
+	}
+}
+
+int wz_widget_get_stretch(const struct wzWidget *widget)
+{
+	assert(widget);
+	return widget->stretch;
 }
 
 bool wz_widget_get_hover(const struct wzWidget *widget)
@@ -494,10 +536,10 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	child->parent = widget;
 	wz_arr_push(widget->children, child);
 
-	// If the parent is a layout widget, call wz_widget_set_size on it, to refresh the layout of it's children.
+	// If the parent is a layout widget, refresh it.
 	if (wz_widget_is_layout(widget))
 	{
-		wz_widget_set_size(widget, wz_widget_get_size(widget));
+		wz_widget_refresh_rect(widget);
 	}
 }
 

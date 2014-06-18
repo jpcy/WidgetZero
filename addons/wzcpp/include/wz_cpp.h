@@ -49,6 +49,7 @@ public:
 	void setSize(int w, int h);
 	void setRect(int x, int y, int w, int h);
 	void setAutosize(int autosize);
+	void setStretch(int stretch);
 	void setMargin(int margin);
 	void setMargin(int top, int right, int bottom, int left);
 	void setMargin(wzBorder margin);

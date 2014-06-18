@@ -34,24 +34,35 @@ struct wzVerticalStackLayout
 
 static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 {
-	int n, h, y, i;
+	int nChildren, availableHeight, nSameDirectionStretchingWidgets, i, y;
 
 	assert(widget);
 	widget->rect = rect;
-	n = wz_arr_len(widget->children);
+	nChildren = wz_arr_len(widget->children);
+	availableHeight = rect.h;
+	nSameDirectionStretchingWidgets = 0;
 
-	// Calculate the height left after subracting all child widget top and bottom margins.
-	h = rect.h;
-
-	for (i = 0; i < n; i++)
+	for (i = 0; i < nChildren; i++)
 	{
-		h -= widget->children[i]->margin.top + widget->children[i]->margin.bottom;
+		// Subtract all child widget top and bottom margins from the available height.
+		availableHeight -= widget->children[i]->margin.top + widget->children[i]->margin.bottom;
+
+		if ((widget->children[i]->stretch & WZ_STRETCH_VERTICAL) != 0)
+		{
+			// Count the number of widgets that stretch in the same direction as the the layout, so available space can be divided evenly between them.
+			nSameDirectionStretchingWidgets++;
+		}
+		else
+		{
+			// Subtract the heights of child widgets that aren't being stretched in the same direction as the the layout.
+			availableHeight -= widget->children[i]->rect.h;
+		}
 	}
 
 	// Layout the children.
 	y = 0;
 
-	for (i = 0; i < n; i++)
+	for (i = 0; i < nChildren; i++)
 	{
 		struct wzWidget *child;
 		wzRect childRect;
@@ -60,8 +71,29 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 		y += child->margin.top;
 		childRect.x = child->margin.left;
 		childRect.y = y;
-		childRect.w = rect.w - (child->margin.left + child->margin.right);
-		childRect.h = (int)(h / (float)n);
+
+		if ((widget->children[i]->stretch & WZ_STRETCH_HORIZONTAL) != 0)
+		{
+			// Fit the width of the layout.
+			childRect.w = rect.w - (child->margin.left + child->margin.right);
+		}
+		else
+		{
+			// Don't change the width.
+			childRect.w = widget->children[i]->rect.w;
+		}
+
+		if ((widget->children[i]->stretch & WZ_STRETCH_VERTICAL) != 0)
+		{
+			// The available height is evenly divided between children that stretch vertically.
+			childRect.h = (int)(availableHeight / (float)nSameDirectionStretchingWidgets);
+		}
+		else
+		{
+			// Don't change the height.
+			childRect.h = widget->children[i]->rect.h;
+		}
+
 		wz_widget_set_rect(widget->children[i], childRect);
 		y += childRect.h + child->margin.bottom;
 	}

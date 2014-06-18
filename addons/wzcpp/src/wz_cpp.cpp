@@ -75,6 +75,11 @@ void Widget::setAutosize(int autosize)
 	wz_widget_set_autosize(getWidget(), autosize);
 }
 
+void Widget::setStretch(int stretch)
+{
+	wz_widget_set_stretch(getWidget(), stretch);
+}
+
 void Widget::setMargin(int margin)
 {
 	wzBorder m;
@@ -290,6 +295,22 @@ Combo::Combo(Widget *parent, const char **items, int nItems) : items_(items)
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_add_child_widget(parent->getContentWidget(), widget);
+
+	// Calculate size based on the biggest item text plus padding.
+	wzSize size;
+	size.w = size.h = 0;
+
+	for (int i = 0; i < nItems; i++)
+	{
+		wzSize textSize;
+		renderer_->measure_text(renderer_, items[i], &textSize.w, &textSize.h);
+		size.w = WZ_MAX(size.w, textSize.w);
+		size.h = WZ_MAX(size.h, textSize.h);
+	}
+
+	size.w += 50;
+	size.h += 4;
+	wz_widget_set_size(widget, size);
 	
 	list_.reset(new List(wz_combo_get_list(combo_), items, nItems));
 }
