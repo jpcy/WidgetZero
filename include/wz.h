@@ -54,6 +54,7 @@ typedef enum
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_DESKTOP,
 	WZ_TYPE_WINDOW,
+	WZ_TYPE_HORIZONTAL_STACK_LAYOUT,
 	WZ_TYPE_VERTICAL_STACK_LAYOUT,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
@@ -292,6 +293,10 @@ int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
 struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
 
+struct wzHorizontalStackLayout *wz_horizontal_stack_layout_create(struct wzDesktop *desktop);
+
+struct wzVerticalStackLayout *wz_vertical_stack_layout_create(struct wzDesktop *desktop);
+
 typedef enum
 {
 	// Click the button on mouse up (default).
@@ -314,8 +319,6 @@ typedef enum
 	WZ_BUTTON_SET_BEHAVIOR_STICKY
 }
 wzButtonSetBehavior;
-
-struct wzVerticalStackLayout *wz_vertical_stack_layout_create(struct wzDesktop *desktop);
 
 struct wzButton *wz_button_create(struct wzDesktop *desktop);
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);

@@ -139,7 +139,7 @@ public:
 		childWindow.reset(new wz::Window(desktop.get(), "Test Window"));
 		childWindow->setRect(650, 100, 300, 300);
 
-		childLayout.reset(new wz::VerticalStackLayout(childWindow.get()));
+		childLayout.reset(new wz::StackLayout(childWindow.get(), wz::StackLayout::Vertical));
 		childLayout->setMargin(8);
 		childLayout->setAutosize(WZ_AUTOSIZE);
 
@@ -180,6 +180,20 @@ public:
 		childList.reset(new wz::List(childWindow3.get(), listData, 17));
 		childList->setMargin(8);
 		childList->setAutosize(WZ_AUTOSIZE);
+
+		horizontalStackLayout.reset(new wz::StackLayout(desktop.get(), wz::StackLayout::Horizontal));
+		horizontalStackLayout->setRect(50, 550, 400, 100);
+
+		hslButton1.reset(new wz::Button(horizontalStackLayout.get(), "Button A"));
+		hslButton1->setStretch(WZ_STRETCH_VERTICAL);
+
+		hslButton2.reset(new wz::Button(horizontalStackLayout.get(), "Button B"));
+		hslButton2->setMargin(0, 0, 0, 8);
+		hslButton2->setAlign(WZ_ALIGN_MIDDLE);
+
+		hslButton3.reset(new wz::Button(horizontalStackLayout.get(), "Button C"));
+		hslButton3->setMargin(0, 0, 0, 8);
+		hslButton3->setAlign(WZ_ALIGN_BOTTOM);
 	}
 
 	std::auto_ptr<wz::Desktop> desktop;
@@ -195,7 +209,7 @@ public:
 	std::auto_ptr<wz::Combo> combo;
 	std::auto_ptr<wz::Combo> combo2;
 	std::auto_ptr<wz::Window> childWindow;
-	std::auto_ptr<wz::VerticalStackLayout> childLayout;
+	std::auto_ptr<wz::StackLayout> childLayout;
 	std::auto_ptr<wz::Button> childWindowButton;
 	std::auto_ptr<wz::Checkbox> childWindowCheckbox;
 	std::auto_ptr<wz::List> childList;
@@ -203,6 +217,9 @@ public:
 	std::auto_ptr<wz::Button> childWindowButton2;
 	std::auto_ptr<wz::Window> childWindow2;
 	std::auto_ptr<wz::Window> childWindow3;
+
+	std::auto_ptr<wz::StackLayout> horizontalStackLayout;
+	std::auto_ptr<wz::Button> hslButton1, hslButton2, hslButton3;
 };
 
 static void ShowError(const char *message)

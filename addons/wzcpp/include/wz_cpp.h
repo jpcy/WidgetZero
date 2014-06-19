@@ -111,15 +111,21 @@ private:
 	std::string title_;
 };
 
-class VerticalStackLayout : public Widget
+class StackLayout : public Widget
 {
 public:
-	VerticalStackLayout(Widget *parent);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)layout_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)layout_; }
+	enum Direction
+	{
+		Horizontal,
+		Vertical
+	};
+
+	StackLayout(Widget *parent, Direction direction);
+	virtual const wzWidget *getWidget() const { return layout_; }
+	virtual wzWidget *getWidget() { return layout_; }
 	
 private:
-	wzVerticalStackLayout *layout_;
+	wzWidget *layout_;
 };
 
 class Button : public Widget

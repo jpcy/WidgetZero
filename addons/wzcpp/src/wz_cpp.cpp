@@ -221,11 +221,20 @@ void Window::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-VerticalStackLayout::VerticalStackLayout(Widget *parent)
+StackLayout::StackLayout(Widget *parent, StackLayout::Direction direction)
 {
 	renderer_ = parent->getRenderer();
-	layout_ = wz_vertical_stack_layout_create(parent->getDesktop());
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)layout_);
+
+	if (direction == Horizontal)
+	{
+		layout_ = (wzWidget *)wz_horizontal_stack_layout_create(parent->getDesktop());
+	}
+	else
+	{
+		layout_ = (wzWidget *)wz_vertical_stack_layout_create(parent->getDesktop());
+	}
+
+	wz_widget_add_child_widget(parent->getContentWidget(), layout_);
 }
 
 //------------------------------------------------------------------------------
