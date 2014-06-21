@@ -41,6 +41,10 @@ struct wzRenderer
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label);
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *item);
 	void (*draw_groupbox)(struct wzRenderer *renderer, wzRect clip, struct wzGroupBox *groupBox, const char *label);
+
+	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *label);
+	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);
+
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
 	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *text, uint8_t r, uint8_t g, uint8_t b);
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items);

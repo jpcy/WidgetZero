@@ -119,6 +119,14 @@ public:
 		groupBox.reset(new wz::GroupBox(desktop.get(), "Test GroupBox"));
 		groupBox->setPosition(100, 300);
 
+		radioButtonLayout.reset(new wz::StackLayout(desktop.get(), wz::StackLayout::Vertical));
+		radioButtonLayout->setRect(108, 320, 200, 200);
+		radioButton1.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 1", &radioButtonGroup));
+		radioButton2.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 2", &radioButtonGroup));
+		radioButton2->setMargin(8, 0, 0, 0);
+		radioButton3.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 3", &radioButtonGroup));
+		radioButton3->setMargin(8, 0, 0, 0);
+
 		scroller.reset(new wz::Scroller(desktop.get(), WZ_SCROLLER_VERTICAL, 20, 10, 100));
 		scroller->setRect(300, 50, 16, 200);
 
@@ -200,6 +208,11 @@ public:
 	std::auto_ptr<wz::Button> button;
 	std::auto_ptr<wz::Checkbox> checkbox;
 	std::auto_ptr<wz::GroupBox> groupBox;
+
+	wz::RadioButtonGroup radioButtonGroup;
+	std::auto_ptr<wz::StackLayout> radioButtonLayout;
+	std::auto_ptr<wz::RadioButton> radioButton1, radioButton2, radioButton3;
+
 	std::auto_ptr<wz::Scroller> scroller;
 	std::auto_ptr<wz::Label> label;
 	std::auto_ptr<wz::Scroller> scrollerHorizontal;

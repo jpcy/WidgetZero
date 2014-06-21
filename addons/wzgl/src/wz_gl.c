@@ -47,6 +47,10 @@ wzRendererData;
 
 static char errorMessage[WZ_GL_MAX_ERROR_MESSAGE];
 
+static const int radioButtonOuterRadius = 8;
+static const int radioButtonInnerRadius = 4;
+static const int radioButtonSpacing = 8;
+
 /*
 ================================================================================
 
@@ -404,7 +408,7 @@ static void wzgl_draw_groupbox(struct wzRenderer *renderer, wzRect clip, struct 
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)groupBox);
 	
 	// Background.
-	wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
+	//wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
 
 	// Border - left, bottom, right, top left, top right.
 	textLeftMargin = 20;
@@ -418,6 +422,58 @@ static void wzgl_draw_groupbox(struct wzRenderer *renderer, wzRect clip, struct 
 
 	// Label.
 	wzgl_printf(rendererData, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), label);
+
+	nvgRestore(vg);
+}
+
+static wzSize wzgl_measure_radio_button(struct wzRenderer *renderer, const char *label)
+{
+	wzSize size;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, label, &size.w, &size.h);
+	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
+	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
+	return size;
+}
+
+static void wzgl_draw_radio_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	wzRect rect;
+	bool hover;
+
+	assert(renderer);
+	assert(button);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgSave(vg);
+	rect = wz_widget_get_absolute_rect((struct wzWidget *)button);
+
+	if (!wzgl_clip_to_rect_intersection(vg, clip, rect))
+		return;
+
+	hover = wz_widget_get_hover((struct wzWidget *)button);
+
+	// Inner circle.
+	if (wz_button_is_set(button))
+	{
+		nvgBeginPath(vg);
+		nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonInnerRadius);
+		nvgFillColor(vg, nvgRGB(0, 0, 0));
+		nvgFill(vg);
+	}
+
+	// Outer circle.
+	nvgBeginPath(vg);
+	nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonOuterRadius);
+	nvgStrokeColor(vg, hover ? nvgRGB(44, 98, 139) : nvgRGB(0, 0, 0));
+	nvgStroke(vg);
+
+	// Label.
+	wzgl_printf(rendererData, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
@@ -656,6 +712,8 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_checkbox = wzgl_draw_checkbox;
 	renderer->draw_combo = wzgl_draw_combo;
 	renderer->draw_groupbox = wzgl_draw_groupbox;
+	renderer->measure_radio_button = wzgl_measure_radio_button;
+	renderer->draw_radio_button = wzgl_draw_radio_button;
 	renderer->draw_scroller = wzgl_draw_scroller;
 	renderer->draw_label = wzgl_draw_label;
 	renderer->draw_list = wzgl_draw_list;

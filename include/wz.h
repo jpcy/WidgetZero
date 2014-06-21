@@ -43,6 +43,7 @@ struct wzWindow;
 struct wzWidget;
 struct wzButton;
 struct wzCombo;
+struct wzRadioButtonGroup;
 struct wzScroller;
 struct wzGroupBox;
 struct wzLabel;
@@ -357,6 +358,10 @@ int wz_list_get_selected_item(const struct wzList *list);
 int wz_list_get_pressed_item(const struct wzList *list);
 int wz_list_get_hovered_item(const struct wzList *list);
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback);
+
+struct wzRadioButtonGroup *wz_radio_button_group_create();
+void wz_radio_button_group_destroy(struct wzRadioButtonGroup *group);
+void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct wzButton *button);
 
 typedef enum
 {

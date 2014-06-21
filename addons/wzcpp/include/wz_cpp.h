@@ -187,6 +187,30 @@ private:
 	std::string label_;
 };
 
+class RadioButtonGroup
+{
+public:
+	RadioButtonGroup();
+	~RadioButtonGroup();
+	wzRadioButtonGroup *get() { return group_; }
+
+private:
+	wzRadioButtonGroup *group_;
+};
+
+class RadioButton : public Widget
+{
+public:
+	RadioButton(Widget *parent, const std::string &label, RadioButtonGroup *group);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
+	void draw(wzRect clip);
+
+private:
+	wzButton *button_;
+	std::string label_;
+};
+
 class Scroller : public Widget
 {
 public:

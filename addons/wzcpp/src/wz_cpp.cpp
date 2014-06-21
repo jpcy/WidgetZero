@@ -355,6 +355,36 @@ void GroupBox::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
+RadioButtonGroup::RadioButtonGroup()
+{
+	group_ = wz_radio_button_group_create();
+}
+
+RadioButtonGroup::~RadioButtonGroup()
+{
+	wz_radio_button_group_destroy(group_);
+}
+
+//------------------------------------------------------------------------------
+
+RadioButton::RadioButton(Widget *parent, const std::string &label, RadioButtonGroup *group) : label_(label)
+{
+	renderer_ = parent->getRenderer();
+	button_ = wz_button_create(parent->getDesktop());
+	wz_radio_button_group_add_button(group->get(), button_);
+	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button_);
+	wz_widget_set_size((wzWidget *)button_, renderer_->measure_radio_button(renderer_, label_.c_str()));
+	wz_widget_set_metadata((wzWidget *)button_, this);
+	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
+}
+
+void RadioButton::draw(wzRect clip)
+{
+	renderer_->draw_radio_button(renderer_, clip, button_, label_.c_str());
+}
+
+//------------------------------------------------------------------------------
+
 Scroller::Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue)
 {
 	renderer_ = parent->getRenderer();
