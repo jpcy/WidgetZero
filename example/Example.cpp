@@ -119,8 +119,8 @@ public:
 		groupBox.reset(new wz::GroupBox(desktop.get(), "Test GroupBox"));
 		groupBox->setPosition(100, 300);
 
-		radioButtonLayout.reset(new wz::StackLayout(desktop.get(), wz::StackLayout::Vertical));
-		radioButtonLayout->setRect(108, 320, 200, 200);
+		radioButtonLayout.reset(new wz::StackLayout(groupBox.get(), wz::StackLayout::Vertical));
+		radioButtonLayout->setAutosize(WZ_AUTOSIZE);
 		radioButton1.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 1", &radioButtonGroup));
 		radioButton2.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 2", &radioButtonGroup));
 		radioButton2->setMargin(8, 0, 0, 0);

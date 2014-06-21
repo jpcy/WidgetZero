@@ -26,19 +26,34 @@ SOFTWARE.
 #include <string.h>
 #include "wz_widget.h"
 
-struct wzGroupBox
+struct wzFrame
 {
 	struct wzWidget base;
+	struct wzWidget *content;
 };
 
-struct wzGroupBox *wz_groupbox_create(struct wzDesktop *desktop)
+struct wzFrame *wz_frame_create(struct wzDesktop *desktop)
 {
-	struct wzGroupBox *groupbox;
+	struct wzFrame *frame;
 
 	assert(desktop);
-	groupbox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
-	memset(groupbox, 0, sizeof(struct wzGroupBox));
-	groupbox->base.type = WZ_TYPE_GROUPBOX;
-	groupbox->base.desktop = desktop;
-	return groupbox;
+	frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
+	memset(frame, 0, sizeof(struct wzFrame));
+	frame->base.type = WZ_TYPE_FRAME;
+	frame->base.desktop = desktop;
+
+	// Create content widget.
+	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
+	memset(frame->content, 0, sizeof(struct wzWidget));
+	frame->content->desktop = desktop;
+	frame->content->autosize = WZ_AUTOSIZE;
+	wz_widget_add_child_widget((struct wzWidget *)frame, frame->content);
+
+	return frame;
+}
+
+struct wzWidget *wz_frame_get_content_widget(struct wzFrame *frame)
+{
+	assert(frame);
+	return frame->content;
 }

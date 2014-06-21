@@ -178,12 +178,13 @@ class GroupBox : public Widget
 {
 public:
 	GroupBox(Widget *parent, const std::string &label);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)groupBox_; }
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)frame_; }
+	virtual wzWidget *getContentWidget() { return wz_frame_get_content_widget(frame_); }
 	void draw(wzRect clip);
 
 private:
-	wzGroupBox *groupBox_;
+	wzFrame *frame_;
 	std::string label_;
 };
 

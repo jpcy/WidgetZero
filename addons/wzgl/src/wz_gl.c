@@ -392,7 +392,23 @@ static void wzgl_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzC
 	nvgRestore(vg);
 }
 
-static void wzgl_draw_groupbox(struct wzRenderer *renderer, wzRect clip, struct wzGroupBox *groupBox, const char *label)
+static wzBorder wzgl_measure_group_box_margin(struct wzRenderer *renderer, const char *label)
+{
+	int labelHeight;
+	wzBorder margin;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, label, NULL, &labelHeight);
+
+	margin.top = labelHeight + 8;
+	margin.bottom = 8;
+	margin.left = 8;
+	margin.right = 8;
+
+	return margin;
+}
+
+static void wzgl_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -405,10 +421,10 @@ static void wzgl_draw_groupbox(struct wzRenderer *renderer, wzRect clip, struct 
 
 	nvgSave(vg);
 	wzgl_clip_to_rect(vg, clip);
-	rect = wz_widget_get_absolute_rect((struct wzWidget *)groupBox);
+	rect = wz_widget_get_absolute_rect((struct wzWidget *)frame);
 	
 	// Background.
-	//wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
+	wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
 
 	// Border - left, bottom, right, top left, top right.
 	textLeftMargin = 20;
@@ -711,7 +727,8 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_button = wzgl_draw_button;
 	renderer->draw_checkbox = wzgl_draw_checkbox;
 	renderer->draw_combo = wzgl_draw_combo;
-	renderer->draw_groupbox = wzgl_draw_groupbox;
+	renderer->measure_group_box_margin = wzgl_measure_group_box_margin;
+	renderer->draw_group_box = wzgl_draw_group_box;
 	renderer->measure_radio_button = wzgl_measure_radio_button;
 	renderer->draw_radio_button = wzgl_draw_radio_button;
 	renderer->draw_scroller = wzgl_draw_scroller;

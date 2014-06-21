@@ -40,7 +40,9 @@ struct wzRenderer
 	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label);
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *item);
-	void (*draw_groupbox)(struct wzRenderer *renderer, wzRect clip, struct wzGroupBox *groupBox, const char *label);
+
+	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *label);
+	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *label);
 
 	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *label);
 	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);

@@ -43,9 +43,9 @@ struct wzWindow;
 struct wzWidget;
 struct wzButton;
 struct wzCombo;
+struct wzFrame;
 struct wzRadioButtonGroup;
 struct wzScroller;
-struct wzGroupBox;
 struct wzLabel;
 struct wzList;
 struct wzVerticalStackLayout;
@@ -59,7 +59,7 @@ typedef enum
 	WZ_TYPE_VERTICAL_STACK_LAYOUT,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
-	WZ_TYPE_GROUPBOX,
+	WZ_TYPE_FRAME,
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
@@ -263,6 +263,7 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget);
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
 
 void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin);
+void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left);
 wzBorder wz_widget_get_margin(const struct wzWidget *widget);
 void wz_widget_set_autosize(struct wzWidget *widget, int autosize);
 int wz_widget_get_autosize(const struct wzWidget *widget);
@@ -334,7 +335,8 @@ struct wzCombo *wz_combo_create(struct wzDesktop *desktop);
 struct wzList *wz_combo_get_list(struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
-struct wzGroupBox *wz_groupbox_create(struct wzDesktop *desktop);
+struct wzFrame *wz_frame_create(struct wzDesktop *desktop);
+struct wzWidget *wz_frame_get_content_widget(struct wzFrame *frame);
 
 struct wzLabel *wz_label_create(struct wzDesktop *desktop);
 

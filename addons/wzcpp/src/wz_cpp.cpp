@@ -340,17 +340,18 @@ void Combo::draw(wzRect clip)
 GroupBox::GroupBox(Widget *parent, const std::string &label) : label_(label)
 {
 	renderer_ = parent->getRenderer();
-	groupBox_ = wz_groupbox_create(parent->getDesktop());
-	wzWidget *widget = (wzWidget *)groupBox_;
+	frame_ = wz_frame_create(parent->getDesktop());
+	wzWidget *widget = (wzWidget *)frame_;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_set_size_args(widget, 200, 200);
+	wz_widget_set_margin(getContentWidget(), renderer_->measure_group_box_margin(renderer_, label_.c_str()));
 	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 }
 
 void GroupBox::draw(wzRect clip)
 {
-	renderer_->draw_groupbox(renderer_, clip, groupBox_, label_.c_str());
+	renderer_->draw_group_box(renderer_, clip, frame_, label_.c_str());
 }
 
 //------------------------------------------------------------------------------

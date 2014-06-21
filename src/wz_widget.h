@@ -126,6 +126,8 @@ enum
 	WZ_NUM_COMPASS_POINTS
 };
 
+void wz_widget_refresh_rect(struct wzWidget *widget);
+
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
 // Also sets all ancestor widgets to the same draw priority.

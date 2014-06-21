@@ -162,7 +162,7 @@ static void wz_widget_set_autosize_rect_recursive(struct wzWidget *widget)
 		}
 
 		// Don't recurse if the rect hasn't changed.
-		recurse = (oldRect.w != newRect.w || oldRect.h != newRect.h);
+		recurse = (oldRect.x != newRect.x || oldRect.y != newRect.y || oldRect.w != newRect.w || oldRect.h != newRect.h);
 	}
 
 	if (recurse)
@@ -181,12 +181,6 @@ MISC.
 
 ================================================================================
 */
-
-static void wz_widget_refresh_rect(struct wzWidget *widget)
-{
-	assert(widget);
-	wz_widget_set_rect(widget, wz_widget_get_rect(widget));
-}
 
 void wz_widget_destroy(struct wzWidget *widget)
 {
@@ -415,6 +409,16 @@ void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 	}
 }
 
+void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left)
+{
+	wzBorder margin;
+	margin.top = top;
+	margin.right = right;
+	margin.bottom = bottom;
+	margin.left = left;
+	wz_widget_set_margin(widget, margin);
+}
+
 wzBorder wz_widget_get_margin(const struct wzWidget *widget)
 {
 	assert(widget);
@@ -615,6 +619,12 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->window;
+}
+
+void wz_widget_refresh_rect(struct wzWidget *widget)
+{
+	assert(widget);
+	wz_widget_set_rect(widget, wz_widget_get_rect(widget));
 }
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)
