@@ -1,2 +1,2 @@
 build
-premake5-custom.lua
+config.lua

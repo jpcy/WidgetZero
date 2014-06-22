@@ -1,26 +1,26 @@
-wz =
+config =
 {
 	glewPath = nil,
 	nanovgPath = nil,
 	sdl2Path = nil
 }
 
-local customFilename = "premake5-custom.lua"
+local configFilename = "config.lua"
 
-if not os.isfile(customFilename) then
-	printf("Error: file premake5-custom.lua doesn't exist")
+if not os.isfile(configFilename) then
+	printf("Error: config file \"" .. configFilename .. "\" doesn't exist")
 	os.exit(1)
 else
-	dofile(customFilename)
+	dofile(configFilename)
 end
 
 if os.get() == "windows" then
-	if wz.glewPath == nil then
+	if config.glewPath == nil then
 		printf("Error: GLEW path not set")
 		os.exit(1)
 	end
 
-	if wz.sdl2Path == nil then
+	if config.sdl2Path == nil then
 		printf("Error: SDL2 path not set")
 		os.exit(1)
 	end
@@ -30,15 +30,15 @@ if os.get() == "windows" then
 	os.mkdir("build/bin_x64");
 
 	-- Copy the GLEW dlls to the build directory.
-	os.copyfile(wz.glewPath .. "/bin/Release/Win32/glew32.dll", "build/bin_x86/glew32.dll");
-	os.copyfile(wz.glewPath .. "/bin/Release/x64/glew32.dll", "build/bin_x64/glew32.dll");
+	os.copyfile(config.glewPath .. "/bin/Release/Win32/glew32.dll", "build/bin_x86/glew32.dll");
+	os.copyfile(config.glewPath .. "/bin/Release/x64/glew32.dll", "build/bin_x64/glew32.dll");
 	
 	-- Copy the SDL2 dlls to the build directory.
-	os.copyfile(wz.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
-	os.copyfile(wz.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
+	os.copyfile(config.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
+	os.copyfile(config.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
 end
 
-if wz.nanovgPath == nil then
+if config.nanovgPath == nil then
 	printf("Error: NanoVG path not set")
 	os.exit(1)
 end
@@ -75,7 +75,7 @@ solution "WidgetZero"
 
 project "WidgetZero"
 	kind "StaticLib"
-	files { "src/*.*", "include/wz.h" }
+	files { "src/*.*", "include/config.h" }
 	includedirs { "include" }
 		
 -----------------------------------------------------------------------------
@@ -116,16 +116,16 @@ project "WidgetZeroGL"
 		"include",
 		"addons/shared/include",
 		"addons/wzgl/include",
-		wz.glewPath .. "/include",
-		wz.nanovgPath .. "/src"
+		config.glewPath .. "/include",
+		config.nanovgPath .. "/src"
 	}
 		
 -----------------------------------------------------------------------------
 
 project "NanoVG"
 	kind "StaticLib"
-	files { wz.nanovgPath .. "/src/*.*" }
-	includedirs { wz.nanovgPath .. "/src" }
+	files { config.nanovgPath .. "/src/*.*" }
+	includedirs { config.nanovgPath .. "/src" }
 		
 -----------------------------------------------------------------------------
 
@@ -149,14 +149,14 @@ project "Example"
 		linkoptions { "`pkg-config --libs sdl2`" }
 		links { "GL", "GLU", "GLEW" }
     configuration "vs*"
-	    includedirs(wz.sdl2Path .. "/include")
+	    includedirs(config.sdl2Path .. "/include")
 		links { "glu32", "opengl32", "glew32" }
 	configuration { "vs*", "not x64" }
-		libdirs(wz.sdl2Path .. "/lib/x86")
-		libdirs(wz.glewPath .. "/lib/Release/Win32")
+		libdirs(config.sdl2Path .. "/lib/x86")
+		libdirs(config.glewPath .. "/lib/Release/Win32")
 	configuration { "vs*",  "x64" }
-		libdirs(wz.sdl2Path .. "/lib/x64")
-		libdirs(wz.glewPath .. "/lib/Release/x64")
+		libdirs(config.sdl2Path .. "/lib/x64")
+		libdirs(config.glewPath .. "/lib/Release/x64")
 	configuration {}
 	
 	links
