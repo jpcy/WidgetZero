@@ -135,7 +135,7 @@ RENDERER
 static void wzgl_begin_frame(struct wzRenderer *renderer, int windowWidth, int windowHeight)
 {
 	assert(renderer);
-	nvgBeginFrame(((wzRendererData *)renderer->data)->vg, windowWidth, windowHeight, 1, NVG_STRAIGHT_ALPHA);
+	nvgBeginFrame(((wzRendererData *)renderer->data)->vg, windowWidth, windowHeight, 1);
 }
 
 static void wzgl_end_frame(struct wzRenderer *renderer)
