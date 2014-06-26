@@ -77,6 +77,7 @@ project "WidgetZero"
 	kind "StaticLib"
 	files { "src/*.*", "include/*.*" }
 	includedirs { "include" }
+	vpaths { ["*"] = { "src", "include" } }
 		
 -----------------------------------------------------------------------------
 
@@ -97,6 +98,8 @@ project "WidgetZeroCpp"
 		"addons/wzcpp/include"
 	}
 	
+	vpaths { ["*"] = { "addons/wzcpp/include", "addons/wzcpp/src" } }
+	
 	configuration "vs2012"
 		linkoptions { "/SAFESEH:NO" }
 		
@@ -108,7 +111,8 @@ project "WidgetZeroGL"
 	files
 	{
 		"addons/wzgl/src/*.c",
-		"addons/wzgl/include/*.h"
+		"addons/wzgl/include/*.h",
+		"addons/shared/include/*.h"
 	}
 	
 	includedirs
@@ -119,6 +123,8 @@ project "WidgetZeroGL"
 		config.glewPath .. "/include",
 		config.nanovgPath .. "/src"
 	}
+	
+	vpaths { ["*"] = { "addons/shared/include", "addons/wzgl/include", "addons/wzgl/src" } }
 		
 -----------------------------------------------------------------------------
 
