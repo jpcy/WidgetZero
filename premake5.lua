@@ -75,7 +75,7 @@ solution "WidgetZero"
 
 project "WidgetZero"
 	kind "StaticLib"
-	files { "src/*.*", "include/config.h" }
+	files { "src/*.*", "include/*.*" }
 	includedirs { "include" }
 		
 -----------------------------------------------------------------------------

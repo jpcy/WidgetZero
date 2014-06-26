@@ -32,7 +32,10 @@ struct wzRenderer
 	void (*end_frame)(struct wzRenderer *renderer);
 
 	// width or height can be NULL.
-	void (*measure_text)(struct wzRenderer *renderer, const char *text, int *width, int *height);
+	void (*measure_text)(struct wzRenderer *renderer, const char *text, int n, int *width, int *height);
+
+	// Return the pixel delta between the index and index + 1 characters.
+	int (*text_get_pixel_delta)(struct wzRenderer *renderer, const char *text, int index);
 
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
@@ -52,7 +55,7 @@ struct wzRenderer
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items);
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
-
+	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit);
 	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
 
 	void *data;

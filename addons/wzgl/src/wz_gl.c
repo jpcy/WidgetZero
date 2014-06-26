@@ -143,7 +143,7 @@ static void wzgl_end_frame(struct wzRenderer *renderer)
 	nvgEndFrame(((wzRendererData *)renderer->data)->vg);
 }
 
-static void wzgl_measure_text(struct wzRenderer *renderer, const char *text, int *width, int *height)
+static void wzgl_measure_text(struct wzRenderer *renderer, const char *text, int n, int *width, int *height)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -154,13 +154,31 @@ static void wzgl_measure_text(struct wzRenderer *renderer, const char *text, int
 
 	if (width)
 	{
-		*width = (int)nvgTextBounds(vg, 0, 0, text, NULL, NULL);
+		*width = (int)nvgTextBounds(vg, 0, 0, text, n == 0 ? NULL : &text[n], NULL);
 	}
 
 	if (height)
 	{
 		*height = (int)rendererData->fontSize;
 	}
+}
+
+static int wzgl_text_get_pixel_delta(struct wzRenderer *renderer, const char *text, int index)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	struct NVGglyphPosition positions[2];
+	float x[2];
+
+	assert(renderer);
+	assert(text);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgTextGlyphPositions(vg, 0, 0, &text[index], &text[index + 2], positions, 2);
+	x[0] = index == 0 ? 0 : positions[0].minx;
+	x[1] = index == (int)strlen(text) - 1 ? positions[0].maxx : positions[1].minx;
+	return (int)(x[1] - x[0]);
 }
 
 static void wzgl_draw_dock_icon(struct wzRenderer *renderer, wzRect rect)
@@ -398,7 +416,7 @@ static wzBorder wzgl_measure_group_box_margin(struct wzRenderer *renderer, const
 	wzBorder margin;
 
 	assert(renderer);
-	wzgl_measure_text(renderer, label, NULL, &labelHeight);
+	wzgl_measure_text(renderer, label, 0, NULL, &labelHeight);
 
 	margin.top = labelHeight + 8;
 	margin.bottom = 8;
@@ -429,7 +447,7 @@ static void wzgl_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct
 	// Border - left, bottom, right, top left, top right.
 	textLeftMargin = 20;
 	textBorderSpacing = 5;
-	wzgl_measure_text(renderer, label, &textWidth, &textHeight);
+	wzgl_measure_text(renderer, label, 0, &textWidth, &textHeight);
 	wzgl_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, nvgRGB(98, 135, 157));
 	wzgl_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
 	wzgl_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
@@ -447,7 +465,7 @@ static wzSize wzgl_measure_radio_button(struct wzRenderer *renderer, const char 
 	wzSize size;
 
 	assert(renderer);
-	wzgl_measure_text(renderer, label, &size.w, &size.h);
+	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
 	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
 	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
 	return size;
@@ -672,6 +690,81 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	nvgRestore(vg);
 }
 
+static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	wzRect rect;
+	bool hover;
+	wzBorder border;
+	const char *text;
+	int cursorIndex, cursorX;
+	int selectionStartIndex, selectionEndIndex;
+
+	assert(renderer);
+	assert(textEdit);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgSave(vg);
+	wzgl_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect((struct wzWidget *)textEdit);
+	hover = wz_widget_get_hover((struct wzWidget *)textEdit);
+	border = wz_text_edit_get_border(textEdit);
+
+	// Background.
+	wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
+
+	// Border.
+	if (hover)
+	{
+		wzgl_draw_rect(vg, rect, nvgRGB(44, 98, 139));
+	}
+	else
+	{
+		wzgl_draw_rect(vg, rect, nvgRGB(0, 0, 0));
+	}
+
+	// Text.
+	text = wz_text_edit_get_text(textEdit);;
+	wzgl_printf(rendererData, rect.x + border.left, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), text);
+
+	// Cursor.
+	cursorIndex = wz_text_edit_get_cursor_index(textEdit);
+	cursorX = rect.x + border.left;
+
+	if (cursorIndex != 0)
+	{
+		cursorX += (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MIN(cursorIndex, (int)strlen(text))], NULL);
+	}
+
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, (float)cursorX, (float)(rect.y + border.top));
+	nvgLineTo(vg, (float)cursorX, (float)(rect.y + rect.h - border.bottom));
+	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+	nvgStroke(vg);
+
+	// Selection.
+	selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
+	selectionEndIndex = wz_text_edit_get_selection_end_index(textEdit);
+
+	if (selectionStartIndex != selectionEndIndex)
+	{
+		int x1, x2;
+		wzRect selectionRect;
+
+		x1 = (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MIN(selectionStartIndex, selectionEndIndex)], NULL);
+		x2 = (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MAX(selectionStartIndex, selectionEndIndex)], NULL);
+		selectionRect.x = rect.x + border.left + x1;
+		selectionRect.y = rect.y + border.top;
+		selectionRect.w = x2 - x1;
+		selectionRect.h = rect.h - (border.top + border.bottom);
+		wzgl_draw_filled_rect(vg, selectionRect, nvgRGBA(0, 0, 255, 65));
+	}
+
+	nvgRestore(vg);
+}
+
 static void wzgl_debug_draw_text(struct wzRenderer *renderer, const char *text, int x, int y)
 {
 	assert(renderer);
@@ -721,6 +814,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->begin_frame = wzgl_begin_frame;
 	renderer->end_frame = wzgl_end_frame;
 	renderer->measure_text = wzgl_measure_text;
+	renderer->text_get_pixel_delta = wzgl_text_get_pixel_delta;
 	renderer->draw_dock_icon = wzgl_draw_dock_icon;
 	renderer->draw_dock_preview = wzgl_draw_dock_preview;
 	renderer->draw_window = wzgl_draw_window;
@@ -736,6 +830,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_list = wzgl_draw_list;
 	renderer->draw_tab_button = wzgl_draw_tab_button;
 	renderer->draw_tab_page = wzgl_draw_tab_page;
+	renderer->draw_text_edit = wzgl_draw_text_edit;
 	renderer->debug_draw_text = wzgl_debug_draw_text;
 
 	return renderer;

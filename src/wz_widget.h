@@ -45,6 +45,9 @@ typedef struct
 	void (*mouse_wheel_move)(struct wzWidget *widget, int x, int y);
 	void (*mouse_hover_on)(struct wzWidget *widget);
 	void (*mouse_hover_off)(struct wzWidget *widget);
+	void (*key_down)(struct wzWidget *widget, wzKey key);
+	void (*key_up)(struct wzWidget *widget, wzKey key);
+	void (*text_input)(struct wzWidget *widget, const char *text);
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
 	wzRect (*get_children_clip_rect)(struct wzWidget *widget);

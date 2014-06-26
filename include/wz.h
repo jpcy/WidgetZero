@@ -46,6 +46,7 @@ struct wzCombo;
 struct wzFrame;
 struct wzRadioButtonGroup;
 struct wzScroller;
+struct wzTextEdit;
 struct wzLabel;
 struct wzList;
 struct wzVerticalStackLayout;
@@ -65,6 +66,7 @@ typedef enum
 	WZ_TYPE_SCROLLER,
 	WZ_TYPE_TAB_BAR,
 	WZ_TYPE_TAB_PAGE,
+	WZ_TYPE_TEXT_EDIT,
 	WZ_TYPE_TABBED,
 	WZ_MAX_WIDGET_TYPES = 64
 }
@@ -192,6 +194,7 @@ typedef void (*wzEventCallback)(wzEvent e);
 typedef enum
 {
 	WZ_CURSOR_DEFAULT,
+	WZ_CURSOR_IBEAM,
 	WZ_CURSOR_RESIZE_N_S,
 	WZ_CURSOR_RESIZE_E_W,
 	WZ_CURSOR_RESIZE_NE_SW,
@@ -220,6 +223,26 @@ wzDockPosition;
 bool wz_is_rect_empty(wzRect rect);
 bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result);
 
+typedef enum
+{
+	WZ_KEY_UNKNOWN,
+	WZ_KEY_LEFT,
+	WZ_KEY_RIGHT,
+	WZ_KEY_UP,
+	WZ_KEY_DOWN, 
+	WZ_KEY_HOME,
+	WZ_KEY_END,
+	WZ_KEY_DELETE,
+	WZ_KEY_BACKSPACE,
+	WZ_NUM_KEYS,
+
+	WZ_KEY_SHIFT = (1<<10),
+	WZ_KEY_CONTROL = (1<<11)
+}
+wzKey;
+
+typedef void (*wzDesktopMeasureTextCallback)(struct wzDesktop *desktop, const char *text, int n, int *width, int *height);
+typedef int (*wzDesktopTextGetPixelDeltaCallback)(struct wzDesktop *desktop, const char *text, int index);
 typedef void (*wzDesktopDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzDesktopDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
@@ -228,6 +251,8 @@ struct wzDesktop *wz_desktop_create();
 // Set the centralized event handler. All events invoked by the ancestor widgets of this desktop will call the callback function.
 void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback);
 
+void wz_desktop_set_measure_text_callback(struct wzDesktop *desktop, wzDesktopMeasureTextCallback callback);
+void wz_desktop_set_text_get_pixel_delta_callback(struct wzDesktop *desktop, wzDesktopTextGetPixelDeltaCallback callback);
 void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata);
 void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata);
 void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size);
@@ -236,6 +261,9 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
+void wz_desktop_key_down(struct wzDesktop *desktop, wzKey key);
+void wz_desktop_key_up(struct wzDesktop *desktop, wzKey key);
+void wz_desktop_text_input(struct wzDesktop *desktop, const char *text);
 void wz_desktop_draw(struct wzDesktop *desktop);
 struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop);
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
@@ -401,6 +429,16 @@ void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallbac
 struct wzTabbed *wz_tabbed_create(struct wzDesktop *desktop);
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
 struct wzTabBar *wz_tabbed_get_tab_bar(struct wzTabbed *tabbed);
+
+struct wzTextEdit *wz_text_edit_create(struct wzDesktop *desktop, int maximumTextLength);
+wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
+void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
+void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left);
+const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
+void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
+int wz_text_edit_get_cursor_index(const struct wzTextEdit *textEdit);
+int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit);
+int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit);
 
 #ifdef __cplusplus
 } // extern "C"

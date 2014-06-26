@@ -82,6 +82,9 @@ public:
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
 	void mouseWheelMove(int x, int y);
+	void keyDown(wzKey key);
+	void keyUp(wzKey key);
+	void textInput(const char *text);
 	void draw();
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
@@ -344,6 +347,18 @@ private:
 	wzTabbed *tabbed_;
 	std::auto_ptr<TabBar> tabBar_;
 	std::vector<TabPage *> tabs_;
+};
+
+class TextEdit : public Widget
+{
+public:
+	TextEdit(Widget *parent, const std::string &text);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)textEdit_; }
+	void draw(wzRect clip);
+
+private:
+	wzTextEdit *textEdit_;
 };
 
 } // namespace wz

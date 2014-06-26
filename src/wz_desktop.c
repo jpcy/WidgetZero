@@ -38,6 +38,9 @@ struct wzDesktop
 	// Centralized event handler.
 	wzEventCallback handle_event;
 
+	wzDesktopMeasureTextCallback measure_text;
+	wzDesktopTextGetPixelDeltaCallback text_get_pixel_delta;
+
 	wzCursor cursor;
 
 	struct wzWidget **lockInputWidgetStack;
@@ -1036,6 +1039,134 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 /*
 ================================================================================
 
+KEY DOWN AND UP
+
+================================================================================
+*/
+
+static void wz_widget_key_recursive(struct wzWidget *widget, wzKey key, bool down)
+{
+	int i;
+
+	assert(widget);
+
+	if (!wz_widget_get_visible(widget))
+		return;
+
+	if (down && widget->vtable.key_down)
+	{
+		widget->vtable.key_down(widget, key);
+	}
+	else if (!down && widget->vtable.key_up)
+	{
+		widget->vtable.key_up(widget, key);
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		if (widget->children[i]->hover)
+		{
+			wz_widget_key_recursive(widget->children[i], key, down);
+		}
+	}
+}
+
+static void wz_desktop_key(struct wzDesktop *desktop, wzKey key, bool down)
+{
+	struct wzWidget *widget;
+
+	assert(desktop);
+
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
+	{
+		// Lock input to the top/last item on the stack.
+		widget = desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)];
+	}
+	else if (desktop->lockInputWindow)
+	{
+		widget = (struct wzWidget *)desktop->lockInputWindow;
+	}
+	else
+	{
+		widget = (struct wzWidget *)desktop;
+	}
+
+	wz_widget_key_recursive(widget, key, down);
+}
+
+void wz_desktop_key_down(struct wzDesktop *desktop, wzKey key)
+{
+	if (key == WZ_KEY_UNKNOWN)
+		return;
+
+	wz_desktop_key(desktop, key, true);
+}
+
+void wz_desktop_key_up(struct wzDesktop *desktop, wzKey key)
+{
+	if (key == WZ_KEY_UNKNOWN)
+		return;
+
+	wz_desktop_key(desktop, key, false);
+}
+
+/*
+================================================================================
+
+TEXT INPUT
+
+================================================================================
+*/
+
+static void wz_widget_text_input_recursive(struct wzWidget *widget, const char *text)
+{
+	int i;
+
+	assert(widget);
+
+	if (!wz_widget_get_visible(widget))
+		return;
+
+	if (widget->vtable.text_input)
+	{
+		widget->vtable.text_input(widget, text);
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		if (widget->children[i]->hover)
+		{
+			wz_widget_text_input_recursive(widget->children[i], text);
+		}
+	}
+}
+
+void wz_desktop_text_input(struct wzDesktop *desktop, const char *text)
+{
+	struct wzWidget *widget;
+
+	assert(desktop);
+
+	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
+	{
+		// Lock input to the top/last item on the stack.
+		widget = desktop->lockInputWidgetStack[wz_arr_lastn(desktop->lockInputWidgetStack)];
+	}
+	else if (desktop->lockInputWindow)
+	{
+		widget = (struct wzWidget *)desktop->lockInputWindow;
+	}
+	else
+	{
+		widget = (struct wzWidget *)desktop;
+	}
+
+	wz_widget_text_input_recursive(widget, text);
+}
+
+/*
+================================================================================
+
 DRAWING
 
 ================================================================================
@@ -1065,6 +1196,18 @@ static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_desktop_update_dock_icon_positions(desktop);
 	wz_desktop_update_docking_rects(desktop);
 	wz_desktop_update_content_rect(desktop);
+}
+
+void wz_desktop_set_measure_text_callback(struct wzDesktop *desktop, wzDesktopMeasureTextCallback callback)
+{
+	assert(desktop);
+	desktop->measure_text = callback;
+}
+
+void wz_desktop_set_text_get_pixel_delta_callback(struct wzDesktop *desktop, wzDesktopTextGetPixelDeltaCallback callback)
+{
+	assert(desktop);
+	desktop->text_get_pixel_delta = callback;
 }
 
 struct wzDesktop *wz_desktop_create()
@@ -1236,4 +1379,14 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 	}
 
 	wz_widget_set_rect(desktop->content, rect);
+}
+
+void wz_desktop_measure_text(struct wzDesktop *desktop, const char *text, int n, int *width, int *height)
+{
+	desktop->measure_text(desktop, text, n, width, height);
+}
+
+int wz_desktop_text_get_pixel_delta(struct wzDesktop *desktop, const char *text, int index)
+{
+	return desktop->text_get_pixel_delta(desktop, text, index);
 }

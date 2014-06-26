@@ -109,6 +109,18 @@ void Widget::setMargin(wzBorder margin)
 
 //------------------------------------------------------------------------------
 
+static void MeasureText(struct wzDesktop *desktop, const char *text, int n, int *width, int *height)
+{
+	wzRenderer *renderer = ((Widget *)wz_widget_get_metadata((wzWidget *)desktop))->getRenderer();
+	renderer->measure_text(renderer, text, n, width, height);
+}
+
+static int TextGetPixelDelta(struct wzDesktop *desktop, const char *text, int index)
+{
+	wzRenderer *renderer = ((Widget *)wz_widget_get_metadata((wzWidget *)desktop))->getRenderer();
+	return renderer->text_get_pixel_delta(renderer, text, index);
+}
+
 static void DrawDockIcon(wzRect rect, void *metadata)
 {
 	Desktop *desktop = (Desktop *)metadata;
@@ -127,6 +139,8 @@ Desktop::Desktop(wzRenderer *renderer)
 	renderer_ = renderer;
 	wz_widget_set_metadata((wzWidget *)desktop_, this);
 	wz_desktop_set_event_callback(desktop_, HandleEvent);
+	wz_desktop_set_measure_text_callback(desktop_, MeasureText);
+	wz_desktop_set_text_get_pixel_delta_callback(desktop_, TextGetPixelDelta);
 	wz_desktop_set_draw_dock_icon_callback(desktop_, DrawDockIcon, this);
 	wz_desktop_set_draw_dock_preview_callback(desktop_, DrawDockPreview, this);
 
@@ -174,6 +188,21 @@ void Desktop::mouseWheelMove(int x, int y)
 	wz_desktop_mouse_wheel_move(desktop_, x, y);
 }
 
+void Desktop::keyDown(wzKey key)
+{
+	wz_desktop_key_down(desktop_, key);
+}
+
+void Desktop::keyUp(wzKey key)
+{
+	wz_desktop_key_up(desktop_, key);
+}
+
+void Desktop::textInput(const char *text)
+{
+	wz_desktop_text_input(desktop_, text);
+}
+
 void Desktop::draw()
 {
 	wzRect rect = wz_widget_get_rect((const wzWidget *)desktop_);
@@ -208,7 +237,7 @@ Window::Window(Widget *parent, const std::string &title) : title_(title)
 	wz_window_set_border_size(window_, 4);
 
 	// Calculate header height based on label text plus padding.
-	renderer_->measure_text(renderer_, title_.c_str(), &size.w, &size.h);
+	renderer_->measure_text(renderer_, title_.c_str(), 0, &size.w, &size.h);
 	wz_window_set_header_height(window_, size.h + 6);
 
 	wz_widget_add_child_widget(parent->getWidget(), widget);
@@ -247,7 +276,7 @@ Button::Button(Widget *parent, const std::string &label) : label_(label)
 
 	// Calculate size based on label text plus padding.
 	wzSize size;
-	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
+	renderer_->measure_text(renderer_, label_.c_str(), 0, &size.w, &size.h);
 	size.w += 16;
 	size.h += 8;
 	wz_widget_set_size((wzWidget *)button_, size);
@@ -285,7 +314,7 @@ Checkbox::Checkbox(Widget *parent, const std::string &label) : label_(label)
 
 	// Calculate size.
 	wzSize size;
-	renderer_->measure_text(renderer_, label_.c_str(), &size.w, &size.h);
+	renderer_->measure_text(renderer_, label_.c_str(), 0, &size.w, &size.h);
 	size.w += boxSize + boxRightMargin;
 	size.w += 16;
 	size.h += 8;
@@ -317,7 +346,7 @@ Combo::Combo(Widget *parent, const char **items, int nItems) : items_(items)
 	for (int i = 0; i < nItems; i++)
 	{
 		wzSize textSize;
-		renderer_->measure_text(renderer_, items[i], &textSize.w, &textSize.h);
+		renderer_->measure_text(renderer_, items[i], 0, &textSize.w, &textSize.h);
 		size.w = WZ_MAX(size.w, textSize.w);
 		size.h = WZ_MAX(size.h, textSize.h);
 	}
@@ -450,7 +479,7 @@ void Label::setText(const char *format, ...)
 	text_ = buffer;
 
 	wzSize size;
-	renderer_->measure_text(renderer_, text_.c_str(), &size.w, &size.h);
+	renderer_->measure_text(renderer_, text_.c_str(), 0, &size.w, &size.h);
 	wz_widget_set_size((wzWidget *)label_, size);
 }
 
@@ -511,7 +540,7 @@ TabButton::TabButton(wzButton *button, const std::string &label) : label_(label)
 
 	// Calculate width based on label text plus padding.
 	int width;
-	renderer_->measure_text(renderer_, label_.c_str(), &width, NULL);
+	renderer_->measure_text(renderer_, label_.c_str(), 0, &width, NULL);
 	width += 16;
 	wz_widget_set_width((wzWidget *)button_, width);
 }
@@ -669,6 +698,32 @@ TabPage *Tabbed::addTab(const std::string &label)
 	tabs_.push_back(tab);
 	
 	return tab;
+}
+
+//------------------------------------------------------------------------------
+
+TextEdit::TextEdit(Widget *parent, const std::string &text)
+{
+	const int borderSize = 4;
+
+	renderer_ = parent->getRenderer();
+	textEdit_ = wz_text_edit_create(parent->getDesktop(), 256);
+	wz_text_edit_set_text(textEdit_, text.c_str());
+	wz_text_edit_set_border_args(textEdit_, borderSize, borderSize, borderSize, borderSize);
+	wzWidget *widget = (wzWidget *)textEdit_;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_draw_function(widget, DrawWidget);
+
+	int h;
+	renderer_->measure_text(renderer_, text.c_str(), 0, NULL, &h);
+	wz_widget_set_size_args(widget, 100, h + borderSize * 2);
+
+	wz_widget_add_child_widget(parent->getContentWidget(), widget);
+}
+
+void TextEdit::draw(wzRect clip)
+{
+	renderer_->draw_text_edit(renderer_, clip, textEdit_);
 }
 
 } // namespace wz

@@ -151,7 +151,11 @@ public:
 		childLayout->setMargin(8);
 		childLayout->setAutosize(WZ_AUTOSIZE);
 
+		childTextEdit.reset(new wz::TextEdit(childLayout.get(), "Text Box"));
+		childTextEdit->setStretch(WZ_STRETCH_HORIZONTAL);
+
 		childWindowButton.reset(new wz::Button(childLayout.get(), "Another Button"));
+		childWindowButton->setMargin(8, 0, 0, 0);
 		childWindowButton->setStretch(WZ_STRETCH_HORIZONTAL);
 
 		childWindowCheckbox.reset(new wz::Checkbox(childLayout.get(), "Checkbox"));
@@ -223,6 +227,7 @@ public:
 	std::auto_ptr<wz::Combo> combo2;
 	std::auto_ptr<wz::Window> childWindow;
 	std::auto_ptr<wz::StackLayout> childLayout;
+	std::auto_ptr<wz::TextEdit> childTextEdit;
 	std::auto_ptr<wz::Button> childWindowButton;
 	std::auto_ptr<wz::Checkbox> childWindowCheckbox;
 	std::auto_ptr<wz::List> childList;
@@ -258,6 +263,42 @@ static Uint32 BenchmarkTimerCallback(Uint32 interval, void *param)
     return interval;
 }
 
+static wzKey ConvertKey(SDL_Keycode sym)
+{
+	static int keys[] =
+	{
+		SDLK_LEFT, WZ_KEY_LEFT,
+		SDLK_RIGHT, WZ_KEY_RIGHT,
+		SDLK_UP, WZ_KEY_UP,
+		SDLK_DOWN, WZ_KEY_DOWN, 
+		SDLK_HOME, WZ_KEY_HOME,
+		SDLK_END, WZ_KEY_END,
+		SDLK_DELETE, WZ_KEY_DELETE,
+		SDLK_BACKSPACE, WZ_KEY_BACKSPACE
+	};
+
+	for (size_t i = 0; i < sizeof(keys) / sizeof(int); i += 2)
+	{
+		if (keys[i] == sym)
+		{
+			int key = keys[i + 1];
+
+			if (SDL_GetModState() & KMOD_SHIFT)
+			{
+				key |= WZ_KEY_SHIFT;
+			}
+
+			if (SDL_GetModState() & KMOD_CTRL)
+			{
+				key |= WZ_KEY_CONTROL;
+			}
+
+			return (wzKey)key;
+		}
+	}
+
+	return WZ_KEY_UNKNOWN;
+}
 
 int main(int argc, char **argv)
 {
@@ -303,6 +344,7 @@ int main(int argc, char **argv)
 	// Setup cursors.
 	SDL_Cursor *cursors[WZ_NUM_CURSORS];
 	cursors[WZ_CURSOR_DEFAULT] = SDL_GetDefaultCursor();
+	cursors[WZ_CURSOR_IBEAM] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
 	cursors[WZ_CURSOR_RESIZE_N_S] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
 	cursors[WZ_CURSOR_RESIZE_E_W] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
 	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
@@ -363,6 +405,24 @@ int main(int argc, char **argv)
 			{
 				benchmark.input.start();
 				gui.desktop->mouseWheelMove(e.wheel.x, e.wheel.y);
+				benchmark.input.end();
+			}
+			else if (e.type == SDL_KEYDOWN)
+			{
+				benchmark.input.start();
+				gui.desktop->keyDown(ConvertKey(e.key.keysym.sym));
+				benchmark.input.end();
+			}
+			else if (e.type == SDL_KEYUP)
+			{
+				benchmark.input.start();
+				gui.desktop->keyUp(ConvertKey(e.key.keysym.sym));
+				benchmark.input.end();
+			}
+			else if (e.type == SDL_TEXTINPUT)
+			{
+				benchmark.input.start();
+				gui.desktop->textInput(e.text.text);
 				benchmark.input.end();
 			}
 		}

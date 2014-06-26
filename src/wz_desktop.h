@@ -46,4 +46,7 @@ void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window
 
 void wz_invoke_event(wzEvent e, wzEventCallback *callbacks);
 
+void wz_desktop_measure_text(struct wzDesktop *desktop, const char *text, int n, int *width, int *height);
+int wz_desktop_text_get_pixel_delta(struct wzDesktop *desktop, const char *text, int index);
+
 #endif // _WZ_DESKTOP_H_
