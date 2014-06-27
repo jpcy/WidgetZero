@@ -747,11 +747,22 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 
 	if (selectionStartIndex != selectionEndIndex)
 	{
-		int x1, x2;
+		int start, end, x1, x2;
 		wzRect selectionRect;
 
-		x1 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[WZ_MIN(selectionStartIndex, selectionEndIndex)], NULL);
-		x2 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[WZ_MAX(selectionStartIndex, selectionEndIndex)], NULL);
+		start = WZ_MIN(selectionStartIndex, selectionEndIndex);
+		end = WZ_MAX(selectionStartIndex, selectionEndIndex);
+
+		if (start < scrollValue)
+		{
+			x1 = 0;
+		}
+		else
+		{
+			x1 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[start], NULL);
+		}
+
+		x2 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[end], NULL);
 		selectionRect.x = textRect.x + x1;
 		selectionRect.y = textRect.y;
 		selectionRect.w = x2 - x1;
