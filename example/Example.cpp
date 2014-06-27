@@ -151,7 +151,7 @@ public:
 		childLayout->setMargin(8);
 		childLayout->setAutosize(WZ_AUTOSIZE);
 
-		childTextEdit.reset(new wz::TextEdit(childLayout.get(), "Text Box"));
+		childTextEdit.reset(new wz::TextEdit(childLayout.get(), "this is a very long string so scrolling can be tested"));
 		childTextEdit->setStretch(WZ_STRETCH_HORIZONTAL);
 
 		childWindowButton.reset(new wz::Button(childLayout.get(), "Another Button"));

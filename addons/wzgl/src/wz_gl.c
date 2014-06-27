@@ -697,7 +697,9 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 	wzRect rect;
 	bool hover;
 	wzBorder border;
+	wzRect textRect;
 	const char *text;
+	int scrollValue;
 	int cursorIndex, cursorX;
 	int selectionStartIndex, selectionEndIndex;
 
@@ -725,24 +727,19 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 		wzgl_draw_rect(vg, rect, nvgRGB(0, 0, 0));
 	}
 
+	// Calculate text rect and clip to it.
+	textRect.x = rect.x + border.left;
+	textRect.y = rect.y + border.top;
+	textRect.w = rect.w - (border.left + border.right);
+	textRect.h = rect.h - (border.top + border.bottom);
+
+	if (!wzgl_clip_to_rect_intersection(vg, clip, textRect))
+		return;
+
 	// Text.
-	text = wz_text_edit_get_text(textEdit);;
-	wzgl_printf(rendererData, rect.x + border.left, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), text);
-
-	// Cursor.
-	cursorIndex = wz_text_edit_get_cursor_index(textEdit);
-	cursorX = rect.x + border.left;
-
-	if (cursorIndex != 0)
-	{
-		cursorX += (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MIN(cursorIndex, (int)strlen(text))], NULL);
-	}
-
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, (float)cursorX, (float)(rect.y + border.top));
-	nvgLineTo(vg, (float)cursorX, (float)(rect.y + rect.h - border.bottom));
-	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
-	nvgStroke(vg);
+	text = wz_text_edit_get_text(textEdit);
+	scrollValue = wz_text_edit_get_scroll_value(textEdit);
+	wzgl_printf(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), &text[scrollValue]);
 
 	// Selection.
 	selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
@@ -753,14 +750,33 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 		int x1, x2;
 		wzRect selectionRect;
 
-		x1 = (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MIN(selectionStartIndex, selectionEndIndex)], NULL);
-		x2 = (int)nvgTextBounds(vg, 0, 0, text, &text[WZ_MAX(selectionStartIndex, selectionEndIndex)], NULL);
-		selectionRect.x = rect.x + border.left + x1;
-		selectionRect.y = rect.y + border.top;
+		x1 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[WZ_MIN(selectionStartIndex, selectionEndIndex)], NULL);
+		x2 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[WZ_MAX(selectionStartIndex, selectionEndIndex)], NULL);
+		selectionRect.x = textRect.x + x1;
+		selectionRect.y = textRect.y;
 		selectionRect.w = x2 - x1;
-		selectionRect.h = rect.h - (border.top + border.bottom);
+		selectionRect.h = textRect.h;
 		wzgl_draw_filled_rect(vg, selectionRect, nvgRGBA(0, 0, 255, 65));
 	}
+
+	// Cursor.
+	cursorIndex = wz_text_edit_get_cursor_index(textEdit);
+
+	if (cursorIndex - scrollValue > 0)
+	{
+		cursorX = textRect.x + (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[cursorIndex], NULL);
+	}
+	else
+	{
+		cursorX = textRect.x;
+	}
+
+	wzgl_clip_to_rect(vg, clip); // Don't clip.
+	nvgBeginPath(vg);
+	nvgMoveTo(vg, (float)cursorX, (float)textRect.y);
+	nvgLineTo(vg, (float)cursorX, (float)(textRect.y + textRect.h));
+	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+	nvgStroke(vg);
 
 	nvgRestore(vg);
 }

@@ -36,6 +36,7 @@ struct wzTextEdit
 	int maximumTextLength;
 	wzBorder border;
 	bool pressed;
+	int scroll;
 	STB_TexteditState state;
 
 	// Must be last.
@@ -61,10 +62,21 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 {
 	int width;
 
-	wz_desktop_measure_text(textEdit->base.desktop, &textEdit->text, 0, &width, NULL);
 	row->num_chars = (int)strlen(&textEdit->text) - i;
-	row->x0 = 0;
+
+	if (textEdit->scroll > 0)
+	{
+		wz_desktop_measure_text(textEdit->base.desktop, &textEdit->text, textEdit->scroll, &width, NULL);
+		row->x0 = (float)-width;
+	}
+	else
+	{
+		row->x0 = 0;
+	}
+
+	wz_desktop_measure_text(textEdit->base.desktop, &textEdit->text, 0, &width, NULL);
 	row->x1 = (float)width;
+
 	row->baseline_y_delta = 1;
 	row->ymin = 0;
 	row->ymax = (float)textEdit->base.rect.h;
@@ -167,6 +179,53 @@ static wzPosition wz_text_edit_calculate_relative_mouse_position(const struct wz
 	return pos;
 }
 
+// Relative to text rect.
+static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
+{
+	int width, delta;
+
+	assert(textEdit);
+	width = 0;
+	delta = textEdit->state.cursor - textEdit->scroll;
+
+	if (delta > 0)
+	{
+		// Text width from the scroll position to the cursor.
+		wz_desktop_measure_text(textEdit->base.desktop, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
+	}
+	else if (delta < 0)
+	{
+		// Text width from the cursor to the scroll position.
+		wz_desktop_measure_text(textEdit->base.desktop, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
+		width = -width;
+	}
+	
+	return width;
+}
+
+static void wz_text_edit_update_scroll_value(struct wzTextEdit *textEdit)
+{
+	assert(textEdit);
+
+	for (;;)
+	{
+		int cursorX = wz_text_edit_calculate_cursor_x(textEdit);
+
+		if (cursorX > textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right))
+		{
+			textEdit->scroll++;
+		}
+		else if (cursorX < 0)
+		{
+			textEdit->scroll--;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
 static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzTextEdit *textEdit;
@@ -178,6 +237,7 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 	{
 		const wzPosition pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
 		stb_textedit_click(textEdit, &textEdit->state, (float)pos.x, (float)pos.y);
+		wz_text_edit_update_scroll_value(textEdit);
 		textEdit->pressed = true;
 	}
 }
@@ -211,6 +271,7 @@ static void wz_text_edit_mouse_move(struct wzWidget *widget, int mouseX, int mou
 		{
 			const wzPosition pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
 			stb_textedit_drag(textEdit, &textEdit->state, (float)pos.x, (float)pos.y);
+			wz_text_edit_update_scroll_value(textEdit);
 		}
 	}
 }
@@ -222,6 +283,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 	assert(widget);
 	textEdit = (struct wzTextEdit *)widget;
 	stb_textedit_key(textEdit, &textEdit->state, (int)key);
+	wz_text_edit_update_scroll_value(textEdit);
 }
 
 static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
@@ -232,6 +294,7 @@ static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 	assert(text);
 	textEdit = (struct wzTextEdit *)widget;
 	stb_textedit_key(textEdit, &textEdit->state, (int)text[0]);
+	wz_text_edit_update_scroll_value(textEdit);
 }
 
 struct wzTextEdit *wz_text_edit_create(struct wzDesktop *desktop, int maximumTextLength)
@@ -286,6 +349,12 @@ void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text)
 {
 	assert(textEdit);
 	strncpy(&textEdit->text, text, WZ_MIN((int)strlen(text), textEdit->maximumTextLength));
+}
+
+int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
+{
+	assert(textEdit);
+	return textEdit->scroll;
 }
 
 int wz_text_edit_get_cursor_index(const struct wzTextEdit *textEdit)
