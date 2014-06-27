@@ -85,6 +85,7 @@ public:
 	void keyDown(wzKey key);
 	void keyUp(wzKey key);
 	void textInput(const char *text);
+	void setShowCursor(bool showCursor) { showCursor_ = showCursor; }
 	void draw();
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
@@ -94,9 +95,12 @@ public:
 		return (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
 	}
 
+	bool getShowCursor() const { return showCursor_; }
+
 private:
 	wzDesktop *desktop_;
 	DockTabBar *dockTabBars_[WZ_NUM_DOCK_POSITIONS];
+	bool showCursor_;
 };
 
 class Window : public Widget

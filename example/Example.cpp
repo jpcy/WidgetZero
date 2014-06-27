@@ -365,6 +365,7 @@ int main(int argc, char **argv)
 	char buffer[1024];
 	uint32_t lastTime = SDL_GetTicks();
 	float accumulatedTime = 0;
+	int tick = 0;
 
 	for (;;)
 	{
@@ -456,6 +457,12 @@ int main(int argc, char **argv)
 			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)gui.desktop->getWidget())]);
 			accumulatedTime -= frameTime;
 			benchmark.frame.end();
+			tick++;
+
+			if ((tick % 30) == 0)
+			{
+				gui.desktop->setShowCursor(!gui.desktop->getShowCursor());
+			}
 		}
 	}
 

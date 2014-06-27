@@ -690,7 +690,7 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	nvgRestore(vg);
 }
 
-static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit)
+static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, bool showCursor)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -771,23 +771,26 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 	}
 
 	// Cursor.
-	cursorIndex = wz_text_edit_get_cursor_index(textEdit);
-
-	if (cursorIndex - scrollValue > 0)
+	if (showCursor)
 	{
-		cursorX = textRect.x + (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[cursorIndex], NULL);
-	}
-	else
-	{
-		cursorX = textRect.x;
-	}
+		cursorIndex = wz_text_edit_get_cursor_index(textEdit);
 
-	wzgl_clip_to_rect(vg, clip); // Don't clip.
-	nvgBeginPath(vg);
-	nvgMoveTo(vg, (float)cursorX, (float)textRect.y);
-	nvgLineTo(vg, (float)cursorX, (float)(textRect.y + textRect.h));
-	nvgStrokeColor(vg, nvgRGB(0, 0, 0));
-	nvgStroke(vg);
+		if (cursorIndex - scrollValue > 0)
+		{
+			cursorX = textRect.x + (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[cursorIndex], NULL);
+		}
+		else
+		{
+			cursorX = textRect.x;
+		}
+
+		wzgl_clip_to_rect(vg, clip); // Don't clip.
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, (float)cursorX, (float)textRect.y);
+		nvgLineTo(vg, (float)cursorX, (float)(textRect.y + textRect.h));
+		nvgStrokeColor(vg, nvgRGB(0, 0, 0));
+		nvgStroke(vg);
+	}
 
 	nvgRestore(vg);
 }

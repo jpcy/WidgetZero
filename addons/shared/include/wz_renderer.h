@@ -55,7 +55,8 @@ struct wzRenderer
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items);
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
-	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit);
+	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, bool showCursor);
+
 	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
 
 	void *data;

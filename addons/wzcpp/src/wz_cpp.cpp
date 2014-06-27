@@ -133,7 +133,7 @@ static void DrawDockPreview(wzRect rect, void *metadata)
 	desktop->drawDockPreview(rect);
 }
 
-Desktop::Desktop(wzRenderer *renderer)
+Desktop::Desktop(wzRenderer *renderer) : showCursor_(false)
 {
 	desktop_ = wz_desktop_create();
 	renderer_ = renderer;
@@ -723,7 +723,7 @@ TextEdit::TextEdit(Widget *parent, const std::string &text)
 
 void TextEdit::draw(wzRect clip)
 {
-	renderer_->draw_text_edit(renderer_, clip, textEdit_);
+	renderer_->draw_text_edit(renderer_, clip, textEdit_, Desktop::fromWidget(getWidget())->getShowCursor());
 }
 
 } // namespace wz
