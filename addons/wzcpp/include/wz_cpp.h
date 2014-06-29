@@ -32,51 +32,40 @@ SOFTWARE.
 
 namespace wz {
 
+class Button;
+class ButtonInternal;
+class Checkbox;
+class CheckboxInternal;
+class Combo;
+class ComboInternal;
+class Desktop;
+class DesktopInternal;
+class GroupBox;
+class GroupBoxInternal;
+class Label;
+class LabelInternal;
 class List;
-class DockTabBar;
+class ListInternal;
+class RadioButton;
+class RadioButtonInternal;
+class Scroller;
+class ScrollerInternal;
+class StackLayout;
+class StackLayoutInternal;
+class Tab;
+class TabInternal;
+class Tabbed;
+class TabbedInternal;
+class TextEdit;
+class TextEditInternal;
+class Window;
+class WindowInternal;
 
-class Widget
-{
-public:
-	virtual ~Widget() {}
-	virtual const wzWidget *getWidget() const = 0;
-	virtual wzWidget *getWidget() = 0;
-	virtual wzWidget *getContentWidget() { return getWidget(); }
-	virtual void draw(wzRect clip) {};
-	virtual void handleEvent(wzEvent e) {};
-	wzRect getRect() const;
-	void setPosition(int x, int y);
-	void setSize(int w, int h);
-	void setRect(int x, int y, int w, int h);
-	void setAutosize(int autosize);
-	void setStretch(int stretch);
-	void setAlign(int align);
-	void setMargin(int margin);
-	void setMargin(int top, int right, int bottom, int left);
-	void setMargin(wzBorder margin);
-	
-	wzRenderer *getRenderer()
-	{
-		return renderer_;
-	}
-
-	wzDesktop *getDesktop()
-	{
-		return wz_widget_get_desktop(getWidget());
-	}
-
-protected:
-	wzRenderer *renderer_;
-};
-
-class Desktop : public Widget
+class Desktop
 {
 public:
 	Desktop(wzRenderer *renderer);
 	~Desktop();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)desktop_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)desktop_; }
-	virtual wzWidget *getContentWidget() { return wz_desktop_get_content_widget(desktop_); }
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
@@ -85,114 +74,182 @@ public:
 	void keyDown(wzKey key);
 	void keyUp(wzKey key);
 	void textInput(const char *text);
-	void setShowCursor(bool showCursor) { showCursor_ = showCursor; }
+	void setShowCursor(bool showCursor);
 	void draw();
-	void drawDockIcon(wzRect rect);
-	void drawDockPreview(wzRect rect);
+	bool getShowCursor() const;
+	wzCursor getCursor() const;
 
-	static Desktop *fromWidget(wzWidget *widget)
-	{
-		return (Desktop *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	}
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
+	Tabbed createTabbed();
+	Window createWindow();
 
-	bool getShowCursor() const { return showCursor_; }
-
-private:
-	wzDesktop *desktop_;
-	DockTabBar *dockTabBars_[WZ_NUM_DOCK_POSITIONS];
-	bool showCursor_;
+	DesktopInternal *internal_;
 };
 
-class Window : public Widget
+class Window
 {
 public:
-	Window(Widget *parent, const std::string &title);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)window_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)window_; }
-	virtual wzWidget *getContentWidget() { return wz_window_get_content_widget(window_); }
-	std::string getTitle() const { return title_; }
-	void draw(wzRect clip);
-	
-private:
-	wzWindow *window_;
-	std::string title_;
+	std::string getTitle() const;
+	Window setTitle(const std::string &title);
+
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
+	Tabbed createTabbed();
+
+	wzRect getRect() const;
+	Window setPosition(int x, int y);
+	Window setSize(int w, int h);
+	Window setRect(int x, int y, int w, int h);
+	Window setAutosize(int autosize);
+	Window setStretch(int stretch);
+	Window setAlign(int align);
+	Window setMargin(int margin);
+	Window setMargin(int top, int right, int bottom, int left);
+	Window setMargin(wzBorder margin);
+
+	WindowInternal *internal_;
 };
 
-class StackLayout : public Widget
+class Button
 {
 public:
-	enum Direction
-	{
-		Horizontal,
-		Vertical
-	};
+	std::string getLabel() const;
+	Button setLabel(const std::string &label);
+	wzRect getRect() const;
+	Button setPosition(int x, int y);
+	Button setSize(int w, int h);
+	Button setRect(int x, int y, int w, int h);
+	Button setAutosize(int autosize);
+	Button setStretch(int stretch);
+	Button setAlign(int align);
+	Button setMargin(int margin);
+	Button setMargin(int top, int right, int bottom, int left);
+	Button setMargin(wzBorder margin);
 
-	StackLayout(Widget *parent, Direction direction);
-	virtual const wzWidget *getWidget() const { return layout_; }
-	virtual wzWidget *getWidget() { return layout_; }
-	
-private:
-	wzWidget *layout_;
+	ButtonInternal *internal_;
 };
 
-class Button : public Widget
+class Checkbox
 {
 public:
-	Button(Widget *parent, const std::string &label);
-	Button(wzButton *button, const std::string &label);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw(wzRect clip);
+	std::string getLabel() const;
+	Checkbox setLabel(const std::string &label);
+	wzRect getRect() const;
+	Checkbox setPosition(int x, int y);
+	Checkbox setSize(int w, int h);
+	Checkbox setRect(int x, int y, int w, int h);
+	Checkbox setAutosize(int autosize);
+	Checkbox setStretch(int stretch);
+	Checkbox setAlign(int align);
+	Checkbox setMargin(int margin);
+	Checkbox setMargin(int top, int right, int bottom, int left);
+	Checkbox setMargin(wzBorder margin);
 
-private:
-	void initialize();
-
-	wzButton *button_;
-	std::string label_;
+	CheckboxInternal *internal_;
 };
 
-class Checkbox : public Widget
+class Combo
 {
 public:
-	Checkbox(Widget *parent, const std::string &label);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw(wzRect clip);
+	Combo setItems(const char **items, int nItems);
+	wzRect getRect() const;
+	Combo setPosition(int x, int y);
+	Combo setSize(int w, int h);
+	Combo setRect(int x, int y, int w, int h);
+	Combo setAutosize(int autosize);
+	Combo setStretch(int stretch);
+	Combo setAlign(int align);
+	Combo setMargin(int margin);
+	Combo setMargin(int top, int right, int bottom, int left);
+	Combo setMargin(wzBorder margin);
 
-private:
-	wzButton *button_;
-	std::string label_;
-
-	static const int boxSize = 16;
-	static const int boxRightMargin = 8;
+	ComboInternal *internal_;
 };
 
-class Combo : public Widget
+class GroupBox
 {
 public:
-	Combo(Widget *parent, const char **items, int nItems);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)combo_; }
-	void draw(wzRect clip);
+	std::string getLabel() const;
+	GroupBox setLabel(const std::string &label);
 
-private:
-	wzCombo *combo_;
-	const char **items_;
-	std::auto_ptr<List> list_;
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
+	Tabbed createTabbed();
+
+	wzRect getRect() const;
+	GroupBox setPosition(int x, int y);
+	GroupBox setSize(int w, int h);
+	GroupBox setRect(int x, int y, int w, int h);
+	GroupBox setAutosize(int autosize);
+	GroupBox setStretch(int stretch);
+	GroupBox setAlign(int align);
+	GroupBox setMargin(int margin);
+	GroupBox setMargin(int top, int right, int bottom, int left);
+	GroupBox setMargin(wzBorder margin);
+
+	GroupBoxInternal *internal_;
 };
 
-class GroupBox : public Widget
+class Label
 {
 public:
-	GroupBox(Widget *parent, const std::string &label);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)frame_; }
-	virtual wzWidget *getContentWidget() { return wz_frame_get_content_widget(frame_); }
-	void draw(wzRect clip);
+	Label setText(const char *format, ...);
+	Label setTextColor(uint8_t r, uint8_t g, uint8_t b);
+	wzRect getRect() const;
+	Label setPosition(int x, int y);
+	Label setSize(int w, int h);
+	Label setRect(int x, int y, int w, int h);
+	Label setAutosize(int autosize);
+	Label setStretch(int stretch);
+	Label setAlign(int align);
+	Label setMargin(int margin);
+	Label setMargin(int top, int right, int bottom, int left);
+	Label setMargin(wzBorder margin);
 
-private:
-	wzFrame *frame_;
-	std::string label_;
+	LabelInternal *internal_;
+};
+
+class List
+{
+public:
+	List setItems(const char **items, int nItems);
+	wzRect getRect() const;
+	List setPosition(int x, int y);
+	List setSize(int w, int h);
+	List setRect(int x, int y, int w, int h);
+	List setAutosize(int autosize);
+	List setStretch(int stretch);
+	List setAlign(int align);
+	List setMargin(int margin);
+	List setMargin(int top, int right, int bottom, int left);
+	List setMargin(wzBorder margin);
+
+	ListInternal *internal_;
 };
 
 class RadioButtonGroup
@@ -206,163 +263,150 @@ private:
 	wzRadioButtonGroup *group_;
 };
 
-class RadioButton : public Widget
+class RadioButton
 {
 public:
-	RadioButton(Widget *parent, const std::string &label, RadioButtonGroup *group);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw(wzRect clip);
+	std::string getLabel() const;
+	RadioButton setLabel(const std::string &label);
+	RadioButton setGroup(RadioButtonGroup *group);
+	wzRect getRect() const;
+	RadioButton setPosition(int x, int y);
+	RadioButton setSize(int w, int h);
+	RadioButton setRect(int x, int y, int w, int h);
+	RadioButton setAutosize(int autosize);
+	RadioButton setStretch(int stretch);
+	RadioButton setAlign(int align);
+	RadioButton setMargin(int margin);
+	RadioButton setMargin(int top, int right, int bottom, int left);
+	RadioButton setMargin(wzBorder margin);
 
-private:
-	wzButton *button_;
-	std::string label_;
+	RadioButtonInternal *internal_;
 };
 
-class Scroller : public Widget
+class Scroller
 {
 public:
-	Scroller(Widget *parent, wzScrollerType type, int value, int stepValue, int maxValue);
-	Scroller(wzScroller *scroller);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)scroller_; }
-	void draw(wzRect clip);
+	Scroller setType(wzScrollerType type);
+	Scroller setValue(int value);
+	Scroller setStepValue(int stepValue);
+	Scroller setMaxValue(int maxValue);	
 	int getValue() const;
+	wzRect getRect() const;
+	Scroller setPosition(int x, int y);
+	Scroller setSize(int w, int h);
+	Scroller setRect(int x, int y, int w, int h);
+	Scroller setAutosize(int autosize);
+	Scroller setStretch(int stretch);
+	Scroller setAlign(int align);
+	Scroller setMargin(int margin);
+	Scroller setMargin(int top, int right, int bottom, int left);
+	Scroller setMargin(wzBorder margin);
 
-private:
-	void initialize();
-
-	wzScroller *scroller_;
-	std::auto_ptr<Button> decrementButton;
-	std::auto_ptr<Button> incrementButton;
+	ScrollerInternal *internal_;
 };
 
-class Label : public Widget
+class StackLayout
 {
 public:
-	Label(Widget *parent);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)label_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)label_; }
-	void setText(const char *format, ...);
-	void setTextColor(uint8_t r, uint8_t g, uint8_t b);
-	void draw(wzRect clip);
+	enum Direction
+	{
+		Horizontal,
+		Vertical
+	};
 
-private:
-	wzLabel *label_;
-	std::string text_;
-	uint8_t r_, g_, b_;
+	StackLayout setDirection(Direction direction);
+
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
+	Tabbed createTabbed();
+
+	wzRect getRect() const;
+	StackLayout setPosition(int x, int y);
+	StackLayout setSize(int w, int h);
+	StackLayout setRect(int x, int y, int w, int h);
+	StackLayout setAutosize(int autosize);
+	StackLayout setStretch(int stretch);
+	StackLayout setAlign(int align);
+	StackLayout setMargin(int margin);
+	StackLayout setMargin(int top, int right, int bottom, int left);
+	StackLayout setMargin(wzBorder margin);
+
+	StackLayoutInternal *internal_;
 };
 
-class List : public Widget
+class Tab
 {
 public:
-	List(Widget *parent, const char **items, int nItems);
-	List(wzList *list, const char **items, int nItems);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)list_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)list_; }
-	void draw(wzRect clip);
+	Tab setLabel(const std::string &label);
 
-private:
-	void initialize(int nItems);
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
 
-	wzList *list_;
-	const char **items_;
-	std::auto_ptr<Scroller> scroller_;
+	wzRect getRect() const;
+	Tab setPosition(int x, int y);
+	Tab setSize(int w, int h);
+	Tab setRect(int x, int y, int w, int h);
+	Tab setAutosize(int autosize);
+	Tab setStretch(int stretch);
+	Tab setAlign(int align);
+	Tab setMargin(int margin);
+	Tab setMargin(int top, int right, int bottom, int left);
+	Tab setMargin(wzBorder margin);
 
-	static const int itemsMargin = 2;
-	static const int itemHeight = 18;
-	static const int itemLeftPadding = 4;
+	TabInternal *internal_;
 };
 
-class TabButton : public Widget
+class Tabbed
 {
 public:
-	TabButton(wzButton *button, const std::string &label);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw(wzRect clip);
+	Tab createTab();
 
-private:
-	wzButton *button_;
-	std::string label_;
+	wzRect getRect() const;
+	Tabbed setPosition(int x, int y);
+	Tabbed setSize(int w, int h);
+	Tabbed setRect(int x, int y, int w, int h);
+	Tabbed setAutosize(int autosize);
+	Tabbed setStretch(int stretch);
+	Tabbed setAlign(int align);
+	Tabbed setMargin(int margin);
+	Tabbed setMargin(int top, int right, int bottom, int left);
+	Tabbed setMargin(wzBorder margin);
+
+	TabbedInternal *internal_;
 };
 
-class DockTabBar : public Widget
+class TextEdit
 {
 public:
-	DockTabBar(wzTabBar *tabBar);
-	~DockTabBar();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void draw(wzRect clip);
-	void handleEvent(wzEvent e);
+	TextEdit setText(const std::string &text);
+	wzRect getRect() const;
+	TextEdit setPosition(int x, int y);
+	TextEdit setSize(int w, int h);
+	TextEdit setRect(int x, int y, int w, int h);
+	TextEdit setAutosize(int autosize);
+	TextEdit setStretch(int stretch);
+	TextEdit setAlign(int align);
+	TextEdit setMargin(int margin);
+	TextEdit setMargin(int top, int right, int bottom, int left);
+	TextEdit setMargin(wzBorder margin);
 
-private:
-	wzTabBar *tabBar_;
-	std::vector<TabButton *> tabs_;
-	std::auto_ptr<Button> decrementButton;
-	std::auto_ptr<Button> incrementButton;
-};
-
-class TabBar : public Widget
-{
-public:
-	TabBar(Widget *parent);
-	TabBar(wzTabBar *tabBar);
-	~TabBar();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void draw(wzRect clip);
-	void addTab(const std::string &label);
-	void addTab(wzButton *button, const std::string &label);
-
-private:
-	void initialize();
-
-	wzTabBar *tabBar_;
-	std::vector<TabButton *> tabs_;
-	std::auto_ptr<Button> decrementButton;
-	std::auto_ptr<Button> incrementButton;
-};
-
-class TabPage : public Widget
-{
-public:
-	TabPage(wzWidget *widget);
-	virtual const wzWidget *getWidget() const { return widget_; }
-	virtual wzWidget *getWidget() { return widget_; }
-	void draw(wzRect clip);
-
-private:
-	wzWidget *widget_;
-};
-
-class Tabbed : public Widget
-{
-public:
-	Tabbed(Widget *parent);
-	~Tabbed();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabbed_; }
-	void draw(wzRect clip);
-	TabPage *addTab(const std::string &label);
-
-private:
-	wzTabbed *tabbed_;
-	std::auto_ptr<TabBar> tabBar_;
-	std::vector<TabPage *> tabs_;
-};
-
-class TextEdit : public Widget
-{
-public:
-	TextEdit(Widget *parent, const std::string &text);
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)textEdit_; }
-	void draw(wzRect clip);
-
-private:
-	wzTextEdit *textEdit_;
+	TextEditInternal *internal_;
 };
 
 } // namespace wz

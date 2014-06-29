@@ -327,7 +327,7 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller->incrementButton);
 }
 
-struct wzScroller *wz_scroller_create(struct wzDesktop *desktop, wzScrollerType scrollerType)
+struct wzScroller *wz_scroller_create(struct wzDesktop *desktop)
 {
 	struct wzScroller *scroller;
 
@@ -341,7 +341,6 @@ struct wzScroller *wz_scroller_create(struct wzDesktop *desktop, wzScrollerType 
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
-	scroller->scrollerType = scrollerType;
 	scroller->stepValue = 1;
 
 	scroller->decrementButton = wz_button_create(desktop);
@@ -356,6 +355,12 @@ struct wzScroller *wz_scroller_create(struct wzDesktop *desktop, wzScrollerType 
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->nub);
 
 	return scroller;
+}
+
+void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType)
+{
+	assert(scroller);
+	scroller->scrollerType = scrollerType;
 }
 
 int wz_scroller_get_value(const struct wzScroller *scroller)

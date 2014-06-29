@@ -1282,7 +1282,7 @@ struct wzWidget *wz_desktop_get_content_widget(struct wzDesktop *desktop)
 	return desktop->content;
 }
 
-wzCursor wz_desktop_get_cursor(struct wzDesktop *desktop)
+wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop)
 {
 	assert(desktop);
 	return desktop->cursor;

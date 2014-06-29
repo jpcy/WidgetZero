@@ -296,7 +296,8 @@ struct wzList *wz_list_create(struct wzDesktop *desktop)
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
 
-	list->scroller = wz_scroller_create(desktop, WZ_SCROLLER_VERTICAL);
+	list->scroller = wz_scroller_create(desktop);
+	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
 	//((struct wzWidget *)list->scroller)->vtable.get_rect = wz_list_scroller_get_rect;
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);

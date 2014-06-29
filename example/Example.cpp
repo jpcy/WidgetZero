@@ -104,140 +104,65 @@ static const char *listData[17] =
 class GUI
 {
 public:
-	GUI(int windowWidth, int windowHeight, wzRenderer *renderer)
+	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : desktop(renderer)
 	{
-		desktop.reset(new wz::Desktop(renderer));
-		desktop->setSize(windowWidth, windowHeight);
+		desktop.setSize(windowWidth, windowHeight);
 
-		button.reset(new wz::Button(desktop.get(), "Test Button"));
-		button->setPosition(100, 100);
+		wz::Button button = desktop.createButton().setLabel("Test Button").setPosition(100, 100);
+		wzRect buttonRect = button.getRect();
+		desktop.createCheckbox().setLabel("Toggle me!").setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
 
-		wzRect buttonRect = button->getRect();
-		checkbox.reset(new wz::Checkbox(desktop.get(), "Toggle me!"));
-		checkbox->setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
+		{
+			wz::GroupBox groupBox = desktop.createGroupBox().setLabel("Test GroupBox").setPosition(100, 300);
+			wz::StackLayout layout = groupBox.createStackLayout().setDirection(wz::StackLayout::Vertical).setAutosize(WZ_AUTOSIZE);
+			layout.createRadioButton().setLabel("Option 1").setGroup(&radioButtonGroup);
+			layout.createRadioButton().setLabel("Option 2").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
+			layout.createRadioButton().setLabel("Option 3").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
+		}
 
-		groupBox.reset(new wz::GroupBox(desktop.get(), "Test GroupBox"));
-		groupBox->setPosition(100, 300);
+		desktop.createScroller().setType(WZ_SCROLLER_VERTICAL).setMaxValue(100).setValue(20).setStepValue(10).setRect(300, 50, 16, 200);
+		desktop.createLabel().setText("Label test").setTextColor(255, 128, 128).setPosition(350, 50);
+		desktop.createScroller().setType(WZ_SCROLLER_HORIZONTAL).setMaxValue(100).setValue(50).setStepValue(10).setRect(500, 50, 200, 16);
+		desktop.createList().setItems(listData, 17).setRect(400, 300, 150, 150);
+		desktop.createCombo().setItems(listData, 17).setRect(800, 50, 150, 20);
 
-		radioButtonLayout.reset(new wz::StackLayout(groupBox.get(), wz::StackLayout::Vertical));
-		radioButtonLayout->setAutosize(WZ_AUTOSIZE);
-		radioButton1.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 1", &radioButtonGroup));
-		radioButton2.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 2", &radioButtonGroup));
-		radioButton2->setMargin(8, 0, 0, 0);
-		radioButton3.reset(new wz::RadioButton(radioButtonLayout.get(), "Option 3", &radioButtonGroup));
-		radioButton3->setMargin(8, 0, 0, 0);
+		{
+			wz::Window window = desktop.createWindow().setTitle("Test Window").setRect(650, 100, 300, 300);
+			wz::StackLayout layout = window.createStackLayout().setDirection(wz::StackLayout::Vertical).setMargin(8).setAutosize(WZ_AUTOSIZE);
+			layout.createTextEdit().setText("this is a very long string so scrolling can be tested").setStretch(WZ_STRETCH_HORIZONTAL);
+			layout.createButton().setLabel("Another Button").setMargin(8, 0, 0, 0).setStretch(WZ_STRETCH_HORIZONTAL);
+			layout.createCheckbox().setLabel("Checkbox").setMargin(8, 0, 0, 0).setAlign(WZ_ALIGN_CENTER);
+			layout.createCombo().setItems(listData, 17).setMargin(8, 0, 0, 0).setAlign(WZ_ALIGN_RIGHT);
+			layout.createButton().setLabel("Yet Another Button").setStretch(WZ_STRETCH).setMargin(8, 0, 0, 0);
+		}
 
-		scroller.reset(new wz::Scroller(desktop.get(), WZ_SCROLLER_VERTICAL, 20, 10, 100));
-		scroller->setRect(300, 50, 16, 200);
+		{
+			wz::Window window = desktop.createWindow().setTitle("Window with a long title").setRect(590, 500, 200, 200);
 
-		label.reset(new wz::Label(desktop.get()));
-		label->setText("Label test");
-		label->setTextColor(255, 128, 128);
-		label->setPosition(350, 50);
+			wz::Tabbed tabbed = window.createTabbed().setMargin(8).setAutosize(WZ_AUTOSIZE);
+			wz::Tab firstTab = tabbed.createTab().setLabel("Tab 1");
+			wz::Tab secondTab = tabbed.createTab().setLabel("Another Tab");
+			tabbed.createTab().setLabel("TabTabTab");
 
-		scrollerHorizontal.reset(new wz::Scroller(desktop.get(), WZ_SCROLLER_HORIZONTAL, 50, 10, 100));
-		scrollerHorizontal->setRect(500, 50, 200, 16);
+			firstTab.createCombo().setItems(listData, 17).setRect(10, 10, 150, 20);
+			secondTab.createButton().setLabel("Button Button Button").setPosition(10, 10);
+		}
 
-		list.reset(new wz::List(desktop.get(), listData, 17));
-		list->setRect(400, 300, 150, 150);
+		{
+			wz::Window window = desktop.createWindow().setTitle("Window 3").setRect(800, 500, 200, 200);
+			window.createList().setItems(listData, 17).setMargin(8).setAutosize(WZ_AUTOSIZE);
+		}
 
-		combo.reset(new wz::Combo(desktop.get(), listData, 17));
-		combo->setRect(800, 50, 150, 20);
-
-		childWindow.reset(new wz::Window(desktop.get(), "Test Window"));
-		childWindow->setRect(650, 100, 300, 300);
-
-		childLayout.reset(new wz::StackLayout(childWindow.get(), wz::StackLayout::Vertical));
-		childLayout->setMargin(8);
-		childLayout->setAutosize(WZ_AUTOSIZE);
-
-		childTextEdit.reset(new wz::TextEdit(childLayout.get(), "this is a very long string so scrolling can be tested"));
-		childTextEdit->setStretch(WZ_STRETCH_HORIZONTAL);
-
-		childWindowButton.reset(new wz::Button(childLayout.get(), "Another Button"));
-		childWindowButton->setMargin(8, 0, 0, 0);
-		childWindowButton->setStretch(WZ_STRETCH_HORIZONTAL);
-
-		childWindowCheckbox.reset(new wz::Checkbox(childLayout.get(), "Checkbox"));
-		childWindowCheckbox->setMargin(8, 0, 0, 0);
-		childWindowCheckbox->setAlign(WZ_ALIGN_CENTER);
-
-		childCombo.reset(new wz::Combo(childLayout.get(), listData, 17));
-		childCombo->setMargin(8, 0, 0, 0);
-		childCombo->setAlign(WZ_ALIGN_RIGHT);
-
-		childWindowButton2.reset(new wz::Button(childLayout.get(), "Yet Another Button"));
-		childWindowButton2->setStretch(WZ_STRETCH);
-		childWindowButton2->setMargin(8, 0, 0, 0);
-
-		childWindow2.reset(new wz::Window(desktop.get(), "Window with a long title"));
-		childWindow2->setRect(590, 500, 200, 200);
-
-		tabbed.reset(new wz::Tabbed(childWindow2.get()));
-		tabbed->setMargin(8);
-		tabbed->setAutosize(WZ_AUTOSIZE);
-		wz::TabPage *firstTabPage = tabbed->addTab("Tab 1");
-		wz::TabPage *secondTabPage = tabbed->addTab("Another Tab");
-		tabbed->addTab("TabTabTab");
-
-		secondTabPageButton.reset(new wz::Button(secondTabPage, "Button Button Button"));
-		secondTabPageButton->setPosition(10, 10);
-
-		combo2.reset(new wz::Combo(firstTabPage, listData, 17));
-		combo2->setRect(10, 10, 150, 20);
-
-		childWindow3.reset(new wz::Window(desktop.get(), "Window 3"));
-		childWindow3->setRect(800, 500, 200, 200);
-
-		childList.reset(new wz::List(childWindow3.get(), listData, 17));
-		childList->setMargin(8);
-		childList->setAutosize(WZ_AUTOSIZE);
-
-		horizontalStackLayout.reset(new wz::StackLayout(desktop.get(), wz::StackLayout::Horizontal));
-		horizontalStackLayout->setRect(50, 550, 400, 100);
-
-		hslButton1.reset(new wz::Button(horizontalStackLayout.get(), "Button A"));
-		hslButton1->setStretch(WZ_STRETCH_VERTICAL);
-
-		hslButton2.reset(new wz::Button(horizontalStackLayout.get(), "Button B"));
-		hslButton2->setMargin(0, 0, 0, 8);
-		hslButton2->setAlign(WZ_ALIGN_MIDDLE);
-
-		hslButton3.reset(new wz::Button(horizontalStackLayout.get(), "Button C"));
-		hslButton3->setMargin(0, 0, 0, 8);
-		hslButton3->setAlign(WZ_ALIGN_BOTTOM);
+		{
+			wz::StackLayout layout = desktop.createStackLayout().setDirection(wz::StackLayout::Horizontal).setRect(50, 550, 400, 100);
+			layout.createButton().setLabel("Button A").setStretch(WZ_STRETCH_VERTICAL);
+			layout.createButton().setLabel("Button B").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_MIDDLE);
+			layout.createButton().setLabel("Button C").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_BOTTOM);
+		}
 	}
 
-	std::auto_ptr<wz::Desktop> desktop;
-	std::auto_ptr<wz::Button> button;
-	std::auto_ptr<wz::Checkbox> checkbox;
-	std::auto_ptr<wz::GroupBox> groupBox;
-
+	wz::Desktop desktop;
 	wz::RadioButtonGroup radioButtonGroup;
-	std::auto_ptr<wz::StackLayout> radioButtonLayout;
-	std::auto_ptr<wz::RadioButton> radioButton1, radioButton2, radioButton3;
-
-	std::auto_ptr<wz::Scroller> scroller;
-	std::auto_ptr<wz::Label> label;
-	std::auto_ptr<wz::Scroller> scrollerHorizontal;
-	std::auto_ptr<wz::List> list;
-	std::auto_ptr<wz::Tabbed> tabbed;
-	std::auto_ptr<wz::Button> secondTabPageButton;
-	std::auto_ptr<wz::Combo> combo;
-	std::auto_ptr<wz::Combo> combo2;
-	std::auto_ptr<wz::Window> childWindow;
-	std::auto_ptr<wz::StackLayout> childLayout;
-	std::auto_ptr<wz::TextEdit> childTextEdit;
-	std::auto_ptr<wz::Button> childWindowButton;
-	std::auto_ptr<wz::Checkbox> childWindowCheckbox;
-	std::auto_ptr<wz::List> childList;
-	std::auto_ptr<wz::Combo> childCombo;
-	std::auto_ptr<wz::Button> childWindowButton2;
-	std::auto_ptr<wz::Window> childWindow2;
-	std::auto_ptr<wz::Window> childWindow3;
-
-	std::auto_ptr<wz::StackLayout> horizontalStackLayout;
-	std::auto_ptr<wz::Button> hslButton1, hslButton2, hslButton3;
 };
 
 static void ShowError(const char *message)
@@ -382,48 +307,48 @@ int main(int argc, char **argv)
 			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
 				glViewport(0, 0, e.window.data1, e.window.data2);
-				gui.desktop->setSize(e.window.data1, e.window.data2);
+				gui.desktop.setSize(e.window.data1, e.window.data2);
 			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{
 				benchmark.input.start();
-				gui.desktop->mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+				gui.desktop.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{
 				benchmark.input.start();
-				gui.desktop->mouseButtonDown(e.button.button, e.button.x, e.button.y);
+				gui.desktop.mouseButtonDown(e.button.button, e.button.x, e.button.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
 				benchmark.input.start();
-				gui.desktop->mouseButtonUp(e.button.button, e.button.x, e.button.y);
+				gui.desktop.mouseButtonUp(e.button.button, e.button.x, e.button.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEWHEEL)
 			{
 				benchmark.input.start();
-				gui.desktop->mouseWheelMove(e.wheel.x, e.wheel.y);
+				gui.desktop.mouseWheelMove(e.wheel.x, e.wheel.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_KEYDOWN)
 			{
 				benchmark.input.start();
-				gui.desktop->keyDown(ConvertKey(e.key.keysym.sym));
+				gui.desktop.keyDown(ConvertKey(e.key.keysym.sym));
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_KEYUP)
 			{
 				benchmark.input.start();
-				gui.desktop->keyUp(ConvertKey(e.key.keysym.sym));
+				gui.desktop.keyUp(ConvertKey(e.key.keysym.sym));
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_TEXTINPUT)
 			{
 				benchmark.input.start();
-				gui.desktop->textInput(e.text.text);
+				gui.desktop.textInput(e.text.text);
 				benchmark.input.end();
 			}
 		}
@@ -441,7 +366,7 @@ int main(int argc, char **argv)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			benchmark.draw.start();
-			gui.desktop->draw();
+			gui.desktop.draw();
 			benchmark.draw.end();
 
 			sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
@@ -454,14 +379,14 @@ int main(int argc, char **argv)
 			renderer->debug_draw_text(renderer, buffer, 0, 40);
 
 			SDL_GL_SwapWindow(window);
-			SDL_SetCursor(cursors[wz_desktop_get_cursor((wzDesktop *)gui.desktop->getWidget())]);
+			SDL_SetCursor(cursors[gui.desktop.getCursor()]);
 			accumulatedTime -= frameTime;
 			benchmark.frame.end();
 			tick++;
 
 			if ((tick % 30) == 0)
 			{
-				gui.desktop->setShowCursor(!gui.desktop->getShowCursor());
+				gui.desktop.setShowCursor(!gui.desktop.getShowCursor());
 			}
 		}
 	}
