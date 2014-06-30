@@ -46,24 +46,23 @@ struct wzCombo;
 struct wzFrame;
 struct wzRadioButtonGroup;
 struct wzScroller;
+struct wzStackLayout;
 struct wzTextEdit;
 struct wzLabel;
 struct wzList;
-struct wzVerticalStackLayout;
 
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
 	WZ_TYPE_DESKTOP,
 	WZ_TYPE_WINDOW,
-	WZ_TYPE_HORIZONTAL_STACK_LAYOUT,
-	WZ_TYPE_VERTICAL_STACK_LAYOUT,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
 	WZ_TYPE_FRAME,
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
+	WZ_TYPE_STACK_LAYOUT,
 	WZ_TYPE_TAB_BAR,
 	WZ_TYPE_TAB_PAGE,
 	WZ_TYPE_TEXT_EDIT,
@@ -323,10 +322,6 @@ int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
 struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
 
-struct wzHorizontalStackLayout *wz_horizontal_stack_layout_create(struct wzDesktop *desktop);
-
-struct wzVerticalStackLayout *wz_vertical_stack_layout_create(struct wzDesktop *desktop);
-
 typedef enum
 {
 	// Click the button on mouse up (default).
@@ -415,6 +410,16 @@ int wz_scroller_get_nub_size(struct wzScroller *scroller);
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
+
+typedef enum
+{
+	WZ_STACK_LAYOUT_VERTICAL,
+	WZ_STACK_LAYOUT_HORIZONTAL,
+}
+wzStackLayoutDirection;
+
+struct wzStackLayout *wz_stack_layout_create(struct wzDesktop *desktop);
+void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction);
 
 struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
 struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);

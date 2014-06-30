@@ -308,13 +308,7 @@ public:
 class StackLayout
 {
 public:
-	enum Direction
-	{
-		Horizontal,
-		Vertical
-	};
-
-	StackLayout setDirection(Direction direction);
+	StackLayout setDirection(wzStackLayoutDirection direction);
 
 	Button createButton();
 	Checkbox createCheckbox();

@@ -313,9 +313,9 @@ class StackLayoutInternal : public Widget
 public:
 	StackLayoutInternal(Widget *parent);
 	~StackLayoutInternal();
-	virtual const wzWidget *getWidget() const { return layout_; }
-	virtual wzWidget *getWidget() { return layout_; }
-	void setDirection(StackLayout::Direction direction);
+	virtual const wzWidget *getWidget() const { return (wzWidget *)layout_; }
+	virtual wzWidget *getWidget() { return (wzWidget *)layout_; }
+	void setDirection(wzStackLayoutDirection direction);
 
 	Button createButton();
 	Checkbox createCheckbox();
@@ -330,7 +330,7 @@ public:
 	Tabbed createTabbed();
 	
 private:
-	wzWidget *layout_;
+	wzStackLayout *layout_;
 	Widget *parent_;
 	std::vector<Widget *> children_;
 };
@@ -1416,6 +1416,8 @@ IMPLEMENT_STANDARD_WIDGET_INTERFACE(Scroller)
 StackLayoutInternal::StackLayoutInternal(Widget *parent) : layout_(NULL), parent_(parent)
 {
 	renderer_ = parent->getRenderer();
+	layout_ = wz_stack_layout_create(parent_->getDesktop());
+	wz_widget_add_child_widget(parent_->getContentWidget(), (wzWidget *)layout_);
 }
 
 StackLayoutInternal::~StackLayoutInternal()
@@ -1428,18 +1430,9 @@ StackLayoutInternal::~StackLayoutInternal()
 	children_.clear();
 }
 
-void StackLayoutInternal::setDirection(StackLayout::Direction direction)
+void StackLayoutInternal::setDirection(wzStackLayoutDirection direction)
 {
-	if (direction == StackLayout::Horizontal)
-	{
-		layout_ = (wzWidget *)wz_horizontal_stack_layout_create(parent_->getDesktop());
-	}
-	else
-	{
-		layout_ = (wzWidget *)wz_vertical_stack_layout_create(parent_->getDesktop());
-	}
-
-	wz_widget_add_child_widget(parent_->getContentWidget(), layout_);
+	wz_stack_layout_set_direction(layout_, direction);
 }
 
 IMPLEMENT_CHILD_WIDGET_CREATE(StackLayoutInternal, this, Button)
@@ -1456,7 +1449,7 @@ IMPLEMENT_CHILD_WIDGET_CREATE(StackLayoutInternal, this, Tabbed)
 
 //------------------------------------------------------------------------------
 
-StackLayout StackLayout::setDirection(Direction direction)
+StackLayout StackLayout::setDirection(wzStackLayoutDirection direction)
 {
 	internal_->setDirection(direction);
 	return *this;

@@ -114,7 +114,7 @@ public:
 
 		{
 			wz::GroupBox groupBox = desktop.createGroupBox().setLabel("Test GroupBox").setPosition(100, 300);
-			wz::StackLayout layout = groupBox.createStackLayout().setDirection(wz::StackLayout::Vertical).setAutosize(WZ_AUTOSIZE);
+			wz::StackLayout layout = groupBox.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setAutosize(WZ_AUTOSIZE);
 			layout.createRadioButton().setLabel("Option 1").setGroup(&radioButtonGroup);
 			layout.createRadioButton().setLabel("Option 2").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
 			layout.createRadioButton().setLabel("Option 3").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
@@ -128,7 +128,7 @@ public:
 
 		{
 			wz::Window window = desktop.createWindow().setTitle("Test Window").setRect(650, 100, 300, 300);
-			wz::StackLayout layout = window.createStackLayout().setDirection(wz::StackLayout::Vertical).setMargin(8).setAutosize(WZ_AUTOSIZE);
+			wz::StackLayout layout = window.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setMargin(8).setAutosize(WZ_AUTOSIZE);
 			layout.createTextEdit().setText("this is a very long string so scrolling can be tested").setStretch(WZ_STRETCH_HORIZONTAL);
 			layout.createButton().setLabel("Another Button").setMargin(8, 0, 0, 0).setStretch(WZ_STRETCH_HORIZONTAL);
 			layout.createCheckbox().setLabel("Checkbox").setMargin(8, 0, 0, 0).setAlign(WZ_ALIGN_CENTER);
@@ -154,7 +154,7 @@ public:
 		}
 
 		{
-			wz::StackLayout layout = desktop.createStackLayout().setDirection(wz::StackLayout::Horizontal).setRect(50, 550, 400, 100);
+			wz::StackLayout layout = desktop.createStackLayout().setDirection(WZ_STACK_LAYOUT_HORIZONTAL).setRect(50, 550, 400, 100);
 			layout.createButton().setLabel("Button A").setStretch(WZ_STRETCH_VERTICAL);
 			layout.createButton().setLabel("Button B").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_MIDDLE);
 			layout.createButton().setLabel("Button C").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_BOTTOM);

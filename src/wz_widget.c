@@ -220,7 +220,7 @@ wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 bool wz_widget_is_layout(const struct wzWidget *widget)
 {
 	assert(widget);
-	return widget->type == WZ_TYPE_HORIZONTAL_STACK_LAYOUT || widget->type == WZ_TYPE_VERTICAL_STACK_LAYOUT;
+	return widget->type == WZ_TYPE_STACK_LAYOUT;
 }
 
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y)
