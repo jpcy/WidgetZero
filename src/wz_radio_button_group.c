@@ -85,3 +85,8 @@ void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct w
 		wz_button_set(button, true);
 	}
 }
+
+void wz_radio_button_group_remove_button(struct wzRadioButtonGroup *group, struct wzButton *button)
+{
+	wz_arr_delete(group->buttons, button);
+}

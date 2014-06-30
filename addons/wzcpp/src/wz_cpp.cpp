@@ -283,6 +283,7 @@ public:
 private:
 	wzButton *button_;
 	std::string label_;
+	RadioButtonGroup *group_;
 };
 
 class ScrollerInternal : public Widget
@@ -1267,7 +1268,7 @@ RadioButtonGroup::~RadioButtonGroup()
 
 //------------------------------------------------------------------------------
 
-RadioButtonInternal::RadioButtonInternal(Widget *parent)
+RadioButtonInternal::RadioButtonInternal(Widget *parent) : group_(NULL)
 {
 	renderer_ = parent->getRenderer();
 	button_ = wz_button_create(parent->getDesktop());
@@ -1294,7 +1295,18 @@ void RadioButtonInternal::setLabel(const std::string &label)
 
 void RadioButtonInternal::setGroup(RadioButtonGroup *group)
 {
-	wz_radio_button_group_add_button(group->get(), button_);
+	if (group_ != NULL && group_ != group)
+	{
+		// Switching groups: remove from the old group.
+		wz_radio_button_group_remove_button(group->get(), button_);
+	}
+
+	group_ = group;
+
+	if (group != NULL)
+	{
+		wz_radio_button_group_add_button(group->get(), button_);
+	}
 }
 
 //------------------------------------------------------------------------------

@@ -268,7 +268,10 @@ class RadioButton
 public:
 	std::string getLabel() const;
 	RadioButton setLabel(const std::string &label);
+
+	// NULL to remove the radio button from it's group.
 	RadioButton setGroup(RadioButtonGroup *group);
+
 	wzRect getRect() const;
 	RadioButton setPosition(int x, int y);
 	RadioButton setSize(int w, int h);

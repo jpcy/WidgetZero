@@ -387,6 +387,7 @@ void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback cal
 struct wzRadioButtonGroup *wz_radio_button_group_create();
 void wz_radio_button_group_destroy(struct wzRadioButtonGroup *group);
 void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct wzButton *button);
+void wz_radio_button_group_remove_button(struct wzRadioButtonGroup *group, struct wzButton *button);
 
 typedef enum
 {
