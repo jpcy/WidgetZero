@@ -112,9 +112,6 @@ public:
 private:
 	wzButton *button_;
 	std::string label_;
-
-	static const int boxSize = 16;
-	static const int boxRightMargin = 8;
 };
 
 class ComboInternal : public Widget
@@ -636,14 +633,7 @@ std::string CheckboxInternal::getLabel() const
 void CheckboxInternal::setLabel(const std::string &label)
 {
 	label_ = label;
-
-	// Calculate size.
-	wzSize size;
-	renderer_->measure_text(renderer_, label_.c_str(), 0, &size.w, &size.h);
-	size.w += boxSize + boxRightMargin;
-	size.w += 16;
-	size.h += 8;
-	wz_widget_set_size((wzWidget *)button_, size);
+	wz_widget_set_size((wzWidget *)button_, renderer_->measure_checkbox(renderer_, label_.c_str()));
 }
 
 //------------------------------------------------------------------------------

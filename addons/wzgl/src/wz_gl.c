@@ -47,6 +47,9 @@ wzRendererData;
 
 static char errorMessage[WZ_GL_MAX_ERROR_MESSAGE];
 
+static const int checkBoxBoxSize = 16;
+static const int checkBoxBoxRightMargin = 8;
+
 static const int radioButtonOuterRadius = 8;
 static const int radioButtonInnerRadius = 4;
 static const int radioButtonSpacing = 8;
@@ -310,6 +313,14 @@ static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wz
 	nvgRestore(vg);
 }
 
+wzSize wzgl_measure_checkbox(struct wzRenderer *renderer, const char *label)
+{
+	wzSize size;
+	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
+	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
+	return size;
+}
+
 static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label)
 {
 	wzRendererData *rendererData;
@@ -317,7 +328,6 @@ static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct 
 	wzRect rect;
 	bool hover;
 	wzRect boxRect;
-	int boxSize, boxRightMargin;
 
 	assert(renderer);
 	assert(checkbox);
@@ -330,12 +340,10 @@ static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct 
 	hover = wz_widget_get_hover((struct wzWidget *)checkbox);
 
 	// Box.
-	boxSize = 16;
-	boxRightMargin = 8;
 	boxRect.x = rect.x;
-	boxRect.y = (int)(rect.y + rect.h / 2.0f - boxSize / 2.0f);
-	boxRect.w = boxSize;
-	boxRect.h = boxSize;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f);
+	boxRect.w = checkBoxBoxSize;
+	boxRect.h = checkBoxBoxSize;
 
 	// Box background.
 	if (wz_button_is_pressed(checkbox) && hover)
@@ -354,14 +362,14 @@ static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct 
 	if (wz_button_is_set(checkbox))
 	{
 		boxRect.x = rect.x + 4;
-		boxRect.y = (int)(rect.y + rect.h / 2.0f - boxSize / 2.0f) + 4;
-		boxRect.w = boxSize - 8;
-		boxRect.h = boxSize - 8;
+		boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f) + 4;
+		boxRect.w = checkBoxBoxSize / 2;
+		boxRect.h = checkBoxBoxSize / 2;
 		wzgl_draw_filled_rect(vg, boxRect, nvgRGB(0, 0, 0));
 	}
 
 	// Label.
-	wzgl_printf(rendererData, rect.x + boxSize + boxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	wzgl_printf(rendererData, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
@@ -849,6 +857,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_dock_preview = wzgl_draw_dock_preview;
 	renderer->draw_window = wzgl_draw_window;
 	renderer->draw_button = wzgl_draw_button;
+	renderer->measure_checkbox = wzgl_measure_checkbox;
 	renderer->draw_checkbox = wzgl_draw_checkbox;
 	renderer->draw_combo = wzgl_draw_combo;
 	renderer->measure_group_box_margin = wzgl_measure_group_box_margin;

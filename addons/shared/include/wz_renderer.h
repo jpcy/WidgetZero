@@ -41,7 +41,10 @@ struct wzRenderer
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *title);
 	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);
+
+	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const char *label);
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label);
+
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *item);
 
 	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *label);
