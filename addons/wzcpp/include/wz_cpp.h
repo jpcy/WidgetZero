@@ -33,33 +33,33 @@ SOFTWARE.
 namespace wz {
 
 class Button;
-class ButtonInternal;
+struct ButtonPrivate;
 class Checkbox;
-class CheckboxInternal;
+struct CheckboxPrivate;
 class Combo;
-class ComboInternal;
+struct ComboPrivate;
 class Desktop;
-class DesktopInternal;
+struct DesktopPrivate;
 class GroupBox;
-class GroupBoxInternal;
+struct GroupBoxPrivate;
 class Label;
-class LabelInternal;
+struct LabelPrivate;
 class List;
-class ListInternal;
+struct ListPrivate;
 class RadioButton;
-class RadioButtonInternal;
+struct RadioButtonPrivate;
 class Scroller;
-class ScrollerInternal;
+struct ScrollerPrivate;
 class StackLayout;
-class StackLayoutInternal;
+struct StackLayoutPrivate;
 class Tab;
-class TabInternal;
+struct TabPrivate;
 class Tabbed;
-class TabbedInternal;
+struct TabbedPrivate;
 class TextEdit;
-class TextEditInternal;
+struct TextEditPrivate;
 class Window;
-class WindowInternal;
+struct WindowPrivate;
 
 class Desktop
 {
@@ -92,7 +92,7 @@ public:
 	Tabbed createTabbed();
 	Window createWindow();
 
-	DesktopInternal *internal_;
+	DesktopPrivate *p;
 };
 
 class Window
@@ -124,7 +124,7 @@ public:
 	Window setMargin(int top, int right, int bottom, int left);
 	Window setMargin(wzBorder margin);
 
-	WindowInternal *internal_;
+	WindowPrivate *p;
 };
 
 class Button
@@ -143,7 +143,7 @@ public:
 	Button setMargin(int top, int right, int bottom, int left);
 	Button setMargin(wzBorder margin);
 
-	ButtonInternal *internal_;
+	ButtonPrivate *p;
 };
 
 class Checkbox
@@ -162,7 +162,7 @@ public:
 	Checkbox setMargin(int top, int right, int bottom, int left);
 	Checkbox setMargin(wzBorder margin);
 
-	CheckboxInternal *internal_;
+	CheckboxPrivate *p;
 };
 
 class Combo
@@ -180,7 +180,7 @@ public:
 	Combo setMargin(int top, int right, int bottom, int left);
 	Combo setMargin(wzBorder margin);
 
-	ComboInternal *internal_;
+	ComboPrivate *p;
 };
 
 class GroupBox
@@ -212,7 +212,7 @@ public:
 	GroupBox setMargin(int top, int right, int bottom, int left);
 	GroupBox setMargin(wzBorder margin);
 
-	GroupBoxInternal *internal_;
+	GroupBoxPrivate *p;
 };
 
 class Label
@@ -231,7 +231,7 @@ public:
 	Label setMargin(int top, int right, int bottom, int left);
 	Label setMargin(wzBorder margin);
 
-	LabelInternal *internal_;
+	LabelPrivate *p;
 };
 
 class List
@@ -249,7 +249,7 @@ public:
 	List setMargin(int top, int right, int bottom, int left);
 	List setMargin(wzBorder margin);
 
-	ListInternal *internal_;
+	ListPrivate *p;
 };
 
 class RadioButtonGroup
@@ -283,7 +283,7 @@ public:
 	RadioButton setMargin(int top, int right, int bottom, int left);
 	RadioButton setMargin(wzBorder margin);
 
-	RadioButtonInternal *internal_;
+	RadioButtonPrivate *p;
 };
 
 class Scroller
@@ -305,7 +305,7 @@ public:
 	Scroller setMargin(int top, int right, int bottom, int left);
 	Scroller setMargin(wzBorder margin);
 
-	ScrollerInternal *internal_;
+	ScrollerPrivate *p;
 };
 
 class StackLayout
@@ -338,7 +338,7 @@ public:
 	StackLayout setMargin(int top, int right, int bottom, int left);
 	StackLayout setMargin(wzBorder margin);
 
-	StackLayoutInternal *internal_;
+	StackLayoutPrivate *p;
 };
 
 class Tab
@@ -368,7 +368,7 @@ public:
 	Tab setMargin(int top, int right, int bottom, int left);
 	Tab setMargin(wzBorder margin);
 
-	TabInternal *internal_;
+	TabPrivate *p;
 };
 
 class Tabbed
@@ -387,7 +387,7 @@ public:
 	Tabbed setMargin(int top, int right, int bottom, int left);
 	Tabbed setMargin(wzBorder margin);
 
-	TabbedInternal *internal_;
+	TabbedPrivate *p;
 };
 
 class TextEdit
@@ -405,7 +405,7 @@ public:
 	TextEdit setMargin(int top, int right, int bottom, int left);
 	TextEdit setMargin(wzBorder margin);
 
-	TextEditInternal *internal_;
+	TextEditPrivate *p;
 };
 
 } // namespace wz
