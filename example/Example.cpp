@@ -114,10 +114,10 @@ public:
 
 		{
 			wz::GroupBox groupBox = desktop.createGroupBox().setLabel("Test GroupBox").setPosition(100, 300);
-			wz::StackLayout layout = groupBox.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setAutosize(WZ_AUTOSIZE);
+			wz::StackLayout layout = groupBox.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setAutosize(WZ_AUTOSIZE).setSpacing(8);
 			layout.createRadioButton().setLabel("Option 1").setGroup(&radioButtonGroup);
-			layout.createRadioButton().setLabel("Option 2").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
-			layout.createRadioButton().setLabel("Option 3").setGroup(&radioButtonGroup).setMargin(8, 0, 0, 0);
+			layout.createRadioButton().setLabel("Option 2").setGroup(&radioButtonGroup);
+			layout.createRadioButton().setLabel("Option 3").setGroup(&radioButtonGroup);
 		}
 
 		desktop.createScroller().setType(WZ_SCROLLER_VERTICAL).setMaxValue(100).setValue(20).setStepValue(10).setRect(300, 50, 16, 200);
@@ -128,12 +128,12 @@ public:
 
 		{
 			wz::Window window = desktop.createWindow().setTitle("Test Window").setRect(650, 100, 300, 300);
-			wz::StackLayout layout = window.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setMargin(8).setAutosize(WZ_AUTOSIZE);
+			wz::StackLayout layout = window.createStackLayout().setDirection(WZ_STACK_LAYOUT_VERTICAL).setMargin(8).setAutosize(WZ_AUTOSIZE).setSpacing(8);
 			layout.createTextEdit().setText("this is a very long string so scrolling can be tested").setStretch(WZ_STRETCH_HORIZONTAL);
-			layout.createButton().setLabel("Another Button").setMargin(8, 0, 0, 0).setStretch(WZ_STRETCH_HORIZONTAL);
-			layout.createCheckbox().setLabel("Checkbox").setMargin(8, 0, 0, 0).setAlign(WZ_ALIGN_CENTER);
-			layout.createCombo().setItems(listData, 17).setMargin(8, 0, 0, 0).setAlign(WZ_ALIGN_RIGHT);
-			layout.createButton().setLabel("Yet Another Button").setStretch(WZ_STRETCH).setMargin(8, 0, 0, 0);
+			layout.createButton().setLabel("Another Button").setStretch(WZ_STRETCH_HORIZONTAL);
+			layout.createCheckbox().setLabel("Checkbox").setAlign(WZ_ALIGN_CENTER);
+			layout.createCombo().setItems(listData, 17).setAlign(WZ_ALIGN_RIGHT);
+			layout.createButton().setLabel("Yet Another Button").setStretch(WZ_STRETCH);
 		}
 
 		{
@@ -154,10 +154,10 @@ public:
 		}
 
 		{
-			wz::StackLayout layout = desktop.createStackLayout().setDirection(WZ_STACK_LAYOUT_HORIZONTAL).setRect(50, 550, 400, 100);
+			wz::StackLayout layout = desktop.createStackLayout().setDirection(WZ_STACK_LAYOUT_HORIZONTAL).setRect(50, 550, 400, 100).setSpacing(8);
 			layout.createButton().setLabel("Button A").setStretch(WZ_STRETCH_VERTICAL);
-			layout.createButton().setLabel("Button B").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_MIDDLE);
-			layout.createButton().setLabel("Button C").setMargin(0, 0, 0, 8).setAlign(WZ_ALIGN_BOTTOM);
+			layout.createButton().setLabel("Button B").setAlign(WZ_ALIGN_MIDDLE);
+			layout.createButton().setLabel("Button C").setAlign(WZ_ALIGN_BOTTOM);
 		}
 	}
 

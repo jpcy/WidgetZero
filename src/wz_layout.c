@@ -27,6 +27,15 @@ SOFTWARE.
 #include "wz_arr.h"
 #include "wz_widget.h"
 
+struct wzStackLayout
+{
+	struct wzWidget base;
+	wzStackLayoutDirection direction;
+
+	// Spacing between child widgets. Applied to the top/left of children.
+	int spacing;
+};
+
 /*
 ================================================================================
 
@@ -37,11 +46,13 @@ VERTICAL STACK LAYOUT
 
 static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 {
+	struct wzStackLayout *stackLayout;
 	int nChildren, availableHeight;
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int i, y;
 
 	assert(widget);
+	stackLayout = (struct wzStackLayout *)widget;
 	widget->rect = rect;
 	nChildren = wz_arr_len(widget->children);
 	availableHeight = rect.h;
@@ -51,6 +62,12 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 	{
 		// Subtract all child widget top and bottom margins from the available height.
 		availableHeight -= widget->children[i]->margin.top + widget->children[i]->margin.bottom;
+
+		// Subtract layout spacing too, except for the first child (because spacing is applied to the top).
+		if (i != 0)
+		{
+			availableHeight -= stackLayout->spacing;
+		}
 
 		if ((widget->children[i]->stretch & WZ_STRETCH_VERTICAL) != 0)
 		{
@@ -73,6 +90,12 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 		wzRect childRect;
 
 		child = widget->children[i];
+
+		if (i != 0)
+		{
+			y += stackLayout->spacing;
+		}
+
 		y += child->margin.top;
 		childRect.x = child->margin.left;
 		childRect.y = y;
@@ -124,11 +147,13 @@ HORIZONTAL STACK LAYOUT
 
 static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 {
+	struct wzStackLayout *stackLayout;
 	int nChildren, availableWidth;
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int i, x;
 
 	assert(widget);
+	stackLayout = (struct wzStackLayout *)widget;
 	widget->rect = rect;
 	nChildren = wz_arr_len(widget->children);
 	availableWidth = rect.w;
@@ -138,6 +163,12 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 	{
 		// Subtract all child widget left and right margins from the available width.
 		availableWidth -= widget->children[i]->margin.left + widget->children[i]->margin.right;
+
+		// Subtract layout spacing too, except for the first child (because spacing is applied to the left).
+		if (i != 0)
+		{
+			availableWidth -= stackLayout->spacing;
+		}
 
 		if ((widget->children[i]->stretch & WZ_STRETCH_HORIZONTAL) != 0)
 		{
@@ -160,6 +191,12 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 		wzRect childRect;
 
 		child = widget->children[i];
+
+		if (i != 0)
+		{
+			x += stackLayout->spacing;
+		}
+
 		x += child->margin.left;
 		childRect.x = x;
 		childRect.y = child->margin.top;
@@ -209,12 +246,6 @@ STACK LAYOUT
 ================================================================================
 */
 
-struct wzStackLayout
-{
-	struct wzWidget base;
-	wzStackLayoutDirection direction;
-};
-
 static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	assert(widget);
@@ -247,4 +278,17 @@ void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLay
 	assert(stackLayout);
 	stackLayout->direction = direction;
 	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
+}
+
+void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing)
+{
+	assert(stackLayout);
+	stackLayout->spacing = spacing;
+	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
+}
+
+int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout)
+{
+	assert(stackLayout);
+	return stackLayout->spacing;
 }

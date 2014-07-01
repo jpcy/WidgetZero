@@ -314,6 +314,8 @@ public:
 	virtual const wzWidget *getWidget() const { return (wzWidget *)layout_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)layout_; }
 	void setDirection(wzStackLayoutDirection direction);
+	void setSpacing(int spacing);
+	int getSpacing() const;
 
 	Button createButton();
 	Checkbox createCheckbox();
@@ -1437,6 +1439,16 @@ void StackLayoutInternal::setDirection(wzStackLayoutDirection direction)
 	wz_stack_layout_set_direction(layout_, direction);
 }
 
+void StackLayoutInternal::setSpacing(int spacing)
+{
+	wz_stack_layout_set_spacing(layout_, spacing);
+}
+
+int StackLayoutInternal::getSpacing() const
+{
+	return wz_stack_layout_get_spacing(layout_);
+}
+
 IMPLEMENT_CHILD_WIDGET_CREATE(StackLayoutInternal, this, Button)
 IMPLEMENT_CHILD_WIDGET_CREATE(StackLayoutInternal, this, Checkbox)
 IMPLEMENT_CHILD_WIDGET_CREATE(StackLayoutInternal, this, Combo)
@@ -1455,6 +1467,17 @@ StackLayout StackLayout::setDirection(wzStackLayoutDirection direction)
 {
 	internal_->setDirection(direction);
 	return *this;
+}
+
+StackLayout StackLayout::setSpacing(int spacing)
+{
+	internal_->setSpacing(spacing);
+	return *this;
+}
+
+int StackLayout::getSpacing() const
+{
+	return internal_->getSpacing();
 }
 
 Button StackLayout::createButton()

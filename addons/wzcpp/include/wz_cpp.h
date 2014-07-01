@@ -312,6 +312,8 @@ class StackLayout
 {
 public:
 	StackLayout setDirection(wzStackLayoutDirection direction);
+	StackLayout setSpacing(int spacing);
+	int getSpacing() const;
 
 	Button createButton();
 	Checkbox createCheckbox();

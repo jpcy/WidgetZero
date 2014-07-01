@@ -421,6 +421,8 @@ wzStackLayoutDirection;
 
 struct wzStackLayout *wz_stack_layout_create(struct wzDesktop *desktop);
 void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction);
+void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
+int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
 
 struct wzTabBar *wz_tab_bar_create(struct wzDesktop *desktop);
 struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
