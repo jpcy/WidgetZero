@@ -260,15 +260,13 @@ static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 }
 
-struct wzStackLayout *wz_stack_layout_create(struct wzDesktop *desktop)
+struct wzStackLayout *wz_stack_layout_create()
 {
 	struct wzStackLayout *stackLayout;
 
-	assert(desktop);
 	stackLayout = (struct wzStackLayout *)malloc(sizeof(struct wzStackLayout));
 	memset(stackLayout, 0, sizeof(struct wzStackLayout));
 	stackLayout->base.type = WZ_TYPE_STACK_LAYOUT;
-	stackLayout->base.desktop = desktop;
 	stackLayout->base.vtable.set_rect = wz_stack_layout_set_rect;
 	return stackLayout;
 }

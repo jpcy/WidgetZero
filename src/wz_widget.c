@@ -522,9 +522,25 @@ void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wz
 	widget->vtable.draw = draw;
 }
 
+static struct wzDesktop *wz_widget_find_desktop(struct wzWidget *widget)
+{
+	for (;;)
+	{
+		if (!widget)
+			break;
+
+		if (widget->type == WZ_TYPE_DESKTOP)
+			return (struct wzDesktop *)widget;
+
+		widget = widget->parent;
+	}
+
+	return NULL;
+}
+
 // Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
 // Example: scroller does this with it's button children.
-static void wz_widget_set_window_recursive(struct wzWidget *widget, struct wzWindow *window)
+static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, struct wzDesktop *desktop, struct wzWindow *window)
 {
 	int i;
 
@@ -533,8 +549,9 @@ static void wz_widget_set_window_recursive(struct wzWidget *widget, struct wzWin
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		struct wzWidget *child = widget->children[i];
+		child->desktop = desktop;
 		child->window = window;
-		wz_widget_set_window_recursive(child, window);
+		wz_widget_set_desktop_and_window_recursive(child, desktop, window);
 	}
 }
 
@@ -551,10 +568,15 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_DESKTOP)
 		return;
 
+	// Set desktop.
+	child->desktop = wz_widget_find_desktop(widget);
+
 	// Find the closest ancestor window.
 	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
 
-	wz_widget_set_window_recursive(child, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
+	// Set children desktop and window.
+	wz_widget_set_desktop_and_window_recursive(child, child->desktop, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
+
 	child->parent = widget;
 	wz_arr_push(widget->children, child);
 

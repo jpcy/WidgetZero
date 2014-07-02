@@ -31,14 +31,12 @@ struct wzLabel
 	struct wzWidget base;
 };
 
-struct wzLabel *wz_label_create(struct wzDesktop *desktop)
+struct wzLabel *wz_label_create()
 {
 	struct wzLabel *label;
 
-	assert(desktop);
 	label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
 	memset(label, 0, sizeof(struct wzLabel));
 	label->base.type = WZ_TYPE_LABEL;
-	label->base.desktop = desktop;
 	return label;
 }

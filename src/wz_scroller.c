@@ -191,7 +191,7 @@ static struct wzScrollerNub *wz_scroller_nub_create(struct wzScroller *scroller)
 	assert(scroller);
 	nub = (struct wzScrollerNub *)malloc(sizeof(struct wzScrollerNub));
 	memset(nub, 0, sizeof(struct wzScrollerNub));
-	nub->base.desktop = scroller->base.desktop;
+	//nub->base.desktop = scroller->base.desktop;
 	nub->scroller = scroller;
 	nub->base.vtable.mouse_button_down = wz_nub_mouse_button_down;
 	nub->base.vtable.mouse_button_up = wz_nub_mouse_button_up;
@@ -327,15 +327,13 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller->incrementButton);
 }
 
-struct wzScroller *wz_scroller_create(struct wzDesktop *desktop)
+struct wzScroller *wz_scroller_create()
 {
 	struct wzScroller *scroller;
 
-	assert(desktop);
 	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
-	scroller->base.desktop = desktop;
 	scroller->base.vtable.destroy = wz_scroller_destroy;
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
@@ -343,11 +341,11 @@ struct wzScroller *wz_scroller_create(struct wzDesktop *desktop)
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
 	scroller->stepValue = 1;
 
-	scroller->decrementButton = wz_button_create(desktop);
+	scroller->decrementButton = wz_button_create();
 	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	
-	scroller->incrementButton = wz_button_create(desktop);
+	scroller->incrementButton = wz_button_create();
 	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 

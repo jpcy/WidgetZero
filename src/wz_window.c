@@ -386,16 +386,14 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_widget_set_rect(window->content, contentRect);
 }
 
-struct wzWindow *wz_window_create(struct wzDesktop *desktop)
+struct wzWindow *wz_window_create()
 {
 	struct wzWindow *window;
 
-	assert(desktop);
 	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
 	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
-	window->base.desktop = desktop;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
 	window->base.vtable.mouse_move = wz_window_mouse_move;
@@ -404,7 +402,6 @@ struct wzWindow *wz_window_create(struct wzDesktop *desktop)
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
-	window->content->desktop = desktop;
 	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
 
 	return window;

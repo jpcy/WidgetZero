@@ -390,7 +390,7 @@ ButtonPrivate::ButtonPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	button = wz_button_create(desktop);
+	button = wz_button_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button);
 	initialize();
 }
@@ -440,7 +440,7 @@ CheckboxPrivate::CheckboxPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	button = wz_button_create(desktop);
+	button = wz_button_create();
 	wzWidget *widget = (wzWidget *)button;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -474,7 +474,7 @@ ComboPrivate::ComboPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	combo = wz_combo_create(desktop);
+	combo = wz_combo_create();
 	wzWidget *widget = (wzWidget *)combo;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -734,7 +734,7 @@ GroupBoxPrivate::GroupBoxPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	frame = wz_frame_create(desktop);
+	frame = wz_frame_create();
 	wzWidget *widget = (wzWidget *)frame;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -790,7 +790,7 @@ LabelPrivate::LabelPrivate(WidgetPrivate *parent) : r(255), g(255), b(255)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	label = wz_label_create(desktop);
+	label = wz_label_create();
 	wzWidget *widget = (wzWidget *)label;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
@@ -837,7 +837,7 @@ ListPrivate::ListPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	list = wz_list_create(desktop);
+	list = wz_list_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)list);
 	initialize();
 }
@@ -897,7 +897,7 @@ RadioButtonPrivate::RadioButtonPrivate(WidgetPrivate *parent) : group(NULL)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	button = wz_button_create(desktop);
+	button = wz_button_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button);
 	wz_widget_set_metadata((wzWidget *)button, this);
 	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
@@ -949,7 +949,7 @@ ScrollerPrivate::ScrollerPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	scroller = wz_scroller_create(desktop);
+	scroller = wz_scroller_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)scroller);
 	initialize();
 }
@@ -1017,7 +1017,7 @@ StackLayoutPrivate::StackLayoutPrivate(WidgetPrivate *parent) : layout(NULL), pa
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	layout = wz_stack_layout_create(desktop);
+	layout = wz_stack_layout_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)layout);
 }
 
@@ -1093,7 +1093,7 @@ TabBar::TabBar(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	tabBar_ = wz_tab_bar_create(desktop);
+	tabBar_ = wz_tab_bar_create();
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabBar_);
 	initialize();
 }
@@ -1200,7 +1200,7 @@ TabbedPrivate::TabbedPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	tabbed = wz_tabbed_create(desktop);
+	tabbed = wz_tabbed_create();
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
 	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabbed);
 	tabBar.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed)));
@@ -1255,7 +1255,7 @@ TextEditPrivate::TextEditPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	textEdit = wz_text_edit_create(desktop, 256);
+	textEdit = wz_text_edit_create(256);
 	wz_text_edit_set_border_args(textEdit, borderSize, borderSize, borderSize, borderSize);
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
@@ -1289,7 +1289,7 @@ WindowPrivate::WindowPrivate(WidgetPrivate *parent)
 {
 	renderer = parent->renderer;
 	desktop = parent->desktop;
-	window = wz_window_create(desktop);
+	window = wz_window_create();
 	wzWidget *widget = (wzWidget *)window;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);

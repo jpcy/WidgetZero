@@ -297,15 +297,13 @@ static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 	wz_text_edit_update_scroll_value(textEdit);
 }
 
-struct wzTextEdit *wz_text_edit_create(struct wzDesktop *desktop, int maximumTextLength)
+struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
 {
 	struct wzTextEdit *textEdit;
 
-	assert(desktop);
 	textEdit = (struct wzTextEdit *)malloc(sizeof(struct wzTextEdit) + maximumTextLength);
 	memset(textEdit, 0, sizeof(struct wzTextEdit) + maximumTextLength);
 	textEdit->base.type = WZ_TYPE_TEXT_EDIT;
-	textEdit->base.desktop = desktop;
 	textEdit->base.vtable.mouse_button_down = wz_text_edit_mouse_button_down;
 	textEdit->base.vtable.mouse_button_up = wz_text_edit_mouse_button_up;
 	textEdit->base.vtable.mouse_move = wz_text_edit_mouse_move;

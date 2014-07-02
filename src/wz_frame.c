@@ -32,20 +32,17 @@ struct wzFrame
 	struct wzWidget *content;
 };
 
-struct wzFrame *wz_frame_create(struct wzDesktop *desktop)
+struct wzFrame *wz_frame_create()
 {
 	struct wzFrame *frame;
 
-	assert(desktop);
 	frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
 	memset(frame, 0, sizeof(struct wzFrame));
 	frame->base.type = WZ_TYPE_FRAME;
-	frame->base.desktop = desktop;
 
 	// Create content widget.
 	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(frame->content, 0, sizeof(struct wzWidget));
-	frame->content->desktop = desktop;
 	frame->content->autosize = WZ_AUTOSIZE;
 	wz_widget_add_child_widget((struct wzWidget *)frame, frame->content);
 
