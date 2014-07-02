@@ -33,33 +33,21 @@ SOFTWARE.
 namespace wz {
 
 class Button;
-struct ButtonPrivate;
 class Checkbox;
-struct CheckboxPrivate;
 class Combo;
-struct ComboPrivate;
-class Desktop;
 struct DesktopPrivate;
 class GroupBox;
-struct GroupBoxPrivate;
 class Label;
-struct LabelPrivate;
 class List;
-struct ListPrivate;
 class RadioButton;
-struct RadioButtonPrivate;
 class Scroller;
-struct ScrollerPrivate;
 class StackLayout;
-struct StackLayoutPrivate;
 class Tab;
 struct TabPrivate;
 class Tabbed;
-struct TabbedPrivate;
 class TextEdit;
-struct TextEditPrivate;
+struct WidgetPrivate;
 class Window;
-struct WindowPrivate;
 
 class Desktop
 {
@@ -95,95 +83,44 @@ public:
 	DesktopPrivate *p;
 };
 
-class Window
+class Widget
 {
 public:
-	std::string getTitle() const;
-	Window setTitle(const std::string &title);
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
-	Tabbed createTabbed();
-
 	wzRect getRect() const;
-	Window setPosition(int x, int y);
-	Window setSize(int w, int h);
-	Window setRect(int x, int y, int w, int h);
-	Window setAutosize(int autosize);
-	Window setStretch(int stretch);
-	Window setAlign(int align);
-	Window setMargin(int margin);
-	Window setMargin(int top, int right, int bottom, int left);
-	Window setMargin(wzBorder margin);
+	Widget setPosition(int x, int y);
+	Widget setSize(int w, int h);
+	Widget setRect(int x, int y, int w, int h);
+	Widget setAutosize(int autosize);
+	Widget setStretch(int stretch);
+	Widget setAlign(int align);
+	Widget setMargin(int margin);
+	Widget setMargin(int top, int right, int bottom, int left);
+	Widget setMargin(wzBorder margin);
 
-	WindowPrivate *p;
+	WidgetPrivate *p;
 };
 
-class Button
+class Button : public Widget
 {
 public:
 	std::string getLabel() const;
 	Button setLabel(const std::string &label);
-	wzRect getRect() const;
-	Button setPosition(int x, int y);
-	Button setSize(int w, int h);
-	Button setRect(int x, int y, int w, int h);
-	Button setAutosize(int autosize);
-	Button setStretch(int stretch);
-	Button setAlign(int align);
-	Button setMargin(int margin);
-	Button setMargin(int top, int right, int bottom, int left);
-	Button setMargin(wzBorder margin);
-
-	ButtonPrivate *p;
 };
 
-class Checkbox
+class Checkbox : public Widget
 {
 public:
 	std::string getLabel() const;
 	Checkbox setLabel(const std::string &label);
-	wzRect getRect() const;
-	Checkbox setPosition(int x, int y);
-	Checkbox setSize(int w, int h);
-	Checkbox setRect(int x, int y, int w, int h);
-	Checkbox setAutosize(int autosize);
-	Checkbox setStretch(int stretch);
-	Checkbox setAlign(int align);
-	Checkbox setMargin(int margin);
-	Checkbox setMargin(int top, int right, int bottom, int left);
-	Checkbox setMargin(wzBorder margin);
-
-	CheckboxPrivate *p;
 };
 
-class Combo
+class Combo : public Widget
 {
 public:
 	Combo setItems(const char **items, int nItems);
-	wzRect getRect() const;
-	Combo setPosition(int x, int y);
-	Combo setSize(int w, int h);
-	Combo setRect(int x, int y, int w, int h);
-	Combo setAutosize(int autosize);
-	Combo setStretch(int stretch);
-	Combo setAlign(int align);
-	Combo setMargin(int margin);
-	Combo setMargin(int top, int right, int bottom, int left);
-	Combo setMargin(wzBorder margin);
-
-	ComboPrivate *p;
 };
 
-class GroupBox
+class GroupBox : public Widget
 {
 public:
 	std::string getLabel() const;
@@ -200,56 +137,19 @@ public:
 	StackLayout createStackLayout();
 	TextEdit createTextEdit();
 	Tabbed createTabbed();
-
-	wzRect getRect() const;
-	GroupBox setPosition(int x, int y);
-	GroupBox setSize(int w, int h);
-	GroupBox setRect(int x, int y, int w, int h);
-	GroupBox setAutosize(int autosize);
-	GroupBox setStretch(int stretch);
-	GroupBox setAlign(int align);
-	GroupBox setMargin(int margin);
-	GroupBox setMargin(int top, int right, int bottom, int left);
-	GroupBox setMargin(wzBorder margin);
-
-	GroupBoxPrivate *p;
 };
 
-class Label
+class Label : public Widget
 {
 public:
 	Label setText(const char *format, ...);
 	Label setTextColor(uint8_t r, uint8_t g, uint8_t b);
-	wzRect getRect() const;
-	Label setPosition(int x, int y);
-	Label setSize(int w, int h);
-	Label setRect(int x, int y, int w, int h);
-	Label setAutosize(int autosize);
-	Label setStretch(int stretch);
-	Label setAlign(int align);
-	Label setMargin(int margin);
-	Label setMargin(int top, int right, int bottom, int left);
-	Label setMargin(wzBorder margin);
-
-	LabelPrivate *p;
 };
 
-class List
+class List : public Widget
 {
 public:
 	List setItems(const char **items, int nItems);
-	wzRect getRect() const;
-	List setPosition(int x, int y);
-	List setSize(int w, int h);
-	List setRect(int x, int y, int w, int h);
-	List setAutosize(int autosize);
-	List setStretch(int stretch);
-	List setAlign(int align);
-	List setMargin(int margin);
-	List setMargin(int top, int right, int bottom, int left);
-	List setMargin(wzBorder margin);
-
-	ListPrivate *p;
 };
 
 class RadioButtonGroup
@@ -263,7 +163,7 @@ private:
 	wzRadioButtonGroup *group_;
 };
 
-class RadioButton
+class RadioButton : public Widget
 {
 public:
 	std::string getLabel() const;
@@ -271,22 +171,9 @@ public:
 
 	// NULL to remove the radio button from it's group.
 	RadioButton setGroup(RadioButtonGroup *group);
-
-	wzRect getRect() const;
-	RadioButton setPosition(int x, int y);
-	RadioButton setSize(int w, int h);
-	RadioButton setRect(int x, int y, int w, int h);
-	RadioButton setAutosize(int autosize);
-	RadioButton setStretch(int stretch);
-	RadioButton setAlign(int align);
-	RadioButton setMargin(int margin);
-	RadioButton setMargin(int top, int right, int bottom, int left);
-	RadioButton setMargin(wzBorder margin);
-
-	RadioButtonPrivate *p;
 };
 
-class Scroller
+class Scroller : public Widget
 {
 public:
 	Scroller setType(wzScrollerType type);
@@ -294,21 +181,9 @@ public:
 	Scroller setStepValue(int stepValue);
 	Scroller setMaxValue(int maxValue);	
 	int getValue() const;
-	wzRect getRect() const;
-	Scroller setPosition(int x, int y);
-	Scroller setSize(int w, int h);
-	Scroller setRect(int x, int y, int w, int h);
-	Scroller setAutosize(int autosize);
-	Scroller setStretch(int stretch);
-	Scroller setAlign(int align);
-	Scroller setMargin(int margin);
-	Scroller setMargin(int top, int right, int bottom, int left);
-	Scroller setMargin(wzBorder margin);
-
-	ScrollerPrivate *p;
 };
 
-class StackLayout
+class StackLayout : public Widget
 {
 public:
 	StackLayout setDirection(wzStackLayoutDirection direction);
@@ -326,19 +201,6 @@ public:
 	StackLayout createStackLayout();
 	TextEdit createTextEdit();
 	Tabbed createTabbed();
-
-	wzRect getRect() const;
-	StackLayout setPosition(int x, int y);
-	StackLayout setSize(int w, int h);
-	StackLayout setRect(int x, int y, int w, int h);
-	StackLayout setAutosize(int autosize);
-	StackLayout setStretch(int stretch);
-	StackLayout setAlign(int align);
-	StackLayout setMargin(int margin);
-	StackLayout setMargin(int top, int right, int bottom, int left);
-	StackLayout setMargin(wzBorder margin);
-
-	StackLayoutPrivate *p;
 };
 
 class Tab
@@ -357,55 +219,38 @@ public:
 	StackLayout createStackLayout();
 	TextEdit createTextEdit();
 
-	wzRect getRect() const;
-	Tab setPosition(int x, int y);
-	Tab setSize(int w, int h);
-	Tab setRect(int x, int y, int w, int h);
-	Tab setAutosize(int autosize);
-	Tab setStretch(int stretch);
-	Tab setAlign(int align);
-	Tab setMargin(int margin);
-	Tab setMargin(int top, int right, int bottom, int left);
-	Tab setMargin(wzBorder margin);
-
 	TabPrivate *p;
 };
 
-class Tabbed
+class Tabbed : public Widget
 {
 public:
 	Tab createTab();
-
-	wzRect getRect() const;
-	Tabbed setPosition(int x, int y);
-	Tabbed setSize(int w, int h);
-	Tabbed setRect(int x, int y, int w, int h);
-	Tabbed setAutosize(int autosize);
-	Tabbed setStretch(int stretch);
-	Tabbed setAlign(int align);
-	Tabbed setMargin(int margin);
-	Tabbed setMargin(int top, int right, int bottom, int left);
-	Tabbed setMargin(wzBorder margin);
-
-	TabbedPrivate *p;
 };
 
-class TextEdit
+class TextEdit : public Widget
 {
 public:
 	TextEdit setText(const std::string &text);
-	wzRect getRect() const;
-	TextEdit setPosition(int x, int y);
-	TextEdit setSize(int w, int h);
-	TextEdit setRect(int x, int y, int w, int h);
-	TextEdit setAutosize(int autosize);
-	TextEdit setStretch(int stretch);
-	TextEdit setAlign(int align);
-	TextEdit setMargin(int margin);
-	TextEdit setMargin(int top, int right, int bottom, int left);
-	TextEdit setMargin(wzBorder margin);
+};
 
-	TextEditPrivate *p;
+class Window : public Widget
+{
+public:
+	std::string getTitle() const;
+	Window setTitle(const std::string &title);
+
+	Button createButton();
+	Checkbox createCheckbox();
+	Combo createCombo();
+	GroupBox createGroupBox();
+	Label createLabel();
+	List createList();
+	RadioButton createRadioButton();
+	Scroller createScroller();
+	StackLayout createStackLayout();
+	TextEdit createTextEdit();
+	Tabbed createTabbed();
 };
 
 } // namespace wz
