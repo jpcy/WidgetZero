@@ -32,6 +32,12 @@ struct wzFrame
 	struct wzWidget *content;
 };
 
+static struct wzWidget *wz_frame_get_content_widget(struct wzWidget *widget)
+{
+	assert(widget);
+	return ((struct wzFrame *)widget)->content;
+}
+
 struct wzFrame *wz_frame_create()
 {
 	struct wzFrame *frame;
@@ -39,18 +45,13 @@ struct wzFrame *wz_frame_create()
 	frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
 	memset(frame, 0, sizeof(struct wzFrame));
 	frame->base.type = WZ_TYPE_FRAME;
+	frame->base.vtable.get_content_widget = wz_frame_get_content_widget;
 
 	// Create content widget.
 	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(frame->content, 0, sizeof(struct wzWidget));
 	frame->content->autosize = WZ_AUTOSIZE;
-	wz_widget_add_child_widget((struct wzWidget *)frame, frame->content);
+	wz_widget_add_child_widget_internal((struct wzWidget *)frame, frame->content);
 
 	return frame;
-}
-
-struct wzWidget *wz_frame_get_content_widget(struct wzFrame *frame)
-{
-	assert(frame);
-	return frame->content;
 }

@@ -266,7 +266,6 @@ void wz_desktop_text_input(struct wzDesktop *desktop, const char *text);
 void wz_desktop_draw(struct wzDesktop *desktop);
 struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop);
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
-struct wzWidget *wz_desktop_get_content_widget(struct wzDesktop *desktop);
 wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop);
 
 void wz_widget_destroy(struct wzWidget *widget);
@@ -288,7 +287,6 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
 wzRect wz_widget_get_rect(const struct wzWidget *widget);
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
-
 void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin);
 void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left);
 wzBorder wz_widget_get_margin(const struct wzWidget *widget);
@@ -314,13 +312,14 @@ struct wzWidget *wz_widget_get_parent(struct wzWidget *widget);
 
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
+struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget);
+
 struct wzWindow *wz_window_create();
 void wz_window_set_header_height(struct wzWindow *window, int height);
 int wz_window_get_header_height(struct wzWindow *window);
 void wz_window_set_border_size(struct wzWindow *window, int size);
 int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
-struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
 
 typedef enum
 {
@@ -359,7 +358,6 @@ struct wzList *wz_combo_get_list(struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
 struct wzFrame *wz_frame_create();
-struct wzWidget *wz_frame_get_content_widget(struct wzFrame *frame);
 
 struct wzLabel *wz_label_create();
 

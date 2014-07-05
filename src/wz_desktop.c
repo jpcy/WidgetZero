@@ -908,7 +908,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	// Don't do this if the inherited widget draw priority is higher than window draw priority.
 	if (widget->window && wz_widget_calculate_inherited_draw_priority(widget) < WZ_DRAW_PRIORITY_WINDOW)
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_widget_get_content_widget((struct wzWidget *)widget->window)));
 	}
 	else
 	{
@@ -1198,6 +1198,12 @@ static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_desktop_update_content_rect(desktop);
 }
 
+static struct wzWidget *wz_desktop_get_content_widget(struct wzWidget *widget)
+{
+	assert(widget);
+	return ((struct wzDesktop *)widget)->content;
+}
+
 void wz_desktop_set_measure_text_callback(struct wzDesktop *desktop, wzDesktopMeasureTextCallback callback)
 {
 	assert(desktop);
@@ -1221,12 +1227,13 @@ struct wzDesktop *wz_desktop_create()
 	desktop->base.type = WZ_TYPE_DESKTOP;
 	desktop->base.desktop = desktop;
 	desktop->base.vtable.set_rect = wz_desktop_set_rect;
+	desktop->base.vtable.get_content_widget = wz_desktop_get_content_widget;
 
 	// Create content widget.
 	desktop->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(desktop->content, 0, sizeof(struct wzWidget));
 	desktop->content->desktop = desktop;
-	wz_widget_add_child_widget((struct wzWidget *)desktop, desktop->content);
+	wz_widget_add_child_widget_internal((struct wzWidget *)desktop, desktop->content);
 
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -1236,7 +1243,7 @@ struct wzDesktop *wz_desktop_create()
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
 		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
 		wz_widget_set_visible(widget, false);
-		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+		wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
 	}
 
 	wz_desktop_set_dock_icon_size_args(desktop, 48, 48);
@@ -1248,7 +1255,7 @@ struct wzDesktop *wz_desktop_create()
 	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
 	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
-	wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+	wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
 
 	// Create dock tab bars.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -1259,7 +1266,7 @@ struct wzDesktop *wz_desktop_create()
 		widget = (struct wzWidget *)desktop->dockTabBars[i];
 		wz_widget_set_visible(widget, false);
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
-		wz_widget_add_child_widget((struct wzWidget *)desktop, widget);
+		wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
 		wz_tab_bar_add_callback_tab_changed(desktop->dockTabBars[i], wz_desktop_dock_tab_bar_tab_changed);
 
 		// Override scroll button draw priority.
@@ -1274,12 +1281,6 @@ void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback ca
 {
 	assert(desktop);
 	desktop->handle_event = callback;
-}
-
-struct wzWidget *wz_desktop_get_content_widget(struct wzDesktop *desktop)
-{
-	assert(desktop);
-	return desktop->content;
 }
 
 wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop)

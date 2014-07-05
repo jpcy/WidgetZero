@@ -386,6 +386,12 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_widget_set_rect(window->content, contentRect);
 }
 
+static struct wzWidget *wz_window_get_content_widget(struct wzWidget *widget)
+{
+	assert(widget);
+	return ((struct wzWindow *)widget)->content;
+}
+
 struct wzWindow *wz_window_create()
 {
 	struct wzWindow *window;
@@ -399,10 +405,11 @@ struct wzWindow *wz_window_create()
 	window->base.vtable.mouse_move = wz_window_mouse_move;
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
+	window->base.vtable.get_content_widget = wz_window_get_content_widget;
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
-	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
+	wz_widget_add_child_widget_internal((struct wzWidget *)window, window->content);
 
 	return window;
 }
@@ -442,12 +449,6 @@ wzRect wz_window_get_header_rect(struct wzWindow *window)
 	rect.w = window->base.rect.w - window->borderSize * 2;
 	rect.h = window->headerHeight;
 	return rect;
-}
-
-struct wzWidget *wz_window_get_content_widget(struct wzWindow *window)
-{
-	assert(window);
-	return window->content;
 }
 
 // Save the window size before docking so it can be restored if the window is undocked later.

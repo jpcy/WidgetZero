@@ -51,6 +51,8 @@ typedef struct
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
 	wzRect (*get_children_clip_rect)(struct wzWidget *widget);
+
+	struct wzWidget *(*get_content_widget)(struct wzWidget *widget);
 }
 wzWidgetVtable;
 
@@ -109,7 +111,7 @@ struct wzWidget
 
 	struct wzDesktop *desktop;
 
-	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget.
+	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget_internal.
 	struct wzWindow *window;
 
 	struct wzWidget *parent;
@@ -128,6 +130,8 @@ enum
 	WZ_COMPASS_NW,
 	WZ_NUM_COMPASS_POINTS
 };
+
+void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
 
 void wz_widget_refresh_rect(struct wzWidget *widget);
 

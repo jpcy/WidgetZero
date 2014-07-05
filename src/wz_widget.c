@@ -541,7 +541,7 @@ static struct wzDesktop *wz_widget_find_desktop(struct wzWidget *widget)
 	return NULL;
 }
 
-// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
+// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget_internal.
 // Example: scroller does this with it's button children.
 static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, struct wzDesktop *desktop, struct wzWindow *window)
 {
@@ -571,29 +571,14 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_DESKTOP)
 		return;
 
-	// Set desktop.
-	child->desktop = wz_widget_find_desktop(widget);
-
-	// Find the closest ancestor window.
-	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
-
-	// Set children desktop and window.
-	wz_widget_set_desktop_and_window_recursive(child, child->desktop, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
-
-	child->parent = widget;
-	wz_arr_push(widget->children, child);
-
-	// If the parent is a layout widget, refresh it.
-	if (wz_widget_is_layout(widget))
+	// Special case for add windows to desktop: add directly, not to the content widget.
+	if (wz_widget_get_type(widget) == WZ_TYPE_DESKTOP && wz_widget_get_type(child) == WZ_TYPE_WINDOW)
 	{
-		wz_widget_refresh_rect(widget);
+		wz_widget_add_child_widget_internal(widget, child);
+		return;
 	}
 
-	// Autosize child.
-	if ((child->autosize & WZ_AUTOSIZE) != 0)
-	{
-		wz_widget_set_autosize_rect_recursive(child);
-	}
+	wz_widget_add_child_widget_internal(wz_widget_get_content_widget(widget), child);
 }
 
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
@@ -652,6 +637,18 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 	return widget->window;
 }
 
+struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget)
+{
+	assert(widget);
+
+	if (widget->vtable.get_content_widget)
+	{
+		return widget->vtable.get_content_widget(widget);
+	}
+
+	return widget;
+}
+
 /*
 ================================================================================
 
@@ -659,6 +656,36 @@ INTERNAL WIDGET FUNCTIONS
 
 ================================================================================
 */
+
+void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child)
+{
+	assert(widget);
+	assert(child);
+
+	// Set desktop.
+	child->desktop = wz_widget_find_desktop(widget);
+
+	// Find the closest ancestor window.
+	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
+
+	// Set children desktop and window.
+	wz_widget_set_desktop_and_window_recursive(child, child->desktop, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
+
+	child->parent = widget;
+	wz_arr_push(widget->children, child);
+
+	// If the parent is a layout widget, refresh it.
+	if (wz_widget_is_layout(widget))
+	{
+		wz_widget_refresh_rect(widget);
+	}
+
+	// Autosize child.
+	if ((child->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wz_widget_set_autosize_rect_recursive(child);
+	}
+}
 
 void wz_widget_refresh_rect(struct wzWidget *widget)
 {

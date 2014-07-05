@@ -99,7 +99,7 @@ struct wzTabbed *wz_tabbed_create()
 	// Create the tab bar.
 	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
+	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
 
 	return tabbed;
 }
@@ -126,7 +126,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	newPage.page->desktop = tabbed->base.desktop;
 	newPage.page->vtable.get_children_clip_rect = wz_tabbed_page_get_children_clip_rect;
 	wz_widget_set_visible(newPage.page, wz_tab_bar_get_selected_tab(tabbed->tabBar) == newPage.tab);
-	wz_widget_add_child_widget((struct wzWidget *)tabbed, newPage.page);
+	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, newPage.page);
 
 	// Set the page widget rect.
 	tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);

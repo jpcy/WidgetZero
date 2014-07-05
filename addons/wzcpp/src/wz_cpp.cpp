@@ -39,7 +39,6 @@ struct WidgetPrivate
 	virtual ~WidgetPrivate();
 	virtual const wzWidget *getWidget() const { return NULL; }
 	virtual wzWidget *getWidget() { return NULL; }
-	virtual wzWidget *getContentWidget() { return getWidget(); }
 	virtual void autosize() {};
 	virtual void draw(wzRect clip) {};
 	virtual void handleEvent(wzEvent e) {};
@@ -95,7 +94,6 @@ struct DesktopPrivate : public WidgetPrivate
 	~DesktopPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)desktop; }
 	virtual wzWidget *getWidget() { return (wzWidget *)desktop; }
-	virtual wzWidget *getContentWidget() { return wz_desktop_get_content_widget(desktop); }
 	void draw();
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
@@ -128,7 +126,6 @@ struct GroupBoxPrivate : public WidgetPrivate
 	GroupBoxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
 	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
-	virtual wzWidget *getContentWidget() { return wz_frame_get_content_widget(frame); }
 	virtual void autosize();
 	virtual void draw(wzRect clip);
 
@@ -296,7 +293,6 @@ struct WindowPrivate : public WidgetPrivate
 	WindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
-	virtual wzWidget *getContentWidget() { return wz_window_get_content_widget(window); }
 	virtual void autosize();
 	virtual void draw(wzRect clip);
 
@@ -345,16 +341,7 @@ wzRenderer *WidgetPrivate::getRenderer()
 
 void WidgetPrivate::add(Widget *widget)
 {
-	// Special case for add windows to desktop: add directly, not to the content widget.
-	if (wz_widget_get_type(getWidget()) == WZ_TYPE_DESKTOP && wz_widget_get_type(widget->p->getWidget()) == WZ_TYPE_WINDOW)
-	{
-		wz_widget_add_child_widget(getWidget(), widget->p->getWidget());
-	}
-	else
-	{
-		wz_widget_add_child_widget(getContentWidget(), widget->p->getWidget());
-	}
-
+	wz_widget_add_child_widget(getWidget(), widget->p->getWidget());
 	widget->p->autosizeRecursive();
 	children.push_back(widget);
 }
@@ -830,7 +817,7 @@ void GroupBoxPrivate::autosize()
 	if (!getRenderer())
 		return;
 
-	wz_widget_set_margin(getContentWidget(), getRenderer()->measure_group_box_margin(getRenderer(), label.c_str()));
+	wz_widget_set_margin(wz_widget_get_content_widget(getWidget()), getRenderer()->measure_group_box_margin(getRenderer(), label.c_str()));
 }
 
 void GroupBoxPrivate::draw(wzRect clip)
