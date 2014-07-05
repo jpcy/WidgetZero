@@ -411,6 +411,7 @@ void wz_window_set_header_height(struct wzWindow *window, int height)
 {
 	assert(window);
 	window->headerHeight = height;
+	wz_widget_refresh_rect((struct wzWidget *)window);
 }
 
 int wz_window_get_header_height(struct wzWindow *window)

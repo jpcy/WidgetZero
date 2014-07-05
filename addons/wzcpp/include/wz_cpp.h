@@ -47,6 +47,7 @@ struct TabPrivate;
 class Tabbed;
 class TextEdit;
 struct WidgetPrivate;
+class Widget;
 class Window;
 
 class Desktop
@@ -66,19 +67,7 @@ public:
 	void draw();
 	bool getShowCursor() const;
 	wzCursor getCursor() const;
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
-	Tabbed createTabbed();
-	Window createWindow();
+	Widget *add(Widget *widget);
 
 	DesktopPrivate *p;
 };
@@ -87,15 +76,15 @@ class Widget
 {
 public:
 	wzRect getRect() const;
-	Widget setPosition(int x, int y);
-	Widget setSize(int w, int h);
-	Widget setRect(int x, int y, int w, int h);
-	Widget setAutosize(int autosize);
-	Widget setStretch(int stretch);
-	Widget setAlign(int align);
-	Widget setMargin(int margin);
-	Widget setMargin(int top, int right, int bottom, int left);
-	Widget setMargin(wzBorder margin);
+	Widget *setPosition(int x, int y);
+	Widget *setSize(int w, int h);
+	Widget *setRect(int x, int y, int w, int h);
+	Widget *setAutosize(int autosize);
+	Widget *setStretch(int stretch);
+	Widget *setAlign(int align);
+	Widget *setMargin(int margin);
+	Widget *setMargin(int top, int right, int bottom, int left);
+	Widget *setMargin(wzBorder margin);
 
 	WidgetPrivate *p;
 };
@@ -103,53 +92,60 @@ public:
 class Button : public Widget
 {
 public:
+	Button();
+	Button(const std::string &label);
+	Button(wzButton *button);
+	~Button();
 	std::string getLabel() const;
-	Button setLabel(const std::string &label);
+	Button *setLabel(const std::string &label);
 };
 
 class Checkbox : public Widget
 {
 public:
+	Checkbox();
+	Checkbox(const std::string &label);
+	~Checkbox();
 	std::string getLabel() const;
-	Checkbox setLabel(const std::string &label);
+	Checkbox *setLabel(const std::string &label);
 };
 
 class Combo : public Widget
 {
 public:
-	Combo setItems(const char **items, int nItems);
+	Combo();
+	~Combo();
+	Combo *setItems(const char **items, int nItems);
 };
 
 class GroupBox : public Widget
 {
 public:
+	GroupBox();
+	GroupBox(const std::string &label);
+	~GroupBox();
 	std::string getLabel() const;
-	GroupBox setLabel(const std::string &label);
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
-	Tabbed createTabbed();
+	GroupBox *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
 };
 
 class Label : public Widget
 {
 public:
-	Label setText(const char *format, ...);
-	Label setTextColor(uint8_t r, uint8_t g, uint8_t b);
+	Label();
+	Label(const std::string &text);
+	~Label();
+	Label *setText(const char *format, ...);
+	Label *setTextColor(uint8_t r, uint8_t g, uint8_t b);
 };
 
 class List : public Widget
 {
 public:
-	List setItems(const char **items, int nItems);
+	List();
+	List(wzList *list);
+	~List();
+	List *setItems(const char **items, int nItems);
 };
 
 class RadioButtonGroup
@@ -166,58 +162,48 @@ private:
 class RadioButton : public Widget
 {
 public:
+	RadioButton();
+	RadioButton(const std::string &label);
+	~RadioButton();
 	std::string getLabel() const;
-	RadioButton setLabel(const std::string &label);
+	RadioButton *setLabel(const std::string &label);
 
 	// NULL to remove the radio button from it's group.
-	RadioButton setGroup(RadioButtonGroup *group);
+	RadioButton *setGroup(RadioButtonGroup *group);
 };
 
 class Scroller : public Widget
 {
 public:
-	Scroller setType(wzScrollerType type);
-	Scroller setValue(int value);
-	Scroller setStepValue(int stepValue);
-	Scroller setMaxValue(int maxValue);	
+	Scroller();
+	Scroller(wzScroller *scroller);
+	~Scroller();
+	Scroller *setType(wzScrollerType type);
+	Scroller *setValue(int value);
+	Scroller *setStepValue(int stepValue);
+	Scroller *setMaxValue(int maxValue);	
 	int getValue() const;
 };
 
 class StackLayout : public Widget
 {
 public:
-	StackLayout setDirection(wzStackLayoutDirection direction);
-	StackLayout setSpacing(int spacing);
+	StackLayout();
+	StackLayout(wzStackLayoutDirection direction);
+	~StackLayout();
+	StackLayout *setDirection(wzStackLayoutDirection direction);
+	StackLayout *setSpacing(int spacing);
 	int getSpacing() const;
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
-	Tabbed createTabbed();
+	Widget *add(Widget *widget);
 };
 
 class Tab
 {
 public:
-	Tab setLabel(const std::string &label);
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
+	Tab();
+	~Tab();
+	Tab *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
 
 	TabPrivate *p;
 };
@@ -225,32 +211,29 @@ public:
 class Tabbed : public Widget
 {
 public:
-	Tab createTab();
+	Tabbed();
+	~Tabbed();
+	Tab *addTab(Tab *tab);
 };
 
 class TextEdit : public Widget
 {
 public:
-	TextEdit setText(const std::string &text);
+	TextEdit();
+	TextEdit(const std::string &text);
+	~TextEdit();
+	TextEdit *setText(const std::string &text);
 };
 
 class Window : public Widget
 {
 public:
+	Window();
+	Window(const std::string &title);
+	~Window();
 	std::string getTitle() const;
-	Window setTitle(const std::string &title);
-
-	Button createButton();
-	Checkbox createCheckbox();
-	Combo createCombo();
-	GroupBox createGroupBox();
-	Label createLabel();
-	List createList();
-	RadioButton createRadioButton();
-	Scroller createScroller();
-	StackLayout createStackLayout();
-	TextEdit createTextEdit();
-	Tabbed createTabbed();
+	Window *setTitle(const std::string &title);
+	Widget *add(Widget *widget);
 };
 
 } // namespace wz

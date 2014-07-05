@@ -27,9 +27,6 @@ SOFTWARE.
 #include <sstream>
 #include <wz_cpp.h>
 
-#define IMPLEMENT_CHILD_WIDGET_CREATE(className, object, parent, childClassName) \
-	childClassName className::create##childClassName() { childClassName c; c.p = new childClassName##Private(parent); (object)->children.push_back(c.p); return c; }
-
 namespace wz {
 
 class DockTabBar;
@@ -39,25 +36,29 @@ struct ScrollerPrivate;
 
 struct WidgetPrivate
 {
-	virtual ~WidgetPrivate() {}
-	virtual const wzWidget *getWidget() const = 0;
-	virtual wzWidget *getWidget() = 0;
+	virtual ~WidgetPrivate();
+	virtual const wzWidget *getWidget() const { return NULL; }
+	virtual wzWidget *getWidget() { return NULL; }
 	virtual wzWidget *getContentWidget() { return getWidget(); }
+	virtual void autosize() {};
 	virtual void draw(wzRect clip) {};
 	virtual void handleEvent(wzEvent e) {};
+
+	wzRenderer *getRenderer();
+	void add(Widget *widget);
+	void autosizeRecursive();
 	
-	wzRenderer *renderer;
-	wzDesktop *desktop;
+	std::vector<Widget *> children;
 };
 
 struct ButtonPrivate : public WidgetPrivate
 {
-	ButtonPrivate(WidgetPrivate *parent);
-	ButtonPrivate(wzButton *button, const std::string &label);
-	void initialize();
+	ButtonPrivate();
+	ButtonPrivate(wzButton *button);
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzButton *button;
 	std::string label;
@@ -65,10 +66,11 @@ struct ButtonPrivate : public WidgetPrivate
 
 struct CheckboxPrivate : public WidgetPrivate
 {
-	CheckboxPrivate(WidgetPrivate *parent);
+	CheckboxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzButton *button;
 	std::string label;
@@ -76,14 +78,15 @@ struct CheckboxPrivate : public WidgetPrivate
 
 struct ComboPrivate : public WidgetPrivate
 {
-	ComboPrivate(WidgetPrivate *parent);
+	ComboPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzCombo *combo;
 	const char **items;
-	std::auto_ptr<ListPrivate> list;
+	std::auto_ptr<List> list;
 };
 
 struct DesktopPrivate : public WidgetPrivate
@@ -97,14 +100,10 @@ struct DesktopPrivate : public WidgetPrivate
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
 
-	static DesktopPrivate *fromWidget(wzWidget *widget)
-	{
-		return (DesktopPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(widget));
-	}
-
+	wzDesktop *desktop;
+	wzRenderer *renderer;
 	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
 	bool showCursor;
-	std::vector<WidgetPrivate *> children;
 };
 
 class DockTabBar : public WidgetPrivate
@@ -114,36 +113,36 @@ public:
 	~DockTabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 	void handleEvent(wzEvent e);
 
 private:
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
-	std::auto_ptr<ButtonPrivate> decrementButton_;
-	std::auto_ptr<ButtonPrivate> incrementButton_;
+	std::auto_ptr<Button> decrementButton_;
+	std::auto_ptr<Button> incrementButton_;
 };
 
 struct GroupBoxPrivate : public WidgetPrivate
 {
-	GroupBoxPrivate(WidgetPrivate *parent);
-	~GroupBoxPrivate();
+	GroupBoxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
 	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
 	virtual wzWidget *getContentWidget() { return wz_frame_get_content_widget(frame); }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzFrame *frame;
 	std::string label;
-	std::vector<WidgetPrivate *> children;
 };
 
 struct LabelPrivate : public WidgetPrivate
 {
-	LabelPrivate(WidgetPrivate *parent);
+	LabelPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzLabel *label;
 	std::string text;
@@ -152,18 +151,18 @@ struct LabelPrivate : public WidgetPrivate
 
 struct ListPrivate : public WidgetPrivate
 {
-	ListPrivate(WidgetPrivate *parent);
+	ListPrivate();
 	ListPrivate(wzList *list);
 	void initialize();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
 	virtual wzWidget *getWidget() { return (wzWidget *)list; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 
 	void setItems(const char **items, int nItems);
 
 	wzList *list;
 	const char **items;
-	std::auto_ptr<ScrollerPrivate> scroller;
+	std::auto_ptr<Scroller> scroller;
 
 	static const int itemsMargin = 2;
 	static const int itemHeight = 18;
@@ -172,10 +171,11 @@ struct ListPrivate : public WidgetPrivate
 
 struct RadioButtonPrivate : public WidgetPrivate
 {
-	RadioButtonPrivate(WidgetPrivate *parent);
+	RadioButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzButton *button;
 	std::string label;
@@ -184,28 +184,25 @@ struct RadioButtonPrivate : public WidgetPrivate
 
 struct ScrollerPrivate : public WidgetPrivate
 {
-	ScrollerPrivate(WidgetPrivate *parent);
+	ScrollerPrivate();
 	ScrollerPrivate(wzScroller *scroller);
 	void initialize();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 
 	wzScroller *scroller;
-	std::auto_ptr<ButtonPrivate> decrementButton;
-	std::auto_ptr<ButtonPrivate> incrementButton;
+	std::auto_ptr<Button> decrementButton;
+	std::auto_ptr<Button> incrementButton;
 };
 
 struct StackLayoutPrivate : public WidgetPrivate
 {
-	StackLayoutPrivate(WidgetPrivate *parent);
-	~StackLayoutPrivate();
+	StackLayoutPrivate();
 	virtual const wzWidget *getWidget() const { return (wzWidget *)layout; }
 	virtual wzWidget *getWidget() { return (wzWidget *)layout; }
 	
 	wzStackLayout *layout;
-	WidgetPrivate *parent;
-	std::vector<WidgetPrivate *> children;
 };
 
 class TabButton : public WidgetPrivate
@@ -214,7 +211,8 @@ public:
 	TabButton(wzButton *button);
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 	void setLabel(const std::string &label);
 
 private:
@@ -225,12 +223,12 @@ private:
 class TabBar : public WidgetPrivate
 {
 public:
-	TabBar(WidgetPrivate *parent);
+	TabBar();
 	TabBar(wzTabBar *tabBar);
 	~TabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 	TabButton *addTab();
 	TabButton *addTab(wzButton *button);
 
@@ -239,8 +237,8 @@ private:
 
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
-	std::auto_ptr<ButtonPrivate> decrementButton_;
-	std::auto_ptr<ButtonPrivate> incrementButton_;
+	std::auto_ptr<Button> decrementButton_;
+	std::auto_ptr<Button> incrementButton_;
 };
 
 class TabPage : public WidgetPrivate
@@ -249,7 +247,7 @@ public:
 	TabPage(wzWidget *widget);
 	virtual const wzWidget *getWidget() const { return widget_; }
 	virtual wzWidget *getWidget() { return widget_; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 
 private:
 	wzWidget *widget_;
@@ -258,21 +256,21 @@ private:
 // Wraps tab button and page.
 struct TabPrivate
 {
-	TabPrivate(TabButton *button, TabPage *page);
+	TabPrivate();
 	~TabPrivate();
 
 	TabButton *button;
 	TabPage *page;
-	std::vector<WidgetPrivate *> children;
+	std::vector<Widget *> children;
 };
 
 struct TabbedPrivate : public WidgetPrivate
 {
-	TabbedPrivate(WidgetPrivate *parent);
+	TabbedPrivate();
 	~TabbedPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }
-	void draw(wzRect clip);
+	virtual void draw(wzRect clip);
 
 	wzTabbed *tabbed;
 	std::auto_ptr<TabBar> tabBar;
@@ -282,10 +280,11 @@ struct TabbedPrivate : public WidgetPrivate
 
 struct TextEditPrivate : public WidgetPrivate
 {
-	TextEditPrivate(WidgetPrivate *parent);
+	TextEditPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
 	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzTextEdit *textEdit;
 
@@ -294,16 +293,15 @@ struct TextEditPrivate : public WidgetPrivate
 
 struct WindowPrivate : public WidgetPrivate
 {
-	WindowPrivate(WidgetPrivate *parent);
-	~WindowPrivate();
+	WindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
 	virtual wzWidget *getContentWidget() { return wz_window_get_content_widget(window); }
-	void draw(wzRect clip);
+	virtual void autosize();
+	virtual void draw(wzRect clip);
 
 	wzWindow *window;
 	std::string title;
-	std::vector<WidgetPrivate *> children;
 };
 
 //------------------------------------------------------------------------------
@@ -325,208 +323,312 @@ static void HandleEvent(wzEvent e)
 
 //------------------------------------------------------------------------------
 
+WidgetPrivate::~WidgetPrivate()
+{
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		delete children[i];
+	}
+
+	children.clear();
+}
+
+wzRenderer *WidgetPrivate::getRenderer()
+{
+	wzDesktop *desktop = wz_widget_get_desktop(getWidget());
+
+	if (!desktop)
+		return NULL;
+
+	return ((DesktopPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
+}
+
+void WidgetPrivate::add(Widget *widget)
+{
+	// Special case for add windows to desktop: add directly, not to the content widget.
+	if (wz_widget_get_type(getWidget()) == WZ_TYPE_DESKTOP && wz_widget_get_type(widget->p->getWidget()) == WZ_TYPE_WINDOW)
+	{
+		wz_widget_add_child_widget(getWidget(), widget->p->getWidget());
+	}
+	else
+	{
+		wz_widget_add_child_widget(getContentWidget(), widget->p->getWidget());
+	}
+
+	widget->p->autosizeRecursive();
+	children.push_back(widget);
+}
+
+void WidgetPrivate::autosizeRecursive()
+{
+	autosize();
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->p->autosizeRecursive();
+	}
+}
+
+//------------------------------------------------------------------------------
+
 wzRect Widget::getRect() const
 {
 	return wz_widget_get_absolute_rect(p->getWidget());
 }
 
-Widget Widget::setPosition(int x, int y)
+Widget *Widget::setPosition(int x, int y)
 { 
 	wz_widget_set_position_args(p->getWidget(), x, y);
-	return *this;
+	return this;
 }
 
-Widget Widget::setSize(int w, int h)
+Widget *Widget::setSize(int w, int h)
 {
 	wz_widget_set_size_args(p->getWidget(), w, h);
-	return *this;
+	return this;
 }
 
-Widget Widget::setRect(int x, int y, int w, int h)
+Widget *Widget::setRect(int x, int y, int w, int h)
 {
 	wz_widget_set_rect_args(p->getWidget(), x, y, w, h);
-	return *this;
+	return this;
 }
 
-Widget Widget::setAutosize(int autosize)
+Widget *Widget::setAutosize(int autosize)
 {
 	wz_widget_set_autosize(p->getWidget(), autosize);
-	return *this;
+	return this;
 }
 
-Widget Widget::setStretch(int stretch)
+Widget *Widget::setStretch(int stretch)
 {
 	wz_widget_set_stretch(p->getWidget(), stretch);
-	return *this;
+	return this;
 }
 
-Widget Widget::setAlign(int align)
+Widget *Widget::setAlign(int align)
 {
 	wz_widget_set_align(p->getWidget(), align);
-	return *this;
+	return this;
 }
 
-Widget Widget::setMargin(int margin)
+Widget *Widget::setMargin(int margin)
 {
 	wz_widget_set_margin_args(p->getWidget(), margin, margin, margin, margin);
-	return *this;
+	return this;
 }
 
-Widget Widget::setMargin(int top, int right, int bottom, int left)
+Widget *Widget::setMargin(int top, int right, int bottom, int left)
 {
 	wz_widget_set_margin_args(p->getWidget(), top, right, bottom, left);
-	return *this;
+	return this;
 }
 
-Widget Widget::setMargin(wzBorder margin)
+Widget *Widget::setMargin(wzBorder margin)
 {
 	wz_widget_set_margin(p->getWidget(), margin);
-	return *this;
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-ButtonPrivate::ButtonPrivate(WidgetPrivate *parent)
+ButtonPrivate::ButtonPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	button = wz_button_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button);
-	initialize();
-}
-
-ButtonPrivate::ButtonPrivate(wzButton *button, const std::string &label) : button(button), label(label)
-{
-	renderer = DesktopPrivate::fromWidget((wzWidget *)button)->renderer;
-	initialize();
-}
-
-void ButtonPrivate::initialize()
-{
 	wz_widget_set_metadata((wzWidget *)button, this);
 	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
 }
 
+ButtonPrivate::ButtonPrivate(wzButton *button)
+{
+	this->button = button;
+	wz_widget_set_metadata((wzWidget *)button, this);
+	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
+}
+
+void ButtonPrivate::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	if (wz_widget_get_type(wz_widget_get_parent(getWidget())) == WZ_TYPE_STACK_LAYOUT)
+		return;
+
+	// Calculate size based on label text plus padding.
+	wzSize size;
+	getRenderer()->measure_text(getRenderer(), label.c_str(), 0, &size.w, &size.h);
+	size.w += 16;
+	size.h += 8;
+	wz_widget_set_size((wzWidget *)button, size);
+}
+
 void ButtonPrivate::draw(wzRect clip)
 {
-	renderer->draw_button(renderer, clip, button, label.c_str());
+	getRenderer()->draw_button(getRenderer(), clip, button, label.c_str());
 }
 
 //------------------------------------------------------------------------------
+
+Button::Button()
+{
+	p = new ButtonPrivate();
+}
+
+Button::Button(const std::string &label)
+{
+	p = new ButtonPrivate();
+	setLabel(label);
+}
+
+Button::Button(wzButton *button)
+{
+	p = new ButtonPrivate(button);
+}
+
+Button::~Button()
+{
+	delete p;
+}
 
 std::string Button::getLabel() const
 {
 	return ((ButtonPrivate *)p)->label;
 }
 
-Button Button::setLabel(const std::string &label)
+Button *Button::setLabel(const std::string &label)
 {
 	ButtonPrivate *bp = (ButtonPrivate *)p;
 	bp->label = label;
-
-	// Calculate size based on label text plus padding.
-	wzSize size;
-	p->renderer->measure_text(p->renderer, bp->label.c_str(), 0, &size.w, &size.h);
-	size.w += 16;
-	size.h += 8;
-	wz_widget_set_size((wzWidget *)bp->button, size);
-
-	return *this;
+	bp->autosize();
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-CheckboxPrivate::CheckboxPrivate(WidgetPrivate *parent)
+CheckboxPrivate::CheckboxPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	button = wz_button_create();
 	wzWidget *widget = (wzWidget *)button;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	wz_widget_add_child_widget(parent->getContentWidget(), widget);
+}
+
+void CheckboxPrivate::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	wz_widget_set_size((wzWidget *)button, getRenderer()->measure_checkbox(getRenderer(), label.c_str()));
 }
 
 void CheckboxPrivate::draw(wzRect clip)
 {
-	renderer->draw_checkbox(renderer, clip, button, label.c_str());
+	getRenderer()->draw_checkbox(getRenderer(), clip, button, label.c_str());
 }
 
 //------------------------------------------------------------------------------
+
+Checkbox::Checkbox()
+{
+	p = new CheckboxPrivate();
+}
+
+Checkbox::Checkbox(const std::string &label)
+{
+	p = new CheckboxPrivate();
+	setLabel(label);
+}
+
+Checkbox::~Checkbox()
+{
+	delete p;
+}
 
 std::string Checkbox::getLabel() const
 {
 	return ((CheckboxPrivate *)p)->label;
 }
 
-Checkbox Checkbox::setLabel(const std::string &label)
+Checkbox *Checkbox::setLabel(const std::string &label)
 {
 	CheckboxPrivate *cp = (CheckboxPrivate *)p;
 	cp->label = label;
-	wz_widget_set_size((wzWidget *)cp->button, p->renderer->measure_checkbox(p->renderer, cp->label.c_str()));
-	return *this;
+	cp->autosize();
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-ComboPrivate::ComboPrivate(WidgetPrivate *parent)
+ComboPrivate::ComboPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	combo = wz_combo_create();
 	wzWidget *widget = (wzWidget *)combo;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getContentWidget(), widget);
-	list.reset(new ListPrivate(wz_combo_get_list(combo)));
+	list.reset(new List(wz_combo_get_list(combo)));
 }
 
-void ComboPrivate::draw(wzRect clip)
+void ComboPrivate::autosize()
 {
-	int itemIndex = wz_list_get_selected_item((const wzList *)list->getWidget());
-	renderer->draw_combo(renderer, clip, combo, itemIndex >= 0 ? items[itemIndex] : NULL);
-}
+	if (!getRenderer())
+		return;
 
-//------------------------------------------------------------------------------
-
-Combo Combo::setItems(const char **items, int nItems)
-{
 	// Calculate size based on the biggest item text plus padding.
 	wzSize size;
 	size.w = size.h = 0;
 
-	for (int i = 0; i < nItems; i++)
+	for (int i = 0; i < wz_list_get_num_items(wz_combo_get_list(combo)); i++)
 	{
 		wzSize textSize;
-		p->renderer->measure_text(p->renderer, items[i], 0, &textSize.w, &textSize.h);
+		getRenderer()->measure_text(getRenderer(), items[i], 0, &textSize.w, &textSize.h);
 		size.w = WZ_MAX(size.w, textSize.w);
 		size.h = WZ_MAX(size.h, textSize.h);
 	}
 
-	ComboPrivate *cp = (ComboPrivate *)p;
-
 	size.w += 50;
 	size.h += 4;
-	wz_widget_set_size((wzWidget *)cp->combo, size);
-
-	cp->items = items;
-	cp->list->setItems(items, nItems);
-	return *this;
+	wz_widget_set_size((wzWidget *)combo, size);
 }
 
+void ComboPrivate::draw(wzRect clip)
+{
+	int itemIndex = wz_list_get_selected_item((const wzList *)list->p->getWidget());
+	getRenderer()->draw_combo(getRenderer(), clip, combo, itemIndex >= 0 ? items[itemIndex] : NULL);
+}
+
+//------------------------------------------------------------------------------
+
+Combo::Combo()
+{
+	p = new ComboPrivate();
+}
+
+Combo::~Combo()
+{
+	delete p;
+}
+
+Combo *Combo::setItems(const char **items, int nItems)
+{
+	ComboPrivate *cp = (ComboPrivate *)p;
+	cp->items = items;
+	cp->list->setItems(items, nItems);
+	cp->autosize();
+	return this;
+}
 
 //------------------------------------------------------------------------------
 
 static void MeasureText(struct wzDesktop *desktop, const char *text, int n, int *width, int *height)
 {
-	wzRenderer *renderer = ((WidgetPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
+	wzRenderer *renderer = ((DesktopPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
 	renderer->measure_text(renderer, text, n, width, height);
 }
 
 static int TextGetPixelDelta(struct wzDesktop *desktop, const char *text, int index)
 {
-	wzRenderer *renderer = ((WidgetPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
+	wzRenderer *renderer = ((DesktopPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
 	return renderer->text_get_pixel_delta(renderer, text, index);
 }
 
@@ -568,13 +670,6 @@ DesktopPrivate::~DesktopPrivate()
 	{
 		delete dockTabBars[i];
 	}
-
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
-
-	children.clear();
 
 	wz_widget_destroy((wzWidget *)desktop);
 }
@@ -664,30 +759,24 @@ wzCursor Desktop::getCursor() const
 	return wz_desktop_get_cursor(p->desktop);
 }
 
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Button)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Checkbox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Combo)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, GroupBox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Label)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, List)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, RadioButton)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Scroller)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, StackLayout)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, TextEdit)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Tabbed)
-IMPLEMENT_CHILD_WIDGET_CREATE(Desktop, p, p, Window)
+Widget *Desktop::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
 
 //------------------------------------------------------------------------------
 
 DockTabBar::DockTabBar(wzTabBar *tabBar) : tabBar_(tabBar)
 {
-	renderer = DesktopPrivate::fromWidget((wzWidget *)tabBar_)->renderer;
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 
-	decrementButton_.reset(new ButtonPrivate(wz_tab_bar_get_decrement_button(tabBar_), "<"));
-	wz_widget_set_width((wzWidget *)decrementButton_->getWidget(), 14);
-	incrementButton_.reset(new ButtonPrivate(wz_tab_bar_get_increment_button(tabBar_), ">"));
-	wz_widget_set_width((wzWidget *)incrementButton_->getWidget(), 14);
+	decrementButton_.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_)));
+	decrementButton_->setLabel("<");
+	wz_widget_set_width((wzWidget *)decrementButton_->p->getWidget(), 14);
+	incrementButton_.reset(new Button(wz_tab_bar_get_increment_button(tabBar_)));
+	incrementButton_->setLabel(">");
+	wz_widget_set_width((wzWidget *)incrementButton_->p->getWidget(), 14);
 }
 
 DockTabBar::~DockTabBar()
@@ -730,81 +819,109 @@ void DockTabBar::handleEvent(wzEvent e)
 
 //------------------------------------------------------------------------------
 
-GroupBoxPrivate::GroupBoxPrivate(WidgetPrivate *parent)
+GroupBoxPrivate::GroupBoxPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	frame = wz_frame_create();
 	wzWidget *widget = (wzWidget *)frame;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_widget_set_size_args(widget, 200, 200);
-	wz_widget_add_child_widget(parent->getContentWidget(), widget);
 }
 
-GroupBoxPrivate::~GroupBoxPrivate()
+void GroupBoxPrivate::autosize()
 {
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
+	if (!getRenderer())
+		return;
 
-	children.clear();
+	wz_widget_set_margin(getContentWidget(), getRenderer()->measure_group_box_margin(getRenderer(), label.c_str()));
 }
 
 void GroupBoxPrivate::draw(wzRect clip)
 {
-	renderer->draw_group_box(renderer, clip, frame, label.c_str());
+	getRenderer()->draw_group_box(getRenderer(), clip, frame, label.c_str());
 }
 
 //------------------------------------------------------------------------------
+
+GroupBox::GroupBox()
+{
+	p = new GroupBoxPrivate();
+}
+
+GroupBox::GroupBox(const std::string &label)
+{
+	p = new GroupBoxPrivate();
+	setLabel(label);
+}
+
+GroupBox::~GroupBox()
+{
+	delete p;
+}
 
 std::string GroupBox::getLabel() const
 {
 	return ((GroupBoxPrivate *)p)->label;
 }
 
-GroupBox GroupBox::setLabel(const std::string &label)
+GroupBox *GroupBox::setLabel(const std::string &label)
 {
 	GroupBoxPrivate *gp = (GroupBoxPrivate *)p;
 	gp->label = label;
-	wz_widget_set_margin(p->getContentWidget(), p->renderer->measure_group_box_margin(p->renderer, gp->label.c_str()));
-	return *this;
+	gp->autosize();
+	return this;
 }
 
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Button)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Checkbox)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Combo)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, GroupBox)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Label)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, List)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, RadioButton)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Scroller)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, StackLayout)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, TextEdit)
-IMPLEMENT_CHILD_WIDGET_CREATE(GroupBox, (GroupBoxPrivate *)p, p, Tabbed)
+Widget *GroupBox::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
 
 //------------------------------------------------------------------------------
 
-LabelPrivate::LabelPrivate(WidgetPrivate *parent) : r(255), g(255), b(255)
+LabelPrivate::LabelPrivate() : r(255), g(255), b(255)
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	label = wz_label_create();
 	wzWidget *widget = (wzWidget *)label;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getContentWidget(), widget);
+}
+
+void LabelPrivate::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	wzSize size;
+	getRenderer()->measure_text(getRenderer(), text.c_str(), 0, &size.w, &size.h);
+	wz_widget_set_size((wzWidget *)label, size);
 }
 
 void LabelPrivate::draw(wzRect clip)
 {
-	renderer->draw_label(renderer, clip, label, text.c_str(), r, g, b);
+	getRenderer()->draw_label(getRenderer(), clip, label, text.c_str(), r, g, b);
 }
 
 //------------------------------------------------------------------------------
 
-Label Label::setText(const char *format, ...)
+Label::Label()
+{
+	p = new LabelPrivate();
+}
+
+Label::Label(const std::string &text)
+{
+	p = new LabelPrivate();
+	setText(text.c_str());
+}
+
+Label::~Label()
+{
+	delete p;
+}
+
+Label *Label::setText(const char *format, ...)
 {
 	static char buffer[1024];
 
@@ -815,37 +932,31 @@ Label Label::setText(const char *format, ...)
 
 	LabelPrivate *lp = (LabelPrivate *)p;
 	lp->text = buffer;
-	wzSize size;
-	p->renderer->measure_text(p->renderer, lp->text.c_str(), 0, &size.w, &size.h);
-	wz_widget_set_size((wzWidget *)lp->label, size);
+	lp->autosize();
 
-	return *this;
+	return this;
 }
 
-Label Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
+Label *Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 {
 	LabelPrivate *lp = (LabelPrivate *)p;
 	lp->r = r;
 	lp->g = g;
 	lp->b = b;
-	return *this;
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate(WidgetPrivate *parent)
+ListPrivate::ListPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	list = wz_list_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)list);
 	initialize();
 }
 
 ListPrivate::ListPrivate(wzList *list)
 {
 	this->list = list;
-	renderer = DesktopPrivate::fromWidget((wzWidget *)list)->renderer;
 	initialize();
 }
 
@@ -856,13 +967,13 @@ void ListPrivate::initialize()
 	wz_widget_set_metadata((wzWidget *)list, this);
 	wz_widget_set_draw_function((wzWidget *)list, DrawWidget);
 
-	scroller.reset(new ScrollerPrivate(wz_list_get_scroller(list)));
-	wz_widget_set_size_args(scroller->getWidget(), 16, 0);
+	scroller.reset(new Scroller(wz_list_get_scroller(list)));
+	wz_widget_set_size_args(scroller->p->getWidget(), 16, 0);
 }
 
 void ListPrivate::draw(wzRect clip)
 {
-	renderer->draw_list(renderer, clip, list, items);
+	getRenderer()->draw_list(getRenderer(), clip, list, items);
 }
 
 void ListPrivate::setItems(const char **items, int nItems)
@@ -873,10 +984,25 @@ void ListPrivate::setItems(const char **items, int nItems)
 
 //------------------------------------------------------------------------------
 
-List List::setItems(const char **items, int nItems)
+List::List()
+{
+	p = new ListPrivate();
+}
+
+List::List(wzList *list)
+{
+	p = new ListPrivate(list);
+}
+
+List::~List()
+{
+	delete p;
+}
+
+List *List::setItems(const char **items, int nItems)
 {
 	((ListPrivate *)p)->setItems(items, nItems);
-	return *this;
+	return this;
 }
 
 //------------------------------------------------------------------------------
@@ -893,37 +1019,58 @@ RadioButtonGroup::~RadioButtonGroup()
 
 //------------------------------------------------------------------------------
 
-RadioButtonPrivate::RadioButtonPrivate(WidgetPrivate *parent) : group(NULL)
+RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	button = wz_button_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)button);
 	wz_widget_set_metadata((wzWidget *)button, this);
 	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
 }
 
+void RadioButtonPrivate::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	wz_widget_set_size((wzWidget *)button, getRenderer()->measure_radio_button(getRenderer(), label.c_str()));
+}
+
 void RadioButtonPrivate::draw(wzRect clip)
 {
-	renderer->draw_radio_button(renderer, clip, button, label.c_str());
+	getRenderer()->draw_radio_button(getRenderer(), clip, button, label.c_str());
 }
 
 //------------------------------------------------------------------------------
+
+RadioButton::RadioButton()
+{
+	p = new RadioButtonPrivate();
+}
+
+RadioButton::RadioButton(const std::string &label)
+{
+	p = new RadioButtonPrivate();
+	setLabel(label);
+}
+
+RadioButton::~RadioButton()
+{
+	delete p;
+}
 
 std::string RadioButton::getLabel() const
 {
 	return ((RadioButtonPrivate *)p)->label;
 }
 
-RadioButton RadioButton::setLabel(const std::string &label)
+RadioButton *RadioButton::setLabel(const std::string &label)
 {
 	RadioButtonPrivate *rp = (RadioButtonPrivate *)p;
 	rp->label = label;
-	wz_widget_set_size((wzWidget *)rp->button, p->renderer->measure_radio_button(p->renderer, rp->label.c_str()));
-	return *this;
+	p->autosize();
+	return this;
 }
 
-RadioButton RadioButton::setGroup(RadioButtonGroup *group)
+RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 {
 	RadioButtonPrivate *rp = (RadioButtonPrivate *)p;
 
@@ -940,30 +1087,26 @@ RadioButton RadioButton::setGroup(RadioButtonGroup *group)
 		wz_radio_button_group_add_button(group->get(), rp->button);
 	}
 
-	return *this;
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-ScrollerPrivate::ScrollerPrivate(WidgetPrivate *parent)
+ScrollerPrivate::ScrollerPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	scroller = wz_scroller_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)scroller);
 	initialize();
 }
 
 ScrollerPrivate::ScrollerPrivate(wzScroller *scroller)
 {
 	this->scroller = scroller;
-	renderer = DesktopPrivate::fromWidget((wzWidget *)scroller)->renderer;
 	initialize();
 }
 
 void ScrollerPrivate::draw(wzRect clip)
 {
-	renderer->draw_scroller(renderer, clip, scroller);
+	getRenderer()->draw_scroller(getRenderer(), clip, scroller);
 }
 
 void ScrollerPrivate::initialize()
@@ -972,8 +1115,10 @@ void ScrollerPrivate::initialize()
 	wz_widget_set_draw_function((wzWidget *)scroller, DrawWidget);
 	wz_scroller_set_nub_size(scroller, 16);
 
-	decrementButton.reset(new ButtonPrivate(wz_scroller_get_decrement_button(scroller), "-"));
-	incrementButton.reset(new ButtonPrivate(wz_scroller_get_increment_button(scroller), "+"));
+	decrementButton.reset(new Button(wz_scroller_get_decrement_button(scroller)));
+	decrementButton->setLabel("-");
+	incrementButton.reset(new Button(wz_scroller_get_increment_button(scroller)));
+	incrementButton->setLabel("+");
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
 	wz_widget_set_size_args((wzWidget *)wz_scroller_get_decrement_button(scroller), 16, 16);
@@ -982,28 +1127,43 @@ void ScrollerPrivate::initialize()
 
 //------------------------------------------------------------------------------
 
-Scroller Scroller::setType(wzScrollerType type)
+Scroller::Scroller()
+{
+	p = new ScrollerPrivate();
+}
+
+Scroller::Scroller(wzScroller *scroller)
+{
+	p = new ScrollerPrivate(scroller);
+}
+
+Scroller::~Scroller()
+{
+	delete p;
+}
+
+Scroller *Scroller::setType(wzScrollerType type)
 {
 	wz_scroller_set_type(((ScrollerPrivate *)p)->scroller, type);
-	return *this;
+	return this;
 }
 
-Scroller Scroller::setValue(int value)
+Scroller *Scroller::setValue(int value)
 {
 	wz_scroller_set_value(((ScrollerPrivate *)p)->scroller, value);
-	return *this;
+	return this;
 }
 
-Scroller Scroller::setStepValue(int stepValue)
+Scroller *Scroller::setStepValue(int stepValue)
 {
 	wz_scroller_set_step_value(((ScrollerPrivate *)p)->scroller, stepValue);
-	return *this;
+	return this;
 }
 
-Scroller Scroller::setMaxValue(int maxValue)
+Scroller *Scroller::setMaxValue(int maxValue)
 {
 	wz_scroller_set_max_value(((ScrollerPrivate *)p)->scroller, maxValue);
-	return *this;
+	return this;
 }
 
 int Scroller::getValue() const
@@ -1013,36 +1173,39 @@ int Scroller::getValue() const
 
 //------------------------------------------------------------------------------
 
-StackLayoutPrivate::StackLayoutPrivate(WidgetPrivate *parent) : layout(NULL), parent(parent)
+StackLayoutPrivate::StackLayoutPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	layout = wz_stack_layout_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)layout);
-}
-
-StackLayoutPrivate::~StackLayoutPrivate()
-{
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
-
-	children.clear();
 }
 
 //------------------------------------------------------------------------------
 
-StackLayout StackLayout::setDirection(wzStackLayoutDirection direction)
+StackLayout::StackLayout()
 {
-	wz_stack_layout_set_direction(((StackLayoutPrivate *)p)->layout, direction);
-	return *this;
+	p = new StackLayoutPrivate();
 }
 
-StackLayout StackLayout::setSpacing(int spacing)
+StackLayout::StackLayout(wzStackLayoutDirection direction)
+{
+	p = new StackLayoutPrivate();
+	setDirection(direction);
+}
+
+StackLayout::~StackLayout()
+{
+	delete p;
+}
+
+StackLayout *StackLayout::setDirection(wzStackLayoutDirection direction)
+{
+	wz_stack_layout_set_direction(((StackLayoutPrivate *)p)->layout, direction);
+	return this;
+}
+
+StackLayout *StackLayout::setSpacing(int spacing)
 {
 	wz_stack_layout_set_spacing(((StackLayoutPrivate *)p)->layout, spacing);
-	return *this;
+	return this;
 }
 
 int StackLayout::getSpacing() const
@@ -1050,57 +1213,53 @@ int StackLayout::getSpacing() const
 	return wz_stack_layout_get_spacing(((StackLayoutPrivate *)p)->layout);
 }
 
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Button)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Checkbox)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Combo)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, GroupBox)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Label)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, List)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, RadioButton)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Scroller)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, StackLayout)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, TextEdit)
-IMPLEMENT_CHILD_WIDGET_CREATE(StackLayout, (StackLayoutPrivate *)p, p, Tabbed)
+Widget *StackLayout::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
 
 //------------------------------------------------------------------------------
 
 TabButton::TabButton(wzButton *button) : button_(button)
 {
-	renderer = DesktopPrivate::fromWidget((wzWidget *)button)->renderer;
 	wz_widget_set_metadata((wzWidget *)button_, this);
 	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
 }
 
+void TabButton::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	// Calculate width based on label text plus padding.
+	int width;
+	getRenderer()->measure_text(getRenderer(), label_.c_str(), 0, &width, NULL);
+	width += 16;
+	wz_widget_set_width((wzWidget *)button_, width);
+}
+
 void TabButton::draw(wzRect clip)
 {
-	renderer->draw_tab_button(renderer, clip, button_, label_.c_str());
+	getRenderer()->draw_tab_button(getRenderer(), clip, button_, label_.c_str());
 }
 
 void TabButton::setLabel(const std::string &label)
 {
 	label_ = label;
-
-	// Calculate width based on label text plus padding.
-	int width;
-	renderer->measure_text(renderer, label_.c_str(), 0, &width, NULL);
-	width += 16;
-	wz_widget_set_width((wzWidget *)button_, width);
+	autosize();	
 }
 
 //------------------------------------------------------------------------------
 
-TabBar::TabBar(WidgetPrivate *parent)
+TabBar::TabBar()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	tabBar_ = wz_tab_bar_create();
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabBar_);
 	initialize();
 }
 
 TabBar::TabBar(wzTabBar *tabBar) : tabBar_(tabBar)
 {
-	renderer = DesktopPrivate::fromWidget((wzWidget *)tabBar_)->renderer;
 	initialize();
 }
 
@@ -1135,10 +1294,12 @@ void TabBar::initialize()
 {
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 
-	decrementButton_.reset(new ButtonPrivate(wz_tab_bar_get_decrement_button(tabBar_), "<"));
-	wz_widget_set_width((wzWidget *)decrementButton_->getWidget(), 14);
-	incrementButton_.reset(new ButtonPrivate(wz_tab_bar_get_increment_button(tabBar_), ">"));
-	wz_widget_set_width((wzWidget *)incrementButton_->getWidget(), 14);
+	decrementButton_.reset(new Button(wz_tab_bar_get_decrement_button(tabBar_)));
+	decrementButton_->setLabel("<");
+	wz_widget_set_width((wzWidget *)decrementButton_->p->getWidget(), 14);
+	incrementButton_.reset(new Button(wz_tab_bar_get_increment_button(tabBar_)));
+	incrementButton_->setLabel(">");
+	wz_widget_set_width((wzWidget *)incrementButton_->p->getWidget(), 14);
 }
 
 //------------------------------------------------------------------------------
@@ -1146,23 +1307,19 @@ void TabBar::initialize()
 TabPage::TabPage(wzWidget *widget)
 {
 	widget_ = widget;
-	renderer = DesktopPrivate::fromWidget(widget)->renderer;
-	desktop = wz_widget_get_desktop(widget);
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget_, DrawWidget);
 }
 
 void TabPage::draw(wzRect clip)
 {
-	renderer->draw_tab_page(renderer, clip, widget_);
+	getRenderer()->draw_tab_page(getRenderer(), clip, widget_);
 }
 
 //------------------------------------------------------------------------------
 
-TabPrivate::TabPrivate(TabButton *button, TabPage *page)
+TabPrivate::TabPrivate()
 {
-	this->button = button;
-	this->page = page;
 }
 
 TabPrivate::~TabPrivate()
@@ -1177,32 +1334,36 @@ TabPrivate::~TabPrivate()
 
 //------------------------------------------------------------------------------
 
-Tab Tab::setLabel(const std::string &label)
+Tab::Tab()
 {
-	((TabPrivate *)p)->button->setLabel(label);
-	return *this;
+	p = new TabPrivate();
 }
 
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, Button)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, Checkbox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, Combo)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, GroupBox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, Label)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, List)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, RadioButton)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, Scroller)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, StackLayout)
-IMPLEMENT_CHILD_WIDGET_CREATE(Tab, (TabPrivate *)p, ((TabPrivate *)p)->page, TextEdit)
+Tab::~Tab()
+{
+	delete p;
+}
+
+Tab *Tab::setLabel(const std::string &label)
+{
+	p->button->setLabel(label);
+	return this;
+}
+
+Widget *Tab::add(Widget *widget)
+{
+	wz_widget_add_child_widget(p->page->getWidget(), widget->p->getWidget());
+	widget->p->autosizeRecursive();
+	p->children.push_back(widget);
+	return widget;
+}
 
 //------------------------------------------------------------------------------
 
-TabbedPrivate::TabbedPrivate(WidgetPrivate *parent)
+TabbedPrivate::TabbedPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	tabbed = wz_tabbed_create();
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
-	wz_widget_add_child_widget(parent->getContentWidget(), (wzWidget *)tabbed);
 	tabBar.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed)));
 	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
 }
@@ -1230,101 +1391,131 @@ void TabbedPrivate::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-Tab Tabbed::createTab()
+Tabbed::Tabbed()
 {
+	p = new TabbedPrivate();
+}
+
+Tabbed::~Tabbed()
+{
+	delete p;
+}
+
+Tab *Tabbed::addTab(Tab *tab)
+{
+	TabbedPrivate *tp = (TabbedPrivate *)p;
+
 	wzButton *button;
 	wzWidget *widget;
-	TabbedPrivate *tp = (TabbedPrivate *)p;
+
 	wz_tabbed_add_tab(tp->tabbed, &button, &widget);
 	TabButton *tabButton = tp->tabBar->addTab(button);
 	
 	TabPage *tabPage = new TabPage(widget);
 	tp->tabPages.push_back(tabPage);
 
-	TabPrivate *tabPrivate = new TabPrivate(tabButton, tabPage);
-	tp->tabs.push_back(tabPrivate);
-
-	Tab tab;
-	tab.p = tabPrivate;
+	tab->p->button = tabButton;
+	tab->p->page = tabPage;
 	return tab;
 }
 
 //------------------------------------------------------------------------------
 
-TextEditPrivate::TextEditPrivate(WidgetPrivate *parent)
+TextEditPrivate::TextEditPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	textEdit = wz_text_edit_create(256);
 	wz_text_edit_set_border_args(textEdit, borderSize, borderSize, borderSize, borderSize);
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
-	wz_widget_add_child_widget(parent->getContentWidget(), widget);
+}
+
+void TextEditPrivate::autosize()
+{
+	if (!getRenderer())
+		return;
+
+	const char *text = wz_text_edit_get_text(textEdit);
+	int h;
+	getRenderer()->measure_text(getRenderer(), text, 0, NULL, &h);
+	wz_widget_set_size_args((wzWidget *)textEdit, 100, h + borderSize * 2);
 }
 
 void TextEditPrivate::draw(wzRect clip)
 {
-	renderer->draw_text_edit(renderer, clip, textEdit, DesktopPrivate::fromWidget(getWidget())->showCursor);
+	DesktopPrivate *desktop = (DesktopPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(getWidget()));
+	getRenderer()->draw_text_edit(getRenderer(), clip, textEdit, desktop->showCursor);
 }
 
 //------------------------------------------------------------------------------
 
-TextEdit TextEdit::setText(const std::string &text)
+TextEdit::TextEdit()
+{
+	p = new TextEditPrivate();
+}
+
+TextEdit::TextEdit(const std::string &text)
+{
+	p = new TextEditPrivate();
+	setText(text);
+}
+
+TextEdit::~TextEdit()
+{
+	delete p;
+}
+
+TextEdit *TextEdit::setText(const std::string &text)
 {
 	TextEditPrivate *tp = (TextEditPrivate *)p;
-
 	wz_text_edit_set_text(tp->textEdit, text.c_str());
-
-	int h;
-	p->renderer->measure_text(p->renderer, text.c_str(), 0, NULL, &h);
-	wz_widget_set_size_args((wzWidget *)tp->textEdit, 100, h + tp->borderSize * 2);
-
-	return *this;
+	p->autosize();
+	return this;
 }
 
 //------------------------------------------------------------------------------
 
-WindowPrivate::WindowPrivate(WidgetPrivate *parent)
+WindowPrivate::WindowPrivate()
 {
-	renderer = parent->renderer;
-	desktop = parent->desktop;
 	window = wz_window_create();
 	wzWidget *widget = (wzWidget *)window;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_window_set_border_size(window, 4);
-	wz_widget_add_child_widget(parent->getWidget(), widget);
 }
 
-WindowPrivate::~WindowPrivate()
+void WindowPrivate::autosize()
 {
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
+	if (!getRenderer())
+		return;
 
-	children.clear();
+	// Calculate header height based on label text plus padding.
+	wzSize size;
+	getRenderer()->measure_text(getRenderer(), title.c_str(), 0, &size.w, &size.h);
+	wz_window_set_header_height(window, size.h + 6);
 }
 
 void WindowPrivate::draw(wzRect clip)
 {
-	renderer->draw_window(renderer, clip, window, title.c_str());
+	getRenderer()->draw_window(getRenderer(), clip, window, title.c_str());
 }
 
 //------------------------------------------------------------------------------
 
-Window Window::setTitle(const std::string &title)
+Window::Window()
 {
-	WindowPrivate *wp = (WindowPrivate *)p;
-	wp->title = title;
+	p = new WindowPrivate();
+}
 
-	// Calculate header height based on label text plus padding.
-	wzSize size;
-	p->renderer->measure_text(p->renderer, wp->title.c_str(), 0, &size.w, &size.h);
-	wz_window_set_header_height(wp->window, size.h + 6);
+Window::Window(const std::string &title)
+{
+	p = new WindowPrivate();
+	setTitle(title);
+}
 
-	return *this;
+Window::~Window()
+{
+	delete p;
 }
 
 std::string Window::getTitle() const
@@ -1332,16 +1523,18 @@ std::string Window::getTitle() const
 	return ((WindowPrivate *)p)->title;
 }
 
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Button)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Checkbox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Combo)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, GroupBox)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Label)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, List)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, RadioButton)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Scroller)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, StackLayout)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, TextEdit)
-IMPLEMENT_CHILD_WIDGET_CREATE(Window, (WindowPrivate *)p, p, Tabbed)
+Window *Window::setTitle(const std::string &title)
+{
+	WindowPrivate *wp = (WindowPrivate *)p;
+	wp->title = title;
+	p->autosize();
+	return this;
+}
+
+Widget *Window::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
 
 } // namespace wz

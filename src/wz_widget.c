@@ -207,7 +207,6 @@ void wz_widget_destroy(struct wzWidget *widget)
 struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget)
 {
 	assert(widget);
-	assert(widget->desktop);
 	return widget->desktop;
 }
 
@@ -407,6 +406,10 @@ void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 	{
 		wz_widget_refresh_rect(widget->parent);
 	}
+	else if ((widget->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wz_widget_set_autosize_rect_recursive(widget);
+	}
 }
 
 void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left)
@@ -584,6 +587,12 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	if (wz_widget_is_layout(widget))
 	{
 		wz_widget_refresh_rect(widget);
+	}
+
+	// Autosize child.
+	if ((child->autosize & WZ_AUTOSIZE) != 0)
+	{
+		wz_widget_set_autosize_rect_recursive(child);
 	}
 }
 

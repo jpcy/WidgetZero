@@ -40,6 +40,10 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	wzBorder listItemsBorder;
 	int listItemHeight, listNumItems, over;
 
+	// Don't do anything if the desktop is NULL (widget hasn't been added yet).
+	if (!combo->base.desktop)
+		return;
+
 	rect = wz_widget_get_rect((struct wzWidget *)combo);
 	absRect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 
