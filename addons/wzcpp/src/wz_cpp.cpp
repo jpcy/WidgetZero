@@ -54,6 +54,7 @@ struct ButtonPrivate : public WidgetPrivate
 {
 	ButtonPrivate();
 	ButtonPrivate(wzButton *button);
+	~ButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 	virtual void autosize();
@@ -66,6 +67,7 @@ struct ButtonPrivate : public WidgetPrivate
 struct CheckboxPrivate : public WidgetPrivate
 {
 	CheckboxPrivate();
+	~CheckboxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 	virtual void autosize();
@@ -78,6 +80,7 @@ struct CheckboxPrivate : public WidgetPrivate
 struct ComboPrivate : public WidgetPrivate
 {
 	ComboPrivate();
+	~ComboPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
 	virtual void autosize();
@@ -124,6 +127,7 @@ private:
 struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate();
+	~GroupBoxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
 	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
 	virtual void autosize();
@@ -136,6 +140,7 @@ struct GroupBoxPrivate : public WidgetPrivate
 struct LabelPrivate : public WidgetPrivate
 {
 	LabelPrivate();
+	~LabelPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label; }
 	virtual void autosize();
@@ -150,6 +155,7 @@ struct ListPrivate : public WidgetPrivate
 {
 	ListPrivate();
 	ListPrivate(wzList *list);
+	~ListPrivate();
 	void initialize();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
 	virtual wzWidget *getWidget() { return (wzWidget *)list; }
@@ -169,6 +175,7 @@ struct ListPrivate : public WidgetPrivate
 struct RadioButtonPrivate : public WidgetPrivate
 {
 	RadioButtonPrivate();
+	~RadioButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 	virtual void autosize();
@@ -183,6 +190,7 @@ struct ScrollerPrivate : public WidgetPrivate
 {
 	ScrollerPrivate();
 	ScrollerPrivate(wzScroller *scroller);
+	~ScrollerPrivate();
 	void initialize();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
@@ -196,6 +204,7 @@ struct ScrollerPrivate : public WidgetPrivate
 struct StackLayoutPrivate : public WidgetPrivate
 {
 	StackLayoutPrivate();
+	~StackLayoutPrivate();
 	virtual const wzWidget *getWidget() const { return (wzWidget *)layout; }
 	virtual wzWidget *getWidget() { return (wzWidget *)layout; }
 	
@@ -278,6 +287,7 @@ struct TabbedPrivate : public WidgetPrivate
 struct TextEditPrivate : public WidgetPrivate
 {
 	TextEditPrivate();
+	~TextEditPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
 	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
 	virtual void autosize();
@@ -291,6 +301,7 @@ struct TextEditPrivate : public WidgetPrivate
 struct WindowPrivate : public WidgetPrivate
 {
 	WindowPrivate();
+	~WindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
 	virtual void autosize();
@@ -433,6 +444,14 @@ ButtonPrivate::ButtonPrivate(wzButton *button)
 	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
 }
 
+ButtonPrivate::~ButtonPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)button))
+	{
+		wz_widget_destroy((wzWidget *)button);
+	}
+}
+
 void ButtonPrivate::autosize()
 {
 	if (!getRenderer())
@@ -498,6 +517,14 @@ CheckboxPrivate::CheckboxPrivate()
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
+CheckboxPrivate::~CheckboxPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)button))
+	{
+		wz_widget_destroy((wzWidget *)button);
+	}
+}
+
 void CheckboxPrivate::autosize()
 {
 	if (!getRenderer())
@@ -551,6 +578,14 @@ ComboPrivate::ComboPrivate()
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	list.reset(new List(wz_combo_get_list(combo)));
+}
+
+ComboPrivate::~ComboPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)combo))
+	{
+		wz_widget_destroy((wzWidget *)combo);
+	}
 }
 
 void ComboPrivate::autosize()
@@ -812,6 +847,14 @@ GroupBoxPrivate::GroupBoxPrivate()
 	wz_widget_set_size_args(widget, 200, 200);
 }
 
+GroupBoxPrivate::~GroupBoxPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)frame))
+	{
+		wz_widget_destroy((wzWidget *)frame);
+	}
+}
+
 void GroupBoxPrivate::autosize()
 {
 	if (!getRenderer())
@@ -870,6 +913,14 @@ LabelPrivate::LabelPrivate() : r(255), g(255), b(255)
 	wzWidget *widget = (wzWidget *)label;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
+}
+
+LabelPrivate::~LabelPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)label))
+	{
+		wz_widget_destroy((wzWidget *)label);
+	}
 }
 
 void LabelPrivate::autosize()
@@ -944,6 +995,14 @@ ListPrivate::ListPrivate(wzList *list)
 	initialize();
 }
 
+ListPrivate::~ListPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)list))
+	{
+		wz_widget_destroy((wzWidget *)list);
+	}
+}
+
 void ListPrivate::initialize()
 {
 	wz_list_set_item_height(list, itemHeight);
@@ -1008,6 +1067,14 @@ RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
+}
+
+RadioButtonPrivate::~RadioButtonPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)button))
+	{
+		wz_widget_destroy((wzWidget *)button);
+	}
 }
 
 void RadioButtonPrivate::autosize()
@@ -1088,6 +1155,14 @@ ScrollerPrivate::ScrollerPrivate(wzScroller *scroller)
 	initialize();
 }
 
+ScrollerPrivate::~ScrollerPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)scroller))
+	{
+		wz_widget_destroy((wzWidget *)scroller);
+	}
+}
+
 void ScrollerPrivate::draw(wzRect clip)
 {
 	getRenderer()->draw_scroller(getRenderer(), clip, scroller);
@@ -1160,6 +1235,14 @@ int Scroller::getValue() const
 StackLayoutPrivate::StackLayoutPrivate()
 {
 	layout = wz_stack_layout_create();
+}
+
+StackLayoutPrivate::~StackLayoutPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)layout))
+	{
+		wz_widget_destroy((wzWidget *)layout);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -1252,6 +1335,11 @@ TabBar::~TabBar()
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
 		delete tabs_[i];
+	}
+
+	if (!wz_widget_get_desktop((wzWidget *)tabBar_))
+	{
+		wz_widget_destroy((wzWidget *)tabBar_);
 	}
 }
 
@@ -1367,6 +1455,11 @@ TabbedPrivate::~TabbedPrivate()
 	}
 
 	tabs.clear();
+
+	if (!wz_widget_get_desktop((wzWidget *)tabbed))
+	{
+		wz_widget_destroy((wzWidget *)tabbed);
+	}
 }
 
 void TabbedPrivate::draw(wzRect clip)
@@ -1412,6 +1505,14 @@ TextEditPrivate::TextEditPrivate()
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
+}
+
+TextEditPrivate::~TextEditPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)textEdit))
+	{
+		wz_widget_destroy((wzWidget *)textEdit);
+	}
 }
 
 void TextEditPrivate::autosize()
@@ -1466,6 +1567,14 @@ WindowPrivate::WindowPrivate()
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_function(widget, DrawWidget);
 	wz_window_set_border_size(window, 4);
+}
+
+WindowPrivate::~WindowPrivate()
+{
+	if (!wz_widget_get_desktop((wzWidget *)window))
+	{
+		wz_widget_destroy((wzWidget *)window);
+	}
 }
 
 void WindowPrivate::autosize()
