@@ -177,7 +177,7 @@ static void wz_widget_set_autosize_rect_recursive(struct wzWidget *widget)
 /*
 ================================================================================
 
-MISC.
+PUBLIC WIDGET FUNCTIONS
 
 ================================================================================
 */
@@ -365,8 +365,8 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	// If the parent is a layout widget, it may need refreshing.
 	if (widget->parent && wz_widget_is_layout(widget->parent))
 	{
-		// Refresh if the width or height has changed and stretching is off.
-		if (((widget->stretch & WZ_STRETCH_HORIZONTAL) == 0 && widget->rect.w != oldRect.w) || ((widget->stretch & WZ_STRETCH_VERTICAL) == 0 && widget->rect.h != oldRect.h))
+		// Refresh if the width or height has changed.
+		if (widget->rect.w != oldRect.w || widget->rect.h != oldRect.h)
 		{
 			wz_widget_refresh_rect(widget->parent);
 		}
@@ -651,6 +651,14 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 	assert(widget);
 	return widget->window;
 }
+
+/*
+================================================================================
+
+INTERNAL WIDGET FUNCTIONS
+
+================================================================================
+*/
 
 void wz_widget_refresh_rect(struct wzWidget *widget)
 {

@@ -451,9 +451,6 @@ void ButtonPrivate::autosize()
 	if (!getRenderer())
 		return;
 
-	if (wz_widget_get_type(wz_widget_get_parent(getWidget())) == WZ_TYPE_STACK_LAYOUT)
-		return;
-
 	// Calculate size based on label text plus padding.
 	wzSize size;
 	getRenderer()->measure_text(getRenderer(), label.c_str(), 0, &size.w, &size.h);
