@@ -94,7 +94,6 @@ class Button : public Widget
 public:
 	Button();
 	Button(const std::string &label);
-	Button(wzButton *button);
 	~Button();
 	std::string getLabel() const;
 	Button *setLabel(const std::string &label);
@@ -143,7 +142,6 @@ class List : public Widget
 {
 public:
 	List();
-	List(wzList *list);
 	~List();
 	List *setItems(const char **items, int nItems);
 };
@@ -176,7 +174,6 @@ class Scroller : public Widget
 {
 public:
 	Scroller();
-	Scroller(wzScroller *scroller);
 	~Scroller();
 	Scroller *setType(wzScrollerType type);
 	Scroller *setValue(int value);

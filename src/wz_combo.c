@@ -44,6 +44,9 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	if (!combo->base.desktop)
 		return;
 
+	if (!combo->list)
+		return;
+
 	rect = wz_widget_get_rect((struct wzWidget *)combo);
 	absRect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 
@@ -149,15 +152,23 @@ struct wzCombo *wz_combo_create()
 	combo->base.vtable.set_rect = wz_combo_set_rect;
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
 	combo->base.vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
+	return combo;
+}
 
-	combo->list = wz_list_create();
+void wz_combo_set_list(struct wzCombo *combo, struct wzList *list)
+{
+	assert(combo);
+	assert(list);
+
+	if (combo->list)
+		return;
+
+	combo->list = list;
 	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);
 	wz_widget_add_child_widget_internal((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
 	wz_widget_set_clip_input_to_parent((struct wzWidget *)combo->list, false);
 	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
-
-	return combo;
 }
 
 struct wzList *wz_combo_get_list(struct wzCombo *combo)

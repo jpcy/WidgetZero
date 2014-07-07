@@ -354,6 +354,7 @@ void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback cal
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 
 struct wzCombo *wz_combo_create();
+void wz_combo_set_list(struct wzCombo *combo, struct wzList *list);
 struct wzList *wz_combo_get_list(struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
@@ -362,6 +363,7 @@ struct wzFrame *wz_frame_create();
 struct wzLabel *wz_label_create();
 
 struct wzList *wz_list_create();
+void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
@@ -395,6 +397,8 @@ typedef enum
 wzScrollerType;
 
 struct wzScroller *wz_scroller_create();
+void wz_scroller_set_decrement_button(struct wzScroller *scroller, struct wzButton *button);
+void wz_scroller_set_increment_button(struct wzScroller *scroller, struct wzButton *button);
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
@@ -403,8 +407,6 @@ void wz_scroller_increment_value(struct wzScroller *scroller);
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
 int wz_scroller_get_step_value(struct wzScroller *scroller);
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
-struct wzButton *wz_scroller_get_decrement_button(struct wzScroller *scroller);
-struct wzButton *wz_scroller_get_increment_button(struct wzScroller *scroller);
 int wz_scroller_get_nub_size(struct wzScroller *scroller);
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
@@ -427,7 +429,9 @@ struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);
+void wz_tab_bar_set_decrement_button(struct wzTabBar *tabBar, struct wzButton *button);
 struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
+void wz_tab_bar_set_increment_button(struct wzTabBar *tabBar, struct wzButton *button);
 struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
 void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);

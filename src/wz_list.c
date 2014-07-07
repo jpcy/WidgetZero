@@ -65,6 +65,9 @@ static void wz_list_update_scroller(struct wzList *list)
 
 	assert(list);
 
+	if (!list->scroller)
+		return;
+
 	// Update max value.
 	max = list->nItems * list->itemHeight - wz_list_get_items_rect(list).h;
 	wz_scroller_set_max_value(list->scroller, max);
@@ -93,12 +96,6 @@ static void wz_list_scroller_value_changed(wzEvent e)
 {
 	struct wzList *list = (struct wzList *)e.base.widget->parent;
 	list->firstItem = e.scroller.value / list->itemHeight;
-}
-
-struct wzScroller *wz_list_get_scroller(struct wzList *list)
-{
-	assert(list);
-	return list->scroller;
 }
 
 /*
@@ -293,15 +290,28 @@ struct wzList *wz_list_create()
 	list->pressedItem = -1;
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
+	return list;
+}
 
-	list->scroller = wz_scroller_create();
+void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller)
+{
+	assert(list);
+	assert(scroller);
+
+	if (list->scroller)
+		return;
+
+	list->scroller = scroller;
 	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
-	//((struct wzWidget *)list->scroller)->vtable.get_rect = wz_list_scroller_get_rect;
 	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
+}
 
-	return list;
+struct wzScroller *wz_list_get_scroller(struct wzList *list)
+{
+	assert(list);
+	return list->scroller;
 }
 
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
@@ -365,6 +375,10 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
 	assert(list);
 	list->itemHeight = itemHeight;
+
+	if (!list->scroller)
+		return;
+
 	wz_scroller_set_step_value(list->scroller, itemHeight);
 	wz_list_update_scroller(list);
 }
