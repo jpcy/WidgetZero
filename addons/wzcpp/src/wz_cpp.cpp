@@ -206,7 +206,6 @@ public:
 
 protected:
 	wzTabBar *tabBar_;
-	std::vector<Button *> tabs_;
 	std::auto_ptr<Button> decrementButton_;
 	std::auto_ptr<Button> incrementButton_;
 };
@@ -761,18 +760,18 @@ void DockTabBar::handleEvent(wzEvent *e)
 		Button *tab = new Button();
 		((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
 		tab->setLabel(window->title);
-		tabs_.push_back(tab);
+		children.push_back(tab);
 		e->create.widget = tab->p->getWidget();
 	}
 	else if (e->base.type == WZ_EVENT_DESTROY_WIDGET)
 	{
 		// Remove the corresponding Button instance.
-		for (size_t i = 0; i < tabs_.size(); i++)
+		for (size_t i = 0; i < children.size(); i++)
 		{
-			if (tabs_[i]->p->getWidget() == (wzWidget *)e->tabBar.tab)
+			if (children[i]->p->getWidget() == (wzWidget *)e->tabBar.tab)
 			{
-				Button *tab = tabs_[i];
-				tabs_.erase(tabs_.begin() + i);
+				Widget *tab = children[i];
+				children.erase(children.begin() + i);
 				delete tab;
 				return;
 			}
@@ -1223,11 +1222,6 @@ TabBar::TabBar()
 
 TabBar::~TabBar()
 {
-	for (size_t i = 0; i < tabs_.size(); i++)
-	{
-		delete tabs_[i];
-	}
-
 	if (!wz_widget_get_desktop((wzWidget *)tabBar_))
 	{
 		wz_widget_destroy((wzWidget *)tabBar_);
@@ -1242,7 +1236,7 @@ Button *TabBar::createTab()
 {
 	Button *tab = new Button();
 	((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
-	tabs_.push_back(tab);
+	children.push_back(tab);
 	return tab;
 }
 
