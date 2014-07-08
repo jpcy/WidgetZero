@@ -264,7 +264,7 @@ void wz_desktop_key_down(struct wzDesktop *desktop, wzKey key);
 void wz_desktop_key_up(struct wzDesktop *desktop, wzKey key);
 void wz_desktop_text_input(struct wzDesktop *desktop, const char *text);
 void wz_desktop_draw(struct wzDesktop *desktop);
-struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop);
+void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockPosition, struct wzTabBar *tabBar);
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
 wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop);
 

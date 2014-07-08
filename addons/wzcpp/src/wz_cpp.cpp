@@ -108,7 +108,7 @@ struct DesktopPrivate : public WidgetPrivate
 class DockTabBar : public WidgetPrivate
 {
 public:
-	DockTabBar(wzTabBar *tabBar);
+	DockTabBar();
 	~DockTabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
@@ -658,12 +658,11 @@ DesktopPrivate::DesktopPrivate(wzRenderer *renderer) : showCursor(false)
 	wz_desktop_set_draw_dock_icon_callback(desktop, DrawDockIcon, this);
 	wz_desktop_set_draw_dock_preview_callback(desktop, DrawDockPreview, this);
 
-	struct wzTabBar **dockTabBars = wz_desktop_get_dock_tab_bars(desktop);
-
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		this->dockTabBars[i] = new DockTabBar(dockTabBars[i]);
-		wz_widget_set_height((wzWidget *)dockTabBars[i], 20);
+		dockTabBars[i] = new DockTabBar();
+		wz_desktop_set_dock_tab_bar(desktop, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
+		wz_widget_set_height(dockTabBars[i]->getWidget(), 20);
 	}
 }
 
@@ -770,8 +769,9 @@ Widget *Desktop::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-DockTabBar::DockTabBar(wzTabBar *tabBar) : tabBar_(tabBar)
+DockTabBar::DockTabBar()
 {
+	tabBar_ = wz_tab_bar_create();
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 
 	decrementButton_.reset(new Button("<"));
@@ -788,6 +788,11 @@ DockTabBar::~DockTabBar()
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
 		delete tabs_[i];
+	}
+
+	if (!wz_widget_get_desktop((wzWidget *)tabBar_))
+	{
+		wz_widget_destroy((wzWidget *)tabBar_);
 	}
 }
 

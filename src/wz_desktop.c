@@ -110,10 +110,65 @@ DOCK TAB BARS
 ================================================================================
 */
 
-struct wzTabBar **wz_desktop_get_dock_tab_bars(struct wzDesktop *desktop)
+// Used by all dock tab bars.
+static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
+{
+	struct wzDesktop *desktop;
+	wzDockPosition dockPosition;
+	int i;
+	struct wzWindow *window;
+
+	desktop = e.base.widget->desktop;
+
+	if (desktop->ignoreDockTabBarChangedEvent)
+		return;
+
+	// Figure out which dock position this tab bar is at.
+	dockPosition = WZ_DOCK_POSITION_NONE;
+
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		if (desktop->dockTabBars[i] == e.tabBar.tabBar)
+		{
+			dockPosition = i;
+			break;
+		}
+	}
+
+	assert(dockPosition != WZ_DOCK_POSITION_NONE);
+
+	// Get the window corresponding to the tab.
+	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e.tabBar.tab);
+
+	// Set the window to visible, hide all the other windows at this dock position.
+	wz_widget_set_visible((struct wzWidget *)window, true);
+
+	for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
+	{
+		if (desktop->dockedWindows[dockPosition][i] == window)
+			continue;
+
+		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][i], false);
+	}
+}
+
+void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockPosition, struct wzTabBar *tabBar)
 {
 	assert(desktop);
-	return desktop->dockTabBars;
+	assert(tabBar);
+
+	if (desktop->dockTabBars[dockPosition])
+		return;
+
+	desktop->dockTabBars[dockPosition] = tabBar;
+	wz_widget_set_visible((struct wzWidget *)tabBar, false);
+	wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
+	wz_widget_add_child_widget_internal((struct wzWidget *)desktop, (struct wzWidget *)tabBar);
+	wz_tab_bar_add_callback_tab_changed(tabBar, wz_desktop_dock_tab_bar_tab_changed);
+
+	// Override scroll button draw priority.
+	wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
+	wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
 }
 
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab)
@@ -171,48 +226,6 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 
 		// Show the tab bar.
 		wz_widget_set_visible((struct wzWidget *)tabBar, true);
-	}
-}
-
-// Used by all dock tab bars.
-static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
-{
-	struct wzDesktop *desktop;
-	wzDockPosition dockPosition;
-	int i;
-	struct wzWindow *window;
-
-	desktop = e.base.widget->desktop;
-
-	if (desktop->ignoreDockTabBarChangedEvent)
-		return;
-
-	// Figure out which dock position this tab bar is at.
-	dockPosition = WZ_DOCK_POSITION_NONE;
-
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		if (desktop->dockTabBars[i] == e.tabBar.tabBar)
-		{
-			dockPosition = i;
-			break;
-		}
-	}
-
-	assert(dockPosition != WZ_DOCK_POSITION_NONE);
-
-	// Get the window corresponding to the tab.
-	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e.tabBar.tab);
-
-	// Set the window to visible, hide all the other windows at this dock position.
-	wz_widget_set_visible((struct wzWidget *)window, true);
-
-	for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
-	{
-		if (desktop->dockedWindows[dockPosition][i] == window)
-			continue;
-
-		wz_widget_set_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][i], false);
 	}
 }
 
@@ -1256,23 +1269,6 @@ struct wzDesktop *wz_desktop_create()
 	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
 	wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
-
-	// Create dock tab bars.
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		struct wzWidget *widget;
-
-		desktop->dockTabBars[i] = wz_tab_bar_create(desktop);
-		widget = (struct wzWidget *)desktop->dockTabBars[i];
-		wz_widget_set_visible(widget, false);
-		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
-		wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
-		wz_tab_bar_add_callback_tab_changed(desktop->dockTabBars[i], wz_desktop_dock_tab_bar_tab_changed);
-
-		// Override scroll button draw priority.
-		/*wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
-		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(desktop->dockTabBars[i]), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);*/
-	}
 
 	return desktop;
 }
