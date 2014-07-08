@@ -31,7 +31,6 @@ namespace wz {
 
 class DockTabBar;
 struct ListPrivate;
-class TabButton;
 
 struct WidgetPrivate
 {
@@ -58,7 +57,14 @@ struct ButtonPrivate : public WidgetPrivate
 	virtual void autosize();
 	virtual void draw(wzRect clip);
 
+	enum DrawStyle
+	{
+		Normal,
+		Tab
+	};
+
 	wzButton *button;
+	DrawStyle drawStyle;
 	std::string label;
 };
 
@@ -188,22 +194,6 @@ struct StackLayoutPrivate : public WidgetPrivate
 	wzStackLayout *layout;
 };
 
-class TabButton : public WidgetPrivate
-{
-public:
-	TabButton();
-	~TabButton();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
-	virtual void autosize();
-	virtual void draw(wzRect clip);
-	void setLabel(const std::string &label);
-
-private:
-	wzButton *button_;
-	std::string label_;
-};
-
 class TabBar : public WidgetPrivate
 {
 public:
@@ -212,11 +202,11 @@ public:
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
 	virtual void draw(wzRect clip);
-	TabButton *createTab();
+	Button *createTab();
 
 protected:
 	wzTabBar *tabBar_;
-	std::vector<TabButton *> tabs_;
+	std::vector<Button *> tabs_;
 	std::auto_ptr<Button> decrementButton_;
 	std::auto_ptr<Button> incrementButton_;
 };
@@ -245,7 +235,7 @@ struct TabPrivate
 	TabPrivate();
 	~TabPrivate();
 
-	TabButton *button;
+	Button *button;
 	TabPage *page;
 	std::vector<Widget *> children;
 };
@@ -410,7 +400,7 @@ Widget *Widget::setMargin(wzBorder margin)
 
 //------------------------------------------------------------------------------
 
-ButtonPrivate::ButtonPrivate()
+ButtonPrivate::ButtonPrivate() : drawStyle(Normal)
 {
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
@@ -440,7 +430,14 @@ void ButtonPrivate::autosize()
 
 void ButtonPrivate::draw(wzRect clip)
 {
-	getRenderer()->draw_button(getRenderer(), clip, button, label.c_str());
+	if (drawStyle == Normal)
+	{
+		getRenderer()->draw_button(getRenderer(), clip, button, label.c_str());
+	}
+	else if (drawStyle == Tab)
+	{
+		getRenderer()->draw_tab_button(getRenderer(), clip, button, label.c_str());
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -761,19 +758,20 @@ void DockTabBar::handleEvent(wzEvent *e)
 	{
 		// Create a new tab.
 		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata(e->create.extra);
-		TabButton *tabButton = new TabButton();
-		tabButton->setLabel(window->title);
-		tabs_.push_back(tabButton);
-		e->create.widget = tabButton->getWidget();
+		Button *tab = new Button();
+		((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
+		tab->setLabel(window->title);
+		tabs_.push_back(tab);
+		e->create.widget = tab->p->getWidget();
 	}
 	else if (e->base.type == WZ_EVENT_DESTROY_WIDGET)
 	{
-		// Remove the corresponding TabButton instance.
+		// Remove the corresponding Button instance.
 		for (size_t i = 0; i < tabs_.size(); i++)
 		{
-			if (tabs_[i]->getWidget() == (wzWidget *)e->tabBar.tab)
+			if (tabs_[i]->p->getWidget() == (wzWidget *)e->tabBar.tab)
 			{
-				TabButton *tab = tabs_[i];
+				Button *tab = tabs_[i];
 				tabs_.erase(tabs_.begin() + i);
 				delete tab;
 				return;
@@ -782,8 +780,8 @@ void DockTabBar::handleEvent(wzEvent *e)
 	}
 	else if (e->base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
 	{
-		TabButton *tabButton = (TabButton *)wz_widget_get_metadata((wzWidget *)e->tabBar.tab);
-		tabButton->autosize();
+		ButtonPrivate *tab = (ButtonPrivate *)wz_widget_get_metadata((wzWidget *)e->tabBar.tab);
+		tab->autosize();
 	}
 }
 
@@ -1209,46 +1207,6 @@ Widget *StackLayout::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-TabButton::TabButton()
-{
-	button_ = wz_button_create();
-	wz_widget_set_metadata((wzWidget *)button_, this);
-	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
-}
-
-TabButton::~TabButton()
-{
-	if (!wz_widget_get_desktop((wzWidget *)button_))
-	{
-		wz_widget_destroy((wzWidget *)button_);
-	}
-}
-
-void TabButton::autosize()
-{
-	if (!getRenderer())
-		return;
-
-	// Calculate width based on label text plus padding.
-	int width;
-	getRenderer()->measure_text(getRenderer(), label_.c_str(), 0, &width, NULL);
-	width += 16;
-	wz_widget_set_width((wzWidget *)button_, width);
-}
-
-void TabButton::draw(wzRect clip)
-{
-	getRenderer()->draw_tab_button(getRenderer(), clip, button_, label_.c_str());
-}
-
-void TabButton::setLabel(const std::string &label)
-{
-	label_ = label;
-	autosize();	
-}
-
-//------------------------------------------------------------------------------
-
 TabBar::TabBar()
 {
 	tabBar_ = wz_tab_bar_create();
@@ -1280,11 +1238,12 @@ void TabBar::draw(wzRect clip)
 {
 }
 
-TabButton *TabBar::createTab()
+Button *TabBar::createTab()
 {
-	TabButton *tabButton = new TabButton();
-	tabs_.push_back(tabButton);
-	return tabButton;
+	Button *tab = new Button();
+	((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
+	tabs_.push_back(tab);
+	return tab;
 }
 
 //------------------------------------------------------------------------------
@@ -1396,10 +1355,10 @@ Tabbed::~Tabbed()
 Tab *Tabbed::addTab(Tab *tab)
 {
 	TabbedPrivate *tp = (TabbedPrivate *)p;
-	TabButton *tabButton = tp->tabBar->createTab();
+	Button *tabButton = tp->tabBar->createTab();
 
 	wzWidget *widget;
-	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->getWidget(), &widget);
+	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->p->getWidget(), &widget);
 	
 	TabPage *tabPage = new TabPage(widget);
 	tp->tabPages.push_back(tabPage);
