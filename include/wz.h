@@ -303,6 +303,7 @@ void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect));
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child);
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 // Determine whether the widget is an descendant of a widget with the provided type.

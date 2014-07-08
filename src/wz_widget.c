@@ -581,7 +581,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	wz_widget_add_child_widget_internal(wz_widget_get_content_widget(widget), child);
 }
 
-void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
 	int i, deleteIndex;
 
@@ -604,6 +604,20 @@ void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *ch
 		return;
 
 	wz_arr_delete(widget->children, deleteIndex);
+}
+
+void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
+{
+	int n;
+
+	assert(widget);
+	n = wz_arr_len(widget->children);
+	wz_widget_remove_child_widget(widget, child);
+
+	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see wz_widget_remove_child_widget.
+	if (n == wz_arr_len(widget->children))
+		return;
+
 	wz_widget_destroy(child);
 }
 
