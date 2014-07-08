@@ -287,7 +287,7 @@ void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 		return;
 
 	// Invoke the tab removed event.
-	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
+	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->tabs[deleteIndex];
 	wz_invoke_event(e, NULL);
