@@ -105,23 +105,6 @@ struct DesktopPrivate : public WidgetPrivate
 	bool showCursor;
 };
 
-class DockTabBar : public WidgetPrivate
-{
-public:
-	DockTabBar();
-	~DockTabBar();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	virtual void draw(wzRect clip);
-	void handleEvent(wzEvent e);
-
-private:
-	wzTabBar *tabBar_;
-	std::vector<TabButton *> tabs_;
-	std::auto_ptr<Button> decrementButton_;
-	std::auto_ptr<Button> incrementButton_;
-};
-
 struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate();
@@ -224,7 +207,6 @@ class TabBar : public WidgetPrivate
 {
 public:
 	TabBar();
-	TabBar(wzTabBar *tabBar);
 	~TabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
@@ -232,13 +214,17 @@ public:
 	TabButton *addTab();
 	TabButton *addTab(wzButton *button);
 
-private:
-	void initialize();
-
+protected:
 	wzTabBar *tabBar_;
 	std::vector<TabButton *> tabs_;
 	std::auto_ptr<Button> decrementButton_;
 	std::auto_ptr<Button> incrementButton_;
+};
+
+class DockTabBar : public TabBar
+{
+public:
+	virtual void handleEvent(wzEvent e);
 };
 
 class TabPage : public WidgetPrivate
@@ -769,37 +755,6 @@ Widget *Desktop::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-DockTabBar::DockTabBar()
-{
-	tabBar_ = wz_tab_bar_create();
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-
-	decrementButton_.reset(new Button("<"));
-	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_decrement_button(tabBar_, (wzButton *)decrementButton_->p->getWidget());
-
-	incrementButton_.reset(new Button(">"));
-	wz_widget_set_width(incrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_increment_button(tabBar_, (wzButton *)incrementButton_->p->getWidget());
-}
-
-DockTabBar::~DockTabBar()
-{
-	for (size_t i = 0; i < tabs_.size(); i++)
-	{
-		delete tabs_[i];
-	}
-
-	if (!wz_widget_get_desktop((wzWidget *)tabBar_))
-	{
-		wz_widget_destroy((wzWidget *)tabBar_);
-	}
-}
-
-void DockTabBar::draw(wzRect clip)
-{
-}
-
 void DockTabBar::handleEvent(wzEvent e)
 {
 	if (e.base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
@@ -1282,12 +1237,15 @@ void TabButton::setLabel(const std::string &label)
 TabBar::TabBar()
 {
 	tabBar_ = wz_tab_bar_create();
-	initialize();
-}
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 
-TabBar::TabBar(wzTabBar *tabBar) : tabBar_(tabBar)
-{
-	initialize();
+	decrementButton_.reset(new Button("<"));
+	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
+	wz_tab_bar_set_decrement_button(tabBar_, (wzButton *)decrementButton_->p->getWidget());
+
+	incrementButton_.reset(new Button(">"));
+	wz_widget_set_width(incrementButton_->p->getWidget(), 14);
+	wz_tab_bar_set_increment_button(tabBar_, (wzButton *)incrementButton_->p->getWidget());
 }
 
 TabBar::~TabBar()
@@ -1320,19 +1278,6 @@ TabButton *TabBar::addTab(wzButton *button)
 	TabButton *tabButton = new TabButton(button);
 	tabs_.push_back(tabButton);
 	return tabButton;
-}
-
-void TabBar::initialize()
-{
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-
-	decrementButton_.reset(new Button("<"));
-	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_decrement_button(tabBar_, (wzButton *)decrementButton_->p->getWidget());
-
-	incrementButton_.reset(new Button(">"));
-	wz_widget_set_width(incrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_increment_button(tabBar_, (wzButton *)incrementButton_->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
