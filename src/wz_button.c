@@ -57,7 +57,7 @@ static void wz_button_click(struct wzButton *button)
 
 	e.button.type = WZ_EVENT_BUTTON_CLICKED;
 	e.button.button = button;
-	wz_invoke_event(e, button->clicked_callbacks);
+	wz_invoke_event(&e, button->clicked_callbacks);
 }
 
 static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
@@ -76,7 +76,7 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = button;
-		wz_invoke_event(e, button->pressed_callbacks);
+		wz_invoke_event(&e, button->pressed_callbacks);
 
 		if (button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
 		{
@@ -172,7 +172,7 @@ void wz_button_set(struct wzButton *button, bool value)
 		wzEvent e;
 		e.button.type = WZ_EVENT_BUTTON_CLICKED;
 		e.button.button = button;
-		wz_invoke_event(e, button->clicked_callbacks);
+		wz_invoke_event(&e, button->clicked_callbacks);
 	}
 }
 

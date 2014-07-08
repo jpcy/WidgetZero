@@ -129,6 +129,8 @@ enum
 typedef enum
 {
 	WZ_EVENT_UNKNOWN,
+	WZ_EVENT_CREATE_WIDGET,
+	WZ_EVENT_DESTROY_WIDGET,
 	WZ_EVENT_BUTTON_PRESSED,
 	WZ_EVENT_BUTTON_CLICKED,
 	WZ_EVENT_LIST_ITEM_SELECTED,
@@ -145,6 +147,23 @@ typedef struct
 	struct wzWidget *widget;
 }
 wzEventBase;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzWidget *parent;
+	struct wzWidget *widget; 
+	struct wzWidget *extra;
+}
+wzCreateWidgetEvent;
+
+typedef struct
+{
+	wzWidgetEventType type;
+	struct wzWidget *parent;
+	struct wzWidget *widget;
+}
+wzDestroyWidgetEvent;
 
 typedef struct
 {
@@ -181,6 +200,8 @@ wzTabBarEvent;
 typedef union
 {
 	wzEventBase base;
+	wzCreateWidgetEvent create;
+	wzDestroyWidgetEvent destroy;
 	wzButtonEvent button;
 	wzListEvent list;
 	wzScrollerEvent scroller;
@@ -188,7 +209,7 @@ typedef union
 }
 wzEvent;
 
-typedef void (*wzEventCallback)(wzEvent e);
+typedef void (*wzEventCallback)(wzEvent *e);
 
 typedef enum
 {

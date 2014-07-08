@@ -40,7 +40,7 @@ struct WidgetPrivate
 	virtual wzWidget *getWidget() { return NULL; }
 	virtual void autosize() {};
 	virtual void draw(wzRect clip) {};
-	virtual void handleEvent(wzEvent e) {};
+	virtual void handleEvent(wzEvent *e) {};
 
 	wzRenderer *getRenderer();
 	void add(Widget *widget);
@@ -191,7 +191,9 @@ struct StackLayoutPrivate : public WidgetPrivate
 class TabButton : public WidgetPrivate
 {
 public:
+	TabButton();
 	TabButton(wzButton *button);
+	~TabButton();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
 	virtual void autosize();
@@ -224,7 +226,7 @@ protected:
 class DockTabBar : public TabBar
 {
 public:
-	virtual void handleEvent(wzEvent e);
+	virtual void handleEvent(wzEvent *e);
 };
 
 class TabPage : public WidgetPrivate
@@ -298,9 +300,9 @@ static void DrawWidget(wzWidget *widget, wzRect clip)
 	((WidgetPrivate *)wz_widget_get_metadata(widget))->draw(clip);
 }
 
-static void HandleEvent(wzEvent e)
+static void HandleEvent(wzEvent *e)
 {
-	void *metadata = wz_widget_get_metadata(e.base.widget);
+	void *metadata = wz_widget_get_metadata(e->base.widget);
 
 	if (metadata)
 	{
@@ -755,22 +757,23 @@ Widget *Desktop::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-void DockTabBar::handleEvent(wzEvent e)
+void DockTabBar::handleEvent(wzEvent *e)
 {
-	if (e.base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
+	if (e->base.type == WZ_EVENT_CREATE_WIDGET)
 	{
-		// Wrap the added tab (e.tabBar.tab) in a new TabButton instance.
-		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata((wzWidget *)wz_desktop_get_dock_tab_window(wz_widget_get_desktop((wzWidget *)tabBar_), e.tabBar.tab));
-		TabButton *tabButton = new TabButton(e.tabBar.tab);
+		// Create a new tab.
+		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata(e->create.extra);
+		TabButton *tabButton = new TabButton();
 		tabButton->setLabel(window->title);
 		tabs_.push_back(tabButton);
+		e->create.widget = tabButton->getWidget();
 	}
-	else if (e.base.type == WZ_EVENT_TAB_BAR_TAB_REMOVED)
+	else if (e->base.type == WZ_EVENT_DESTROY_WIDGET)
 	{
 		// Remove the corresponding TabButton instance.
 		for (size_t i = 0; i < tabs_.size(); i++)
 		{
-			if (tabs_[i]->getWidget() == (wzWidget *)e.tabBar.tab)
+			if (tabs_[i]->getWidget() == (wzWidget *)e->tabBar.tab)
 			{
 				TabButton *tab = tabs_[i];
 				tabs_.erase(tabs_.begin() + i);
@@ -778,6 +781,11 @@ void DockTabBar::handleEvent(wzEvent e)
 				return;
 			}
 		}
+	}
+	else if (e->base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
+	{
+		TabButton *tabButton = (TabButton *)wz_widget_get_metadata((wzWidget *)e->tabBar.tab);
+		tabButton->autosize();
 	}
 }
 
@@ -1203,10 +1211,25 @@ Widget *StackLayout::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
+TabButton::TabButton()
+{
+	button_ = wz_button_create();
+	wz_widget_set_metadata((wzWidget *)button_, this);
+	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
+}
+
 TabButton::TabButton(wzButton *button) : button_(button)
 {
 	wz_widget_set_metadata((wzWidget *)button_, this);
 	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
+}
+
+TabButton::~TabButton()
+{
+	if (!wz_widget_get_desktop((wzWidget *)button_))
+	{
+		wz_widget_destroy((wzWidget *)button_);
+	}
 }
 
 void TabButton::autosize()

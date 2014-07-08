@@ -297,18 +297,20 @@ static void wz_scroller_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 	wz_scroller_set_value(scroller, scroller->value - y * scroller->stepValue);
 }
 
-static void wz_scroller_decrement_button_clicked(wzEvent e)
+static void wz_scroller_decrement_button_clicked(wzEvent *e)
 {
-	assert(e.base.widget);
-	assert(e.base.widget->parent);
-	wz_scroller_decrement_value((struct wzScroller *)e.base.widget->parent);
+	assert(e);
+	assert(e->base.widget);
+	assert(e->base.widget->parent);
+	wz_scroller_decrement_value((struct wzScroller *)e->base.widget->parent);
 }
 
-static void wz_scroller_increment_button_clicked(wzEvent e)
+static void wz_scroller_increment_button_clicked(wzEvent *e)
 {
-	assert(e.base.widget);
-	assert(e.base.widget->parent);
-	wz_scroller_increment_value((struct wzScroller *)e.base.widget->parent);
+	assert(e);
+	assert(e->base.widget);
+	assert(e->base.widget->parent);
+	wz_scroller_increment_value((struct wzScroller *)e->base.widget->parent);
 }
 
 static void wz_scroller_destroy(struct wzWidget *widget)
@@ -410,7 +412,7 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 	e.scroller.scroller = scroller;
 	e.scroller.oldValue = oldValue;
 	e.scroller.value = scroller->value;
-	wz_invoke_event(e, scroller->value_changed_callbacks);
+	wz_invoke_event(&e, scroller->value_changed_callbacks);
 
 	wz_scroller_nub_update_rect(scroller->nub);
 }

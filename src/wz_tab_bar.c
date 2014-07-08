@@ -140,13 +140,14 @@ static void wz_tab_bar_invoke_tab_changed(struct wzTabBar *tabBar)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->selectedTab;
-	wz_invoke_event(e, tabBar->tab_changed_callbacks);
+	wz_invoke_event(&e, tabBar->tab_changed_callbacks);
 }
 
 // Sets the tab bar (the button's parent) selected tab.
-static void wz_tab_bar_button_pressed(wzEvent e)
+static void wz_tab_bar_button_pressed(wzEvent *e)
 {
-	wz_tab_bar_select_tab((struct wzTabBar *)e.base.widget->parent, (struct wzButton *)e.base.widget);
+	assert(e);
+	wz_tab_bar_select_tab((struct wzTabBar *)e->base.widget->parent, (struct wzButton *)e->base.widget);
 }
 
 static void wz_tab_bar_destroy(struct wzWidget *widget)
@@ -181,23 +182,25 @@ static wzRect wz_tab_bar_get_children_clip_rect(struct wzWidget *widget)
 	return wz_widget_get_absolute_rect(widget);
 }
 
-static void wz_tab_bar_decrement_button_clicked(wzEvent e)
+static void wz_tab_bar_decrement_button_clicked(wzEvent *e)
 {
 	struct wzTabBar *tabBar;
 
-	assert(e.base.widget);
-	assert(e.base.widget->parent);
-	tabBar = (struct wzTabBar *)e.base.widget->parent;
+	assert(e);
+	assert(e->base.widget);
+	assert(e->base.widget->parent);
+	tabBar = (struct wzTabBar *)e->base.widget->parent;
 	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue - 1);
 }
 
-static void wz_tab_bar_increment_button_clicked(wzEvent e)
+static void wz_tab_bar_increment_button_clicked(wzEvent *e)
 {
 	struct wzTabBar *tabBar;
 
-	assert(e.base.widget);
-	assert(e.base.widget->parent);
-	tabBar = (struct wzTabBar *)e.base.widget->parent;
+	assert(e);
+	assert(e->base.widget);
+	assert(e->base.widget->parent);
+	tabBar = (struct wzTabBar *)e->base.widget->parent;
 	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue + 1);
 }
 
@@ -260,7 +263,7 @@ struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzB
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tab;
-	wz_invoke_event(e, NULL);
+	wz_invoke_event(&e, NULL);
 
 	return tab;
 }
@@ -290,11 +293,17 @@ void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->tabs[deleteIndex];
-	wz_invoke_event(e, NULL);
+	wz_invoke_event(&e, NULL);
 
-	// Delete the tab.
+	// Remove our references to the tab.
 	wz_arr_delete(tabBar->tabs, deleteIndex);
-	wz_widget_destroy_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
+	wz_widget_remove_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
+
+	// Invoke the destroy widget event.
+	e.destroy.type = WZ_EVENT_DESTROY_WIDGET;
+	e.destroy.parent = (struct wzWidget *)tabBar;
+	e.destroy.widget = (struct wzWidget *)tab;
+	wz_invoke_event(&e, NULL);
 }
 
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
@@ -305,14 +314,21 @@ void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
 
 	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
 	{
-		// Invoke the tab removed event.
 		wzEvent e;
+
+		// Invoke the tab removed event.
 		e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 		e.tabBar.tabBar = tabBar;
 		e.tabBar.tab = tabBar->tabs[i];
-		wz_invoke_event(e, NULL);
+		wz_invoke_event(&e, NULL);
 
-		wz_widget_destroy_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->tabs[i]);
+		wz_widget_remove_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->tabs[i]);
+
+		// Invoke the destroy widget event.
+		e.destroy.type = WZ_EVENT_DESTROY_WIDGET;
+		e.destroy.parent = (struct wzWidget *)tabBar;
+		e.destroy.widget = (struct wzWidget *)tabBar->tabs[i];
+		wz_invoke_event(&e, NULL);
 	}
 
 	wz_arr_deleten(tabBar->tabs, 0, wz_arr_len(tabBar->tabs));

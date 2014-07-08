@@ -92,10 +92,13 @@ static void wz_list_update_scroller(struct wzList *list)
 	}
 }
 
-static void wz_list_scroller_value_changed(wzEvent e)
+static void wz_list_scroller_value_changed(wzEvent *e)
 {
-	struct wzList *list = (struct wzList *)e.base.widget->parent;
-	list->firstItem = e.scroller.value / list->itemHeight;
+	struct wzList *list;
+	
+	assert(e);
+	list = (struct wzList *)e->base.widget->parent;
+	list->firstItem = e->scroller.value / list->itemHeight;
 }
 
 /*
@@ -206,7 +209,7 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 		e.list.list = list;
 		e.list.selectedItem = list->selectedItem;
-		wz_invoke_event(e, list->item_selected_callbacks);
+		wz_invoke_event(&e, list->item_selected_callbacks);
 	}
 }
 
@@ -418,7 +421,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 	e.list.list = list;
 	e.list.selectedItem = list->selectedItem;
-	wz_invoke_event(e, list->item_selected_callbacks);
+	wz_invoke_event(&e, list->item_selected_callbacks);
 }
 
 int wz_list_get_selected_item(const struct wzList *list)

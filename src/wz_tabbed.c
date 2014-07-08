@@ -72,17 +72,18 @@ static void wz_tabbed_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 }
 
-static void wz_tabbed_tab_bar_tab_changed(wzEvent e)
+static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 {
 	struct wzTabbed *tabbed;
 	int i;
 
-	tabbed = (struct wzTabbed *)e.base.widget->parent;
+	assert(e);
+	tabbed = (struct wzTabbed *)e->base.widget->parent;
 
 	// Set the corresponding page to visible, hide all the others.
 	for (i = 0; i < wz_arr_len(tabbed->pages); i++)
 	{
-		wz_widget_set_visible(tabbed->pages[i].page, tabbed->pages[i].tab == e.tabBar.tab);
+		wz_widget_set_visible(tabbed->pages[i].page, tabbed->pages[i].tab == e->tabBar.tab);
 	}
 }
 

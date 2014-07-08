@@ -604,6 +604,11 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 		return;
 
 	wz_arr_delete(widget->children, deleteIndex);
+
+	// The child is no longer connected to the widget hierarchy, so reset some state.
+	child->desktop = NULL;
+	child->parent = NULL;
+	child->window = NULL;
 }
 
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)

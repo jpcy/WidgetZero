@@ -111,14 +111,15 @@ DOCK TAB BARS
 */
 
 // Used by all dock tab bars.
-static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
+static void wz_desktop_dock_tab_bar_tab_changed(wzEvent *e)
 {
 	struct wzDesktop *desktop;
 	wzDockPosition dockPosition;
 	int i;
 	struct wzWindow *window;
 
-	desktop = e.base.widget->desktop;
+	assert(e);
+	desktop = e->base.widget->desktop;
 
 	if (desktop->ignoreDockTabBarChangedEvent)
 		return;
@@ -128,7 +129,7 @@ static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		if (desktop->dockTabBars[i] == e.tabBar.tabBar)
+		if (desktop->dockTabBars[i] == e->tabBar.tabBar)
 		{
 			dockPosition = i;
 			break;
@@ -138,7 +139,7 @@ static void wz_desktop_dock_tab_bar_tab_changed(wzEvent e)
 	assert(dockPosition != WZ_DOCK_POSITION_NONE);
 
 	// Get the window corresponding to the tab.
-	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e.tabBar.tab);
+	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e->tabBar.tab);
 
 	// Set the window to visible, hide all the other windows at this dock position.
 	wz_widget_set_visible((struct wzWidget *)window, true);
@@ -209,12 +210,22 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 		// Add one tab for each window.
 		for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
 		{
-			// Create the tab before adding it to the tab bar (i.e. use wz_tab_bar_add_existing_tab instead of wz_tab_bar_add_tab), so we have the opportunity to set tab internal metadata before adding the tab invokes a WZ_EVENT_TAB_BAR_TAB_ADDED event.
-			struct wzButton *tab = wz_button_create(desktop);
+			wzEvent e;
+			struct wzButton *tab;
 
-			// Set the tab internal metadata to the window, so the consumer can, for example, set the tab label to the window title. See wz_desktop_get_dock_tab_window.
+			// Have the consumer create the tab.
+			e.create.type = WZ_EVENT_CREATE_WIDGET;
+			e.create.widget = NULL;
+			e.create.parent = (struct wzWidget *)tabBar;
+			e.create.extra = (struct wzWidget *)desktop->dockedWindows[dockPosition][i];
+			wz_invoke_event(&e, NULL);
+			tab = (struct wzButton *)e.create.widget;
+			assert(tab); // Consumer didn't handle the event.
+
+			// Set the tab internal metadata to the window.
 			wz_widget_set_internal_metadata((struct wzWidget *)tab, desktop->dockedWindows[dockPosition][i]);
 
+			// Add the tab to the tab bar.
 			wz_tab_bar_add_existing_tab(tabBar, tab);
 
 			// If this window is selected (visible), select the corresponding tab.
@@ -1323,13 +1334,15 @@ void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *wi
 	}
 }
 
-void wz_invoke_event(wzEvent e, wzEventCallback *callbacks)
+void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks)
 {
 	int i;
 
-	if (e.base.widget->desktop && e.base.widget->desktop->handle_event)
+	assert(e);
+
+	if (e->base.widget->desktop && e->base.widget->desktop->handle_event)
 	{
-		e.base.widget->desktop->handle_event(e);
+		e->base.widget->desktop->handle_event(e);
 	}
 
 	for (i = 0; i < wz_arr_len(callbacks); i++)

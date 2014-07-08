@@ -43,17 +43,18 @@ void wz_radio_button_group_destroy(struct wzRadioButtonGroup *group)
 	free(group);
 }
 
-static void wz_radio_button_group_button_clicked(wzEvent e)
+static void wz_radio_button_group_button_clicked(wzEvent *e)
 {
 	int i;
 	struct wzRadioButtonGroup *group;
 	
-	group = (struct wzRadioButtonGroup *)wz_widget_get_internal_metadata(e.base.widget);
+	assert(e);
+	group = (struct wzRadioButtonGroup *)wz_widget_get_internal_metadata(e->base.widget);
 
 	// Unset all the other buttons in the group.
 	for (i = 0; i < wz_arr_len(group->buttons); i++)
 	{
-		if (group->buttons[i] != e.button.button)
+		if (group->buttons[i] != e->button.button)
 		{
 			wz_button_set(group->buttons[i], false);
 		}

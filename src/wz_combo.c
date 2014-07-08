@@ -126,12 +126,13 @@ static wzRect wz_combo_get_children_clip_rect(struct wzWidget *widget)
 	return zero;
 }
 
-static void wz_combo_list_item_selected(wzEvent e)
+static void wz_combo_list_item_selected(wzEvent *e)
 {
 	struct wzCombo *combo;
 
-	assert(e.base.widget);
-	combo = (struct wzCombo *)e.base.widget->parent;
+	assert(e);
+	assert(e->base.widget);
+	combo = (struct wzCombo *)e->base.widget->parent;
 
 	// Unlock input.
 	wz_desktop_pop_lock_input_widget(combo->base.desktop, (struct wzWidget *)combo);
