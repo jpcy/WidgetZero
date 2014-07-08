@@ -219,7 +219,7 @@ public:
 class TabPage : public WidgetPrivate
 {
 public:
-	TabPage(wzWidget *widget);
+	TabPage();
 	virtual const wzWidget *getWidget() const { return widget_; }
 	virtual wzWidget *getWidget() { return widget_; }
 	virtual void draw(wzRect clip);
@@ -250,7 +250,6 @@ struct TabbedPrivate : public WidgetPrivate
 	wzTabbed *tabbed;
 	std::auto_ptr<TabBar> tabBar;
 	std::vector<TabPage *> tabPages;
-	std::vector<TabPrivate *> tabs;
 };
 
 struct TextEditPrivate : public WidgetPrivate
@@ -1242,10 +1241,10 @@ Button *TabBar::createTab()
 
 //------------------------------------------------------------------------------
 
-TabPage::TabPage(wzWidget *widget)
+TabPage::TabPage()
 {
-	widget_ = widget;
-	wz_widget_set_metadata(widget, this);
+	widget_ = wz_tab_page_create();
+	wz_widget_set_metadata(widget_, this);
 	wz_widget_set_draw_function(widget_, DrawWidget);
 }
 
@@ -1317,13 +1316,6 @@ TabbedPrivate::~TabbedPrivate()
 
 	tabPages.clear();
 
-	for (size_t i = 0; i < tabPages.size(); i++)
-	{
-		delete tabs[i];
-	}
-
-	tabs.clear();
-
 	if (!wz_widget_get_desktop((wzWidget *)tabbed))
 	{
 		wz_widget_destroy((wzWidget *)tabbed);
@@ -1349,14 +1341,13 @@ Tabbed::~Tabbed()
 Tab *Tabbed::addTab(Tab *tab)
 {
 	TabbedPrivate *tp = (TabbedPrivate *)p;
+	
 	Button *tabButton = tp->tabBar->createTab();
 
-	wzWidget *widget;
-	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->p->getWidget(), &widget);
-	
-	TabPage *tabPage = new TabPage(widget);
+	TabPage *tabPage = new TabPage();
 	tp->tabPages.push_back(tabPage);
 
+	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->p->getWidget(), tabPage->getWidget());
 	tab->p->button = tabButton;
 	tab->p->page = tabPage;
 	return tab;
