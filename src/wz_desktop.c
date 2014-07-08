@@ -226,7 +226,7 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 			wz_widget_set_internal_metadata((struct wzWidget *)tab, desktop->dockedWindows[dockPosition][i]);
 
 			// Add the tab to the tab bar.
-			wz_tab_bar_add_existing_tab(tabBar, tab);
+			wz_tab_bar_add_tab(tabBar, tab);
 
 			// If this window is selected (visible), select the corresponding tab.
 			if (wz_widget_get_visible((struct wzWidget *)desktop->dockedWindows[dockPosition][i]))

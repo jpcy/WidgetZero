@@ -104,7 +104,7 @@ static wzRect wz_tabbed_page_get_children_clip_rect(struct wzWidget *widget)
 	return wz_widget_get_absolute_rect(widget);
 }
 
-void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page)
+void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzWidget **page)
 {
 	wzTabbedPage newPage;
 	int tabBarHeight;
@@ -112,7 +112,8 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	assert(tabbed);
 
 	// Add the tab.
-	newPage.tab = wz_tab_bar_add_tab(tabbed->tabBar);
+	wz_tab_bar_add_tab(tabbed->tabBar, tab);
+	newPage.tab = tab;
 
 	// Create the page widget.
 	newPage.page = (struct wzWidget *)malloc(sizeof(struct wzWidget));
@@ -131,11 +132,6 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	wz_arr_push(tabbed->pages, newPage);
 
 	// Set return values.
-	if (tab)
-	{
-		*tab = newPage.tab;
-	}
-
 	if (page)
 	{
 		*page = newPage.page;

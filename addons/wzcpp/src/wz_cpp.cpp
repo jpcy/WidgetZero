@@ -192,7 +192,6 @@ class TabButton : public WidgetPrivate
 {
 public:
 	TabButton();
-	TabButton(wzButton *button);
 	~TabButton();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button_; }
@@ -213,8 +212,7 @@ public:
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
 	virtual void draw(wzRect clip);
-	TabButton *addTab();
-	TabButton *addTab(wzButton *button);
+	TabButton *createTab();
 
 protected:
 	wzTabBar *tabBar_;
@@ -1218,12 +1216,6 @@ TabButton::TabButton()
 	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
 }
 
-TabButton::TabButton(wzButton *button) : button_(button)
-{
-	wz_widget_set_metadata((wzWidget *)button_, this);
-	wz_widget_set_draw_function((wzWidget *)button_, DrawWidget);
-}
-
 TabButton::~TabButton()
 {
 	if (!wz_widget_get_desktop((wzWidget *)button_))
@@ -1288,17 +1280,9 @@ void TabBar::draw(wzRect clip)
 {
 }
 
-TabButton *TabBar::addTab()
+TabButton *TabBar::createTab()
 {
-	wzButton *button = wz_tab_bar_add_tab(tabBar_);
-	TabButton *tabButton = new TabButton(button);
-	tabs_.push_back(tabButton);
-	return tabButton;
-}
-
-TabButton *TabBar::addTab(wzButton *button)
-{
-	TabButton *tabButton = new TabButton(button);
+	TabButton *tabButton = new TabButton();
 	tabs_.push_back(tabButton);
 	return tabButton;
 }
@@ -1412,12 +1396,10 @@ Tabbed::~Tabbed()
 Tab *Tabbed::addTab(Tab *tab)
 {
 	TabbedPrivate *tp = (TabbedPrivate *)p;
+	TabButton *tabButton = tp->tabBar->createTab();
 
-	wzButton *button;
 	wzWidget *widget;
-
-	wz_tabbed_add_tab(tp->tabbed, &button, &widget);
-	TabButton *tabButton = tp->tabBar->addTab(button);
+	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->getWidget(), &widget);
 	
 	TabPage *tabPage = new TabPage(widget);
 	tp->tabPages.push_back(tabPage);

@@ -217,12 +217,7 @@ struct wzTabBar *wz_tab_bar_create()
 	return tabBar;
 }
 
-struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar)
-{
-	return wz_tab_bar_add_existing_tab(tabBar, wz_button_create(tabBar->base.desktop));
-}
-
-struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzButton *tab)
+void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 {
 	wzRect rect;
 	int i;
@@ -264,8 +259,6 @@ struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzB
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tab;
 	wz_invoke_event(&e, NULL);
-
-	return tab;
 }
 
 void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)

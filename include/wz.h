@@ -65,8 +65,8 @@ typedef enum
 	WZ_TYPE_STACK_LAYOUT,
 	WZ_TYPE_TAB_BAR,
 	WZ_TYPE_TAB_PAGE,
-	WZ_TYPE_TEXT_EDIT,
 	WZ_TYPE_TABBED,
+	WZ_TYPE_TEXT_EDIT,
 	WZ_MAX_WIDGET_TYPES = 64
 }
 wzWidgetType;
@@ -447,8 +447,7 @@ void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing)
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
 
 struct wzTabBar *wz_tab_bar_create();
-struct wzButton *wz_tab_bar_add_tab(struct wzTabBar *tabBar);
-struct wzButton *wz_tab_bar_add_existing_tab(struct wzTabBar *tabBar, struct wzButton *tab);
+void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);
 void wz_tab_bar_set_decrement_button(struct wzTabBar *tabBar, struct wzButton *button);
@@ -460,7 +459,7 @@ void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
 
 struct wzTabbed *wz_tabbed_create();
-void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
+void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzWidget **page);
 void wz_tabbed_set_tab_bar(struct wzTabbed *tabbed, struct wzTabBar *tabBar);
 
 struct wzTextEdit *wz_text_edit_create(int maximumTextLength);
