@@ -439,7 +439,7 @@ void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallbac
 
 struct wzTabbed *wz_tabbed_create();
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
-struct wzTabBar *wz_tabbed_get_tab_bar(struct wzTabbed *tabbed);
+void wz_tabbed_set_tab_bar(struct wzTabbed *tabbed, struct wzTabBar *tabBar);
 
 struct wzTextEdit *wz_text_edit_create(int maximumTextLength);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);

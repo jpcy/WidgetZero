@@ -1397,7 +1397,9 @@ TabbedPrivate::TabbedPrivate()
 {
 	tabbed = wz_tabbed_create();
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
-	tabBar.reset(new TabBar(wz_tabbed_get_tab_bar(tabbed)));
+
+	tabBar.reset(new TabBar());
+	wz_tabbed_set_tab_bar(tabbed, (wzTabBar *)tabBar->getWidget());
 	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
 }
 
