@@ -69,7 +69,7 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 			availableHeight -= stackLayout->spacing;
 		}
 
-		if ((widget->children[i]->stretch & WZ_STRETCH_VERTICAL) != 0)
+		if ((widget->children[i]->stretch & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// Count the number of widgets that stretch in the same direction as the the layout, so available space can be divided evenly between them.
 			nStretchingWidgets++;
@@ -100,7 +100,7 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 		childRect.x = child->margin.left;
 		childRect.y = y;
 
-		if ((child->stretch & WZ_STRETCH_HORIZONTAL) != 0)
+		if ((child->stretch & WZ_STRETCH_WIDTH) != 0)
 		{
 			// Fit the width of the layout.
 			childRect.w = rect.w - (child->margin.left + child->margin.right);
@@ -121,7 +121,7 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 			}
 		}
 
-		if ((child->stretch & WZ_STRETCH_VERTICAL) != 0)
+		if ((child->stretch & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// The available height is evenly divided between children that stretch vertically.
 			childRect.h = (int)(availableHeight / (float)nStretchingWidgets);
@@ -170,7 +170,7 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 			availableWidth -= stackLayout->spacing;
 		}
 
-		if ((widget->children[i]->stretch & WZ_STRETCH_HORIZONTAL) != 0)
+		if ((widget->children[i]->stretch & WZ_STRETCH_WIDTH) != 0)
 		{
 			// Count the number of widgets that stretch in the same direction as the the layout, so available space can be divided evenly between them.
 			nStretchingWidgets++;
@@ -201,7 +201,7 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 		childRect.x = x;
 		childRect.y = child->margin.top;
 
-		if ((child->stretch & WZ_STRETCH_HORIZONTAL) != 0)
+		if ((child->stretch & WZ_STRETCH_WIDTH) != 0)
 		{
 			// The available width is evenly divided between children that stretch horizontally.
 			childRect.w = (int)(availableWidth / (float)nStretchingWidgets);
@@ -212,7 +212,7 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 			childRect.w = child->rect.w;
 		}
 
-		if ((child->stretch & WZ_STRETCH_VERTICAL) != 0)
+		if ((child->stretch & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// Fit the height of the layout.
 			childRect.h = rect.h - (child->margin.top + child->margin.bottom);

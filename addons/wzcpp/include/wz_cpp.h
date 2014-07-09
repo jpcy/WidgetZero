@@ -79,7 +79,6 @@ public:
 	Widget *setPosition(int x, int y);
 	Widget *setSize(int w, int h);
 	Widget *setRect(int x, int y, int w, int h);
-	Widget *setAutosize(int autosize);
 	Widget *setStretch(int stretch);
 	Widget *setAlign(int align);
 	Widget *setMargin(int margin);

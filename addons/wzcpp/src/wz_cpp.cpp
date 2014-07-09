@@ -360,12 +360,6 @@ Widget *Widget::setRect(int x, int y, int w, int h)
 	return this;
 }
 
-Widget *Widget::setAutosize(int autosize)
-{
-	wz_widget_set_autosize(p->getWidget(), autosize);
-	return this;
-}
-
 Widget *Widget::setStretch(int stretch)
 {
 	wz_widget_set_stretch(p->getWidget(), stretch);

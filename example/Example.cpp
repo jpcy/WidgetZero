@@ -145,7 +145,7 @@ public:
 			desktop.add(groupBox);
 
 			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-			layout->setSpacing(8)->setAutosize(WZ_AUTOSIZE);
+			layout->setSpacing(8)->setStretch(WZ_STRETCH);
 			groupBox->add(layout);
 
 			wz::RadioButton *rb1 = new wz::RadioButton("Option 1");
@@ -167,15 +167,15 @@ public:
 			desktop.add(window);
 
 			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-			layout->setSpacing(8)->setMargin(8)->setAutosize(WZ_AUTOSIZE);
+			layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(layout);
 
 			wz::TextEdit *textEdit = new wz::TextEdit("this is a very long string so scrolling can be tested");
-			textEdit->setStretch(WZ_STRETCH_HORIZONTAL);
+			textEdit->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(textEdit);
 
 			wz::Button *button = new wz::Button("Another Button");
-			button->setStretch(WZ_STRETCH_HORIZONTAL);
+			button->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(button);
 
 			wz::Checkbox *checkbox = new wz::Checkbox("Checkbox");
@@ -197,7 +197,7 @@ public:
 			desktop.add(window);
 
 			wz::Tabbed *tabbed = new wz::Tabbed();
-			tabbed->setMargin(8)->setAutosize(WZ_AUTOSIZE);
+			tabbed->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(tabbed);
 
 			wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
@@ -221,7 +221,7 @@ public:
 			desktop.add(window);
 
 			wz::List *list = new wz::List();
-			list->setItems(listData, 17)->setMargin(8)->setAutosize(WZ_AUTOSIZE);
+			list->setItems(listData, 17)->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(list);
 		}
 
@@ -230,7 +230,7 @@ public:
 			layout->setSpacing(8)->setRect(50, 550, 400, 100);
 			desktop.add(layout);
 
-			layout->add(new wz::Button("Button A"))->setStretch(WZ_STRETCH_VERTICAL);
+			layout->add(new wz::Button("Button A"))->setStretch(WZ_STRETCH_HEIGHT);
 			layout->add(new wz::Button("Button B"))->setAlign(WZ_ALIGN_MIDDLE);
 			layout->add(new wz::Button("Button C"))->setAlign(WZ_ALIGN_BOTTOM);
 		}

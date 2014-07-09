@@ -50,7 +50,7 @@ struct wzFrame *wz_frame_create()
 	// Create content widget.
 	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(frame->content, 0, sizeof(struct wzWidget));
-	frame->content->autosize = WZ_AUTOSIZE;
+	frame->content->stretch = WZ_STRETCH;
 	wz_widget_add_child_widget_internal((struct wzWidget *)frame, frame->content);
 
 	return frame;

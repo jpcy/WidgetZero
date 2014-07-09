@@ -79,8 +79,6 @@ struct wzWidget
 	int drawPriority;
 	wzRect rect;
 
-	int autosize;
-
 	// Only used if the widget is the child of a layout.
 	int stretch;
 

@@ -104,27 +104,28 @@ bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result)
 /*
 ================================================================================
 
-AUTOSIZING
+STRETCHING (OUTSIDE LAYOUT)
 
 ================================================================================
 */
 
-// Applies autosizing to the provided rect.
-static wzRect wz_widget_calculate_autosized_rect(const struct wzWidget *widget, wzRect rect)
+// Applies stretching to the provided rect.
+static wzRect wz_widget_calculate_stretched_rect(const struct wzWidget *widget, wzRect rect)
 {
 	assert(widget);
 
-	if (widget->parent && (widget->autosize & WZ_AUTOSIZE) != 0)
+	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
+	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
 	{
 		wzSize parentSize = wz_widget_get_size(widget->parent);
 
-		if ((widget->autosize & WZ_AUTOSIZE_WIDTH) != 0)
+		if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)
 		{
 			rect.x = widget->margin.left;
 			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
 		}
 
-		if ((widget->autosize & WZ_AUTOSIZE_HEIGHT) != 0)
+		if ((widget->stretch & WZ_STRETCH_HEIGHT) != 0)
 		{
 			rect.y = widget->margin.top;
 			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
@@ -134,22 +135,23 @@ static wzRect wz_widget_calculate_autosized_rect(const struct wzWidget *widget, 
 	return rect;
 }
 
-static void wz_widget_set_autosize_rect_recursive(struct wzWidget *widget)
+static void wz_widget_set_stretched_rect_recursive(struct wzWidget *widget)
 {
 	int i;
 	bool recurse;
 
 	assert(widget);
 
-	// Don't do anything to widgets that aren't set to autosize, but still recurse on children.
+	// Don't do anything to widgets that aren't set to stretch, but still recurse on children.
 	recurse = true;
 
-	if ((widget->autosize & WZ_AUTOSIZE) != 0)
+	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
+	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
 	{
 		wzRect oldRect, newRect;
 
 		oldRect = wz_widget_get_rect(widget);
-		newRect = wz_widget_calculate_autosized_rect(widget, oldRect);
+		newRect = wz_widget_calculate_stretched_rect(widget, oldRect);
 
 		if (widget->vtable.set_rect)
 		{
@@ -169,7 +171,7 @@ static void wz_widget_set_autosize_rect_recursive(struct wzWidget *widget)
 	{
 		for (i = 0; i < wz_arr_len(widget->children); i++)
 		{
-			wz_widget_set_autosize_rect_recursive(widget->children[i]);
+			wz_widget_set_stretched_rect_recursive(widget->children[i]);
 		}
 	}
 }
@@ -344,8 +346,8 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 	assert(widget);
 	oldRect = widget->rect;
 
-	// Apply autosizing.
-	rect = wz_widget_calculate_autosized_rect(widget, rect);
+	// Apply stretching.
+	rect = wz_widget_calculate_stretched_rect(widget, rect);
 
 	if (widget->vtable.set_rect)
 	{
@@ -356,10 +358,10 @@ void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 		widget->rect = rect;
 	}
 
-	// Autosize children too.
+	// Stretch children too.
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_set_autosize_rect_recursive(widget->children[i]);
+		wz_widget_set_stretched_rect_recursive(widget->children[i]);
 	}
 
 	// If the parent is a layout widget, it may need refreshing.
@@ -401,14 +403,17 @@ void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 	assert(widget);
 	widget->margin = margin;
 
-	// If the parent is a layout widget, refresh it.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
+	if (widget->parent)
 	{
-		wz_widget_refresh_rect(widget->parent);
-	}
-	else if ((widget->autosize & WZ_AUTOSIZE) != 0)
-	{
-		wz_widget_set_autosize_rect_recursive(widget);
+		// If the parent is a layout widget, refresh it.
+		if (wz_widget_is_layout(widget->parent))
+		{
+			wz_widget_refresh_rect(widget->parent);
+		}
+		else if ((widget->stretch & WZ_STRETCH) != 0)
+		{
+			wz_widget_set_stretched_rect_recursive(widget);
+		}
 	}
 }
 
@@ -426,23 +431,6 @@ wzBorder wz_widget_get_margin(const struct wzWidget *widget)
 {
 	assert(widget);
 	return widget->margin;
-}
-
-void wz_widget_set_autosize(struct wzWidget *widget, int autosize)
-{
-	assert(widget);
-	widget->autosize = autosize;
-
-	if ((widget->autosize & WZ_AUTOSIZE) != 0)
-	{
-		wz_widget_set_autosize_rect_recursive(widget);
-	}
-}
-
-int wz_widget_get_autosize(const struct wzWidget *widget)
-{
-	assert(widget);
-	return widget->autosize;
 }
 
 void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
@@ -698,11 +686,10 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	{
 		wz_widget_refresh_rect(widget);
 	}
-
-	// Autosize child.
-	if ((child->autosize & WZ_AUTOSIZE) != 0)
+	// Stretch child.
+	else if ((child->stretch & WZ_STRETCH) != 0)
 	{
-		wz_widget_set_autosize_rect_recursive(child);
+		wz_widget_set_stretched_rect_recursive(child);
 	}
 }
 
