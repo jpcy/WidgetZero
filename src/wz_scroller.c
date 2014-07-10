@@ -334,9 +334,12 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller);
 }
 
-struct wzScroller *wz_scroller_create()
+struct wzScroller *wz_scroller_create(struct wzButton *decrementButton, struct wzButton *incrementButton)
 {
 	struct wzScroller *scroller;
+
+	assert(decrementButton);
+	assert(incrementButton);
 
 	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
@@ -348,38 +351,20 @@ struct wzScroller *wz_scroller_create()
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
 	scroller->stepValue = 1;
 
+	scroller->decrementButton = decrementButton;
+	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
+	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
+	wz_scroller_decrement_button_update_rect(scroller);
+
+	scroller->incrementButton = incrementButton;
+	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
+	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
+	wz_scroller_increment_button_update_rect(scroller);
+
 	scroller->nub = wz_scroller_nub_create(scroller);
 	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->nub);
 
 	return scroller;
-}
-
-void wz_scroller_set_decrement_button(struct wzScroller *scroller, struct wzButton *button)
-{
-	assert(scroller);
-	assert(button);
-
-	if (scroller->decrementButton)
-		return;
-
-	scroller->decrementButton = button;
-	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
-	wz_scroller_decrement_button_update_rect(scroller);
-}
-
-void wz_scroller_set_increment_button(struct wzScroller *scroller, struct wzButton *button)
-{
-	assert(scroller);
-	assert(button);
-
-	if (scroller->incrementButton)
-		return;
-
-	scroller->incrementButton = button;
-	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
-	wz_scroller_increment_button_update_rect(scroller);
 }
 
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType)

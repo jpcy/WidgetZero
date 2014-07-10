@@ -374,8 +374,7 @@ struct wzFrame *wz_frame_create();
 
 struct wzLabel *wz_label_create();
 
-struct wzList *wz_list_create();
-void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller);
+struct wzList *wz_list_create(struct wzScroller *scroller);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
@@ -408,9 +407,7 @@ typedef enum
 }
 wzScrollerType;
 
-struct wzScroller *wz_scroller_create();
-void wz_scroller_set_decrement_button(struct wzScroller *scroller, struct wzButton *button);
-void wz_scroller_set_increment_button(struct wzScroller *scroller, struct wzButton *button);
+struct wzScroller *wz_scroller_create(struct wzButton *decrementButton, struct wzButton *incrementButton);
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
@@ -436,13 +433,11 @@ void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLay
 void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
 
-struct wzTabBar *wz_tab_bar_create();
+struct wzTabBar *wz_tab_bar_create(struct wzButton *decrementButton, struct wzButton *incrementButton);
 void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);
-void wz_tab_bar_set_decrement_button(struct wzTabBar *tabBar, struct wzButton *button);
 struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
-void wz_tab_bar_set_increment_button(struct wzTabBar *tabBar, struct wzButton *button);
 struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
 struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
 void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
@@ -450,9 +445,8 @@ void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallbac
 
 struct wzWidget *wz_tab_page_create();
 
-struct wzTabbed *wz_tabbed_create();
+struct wzTabbed *wz_tabbed_create(struct wzTabBar *tabBar);
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzWidget *page);
-void wz_tabbed_set_tab_bar(struct wzTabbed *tabbed, struct wzTabBar *tabBar);
 
 struct wzTextEdit *wz_text_edit_create(int maximumTextLength);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);

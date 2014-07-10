@@ -926,15 +926,14 @@ Label *Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 
 ListPrivate::ListPrivate()
 {
-	list = wz_list_create();
+	scroller.reset(new Scroller());
+	wz_widget_set_size_args(scroller->p->getWidget(), 16, 0);
+
+	list = wz_list_create((wzScroller *)scroller->p->getWidget());
 	wz_list_set_item_height(list, itemHeight);
 	wz_list_set_items_border_args(list, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
 	wz_widget_set_metadata((wzWidget *)list, this);
 	wz_widget_set_draw_function((wzWidget *)list, DrawWidget);
-
-	scroller.reset(new Scroller());
-	wz_widget_set_size_args(scroller->p->getWidget(), 16, 0);
-	wz_list_set_scroller(list, (wzScroller *)scroller->p->getWidget());
 }
 
 ListPrivate::~ListPrivate()
@@ -1071,16 +1070,13 @@ RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 
 ScrollerPrivate::ScrollerPrivate()
 {
-	scroller = wz_scroller_create();
+	decrementButton.reset(new Button("-"));
+	incrementButton.reset(new Button("+"));
+
+	scroller = wz_scroller_create((wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 	wz_widget_set_draw_function((wzWidget *)scroller, DrawWidget);
 	wz_scroller_set_nub_size(scroller, 16);
-
-	decrementButton.reset(new Button("-"));
-	wz_scroller_set_decrement_button(scroller, (wzButton *)decrementButton->p->getWidget());
-
-	incrementButton.reset(new Button("+"));
-	wz_scroller_set_increment_button(scroller, (wzButton *)incrementButton->p->getWidget());
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
 	wz_widget_set_size_args(decrementButton->p->getWidget(), 16, 16);
@@ -1201,16 +1197,14 @@ Widget *StackLayout::add(Widget *widget)
 
 TabBar::TabBar()
 {
-	tabBar_ = wz_tab_bar_create();
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-
 	decrementButton_.reset(new Button("<"));
 	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_decrement_button(tabBar_, (wzButton *)decrementButton_->p->getWidget());
 
 	incrementButton_.reset(new Button(">"));
 	wz_widget_set_width(incrementButton_->p->getWidget(), 14);
-	wz_tab_bar_set_increment_button(tabBar_, (wzButton *)incrementButton_->p->getWidget());
+
+	tabBar_ = wz_tab_bar_create((wzButton *)decrementButton_->p->getWidget(), (wzButton *)incrementButton_->p->getWidget());
+	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 }
 
 TabBar::~TabBar()
@@ -1293,12 +1287,11 @@ Widget *Tab::add(Widget *widget)
 
 TabbedPrivate::TabbedPrivate()
 {
-	tabbed = wz_tabbed_create();
-	wz_widget_set_metadata((wzWidget *)tabbed, this);
-
 	tabBar.reset(new TabBar());
-	wz_tabbed_set_tab_bar(tabbed, (wzTabBar *)tabBar->getWidget());
 	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
+
+	tabbed = wz_tabbed_create((wzTabBar *)tabBar->getWidget());
+	wz_widget_set_metadata((wzWidget *)tabbed, this);
 }
 
 TabbedPrivate::~TabbedPrivate()

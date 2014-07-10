@@ -117,15 +117,22 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-struct wzTabbed *wz_tabbed_create()
+struct wzTabbed *wz_tabbed_create(struct wzTabBar *tabBar)
 {
 	struct wzTabbed *tabbed;
+
+	assert(tabBar);
 
 	tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
 	memset(tabbed, 0, sizeof(struct wzTabbed));
 	tabbed->base.type = WZ_TYPE_TABBED;
 	tabbed->base.vtable.destroy = wz_tabbed_destroy;
 	tabbed->base.vtable.set_rect = wz_tabbed_set_rect;
+
+	tabbed->tabBar = tabBar;
+	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
+	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
+
 	return tabbed;
 }
 
@@ -153,17 +160,4 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzW
 	newPage.tab = tab;
 	newPage.page = page;
 	wz_arr_push(tabbed->pages, newPage);
-}
-
-void wz_tabbed_set_tab_bar(struct wzTabbed *tabbed, struct wzTabBar *tabBar)
-{
-	assert(tabbed);
-	assert(tabBar);
-
-	if (tabbed->tabBar)
-		return;
-
-	tabbed->tabBar = tabBar;
-	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
 }

@@ -274,9 +274,11 @@ static void wz_list_destroy(struct wzWidget *widget)
 	wz_arr_free(list->item_selected_callbacks);
 }
 
-struct wzList *wz_list_create()
+struct wzList *wz_list_create(struct wzScroller *scroller)
 {
 	struct wzList *list;
+
+	assert(scroller);
 
 	list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
@@ -293,22 +295,14 @@ struct wzList *wz_list_create()
 	list->pressedItem = -1;
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
-	return list;
-}
-
-void wz_list_set_scroller(struct wzList *list, struct wzScroller *scroller)
-{
-	assert(list);
-	assert(scroller);
-
-	if (list->scroller)
-		return;
 
 	list->scroller = scroller;
 	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
+
+	return list;
 }
 
 struct wzScroller *wz_list_get_scroller(struct wzList *list)
