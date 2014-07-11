@@ -205,7 +205,7 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 		tabBarHeight = wz_widget_get_height((struct wzWidget *)tabBar);
 
 		// Assume space has already been made for the tab bar below the window.
-		wz_widget_set_rect_args((struct wzWidget *)tabBar, windowRect.x, windowRect.y + windowRect.h, windowRect.w, tabBarHeight);
+		wz_widget_set_rect_args_internal((struct wzWidget *)tabBar, windowRect.x, windowRect.y + windowRect.h, windowRect.w, tabBarHeight);
 
 		// Add one tab for each window.
 		for (i = 0; i < wz_arr_len(desktop->dockedWindows[dockPosition]); i++)
@@ -270,11 +270,11 @@ void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWi
 					if (j == k)
 						continue;
 
-					wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][k], rect);
+					wz_widget_set_rect_internal((struct wzWidget *)desktop->dockedWindows[i][k], rect);
 				}
 
 				// Update the tab bar too.
-				wz_widget_set_rect_args((struct wzWidget *)desktop->dockTabBars[i], rect.x, rect.y + rect.h, rect.w, wz_widget_get_height((struct wzWidget *)desktop->dockTabBars[i]));
+				wz_widget_set_rect_args_internal((struct wzWidget *)desktop->dockTabBars[i], rect.x, rect.y + rect.h, rect.w, wz_widget_get_height((struct wzWidget *)desktop->dockTabBars[i]));
 				return;
 			}
 		}
@@ -346,13 +346,13 @@ static void wz_desktop_update_docking_rects(struct wzDesktop *desktop)
 				break;
 			}
 
-			wz_widget_set_rect((struct wzWidget *)desktop->dockTabBars[i], tabBarRect);
+			wz_widget_set_rect_internal((struct wzWidget *)desktop->dockTabBars[i], tabBarRect);
 		}
 
 		// Set window rects.
 		for (j = 0; j < wz_arr_len(desktop->dockedWindows[i]); j++)
 		{
-			wz_widget_set_rect((struct wzWidget *)desktop->dockedWindows[i][j], windowRect);
+			wz_widget_set_rect_internal((struct wzWidget *)desktop->dockedWindows[i][j], windowRect);
 		}
 	}
 }
@@ -377,7 +377,7 @@ static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *w
 	wz_window_dock(window);
 
 	// Resize the window to match the dock preview.
-	wz_widget_set_rect((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
+	wz_widget_set_rect_internal((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)desktop->dockPreview));
 
 	// Resize the other windows docked at this position to match.
 	wz_desktop_update_docked_window_rect(desktop, window);
@@ -466,11 +466,11 @@ void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window
 
 			if (dockPosition == WZ_DOCK_POSITION_SOUTH)
 			{
-				wz_widget_set_height(widget, widget->rect.h + (desktop->base.rect.h - (widget->rect.y + widget->rect.h)));
+				wz_widget_set_height_internal(widget, widget->rect.h + (desktop->base.rect.h - (widget->rect.y + widget->rect.h)));
 			}
 			else if (dockPosition == WZ_DOCK_POSITION_EAST || dockPosition == WZ_DOCK_POSITION_WEST)
 			{
-				wz_widget_set_height(widget, desktop->base.rect.h);
+				wz_widget_set_height_internal(widget, desktop->base.rect.h);
 			}
 		}
 	}
@@ -513,10 +513,10 @@ static void wz_desktop_update_dock_icon_positions(struct wzDesktop *desktop)
 	centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
 	centerH = (int)(ds.h / 2.0f - dis.h / 2.0f);
 
-	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_NORTH], centerW, (int)(ds.h * percent));
-	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_SOUTH], centerW, (int)(ds.h * (1.0f - percent) - dis.h));
-	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_EAST], (int)(ds.w * (1.0f - percent) - dis.h), centerH);
-	wz_widget_set_position_args((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_WEST], (int)(ds.w * percent), centerH);
+	wz_widget_set_position_args_internal((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_NORTH], centerW, (int)(ds.h * percent));
+	wz_widget_set_position_args_internal((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_SOUTH], centerW, (int)(ds.h * (1.0f - percent) - dis.h));
+	wz_widget_set_position_args_internal((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_EAST], (int)(ds.w * (1.0f - percent) - dis.h), centerH);
+	wz_widget_set_position_args_internal((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_WEST], (int)(ds.w * percent), centerH);
 }
 
 void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata)
@@ -545,7 +545,10 @@ void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		wz_widget_set_size_args((struct wzWidget *)desktop->dockIcons[i], w, h);
+		wzSize size;
+		size.w = w;
+		size.h = h;
+		wz_widget_set_size_internal((struct wzWidget *)desktop->dockIcons[i], size);
 	}
 
 	wz_desktop_update_dock_icon_positions(desktop);
@@ -593,7 +596,7 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDock
 			rect.h -= wz_widget_get_height((struct wzWidget *)desktop->dockTabBars[dockPosition]);
 		}
 
-		wz_widget_set_rect((struct wzWidget *)desktop->dockPreview, rect);
+		wz_widget_set_rect_internal((struct wzWidget *)desktop->dockPreview, rect);
 	}
 	else
 	{
@@ -634,7 +637,7 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDock
 			rect.h = desktop->base.rect.h;
 		}
 
-		wz_widget_set_rect((struct wzWidget *)desktop->dockPreview, rect);
+		wz_widget_set_rect_internal((struct wzWidget *)desktop->dockPreview, rect);
 	}
 }
 
@@ -1265,7 +1268,7 @@ struct wzDesktop *wz_desktop_create()
 		desktop->dockIcons[i] = wz_label_create(desktop);
 		widget = (struct wzWidget *)desktop->dockIcons[i];
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
-		wz_widget_set_draw_function(widget, wz_desktop_draw_dock_icon);
+		wz_widget_set_draw_callback(widget, wz_desktop_draw_dock_icon);
 		wz_widget_set_visible(widget, false);
 		wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
 	}
@@ -1277,7 +1280,7 @@ struct wzDesktop *wz_desktop_create()
 	desktop->dockPreview = wz_label_create(desktop);
 	widget = (struct wzWidget *)desktop->dockPreview;
 	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
-	wz_widget_set_draw_function(widget, wz_desktop_draw_dock_preview);
+	wz_widget_set_draw_callback(widget, wz_desktop_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
 	wz_widget_add_child_widget_internal((struct wzWidget *)desktop, widget);
 
@@ -1388,7 +1391,7 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 		}
 	}
 
-	wz_widget_set_rect(desktop->content, rect);
+	wz_widget_set_rect_internal(desktop->content, rect);
 }
 
 void wz_desktop_measure_text(struct wzDesktop *desktop, const char *text, int n, int *width, int *height)

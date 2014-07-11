@@ -269,7 +269,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 			rect.x = mouseX - rect.w / 2;
 		}
 
-		wz_widget_set_rect(widget, rect);
+		wz_widget_set_rect_internal(widget, rect);
 		wz_desktop_update_content_rect(widget->desktop);
 	}
 
@@ -347,7 +347,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		return; // Not dragging, don't call wz_desktop_update_content_rect.
 	}
 
-	wz_widget_set_rect(widget, rect);
+	wz_widget_set_rect_internal(widget, rect);
 
 	// Resizing a docked window: 
 	if (wz_desktop_get_window_dock_position(widget->desktop, window) != WZ_DOCK_POSITION_NONE)
@@ -383,7 +383,7 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	contentRect.w = rect.w - window->borderSize * 2;
 	contentRect.h = rect.h - (window->headerHeight + window->borderSize * 2);
 
-	wz_widget_set_rect(window->content, contentRect);
+	wz_widget_set_rect_internal(window->content, contentRect);
 }
 
 static struct wzWidget *wz_window_get_content_widget(struct wzWidget *widget)

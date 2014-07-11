@@ -29,9 +29,10 @@ SOFTWARE.
 
 typedef struct
 {
-	void (*destroy)(struct wzWidget *widget);
+	wzWidgetDrawCallback draw;
+	wzWidgetMeasureCallback measure;
 
-	void (*draw)(struct wzWidget *widget, wzRect clip);
+	void (*destroy)(struct wzWidget *widget);
 
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
@@ -77,6 +78,10 @@ struct wzWidget
 {
 	wzWidgetType type;
 	int drawPriority;
+
+	// Explicitly set by the user.
+	wzRect userRect;
+
 	wzRect rect;
 
 	// Only used if the widget is the child of a layout.
@@ -130,6 +135,15 @@ enum
 };
 
 void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
+
+void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y);
+void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position);
+void wz_widget_set_width_internal(struct wzWidget *widget, int w);
+void wz_widget_set_height_internal(struct wzWidget *widget, int h);
+void wz_widget_set_size_args_internal(struct wzWidget *widget, int w, int h);
+void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size);
+void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int w, int h);
+void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect);
 
 void wz_widget_refresh_rect(struct wzWidget *widget);
 

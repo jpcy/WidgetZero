@@ -90,7 +90,7 @@ static void wz_tabbed_set_rect(struct wzWidget *widget, wzRect rect)
 	tabbed = (struct wzTabbed *)widget;
 
 	// Set the tab bar width to match.
-	wz_widget_set_width((struct wzWidget *)tabbed->tabBar, rect.w);
+	wz_widget_set_width_internal((struct wzWidget *)tabbed->tabBar, rect.w);
 
 	// Resize the pages to take up the remaining space.
 	pageSize.w = rect.w;
@@ -98,7 +98,7 @@ static void wz_tabbed_set_rect(struct wzWidget *widget, wzRect rect)
 
 	for (i = 0; i < wz_arr_len(tabbed->pages); i++)
 	{
-		wz_widget_set_size((struct wzWidget *)tabbed->pages[i].page, pageSize);
+		wz_widget_set_size_internal((struct wzWidget *)tabbed->pages[i].page, pageSize);
 	}
 }
 
@@ -154,7 +154,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzW
 
 	// Set the page widget rect.
 	tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);
-	wz_widget_set_rect_args(page, 0, tabBarHeight, tabbed->base.rect.w, tabbed->base.rect.h - tabBarHeight);
+	wz_widget_set_rect_args_internal(page, 0, tabBarHeight, tabbed->base.rect.w, tabbed->base.rect.h - tabBarHeight);
 
 	// Add the tabbed page.
 	newPage.tab = tab;

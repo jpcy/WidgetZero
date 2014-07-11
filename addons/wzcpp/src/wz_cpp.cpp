@@ -35,15 +35,16 @@ struct ListPrivate;
 struct WidgetPrivate
 {
 	virtual ~WidgetPrivate();
+	virtual void onAdded() {}
 	virtual const wzWidget *getWidget() const { return NULL; }
 	virtual wzWidget *getWidget() { return NULL; }
-	virtual void autosize() {};
-	virtual void draw(wzRect clip) {};
-	virtual void handleEvent(wzEvent *e) {};
+	virtual wzSize measure() { wzSize s; s.w = s.h = 0; return s; }
+	virtual void draw(wzRect clip) {}
+	virtual void handleEvent(wzEvent *e) {}
 
 	wzRenderer *getRenderer();
 	void add(Widget *widget);
-	void autosizeRecursive();
+	void onAddedRecursive();
 	
 	std::vector<Widget *> children;
 };
@@ -54,7 +55,7 @@ struct ButtonPrivate : public WidgetPrivate
 	~ButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	enum DrawStyle
@@ -74,7 +75,7 @@ struct CheckboxPrivate : public WidgetPrivate
 	~CheckboxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzButton *button;
@@ -87,7 +88,7 @@ struct ComboPrivate : public WidgetPrivate
 	~ComboPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzCombo *combo;
@@ -115,10 +116,12 @@ struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate();
 	~GroupBoxPrivate();
+	virtual void onAdded();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
 	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
-	virtual void autosize();
 	virtual void draw(wzRect clip);
+
+	void refreshMargin();
 
 	wzFrame *frame;
 	std::string label;
@@ -130,7 +133,7 @@ struct LabelPrivate : public WidgetPrivate
 	~LabelPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzLabel *label;
@@ -163,7 +166,7 @@ struct RadioButtonPrivate : public WidgetPrivate
 	~RadioButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzButton *button;
@@ -258,7 +261,7 @@ struct TextEditPrivate : public WidgetPrivate
 	~TextEditPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
 	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
-	virtual void autosize();
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzTextEdit *textEdit;
@@ -270,10 +273,12 @@ struct WindowPrivate : public WidgetPrivate
 {
 	WindowPrivate();
 	~WindowPrivate();
+	virtual void onAdded();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
-	virtual void autosize();
 	virtual void draw(wzRect clip);
+
+	void refreshHeaderHeight();
 
 	wzWindow *window;
 	std::string title;
@@ -284,6 +289,11 @@ struct WindowPrivate : public WidgetPrivate
 static void DrawWidget(wzWidget *widget, wzRect clip)
 {
 	((WidgetPrivate *)wz_widget_get_metadata(widget))->draw(clip);
+}
+
+static wzSize MeasureWidget(wzWidget *widget)
+{
+	return ((WidgetPrivate *)wz_widget_get_metadata(widget))->measure();
 }
 
 static void HandleEvent(wzEvent *e)
@@ -321,17 +331,17 @@ wzRenderer *WidgetPrivate::getRenderer()
 void WidgetPrivate::add(Widget *widget)
 {
 	wz_widget_add_child_widget(getWidget(), widget->p->getWidget());
-	widget->p->autosizeRecursive();
 	children.push_back(widget);
+	widget->p->onAddedRecursive();
 }
 
-void WidgetPrivate::autosizeRecursive()
+void WidgetPrivate::onAddedRecursive()
 {
-	autosize();
+	onAdded();
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
-		children[i]->p->autosizeRecursive();
+		children[i]->p->onAddedRecursive();
 	}
 }
 
@@ -396,7 +406,8 @@ ButtonPrivate::ButtonPrivate() : drawStyle(Normal)
 {
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
-	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
+	wz_widget_set_draw_callback((wzWidget *)button, DrawWidget);
+	wz_widget_set_measure_callback((wzWidget *)button, MeasureWidget);
 }
 
 ButtonPrivate::~ButtonPrivate()
@@ -407,17 +418,23 @@ ButtonPrivate::~ButtonPrivate()
 	}
 }
 
-void ButtonPrivate::autosize()
+wzSize ButtonPrivate::measure()
 {
-	if (!getRenderer())
-		return;
-
-	// Calculate size based on label text plus padding.
 	wzSize size;
-	getRenderer()->measure_text(getRenderer(), label.c_str(), 0, &size.w, &size.h);
-	size.w += 16;
-	size.h += 8;
-	wz_widget_set_size((wzWidget *)button, size);
+
+	if (!getRenderer())
+	{
+		size.w = size.h = 0;
+	}
+	else
+	{
+		// Calculate size based on label text plus padding.
+		getRenderer()->measure_text(getRenderer(), label.c_str(), 0, &size.w, &size.h);
+		size.w += 16;
+		size.h += 8;
+	}
+
+	return size;
 }
 
 void ButtonPrivate::draw(wzRect clip)
@@ -459,7 +476,7 @@ Button *Button::setLabel(const std::string &label)
 {
 	ButtonPrivate *bp = (ButtonPrivate *)p;
 	bp->label = label;
-	bp->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
 
@@ -470,7 +487,8 @@ CheckboxPrivate::CheckboxPrivate()
 	button = wz_button_create();
 	wzWidget *widget = (wzWidget *)button;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
+	wz_widget_set_measure_callback(widget, MeasureWidget);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
@@ -482,12 +500,20 @@ CheckboxPrivate::~CheckboxPrivate()
 	}
 }
 
-void CheckboxPrivate::autosize()
+wzSize CheckboxPrivate::measure()
 {
-	if (!getRenderer())
-		return;
+	wzSize size;
 
-	wz_widget_set_size((wzWidget *)button, getRenderer()->measure_checkbox(getRenderer(), label.c_str()));
+	if (!getRenderer())
+	{
+		size.w = size.h = 0;
+	}
+	else
+	{
+		size = getRenderer()->measure_checkbox(getRenderer(), label.c_str());
+	}
+
+	return size;
 }
 
 void CheckboxPrivate::draw(wzRect clip)
@@ -522,7 +548,7 @@ Checkbox *Checkbox::setLabel(const std::string &label)
 {
 	CheckboxPrivate *cp = (CheckboxPrivate *)p;
 	cp->label = label;
-	cp->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
 
@@ -533,7 +559,8 @@ ComboPrivate::ComboPrivate()
 	combo = wz_combo_create();
 	wzWidget *widget = (wzWidget *)combo;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
+	wz_widget_set_measure_callback(widget, MeasureWidget);
 
 	list.reset(new List());
 	wz_combo_set_list(combo, (wzList *)list->p->getWidget());
@@ -547,26 +574,32 @@ ComboPrivate::~ComboPrivate()
 	}
 }
 
-void ComboPrivate::autosize()
+wzSize ComboPrivate::measure()
 {
-	if (!getRenderer())
-		return;
-
-	// Calculate size based on the biggest item text plus padding.
 	wzSize size;
-	size.w = size.h = 0;
 
-	for (int i = 0; i < wz_list_get_num_items(wz_combo_get_list(combo)); i++)
+	if (!getRenderer())
 	{
-		wzSize textSize;
-		getRenderer()->measure_text(getRenderer(), items[i], 0, &textSize.w, &textSize.h);
-		size.w = WZ_MAX(size.w, textSize.w);
-		size.h = WZ_MAX(size.h, textSize.h);
+		size.w = size.h = 0;
+	}
+	else
+	{
+		// Calculate size based on the biggest item text plus padding.
+		size.w = size.h = 0;
+
+		for (int i = 0; i < wz_list_get_num_items(wz_combo_get_list(combo)); i++)
+		{
+			wzSize textSize;
+			getRenderer()->measure_text(getRenderer(), items[i], 0, &textSize.w, &textSize.h);
+			size.w = WZ_MAX(size.w, textSize.w);
+			size.h = WZ_MAX(size.h, textSize.h);
+		}
+
+		size.w += 50;
+		size.h += 4;
 	}
 
-	size.w += 50;
-	size.h += 4;
-	wz_widget_set_size((wzWidget *)combo, size);
+	return size;
 }
 
 void ComboPrivate::draw(wzRect clip)
@@ -592,7 +625,7 @@ Combo *Combo::setItems(const char **items, int nItems)
 	ComboPrivate *cp = (ComboPrivate *)p;
 	cp->items = items;
 	cp->list->setItems(items, nItems);
-	cp->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
 
@@ -773,7 +806,7 @@ void DockTabBar::handleEvent(wzEvent *e)
 	else if (e->base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
 	{
 		ButtonPrivate *tab = (ButtonPrivate *)wz_widget_get_metadata((wzWidget *)e->tabBar.tab);
-		tab->autosize();
+		wz_widget_resize_to_measured(tab->getWidget());
 	}
 }
 
@@ -784,7 +817,7 @@ GroupBoxPrivate::GroupBoxPrivate()
 	frame = wz_frame_create();
 	wzWidget *widget = (wzWidget *)frame;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
 	wz_widget_set_size_args(widget, 200, 200);
 }
 
@@ -796,7 +829,12 @@ GroupBoxPrivate::~GroupBoxPrivate()
 	}
 }
 
-void GroupBoxPrivate::autosize()
+void GroupBoxPrivate::onAdded()
+{
+	refreshMargin();
+}
+
+void GroupBoxPrivate::refreshMargin()
 {
 	if (!getRenderer())
 		return;
@@ -836,7 +874,7 @@ GroupBox *GroupBox::setLabel(const std::string &label)
 {
 	GroupBoxPrivate *gp = (GroupBoxPrivate *)p;
 	gp->label = label;
-	gp->autosize();
+	gp->refreshMargin();
 	return this;
 }
 
@@ -853,7 +891,8 @@ LabelPrivate::LabelPrivate() : r(255), g(255), b(255)
 	label = wz_label_create();
 	wzWidget *widget = (wzWidget *)label;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
+	wz_widget_set_measure_callback(widget, MeasureWidget);
 }
 
 LabelPrivate::~LabelPrivate()
@@ -864,14 +903,20 @@ LabelPrivate::~LabelPrivate()
 	}
 }
 
-void LabelPrivate::autosize()
+wzSize LabelPrivate::measure()
 {
-	if (!getRenderer())
-		return;
-
 	wzSize size;
-	getRenderer()->measure_text(getRenderer(), text.c_str(), 0, &size.w, &size.h);
-	wz_widget_set_size((wzWidget *)label, size);
+
+	if (!getRenderer())
+	{
+		size.w = size.h = 0;
+	}
+	else
+	{
+		getRenderer()->measure_text(getRenderer(), text.c_str(), 0, &size.w, &size.h);
+	}
+
+	return size;
 }
 
 void LabelPrivate::draw(wzRect clip)
@@ -908,7 +953,7 @@ Label *Label::setText(const char *format, ...)
 
 	LabelPrivate *lp = (LabelPrivate *)p;
 	lp->text = buffer;
-	lp->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 
 	return this;
 }
@@ -933,7 +978,7 @@ ListPrivate::ListPrivate()
 	wz_list_set_item_height(list, itemHeight);
 	wz_list_set_items_border_args(list, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
 	wz_widget_set_metadata((wzWidget *)list, this);
-	wz_widget_set_draw_function((wzWidget *)list, DrawWidget);
+	wz_widget_set_draw_callback((wzWidget *)list, DrawWidget);
 }
 
 ListPrivate::~ListPrivate()
@@ -991,7 +1036,8 @@ RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
 {
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
-	wz_widget_set_draw_function((wzWidget *)button, DrawWidget);
+	wz_widget_set_draw_callback((wzWidget *)button, DrawWidget);
+	wz_widget_set_measure_callback((wzWidget *)button, MeasureWidget);
 }
 
 RadioButtonPrivate::~RadioButtonPrivate()
@@ -1002,12 +1048,20 @@ RadioButtonPrivate::~RadioButtonPrivate()
 	}
 }
 
-void RadioButtonPrivate::autosize()
+wzSize RadioButtonPrivate::measure()
 {
-	if (!getRenderer())
-		return;
+	wzSize size;
 
-	wz_widget_set_size((wzWidget *)button, getRenderer()->measure_radio_button(getRenderer(), label.c_str()));
+	if (!getRenderer())
+	{
+		size.w = size.h = 0;
+	}
+	else
+	{
+		size = getRenderer()->measure_radio_button(getRenderer(), label.c_str());
+	}
+
+	return size;
 }
 
 void RadioButtonPrivate::draw(wzRect clip)
@@ -1042,7 +1096,7 @@ RadioButton *RadioButton::setLabel(const std::string &label)
 {
 	RadioButtonPrivate *rp = (RadioButtonPrivate *)p;
 	rp->label = label;
-	p->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
 
@@ -1075,7 +1129,7 @@ ScrollerPrivate::ScrollerPrivate()
 
 	scroller = wz_scroller_create((wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
 	wz_widget_set_metadata((wzWidget *)scroller, this);
-	wz_widget_set_draw_function((wzWidget *)scroller, DrawWidget);
+	wz_widget_set_draw_callback((wzWidget *)scroller, DrawWidget);
 	wz_scroller_set_nub_size(scroller, 16);
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
@@ -1233,7 +1287,7 @@ TabPage::TabPage()
 {
 	widget_ = wz_tab_page_create();
 	wz_widget_set_metadata(widget_, this);
-	wz_widget_set_draw_function(widget_, DrawWidget);
+	wz_widget_set_draw_callback(widget_, DrawWidget);
 }
 
 void TabPage::draw(wzRect clip)
@@ -1278,8 +1332,8 @@ Tab *Tab::setLabel(const std::string &label)
 Widget *Tab::add(Widget *widget)
 {
 	wz_widget_add_child_widget(p->page->getWidget(), widget->p->getWidget());
-	widget->p->autosizeRecursive();
 	p->children.push_back(widget);
+	widget->p->onAddedRecursive();
 	return widget;
 }
 
@@ -1348,7 +1402,8 @@ TextEditPrivate::TextEditPrivate()
 	wz_text_edit_set_border_args(textEdit, borderSize, borderSize, borderSize, borderSize);
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
+	wz_widget_set_measure_callback(widget, MeasureWidget);
 }
 
 TextEditPrivate::~TextEditPrivate()
@@ -1359,15 +1414,24 @@ TextEditPrivate::~TextEditPrivate()
 	}
 }
 
-void TextEditPrivate::autosize()
+wzSize TextEditPrivate::measure()
 {
-	if (!getRenderer())
-		return;
+	wzSize size;
 
-	const char *text = wz_text_edit_get_text(textEdit);
-	int h;
-	getRenderer()->measure_text(getRenderer(), text, 0, NULL, &h);
-	wz_widget_set_size_args((wzWidget *)textEdit, 100, h + borderSize * 2);
+	if (!getRenderer())
+	{
+		size.w = size.h = 0;
+	}
+	else
+	{
+		const char *text = wz_text_edit_get_text(textEdit);
+		int h;
+		getRenderer()->measure_text(getRenderer(), text, 0, NULL, &h);
+		size.w = 100;
+		size.h = h + borderSize * 2;
+	}
+
+	return size;
 }
 
 void TextEditPrivate::draw(wzRect clip)
@@ -1398,7 +1462,7 @@ TextEdit *TextEdit::setText(const std::string &text)
 {
 	TextEditPrivate *tp = (TextEditPrivate *)p;
 	wz_text_edit_set_text(tp->textEdit, text.c_str());
-	p->autosize();
+	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
 
@@ -1409,7 +1473,7 @@ WindowPrivate::WindowPrivate()
 	window = wz_window_create();
 	wzWidget *widget = (wzWidget *)window;
 	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_function(widget, DrawWidget);
+	wz_widget_set_draw_callback(widget, DrawWidget);
 	wz_window_set_border_size(window, 4);
 }
 
@@ -1421,20 +1485,25 @@ WindowPrivate::~WindowPrivate()
 	}
 }
 
-void WindowPrivate::autosize()
+void WindowPrivate::onAdded()
 {
-	if (!getRenderer())
-		return;
-
-	// Calculate header height based on label text plus padding.
-	wzSize size;
-	getRenderer()->measure_text(getRenderer(), title.c_str(), 0, &size.w, &size.h);
-	wz_window_set_header_height(window, size.h + 6);
+	refreshHeaderHeight();
 }
 
 void WindowPrivate::draw(wzRect clip)
 {
 	getRenderer()->draw_window(getRenderer(), clip, window, title.c_str());
+}
+
+void WindowPrivate::refreshHeaderHeight()
+{
+	if (!getRenderer())
+		return;
+
+	// Calculate header height based on label text plus padding.
+	int h;
+	getRenderer()->measure_text(getRenderer(), title.c_str(), 0, NULL, &h);
+	wz_window_set_header_height(window, h + 6);
 }
 
 //------------------------------------------------------------------------------
@@ -1464,7 +1533,7 @@ Window *Window::setTitle(const std::string &title)
 {
 	WindowPrivate *wp = (WindowPrivate *)p;
 	wp->title = title;
-	p->autosize();
+	wp->refreshHeaderHeight();
 	return this;
 }
 

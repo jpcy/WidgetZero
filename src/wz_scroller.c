@@ -186,7 +186,7 @@ static void wz_scroller_nub_update_rect(struct wzScrollerNub *nub)
 		rect.h = scrollerSize.h;
 	}
 
-	wz_widget_set_rect((struct wzWidget *)nub, rect);
+	wz_widget_set_rect_internal((struct wzWidget *)nub, rect);
 }
 
 static struct wzScrollerNub *wz_scroller_nub_create(struct wzScroller *scroller)
@@ -234,7 +234,7 @@ static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller
 		rect.h = scrollerSize.h;
 	}
 
-	wz_widget_set_rect((struct wzWidget *)scroller->decrementButton, rect);
+	wz_widget_set_rect_internal((struct wzWidget *)scroller->decrementButton, rect);
 }
 
 static void wz_scroller_increment_button_update_rect(struct wzScroller *scroller)
@@ -261,7 +261,7 @@ static void wz_scroller_increment_button_update_rect(struct wzScroller *scroller
 		rect.h = scrollerSize.h;
 	}
 
-	wz_widget_set_rect((struct wzWidget *)scroller->incrementButton, rect);
+	wz_widget_set_rect_internal((struct wzWidget *)scroller->incrementButton, rect);
 }
 
 /*

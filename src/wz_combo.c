@@ -70,7 +70,7 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 		listRect.h -= over;
 	}
 
-	wz_widget_set_rect((struct wzWidget *)combo->list, listRect);
+	wz_widget_set_rect_internal((struct wzWidget *)combo->list, listRect);
 }
 
 static void wz_combo_set_rect(struct wzWidget *widget, wzRect rect)

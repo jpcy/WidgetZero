@@ -281,10 +281,17 @@ void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockP
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
 wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop);
 
+typedef void (*wzWidgetDrawCallback)(struct wzWidget *widget, wzRect clip);
+typedef wzSize (*wzWidgetMeasureCallback)(struct wzWidget *widget);
+
 void wz_widget_destroy(struct wzWidget *widget);
 struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 bool wz_widget_is_layout(const struct wzWidget *widget);
+
+// Resize the widget to the result of calling the widget "measure" callback.
+void wz_widget_resize_to_measured(struct wzWidget *widget);
+
 void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
 wzPosition wz_widget_get_position(const struct wzWidget *widget);
@@ -312,7 +319,8 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible);
 bool wz_widget_get_visible(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
-void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect));
+void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw);
+void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure);
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
 void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child);
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);

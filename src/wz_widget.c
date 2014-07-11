@@ -340,39 +340,9 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 {
-	wzRect oldRect;
-	int i;
-
 	assert(widget);
-	oldRect = widget->rect;
-
-	// Apply stretching.
-	rect = wz_widget_calculate_stretched_rect(widget, rect);
-
-	if (widget->vtable.set_rect)
-	{
-		widget->vtable.set_rect(widget, rect);
-	}
-	else
-	{
-		widget->rect = rect;
-	}
-
-	// Stretch children too.
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		wz_widget_set_stretched_rect_recursive(widget->children[i]);
-	}
-
-	// If the parent is a layout widget, it may need refreshing.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
-	{
-		// Refresh if the width or height has changed.
-		if (widget->rect.w != oldRect.w || widget->rect.h != oldRect.h)
-		{
-			wz_widget_refresh_rect(widget->parent);
-		}
-	}
+	widget->userRect = rect;
+	wz_widget_set_rect_internal(widget, rect);
 }
 
 wzRect wz_widget_get_rect(const struct wzWidget *widget)
@@ -507,10 +477,16 @@ void *wz_widget_get_metadata(struct wzWidget *widget)
 	return widget->metadata;
 }
 
-void wz_widget_set_draw_function(struct wzWidget *widget, void (*draw)(struct wzWidget *, wzRect))
+void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw)
 {
 	assert(widget);
 	widget->vtable.draw = draw;
+}
+
+void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure)
+{
+	assert(widget);
+	widget->vtable.measure = measure;
 }
 
 static struct wzDesktop *wz_widget_find_desktop(struct wzWidget *widget)
@@ -659,6 +635,62 @@ struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget)
 /*
 ================================================================================
 
+WIDGET MEASURING
+
+================================================================================
+*/
+
+void wz_widget_resize_to_measured(struct wzWidget *widget)
+{
+	assert(widget);
+
+	if (widget->vtable.measure)
+	{
+		wzSize size = widget->vtable.measure(widget);
+
+		// The explicitly set size overrides the measured size.
+		if (widget->userRect.w != 0)
+		{
+			size.w = widget->userRect.w;
+		}
+
+		if (widget->userRect.h != 0)
+		{
+			size.h = widget->userRect.h;
+		}
+
+		// Keep the current size if 0.
+		if (size.w == 0)
+		{
+			size.w = wz_widget_get_width(widget);
+		}
+
+		if (size.h == 0)
+		{
+			size.h = wz_widget_get_height(widget);
+		}
+		
+		// Set the size.
+		wz_widget_set_size_internal(widget, size);
+	}
+}
+
+static void wz_widget_measure_and_resize_recursive(struct wzWidget *widget)
+{
+	int i;
+
+	assert(widget);
+	wz_widget_resize_to_measured(widget);
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_measure_and_resize_recursive(widget->children[i]);
+	}
+}
+
+/*
+================================================================================
+
 INTERNAL WIDGET FUNCTIONS
 
 ================================================================================
@@ -681,6 +713,9 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	child->parent = widget;
 	wz_arr_push(widget->children, child);
 
+	// Resize the widget and children to their measured sizes.
+	wz_widget_measure_and_resize_recursive(child);
+
 	// If the parent is a layout widget, refresh it.
 	if (wz_widget_is_layout(widget))
 	{
@@ -693,10 +728,115 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	}
 }
 
+void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y)
+{
+	wzPosition position;
+	position.x = x;
+	position.y = y;
+	wz_widget_set_position_internal(widget, position);
+}
+
+void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.x = position.x;
+	rect.y = position.y;
+	wz_widget_set_rect_internal(widget, rect);
+}
+
+void wz_widget_set_width_internal(struct wzWidget *widget, int w)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.w = w;
+	wz_widget_set_rect_internal(widget, rect);
+}
+
+void wz_widget_set_height_internal(struct wzWidget *widget, int h)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.h = h;
+	wz_widget_set_rect_internal(widget, rect);
+}
+
+void wz_widget_set_size_args_internal(struct wzWidget *widget, int w, int h)
+{
+	wzSize size;
+	size.w = w;
+	size.h = h;
+	wz_widget_set_size_internal(widget, size);
+}
+
+void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size)
+{
+	wzRect rect;
+
+	assert(widget);
+	rect = widget->rect;
+	rect.w = size.w;
+	rect.h = size.h;
+	wz_widget_set_rect_internal(widget, rect);
+}
+
+void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int w, int h)
+{
+	wzRect rect;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+	wz_widget_set_rect_internal(widget, rect);
+}
+
+void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
+{
+	wzRect oldRect;
+	int i;
+
+	assert(widget);
+	oldRect = widget->rect;
+
+	// Apply stretching.
+	rect = wz_widget_calculate_stretched_rect(widget, rect);
+
+	if (widget->vtable.set_rect)
+	{
+		widget->vtable.set_rect(widget, rect);
+	}
+	else
+	{
+		widget->rect = rect;
+	}
+
+	// Stretch children too.
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_set_stretched_rect_recursive(widget->children[i]);
+	}
+
+	// If the parent is a layout widget, it may need refreshing.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+	{
+		// Refresh if the width or height has changed.
+		if (widget->rect.w != oldRect.w || widget->rect.h != oldRect.h)
+		{
+			wz_widget_refresh_rect(widget->parent);
+		}
+	}
+}
+
 void wz_widget_refresh_rect(struct wzWidget *widget)
 {
 	assert(widget);
-	wz_widget_set_rect(widget, wz_widget_get_rect(widget));
+	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
 }
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)

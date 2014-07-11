@@ -69,14 +69,14 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 	rect.x = tabBar->base.rect.w - rect.w * 2;
 	rect.y = 0;
 	rect.h = tabBar->base.rect.h;
-	wz_widget_set_rect((struct wzWidget *)tabBar->decrementButton, rect);
+	wz_widget_set_rect_internal((struct wzWidget *)tabBar->decrementButton, rect);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, showScrollButtons);
 
 	rect.w = wz_widget_get_size((struct wzWidget *)tabBar->incrementButton).w;
 	rect.x = tabBar->base.rect.w - rect.w;
 	rect.y = 0;
 	rect.h = tabBar->base.rect.h;
-	wz_widget_set_rect((struct wzWidget *)tabBar->incrementButton, rect);
+	wz_widget_set_rect_internal((struct wzWidget *)tabBar->incrementButton, rect);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, showScrollButtons);
 
 	if (wereScrollButtonsVisible && showScrollButtons)
@@ -112,7 +112,7 @@ static void wz_tab_bar_update_tabs(struct wzTabBar *tabBar)
 			rect.y = 0;
 			rect.w = widget->rect.w;
 			rect.h = tabBar->base.rect.h;
-			wz_widget_set_rect(widget, rect);
+			wz_widget_set_rect_internal(widget, rect);
 			wz_widget_set_visible(widget, true);
 			x += rect.w;
 		}
@@ -170,7 +170,7 @@ static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
 	// Set button heights to match.
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_set_height(widget->children[i], rect.h);
+		wz_widget_set_height_internal(widget->children[i], rect.h);
 	}
 
 	wz_tab_bar_update_tabs((struct wzTabBar *)widget);
@@ -224,14 +224,14 @@ struct wzTabBar *wz_tab_bar_create(struct wzButton *decrementButton, struct wzBu
 	tabBar->decrementButton = decrementButton;
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
-	wz_widget_set_width((struct wzWidget *)tabBar->decrementButton, defaultScrollButtonWidth);
+	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, false);
 	wz_widget_set_draw_priority((struct wzWidget *)tabBar->decrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
 
 	tabBar->incrementButton = incrementButton;
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
-	wz_widget_set_width((struct wzWidget *)tabBar->incrementButton, defaultScrollButtonWidth);
+	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, false);
 	wz_widget_set_draw_priority((struct wzWidget *)tabBar->incrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
 
@@ -246,11 +246,6 @@ void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 
 	assert(tabBar);
 	assert(tab);
-	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
-	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
-	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tab);
-	wz_arr_push(tabBar->tabs, tab);
 
 	// Position to the right of the last tab.
 	rect.x = rect.y = 0;
@@ -263,7 +258,12 @@ void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 		rect.x += size.w;
 	}
 
-	wz_widget_set_rect((struct wzWidget *)tab, rect);
+	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
+	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
+	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tab);
+	wz_arr_push(tabBar->tabs, tab);
+	wz_widget_set_rect_internal((struct wzWidget *)tab, rect);
 
 	// Select the first tab added.
 	if (!tabBar->selectedTab)

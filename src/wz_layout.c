@@ -132,7 +132,7 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 			childRect.h = child->rect.h;
 		}
 
-		wz_widget_set_rect(child, childRect);
+		wz_widget_set_rect_internal(child, childRect);
 		y += childRect.h + child->margin.bottom;
 	}
 }
@@ -233,7 +233,7 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 			}
 		}
 
-		wz_widget_set_rect(child, childRect);
+		wz_widget_set_rect_internal(child, childRect);
 		x += childRect.w + child->margin.right;
 	}
 }
