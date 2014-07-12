@@ -40,6 +40,14 @@ struct wzTabBar
 	wzEventCallback *tab_changed_callbacks;
 };
 
+// Ensure tab height stay the same as the tab bar.
+static void wz_tab_set_rect(struct wzWidget *widget, wzRect rect)
+{
+	assert(widget);
+	rect.h = ((struct wzTabBar *)widget->parent)->base.rect.h;
+	widget->rect = rect;
+}
+
 // Show the scroll buttons if they're required, hides them if they're not.
 static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 {
@@ -258,6 +266,7 @@ void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 		rect.x += size.w;
 	}
 
+	((struct wzWidget *)tab)->vtable.set_rect = wz_tab_set_rect;
 	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
 	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
