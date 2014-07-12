@@ -64,7 +64,9 @@ public:
 	void keyUp(wzKey key);
 	void textInput(const char *text);
 	void setShowCursor(bool showCursor);
-	void draw();
+	void beginFrame();
+	void drawFrame();
+	void endFrame();
 	bool getShowCursor() const;
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);

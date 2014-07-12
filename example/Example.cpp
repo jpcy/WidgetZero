@@ -441,8 +441,8 @@ int main(int argc, char **argv)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			benchmark.draw.start();
-			gui.desktop.draw();
-			benchmark.draw.end();
+			gui.desktop.beginFrame();
+			gui.desktop.drawFrame();
 
 			sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
 			renderer->debug_draw_text(renderer, buffer, 0, 0);
@@ -452,6 +452,9 @@ int main(int argc, char **argv)
 
 			sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
 			renderer->debug_draw_text(renderer, buffer, 0, 40);
+
+			gui.desktop.endFrame();
+			benchmark.draw.end();
 
 			SDL_GL_SwapWindow(window);
 			SDL_SetCursor(cursors[gui.desktop.getCursor()]);

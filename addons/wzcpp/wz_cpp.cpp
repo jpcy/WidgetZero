@@ -751,11 +751,19 @@ void Desktop::setShowCursor(bool showCursor)
 	p->showCursor = showCursor;
 }
 
-void Desktop::draw()
+void Desktop::beginFrame()
 {
 	wzRect rect = wz_widget_get_rect((const wzWidget *)p->desktop);
 	p->renderer->begin_frame(p->renderer, rect.w, rect.h);
+}
+
+void Desktop::drawFrame()
+{	
 	wz_desktop_draw(p->desktop);
+}
+
+void Desktop::endFrame()
+{
 	p->renderer->end_frame(p->renderer);
 }
 
