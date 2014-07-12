@@ -85,20 +85,14 @@ project "WidgetZeroCpp"
 	language "C++"
 	kind "StaticLib"
 
-	files
-	{
-		"addons/wzcpp/src/*.cpp",
-		"addons/wzcpp/include/*.h"
-	}
+	files { "addons/wzcpp/*.*" }
 	
 	includedirs
 	{
 		"include",
-		"addons/shared/include",
-		"addons/wzcpp/include"
+		"addons/shared",
+		"addons/wzcpp"
 	}
-	
-	vpaths { ["*"] = { "addons/wzcpp/include", "addons/wzcpp/src" } }
 	
 	configuration "vs2012"
 		linkoptions { "/SAFESEH:NO" }
@@ -108,23 +102,18 @@ project "WidgetZeroCpp"
 project "WidgetZeroGL"
 	kind "StaticLib"
 
-	files
-	{
-		"addons/wzgl/src/*.c",
-		"addons/wzgl/include/*.h",
-		"addons/shared/include/*.h"
-	}
+	files { "addons/wzgl/*.*", "addons/shared/*.h" }
 	
 	includedirs
 	{
 		"include",
-		"addons/shared/include",
-		"addons/wzgl/include",
+		"addons/shared",
+		"addons/wzgl",
 		config.glewPath .. "/include",
 		config.nanovgPath .. "/src"
 	}
 	
-	vpaths { ["*"] = { "addons/shared/include", "addons/wzgl/include", "addons/wzgl/src" } }
+	vpaths { ["*"] = { "addons/shared", "addons/wzgl" } }
 		
 -----------------------------------------------------------------------------
 
@@ -145,9 +134,9 @@ project "Example"
 	includedirs
 	{
 		"include",
-		"addons/shared/include",
-		"addons/wzcpp/include",
-		"addons/wzgl/include"
+		"addons/shared",
+		"addons/wzcpp",
+		"addons/wzgl"
 	}
 	
 	configuration "linux"
