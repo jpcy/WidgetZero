@@ -211,6 +211,15 @@ static void wzgl_draw_dock_preview(struct wzRenderer *renderer, wzRect rect)
 	nvgRestore(vg);
 }
 
+static int wzgl_measure_window_header_height(struct wzRenderer *renderer, const char *title)
+{
+	int h;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, title, 0, NULL, &h);
+	return h + 6; // Padding.
+}
+
 static void wzgl_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *title)
 {
 	wzRendererData *rendererData;
@@ -260,6 +269,19 @@ static void wzgl_draw_window(struct wzRenderer *renderer, wzRect clip, struct wz
 	}
 
 	nvgRestore(vg);
+}
+
+static wzSize wzgl_measure_button(struct wzRenderer *renderer, const char *label)
+{
+	wzSize size;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
+
+	// Padding.
+	size.w += 16;
+	size.h += 8;
+	return size;
 }
 
 static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label)
@@ -313,9 +335,11 @@ static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wz
 	nvgRestore(vg);
 }
 
-wzSize wzgl_measure_checkbox(struct wzRenderer *renderer, const char *label)
+static wzSize wzgl_measure_checkbox(struct wzRenderer *renderer, const char *label)
 {
 	wzSize size;
+
+	assert(renderer);
 	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
 	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
 	return size;
@@ -372,6 +396,32 @@ static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct 
 	wzgl_printf(rendererData, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
+}
+
+static wzSize wzgl_measure_combo(struct wzRenderer *renderer, const char **items, int nItems)
+{
+	wzSize size;
+	int i;
+
+	assert(renderer);
+	assert(items);
+
+	// Calculate size based on the biggest item text plus padding.
+	size.w = size.h = 0;
+
+	for (i = 0; i < nItems; i++)
+	{
+		wzSize textSize;
+
+		wzgl_measure_text(renderer, items[i], 0, &textSize.w, &textSize.h);
+		size.w = WZ_MAX(size.w, textSize.w);
+		size.h = WZ_MAX(size.h, textSize.h);
+	}
+
+	// Padding.
+	size.w += 50;
+	size.h += 4;
+	return size;
 }
 
 static void wzgl_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *item)
@@ -546,6 +596,15 @@ static void wzgl_draw_scroller(struct wzRenderer *renderer, wzRect clip, struct 
 	nvgRestore(vg);
 }
 
+static wzSize wzgl_measure_label(struct wzRenderer *renderer, const char *text)
+{
+	wzSize size;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, text, 0, &size.w, &size.h);
+	return size;
+}
+
 static void wzgl_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *text, uint8_t r, uint8_t g, uint8_t b)
 {
 	wzRendererData *rendererData;
@@ -696,6 +755,17 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	wzgl_draw_filled_rect(vg, rect, nvgRGB(224, 224, 224));
 	wzgl_draw_rect(vg, rect, nvgRGB(112, 112, 112));
 	nvgRestore(vg);
+}
+
+static wzSize wzgl_measure_text_edit(struct wzRenderer *renderer, wzBorder border, const char *text)
+{
+	wzSize size;
+
+	assert(renderer);
+	wzgl_measure_text(renderer, text, 0, NULL, &size.h);
+	size.w = 100;
+	size.h += border.top + border.bottom;
+	return size;
 }
 
 static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, bool showCursor)
@@ -855,20 +925,25 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->text_get_pixel_delta = wzgl_text_get_pixel_delta;
 	renderer->draw_dock_icon = wzgl_draw_dock_icon;
 	renderer->draw_dock_preview = wzgl_draw_dock_preview;
+	renderer->measure_window_header_height = wzgl_measure_window_header_height;
 	renderer->draw_window = wzgl_draw_window;
+	renderer->measure_button = wzgl_measure_button;
 	renderer->draw_button = wzgl_draw_button;
 	renderer->measure_checkbox = wzgl_measure_checkbox;
 	renderer->draw_checkbox = wzgl_draw_checkbox;
+	renderer->measure_combo = wzgl_measure_combo;
 	renderer->draw_combo = wzgl_draw_combo;
 	renderer->measure_group_box_margin = wzgl_measure_group_box_margin;
 	renderer->draw_group_box = wzgl_draw_group_box;
 	renderer->measure_radio_button = wzgl_measure_radio_button;
 	renderer->draw_radio_button = wzgl_draw_radio_button;
 	renderer->draw_scroller = wzgl_draw_scroller;
+	renderer->measure_label = wzgl_measure_label;
 	renderer->draw_label = wzgl_draw_label;
 	renderer->draw_list = wzgl_draw_list;
 	renderer->draw_tab_button = wzgl_draw_tab_button;
 	renderer->draw_tab_page = wzgl_draw_tab_page;
+	renderer->measure_text_edit = wzgl_measure_text_edit;
 	renderer->draw_text_edit = wzgl_draw_text_edit;
 	renderer->debug_draw_text = wzgl_debug_draw_text;
 

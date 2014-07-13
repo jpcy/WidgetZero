@@ -428,10 +428,7 @@ wzSize ButtonPrivate::measure()
 	}
 	else
 	{
-		// Calculate size based on label text plus padding.
-		getRenderer()->measure_text(getRenderer(), label.c_str(), 0, &size.w, &size.h);
-		size.w += 16;
-		size.h += 8;
+		size = getRenderer()->measure_button(getRenderer(), label.c_str());
 	}
 
 	return size;
@@ -584,19 +581,7 @@ wzSize ComboPrivate::measure()
 	}
 	else
 	{
-		// Calculate size based on the biggest item text plus padding.
-		size.w = size.h = 0;
-
-		for (int i = 0; i < wz_list_get_num_items(wz_combo_get_list(combo)); i++)
-		{
-			wzSize textSize;
-			getRenderer()->measure_text(getRenderer(), items[i], 0, &textSize.w, &textSize.h);
-			size.w = WZ_MAX(size.w, textSize.w);
-			size.h = WZ_MAX(size.h, textSize.h);
-		}
-
-		size.w += 50;
-		size.h += 4;
+		size = getRenderer()->measure_combo(getRenderer(), items, wz_list_get_num_items(wz_combo_get_list(combo)));
 	}
 
 	return size;
@@ -921,7 +906,7 @@ wzSize LabelPrivate::measure()
 	}
 	else
 	{
-		getRenderer()->measure_text(getRenderer(), text.c_str(), 0, &size.w, &size.h);
+		size = getRenderer()->measure_label(getRenderer(), text.c_str());
 	}
 
 	return size;
@@ -1432,11 +1417,7 @@ wzSize TextEditPrivate::measure()
 	}
 	else
 	{
-		const char *text = wz_text_edit_get_text(textEdit);
-		int h;
-		getRenderer()->measure_text(getRenderer(), text, 0, NULL, &h);
-		size.w = 100;
-		size.h = h + borderSize * 2;
+		size = getRenderer()->measure_text_edit(getRenderer(), wz_text_edit_get_border(textEdit), wz_text_edit_get_text(textEdit));
 	}
 
 	return size;
@@ -1508,10 +1489,7 @@ void WindowPrivate::refreshHeaderHeight()
 	if (!getRenderer())
 		return;
 
-	// Calculate header height based on label text plus padding.
-	int h;
-	getRenderer()->measure_text(getRenderer(), title.c_str(), 0, NULL, &h);
-	wz_window_set_header_height(window, h + 6);
+	wz_window_set_header_height(window, getRenderer()->measure_window_header_height(getRenderer(), title.c_str()));
 }
 
 //------------------------------------------------------------------------------
