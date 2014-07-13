@@ -58,6 +58,7 @@ struct wzRenderer
 	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *label);
 	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);
 
+	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
 
 	wzSize (*measure_label)(struct wzRenderer *renderer, const char *text);

@@ -119,11 +119,11 @@ public:
 			desktop.add(checkbox);
 
 			wz::Scroller *scroller1 = new wz::Scroller(renderer);
-			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setRect(300, 50, 16, 200);
+			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setPosition(300, 50)->setHeight(200);
 			desktop.add(scroller1);
 
 			wz::Scroller *scroller2 = new wz::Scroller(renderer);
-			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setRect(500, 50, 200, 16);
+			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setPosition(500, 50)->setWidth(200);
 			desktop.add(scroller2);
 
 			wz::Label *label = new wz::Label(renderer, "Label test");

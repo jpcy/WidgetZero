@@ -177,6 +177,7 @@ struct ScrollerPrivate : public WidgetPrivate
 	~ScrollerPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
+	virtual wzSize measure();
 	virtual void draw(wzRect clip);
 
 	wzScroller *scroller;
@@ -333,6 +334,18 @@ wzRect Widget::getRect() const
 Widget *Widget::setPosition(int x, int y)
 { 
 	wz_widget_set_position_args(p->getWidget(), x, y);
+	return this;
+}
+
+Widget *Widget::setWidth(int w)
+{
+	wz_widget_set_width(p->getWidget(), w);
+	return this;
+}
+
+Widget *Widget::setHeight(int h)
+{
+	wz_widget_set_height(p->getWidget(), h);
 	return this;
 }
 
@@ -909,7 +922,6 @@ ListPrivate::ListPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	scroller.reset(new Scroller(renderer));
-	wz_widget_set_size_args(scroller->p->getWidget(), 16, 0);
 
 	list = wz_list_create((wzScroller *)scroller->p->getWidget());
 	wz_list_set_item_height(list, itemHeight);
@@ -1060,6 +1072,7 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 	scroller = wz_scroller_create((wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 	wz_widget_set_draw_callback((wzWidget *)scroller, DrawWidget);
+	wz_widget_set_measure_callback((wzWidget *)scroller, MeasureWidget);
 	wz_scroller_set_nub_size(scroller, 16);
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
@@ -1073,6 +1086,11 @@ ScrollerPrivate::~ScrollerPrivate()
 	{
 		wz_widget_destroy((wzWidget *)scroller);
 	}
+}
+
+wzSize ScrollerPrivate::measure()
+{
+	return renderer->measure_scroller(renderer, wz_scroller_get_type(scroller));
 }
 
 void ScrollerPrivate::draw(wzRect clip)

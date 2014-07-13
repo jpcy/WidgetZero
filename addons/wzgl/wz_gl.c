@@ -579,6 +579,26 @@ static void wzgl_draw_radio_button(struct wzRenderer *renderer, wzRect clip, str
 	nvgRestore(vg);
 }
 
+static wzSize wzgl_measure_scroller(struct wzRenderer *renderer, wzScrollerType scrollerType)
+{
+	wzSize size;
+
+	WZ_ASSERT(renderer);
+
+	if (scrollerType == WZ_SCROLLER_VERTICAL)
+	{
+		size.w = 16;
+		size.h = 0;
+	}
+	else
+	{
+		size.w = 0;
+		size.h = 16;
+	}
+
+	return size;
+}
+
 static void wzgl_draw_scroller(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller)
 {
 	wzRendererData *rendererData;
@@ -953,6 +973,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_group_box = wzgl_draw_group_box;
 	renderer->measure_radio_button = wzgl_measure_radio_button;
 	renderer->draw_radio_button = wzgl_draw_radio_button;
+	renderer->measure_scroller = wzgl_measure_scroller;
 	renderer->draw_scroller = wzgl_draw_scroller;
 	renderer->measure_label = wzgl_measure_label;
 	renderer->draw_label = wzgl_draw_label;

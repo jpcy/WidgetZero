@@ -80,6 +80,8 @@ public:
 	virtual ~Widget();
 	wzRect getRect() const;
 	Widget *setPosition(int x, int y);
+	Widget *setWidth(int w);
+	Widget *setHeight(int h);
 	Widget *setSize(int w, int h);
 	Widget *setRect(int x, int y, int w, int h);
 	Widget *setStretch(int stretch);
