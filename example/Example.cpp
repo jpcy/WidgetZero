@@ -109,38 +109,38 @@ public:
 		desktop.setSize(windowWidth, windowHeight);
 
 		{
-			wz::Button *button = new wz::Button("Test Button");
+			wz::Button *button = new wz::Button(renderer, "Test Button");
 			button->setPosition(100, 100);
 			desktop.add(button);
 
 			const wzRect buttonRect = button->getRect();
-			wz::Checkbox *checkbox = new wz::Checkbox("Toggle me!");
+			wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Toggle me!");
 			checkbox->setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
 			desktop.add(checkbox);
 
-			wz::Scroller *scroller1 = new wz::Scroller();
+			wz::Scroller *scroller1 = new wz::Scroller(renderer);
 			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setRect(300, 50, 16, 200);
 			desktop.add(scroller1);
 
-			wz::Scroller *scroller2 = new wz::Scroller();
+			wz::Scroller *scroller2 = new wz::Scroller(renderer);
 			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setRect(500, 50, 200, 16);
 			desktop.add(scroller2);
 
-			wz::Label *label = new wz::Label("Label test");
+			wz::Label *label = new wz::Label(renderer, "Label test");
 			label->setTextColor(255, 128, 128)->setPosition(350, 50);
 			desktop.add(label);
 
-			wz::List *list = new wz::List();
+			wz::List *list = new wz::List(renderer);
 			list->setItems(listData, 17)->setRect(400, 300, 150, 150);
 			desktop.add(list);
 
-			wz::Combo *combo = new wz::Combo();
+			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems(listData, 17)->setRect(800, 50, 150, 20);
 			desktop.add(combo);
 		}
 
 		{
-			wz::GroupBox *groupBox = new wz::GroupBox("Test GroupBox");
+			wz::GroupBox *groupBox = new wz::GroupBox(renderer, "Test GroupBox");
 			groupBox->setPosition(100, 300);
 			desktop.add(groupBox);
 
@@ -148,21 +148,21 @@ public:
 			layout->setSpacing(8)->setStretch(WZ_STRETCH);
 			groupBox->add(layout);
 
-			wz::RadioButton *rb1 = new wz::RadioButton("Option 1");
+			wz::RadioButton *rb1 = new wz::RadioButton(renderer, "Option 1");
 			rb1->setGroup(&radioButtonGroup);
 			layout->add(rb1);
 
-			wz::RadioButton *rb2 = new wz::RadioButton("Option 2");
+			wz::RadioButton *rb2 = new wz::RadioButton(renderer, "Option 2");
 			rb2->setGroup(&radioButtonGroup);
 			layout->add(rb2);
 
-			wz::RadioButton *rb3 = new wz::RadioButton("Option 3");
+			wz::RadioButton *rb3 = new wz::RadioButton(renderer, "Option 3");
 			rb3->setGroup(&radioButtonGroup);
 			layout->add(rb3);
 		}
 
 		{
-			wz::Window *window = new wz::Window("Test Window");
+			wz::Window *window = new wz::Window(renderer, "Test Window");
 			window->setRect(650, 100, 300, 300);
 			desktop.add(window);
 
@@ -170,33 +170,33 @@ public:
 			layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(layout);
 
-			wz::TextEdit *textEdit = new wz::TextEdit("this is a very long string so scrolling can be tested");
+			wz::TextEdit *textEdit = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested");
 			textEdit->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(textEdit);
 
-			wz::Button *button = new wz::Button("Another Button");
+			wz::Button *button = new wz::Button(renderer, "Another Button");
 			button->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(button);
 
-			wz::Checkbox *checkbox = new wz::Checkbox("Checkbox");
+			wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Checkbox");
 			checkbox->setAlign(WZ_ALIGN_CENTER);
 			layout->add(checkbox);
 
-			wz::Combo *combo = new wz::Combo();
+			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems(listData, 17)->setAlign(WZ_ALIGN_RIGHT);
 			layout->add(combo);
 
-			wz::Button *button2 = new wz::Button("Yet Another Button");
+			wz::Button *button2 = new wz::Button(renderer, "Yet Another Button");
 			button2->setStretch(WZ_STRETCH);
 			layout->add(button2);
 		}
 
 		{
-			wz::Window *window = new wz::Window("Window with a long title");
+			wz::Window *window = new wz::Window(renderer, "Window with a long title");
 			window->setRect(590, 500, 200, 200);
 			desktop.add(window);
 
-			wz::Tabbed *tabbed = new wz::Tabbed();
+			wz::Tabbed *tabbed = new wz::Tabbed(renderer);
 			tabbed->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(tabbed);
 
@@ -208,19 +208,19 @@ public:
 
 			tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 
-			wz::Combo *combo = new wz::Combo();
+			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems(listData, 17)->setRect(10, 10, 150, 20);
 			firstTab->add(combo);
 
-			secondTab->add(new wz::Button("Button Button Button"))->setPosition(10, 10);
+			secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);
 		}
 
 		{
-			wz::Window *window = new wz::Window("Window 3");
+			wz::Window *window = new wz::Window(renderer, "Window 3");
 			window->setRect(800, 500, 200, 200);
 			desktop.add(window);
 
-			wz::List *list = new wz::List();
+			wz::List *list = new wz::List(renderer);
 			list->setItems(listData, 17)->setMargin(8)->setStretch(WZ_STRETCH);
 			window->add(list);
 		}
@@ -230,9 +230,9 @@ public:
 			layout->setSpacing(8)->setRect(50, 550, 400, 100);
 			desktop.add(layout);
 
-			layout->add(new wz::Button("Button A"))->setStretch(WZ_STRETCH_HEIGHT);
-			layout->add(new wz::Button("Button B"))->setAlign(WZ_ALIGN_MIDDLE);
-			layout->add(new wz::Button("Button C"))->setAlign(WZ_ALIGN_BOTTOM);
+			layout->add(new wz::Button(renderer, "Button A"))->setStretch(WZ_STRETCH_HEIGHT);
+			layout->add(new wz::Button(renderer, "Button B"))->setAlign(WZ_ALIGN_MIDDLE);
+			layout->add(new wz::Button(renderer, "Button C"))->setAlign(WZ_ALIGN_BOTTOM);
 		}
 	}
 

@@ -94,8 +94,8 @@ public:
 class Button : public Widget
 {
 public:
-	Button();
-	Button(const std::string &label);
+	Button(wzRenderer *renderer);
+	Button(wzRenderer *renderer, const std::string &label);
 	~Button();
 	std::string getLabel() const;
 	Button *setLabel(const std::string &label);
@@ -104,8 +104,8 @@ public:
 class Checkbox : public Widget
 {
 public:
-	Checkbox();
-	Checkbox(const std::string &label);
+	Checkbox(wzRenderer *renderer);
+	Checkbox(wzRenderer *renderer, const std::string &label);
 	~Checkbox();
 	std::string getLabel() const;
 	Checkbox *setLabel(const std::string &label);
@@ -114,7 +114,7 @@ public:
 class Combo : public Widget
 {
 public:
-	Combo();
+	Combo(wzRenderer *renderer);
 	~Combo();
 	Combo *setItems(const char **items, int nItems);
 };
@@ -122,8 +122,8 @@ public:
 class GroupBox : public Widget
 {
 public:
-	GroupBox();
-	GroupBox(const std::string &label);
+	GroupBox(wzRenderer *renderer);
+	GroupBox(wzRenderer *renderer, const std::string &label);
 	~GroupBox();
 	std::string getLabel() const;
 	GroupBox *setLabel(const std::string &label);
@@ -133,8 +133,8 @@ public:
 class Label : public Widget
 {
 public:
-	Label();
-	Label(const std::string &text);
+	Label(wzRenderer *renderer);
+	Label(wzRenderer *renderer, const std::string &text);
 	~Label();
 	Label *setText(const char *format, ...);
 	Label *setTextColor(uint8_t r, uint8_t g, uint8_t b);
@@ -143,7 +143,7 @@ public:
 class List : public Widget
 {
 public:
-	List();
+	List(wzRenderer *renderer);
 	~List();
 	List *setItems(const char **items, int nItems);
 };
@@ -162,8 +162,8 @@ private:
 class RadioButton : public Widget
 {
 public:
-	RadioButton();
-	RadioButton(const std::string &label);
+	RadioButton(wzRenderer *renderer);
+	RadioButton(wzRenderer *renderer, const std::string &label);
 	~RadioButton();
 	std::string getLabel() const;
 	RadioButton *setLabel(const std::string &label);
@@ -175,7 +175,7 @@ public:
 class Scroller : public Widget
 {
 public:
-	Scroller();
+	Scroller(wzRenderer *renderer);
 	~Scroller();
 	Scroller *setType(wzScrollerType type);
 	Scroller *setValue(int value);
@@ -210,7 +210,7 @@ public:
 class Tabbed : public Widget
 {
 public:
-	Tabbed();
+	Tabbed(wzRenderer *renderer);
 	~Tabbed();
 	Tab *addTab(Tab *tab);
 };
@@ -218,8 +218,8 @@ public:
 class TextEdit : public Widget
 {
 public:
-	TextEdit();
-	TextEdit(const std::string &text);
+	TextEdit(wzRenderer *renderer);
+	TextEdit(wzRenderer *renderer, const std::string &text);
 	~TextEdit();
 	TextEdit *setText(const std::string &text);
 };
@@ -227,8 +227,8 @@ public:
 class Window : public Widget
 {
 public:
-	Window();
-	Window(const std::string &title);
+	Window(wzRenderer *renderer);
+	Window(wzRenderer *renderer, const std::string &title);
 	~Window();
 	std::string getTitle() const;
 	Window *setTitle(const std::string &title);
