@@ -263,8 +263,6 @@ struct TextEditPrivate : public WidgetPrivate
 	virtual void draw(wzRect clip);
 
 	wzTextEdit *textEdit;
-
-	static const int borderSize = 4;
 };
 
 struct WindowPrivate : public WidgetPrivate
@@ -1338,7 +1336,7 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	textEdit = wz_text_edit_create(256);
-	wz_text_edit_set_border_args(textEdit, borderSize, borderSize, borderSize, borderSize);
+	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer));
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_callback(widget, DrawWidget);

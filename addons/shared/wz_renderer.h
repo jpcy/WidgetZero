@@ -67,6 +67,7 @@ struct wzRenderer
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
+	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer);
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, wzBorder border, const char *text);
 	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, bool showCursor);
 

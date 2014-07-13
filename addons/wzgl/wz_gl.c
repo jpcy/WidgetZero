@@ -766,6 +766,13 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	nvgRestore(vg);
 }
 
+static wzBorder wzgl_get_text_edit_border(struct wzRenderer *renderer)
+{
+	wzBorder b;
+	b.left = b.top = b.right = b.bottom = 4;
+	return b;
+}
+
 static wzSize wzgl_measure_text_edit(struct wzRenderer *renderer, wzBorder border, const char *text)
 {
 	wzSize size;
@@ -952,6 +959,7 @@ struct wzRenderer *wzgl_create_renderer()
 	renderer->draw_list = wzgl_draw_list;
 	renderer->draw_tab_button = wzgl_draw_tab_button;
 	renderer->draw_tab_page = wzgl_draw_tab_page;
+	renderer->get_text_edit_border = wzgl_get_text_edit_border;
 	renderer->measure_text_edit = wzgl_measure_text_edit;
 	renderer->draw_text_edit = wzgl_draw_text_edit;
 	renderer->debug_draw_text = wzgl_debug_draw_text;
