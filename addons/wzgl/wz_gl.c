@@ -476,7 +476,7 @@ static wzBorder wzgl_measure_group_box_margin(struct wzRenderer *renderer, const
 	assert(renderer);
 	wzgl_measure_text(renderer, label, 0, NULL, &labelHeight);
 
-	margin.top = labelHeight + 8;
+	margin.top = (!label || !label[0]) ? 8 : labelHeight + 8;
 	margin.bottom = 8;
 	margin.left = 8;
 	margin.right = 8;
@@ -489,8 +489,6 @@ static void wzgl_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
-	int textLeftMargin, textBorderSpacing;
-	int textWidth, textHeight;
 
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
@@ -502,18 +500,30 @@ static void wzgl_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct
 	// Background.
 	wzgl_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
 
-	// Border - left, bottom, right, top left, top right.
-	textLeftMargin = 20;
-	textBorderSpacing = 5;
-	wzgl_measure_text(renderer, label, 0, &textWidth, &textHeight);
-	wzgl_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, nvgRGB(98, 135, 157));
-	wzgl_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
-	wzgl_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
-	wzgl_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + textLeftMargin - textBorderSpacing, rect.y + textHeight / 2, nvgRGB(98, 135, 157));
-	wzgl_draw_line(vg, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, nvgRGB(98, 135, 157));
+	// Border.
+	if (!label || !label[0])
+	{
+		wzgl_draw_rect(vg, rect, nvgRGB(98, 135, 157));
+	}
+	else
+	{
+		int textLeftMargin, textBorderSpacing;
+		int textWidth, textHeight;
 
-	// Label.
-	wzgl_printf(rendererData, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), label);
+		textLeftMargin = 20;
+		textBorderSpacing = 5;
+		wzgl_measure_text(renderer, label, 0, &textWidth, &textHeight);
+
+		// Left, right, bottom, top left, top right.
+		wzgl_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, nvgRGB(98, 135, 157));
+		wzgl_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
+		wzgl_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, nvgRGB(98, 135, 157));
+		wzgl_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + textLeftMargin - textBorderSpacing, rect.y + textHeight / 2, nvgRGB(98, 135, 157));
+		wzgl_draw_line(vg, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, nvgRGB(98, 135, 157));
+
+		// Label.
+		wzgl_printf(rendererData, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), label);
+	}
 
 	nvgRestore(vg);
 }
