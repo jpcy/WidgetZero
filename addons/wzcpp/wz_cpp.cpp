@@ -272,7 +272,7 @@ struct TextEditPrivate : public WidgetPrivate
 struct WindowPrivate : public WidgetPrivate
 {
 	WindowPrivate();
-	~WindowPrivate();
+	virtual ~WindowPrivate();
 	virtual void onAdded();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
@@ -346,6 +346,10 @@ void WidgetPrivate::onAddedRecursive()
 }
 
 //------------------------------------------------------------------------------
+
+Widget::~Widget()
+{
+}
 
 wzRect Widget::getRect() const
 {

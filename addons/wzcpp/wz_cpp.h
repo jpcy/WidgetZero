@@ -77,6 +77,7 @@ public:
 class Widget
 {
 public:
+	virtual ~Widget();
 	wzRect getRect() const;
 	Widget *setPosition(int x, int y);
 	Widget *setSize(int w, int h);
