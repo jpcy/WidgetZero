@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include "wz_desktop.h"
 #include "wz_widget.h"
 #include "wz_widget_draw.h"
@@ -84,7 +83,7 @@ static struct wzWindow *wz_desktop_get_hover_window(struct wzDesktop *desktop, i
 	int drawPriority;
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	result = NULL;
 	drawPriority = -1;
 
@@ -118,7 +117,7 @@ static void wz_desktop_dock_tab_bar_tab_changed(wzEvent *e)
 	int i;
 	struct wzWindow *window;
 
-	assert(e);
+	WZ_ASSERT(e);
 	desktop = e->base.widget->desktop;
 
 	if (desktop->ignoreDockTabBarChangedEvent)
@@ -136,7 +135,7 @@ static void wz_desktop_dock_tab_bar_tab_changed(wzEvent *e)
 		}
 	}
 
-	assert(dockPosition != WZ_DOCK_POSITION_NONE);
+	WZ_ASSERT(dockPosition != WZ_DOCK_POSITION_NONE);
 
 	// Get the window corresponding to the tab.
 	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e->tabBar.tab);
@@ -155,8 +154,8 @@ static void wz_desktop_dock_tab_bar_tab_changed(wzEvent *e)
 
 void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockPosition, struct wzTabBar *tabBar)
 {
-	assert(desktop);
-	assert(tabBar);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(tabBar);
 
 	if (desktop->dockTabBars[dockPosition])
 		return;
@@ -174,8 +173,8 @@ void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockP
 
 struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab)
 {
-	assert(desktop);
-	assert(tab);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(tab);
 	return (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)tab);
 }
 
@@ -183,7 +182,7 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 {
 	struct wzTabBar *tabBar;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	tabBar = desktop->dockTabBars[dockPosition];
 
 	if (wz_arr_len(desktop->dockedWindows[dockPosition]) < 2)
@@ -220,7 +219,7 @@ static void wz_desktop_refresh_dock_tab_bar(struct wzDesktop *desktop, wzDockPos
 			e.create.extra = (struct wzWidget *)desktop->dockedWindows[dockPosition][i];
 			wz_invoke_event(&e, NULL);
 			tab = (struct wzButton *)e.create.widget;
-			assert(tab); // Consumer didn't handle the event.
+			WZ_ASSERT(tab); // Consumer didn't handle the event.
 
 			// Set the tab internal metadata to the window.
 			wz_widget_set_internal_metadata((struct wzWidget *)tab, desktop->dockedWindows[dockPosition][i]);
@@ -255,8 +254,8 @@ void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWi
 	wzDockPosition i;
 	int j, k;
 
-	assert(desktop);
-	assert(window);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(window);
 	rect = wz_widget_get_rect((const struct wzWidget *)window);
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -286,7 +285,7 @@ static void wz_desktop_update_docking_rects(struct wzDesktop *desktop)
 {
 	wzDockPosition i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -361,8 +360,8 @@ static void wz_desktop_dock_window(struct wzDesktop *desktop, struct wzWindow *w
 {
 	int i;
 
-	assert(desktop);
-	assert(window);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(window);
 
 	// Hide any other windows docked at the same position.
 	for (i = 0; i < wz_arr_len(desktop->dockedWindows[desktop->windowDockPosition]); i++)
@@ -396,8 +395,8 @@ wzDockPosition wz_desktop_get_window_dock_position(const struct wzDesktop *deskt
 	wzDockPosition i;
 	int j;
 
-	assert(desktop);
-	assert(window);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(window);
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -419,8 +418,8 @@ void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window
 	int j, windowIndex;
 	int nDockedWindows;
 
-	assert(desktop);
-	assert(window);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(window);
 
 	// Find the dock position for the window, and the window index.
 	dockPosition = WZ_DOCK_POSITION_NONE;
@@ -486,7 +485,7 @@ DOCK ICON
 
 static void wz_desktop_draw_dock_icon(struct wzWidget *widget, wzRect clip)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	if (widget->desktop->draw_dock_icon)
@@ -507,7 +506,7 @@ static void wz_desktop_update_dock_icon_positions(struct wzDesktop *desktop)
 	wzSize ds, dis;
 	int centerW, centerH;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	ds = wz_widget_get_size((struct wzWidget *)desktop);
 	dis = wz_widget_get_size((struct wzWidget *)desktop->dockIcons[WZ_DOCK_POSITION_NORTH]);
 	centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
@@ -523,7 +522,7 @@ void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktop
 {
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->draw_dock_icon = callback;
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -541,7 +540,7 @@ void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h)
 {
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -564,7 +563,7 @@ DOCK PREVIEW
 
 static void wz_desktop_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	if (widget->desktop->draw_dock_preview)
@@ -580,8 +579,8 @@ static void wz_widget_update_dock_preview_rect(struct wzDesktop *desktop, wzDock
 	// e.g. north dock max height is desktop height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
-	assert(desktop);
-	assert(desktop->movingWindow);
+	WZ_ASSERT(desktop);
+	WZ_ASSERT(desktop->movingWindow);
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
 	nDockedWindows = wz_arr_len(desktop->dockedWindows[dockPosition]);
@@ -646,7 +645,7 @@ static void wz_desktop_update_dock_preview_visible(struct wzDesktop *desktop, in
 	wzDockPosition i;
 	bool showDockPreview = false;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	if (!desktop->movingWindow)
 		return;
@@ -669,7 +668,7 @@ static void wz_desktop_update_dock_preview_visible(struct wzDesktop *desktop, in
 
 void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->draw_dock_preview = callback;
 	wz_widget_set_metadata((struct wzWidget *)desktop->dockPreview, metadata);
 }
@@ -694,7 +693,7 @@ static void wz_desktop_update_window_draw_priorities(struct wzDesktop *desktop, 
 	int nWindows;
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	// Get a list of windows (excluding top).
 	nWindows = 0;
@@ -738,7 +737,7 @@ static void wz_widget_mouse_button_down_recursive(struct wzWidget *widget, int m
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -761,7 +760,7 @@ void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, in
 {
 	struct wzWidget *widget;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	desktop->lockInputWindow = wz_desktop_get_hover_window(desktop, mouseX, mouseY);
 
@@ -798,7 +797,7 @@ static void wz_widget_mouse_button_up_recursive(struct wzWidget *widget, int mou
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -818,7 +817,7 @@ void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int 
 {
 	struct wzWidget *widget;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	// Need a special case for dock icons.
 	if (desktop->movingWindow)
@@ -863,7 +862,7 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 {
 	int i, j;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
@@ -909,7 +908,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	bool oldHover;
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -990,7 +989,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 
 void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	// Reset the mouse cursor to default.
 	desktop->cursor = WZ_CURSOR_DEFAULT;
@@ -1021,7 +1020,7 @@ static void wz_widget_mouse_wheel_move_recursive(struct wzWidget *widget, int x,
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -1044,7 +1043,7 @@ void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y)
 {
 	struct wzWidget *widget;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -1075,7 +1074,7 @@ static void wz_widget_key_recursive(struct wzWidget *widget, wzKey key, bool dow
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -1102,7 +1101,7 @@ static void wz_desktop_key(struct wzDesktop *desktop, wzKey key, bool down)
 {
 	struct wzWidget *widget;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -1149,7 +1148,7 @@ static void wz_widget_text_input_recursive(struct wzWidget *widget, const char *
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -1172,7 +1171,7 @@ void wz_desktop_text_input(struct wzDesktop *desktop, const char *text)
 {
 	struct wzWidget *widget;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	if (wz_arr_len(desktop->lockInputWidgetStack) > 0)
 	{
@@ -1216,7 +1215,7 @@ static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzDesktop *desktop;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	desktop = (struct wzDesktop *)widget;
 	desktop->base.rect.w = rect.w;
 	desktop->base.rect.h = rect.h;
@@ -1227,19 +1226,19 @@ static void wz_desktop_set_rect(struct wzWidget *widget, wzRect rect)
 
 static struct wzWidget *wz_desktop_get_content_widget(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return ((struct wzDesktop *)widget)->content;
 }
 
 void wz_desktop_set_measure_text_callback(struct wzDesktop *desktop, wzDesktopMeasureTextCallback callback)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->measure_text = callback;
 }
 
 void wz_desktop_set_text_get_pixel_delta_callback(struct wzDesktop *desktop, wzDesktopTextGetPixelDeltaCallback callback)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->text_get_pixel_delta = callback;
 }
 
@@ -1289,25 +1288,25 @@ struct wzDesktop *wz_desktop_create()
 
 void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->handle_event = callback;
 }
 
 wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	return desktop->cursor;
 }
 
 void wz_desktop_set_cursor(struct wzDesktop *desktop, wzCursor cursor)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->cursor = cursor;
 }
 
 void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget)
 {
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	wz_arr_push(desktop->lockInputWidgetStack, widget);
 }
 
@@ -1327,7 +1326,7 @@ void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *wi
 {
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	desktop->movingWindow = window;
 
 	// Show the dock icons if movingWindow is not NULL.
@@ -1341,7 +1340,7 @@ void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks)
 {
 	int i;
 
-	assert(e);
+	WZ_ASSERT(e);
 
 	if (e->base.widget->desktop && e->base.widget->desktop->handle_event)
 	{
@@ -1359,7 +1358,7 @@ void wz_desktop_update_content_rect(struct wzDesktop *desktop)
 	wzRect rect;
 	wzDockPosition i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 	rect = desktop->base.rect;
 
 	// Adjust the content rect based on docked windows.

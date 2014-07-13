@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_desktop.h"
@@ -64,7 +63,7 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 {
 	struct wzButton *button;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	button = (struct wzButton *)widget;
 
 	if (mouseButton == 1)
@@ -89,7 +88,7 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 {
 	struct wzButton *button;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	button = (struct wzButton *)widget;
 
 	if (mouseButton == 1 && button->isPressed)
@@ -108,7 +107,7 @@ static void wz_button_destroy(struct wzWidget *widget)
 {
 	struct wzButton *button;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	button = (struct wzButton *)widget;
 	wz_arr_free(button->pressed_callbacks);
 	wz_arr_free(button->clicked_callbacks);
@@ -129,31 +128,31 @@ struct wzButton *wz_button_create()
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	button->clickBehavior = clickBehavior;
 }
 
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior setBehavior)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	button->setBehavior = setBehavior;
 }
 
 bool wz_button_is_pressed(const struct wzButton *button)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	return button->isPressed;
 }
 
 bool wz_button_is_set(const struct wzButton *button)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	return button->isSet;
 }
 
 void wz_button_set(struct wzButton *button, bool value)
 {
-	assert(button);
+	WZ_ASSERT(button);
 
 	// No such thing as setting a button if using the default behavior.
 	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
@@ -178,12 +177,12 @@ void wz_button_set(struct wzButton *button, bool value)
 
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	wz_arr_push(button->pressed_callbacks, callback);
 }
 
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	wz_arr_push(button->clicked_callbacks, callback);
 }

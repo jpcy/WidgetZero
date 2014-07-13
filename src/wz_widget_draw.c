@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include "wz_desktop.h"
 #include "wz_widget.h"
 #include "wz_window.h"
@@ -42,7 +41,7 @@ static void wz_widget_calculate_unique_draw_priorities_recursive(int *drawPriori
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -101,9 +100,9 @@ DRAWING
 
 static bool wz_widget_draw_internal(int priority, bool (*draw_priority_compare)(int, int), struct wzWidget *widget, wzRect *clip)
 {
-	assert(draw_priority_compare);
-	assert(widget);
-	assert(clip);
+	WZ_ASSERT(draw_priority_compare);
+	WZ_ASSERT(widget);
+	WZ_ASSERT(clip);
 
 	if (!wz_widget_get_visible(widget))
 		return false;
@@ -134,7 +133,7 @@ static void wz_widget_draw_by_less_than_or_equals_priority_recursive(int priorit
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_draw_internal(priority, wz_draw_priority_less_than_or_equals, widget, &clip))
 		return;
@@ -152,7 +151,7 @@ static void wz_widget_draw_by_priority_recursive(int priority, struct wzWidget *
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (!wz_widget_draw_internal(priority, wz_draw_priority_equals, widget, &clip))
 		return;
@@ -181,7 +180,7 @@ static void wz_widget_draw(struct wzWidget *widget, wzWidgetPredicate add_draw_p
 	wzRect clip;
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	// Calculate unique draw priorities.
 	nDrawPriorities = 0;
@@ -248,7 +247,7 @@ void wz_widget_draw_desktop(struct wzDesktop *desktop)
 	int nWindows;
 	int i;
 
-	assert(desktop);
+	WZ_ASSERT(desktop);
 
 	// Draw the desktop and ancestors with draw priority < window. Don't recurse into windows.
 	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_less_than_window, wz_widget_is_not_window);

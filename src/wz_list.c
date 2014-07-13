@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,7 +62,7 @@ static void wz_list_update_scroller(struct wzList *list)
 	wzRect listRect, rect;
 	int max;
 
-	assert(list);
+	WZ_ASSERT(list);
 
 	if (!list->scroller)
 		return;
@@ -96,7 +95,7 @@ static void wz_list_scroller_value_changed(wzEvent *e)
 {
 	struct wzList *list;
 	
-	assert(e);
+	WZ_ASSERT(e);
 	list = (struct wzList *)e->base.widget->parent;
 	list->firstItem = e->scroller.value / list->itemHeight;
 }
@@ -113,7 +112,7 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->rect = rect;
 	list = (struct wzList *)widget;
 	wz_list_update_scroller(list);
@@ -121,7 +120,7 @@ static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 
 static void wz_list_set_visible(struct wzWidget *widget, bool visible)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->hidden = !visible;
 
 	// Clear some additional state when hidden.
@@ -168,7 +167,7 @@ static void wz_list_mouse_button_down(struct wzWidget *widget, int mouseButton, 
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 
 	if (mouseButton == 1 && list->hoveredItem != -1)
@@ -184,7 +183,7 @@ static void wz_list_mouse_button_up(struct wzWidget *widget, int mouseButton, in
 	struct wzList *list;
 	bool selectedItemAssignedTo = false;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 
 	if (mouseButton == 1)
@@ -217,7 +216,7 @@ static void wz_list_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, 
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 	list->lastMousePosition.x = mouseX;
 	list->lastMousePosition.y = mouseY;
@@ -238,7 +237,7 @@ static void wz_list_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 
 	if (wz_widget_get_visible((struct wzWidget *)list->scroller))
@@ -259,7 +258,7 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
@@ -269,7 +268,7 @@ static void wz_list_destroy(struct wzWidget *widget)
 {
 	struct wzList *list;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	list = (struct wzList *)widget;
 	wz_arr_free(list->item_selected_callbacks);
 }
@@ -278,7 +277,7 @@ struct wzList *wz_list_create(struct wzScroller *scroller)
 {
 	struct wzList *list;
 
-	assert(scroller);
+	WZ_ASSERT(scroller);
 
 	list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
@@ -307,13 +306,13 @@ struct wzList *wz_list_create(struct wzScroller *scroller)
 
 struct wzScroller *wz_list_get_scroller(struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->scroller;
 }
 
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	list->itemsBorder = itemsBorder;
 	wz_list_update_scroller(list);
 }
@@ -330,7 +329,7 @@ void wz_list_set_items_border_args(struct wzList *list, int top, int right, int 
 
 wzBorder wz_list_get_items_border(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->itemsBorder;
 }
 
@@ -338,7 +337,7 @@ wzRect wz_list_get_items_rect(const struct wzList *list)
 {
 	wzRect listRect, rect;
 
-	assert(list);
+	WZ_ASSERT(list);
 	listRect = wz_widget_get_rect((struct wzWidget *)list);
 	rect.x = list->itemsBorder.left;
 	rect.y = list->itemsBorder.top;
@@ -359,7 +358,7 @@ wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 	wzRect rect;
 	wzPosition offset;
 	
-	assert(list);
+	WZ_ASSERT(list);
 	rect = wz_list_get_items_rect(list);
 	offset = wz_widget_get_absolute_position((const struct wzWidget *)list);
 	rect.x += offset.x;
@@ -370,7 +369,7 @@ wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 
 void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	list->itemHeight = itemHeight;
 
 	if (!list->scroller)
@@ -382,26 +381,26 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 
 int wz_list_get_item_height(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->itemHeight;
 }
 
 void wz_list_set_num_items(struct wzList *list, int nItems)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	list->nItems = WZ_MAX(0, nItems);
 	wz_list_update_scroller(list);
 }
 
 int wz_list_get_num_items(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->nItems;
 }
 
 int wz_list_get_first_item(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->firstItem;
 }
 
@@ -409,7 +408,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 {
 	wzEvent e;
 
-	assert(list);
+	WZ_ASSERT(list);
 	list->selectedItem = selectedItem;
 	
 	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
@@ -420,24 +419,24 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem)
 
 int wz_list_get_selected_item(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->selectedItem;
 }
 
 int wz_list_get_pressed_item(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->pressedItem;
 }
 
 int wz_list_get_hovered_item(const struct wzList *list)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	return list->hoveredItem;
 }
 
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback)
 {
-	assert(list);
+	WZ_ASSERT(list);
 	wz_arr_push(list->item_selected_callbacks, callback);
 }

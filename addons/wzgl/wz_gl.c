@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -67,7 +66,7 @@ static void wzgl_printf(wzRendererData *rendererData, int x, int y, int align, s
 	static char buffer[2048];
 	va_list args;
 
-	assert(rendererData);
+	WZ_ASSERT(rendererData);
 
 	va_start(args, format);
 	vsnprintf(buffer, sizeof(buffer), format, args);
@@ -83,7 +82,7 @@ static void wzgl_printf(wzRendererData *rendererData, int x, int y, int align, s
 
 static void wzgl_clip_to_rect(struct NVGcontext *vg, wzRect rect)
 {
-	assert(vg);
+	WZ_ASSERT(vg);
 	nvgScissor(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
 }
 
@@ -91,7 +90,7 @@ static bool wzgl_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, 
 {
 	wzRect intersection;
 
-	assert(vg);
+	WZ_ASSERT(vg);
 
 	if (!wz_intersect_rects(rect1, rect2, &intersection))
 	{
@@ -137,7 +136,7 @@ RENDERER
 
 static void wzgl_begin_frame(struct wzRenderer *renderer, int windowWidth, int windowHeight)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	nvgBeginFrame(((wzRendererData *)renderer->data)->vg, windowWidth, windowHeight, 1);
 }
 
@@ -151,7 +150,7 @@ static void wzgl_measure_text(struct wzRenderer *renderer, const char *text, int
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -173,8 +172,8 @@ static int wzgl_text_get_pixel_delta(struct wzRenderer *renderer, const char *te
 	struct NVGglyphPosition positions[2];
 	float x[2];
 
-	assert(renderer);
-	assert(text);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(text);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -188,7 +187,7 @@ static void wzgl_draw_dock_icon(struct wzRenderer *renderer, wzRect rect)
 {
 	struct NVGcontext *vg;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	vg = ((wzRendererData *)renderer->data)->vg;
 
 	nvgSave(vg);
@@ -203,7 +202,7 @@ static void wzgl_draw_dock_preview(struct wzRenderer *renderer, wzRect rect)
 {
 	struct NVGcontext *vg;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	vg = ((wzRendererData *)renderer->data)->vg;
 
 	nvgSave(vg);
@@ -215,7 +214,7 @@ static int wzgl_measure_window_header_height(struct wzRenderer *renderer, const 
 {
 	int h;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, title, 0, NULL, &h);
 	return h + 6; // Padding.
 }
@@ -228,8 +227,8 @@ static void wzgl_draw_window(struct wzRenderer *renderer, wzRect clip, struct wz
 	int borderSize;
 	wzRect borderRect, headerRect;
 
-	assert(renderer);
-	assert(window);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(window);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -275,7 +274,7 @@ static wzSize wzgl_measure_button(struct wzRenderer *renderer, const char *label
 {
 	wzSize size;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
 
 	// Padding.
@@ -291,8 +290,8 @@ static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wz
 	wzRect rect;
 	bool hover, pressed;
 
-	assert(renderer);
-	assert(button);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(button);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -339,7 +338,7 @@ static wzSize wzgl_measure_checkbox(struct wzRenderer *renderer, const char *lab
 {
 	wzSize size;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
 	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
 	return size;
@@ -353,8 +352,8 @@ static void wzgl_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct 
 	bool hover;
 	wzRect boxRect;
 
-	assert(renderer);
-	assert(checkbox);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(checkbox);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -403,8 +402,8 @@ static wzSize wzgl_measure_combo(struct wzRenderer *renderer, const char **items
 	wzSize size;
 	int i;
 
-	assert(renderer);
-	assert(items);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(items);
 
 	// Calculate size based on the biggest item text plus padding.
 	size.w = size.h = 0;
@@ -431,8 +430,8 @@ static void wzgl_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzC
 	wzRect rect;
 	bool hover;
 
-	assert(renderer);
-	assert(combo);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(combo);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -473,7 +472,7 @@ static wzBorder wzgl_measure_group_box_margin(struct wzRenderer *renderer, const
 	int labelHeight;
 	wzBorder margin;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, label, 0, NULL, &labelHeight);
 
 	margin.top = (!label || !label[0]) ? 8 : labelHeight + 8;
@@ -532,7 +531,7 @@ static wzSize wzgl_measure_radio_button(struct wzRenderer *renderer, const char 
 {
 	wzSize size;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
 	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
 	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
@@ -546,8 +545,8 @@ static void wzgl_draw_radio_button(struct wzRenderer *renderer, wzRect clip, str
 	wzRect rect;
 	bool hover;
 
-	assert(renderer);
-	assert(button);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(button);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -586,8 +585,8 @@ static void wzgl_draw_scroller(struct wzRenderer *renderer, wzRect clip, struct 
 	struct NVGcontext *vg;
 	wzRect rect, nubRect;
 
-	assert(renderer);
-	assert(scroller);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(scroller);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -610,7 +609,7 @@ static wzSize wzgl_measure_label(struct wzRenderer *renderer, const char *text)
 {
 	wzSize size;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, text, 0, &size.w, &size.h);
 	return size;
 }
@@ -621,8 +620,8 @@ static void wzgl_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzL
 	struct NVGcontext *vg;
 	wzRect rect;
 
-	assert(renderer);
-	assert(label);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(label);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)label);
@@ -641,8 +640,8 @@ static void wzgl_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzLi
 	int itemsMargin, itemHeight, itemLeftPadding;
 	int nItems, scrollerValue, y, i;
 
-	assert(renderer);
-	assert(list);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(list);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -705,8 +704,8 @@ static void wzgl_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struc
 	wzRect rect;
 	bool hover, set;
 
-	assert(renderer);
-	assert(tabButton);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(tabButton);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -754,8 +753,8 @@ static void wzgl_draw_tab_page(struct wzRenderer *renderer, wzRect clip, struct 
 	struct NVGcontext *vg;
 	wzRect rect;
 
-	assert(renderer);
-	assert(tabPage);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(tabPage);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -771,7 +770,7 @@ static wzSize wzgl_measure_text_edit(struct wzRenderer *renderer, wzBorder borde
 {
 	wzSize size;
 
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, text, 0, NULL, &size.h);
 	size.w = 100;
 	size.h += border.top + border.bottom;
@@ -791,8 +790,8 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 	int cursorIndex, cursorX;
 	int selectionStartIndex, selectionEndIndex;
 
-	assert(renderer);
-	assert(textEdit);
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(textEdit);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
@@ -885,7 +884,7 @@ static void wzgl_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const 
 
 static void wzgl_debug_draw_text(struct wzRenderer *renderer, const char *text, int x, int y)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	wzgl_printf((wzRendererData *)renderer->data, x, y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), text);
 }
 

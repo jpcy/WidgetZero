@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
@@ -48,7 +47,7 @@ static void wz_radio_button_group_button_clicked(wzEvent *e)
 	int i;
 	struct wzRadioButtonGroup *group;
 	
-	assert(e);
+	WZ_ASSERT(e);
 	group = (struct wzRadioButtonGroup *)wz_widget_get_internal_metadata(e->base.widget);
 
 	// Unset all the other buttons in the group.
@@ -65,8 +64,8 @@ void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct w
 {
 	int i;
 
-	assert(group);
-	assert(button);
+	WZ_ASSERT(group);
+	WZ_ASSERT(button);
 
 	// Don't add it if it already exists.
 	for (i = 0; i < wz_arr_len(group->buttons); i++)

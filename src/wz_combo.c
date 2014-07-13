@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_desktop.h"
@@ -84,7 +83,7 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 	struct wzCombo *combo;
 	wzRect listRect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	combo = (struct wzCombo *)widget;
 
 	if (mouseButton == 1)
@@ -130,8 +129,8 @@ static void wz_combo_list_item_selected(wzEvent *e)
 {
 	struct wzCombo *combo;
 
-	assert(e);
-	assert(e->base.widget);
+	WZ_ASSERT(e);
+	WZ_ASSERT(e->base.widget);
 	combo = (struct wzCombo *)e->base.widget->parent;
 
 	// Unlock input.
@@ -158,8 +157,8 @@ struct wzCombo *wz_combo_create()
 
 void wz_combo_set_list(struct wzCombo *combo, struct wzList *list)
 {
-	assert(combo);
-	assert(list);
+	WZ_ASSERT(combo);
+	WZ_ASSERT(list);
 
 	if (combo->list)
 		return;
@@ -174,12 +173,12 @@ void wz_combo_set_list(struct wzCombo *combo, struct wzList *list)
 
 struct wzList *wz_combo_get_list(struct wzCombo *combo)
 {
-	assert(combo);
+	WZ_ASSERT(combo);
 	return combo->list;
 }
 
 bool wz_combo_is_open(struct wzCombo *combo)
 {
-	assert(combo);
+	WZ_ASSERT(combo);
 	return combo->isOpen;
 }

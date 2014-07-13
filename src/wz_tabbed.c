@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
@@ -74,7 +73,7 @@ static void wz_tabbed_destroy(struct wzWidget *widget)
 {
 	struct wzTabbed *tabbed;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	tabbed = (struct wzTabbed *)widget;
 	wz_arr_free(tabbed->pages);
 }
@@ -85,7 +84,7 @@ static void wz_tabbed_set_rect(struct wzWidget *widget, wzRect rect)
 	wzSize pageSize;
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->rect = rect;
 	tabbed = (struct wzTabbed *)widget;
 
@@ -107,7 +106,7 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 	struct wzTabbed *tabbed;
 	int i;
 
-	assert(e);
+	WZ_ASSERT(e);
 	tabbed = (struct wzTabbed *)e->base.widget->parent;
 
 	// Set the corresponding page to visible, hide all the others.
@@ -121,7 +120,7 @@ struct wzTabbed *wz_tabbed_create(struct wzTabBar *tabBar)
 {
 	struct wzTabbed *tabbed;
 
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 
 	tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
 	memset(tabbed, 0, sizeof(struct wzTabbed));
@@ -141,9 +140,9 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzW
 	int tabBarHeight;
 	wzTabbedPage newPage;
 
-	assert(tabbed);
-	assert(tab);
-	assert(page);
+	WZ_ASSERT(tabbed);
+	WZ_ASSERT(tab);
+	WZ_ASSERT(page);
 
 	// Add the tab.
 	wz_tab_bar_add_tab(tabbed->tabBar, tab);

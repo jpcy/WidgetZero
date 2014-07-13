@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
@@ -34,7 +33,7 @@ struct wzFrame
 
 static struct wzWidget *wz_frame_get_content_widget(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return ((struct wzFrame *)widget)->content;
 }
 

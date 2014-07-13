@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <string>
@@ -385,7 +384,7 @@ Widget *Widget::setMargin(wzBorder margin)
 
 ButtonPrivate::ButtonPrivate(wzRenderer *renderer) : drawStyle(Normal)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
@@ -453,7 +452,7 @@ Button *Button::setLabel(const std::string &label)
 
 CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	button = wz_button_create();
 	wzWidget *widget = (wzWidget *)button;
@@ -516,7 +515,7 @@ Checkbox *Checkbox::setLabel(const std::string &label)
 
 ComboPrivate::ComboPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	combo = wz_combo_create();
 	wzWidget *widget = (wzWidget *)combo;
@@ -596,7 +595,7 @@ static void DrawDockPreview(wzRect rect, void *metadata)
 
 DesktopPrivate::DesktopPrivate(wzRenderer *renderer) : showCursor(false)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	desktop = wz_desktop_create();
 	wz_widget_set_metadata((wzWidget *)desktop, this);
@@ -766,7 +765,7 @@ void DockTabBar::handleEvent(wzEvent *e)
 
 GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	frame = wz_frame_create();
 	wzWidget *widget = (wzWidget *)frame;
@@ -835,7 +834,7 @@ Widget *GroupBox::add(Widget *widget)
 
 LabelPrivate::LabelPrivate(wzRenderer *renderer) : r(255), g(255), b(255)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	label = wz_label_create();
 	wzWidget *widget = (wzWidget *)label;
@@ -909,7 +908,7 @@ Label *Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 
 ListPrivate::ListPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	scroller.reset(new Scroller(renderer));
 	wz_widget_set_size_args(scroller->p->getWidget(), 16, 0);
@@ -974,7 +973,7 @@ RadioButtonGroup::~RadioButtonGroup()
 
 RadioButtonPrivate::RadioButtonPrivate(wzRenderer *renderer) : group(NULL)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
@@ -1055,7 +1054,7 @@ RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 
 ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	decrementButton.reset(new Button(renderer, "-"));
 	incrementButton.reset(new Button(renderer, "+"));
@@ -1184,7 +1183,7 @@ Widget *StackLayout::add(Widget *widget)
 
 TabBar::TabBar(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	decrementButton_.reset(new Button(renderer, "<"));
 	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
@@ -1220,7 +1219,7 @@ Button *TabBar::createTab()
 
 TabPage::TabPage(wzRenderer *renderer) 
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	widget_ = wz_tab_page_create();
 	wz_widget_set_metadata(widget_, this);
@@ -1277,7 +1276,7 @@ Widget *Tab::add(Widget *widget)
 
 TabbedPrivate::TabbedPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	tabBar.reset(new TabBar(renderer));
 	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
@@ -1336,7 +1335,7 @@ Tab *Tabbed::addTab(Tab *tab)
 
 TextEditPrivate::TextEditPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	textEdit = wz_text_edit_create(256);
 	wz_text_edit_set_border_args(textEdit, borderSize, borderSize, borderSize, borderSize);
@@ -1395,7 +1394,7 @@ TextEdit *TextEdit::setText(const std::string &text)
 
 WindowPrivate::WindowPrivate(wzRenderer *renderer)
 {
-	assert(renderer);
+	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	window = wz_window_create();
 	wzWidget *widget = (wzWidget *)window;

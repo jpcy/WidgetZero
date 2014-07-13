@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_desktop.h"
@@ -104,7 +103,7 @@ static void wz_stb_textedit_deletechars(STB_TEXTEDIT_STRING *textEdit, int i, in
 {
 	int length;
 
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	length = (int)strlen(&textEdit->text);
 	memmove(&(&textEdit->text)[i], &(&textEdit->text)[i + n], length - (i + n));
 	(&textEdit->text)[length - n] = 0;
@@ -114,8 +113,8 @@ static int wz_stb_textedit_insertchars(STB_TEXTEDIT_STRING *textEdit, int i, STB
 {
 	int length;
 
-	assert(textEdit);
-	assert(chars);
+	WZ_ASSERT(textEdit);
+	WZ_ASSERT(chars);
 	length = (int)strlen(&textEdit->text);
 
 	// Move the displaced characters to the end.
@@ -172,7 +171,7 @@ static wzPosition wz_text_edit_calculate_relative_mouse_position(const struct wz
 {
 	wzPosition pos;
 
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	pos = wz_widget_get_absolute_position((const struct wzWidget *)textEdit);
 	pos.x = mouseX - (pos.x + textEdit->border.left);
 	pos.y = mouseY - (pos.y + textEdit->border.top);
@@ -184,7 +183,7 @@ static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
 {
 	int width, delta;
 
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	width = 0;
 	delta = textEdit->state.cursor - textEdit->scroll;
 
@@ -205,7 +204,7 @@ static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
 
 static void wz_text_edit_update_scroll_value(struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 
 	for (;;)
 	{
@@ -230,7 +229,7 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 {
 	struct wzTextEdit *textEdit;
 	
-	assert(widget);
+	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
 
 	if (mouseButton == 1)
@@ -246,7 +245,7 @@ static void wz_text_edit_mouse_button_up(struct wzWidget *widget, int mouseButto
 {
 	struct wzTextEdit *textEdit;
 	
-	assert(widget);
+	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
 
 	if (mouseButton == 1)
@@ -259,7 +258,7 @@ static void wz_text_edit_mouse_move(struct wzWidget *widget, int mouseX, int mou
 {
 	struct wzTextEdit *textEdit;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
 
 	if (widget->hover)
@@ -280,7 +279,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 {
 	struct wzTextEdit *textEdit;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
 	stb_textedit_key(textEdit, &textEdit->state, (int)key);
 	wz_text_edit_update_scroll_value(textEdit);
@@ -290,8 +289,8 @@ static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 {
 	struct wzTextEdit *textEdit;
 
-	assert(widget);
-	assert(text);
+	WZ_ASSERT(widget);
+	WZ_ASSERT(text);
 	textEdit = (struct wzTextEdit *)widget;
 	stb_textedit_key(textEdit, &textEdit->state, (int)text[0]);
 	wz_text_edit_update_scroll_value(textEdit);
@@ -318,19 +317,19 @@ struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
 
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return textEdit->border;
 }
 
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	textEdit->border = border;
 }
 
 void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	textEdit->border.top = top;
 	textEdit->border.right = right;
 	textEdit->border.bottom = bottom;
@@ -339,36 +338,36 @@ void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int righ
 
 const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return &textEdit->text;
 }
 
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	strncpy(&textEdit->text, text, WZ_MIN((int)strlen(text), textEdit->maximumTextLength));
 }
 
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return textEdit->scroll;
 }
 
 int wz_text_edit_get_cursor_index(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return textEdit->state.cursor;
 }
 
 int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return textEdit->state.select_start;
 }
 
 int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit)
 {
-	assert(textEdit);
+	WZ_ASSERT(textEdit);
 	return textEdit->state.select_end;
 }

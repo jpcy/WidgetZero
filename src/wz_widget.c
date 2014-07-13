@@ -43,7 +43,6 @@ wz_intersect_rects is SDL_IntersectRect
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
@@ -65,7 +64,7 @@ bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result)
 {
     int Amin, Amax, Bmin, Bmax;
 
-	assert(result);
+	WZ_ASSERT(result);
 
     /* Special cases for empty rects */
     if (wz_is_rect_empty(A) || wz_is_rect_empty(B))
@@ -112,7 +111,7 @@ STRETCHING (OUTSIDE LAYOUT)
 // Applies stretching to the provided rect.
 static wzRect wz_widget_calculate_stretched_rect(const struct wzWidget *widget, wzRect rect)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
 	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
@@ -140,7 +139,7 @@ static void wz_widget_set_stretched_rect_recursive(struct wzWidget *widget)
 	int i;
 	bool recurse;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	// Don't do anything to widgets that aren't set to stretch, but still recurse on children.
 	recurse = true;
@@ -188,7 +187,7 @@ void wz_widget_destroy(struct wzWidget *widget)
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	// Destroy children.
 	for (i = 0; i < wz_arr_len(widget->children); i++)
@@ -208,19 +207,19 @@ void wz_widget_destroy(struct wzWidget *widget)
 
 struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->desktop;
 }
 
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->type;
 }
 
 bool wz_widget_is_layout(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->type == WZ_TYPE_STACK_LAYOUT;
 }
 
@@ -236,7 +235,7 @@ void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.x = position.x;
 	rect.y = position.y;
@@ -248,7 +247,7 @@ wzPosition wz_widget_get_position(const struct wzWidget *widget)
 	wzRect rect;
 	wzPosition pos;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
 	pos.x = rect.x;
 	pos.y = rect.y;
@@ -260,7 +259,7 @@ wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget)
 	wzRect rect;
 	wzPosition pos;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = wz_widget_get_absolute_rect(widget);
 	pos.x = rect.x;
 	pos.y = rect.y;
@@ -271,7 +270,7 @@ void wz_widget_set_width(struct wzWidget *widget, int w)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.w = w;
 	wz_widget_set_rect(widget, rect);
@@ -281,7 +280,7 @@ void wz_widget_set_height(struct wzWidget *widget, int h)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.h = h;
 	wz_widget_set_rect(widget, rect);
@@ -299,7 +298,7 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.w = size.w;
 	rect.h = size.h;
@@ -321,7 +320,7 @@ wzSize wz_widget_get_size(const struct wzWidget *widget)
 	wzRect rect;
 	wzSize size;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
 	size.w = rect.w;
 	size.h = rect.h;
@@ -340,14 +339,14 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 
 void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->userRect = rect;
 	wz_widget_set_rect_internal(widget, rect);
 }
 
 wzRect wz_widget_get_rect(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->rect;
 }
 
@@ -355,7 +354,7 @@ wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
 
 	if (widget->parent)
@@ -370,7 +369,7 @@ wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 
 void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->margin = margin;
 
 	if (widget->parent)
@@ -399,13 +398,13 @@ void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int 
 
 wzBorder wz_widget_get_margin(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->margin;
 }
 
 void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->stretch = stretch;
 
 	// If the parent is a layout widget, refresh it.
@@ -417,13 +416,13 @@ void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
 
 int wz_widget_get_stretch(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->stretch;
 }
 
 void wz_widget_set_align(struct wzWidget *widget, int align)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->align = align;
 
 	// If the parent is a layout widget, refresh it.
@@ -435,19 +434,19 @@ void wz_widget_set_align(struct wzWidget *widget, int align)
 
 int wz_widget_get_align(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->align;
 }
 
 bool wz_widget_get_hover(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->hover;
 }
 
 void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (widget->vtable.set_visible)
 	{
@@ -461,31 +460,31 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 
 bool wz_widget_get_visible(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return !widget->hidden;
 }
 
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->metadata = metadata;
 }
 
 void *wz_widget_get_metadata(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->metadata;
 }
 
 void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->vtable.draw = draw;
 }
 
 void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->vtable.measure = measure;
 }
 
@@ -511,7 +510,7 @@ static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, 
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
@@ -524,8 +523,8 @@ static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, 
 
 void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
-	assert(widget);
-	assert(child);
+	WZ_ASSERT(widget);
+	WZ_ASSERT(child);
 
 	// Desktops cannot be added as children.
 	if (child->type == WZ_TYPE_DESKTOP)
@@ -549,8 +548,8 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 {
 	int i, deleteIndex;
 
-	assert(widget);
-	assert(child);
+	WZ_ASSERT(widget);
+	WZ_ASSERT(child);
 
 	// Ensure the child is actually a child of widget before destroying it.
 	deleteIndex = -1;
@@ -579,7 +578,7 @@ void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *ch
 {
 	int n;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	n = wz_arr_len(widget->children);
 	wz_widget_remove_child_widget(widget, child);
 
@@ -592,7 +591,7 @@ void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *ch
 
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	for (;;)
 	{
@@ -610,19 +609,19 @@ bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
 
 struct wzWidget *wz_widget_get_parent(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->parent;
 }
 
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->window;
 }
 
 struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (widget->vtable.get_content_widget)
 	{
@@ -642,7 +641,7 @@ WIDGET MEASURING
 
 void wz_widget_resize_to_measured(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (widget->vtable.measure)
 	{
@@ -679,7 +678,7 @@ static void wz_widget_measure_and_resize_recursive(struct wzWidget *widget)
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	wz_widget_resize_to_measured(widget);
 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
@@ -698,8 +697,8 @@ INTERNAL WIDGET FUNCTIONS
 
 void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child)
 {
-	assert(widget);
-	assert(child);
+	WZ_ASSERT(widget);
+	WZ_ASSERT(child);
 
 	// Set desktop.
 	child->desktop = wz_widget_find_desktop(widget);
@@ -740,7 +739,7 @@ void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition positio
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.x = position.x;
 	rect.y = position.y;
@@ -751,7 +750,7 @@ void wz_widget_set_width_internal(struct wzWidget *widget, int w)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.w = w;
 	wz_widget_set_rect_internal(widget, rect);
@@ -761,7 +760,7 @@ void wz_widget_set_height_internal(struct wzWidget *widget, int h)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.h = h;
 	wz_widget_set_rect_internal(widget, rect);
@@ -779,7 +778,7 @@ void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size)
 {
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect = widget->rect;
 	rect.w = size.w;
 	rect.h = size.h;
@@ -801,7 +800,7 @@ void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
 	wzRect oldRect;
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	oldRect = widget->rect;
 
 	// Apply stretching.
@@ -835,7 +834,7 @@ void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
 
 void wz_widget_refresh_rect(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
 }
 
@@ -861,13 +860,13 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 
 void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->drawPriority = drawPriority;
 }
 
 int wz_widget_get_draw_priority(const struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->drawPriority;
 }
 
@@ -885,19 +884,19 @@ bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
 
 void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->inputNotClippedToParent = !value;
 }
 
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->internalMetadata = metadata;
 }
 
 void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return widget->internalMetadata;
 }
 

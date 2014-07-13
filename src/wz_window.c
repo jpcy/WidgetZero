@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,8 +68,8 @@ struct wzWindow
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
 static void wz_window_calculate_border_rects(struct wzWindow *window, wzRect *rects)
 {
-	assert(window);
-	assert(rects);
+	WZ_ASSERT(window);
+	WZ_ASSERT(rects);
 
 	rects[WZ_COMPASS_N] = window->base.rect;
 	rects[WZ_COMPASS_N].x += window->borderSize;
@@ -120,7 +119,7 @@ static void wz_window_calculate_mouse_over_border_rects(struct wzWindow *window,
 {
 	wzDockPosition dockPosition;
 
-	assert(window);
+	WZ_ASSERT(window);
 	dockPosition = wz_desktop_get_window_dock_position(window->base.desktop, window);
 
 	// Take into account dockPositioning, e.g. north dockPositioned window can only be resized south.
@@ -138,7 +137,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 {
 	struct wzWindow *window;
 	
-	assert(widget);
+	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
 
 	if (mouseButton == 1)
@@ -190,7 +189,7 @@ static void wz_window_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 {
 	struct wzWindow *window;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
 
 	if (mouseButton == 1)
@@ -215,7 +214,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 	wzPosition resizeDelta;
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
 
 	// Set the mouse cursor.
@@ -364,7 +363,7 @@ static wzRect wz_window_get_children_clip_rect(struct wzWidget *widget)
 {
 	struct wzWindow *window;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
 	return wz_widget_get_absolute_rect(window->content);
 }
@@ -374,7 +373,7 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	struct wzWindow *window;
 	wzRect contentRect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
 	window->base.rect = rect;
 
@@ -388,7 +387,7 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 
 static struct wzWidget *wz_window_get_content_widget(struct wzWidget *widget)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	return ((struct wzWindow *)widget)->content;
 }
 
@@ -416,26 +415,26 @@ struct wzWindow *wz_window_create()
 
 void wz_window_set_header_height(struct wzWindow *window, int height)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	window->headerHeight = height;
 	wz_widget_refresh_rect((struct wzWidget *)window);
 }
 
 int wz_window_get_header_height(struct wzWindow *window)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	return window->headerHeight;
 }
 
 void wz_window_set_border_size(struct wzWindow *window, int size)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	window->borderSize = size;
 }
 
 int wz_window_get_border_size(struct wzWindow *window)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	return window->borderSize;
 }
 
@@ -443,7 +442,7 @@ wzRect wz_window_get_header_rect(struct wzWindow *window)
 {
 	wzRect rect;
 
-	assert(window);
+	WZ_ASSERT(window);
 	rect.x = window->base.rect.x + window->borderSize;
 	rect.y = window->base.rect.y + window->borderSize;
 	rect.w = window->base.rect.w - window->borderSize * 2;
@@ -454,19 +453,19 @@ wzRect wz_window_get_header_rect(struct wzWindow *window)
 // Save the window size before docking so it can be restored if the window is undocked later.
 void wz_window_dock(struct wzWindow *window)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	window->sizeBeforeDocking.w = window->base.rect.w;
 	window->sizeBeforeDocking.h = window->base.rect.h;
 }
 
 int wz_window_get_draw_priority(const struct wzWindow *window)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	return window->drawPriority;
 }
 
 void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority)
 {
-	assert(window);
+	WZ_ASSERT(window);
 	window->drawPriority = drawPriority;
 }

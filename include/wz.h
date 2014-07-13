@@ -51,6 +51,11 @@ struct wzTextEdit;
 struct wzLabel;
 struct wzList;
 
+#ifndef WZ_ASSERT
+#include <assert.h>
+#define WZ_ASSERT assert
+#endif
+
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,

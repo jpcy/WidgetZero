@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_desktop.h"
@@ -43,7 +42,7 @@ struct wzTabBar
 // Ensure tab height stay the same as the tab bar.
 static void wz_tab_set_rect(struct wzWidget *widget, wzRect rect)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 	rect.h = ((struct wzTabBar *)widget->parent)->base.rect.h;
 	widget->rect = rect;
 }
@@ -55,7 +54,7 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 	bool wereScrollButtonsVisible, showScrollButtons;
 	wzRect rect;
 
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 
 	if (!tabBar->decrementButton || !tabBar->incrementButton)
 		return;
@@ -97,7 +96,7 @@ static void wz_tab_bar_update_tabs(struct wzTabBar *tabBar)
 {
 	int x, i;
 
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 
 	// Start at the left edge of the tab bar.
 	x = 0;
@@ -144,7 +143,7 @@ static void wz_tab_bar_invoke_tab_changed(struct wzTabBar *tabBar)
 {
 	wzEvent e;
 
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->selectedTab;
@@ -154,7 +153,7 @@ static void wz_tab_bar_invoke_tab_changed(struct wzTabBar *tabBar)
 // Sets the tab bar (the button's parent) selected tab.
 static void wz_tab_bar_button_pressed(wzEvent *e)
 {
-	assert(e);
+	WZ_ASSERT(e);
 	wz_tab_bar_select_tab((struct wzTabBar *)e->base.widget->parent, (struct wzButton *)e->base.widget);
 }
 
@@ -162,7 +161,7 @@ static void wz_tab_bar_destroy(struct wzWidget *widget)
 {
 	struct wzTabBar *tabBar;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	tabBar = (struct wzTabBar *)widget;
 	wz_arr_free(tabBar->tabs);
 	wz_arr_free(tabBar->tab_changed_callbacks);
@@ -172,7 +171,7 @@ static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	int i;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	widget->rect = rect;
 
 	// Set button heights to match.
@@ -194,9 +193,9 @@ static void wz_tab_bar_decrement_button_clicked(wzEvent *e)
 {
 	struct wzTabBar *tabBar;
 
-	assert(e);
-	assert(e->base.widget);
-	assert(e->base.widget->parent);
+	WZ_ASSERT(e);
+	WZ_ASSERT(e->base.widget);
+	WZ_ASSERT(e->base.widget->parent);
 	tabBar = (struct wzTabBar *)e->base.widget->parent;
 	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue - 1);
 }
@@ -205,9 +204,9 @@ static void wz_tab_bar_increment_button_clicked(wzEvent *e)
 {
 	struct wzTabBar *tabBar;
 
-	assert(e);
-	assert(e->base.widget);
-	assert(e->base.widget->parent);
+	WZ_ASSERT(e);
+	WZ_ASSERT(e->base.widget);
+	WZ_ASSERT(e->base.widget->parent);
 	tabBar = (struct wzTabBar *)e->base.widget->parent;
 	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue + 1);
 }
@@ -217,8 +216,8 @@ struct wzTabBar *wz_tab_bar_create(struct wzButton *decrementButton, struct wzBu
 	struct wzTabBar *tabBar;
 	int defaultScrollButtonWidth;
 
-	assert(decrementButton);
-	assert(incrementButton);
+	WZ_ASSERT(decrementButton);
+	WZ_ASSERT(incrementButton);
 
 	tabBar = (struct wzTabBar *)malloc(sizeof(struct wzTabBar));
 	memset(tabBar, 0, sizeof(struct wzTabBar));
@@ -252,8 +251,8 @@ void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 	int i;
 	wzEvent e;
 
-	assert(tabBar);
-	assert(tab);
+	WZ_ASSERT(tabBar);
+	WZ_ASSERT(tab);
 
 	// Position to the right of the last tab.
 	rect.x = rect.y = 0;
@@ -296,8 +295,8 @@ void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 	int i, deleteIndex;
 	wzEvent e;
 
-	assert(tabBar);
-	assert(tab);
+	WZ_ASSERT(tabBar);
+	WZ_ASSERT(tab);
 	deleteIndex = -1;
 
 	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
@@ -333,7 +332,7 @@ void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
 {
 	int i;
 
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 
 	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
 	{
@@ -363,19 +362,19 @@ void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
 
 struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar)
 {
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 	return tabBar->decrementButton;
 }
 
 struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar)
 {
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 	return tabBar->incrementButton;
 }
 
 struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar)
 {
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 	return tabBar->selectedTab;
 }
 
@@ -383,8 +382,8 @@ void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 {
 	int i;
 
-	assert(tabBar);
-	assert(tab);
+	WZ_ASSERT(tabBar);
+	WZ_ASSERT(tab);
 
 	if (tabBar->selectedTab == tab)
 		return; // Already selected.
@@ -406,6 +405,6 @@ void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 
 void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback)
 {
-	assert(tabBar);
+	WZ_ASSERT(tabBar);
 	wz_arr_push(tabBar->tab_changed_callbacks, callback);
 }

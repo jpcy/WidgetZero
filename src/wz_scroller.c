@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_desktop.h"
@@ -62,7 +61,7 @@ static void wz_nub_mouse_button_down(struct wzWidget *widget, int mouseButton, i
 {
 	struct wzScrollerNub *nub;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	nub = (struct wzScrollerNub *)widget;
 
 	if (mouseButton == 1 && nub->base.hover)
@@ -76,7 +75,7 @@ static void wz_nub_mouse_button_up(struct wzWidget *widget, int mouseButton, int
 {
 	struct wzScrollerNub *nub;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	nub = (struct wzScrollerNub *)widget;
 
 	if (mouseButton == 1)
@@ -91,7 +90,7 @@ static void wz_nub_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, i
 	struct wzScrollerNub *nub;
 	wzRect rect;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	nub = (struct wzScrollerNub *)widget;
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)nub->scroller);
 
@@ -139,7 +138,7 @@ static void wz_scroller_nub_update_rect(struct wzScrollerNub *nub)
 	// Space left when button size and nub size are subtracted.
 	int scrollSpace;
 
-	assert(nub);
+	WZ_ASSERT(nub);
 
 	// Buttons not set yet.
 	if (!nub->scroller->decrementButton || !nub->scroller->incrementButton)
@@ -193,7 +192,7 @@ static struct wzScrollerNub *wz_scroller_nub_create(struct wzScroller *scroller)
 {
 	struct wzScrollerNub *nub;
 
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	nub = (struct wzScrollerNub *)malloc(sizeof(struct wzScrollerNub));
 	memset(nub, 0, sizeof(struct wzScrollerNub));
 	//nub->base.desktop = scroller->base.desktop;
@@ -276,7 +275,7 @@ static void wz_scroller_mouse_button_down(struct wzWidget *widget, int mouseButt
 {
 	struct wzScroller *scroller;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
 }
 
@@ -284,7 +283,7 @@ static void wz_scroller_mouse_button_up(struct wzWidget *widget, int mouseButton
 {
 	struct wzScroller *scroller;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
 }
 
@@ -292,24 +291,24 @@ static void wz_scroller_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 {
 	struct wzScroller *scroller;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
 	wz_scroller_set_value(scroller, scroller->value - y * scroller->stepValue);
 }
 
 static void wz_scroller_decrement_button_clicked(wzEvent *e)
 {
-	assert(e);
-	assert(e->base.widget);
-	assert(e->base.widget->parent);
+	WZ_ASSERT(e);
+	WZ_ASSERT(e->base.widget);
+	WZ_ASSERT(e->base.widget->parent);
 	wz_scroller_decrement_value((struct wzScroller *)e->base.widget->parent);
 }
 
 static void wz_scroller_increment_button_clicked(wzEvent *e)
 {
-	assert(e);
-	assert(e->base.widget);
-	assert(e->base.widget->parent);
+	WZ_ASSERT(e);
+	WZ_ASSERT(e->base.widget);
+	WZ_ASSERT(e->base.widget->parent);
 	wz_scroller_increment_value((struct wzScroller *)e->base.widget->parent);
 }
 
@@ -317,7 +316,7 @@ static void wz_scroller_destroy(struct wzWidget *widget)
 {
 	struct wzScroller *scroller;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
 	wz_arr_free(scroller->value_changed_callbacks);
 }
@@ -326,7 +325,7 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzScroller *scroller;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
 	widget->rect = rect;
 	wz_scroller_nub_update_rect(scroller->nub);
@@ -338,8 +337,8 @@ struct wzScroller *wz_scroller_create(struct wzButton *decrementButton, struct w
 {
 	struct wzScroller *scroller;
 
-	assert(decrementButton);
-	assert(incrementButton);
+	WZ_ASSERT(decrementButton);
+	WZ_ASSERT(incrementButton);
 
 	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
@@ -369,13 +368,13 @@ struct wzScroller *wz_scroller_create(struct wzButton *decrementButton, struct w
 
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	scroller->scrollerType = scrollerType;
 }
 
 int wz_scroller_get_value(const struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	return scroller->value;
 }
 
@@ -385,7 +384,7 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 	int oldValue;
 	wzEvent e;
 
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	oldValue = scroller->value;
 	scroller->value = WZ_CLAMPED(0, value, scroller->maxValue);
 
@@ -404,31 +403,31 @@ void wz_scroller_set_value(struct wzScroller *scroller, int value)
 
 void wz_scroller_decrement_value(struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	wz_scroller_set_value(scroller, scroller->value - scroller->stepValue);
 }
 
 void wz_scroller_increment_value(struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	wz_scroller_set_value(scroller, scroller->value + scroller->stepValue);
 }
 
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	scroller->stepValue = WZ_MAX(1, stepValue);
 }
 
 int wz_scroller_get_step_value(struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	return scroller->stepValue;
 }
 
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	scroller->maxValue = WZ_MAX(0, maxValue);
 
 	// Keep value in 0 to maxValue range.
@@ -438,25 +437,25 @@ void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue)
 
 int wz_scroller_get_nub_size(struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	return scroller->nubSize;
 }
 
 void wz_scroller_set_nub_size(struct wzScroller *scroller, int size)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	scroller->nubSize = size;
 	wz_scroller_nub_update_rect(scroller->nub);
 }
 
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	return wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
 }
 
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback)
 {
-	assert(scroller);
+	WZ_ASSERT(scroller);
 	wz_arr_push(scroller->value_changed_callbacks, callback);
 }

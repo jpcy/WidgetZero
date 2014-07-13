@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_arr.h"
@@ -51,7 +50,7 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int i, y;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	stackLayout = (struct wzStackLayout *)widget;
 	widget->rect = rect;
 	nChildren = wz_arr_len(widget->children);
@@ -152,7 +151,7 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int i, x;
 
-	assert(widget);
+	WZ_ASSERT(widget);
 	stackLayout = (struct wzStackLayout *)widget;
 	widget->rect = rect;
 	nChildren = wz_arr_len(widget->children);
@@ -248,7 +247,7 @@ STACK LAYOUT
 
 static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 {
-	assert(widget);
+	WZ_ASSERT(widget);
 
 	if (((struct wzStackLayout *)widget)->direction == WZ_STACK_LAYOUT_VERTICAL)
 	{
@@ -273,20 +272,20 @@ struct wzStackLayout *wz_stack_layout_create()
 
 void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction)
 {
-	assert(stackLayout);
+	WZ_ASSERT(stackLayout);
 	stackLayout->direction = direction;
 	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
 }
 
 void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing)
 {
-	assert(stackLayout);
+	WZ_ASSERT(stackLayout);
 	stackLayout->spacing = spacing;
 	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
 }
 
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout)
 {
-	assert(stackLayout);
+	WZ_ASSERT(stackLayout);
 	return stackLayout->spacing;
 }
