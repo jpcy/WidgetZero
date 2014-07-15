@@ -34,26 +34,17 @@ SOFTWARE.
 #define BUTTON_WIDTH 200
 #define BUTTON_HEIGHT 100
 
-static void ShowError(const char *message)
+SDL_Window *sdlWindow;
+SDL_GLContext glContext;
+
+void ShowError(const char *message)
 {
 	fprintf(stderr, "%s\n", message);
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, NULL);
 }
 
-static void DrawButton(struct wzWidget *widget, wzRect clip)
+int InitializeSDL()
 {
-	struct wzRenderer *renderer = wz_widget_get_metadata(widget);
-	renderer->draw_button(renderer, clip, (struct wzButton *)widget, "Click me!");
-}
-
-int main(int argc, char **argv)
-{
-	SDL_Window *window;
-	SDL_GLContext glContext;
-	struct wzRenderer *renderer;
-	struct wzMainWindow *mainWindow;
-	struct wzButton *button;
-
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{
 		ShowError(SDL_GetError());
@@ -63,16 +54,16 @@ int main(int argc, char **argv)
 
 	atexit(SDL_Quit);
 
-	window = SDL_CreateWindow("WidgetZero Example - simple", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
+	sdlWindow = SDL_CreateWindow("WidgetZero Example - simple", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
 
-	if (!window)
+	if (!sdlWindow)
 	{
 		ShowError(SDL_GetError());
 		SDL_ClearError();
 		return 1;
 	}
 
-	glContext = SDL_GL_CreateContext(window);
+	glContext = SDL_GL_CreateContext(sdlWindow);
 
 	if (!glContext)
 	{
@@ -89,6 +80,27 @@ int main(int argc, char **argv)
 
 	glClearColor(1, 1, 1, 1);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	return 0;
+}
+
+static void DrawButton(struct wzWidget *widget, wzRect clip)
+{
+	struct wzRenderer *renderer = wz_widget_get_metadata(widget);
+	renderer->draw_button(renderer, clip, (struct wzButton *)widget, "Click me!");
+}
+
+int main(int argc, char **argv)
+{
+	int errorCode;
+	struct wzRenderer *renderer;
+	struct wzMainWindow *mainWindow;
+	struct wzButton *button;
+
+	// SDL init - create a window and GL context.
+	errorCode = InitializeSDL();
+
+	if (errorCode)
+		return errorCode;
 
 	// Create the wzgl renderer.
 	renderer = wzgl_create_renderer();
@@ -143,7 +155,7 @@ int main(int argc, char **argv)
 		renderer->begin_frame(renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
 		wz_main_window_draw(mainWindow);
 		renderer->end_frame(renderer);
-		SDL_GL_SwapWindow(window);
+		SDL_GL_SwapWindow(sdlWindow);
 	}
 
 	wzgl_destroy_renderer(renderer);
