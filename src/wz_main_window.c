@@ -81,20 +81,37 @@ static struct wzWindow *wz_main_window_get_hover_window(struct wzMainWindow *mai
 {
 	struct wzWindow *result;
 	int drawPriority;
+	bool resultIsDocked;
 	int i;
 
 	WZ_ASSERT(mainWindow);
 	result = NULL;
+	resultIsDocked = false;
 	drawPriority = -1;
 
 	for (i = 0; i < wz_arr_len(mainWindow->base.children); i++)
 	{
-		struct wzWidget *widget = mainWindow->base.children[i];
+		struct wzWidget *widget;
+		struct wzWindow *window;
+		bool docked;
 
-		if (widget->type == WZ_TYPE_WINDOW && wz_widget_get_visible(widget) && WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect) && wz_window_get_draw_priority((struct wzWindow *)widget) >= drawPriority)
+		widget = mainWindow->base.children[i];
+
+		if (widget->type != WZ_TYPE_WINDOW)
+			continue;
+
+		if (!wz_widget_get_visible(widget) || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
+			continue;
+
+		window = (struct wzWindow *)widget;
+		docked = wz_main_window_get_window_dock_position(mainWindow, window) != WZ_DOCK_POSITION_NONE;
+
+		// Undocked always takes priority over docked.
+		if (wz_window_get_draw_priority(window) >= drawPriority || (resultIsDocked && !docked))
 		{
 			drawPriority = wz_window_get_draw_priority((struct wzWindow *)widget);
-			result = (struct wzWindow *)widget;
+			resultIsDocked = docked;
+			result = window;
 		}
 	}
 
