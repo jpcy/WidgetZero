@@ -134,10 +134,13 @@ RENDERER
 ================================================================================
 */
 
-static void wzgl_begin_frame(struct wzRenderer *renderer, int windowWidth, int windowHeight)
+static void wzgl_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow)
 {
+	wzSize windowSize;
+
 	WZ_ASSERT(renderer);
-	nvgBeginFrame(((wzRendererData *)renderer->data)->vg, windowWidth, windowHeight, 1);
+	windowSize = wz_widget_get_size((const struct wzWidget *)mainWindow);
+	nvgBeginFrame(((wzRendererData *)renderer->data)->vg, windowSize.w, windowSize.h, 1);
 }
 
 static void wzgl_end_frame(struct wzRenderer *renderer)

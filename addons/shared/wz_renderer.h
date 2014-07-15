@@ -28,7 +28,7 @@ SOFTWARE.
 
 struct wzRenderer
 {
-	void (*begin_frame)(struct wzRenderer *renderer, int windowWidth, int windowHeight);
+	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 	void (*end_frame)(struct wzRenderer *renderer);
 
 	// width or height can be NULL.

@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 			break;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		renderer->begin_frame(renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+		renderer->begin_frame(renderer, mainWindow);
 		wz_main_window_draw(mainWindow);
 		renderer->end_frame(renderer);
 		SDL_GL_SwapWindow(sdlWindow);

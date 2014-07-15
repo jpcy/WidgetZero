@@ -703,8 +703,7 @@ void MainWindow::setShowCursor(bool showCursor)
 
 void MainWindow::beginFrame()
 {
-	wzRect rect = wz_widget_get_rect((const wzWidget *)p->mainWindow);
-	p->renderer->begin_frame(p->renderer, rect.w, rect.h);
+	p->renderer->begin_frame(p->renderer, p->mainWindow);
 }
 
 void MainWindow::drawFrame()
