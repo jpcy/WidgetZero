@@ -36,6 +36,9 @@ SOFTWARE.
 
 SDL_Window *sdlWindow;
 SDL_GLContext glContext;
+struct wzRenderer *renderer;
+struct wzMainWindow *mainWindow;
+struct wzButton *button;
 
 void ShowError(const char *message)
 {
@@ -85,16 +88,12 @@ int InitializeSDL()
 
 static void DrawButton(struct wzWidget *widget, wzRect clip)
 {
-	struct wzRenderer *renderer = wz_widget_get_metadata(widget);
-	renderer->draw_button(renderer, clip, (struct wzButton *)widget, "Click me!");
+	renderer->draw_button(renderer, clip, (struct wzButton *)widget, wz_widget_get_metadata(widget));
 }
 
 int main(int argc, char **argv)
 {
 	int errorCode;
-	struct wzRenderer *renderer;
-	struct wzMainWindow *mainWindow;
-	struct wzButton *button;
 
 	// SDL init - create a window and GL context.
 	errorCode = InitializeSDL();
@@ -118,7 +117,7 @@ int main(int argc, char **argv)
 	// Create a button.
 	button = wz_button_create();
 	wz_widget_set_rect_args((struct wzWidget *)button, WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
-	wz_widget_set_metadata((struct wzWidget *)button, renderer);
+	wz_widget_set_metadata((struct wzWidget *)button, "Click me!");
 	wz_widget_set_draw_callback((struct wzWidget *)button, DrawButton);
 	wz_widget_add_child_widget((struct wzWidget *)mainWindow, (struct wzWidget *)button);
 
