@@ -112,9 +112,9 @@ struct wzWidget
 
 	wzWidgetVtable vtable;
 
-	struct wzDesktop *desktop;
+	struct wzMainWindow *mainWindow;
 
-	// The closest ancestor window. NULL if the widget is the descendant of a desktop. Set in wz_widget_add_child_widget_internal.
+	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in wz_widget_add_child_widget_internal.
 	struct wzWindow *window;
 
 	struct wzWidget *parent;

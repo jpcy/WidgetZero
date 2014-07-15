@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 
 struct wzButton
@@ -71,7 +71,7 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 		wzEvent e;
 
 		button->isPressed = true;
-		wz_desktop_push_lock_input_widget(widget->desktop, widget);
+		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = button;
@@ -94,7 +94,7 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	if (mouseButton == 1 && button->isPressed)
 	{
 		button->isPressed = false;
-		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
+		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 
 		if (widget->hover && button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
 		{

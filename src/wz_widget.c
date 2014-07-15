@@ -205,10 +205,10 @@ void wz_widget_destroy(struct wzWidget *widget)
 	free(widget);
 }
 
-struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget)
+struct wzMainWindow *wz_widget_get_main_window(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
-	return widget->desktop;
+	return widget->mainWindow;
 }
 
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
@@ -488,15 +488,15 @@ void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCall
 	widget->vtable.measure = measure;
 }
 
-static struct wzDesktop *wz_widget_find_desktop(struct wzWidget *widget)
+static struct wzMainWindow *wz_widget_find_main_window(struct wzWidget *widget)
 {
 	for (;;)
 	{
 		if (!widget)
 			break;
 
-		if (widget->type == WZ_TYPE_DESKTOP)
-			return (struct wzDesktop *)widget;
+		if (widget->type == WZ_TYPE_MAIN_WINDOW)
+			return (struct wzMainWindow *)widget;
 
 		widget = widget->parent;
 	}
@@ -506,7 +506,7 @@ static struct wzDesktop *wz_widget_find_desktop(struct wzWidget *widget)
 
 // Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget_internal.
 // Example: scroller does this with it's button children.
-static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, struct wzDesktop *desktop, struct wzWindow *window)
+static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widget, struct wzMainWindow *mainWindow, struct wzWindow *window)
 {
 	int i;
 
@@ -515,9 +515,9 @@ static void wz_widget_set_desktop_and_window_recursive(struct wzWidget *widget, 
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
 		struct wzWidget *child = widget->children[i];
-		child->desktop = desktop;
+		child->mainWindow = mainWindow;
 		child->window = window;
-		wz_widget_set_desktop_and_window_recursive(child, desktop, window);
+		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
 	}
 }
 
@@ -526,16 +526,16 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	WZ_ASSERT(widget);
 	WZ_ASSERT(child);
 
-	// Desktops cannot be added as children.
-	if (child->type == WZ_TYPE_DESKTOP)
+	// MainWindows cannot be added as children.
+	if (child->type == WZ_TYPE_MAIN_WINDOW)
 		return;
 
-	// Windows can only be children of desktop.
-	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_DESKTOP)
+	// Windows can only be children of mainWindow.
+	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_MAIN_WINDOW)
 		return;
 
-	// Special case for add windows to desktop: add directly, not to the content widget.
-	if (wz_widget_get_type(widget) == WZ_TYPE_DESKTOP && wz_widget_get_type(child) == WZ_TYPE_WINDOW)
+	// Special case for add windows to mainWindow: add directly, not to the content widget.
+	if (wz_widget_get_type(widget) == WZ_TYPE_MAIN_WINDOW && wz_widget_get_type(child) == WZ_TYPE_WINDOW)
 	{
 		wz_widget_add_child_widget_internal(widget, child);
 		return;
@@ -569,7 +569,7 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 	wz_arr_delete(widget->children, deleteIndex);
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
-	child->desktop = NULL;
+	child->mainWindow = NULL;
 	child->parent = NULL;
 	child->window = NULL;
 }
@@ -700,14 +700,14 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	WZ_ASSERT(widget);
 	WZ_ASSERT(child);
 
-	// Set desktop.
-	child->desktop = wz_widget_find_desktop(widget);
+	// Set mainWindow.
+	child->mainWindow = wz_widget_find_main_window(widget);
 
 	// Find the closest ancestor window.
 	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
 
-	// Set children desktop and window.
-	wz_widget_set_desktop_and_window_recursive(child, child->desktop, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
+	// Set children mainWindow and window.
+	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
 
 	child->parent = widget;
 	wz_arr_push(widget->children, child);

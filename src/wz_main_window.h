@@ -21,32 +21,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_DESKTOP_H_
-#define _WZ_DESKTOP_H_
+#ifndef _WZ_MAIN_WINDOW_H_
+#define _WZ_MAIN_WINDOW_H_
 
 #include <wz.h>
 
-void wz_desktop_set_cursor(struct wzDesktop *desktop, wzCursor cursor);
+void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor);
 
 // Lock input to this widget.
-void wz_desktop_push_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 
 // Stop locking input to this widget.
-void wz_desktop_pop_lock_input_widget(struct wzDesktop *desktop, struct wzWidget *widget);
+void wz_main_window_pop_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 
-void wz_desktop_set_moving_window(struct wzDesktop *desktop, struct wzWindow *window);
+void wz_main_window_set_moving_window(struct wzMainWindow *mainWindow, struct wzWindow *window);
 
-void wz_desktop_update_content_rect(struct wzDesktop *desktop);
+void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow);
 
-void wz_desktop_update_docked_window_rect(struct wzDesktop *desktop, struct wzWindow *window);
+void wz_main_window_update_docked_window_rect(struct wzMainWindow *mainWindow, struct wzWindow *window);
 
-wzDockPosition wz_desktop_get_window_dock_position(const struct wzDesktop *desktop, const struct wzWindow *window);
+wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow *mainWindow, const struct wzWindow *window);
 
-void wz_desktop_undock_window(struct wzDesktop *desktop, struct wzWindow *window);
+void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWindow *window);
 
 void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
 
-void wz_desktop_measure_text(struct wzDesktop *desktop, const char *text, int n, int *width, int *height);
-int wz_desktop_text_get_pixel_delta(struct wzDesktop *desktop, const char *text, int index);
+void wz_main_window_measure_text(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height);
+int wz_main_window_text_get_pixel_delta(struct wzMainWindow *mainWindow, const char *text, int index);
 
-#endif // _WZ_DESKTOP_H_
+#endif // _WZ_MAIN_WINDOW_H_

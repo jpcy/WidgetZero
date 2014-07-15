@@ -35,7 +35,7 @@ namespace wz {
 class Button;
 class Checkbox;
 class Combo;
-struct DesktopPrivate;
+struct MainWindowPrivate;
 class GroupBox;
 class Label;
 class List;
@@ -50,11 +50,11 @@ struct WidgetPrivate;
 class Widget;
 class Window;
 
-class Desktop
+class MainWindow
 {
 public:
-	Desktop(wzRenderer *renderer);
-	~Desktop();
+	MainWindow(wzRenderer *renderer);
+	~MainWindow();
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
@@ -71,7 +71,7 @@ public:
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
 
-	DesktopPrivate *p;
+	MainWindowPrivate *p;
 };
 
 class Widget

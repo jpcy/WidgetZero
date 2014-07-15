@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 #include "wz_window.h"
 
@@ -121,8 +121,8 @@ static bool wz_widget_draw_internal(int priority, bool (*draw_priority_compare)(
 	{
 		if (!wz_intersect_rects(*clip, widget->vtable.get_children_clip_rect(widget), clip))
 		{
-			// Reset to desktop clip rect.
-			*clip = wz_widget_get_rect((struct wzWidget *)widget->desktop);
+			// Reset to mainWindow clip rect.
+			*clip = wz_widget_get_rect((struct wzWidget *)widget->mainWindow);
 		}
 	}
 
@@ -226,8 +226,8 @@ static int wz_compare_window_draw_priorities(const void *a, const void *b)
 
 	window1 = *((const struct wzWindow **)a);
 	window2 = *((const struct wzWindow **)b);
-	window1Docked = wz_desktop_get_window_dock_position(((const struct wzWidget *)window1)->desktop, window1) != WZ_DOCK_POSITION_NONE;
-	window2Docked = wz_desktop_get_window_dock_position(((const struct wzWidget *)window2)->desktop, window2) != WZ_DOCK_POSITION_NONE;
+	window1Docked = wz_main_window_get_window_dock_position(((const struct wzWidget *)window1)->mainWindow, window1) != WZ_DOCK_POSITION_NONE;
+	window2Docked = wz_main_window_get_window_dock_position(((const struct wzWidget *)window2)->mainWindow, window2) != WZ_DOCK_POSITION_NONE;
 
 	if (window1Docked && !window2Docked)
 	{
@@ -241,23 +241,23 @@ static int wz_compare_window_draw_priorities(const void *a, const void *b)
 	return wz_window_get_draw_priority(window1) - wz_window_get_draw_priority(window2);
 }
 
-void wz_widget_draw_desktop(struct wzDesktop *desktop)
+void wz_widget_draw_main_window(struct wzMainWindow *mainWindow)
 {
 	struct wzWindow *windows[WZ_MAX_WINDOWS];
 	int nWindows;
 	int i;
 
-	WZ_ASSERT(desktop);
+	WZ_ASSERT(mainWindow);
 
-	// Draw the desktop and ancestors with draw priority < window. Don't recurse into windows.
-	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_less_than_window, wz_widget_is_not_window);
+	// Draw the mainWindow and ancestors with draw priority < window. Don't recurse into windows.
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_draw_priority_less_than_window, wz_widget_is_not_window);
 
 	// Get a list of windows (excluding top).
 	nWindows = 0;
 
-	for (i = 0; i < wz_arr_len(((struct wzWidget *)desktop)->children); i++)
+	for (i = 0; i < wz_arr_len(((struct wzWidget *)mainWindow)->children); i++)
 	{
-		struct wzWidget *widget = ((struct wzWidget *)desktop)->children[i];
+		struct wzWidget *widget = ((struct wzWidget *)mainWindow)->children[i];
 	
 		if (widget->type == WZ_TYPE_WINDOW)
 		{
@@ -276,13 +276,13 @@ void wz_widget_draw_desktop(struct wzDesktop *desktop)
 
 		if (wz_widget_get_visible(widget) && widget->vtable.draw)
 		{
-			widget->vtable.draw(widget, ((struct wzWidget *)desktop)->rect);
+			widget->vtable.draw(widget, ((struct wzWidget *)mainWindow)->rect);
 		}
 
 		wz_widget_draw(widget, wz_widget_draw_priority_less_than_window, wz_widget_true);
 	}
 
 	// Draw all widgets with draw priority > window.
-	wz_widget_draw((struct wzWidget *)desktop, wz_widget_draw_priority_greater_than_window, wz_widget_true);
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_draw_priority_greater_than_window, wz_widget_true);
 }
 

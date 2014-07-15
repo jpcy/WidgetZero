@@ -94,17 +94,17 @@ struct ComboPrivate : public WidgetPrivate
 	std::auto_ptr<List> list;
 };
 
-struct DesktopPrivate : public WidgetPrivate
+struct MainWindowPrivate : public WidgetPrivate
 {
-	DesktopPrivate(wzRenderer *renderer);
-	~DesktopPrivate();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)desktop; }
-	virtual wzWidget *getWidget() { return (wzWidget *)desktop; }
+	MainWindowPrivate(wzRenderer *renderer);
+	~MainWindowPrivate();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
+	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
 	void draw();
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
 
-	wzDesktop *desktop;
+	wzMainWindow *mainWindow;
 	wzRenderer *renderer;
 	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
 	bool showCursor;
@@ -405,7 +405,7 @@ ButtonPrivate::ButtonPrivate(wzRenderer *renderer) : drawStyle(Normal)
 
 ButtonPrivate::~ButtonPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)button))
+	if (!wz_widget_get_main_window((wzWidget *)button))
 	{
 		wz_widget_destroy((wzWidget *)button);
 	}
@@ -475,7 +475,7 @@ CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
 
 CheckboxPrivate::~CheckboxPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)button))
+	if (!wz_widget_get_main_window((wzWidget *)button))
 	{
 		wz_widget_destroy((wzWidget *)button);
 	}
@@ -540,7 +540,7 @@ ComboPrivate::ComboPrivate(wzRenderer *renderer)
 
 ComboPrivate::~ComboPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)combo))
+	if (!wz_widget_get_main_window((wzWidget *)combo))
 	{
 		wz_widget_destroy((wzWidget *)combo);
 	}
@@ -580,154 +580,154 @@ Combo *Combo::setItems(const char **items, int nItems)
 
 //------------------------------------------------------------------------------
 
-static void MeasureText(struct wzDesktop *desktop, const char *text, int n, int *width, int *height)
+static void MeasureText(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height)
 {
-	wzRenderer *renderer = ((DesktopPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
+	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
 	renderer->measure_text(renderer, text, n, width, height);
 }
 
-static int TextGetPixelDelta(struct wzDesktop *desktop, const char *text, int index)
+static int TextGetPixelDelta(struct wzMainWindow *mainWindow, const char *text, int index)
 {
-	wzRenderer *renderer = ((DesktopPrivate *)wz_widget_get_metadata((wzWidget *)desktop))->renderer;
+	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
 	return renderer->text_get_pixel_delta(renderer, text, index);
 }
 
 static void DrawDockIcon(wzRect rect, void *metadata)
 {
-	DesktopPrivate *desktop = (DesktopPrivate *)metadata;
-	desktop->drawDockIcon(rect);
+	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
+	mainWindow->drawDockIcon(rect);
 }
 
 static void DrawDockPreview(wzRect rect, void *metadata)
 {
-	DesktopPrivate *desktop = (DesktopPrivate *)metadata;
-	desktop->drawDockPreview(rect);
+	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
+	mainWindow->drawDockPreview(rect);
 }
 
-DesktopPrivate::DesktopPrivate(wzRenderer *renderer) : showCursor(false)
+MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	desktop = wz_desktop_create();
-	wz_widget_set_metadata((wzWidget *)desktop, this);
-	wz_desktop_set_event_callback(desktop, HandleEvent);
-	wz_desktop_set_measure_text_callback(desktop, MeasureText);
-	wz_desktop_set_text_get_pixel_delta_callback(desktop, TextGetPixelDelta);
-	wz_desktop_set_draw_dock_icon_callback(desktop, DrawDockIcon, this);
-	wz_desktop_set_draw_dock_preview_callback(desktop, DrawDockPreview, this);
+	mainWindow = wz_main_window_create();
+	wz_widget_set_metadata((wzWidget *)mainWindow, this);
+	wz_main_window_set_event_callback(mainWindow, HandleEvent);
+	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
+	wz_main_window_set_text_get_pixel_delta_callback(mainWindow, TextGetPixelDelta);
+	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
+	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
 		dockTabBars[i] = new DockTabBar(renderer);
-		wz_desktop_set_dock_tab_bar(desktop, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
+		wz_main_window_set_dock_tab_bar(mainWindow, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
 		wz_widget_set_height(dockTabBars[i]->getWidget(), 20);
 	}
 }
 
-DesktopPrivate::~DesktopPrivate()
+MainWindowPrivate::~MainWindowPrivate()
 {
 	for (size_t i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
 		delete dockTabBars[i];
 	}
 
-	wz_widget_destroy((wzWidget *)desktop);
+	wz_widget_destroy((wzWidget *)mainWindow);
 }
 
-void DesktopPrivate::drawDockIcon(wzRect rect)
+void MainWindowPrivate::drawDockIcon(wzRect rect)
 {
 	renderer->draw_dock_icon(renderer, rect);
 }
 
-void DesktopPrivate::drawDockPreview(wzRect rect)
+void MainWindowPrivate::drawDockPreview(wzRect rect)
 {
 	renderer->draw_dock_preview(renderer, rect);
 }
 
 //------------------------------------------------------------------------------
 
-Desktop::Desktop(wzRenderer *renderer)
+MainWindow::MainWindow(wzRenderer *renderer)
 {
-	p = new DesktopPrivate(renderer);
+	p = new MainWindowPrivate(renderer);
 }
 
-Desktop::~Desktop()
+MainWindow::~MainWindow()
 {
 	delete p;
 }
 
-void Desktop::setSize(int w, int h)
+void MainWindow::setSize(int w, int h)
 {
-	wz_widget_set_size_args((wzWidget *)p->desktop, w, h);
+	wz_widget_set_size_args((wzWidget *)p->mainWindow, w, h);
 }
 
-void Desktop::mouseMove(int x, int y, int dx, int dy)
+void MainWindow::mouseMove(int x, int y, int dx, int dy)
 {
-	wz_desktop_mouse_move(p->desktop, x, y, dx, dy);
+	wz_main_window_mouse_move(p->mainWindow, x, y, dx, dy);
 }
 
-void Desktop::mouseButtonDown(int button, int x, int y)
+void MainWindow::mouseButtonDown(int button, int x, int y)
 {
-	wz_desktop_mouse_button_down(p->desktop, button, x, y);
+	wz_main_window_mouse_button_down(p->mainWindow, button, x, y);
 }
 
-void Desktop::mouseButtonUp(int button, int x, int y)
+void MainWindow::mouseButtonUp(int button, int x, int y)
 {
-	wz_desktop_mouse_button_up(p->desktop, button, x, y);
+	wz_main_window_mouse_button_up(p->mainWindow, button, x, y);
 }
 
-void Desktop::mouseWheelMove(int x, int y)
+void MainWindow::mouseWheelMove(int x, int y)
 {
-	wz_desktop_mouse_wheel_move(p->desktop, x, y);
+	wz_main_window_mouse_wheel_move(p->mainWindow, x, y);
 }
 
-void Desktop::keyDown(wzKey key)
+void MainWindow::keyDown(wzKey key)
 {
-	wz_desktop_key_down(p->desktop, key);
+	wz_main_window_key_down(p->mainWindow, key);
 }
 
-void Desktop::keyUp(wzKey key)
+void MainWindow::keyUp(wzKey key)
 {
-	wz_desktop_key_up(p->desktop, key);
+	wz_main_window_key_up(p->mainWindow, key);
 }
 
-void Desktop::textInput(const char *text)
+void MainWindow::textInput(const char *text)
 {
-	wz_desktop_text_input(p->desktop, text);
+	wz_main_window_text_input(p->mainWindow, text);
 }
 
-void Desktop::setShowCursor(bool showCursor)
+void MainWindow::setShowCursor(bool showCursor)
 {
 	p->showCursor = showCursor;
 }
 
-void Desktop::beginFrame()
+void MainWindow::beginFrame()
 {
-	wzRect rect = wz_widget_get_rect((const wzWidget *)p->desktop);
+	wzRect rect = wz_widget_get_rect((const wzWidget *)p->mainWindow);
 	p->renderer->begin_frame(p->renderer, rect.w, rect.h);
 }
 
-void Desktop::drawFrame()
+void MainWindow::drawFrame()
 {	
-	wz_desktop_draw(p->desktop);
+	wz_main_window_draw(p->mainWindow);
 }
 
-void Desktop::endFrame()
+void MainWindow::endFrame()
 {
 	p->renderer->end_frame(p->renderer);
 }
 
-bool Desktop::getShowCursor() const
+bool MainWindow::getShowCursor() const
 {
 	return p->showCursor;
 }
 
-wzCursor Desktop::getCursor() const
+wzCursor MainWindow::getCursor() const
 {
-	return wz_desktop_get_cursor(p->desktop);
+	return wz_main_window_get_cursor(p->mainWindow);
 }
 
-Widget *Desktop::add(Widget *widget)
+Widget *MainWindow::add(Widget *widget)
 {
 	p->add(widget);
 	return widget;
@@ -788,7 +788,7 @@ GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 
 GroupBoxPrivate::~GroupBoxPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)frame))
+	if (!wz_widget_get_main_window((wzWidget *)frame))
 	{
 		wz_widget_destroy((wzWidget *)frame);
 	}
@@ -856,7 +856,7 @@ LabelPrivate::LabelPrivate(wzRenderer *renderer) : r(255), g(255), b(255)
 
 LabelPrivate::~LabelPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)label))
+	if (!wz_widget_get_main_window((wzWidget *)label))
 	{
 		wz_widget_destroy((wzWidget *)label);
 	}
@@ -932,7 +932,7 @@ ListPrivate::ListPrivate(wzRenderer *renderer)
 
 ListPrivate::~ListPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)list))
+	if (!wz_widget_get_main_window((wzWidget *)list))
 	{
 		wz_widget_destroy((wzWidget *)list);
 	}
@@ -993,7 +993,7 @@ RadioButtonPrivate::RadioButtonPrivate(wzRenderer *renderer) : group(NULL)
 
 RadioButtonPrivate::~RadioButtonPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)button))
+	if (!wz_widget_get_main_window((wzWidget *)button))
 	{
 		wz_widget_destroy((wzWidget *)button);
 	}
@@ -1082,7 +1082,7 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 
 ScrollerPrivate::~ScrollerPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)scroller))
+	if (!wz_widget_get_main_window((wzWidget *)scroller))
 	{
 		wz_widget_destroy((wzWidget *)scroller);
 	}
@@ -1148,7 +1148,7 @@ StackLayoutPrivate::StackLayoutPrivate()
 
 StackLayoutPrivate::~StackLayoutPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)layout))
+	if (!wz_widget_get_main_window((wzWidget *)layout))
 	{
 		wz_widget_destroy((wzWidget *)layout);
 	}
@@ -1213,7 +1213,7 @@ TabBar::TabBar(wzRenderer *renderer)
 
 TabBar::~TabBar()
 {
-	if (!wz_widget_get_desktop((wzWidget *)tabBar_))
+	if (!wz_widget_get_main_window((wzWidget *)tabBar_))
 	{
 		wz_widget_destroy((wzWidget *)tabBar_);
 	}
@@ -1310,7 +1310,7 @@ TabbedPrivate::~TabbedPrivate()
 
 	tabPages.clear();
 
-	if (!wz_widget_get_desktop((wzWidget *)tabbed))
+	if (!wz_widget_get_main_window((wzWidget *)tabbed))
 	{
 		wz_widget_destroy((wzWidget *)tabbed);
 	}
@@ -1363,7 +1363,7 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer)
 
 TextEditPrivate::~TextEditPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)textEdit))
+	if (!wz_widget_get_main_window((wzWidget *)textEdit))
 	{
 		wz_widget_destroy((wzWidget *)textEdit);
 	}
@@ -1376,8 +1376,8 @@ wzSize TextEditPrivate::measure()
 
 void TextEditPrivate::draw(wzRect clip)
 {
-	DesktopPrivate *desktop = (DesktopPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_desktop(getWidget()));
-	renderer->draw_text_edit(renderer, clip, textEdit, desktop->showCursor);
+	MainWindowPrivate *mainWindow = (MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_main_window(getWidget()));
+	renderer->draw_text_edit(renderer, clip, textEdit, mainWindow->showCursor);
 }
 
 //------------------------------------------------------------------------------
@@ -1422,7 +1422,7 @@ WindowPrivate::WindowPrivate(wzRenderer *renderer)
 
 WindowPrivate::~WindowPrivate()
 {
-	if (!wz_widget_get_desktop((wzWidget *)window))
+	if (!wz_widget_get_main_window((wzWidget *)window))
 	{
 		wz_widget_destroy((wzWidget *)window);
 	}

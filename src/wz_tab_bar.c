@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 
 struct wzTabBar

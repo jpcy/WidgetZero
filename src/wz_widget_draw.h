@@ -24,8 +24,8 @@ SOFTWARE.
 #ifndef _WZ_WIDGET_DRAW_H_
 #define _WZ_WIDGET_DRAW_H_
 
-struct wzDesktop;
+struct wzMainWindow;
 
-void wz_widget_draw_desktop(struct wzDesktop *desktop);
+void wz_widget_draw_main_window(struct wzMainWindow *mainWindow);
 
 #endif // _WZ_WIDGET_DRAW_H_

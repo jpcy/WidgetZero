@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 
 #define STB_TEXTEDIT_CHARTYPE char
@@ -65,7 +65,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 
 	if (textEdit->scroll > 0)
 	{
-		wz_desktop_measure_text(textEdit->base.desktop, &textEdit->text, textEdit->scroll, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, &textEdit->text, textEdit->scroll, &width, NULL);
 		row->x0 = (float)-width;
 	}
 	else
@@ -73,7 +73,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 		row->x0 = 0;
 	}
 
-	wz_desktop_measure_text(textEdit->base.desktop, &textEdit->text, 0, &width, NULL);
+	wz_main_window_measure_text(textEdit->base.mainWindow, &textEdit->text, 0, &width, NULL);
 	row->x1 = (float)width;
 
 	row->baseline_y_delta = 1;
@@ -83,7 +83,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 
 static float wz_stb_textedit_getwidth(STB_TEXTEDIT_STRING *textEdit, int n, int i)
 {
-	return (float)wz_desktop_text_get_pixel_delta(textEdit->base.desktop, &textEdit->text, i);
+	return (float)wz_main_window_text_get_pixel_delta(textEdit->base.mainWindow, &textEdit->text, i);
 }
 
 static int wz_stb_textedit_keytotext(int key)
@@ -190,12 +190,12 @@ static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
 	if (delta > 0)
 	{
 		// Text width from the scroll position to the cursor.
-		wz_desktop_measure_text(textEdit->base.desktop, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
 	}
 	else if (delta < 0)
 	{
 		// Text width from the cursor to the scroll position.
-		wz_desktop_measure_text(textEdit->base.desktop, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
 		width = -width;
 	}
 	
@@ -262,7 +262,7 @@ static void wz_text_edit_mouse_move(struct wzWidget *widget, int mouseX, int mou
 	textEdit = (struct wzTextEdit *)widget;
 
 	if (widget->hover)
-		wz_desktop_set_cursor(widget->desktop, WZ_CURSOR_IBEAM);
+		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_IBEAM);
 
 	if (textEdit->pressed)
 	{

@@ -38,7 +38,7 @@ typedef int bool;
 extern "C" {
 #endif
 
-struct wzDesktop;
+struct wzMainWindow;
 struct wzWindow;
 struct wzWidget;
 struct wzButton;
@@ -59,7 +59,7 @@ struct wzList;
 typedef enum
 {
 	WZ_TYPE_UNKNOWN,
-	WZ_TYPE_DESKTOP,
+	WZ_TYPE_MAIN_WINDOW,
 	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
@@ -258,39 +258,39 @@ typedef enum
 }
 wzKey;
 
-typedef void (*wzDesktopMeasureTextCallback)(struct wzDesktop *desktop, const char *text, int n, int *width, int *height);
-typedef int (*wzDesktopTextGetPixelDeltaCallback)(struct wzDesktop *desktop, const char *text, int index);
-typedef void (*wzDesktopDrawDockIconCallback)(wzRect rect, void *metadata);
-typedef void (*wzDesktopDrawDockPreviewCallback)(wzRect rect, void *metadata);
+typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height);
+typedef int (*wzMainWindowTextGetPixelDeltaCallback)(struct wzMainWindow *mainWindow, const char *text, int index);
+typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
+typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
-struct wzDesktop *wz_desktop_create();
+struct wzMainWindow *wz_main_window_create();
 
-// Set the centralized event handler. All events invoked by the ancestor widgets of this desktop will call the callback function.
-void wz_desktop_set_event_callback(struct wzDesktop *desktop, wzEventCallback callback);
+// Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
+void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
-void wz_desktop_set_measure_text_callback(struct wzDesktop *desktop, wzDesktopMeasureTextCallback callback);
-void wz_desktop_set_text_get_pixel_delta_callback(struct wzDesktop *desktop, wzDesktopTextGetPixelDeltaCallback callback);
-void wz_desktop_set_draw_dock_icon_callback(struct wzDesktop *desktop, wzDesktopDrawDockIconCallback callback, void *metadata);
-void wz_desktop_set_draw_dock_preview_callback(struct wzDesktop *desktop, wzDesktopDrawDockPreviewCallback callback, void *metadata);
-void wz_desktop_set_dock_icon_size(struct wzDesktop *desktop, wzSize size);
-void wz_desktop_set_dock_icon_size_args(struct wzDesktop *desktop, int w, int h);
-void wz_desktop_mouse_button_down(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
-void wz_desktop_mouse_button_up(struct wzDesktop *desktop, int mouseButton, int mouseX, int mouseY);
-void wz_desktop_mouse_move(struct wzDesktop *desktop, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-void wz_desktop_mouse_wheel_move(struct wzDesktop *desktop, int x, int y);
-void wz_desktop_key_down(struct wzDesktop *desktop, wzKey key);
-void wz_desktop_key_up(struct wzDesktop *desktop, wzKey key);
-void wz_desktop_text_input(struct wzDesktop *desktop, const char *text);
-void wz_desktop_draw(struct wzDesktop *desktop);
-void wz_desktop_set_dock_tab_bar(struct wzDesktop *desktop, wzDockPosition dockPosition, struct wzTabBar *tabBar);
-struct wzWindow *wz_desktop_get_dock_tab_window(struct wzDesktop *desktop, struct wzButton *tab);
-wzCursor wz_desktop_get_cursor(const struct wzDesktop *desktop);
+void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback);
+void wz_main_window_set_text_get_pixel_delta_callback(struct wzMainWindow *mainWindow, wzMainWindowTextGetPixelDeltaCallback callback);
+void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);
+void wz_main_window_set_draw_dock_preview_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockPreviewCallback callback, void *metadata);
+void wz_main_window_set_dock_icon_size(struct wzMainWindow *mainWindow, wzSize size);
+void wz_main_window_set_dock_icon_size_args(struct wzMainWindow *mainWindow, int w, int h);
+void wz_main_window_mouse_button_down(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
+void wz_main_window_mouse_button_up(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
+void wz_main_window_mouse_move(struct wzMainWindow *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+void wz_main_window_mouse_wheel_move(struct wzMainWindow *mainWindow, int x, int y);
+void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
+void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
+void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
+void wz_main_window_draw(struct wzMainWindow *mainWindow);
+void wz_main_window_set_dock_tab_bar(struct wzMainWindow *mainWindow, wzDockPosition dockPosition, struct wzTabBar *tabBar);
+struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab);
+wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
 
 typedef void (*wzWidgetDrawCallback)(struct wzWidget *widget, wzRect clip);
 typedef wzSize (*wzWidgetMeasureCallback)(struct wzWidget *widget);
 
 void wz_widget_destroy(struct wzWidget *widget);
-struct wzDesktop *wz_widget_get_desktop(struct wzWidget *widget);
+struct wzMainWindow *wz_widget_get_main_window(struct wzWidget *widget);
 wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
 bool wz_widget_is_layout(const struct wzWidget *widget);
 

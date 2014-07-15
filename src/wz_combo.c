@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 
 struct wzCombo
@@ -39,8 +39,8 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	wzBorder listItemsBorder;
 	int listItemHeight, listNumItems, over;
 
-	// Don't do anything if the desktop is NULL (widget hasn't been added yet).
-	if (!combo->base.desktop)
+	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
+	if (!combo->base.mainWindow)
 		return;
 
 	if (!combo->list)
@@ -60,9 +60,9 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	listNumItems = wz_list_get_num_items(combo->list);
 	listRect.h = listItemsBorder.top + listItemHeight * listNumItems + listItemsBorder.bottom;
 
-	// Clip the height to the desktop.
+	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct wzWidget *)combo->base.desktop).h;
+	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct wzWidget *)combo->base.mainWindow).h;
 	
 	if (over > 0)
 	{
@@ -94,7 +94,7 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 		if (!combo->isOpen)
 		{
 			// Lock input.
-			wz_desktop_push_lock_input_widget(widget->desktop, widget);
+			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 
 			// Show dropdown list and set it to draw last.
 			wz_widget_set_visible((struct wzWidget *)combo->list, true);
@@ -107,7 +107,7 @@ static void wz_combo_mouse_button_down(struct wzWidget *widget, int mouseButton,
 		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
 		{
 			// Unlock input.
-			wz_desktop_pop_lock_input_widget(widget->desktop, widget);
+			wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 
 			// Hide dropdown list.
 			wz_widget_set_visible((struct wzWidget *)combo->list, false);
@@ -134,7 +134,7 @@ static void wz_combo_list_item_selected(wzEvent *e)
 	combo = (struct wzCombo *)e->base.widget->parent;
 
 	// Unlock input.
-	wz_desktop_pop_lock_input_widget(combo->base.desktop, (struct wzWidget *)combo);
+	wz_main_window_pop_lock_input_widget(combo->base.mainWindow, (struct wzWidget *)combo);
 
 	// Hide dropdown list.
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);

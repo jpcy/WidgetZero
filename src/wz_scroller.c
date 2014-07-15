@@ -23,7 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
-#include "wz_desktop.h"
+#include "wz_main_window.h"
 #include "wz_widget.h"
 
 struct wzScrollerNub
@@ -67,7 +67,7 @@ static void wz_nub_mouse_button_down(struct wzWidget *widget, int mouseButton, i
 	if (mouseButton == 1 && nub->base.hover)
 	{
 		nub->isPressed = true;
-		wz_desktop_push_lock_input_widget(widget->desktop, widget);
+		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 	}
 }
 
@@ -81,7 +81,7 @@ static void wz_nub_mouse_button_up(struct wzWidget *widget, int mouseButton, int
 	if (mouseButton == 1)
 	{
 		nub->isPressed = false;
-		wz_desktop_pop_lock_input_widget(widget->desktop, widget);
+		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 	}
 }
 
@@ -195,7 +195,7 @@ static struct wzScrollerNub *wz_scroller_nub_create(struct wzScroller *scroller)
 	WZ_ASSERT(scroller);
 	nub = (struct wzScrollerNub *)malloc(sizeof(struct wzScrollerNub));
 	memset(nub, 0, sizeof(struct wzScrollerNub));
-	//nub->base.desktop = scroller->base.desktop;
+	//nub->base.mainWindow = scroller->base.mainWindow;
 	nub->scroller = scroller;
 	nub->base.vtable.mouse_button_down = wz_nub_mouse_button_down;
 	nub->base.vtable.mouse_button_up = wz_nub_mouse_button_up;
