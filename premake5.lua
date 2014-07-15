@@ -48,7 +48,7 @@ end
 solution "WidgetZero"
 	language "C"
 	location "build"
-	startproject "Example"
+	startproject "Example_demo"
 	
 	configurations { "Debug", "Release" }
 	platforms { "native", "x64", "x32" }
@@ -124,45 +124,54 @@ project "NanoVG"
 		
 -----------------------------------------------------------------------------
 
-project "Example"
-	language "C++"
-	kind "WindowedApp"
-	targetname "example"
+function createExampleProject(_name, _language, _includedirs, _links)
+	project("Example_" .. _name)
+		language(_language)
+		kind "WindowedApp"
+		targetname("example_" .. _name)
 
-	files { "example/*.cpp" }
-	
-	includedirs
-	{
-		"include",
-		"addons/shared",
-		"addons/wzcpp",
-		"addons/wzgl"
-	}
-	
-	configuration "linux"
-		buildoptions { "`pkg-config --cflags sdl2`" }
-		linkoptions { "`pkg-config --libs sdl2`" }
-		links { "GL", "GLU", "GLEW" }
-    configuration "vs*"
-	    includedirs(config.sdl2Path .. "/include")
-		links { "glu32", "opengl32", "glew32" }
-	configuration { "vs*", "not x64" }
-		libdirs(config.sdl2Path .. "/lib/x86")
-		libdirs(config.glewPath .. "/lib/Release/Win32")
-	configuration { "vs*",  "x64" }
-		libdirs(config.sdl2Path .. "/lib/x64")
-		libdirs(config.glewPath .. "/lib/Release/x64")
-	configuration {}
-	
-	links
-	{
-		"SDL2",
-		"SDL2main",
-		"NanoVG",
-		"WidgetZero",
-		"WidgetZeroCpp",
-		"WidgetZeroGL"
-	}
-	
-	configuration "vs2012"
-		linkoptions { "/SAFESEH:NO" }
+		files { "examples/" .. _name .. "/*.*" }
+		
+		includedirs
+		{
+			"include",
+			"addons/shared",
+			"addons/wzgl",
+			_includedirs
+		}
+		
+		configuration "linux"
+			buildoptions { "`pkg-config --cflags sdl2`" }
+			linkoptions { "`pkg-config --libs sdl2`" }
+			links { "GL", "GLU", "GLEW" }
+		configuration "vs*"
+			includedirs(config.sdl2Path .. "/include")
+			links { "glu32", "opengl32", "glew32" }
+		configuration { "vs*", "not x64" }
+			libdirs(config.sdl2Path .. "/lib/x86")
+			libdirs(config.glewPath .. "/lib/Release/Win32")
+		configuration { "vs*",  "x64" }
+			libdirs(config.sdl2Path .. "/lib/x64")
+			libdirs(config.glewPath .. "/lib/Release/x64")
+		configuration {}
+		
+		links
+		{
+			"SDL2",
+			"SDL2main",
+			"NanoVG",
+			"WidgetZero",
+			"WidgetZeroGL",
+			_links
+		}
+		
+		if _language == "C++" then
+			configuration "vs2012"
+				linkoptions { "/SAFESEH:NO" }
+		end
+end
+
+-----------------------------------------------------------------------------
+
+createExampleProject("demo", "C++", "addons/wzcpp", "WidgetZeroCpp")
+createExampleProject("simple", "C", nil, nil)

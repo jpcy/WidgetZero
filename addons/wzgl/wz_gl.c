@@ -944,7 +944,7 @@ struct wzRenderer *wzgl_create_renderer()
 	}
 
 	// Load font.
-	rendererData->font = nvgCreateFont(rendererData->vg, "default", "../example/data/DejaVuSans.ttf");
+	rendererData->font = nvgCreateFont(rendererData->vg, "default", "../examples/data/DejaVuSans.ttf");
 	rendererData->fontSize = 16;
 
 	if (rendererData->font == -1)
