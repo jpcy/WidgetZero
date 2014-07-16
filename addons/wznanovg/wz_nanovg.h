@@ -30,9 +30,9 @@ SOFTWARE.
 extern "C" {
 #endif
 
-struct wzRenderer *wzgl_create_renderer();
-void wzgl_destroy_renderer(struct wzRenderer *renderer);
-const char *wzgl_get_error();
+struct wzRenderer *wz_nanovg_create_renderer();
+void wz_nanovg_destroy_renderer(struct wzRenderer *renderer);
+const char *wz_nanovg_get_error();
 
 #ifdef __cplusplus
 } // extern "C"

@@ -28,7 +28,7 @@ SOFTWARE.
 #include <GL/glew.h>
 #include <SDL.h>
 #include <wz_cpp.h>
-#include <wz_gl.h>
+#include <wz_nanovg.h>
 
 static const float frameTime = 1000 / 60.0f;
 
@@ -351,12 +351,12 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
-	// Create the wzgl renderer.
-	wzRenderer *renderer = wzgl_create_renderer();
+	// Create the NanoVG renderer.
+	wzRenderer *renderer = wz_nanovg_create_renderer();
 
 	if (!renderer)
 	{
-		ShowError(wzgl_get_error());
+		ShowError(wz_nanovg_get_error());
 		return 1;
 	}
 
@@ -470,6 +470,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	wzgl_destroy_renderer(renderer);
+	wz_nanovg_destroy_renderer(renderer);
 	return 0;
 }

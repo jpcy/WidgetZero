@@ -26,7 +26,7 @@ SOFTWARE.
 #include <GL/glew.h>
 #include <SDL.h>
 #include <wz.h>
-#include <wz_gl.h>
+#include <wz_nanovg.h>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -101,12 +101,12 @@ int main(int argc, char **argv)
 	if (errorCode)
 		return errorCode;
 
-	// Create the wzgl renderer.
-	renderer = wzgl_create_renderer();
+	// Create the NanoVG renderer.
+	renderer = wz_nanovg_create_renderer();
 
 	if (!renderer)
 	{
-		ShowError(wzgl_get_error());
+		ShowError(wz_nanovg_get_error());
 		return 1;
 	}
 
@@ -157,6 +157,6 @@ int main(int argc, char **argv)
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	wzgl_destroy_renderer(renderer);
+	wz_nanovg_destroy_renderer(renderer);
 	return 0;
 }

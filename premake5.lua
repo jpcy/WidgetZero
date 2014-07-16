@@ -99,21 +99,21 @@ project "WidgetZeroCpp"
 		
 -----------------------------------------------------------------------------
 
-project "WidgetZeroGL"
+project "WidgetZeroNanoVG"
 	kind "StaticLib"
 
-	files { "addons/wzgl/*.*", "addons/shared/*.h" }
+	files { "addons/wznanovg/*.*", "addons/shared/*.h" }
 	
 	includedirs
 	{
 		"include",
 		"addons/shared",
-		"addons/wzgl",
+		"addons/wznanovg",
 		config.glewPath .. "/include",
 		config.nanovgPath .. "/src"
 	}
 	
-	vpaths { ["*"] = { "addons/shared", "addons/wzgl" } }
+	vpaths { ["*"] = { "addons/shared", "addons/wznanovg" } }
 		
 -----------------------------------------------------------------------------
 
@@ -136,7 +136,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 		{
 			"include",
 			"addons/shared",
-			"addons/wzgl",
+			"addons/wznanovg",
 			_includedirs
 		}
 		
@@ -161,7 +161,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 			"SDL2main",
 			"NanoVG",
 			"WidgetZero",
-			"WidgetZeroGL",
+			"WidgetZeroNanoVG",
 			_links
 		}
 		
