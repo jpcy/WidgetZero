@@ -34,17 +34,19 @@ SOFTWARE.
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
 
-#define WZ_GL_MAX_ERROR_MESSAGE 1024
+#define WZ_NANOVG_MAX_PATH 256
+#define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
 
 typedef struct
 {
 	struct NVGcontext *vg;
+	char fontDirectory[WZ_NANOVG_MAX_PATH];
 	int font;
 	float fontSize;
 }
 wzRendererData;
 
-static char errorMessage[WZ_GL_MAX_ERROR_MESSAGE];
+static char errorMessage[WZ_NANOVG_MAX_ERROR_MESSAGE];
 
 static const int checkBoxBoxSize = 16;
 static const int checkBoxBoxRightMargin = 8;
@@ -934,10 +936,11 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzRenderer *wz_nanovg_create_renderer()
+struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory)
 {
 	struct wzRenderer *renderer;
 	wzRendererData *rendererData;
+	char fontPath[WZ_NANOVG_MAX_PATH];
 
 	// Alloc renderer.
 	renderer = malloc(sizeof(struct wzRenderer));
@@ -954,8 +957,11 @@ struct wzRenderer *wz_nanovg_create_renderer()
 		return NULL;
 	}
 
-	// Load font.
-	rendererData->font = nvgCreateFont(rendererData->vg, "default", "../examples/data/DejaVuSans.ttf");
+	// Load default font.
+	strncpy(rendererData->fontDirectory, fontDirectory, WZ_NANOVG_MAX_PATH);
+	strncpy(fontPath, fontDirectory, WZ_NANOVG_MAX_PATH);
+	strcat(fontPath, "/DejaVuSans.ttf");
+	rendererData->font = nvgCreateFont(rendererData->vg, "default", fontPath);
 	rendererData->fontSize = 16;
 
 	if (rendererData->font == -1)
