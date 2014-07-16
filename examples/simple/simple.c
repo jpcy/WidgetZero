@@ -88,7 +88,7 @@ int InitializeSDL()
 
 static void DrawButton(struct wzWidget *widget, wzRect clip)
 {
-	renderer->draw_button(renderer, clip, (struct wzButton *)widget, wz_widget_get_metadata(widget));
+	renderer->draw_button(renderer, clip, (struct wzButton *)widget, wzBorder_zero, wz_widget_get_metadata(widget));
 }
 
 int main(int argc, char **argv)

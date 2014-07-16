@@ -110,7 +110,7 @@ public:
 
 		{
 			wz::Button *button = new wz::Button(renderer, "Test Button");
-			button->setPosition(100, 100);
+			button->setPadding(20, 50, 20, 50)->setPosition(100, 100);
 			mainWindow.add(button);
 
 			const wzRect buttonRect = button->getRect();

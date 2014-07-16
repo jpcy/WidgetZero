@@ -64,6 +64,7 @@ struct ButtonPrivate : public WidgetPrivate
 
 	wzButton *button;
 	DrawStyle drawStyle;
+	wzBorder padding;
 	std::string label;
 };
 
@@ -396,6 +397,8 @@ Widget *Widget::setMargin(wzBorder margin)
 ButtonPrivate::ButtonPrivate(wzRenderer *renderer) : drawStyle(Normal)
 {
 	WZ_ASSERT(renderer);
+	padding.left = padding.right = 8;
+	padding.top = padding.bottom = 4;
 	this->renderer = renderer;
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
@@ -413,18 +416,18 @@ ButtonPrivate::~ButtonPrivate()
 
 wzSize ButtonPrivate::measure()
 {
-	return renderer->measure_button(renderer, label.c_str());
+	return renderer->measure_button(renderer, padding, label.c_str());
 }
 
 void ButtonPrivate::draw(wzRect clip)
 {
 	if (drawStyle == Normal)
 	{
-		renderer->draw_button(renderer, clip, button, label.c_str());
+		renderer->draw_button(renderer, clip, button, padding, label.c_str());
 	}
 	else if (drawStyle == Tab)
 	{
-		renderer->draw_tab_button(renderer, clip, button, label.c_str());
+		renderer->draw_tab_button(renderer, clip, button, padding, label.c_str());
 	}
 }
 
@@ -444,6 +447,29 @@ Button::Button(wzRenderer *renderer, const std::string &label)
 Button::~Button()
 {
 	delete p;
+}
+
+wzBorder Button::getPadding() const
+{
+	return ((ButtonPrivate *)p)->padding;
+}
+
+Button *Button::setPadding(wzBorder padding)
+{
+	((ButtonPrivate *)p)->padding = padding;
+	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
+Button *Button::setPadding(int top, int right, int bottom, int left)
+{
+	ButtonPrivate *bp = (ButtonPrivate *)p;
+	bp->padding.top = top;
+	bp->padding.right = right;
+	bp->padding.bottom = bottom;
+	bp->padding.left = left;
+	wz_widget_resize_to_measured(p->getWidget());
+	return this;
 }
 
 std::string Button::getLabel() const

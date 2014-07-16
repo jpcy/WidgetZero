@@ -100,6 +100,9 @@ public:
 	Button(wzRenderer *renderer);
 	Button(wzRenderer *renderer, const std::string &label);
 	~Button();
+	wzBorder getPadding() const;
+	Button *setPadding(wzBorder padding);
+	Button *setPadding(int top, int right, int bottom, int left);
 	std::string getLabel() const;
 	Button *setLabel(const std::string &label);
 };

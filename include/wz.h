@@ -100,6 +100,8 @@ typedef struct
 }
 wzBorder;
 
+extern const wzBorder wzBorder_zero;
+
 enum
 {
 	WZ_STRETCH_NONE,

@@ -43,8 +43,8 @@ struct wzRenderer
 	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *title);
 	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *title);
 
-	wzSize (*measure_button)(struct wzRenderer *renderer, const char *label);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label);
+	wzSize (*measure_button)(struct wzRenderer *renderer, wzBorder padding, const char *label);
+	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *label);
 
 	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const char *label);
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label);
@@ -65,7 +65,7 @@ struct wzRenderer
 	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *text, uint8_t r, uint8_t g, uint8_t b);
 
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items);
-	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label);
+	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *label);
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
 	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer);

@@ -47,6 +47,8 @@ wz_intersect_rects is SDL_IntersectRect
 #include <string.h>
 #include "wz_widget.h"
 
+const wzBorder wzBorder_zero = { 0, 0, 0, 0 };
+
 /*
 ================================================================================
 

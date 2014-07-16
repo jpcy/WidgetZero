@@ -273,25 +273,24 @@ static void wzgl_draw_window(struct wzRenderer *renderer, wzRect clip, struct wz
 	nvgRestore(vg);
 }
 
-static wzSize wzgl_measure_button(struct wzRenderer *renderer, const char *label)
+static wzSize wzgl_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *label)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
 	wzgl_measure_text(renderer, label, 0, &size.w, &size.h);
-
-	// Padding.
-	size.w += 16;
-	size.h += 8;
+	size.w += padding.left + padding.right;
+	size.h += padding.top + padding.bottom;
 	return size;
 }
 
-static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label)
+static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover, pressed;
+	wzRect labelRect;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(button);
@@ -332,7 +331,11 @@ static void wzgl_draw_button(struct wzRenderer *renderer, wzRect clip, struct wz
 	}
 
 	// Label.
-	wzgl_printf(rendererData, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	labelRect.x = rect.x + padding.left;
+	labelRect.y = rect.y + padding.top;
+	labelRect.w = rect.w - (padding.left + padding.right);
+	labelRect.h = rect.h - (padding.top + padding.bottom);
+	wzgl_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
@@ -720,12 +723,13 @@ static void wzgl_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzLi
 	nvgRestore(vg);
 }
 
-static void wzgl_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, const char *label)
+static void wzgl_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover, set;
+	wzRect labelRect;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(tabButton);
@@ -765,7 +769,11 @@ static void wzgl_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struc
 	}
 
 	// Label.
-	wzgl_printf(rendererData, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	labelRect.x = rect.x + padding.left;
+	labelRect.y = rect.y + padding.top;
+	labelRect.w = rect.w - (padding.left + padding.right);
+	labelRect.h = rect.h - (padding.top + padding.bottom);
+	wzgl_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
