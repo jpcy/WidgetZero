@@ -219,6 +219,7 @@ public:
 			wz::Window *window = new wz::Window(renderer, "Window 3");
 			window->setRect(800, 500, 200, 200);
 			mainWindow.add(window);
+			mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
 
 			wz::List *list = new wz::List(renderer);
 			list->setItems(listData, 17)->setMargin(8)->setStretch(WZ_STRETCH);

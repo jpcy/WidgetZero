@@ -373,34 +373,106 @@ static void wz_main_window_update_docking_rects(struct wzMainWindow *mainWindow)
 	}
 }
 
-static void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window)
+static wzRect wz_main_window_calculate_dock_window_rect(struct wzMainWindow *mainWindow, wzDockPosition dockPosition, wzSize windowSize)
+{
+	int nDockedWindows;
+	wzRect rect;
+
+	// e.g. north dock max height is mainWindow height * maxPreviewSizeMultiplier.
+	const float maxPreviewSizeMultiplier = 0.3f;
+
+	WZ_ASSERT(mainWindow);
+
+	// If there's already a window docked at this position, set the dock preview rect to that size.
+	nDockedWindows = wz_arr_len(mainWindow->dockedWindows[dockPosition]);
+
+	if (nDockedWindows > 0)
+	{
+		rect = wz_widget_get_rect((struct wzWidget *)mainWindow->dockedWindows[dockPosition][0]);
+
+		// If there's exactly one window already docked at this position, leave room for the dock tab bar.
+		if (nDockedWindows == 1)
+		{
+			rect.h -= wz_widget_get_height((struct wzWidget *)mainWindow->dockTabBars[dockPosition]);
+		}
+	}
+	else
+	{
+		// Use the window width for east/west or height for north/south, but don't go over half of the mainWindow width/height.
+		if (dockPosition == WZ_DOCK_POSITION_NORTH)
+		{
+			rect.x = 0;
+			rect.y = 0;
+			rect.w = mainWindow->base.rect.w;
+			rect.h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier));
+		}
+		else if (dockPosition == WZ_DOCK_POSITION_SOUTH)
+		{
+			const int h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier));
+			rect.x = 0;
+			rect.y = mainWindow->base.rect.h - h;
+			rect.w = mainWindow->base.rect.w;
+			rect.h = h;
+		}
+		else if (dockPosition == WZ_DOCK_POSITION_EAST)
+		{
+			const int w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
+			rect.x = mainWindow->base.rect.w - w;
+			rect.y = 0;
+			rect.w = w;
+			rect.h = mainWindow->base.rect.h;
+		}
+		else if (dockPosition == WZ_DOCK_POSITION_WEST)
+		{
+			rect.x = 0;
+			rect.y = 0;
+			rect.w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
+			rect.h = mainWindow->base.rect.h;
+		}
+	}
+
+	return rect;
+}
+
+void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition)
 {
 	int i;
 
 	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(window);
 
-	// Hide any other windows docked at the same position.
-	for (i = 0; i < wz_arr_len(mainWindow->dockedWindows[mainWindow->windowDockPosition]); i++)
+	// Not valid, use wz_main_window_undock_window to undock.
+	if (dockPosition == WZ_DOCK_POSITION_NONE)
+		return;
+
+	// Don't do anything if this window is already docked at this position.
+	for (i = 0; i < wz_arr_len(mainWindow->dockedWindows[dockPosition]); i++)
 	{
-		wz_widget_set_visible((struct wzWidget *)mainWindow->dockedWindows[mainWindow->windowDockPosition][i], false);
+		if (mainWindow->dockedWindows[dockPosition][i] == window)
+			return;
 	}
 
-	// Dock the window.
-	wz_arr_push(mainWindow->dockedWindows[mainWindow->windowDockPosition], window);
+	// Hide any other windows docked at the same position.
+	for (i = 0; i < wz_arr_len(mainWindow->dockedWindows[dockPosition]); i++)
+	{
+		wz_widget_set_visible((struct wzWidget *)mainWindow->dockedWindows[dockPosition][i], false);
+	}
 
 	// Inform the window it is being docked.
 	wz_window_dock(window);
 
-	// Resize the window to match the dock preview.
-	wz_widget_set_rect_internal((struct wzWidget *)window, wz_widget_get_rect((struct wzWidget *)mainWindow->dockPreview));
+	// Resize the window.
+	wz_widget_set_rect_internal((struct wzWidget *)window, wz_main_window_calculate_dock_window_rect(mainWindow, dockPosition, wz_widget_get_size((struct wzWidget *)window)));
+
+	// Dock the window.
+	wz_arr_push(mainWindow->dockedWindows[dockPosition], window);
 
 	// Resize the other windows docked at this position to match.
 	wz_main_window_update_docked_window_rect(mainWindow, window);
 
 	// Refresh the tab bar for this dock position.
 	mainWindow->ignoreDockTabBarChangedEvent = true;
-	wz_main_window_refresh_dock_tab_bar(mainWindow, mainWindow->windowDockPosition);
+	wz_main_window_refresh_dock_tab_bar(mainWindow, dockPosition);
 	mainWindow->ignoreDockTabBarChangedEvent = false;
 
 	// Docked windows affect the mainWindow content rect, so update it.
@@ -591,70 +663,14 @@ static void wz_main_window_draw_dock_preview(struct wzWidget *widget, wzRect cli
 
 static void wz_widget_update_dock_preview_rect(struct wzMainWindow *mainWindow, wzDockPosition dockPosition)
 {
-	int nDockedWindows;
-
-	// e.g. north dock max height is mainWindow height * maxPreviewSizeMultiplier.
-	const float maxPreviewSizeMultiplier = 0.3f;
+	wzSize windowSize;
+	wzRect rect;
 
 	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(mainWindow->movingWindow);
-
-	// If there's already a window docked at this position, set the dock preview rect to that size.
-	nDockedWindows = wz_arr_len(mainWindow->dockedWindows[dockPosition]);
-
-	if (nDockedWindows > 0)
-	{
-		wzRect rect = wz_widget_get_rect((struct wzWidget *)mainWindow->dockedWindows[dockPosition][0]);
-
-		// If there's exactly one window already docked at this position, leave room for the dock tab bar.
-		if (nDockedWindows == 1)
-		{
-			rect.h -= wz_widget_get_height((struct wzWidget *)mainWindow->dockTabBars[dockPosition]);
-		}
-
-		wz_widget_set_rect_internal((struct wzWidget *)mainWindow->dockPreview, rect);
-	}
-	else
-	{
-		wzSize windowSize;
-		wzRect rect;
-
-		// Use the window width for east/west or height for north/south, but don't go over half of the mainWindow width/height.
-		windowSize = wz_widget_get_size((struct wzWidget *)mainWindow->movingWindow);
-
-		if (dockPosition == WZ_DOCK_POSITION_NORTH)
-		{
-			rect.x = 0;
-			rect.y = 0;
-			rect.w = mainWindow->base.rect.w;
-			rect.h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier));
-		}
-		else if (dockPosition == WZ_DOCK_POSITION_SOUTH)
-		{
-			const int h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier));
-			rect.x = 0;
-			rect.y = mainWindow->base.rect.h - h;
-			rect.w = mainWindow->base.rect.w;
-			rect.h = h;
-		}
-		else if (dockPosition == WZ_DOCK_POSITION_EAST)
-		{
-			const int w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
-			rect.x = mainWindow->base.rect.w - w;
-			rect.y = 0;
-			rect.w = w;
-			rect.h = mainWindow->base.rect.h;
-		}
-		else if (dockPosition == WZ_DOCK_POSITION_WEST)
-		{
-			rect.x = 0;
-			rect.y = 0;
-			rect.w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
-			rect.h = mainWindow->base.rect.h;
-		}
-
-		wz_widget_set_rect_internal((struct wzWidget *)mainWindow->dockPreview, rect);
-	}
+	windowSize = wz_widget_get_size((struct wzWidget *)mainWindow->movingWindow);
+	rect = wz_main_window_calculate_dock_window_rect(mainWindow, dockPosition, windowSize);
+	wz_widget_set_rect_internal((struct wzWidget *)mainWindow->dockPreview, rect);
 }
 
 static void wz_main_window_update_dock_preview_visible(struct wzMainWindow *mainWindow, int mouseX, int mouseY)
@@ -842,7 +858,7 @@ void wz_main_window_mouse_button_up(struct wzMainWindow *mainWindow, int mouseBu
 		// If the dock preview is visible, movingWindow can be docked.
 		if (wz_widget_get_visible((struct wzWidget *)mainWindow->dockPreview))
 		{
-			wz_main_window_dock_window(mainWindow, mainWindow->movingWindow);
+			wz_main_window_dock_window(mainWindow, mainWindow->movingWindow, mainWindow->windowDockPosition);
 		}
 
 		wz_widget_set_visible((struct wzWidget *)mainWindow->dockPreview, false);

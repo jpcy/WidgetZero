@@ -285,6 +285,7 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow);
 void wz_main_window_set_dock_tab_bar(struct wzMainWindow *mainWindow, wzDockPosition dockPosition, struct wzTabBar *tabBar);
 struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab);
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
+void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition);
 
 typedef void (*wzWidgetDrawCallback)(struct wzWidget *widget, wzRect clip);
 typedef wzSize (*wzWidgetMeasureCallback)(struct wzWidget *widget);

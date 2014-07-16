@@ -70,6 +70,7 @@ public:
 	bool getShowCursor() const;
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
+	void dockWindow(Window *window, wzDockPosition dockPosition);
 
 	MainWindowPrivate *p;
 };

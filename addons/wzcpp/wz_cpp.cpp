@@ -732,6 +732,11 @@ Widget *MainWindow::add(Widget *widget)
 	return widget;
 }
 
+void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
+{
+	wz_main_window_dock_window(p->mainWindow, (wzWindow *)window->p->getWidget(), dockPosition);
+}
+
 //------------------------------------------------------------------------------
 
 DockTabBar::DockTabBar(wzRenderer *renderer) : TabBar(renderer)
