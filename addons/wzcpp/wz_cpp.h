@@ -79,20 +79,20 @@ class Widget
 {
 public:
 	virtual ~Widget();
-	wzRect getRect() const;
-	Widget *setPosition(int x, int y);
-	Widget *setWidth(int w);
-	Widget *setHeight(int h);
-	Widget *setSize(int w, int h);
-	Widget *setRect(int x, int y, int w, int h);
-	Widget *setStretch(int stretch);
-	Widget *setAlign(int align);
-	Widget *setMargin(int margin);
-	Widget *setMargin(int top, int right, int bottom, int left);
-	Widget *setMargin(wzBorder margin);
-	Widget *setFontFace(const std::string &fontFace);
-	Widget *setFontSize(float fontSize);
-	Widget *setFont(const std::string &fontFace, float fontSize);
+	virtual wzRect getRect() const;
+	virtual Widget *setPosition(int x, int y);
+	virtual Widget *setWidth(int w);
+	virtual Widget *setHeight(int h);
+	virtual Widget *setSize(int w, int h);
+	virtual Widget *setRect(int x, int y, int w, int h);
+	virtual Widget *setStretch(int stretch);
+	virtual Widget *setAlign(int align);
+	virtual Widget *setMargin(int margin);
+	virtual Widget *setMargin(int top, int right, int bottom, int left);
+	virtual Widget *setMargin(wzBorder margin);
+	virtual Widget *setFontFace(const std::string &fontFace);
+	virtual Widget *setFontSize(float fontSize);
+	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 
 	WidgetPrivate *p;
 };
@@ -154,6 +154,9 @@ class List : public Widget
 public:
 	List(wzRenderer *renderer);
 	~List();
+	virtual Widget *setFontFace(const std::string &fontFace);
+	virtual Widget *setFontSize(float fontSize);
+	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(const char **items, int nItems);
 };
 

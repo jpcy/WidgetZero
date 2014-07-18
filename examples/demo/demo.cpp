@@ -222,7 +222,7 @@ public:
 			mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
 
 			wz::List *list = new wz::List(renderer);
-			list->setItems(listData, 17)->setMargin(8)->setStretch(WZ_STRETCH);
+			list->setItems(listData, 17)->setMargin(8)->setStretch(WZ_STRETCH)->setFontSize(24);
 			window->add(list);
 		}
 

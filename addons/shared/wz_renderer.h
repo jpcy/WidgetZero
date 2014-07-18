@@ -64,13 +64,15 @@ struct wzRenderer
 	wzSize (*measure_label)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text);
 	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, const char *text, uint8_t r, uint8_t g, uint8_t b);
 
+	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
+	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, const char **items);
 
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);
 
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
-	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer);
+	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, wzBorder border, const char *fontFace, float fontSize, const char *text);
 	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor);
 

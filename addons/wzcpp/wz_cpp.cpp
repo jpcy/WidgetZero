@@ -150,15 +150,14 @@ struct ListPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)list; }
 	virtual void draw(wzRect clip);
 
+	// Called on init and when the font face or size changed.
+	void refreshItemHeight();
+
 	void setItems(const char **items, int nItems);
 
 	wzList *list;
 	const char **items;
 	std::auto_ptr<Scroller> scroller;
-
-	static const int itemsMargin = 2;
-	static const int itemHeight = 18;
-	static const int itemLeftPadding = 4;
 };
 
 struct RadioButtonPrivate : public WidgetPrivate
@@ -981,10 +980,10 @@ ListPrivate::ListPrivate(wzRenderer *renderer)
 	scroller.reset(new Scroller(renderer));
 
 	list = wz_list_create((wzScroller *)scroller->p->getWidget());
-	wz_list_set_item_height(list, itemHeight);
-	wz_list_set_items_border_args(list, itemsMargin, itemsMargin, itemsMargin, itemsMargin);
+	wz_list_set_items_border(list, renderer->get_list_items_border(renderer, list));
 	wz_widget_set_metadata((wzWidget *)list, this);
 	wz_widget_set_draw_callback((wzWidget *)list, DrawWidget);
+	refreshItemHeight();
 }
 
 ListPrivate::~ListPrivate()
@@ -998,6 +997,11 @@ ListPrivate::~ListPrivate()
 void ListPrivate::draw(wzRect clip)
 {
 	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, items);
+}
+
+void ListPrivate::refreshItemHeight()
+{
+	wz_list_set_item_height(list, renderer->measure_list_item_height(renderer, list, fontFace.c_str(), fontSize));
 }
 
 void ListPrivate::setItems(const char **items, int nItems)
@@ -1016,6 +1020,27 @@ List::List(wzRenderer *renderer)
 List::~List()
 {
 	delete p;
+}
+
+Widget *List::setFontFace(const std::string &fontFace)
+{
+	Widget::setFontFace(fontFace);
+	((ListPrivate *)p)->refreshItemHeight();
+	return (Widget *)this;
+}
+
+Widget *List::setFontSize(float fontSize)
+{
+	Widget::setFontSize(fontSize);
+	((ListPrivate *)p)->refreshItemHeight();
+	return (Widget *)this;
+}
+
+Widget *List::setFont(const std::string &fontFace, float fontSize)
+{
+	Widget::setFont(fontFace, fontSize);
+	((ListPrivate *)p)->refreshItemHeight();
+	return (Widget *)this;
 }
 
 List *List::setItems(const char **items, int nItems)
@@ -1411,7 +1436,7 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	textEdit = wz_text_edit_create(256);
-	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer));
+	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer, textEdit));
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
 	wz_widget_set_draw_callback(widget, DrawWidget);

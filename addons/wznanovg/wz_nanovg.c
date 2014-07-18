@@ -724,12 +724,29 @@ static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struc
 	nvgRestore(vg);
 }
 
+static wzBorder wz_nanovg_get_list_items_border(struct wzRenderer *renderer, struct wzList *list)
+{
+	wzBorder b;
+	b.left = b.top = b.right = b.bottom = 2;
+	return b;
+}
+
+static int wz_nanovg_measure_list_item_height(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize)
+{
+	wzSize size;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(list);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, NULL, 0, NULL, &size.h);
+	return size.h + 2; // Add a little padding.
+}
+
 static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, const char **items)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect, itemsRect;
-	int itemsMargin, itemHeight, itemLeftPadding;
+	int itemHeight, itemLeftPadding;
 	int nItems, scrollerValue, y, i;
 
 	WZ_ASSERT(renderer);
@@ -748,8 +765,7 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct
 	wz_nanovg_draw_rect(vg, rect, nvgRGB(130, 135, 144));
 
 	// Items.
-	itemsMargin = 2;
-	itemHeight = 18;
+	itemHeight = wz_list_get_item_height(list);
 	itemLeftPadding = 4;
 	itemsRect = wz_list_get_absolute_items_rect(list);
 
@@ -863,7 +879,7 @@ static void wz_nanovg_draw_tab_page(struct wzRenderer *renderer, wzRect clip, st
 	nvgRestore(vg);
 }
 
-static wzBorder wz_nanovg_get_text_edit_border(struct wzRenderer *renderer)
+static wzBorder wz_nanovg_get_text_edit_border(struct wzRenderer *renderer, const struct wzTextEdit *textEdit)
 {
 	wzBorder b;
 	b.left = b.top = b.right = b.bottom = 4;
@@ -1054,6 +1070,8 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->draw_scroller = wz_nanovg_draw_scroller;
 	renderer->measure_label = wz_nanovg_measure_label;
 	renderer->draw_label = wz_nanovg_draw_label;
+	renderer->get_list_items_border = wz_nanovg_get_list_items_border;
+	renderer->measure_list_item_height = wz_nanovg_measure_list_item_height;
 	renderer->draw_list = wz_nanovg_draw_list;
 	renderer->draw_tab_button = wz_nanovg_draw_tab_button;
 	renderer->draw_tab_page = wz_nanovg_draw_tab_page;
