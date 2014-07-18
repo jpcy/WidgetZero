@@ -352,7 +352,7 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
 	// Create the NanoVG renderer.
-	wzRenderer *renderer = wz_nanovg_create_renderer("../examples/data");
+	wzRenderer *renderer = wz_nanovg_create_renderer("../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{

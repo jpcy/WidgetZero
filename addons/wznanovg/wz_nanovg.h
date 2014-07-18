@@ -30,7 +30,7 @@ SOFTWARE.
 extern "C" {
 #endif
 
-struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory);
+struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
 void wz_nanovg_destroy_renderer(struct wzRenderer *renderer);
 const char *wz_nanovg_get_error();
 

@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 		return errorCode;
 
 	// Create the NanoVG renderer.
-	renderer = wz_nanovg_create_renderer("../examples/data");
+	renderer = wz_nanovg_create_renderer("../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{

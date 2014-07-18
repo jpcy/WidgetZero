@@ -34,8 +34,6 @@ SOFTWARE.
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
 
-#define WZ_NANOVG_DEFAULT_FONT_FACE "DejaVuSans"
-#define WZ_NANOVG_DEFAULT_FONT_SIZE 16.0f
 #define WZ_NANOVG_MAX_PATH 256
 #define WZ_NANOVG_MAX_FONTS 32
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
@@ -53,6 +51,7 @@ typedef struct
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
 	wzFont fonts[WZ_NANOVG_MAX_FONTS];
 	int nFonts;
+	float defaultFontSize;
 }
 wzRendererData;
 
@@ -135,7 +134,7 @@ static void wz_nanovg_printf(wzRendererData *rendererData, int x, int y, int ali
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
-	nvgFontSize(rendererData->vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+	nvgFontSize(rendererData->vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
 	wz_nanovg_set_font_face(rendererData, fontFace);
 	nvgTextAlign(rendererData->vg, align);
 	nvgFontBlur(rendererData->vg, 0);
@@ -222,14 +221,14 @@ static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *font
 
 	if (width)
 	{
-		nvgFontSize(vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+		nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
 		wz_nanovg_set_font_face(rendererData, fontFace);
 		*width = (int)nvgTextBounds(vg, 0, 0, text, n == 0 ? NULL : &text[n], NULL);
 	}
 
 	if (height)
 	{
-		*height = (int)(fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+		*height = (int)(fontSize == 0 ? rendererData->defaultFontSize : fontSize);
 	}
 }
 
@@ -245,7 +244,7 @@ static int wz_nanovg_text_get_pixel_delta(struct wzRenderer *renderer, const cha
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
-	nvgFontSize(vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+	nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
 	wz_nanovg_set_font_face(rendererData, fontFace);
 	nvgTextGlyphPositions(vg, 0, 0, &text[index], &text[index + 2], positions, 2);
 	x[0] = index == 0 ? 0 : positions[0].minx;
@@ -1001,7 +1000,7 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory)
+struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
 {
 	struct wzRenderer *renderer;
 	wzRendererData *rendererData;
@@ -1023,10 +1022,11 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory)
 
 	// Load the default font.
 	strncpy(rendererData->fontDirectory, fontDirectory, WZ_NANOVG_MAX_PATH);
+	rendererData->defaultFontSize = defaultFontSize;
 
-	if (wz_nanovg_create_font(rendererData, WZ_NANOVG_DEFAULT_FONT_FACE) == -1)
+	if (wz_nanovg_create_font(rendererData, defaultFontFace) == -1)
 	{
-		sprintf(errorMessage, "Error loading font %s", WZ_NANOVG_DEFAULT_FONT_FACE);
+		sprintf(errorMessage, "Error loading font %s", defaultFontFace);
 		wz_nanovg_destroy_renderer(renderer);
 		return NULL;
 	}
