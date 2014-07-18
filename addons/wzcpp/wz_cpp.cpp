@@ -98,22 +98,6 @@ struct ComboPrivate : public WidgetPrivate
 	std::auto_ptr<List> list;
 };
 
-struct MainWindowPrivate : public WidgetPrivate
-{
-	MainWindowPrivate(wzRenderer *renderer);
-	~MainWindowPrivate();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
-	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
-	void draw();
-	void drawDockIcon(wzRect rect);
-	void drawDockPreview(wzRect rect);
-
-	wzMainWindow *mainWindow;
-	wzRenderer *renderer;
-	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
-	bool showCursor;
-};
-
 struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate(wzRenderer *renderer);
@@ -158,6 +142,22 @@ struct ListPrivate : public WidgetPrivate
 	wzList *list;
 	const char **items;
 	std::auto_ptr<Scroller> scroller;
+};
+
+struct MainWindowPrivate : public WidgetPrivate
+{
+	MainWindowPrivate(wzRenderer *renderer);
+	~MainWindowPrivate();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
+	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
+	void draw();
+	void drawDockIcon(wzRect rect);
+	void drawDockPreview(wzRect rect);
+
+	wzMainWindow *mainWindow;
+	wzRenderer *renderer;
+	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
+	bool showCursor;
 };
 
 struct RadioButtonPrivate : public WidgetPrivate
@@ -630,167 +630,6 @@ Combo *Combo::setItems(const char **items, int nItems)
 
 //------------------------------------------------------------------------------
 
-static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int *width, int *height)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
-}
-
-static int TextGetPixelDelta(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int index)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	return renderer->text_get_pixel_delta(renderer, wp->fontFace.c_str(), wp->fontSize, text, index);
-}
-
-static void DrawDockIcon(wzRect rect, void *metadata)
-{
-	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
-	mainWindow->drawDockIcon(rect);
-}
-
-static void DrawDockPreview(wzRect rect, void *metadata)
-{
-	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
-	mainWindow->drawDockPreview(rect);
-}
-
-MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
-{
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
-	mainWindow = wz_main_window_create();
-	wz_widget_set_metadata((wzWidget *)mainWindow, this);
-	wz_main_window_set_event_callback(mainWindow, HandleEvent);
-	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
-	wz_main_window_set_text_get_pixel_delta_callback(mainWindow, TextGetPixelDelta);
-	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
-	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
-
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		dockTabBars[i] = new DockTabBar(renderer);
-		wz_main_window_set_dock_tab_bar(mainWindow, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
-		wz_widget_set_height(dockTabBars[i]->getWidget(), 20);
-	}
-}
-
-MainWindowPrivate::~MainWindowPrivate()
-{
-	for (size_t i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		delete dockTabBars[i];
-	}
-
-	wz_widget_destroy((wzWidget *)mainWindow);
-}
-
-void MainWindowPrivate::drawDockIcon(wzRect rect)
-{
-	renderer->draw_dock_icon(renderer, rect);
-}
-
-void MainWindowPrivate::drawDockPreview(wzRect rect)
-{
-	renderer->draw_dock_preview(renderer, rect);
-}
-
-//------------------------------------------------------------------------------
-
-MainWindow::MainWindow(wzRenderer *renderer)
-{
-	p = new MainWindowPrivate(renderer);
-}
-
-MainWindow::~MainWindow()
-{
-	delete p;
-}
-
-void MainWindow::setSize(int w, int h)
-{
-	wz_widget_set_size_args((wzWidget *)p->mainWindow, w, h);
-}
-
-void MainWindow::mouseMove(int x, int y, int dx, int dy)
-{
-	wz_main_window_mouse_move(p->mainWindow, x, y, dx, dy);
-}
-
-void MainWindow::mouseButtonDown(int button, int x, int y)
-{
-	wz_main_window_mouse_button_down(p->mainWindow, button, x, y);
-}
-
-void MainWindow::mouseButtonUp(int button, int x, int y)
-{
-	wz_main_window_mouse_button_up(p->mainWindow, button, x, y);
-}
-
-void MainWindow::mouseWheelMove(int x, int y)
-{
-	wz_main_window_mouse_wheel_move(p->mainWindow, x, y);
-}
-
-void MainWindow::keyDown(wzKey key)
-{
-	wz_main_window_key_down(p->mainWindow, key);
-}
-
-void MainWindow::keyUp(wzKey key)
-{
-	wz_main_window_key_up(p->mainWindow, key);
-}
-
-void MainWindow::textInput(const char *text)
-{
-	wz_main_window_text_input(p->mainWindow, text);
-}
-
-void MainWindow::setShowCursor(bool showCursor)
-{
-	p->showCursor = showCursor;
-}
-
-void MainWindow::beginFrame()
-{
-	p->renderer->begin_frame(p->renderer, p->mainWindow);
-}
-
-void MainWindow::drawFrame()
-{	
-	wz_main_window_draw(p->mainWindow);
-}
-
-void MainWindow::endFrame()
-{
-	p->renderer->end_frame(p->renderer);
-}
-
-bool MainWindow::getShowCursor() const
-{
-	return p->showCursor;
-}
-
-wzCursor MainWindow::getCursor() const
-{
-	return wz_main_window_get_cursor(p->mainWindow);
-}
-
-Widget *MainWindow::add(Widget *widget)
-{
-	p->add(widget);
-	return widget;
-}
-
-void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
-{
-	wz_main_window_dock_window(p->mainWindow, (wzWindow *)window->p->getWidget(), dockPosition);
-}
-
-//------------------------------------------------------------------------------
-
 DockTabBar::DockTabBar(wzRenderer *renderer) : TabBar(renderer)
 {
 }
@@ -1047,6 +886,167 @@ List *List::setItems(const char **items, int nItems)
 {
 	((ListPrivate *)p)->setItems(items, nItems);
 	return this;
+}
+
+//------------------------------------------------------------------------------
+
+static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int *width, int *height)
+{
+	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
+	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
+	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
+}
+
+static int TextGetPixelDelta(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int index)
+{
+	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
+	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
+	return renderer->text_get_pixel_delta(renderer, wp->fontFace.c_str(), wp->fontSize, text, index);
+}
+
+static void DrawDockIcon(wzRect rect, void *metadata)
+{
+	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
+	mainWindow->drawDockIcon(rect);
+}
+
+static void DrawDockPreview(wzRect rect, void *metadata)
+{
+	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
+	mainWindow->drawDockPreview(rect);
+}
+
+MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
+{
+	WZ_ASSERT(renderer);
+	this->renderer = renderer;
+	mainWindow = wz_main_window_create();
+	wz_widget_set_metadata((wzWidget *)mainWindow, this);
+	wz_main_window_set_event_callback(mainWindow, HandleEvent);
+	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
+	wz_main_window_set_text_get_pixel_delta_callback(mainWindow, TextGetPixelDelta);
+	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
+	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
+
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		dockTabBars[i] = new DockTabBar(renderer);
+		wz_main_window_set_dock_tab_bar(mainWindow, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
+		wz_widget_set_height(dockTabBars[i]->getWidget(), 20);
+	}
+}
+
+MainWindowPrivate::~MainWindowPrivate()
+{
+	for (size_t i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		delete dockTabBars[i];
+	}
+
+	wz_widget_destroy((wzWidget *)mainWindow);
+}
+
+void MainWindowPrivate::drawDockIcon(wzRect rect)
+{
+	renderer->draw_dock_icon(renderer, rect);
+}
+
+void MainWindowPrivate::drawDockPreview(wzRect rect)
+{
+	renderer->draw_dock_preview(renderer, rect);
+}
+
+//------------------------------------------------------------------------------
+
+MainWindow::MainWindow(wzRenderer *renderer)
+{
+	p = new MainWindowPrivate(renderer);
+}
+
+MainWindow::~MainWindow()
+{
+	delete p;
+}
+
+void MainWindow::setSize(int w, int h)
+{
+	wz_widget_set_size_args((wzWidget *)p->mainWindow, w, h);
+}
+
+void MainWindow::mouseMove(int x, int y, int dx, int dy)
+{
+	wz_main_window_mouse_move(p->mainWindow, x, y, dx, dy);
+}
+
+void MainWindow::mouseButtonDown(int button, int x, int y)
+{
+	wz_main_window_mouse_button_down(p->mainWindow, button, x, y);
+}
+
+void MainWindow::mouseButtonUp(int button, int x, int y)
+{
+	wz_main_window_mouse_button_up(p->mainWindow, button, x, y);
+}
+
+void MainWindow::mouseWheelMove(int x, int y)
+{
+	wz_main_window_mouse_wheel_move(p->mainWindow, x, y);
+}
+
+void MainWindow::keyDown(wzKey key)
+{
+	wz_main_window_key_down(p->mainWindow, key);
+}
+
+void MainWindow::keyUp(wzKey key)
+{
+	wz_main_window_key_up(p->mainWindow, key);
+}
+
+void MainWindow::textInput(const char *text)
+{
+	wz_main_window_text_input(p->mainWindow, text);
+}
+
+void MainWindow::setShowCursor(bool showCursor)
+{
+	p->showCursor = showCursor;
+}
+
+void MainWindow::beginFrame()
+{
+	p->renderer->begin_frame(p->renderer, p->mainWindow);
+}
+
+void MainWindow::drawFrame()
+{	
+	wz_main_window_draw(p->mainWindow);
+}
+
+void MainWindow::endFrame()
+{
+	p->renderer->end_frame(p->renderer);
+}
+
+bool MainWindow::getShowCursor() const
+{
+	return p->showCursor;
+}
+
+wzCursor MainWindow::getCursor() const
+{
+	return wz_main_window_get_cursor(p->mainWindow);
+}
+
+Widget *MainWindow::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
+
+void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
+{
+	wz_main_window_dock_window(p->mainWindow, (wzWindow *)window->p->getWidget(), dockPosition);
 }
 
 //------------------------------------------------------------------------------

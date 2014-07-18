@@ -37,11 +37,10 @@ struct wzRenderer
 	// Return the pixel delta between the index and index + 1 characters.
 	int (*text_get_pixel_delta)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int index);
 
+	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
+
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
-
-	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);
-	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title);
 
 	wzSize (*measure_button)(struct wzRenderer *renderer, wzBorder padding, const char *fontFace, float fontSize, const char *label);
 	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *fontFace, float fontSize, const char *label);
@@ -55,18 +54,18 @@ struct wzRenderer
 	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *fontFace, float fontSize, const char *label);
 
-	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
-	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *fontFace, float fontSize, const char *label);
-
-	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
-	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
-
 	wzSize (*measure_label)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text);
 	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, const char *text, uint8_t r, uint8_t g, uint8_t b);
 
 	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
 	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, const char **items);
+
+	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
+	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *fontFace, float fontSize, const char *label);
+
+	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
+	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
 
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);
 
@@ -76,7 +75,8 @@ struct wzRenderer
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, wzBorder border, const char *fontFace, float fontSize, const char *text);
 	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor);
 
-	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
+	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);
+	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title);
 
 	void *data;
 };

@@ -50,31 +50,6 @@ struct WidgetPrivate;
 class Widget;
 class Window;
 
-class MainWindow
-{
-public:
-	MainWindow(wzRenderer *renderer);
-	~MainWindow();
-	void setSize(int w, int h);
-	void mouseMove(int x, int y, int dx, int dy);
-	void mouseButtonDown(int button, int x, int y);
-	void mouseButtonUp(int button, int x, int y);
-	void mouseWheelMove(int x, int y);
-	void keyDown(wzKey key);
-	void keyUp(wzKey key);
-	void textInput(const char *text);
-	void setShowCursor(bool showCursor);
-	void beginFrame();
-	void drawFrame();
-	void endFrame();
-	bool getShowCursor() const;
-	wzCursor getCursor() const;
-	Widget *add(Widget *widget);
-	void dockWindow(Window *window, wzDockPosition dockPosition);
-
-	MainWindowPrivate *p;
-};
-
 class Widget
 {
 public:
@@ -158,6 +133,31 @@ public:
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(const char **items, int nItems);
+};
+
+class MainWindow
+{
+public:
+	MainWindow(wzRenderer *renderer);
+	~MainWindow();
+	void setSize(int w, int h);
+	void mouseMove(int x, int y, int dx, int dy);
+	void mouseButtonDown(int button, int x, int y);
+	void mouseButtonUp(int button, int x, int y);
+	void mouseWheelMove(int x, int y);
+	void keyDown(wzKey key);
+	void keyUp(wzKey key);
+	void textInput(const char *text);
+	void setShowCursor(bool showCursor);
+	void beginFrame();
+	void drawFrame();
+	void endFrame();
+	bool getShowCursor() const;
+	wzCursor getCursor() const;
+	Widget *add(Widget *widget);
+	void dockWindow(Window *window, wzDockPosition dockPosition);
+
+	MainWindowPrivate *p;
 };
 
 class RadioButtonGroup
