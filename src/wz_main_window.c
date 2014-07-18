@@ -1426,12 +1426,12 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 	wz_widget_set_rect_internal(mainWindow->content, rect);
 }
 
-void wz_main_window_measure_text(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height)
+void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height)
 {
-	mainWindow->measure_text(mainWindow, text, n, width, height);
+	mainWindow->measure_text(mainWindow, widget, text, n, width, height);
 }
 
-int wz_main_window_text_get_pixel_delta(struct wzMainWindow *mainWindow, const char *text, int index)
+int wz_main_window_text_get_pixel_delta(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index)
 {
-	return mainWindow->text_get_pixel_delta(mainWindow, text, index);
+	return mainWindow->text_get_pixel_delta(mainWindow, widget, text, index);
 }

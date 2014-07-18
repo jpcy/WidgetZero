@@ -34,15 +34,25 @@ SOFTWARE.
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
 
+#define WZ_NANOVG_DEFAULT_FONT_FACE "DejaVuSans"
+#define WZ_NANOVG_DEFAULT_FONT_SIZE 16.0f
 #define WZ_NANOVG_MAX_PATH 256
+#define WZ_NANOVG_MAX_FONTS 32
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
+
+typedef struct
+{
+	int id;
+	char face[WZ_NANOVG_MAX_PATH];
+}
+wzFont;
 
 typedef struct
 {
 	struct NVGcontext *vg;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
-	int font;
-	float fontSize;
+	wzFont fonts[WZ_NANOVG_MAX_FONTS];
+	int nFonts;
 }
 wzRendererData;
 
@@ -63,7 +73,58 @@ MISC. UTILITY FUNCTIONS
 ================================================================================
 */
 
-static void wz_nanovg_printf(wzRendererData *rendererData, int x, int y, int align, struct NVGcolor color, const char *format, ...)
+static int wz_nanovg_create_font(wzRendererData *rendererData, const char *face)
+{
+	int i;
+	char fontPath[WZ_NANOVG_MAX_PATH];
+	int id;
+
+	// Empty face: return the first font.
+	if (!face || !face[0])
+	{
+		WZ_ASSERT(rendererData->nFonts > 0);
+		return 0;
+	}
+
+	// Check the cache.
+	for (i = 0; i < rendererData->nFonts; i++)
+	{
+		if (strcmp(rendererData->fonts[i].face, face) == 0)
+		{
+			return rendererData->fonts[i].id;
+		}
+	}
+
+	// Not cached, create it.
+	strcpy(fontPath, rendererData->fontDirectory);
+	strcat(fontPath, "/");
+	strcat(fontPath, face);
+	strcat(fontPath, ".ttf");
+	id = nvgCreateFont(rendererData->vg, face, fontPath);
+
+	// Cache it.
+	if (id != -1)
+	{
+		rendererData->fonts[rendererData->nFonts].id = id;
+		strcpy(rendererData->fonts[rendererData->nFonts].face, face);
+		rendererData->nFonts++;
+	}
+
+	return id;
+}
+
+static void wz_nanovg_set_font_face(wzRendererData *rendererData, const char *face)
+{
+	int id = wz_nanovg_create_font(rendererData, face);
+
+	// Use the first font if creating failed.
+	if (id == -1)
+		id = 0;
+
+	nvgFontFaceId(rendererData->vg, id);
+}
+
+static void wz_nanovg_printf(wzRendererData *rendererData, int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *format, ...)
 {
 	static char buffer[2048];
 	va_list args;
@@ -74,8 +135,8 @@ static void wz_nanovg_printf(wzRendererData *rendererData, int x, int y, int ali
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
-	nvgFontSize(rendererData->vg, rendererData->fontSize);
-	nvgFontFace(rendererData->vg, "default");
+	nvgFontSize(rendererData->vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+	wz_nanovg_set_font_face(rendererData, fontFace);
 	nvgTextAlign(rendererData->vg, align);
 	nvgFontBlur(rendererData->vg, 0);
 	nvgFillColor(rendererData->vg, color);
@@ -150,7 +211,7 @@ static void wz_nanovg_end_frame(struct wzRenderer *renderer)
 	nvgEndFrame(((wzRendererData *)renderer->data)->vg);
 }
 
-static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *text, int n, int *width, int *height)
+static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -161,16 +222,18 @@ static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *text
 
 	if (width)
 	{
+		nvgFontSize(vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+		wz_nanovg_set_font_face(rendererData, fontFace);
 		*width = (int)nvgTextBounds(vg, 0, 0, text, n == 0 ? NULL : &text[n], NULL);
 	}
 
 	if (height)
 	{
-		*height = (int)rendererData->fontSize;
+		*height = (int)(fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
 	}
 }
 
-static int wz_nanovg_text_get_pixel_delta(struct wzRenderer *renderer, const char *text, int index)
+static int wz_nanovg_text_get_pixel_delta(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int index)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -182,6 +245,8 @@ static int wz_nanovg_text_get_pixel_delta(struct wzRenderer *renderer, const cha
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
+	nvgFontSize(vg, fontSize == 0 ? WZ_NANOVG_DEFAULT_FONT_SIZE : fontSize);
+	wz_nanovg_set_font_face(rendererData, fontFace);
 	nvgTextGlyphPositions(vg, 0, 0, &text[index], &text[index + 2], positions, 2);
 	x[0] = index == 0 ? 0 : positions[0].minx;
 	x[1] = index == (int)strlen(text) - 1 ? positions[0].maxx : positions[1].minx;
@@ -215,16 +280,16 @@ static void wz_nanovg_draw_dock_preview(struct wzRenderer *renderer, wzRect rect
 	nvgRestore(vg);
 }
 
-static int wz_nanovg_measure_window_header_height(struct wzRenderer *renderer, const char *title)
+static int wz_nanovg_measure_window_header_height(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title)
 {
 	int h;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, title, 0, NULL, &h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, title, 0, NULL, &h);
 	return h + 6; // Padding.
 }
 
-static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *title)
+static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -269,24 +334,24 @@ static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, stru
 	{
 		wz_nanovg_clip_to_rect(vg, headerRect);
 		wz_nanovg_draw_filled_rect(vg, headerRect, nvgRGB(255, 232, 166));
-		wz_nanovg_printf(rendererData, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), title);
+		wz_nanovg_printf(rendererData, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), title);
 	}
 
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *label)
+static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *fontFace, float fontSize, const char *label)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
 	size.w += padding.left + padding.right;
 	size.h += padding.top + padding.bottom;
 	return size;
 }
 
-static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *label)
+static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -337,22 +402,22 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_nanovg_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	wz_nanovg_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_checkbox(struct wzRenderer *renderer, const char *label)
+static wzSize wz_nanovg_measure_checkbox(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
 	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
 	return size;
 }
 
-static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *label)
+static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -400,12 +465,12 @@ static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, st
 	}
 
 	// Label.
-	wz_nanovg_printf(rendererData, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	wz_nanovg_printf(rendererData, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char **items, int nItems)
+static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char **items, int nItems)
 {
 	wzSize size;
 	int i;
@@ -420,7 +485,7 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char **
 	{
 		wzSize textSize;
 
-		wz_nanovg_measure_text(renderer, items[i], 0, &textSize.w, &textSize.h);
+		wz_nanovg_measure_text(renderer, fontFace, fontSize, items[i], 0, &textSize.w, &textSize.h);
 		size.w = WZ_MAX(size.w, textSize.w);
 		size.h = WZ_MAX(size.h, textSize.h);
 	}
@@ -431,7 +496,7 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char **
 	return size;
 }
 
-static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *item)
+static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *fontFace, float fontSize, const char *item)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -470,18 +535,18 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struc
 
 	// Selected item.
 	if (item)
-		wz_nanovg_printf(rendererData, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), item);
+		wz_nanovg_printf(rendererData, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), item);
 
 	nvgRestore(vg);
 }
 
-static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, const char *label)
+static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
 {
 	int labelHeight;
 	wzBorder margin;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, label, 0, NULL, &labelHeight);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, NULL, &labelHeight);
 
 	margin.top = (!label || !label[0]) ? 8 : labelHeight + 8;
 	margin.bottom = 8;
@@ -491,7 +556,7 @@ static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, 
 	return margin;
 }
 
-static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *label)
+static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -519,7 +584,7 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, s
 
 		textLeftMargin = 20;
 		textBorderSpacing = 5;
-		wz_nanovg_measure_text(renderer, label, 0, &textWidth, &textHeight);
+		wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &textWidth, &textHeight);
 
 		// Left, right, bottom, top left, top right.
 		wz_nanovg_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, nvgRGB(98, 135, 157));
@@ -529,24 +594,24 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, s
 		wz_nanovg_draw_line(vg, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, nvgRGB(98, 135, 157));
 
 		// Label.
-		wz_nanovg_printf(rendererData, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), label);
+		wz_nanovg_printf(rendererData, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, nvgRGB(0, 0, 0), label);
 	}
 
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_radio_button(struct wzRenderer *renderer, const char *label)
+static wzSize wz_nanovg_measure_radio_button(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
 	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
 	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
 	return size;
 }
 
-static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *label)
+static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -582,7 +647,7 @@ static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip
 	nvgStroke(vg);
 
 	// Label.
-	wz_nanovg_printf(rendererData, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	wz_nanovg_printf(rendererData, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
@@ -633,16 +698,16 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const char *text)
+static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, text, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, text, 0, &size.w, &size.h);
 	return size;
 }
 
-static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *text, uint8_t r, uint8_t g, uint8_t b)
+static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, const char *text, uint8_t r, uint8_t g, uint8_t b)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -656,11 +721,11 @@ static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struc
 
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
-	wz_nanovg_printf(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(r, g, b), text);
+	wz_nanovg_printf(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(r, g, b), text);
 	nvgRestore(vg);
 }
 
-static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char **items)
+static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, const char **items)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -718,14 +783,14 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct
 			wz_nanovg_draw_filled_rect(vg, itemRect, nvgRGB(188, 229, 252));
 		}
 
-		wz_nanovg_printf(rendererData, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), items[i]);
+		wz_nanovg_printf(rendererData, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), items[i]);
 		y += itemHeight;
 	}
 
 	nvgRestore(vg);
 }
 
-static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *label)
+static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -775,7 +840,7 @@ static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, 
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_nanovg_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), label);
+	wz_nanovg_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
 
 	nvgRestore(vg);
 }
@@ -806,18 +871,18 @@ static wzBorder wz_nanovg_get_text_edit_border(struct wzRenderer *renderer)
 	return b;
 }
 
-static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, wzBorder border, const char *text)
+static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, wzBorder border, const char *fontFace, float fontSize, const char *text)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, text, 0, NULL, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, text, 0, NULL, &size.h);
 	size.w = 100;
 	size.h += border.top + border.bottom;
 	return size;
 }
 
-static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, bool showCursor)
+static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -866,7 +931,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	// Text.
 	text = wz_text_edit_get_text(textEdit);
 	scrollValue = wz_text_edit_get_scroll_value(textEdit);
-	wz_nanovg_printf(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, nvgRGB(0, 0, 0), &text[scrollValue]);
+	wz_nanovg_printf(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), &text[scrollValue]);
 
 	// Selection.
 	selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
@@ -925,7 +990,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 static void wz_nanovg_debug_draw_text(struct wzRenderer *renderer, const char *text, int x, int y)
 {
 	WZ_ASSERT(renderer);
-	wz_nanovg_printf((wzRendererData *)renderer->data, x, y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, nvgRGB(0, 0, 0), text);
+	wz_nanovg_printf((wzRendererData *)renderer->data, x, y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, NULL, 0, nvgRGB(0, 0, 0), text);
 }
 
 /*
@@ -940,7 +1005,6 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory)
 {
 	struct wzRenderer *renderer;
 	wzRendererData *rendererData;
-	char fontPath[WZ_NANOVG_MAX_PATH];
 
 	// Alloc renderer.
 	renderer = malloc(sizeof(struct wzRenderer));
@@ -957,16 +1021,12 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory)
 		return NULL;
 	}
 
-	// Load default font.
+	// Load the default font.
 	strncpy(rendererData->fontDirectory, fontDirectory, WZ_NANOVG_MAX_PATH);
-	strncpy(fontPath, fontDirectory, WZ_NANOVG_MAX_PATH);
-	strcat(fontPath, "/DejaVuSans.ttf");
-	rendererData->font = nvgCreateFont(rendererData->vg, "default", fontPath);
-	rendererData->fontSize = 16;
 
-	if (rendererData->font == -1)
+	if (wz_nanovg_create_font(rendererData, WZ_NANOVG_DEFAULT_FONT_FACE) == -1)
 	{
-		strcpy(errorMessage, "Error loading font");
+		sprintf(errorMessage, "Error loading font %s", WZ_NANOVG_DEFAULT_FONT_FACE);
 		wz_nanovg_destroy_renderer(renderer);
 		return NULL;
 	}

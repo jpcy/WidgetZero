@@ -127,7 +127,7 @@ public:
 			mainWindow.add(scroller2);
 
 			wz::Label *label = new wz::Label(renderer, "Label test");
-			label->setTextColor(255, 128, 128)->setPosition(350, 50);
+			label->setTextColor(255, 128, 128)->setFont("visitor1", 32)->setPosition(350, 10);
 			mainWindow.add(label);
 
 			wz::List *list = new wz::List(renderer);

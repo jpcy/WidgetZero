@@ -34,6 +34,7 @@ struct ListPrivate;
 
 struct WidgetPrivate
 {
+	WidgetPrivate() : fontSize(0) {}
 	virtual ~WidgetPrivate();
 	virtual const wzWidget *getWidget() const { return NULL; }
 	virtual wzWidget *getWidget() { return NULL; }
@@ -45,6 +46,8 @@ struct WidgetPrivate
 	
 	wzRenderer *renderer;
 	std::vector<Widget *> children;
+	std::string fontFace;
+	float fontSize;
 };
 
 struct ButtonPrivate : public WidgetPrivate
@@ -392,6 +395,28 @@ Widget *Widget::setMargin(wzBorder margin)
 	return this;
 }
 
+Widget *Widget::setFontFace(const std::string &fontFace)
+{
+	p->fontFace = fontFace;
+	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
+Widget *Widget::setFontSize(float fontSize)
+{
+	p->fontSize = fontSize;
+	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
+Widget *Widget::setFont(const std::string &fontFace, float fontSize)
+{
+	p->fontFace = fontFace;
+	p->fontSize = fontSize;
+	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
 //------------------------------------------------------------------------------
 
 ButtonPrivate::ButtonPrivate(wzRenderer *renderer) : drawStyle(Normal)
@@ -416,18 +441,18 @@ ButtonPrivate::~ButtonPrivate()
 
 wzSize ButtonPrivate::measure()
 {
-	return renderer->measure_button(renderer, padding, label.c_str());
+	return renderer->measure_button(renderer, padding, fontFace.c_str(), fontSize, label.c_str());
 }
 
 void ButtonPrivate::draw(wzRect clip)
 {
 	if (drawStyle == Normal)
 	{
-		renderer->draw_button(renderer, clip, button, padding, label.c_str());
+		renderer->draw_button(renderer, clip, button, padding, fontFace.c_str(), fontSize, label.c_str());
 	}
 	else if (drawStyle == Tab)
 	{
-		renderer->draw_tab_button(renderer, clip, button, padding, label.c_str());
+		renderer->draw_tab_button(renderer, clip, button, padding, fontFace.c_str(), fontSize, label.c_str());
 	}
 }
 
@@ -509,12 +534,12 @@ CheckboxPrivate::~CheckboxPrivate()
 
 wzSize CheckboxPrivate::measure()
 {
-	return renderer->measure_checkbox(renderer, label.c_str());
+	return renderer->measure_checkbox(renderer, fontFace.c_str(), fontSize, label.c_str());
 }
 
 void CheckboxPrivate::draw(wzRect clip)
 {
-	renderer->draw_checkbox(renderer, clip, button, label.c_str());
+	renderer->draw_checkbox(renderer, clip, button, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -574,13 +599,13 @@ ComboPrivate::~ComboPrivate()
 
 wzSize ComboPrivate::measure()
 {
-	return renderer->measure_combo(renderer, items, wz_list_get_num_items(wz_combo_get_list(combo)));
+	return renderer->measure_combo(renderer, fontFace.c_str(), fontSize, items, wz_list_get_num_items(wz_combo_get_list(combo)));
 }
 
 void ComboPrivate::draw(wzRect clip)
 {
 	int itemIndex = wz_list_get_selected_item((const wzList *)list->p->getWidget());
-	renderer->draw_combo(renderer, clip, combo, itemIndex >= 0 ? items[itemIndex] : NULL);
+	renderer->draw_combo(renderer, clip, combo, fontFace.c_str(), fontSize, itemIndex >= 0 ? items[itemIndex] : NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -606,16 +631,18 @@ Combo *Combo::setItems(const char **items, int nItems)
 
 //------------------------------------------------------------------------------
 
-static void MeasureText(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height)
+static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int *width, int *height)
 {
 	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	renderer->measure_text(renderer, text, n, width, height);
+	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
+	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
 }
 
-static int TextGetPixelDelta(struct wzMainWindow *mainWindow, const char *text, int index)
+static int TextGetPixelDelta(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int index)
 {
 	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	return renderer->text_get_pixel_delta(renderer, text, index);
+	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
+	return renderer->text_get_pixel_delta(renderer, wp->fontFace.c_str(), wp->fontSize, text, index);
 }
 
 static void DrawDockIcon(wzRect rect, void *metadata)
@@ -826,12 +853,12 @@ GroupBoxPrivate::~GroupBoxPrivate()
 
 void GroupBoxPrivate::refreshMargin()
 {
-	wz_widget_set_margin(wz_widget_get_content_widget(getWidget()), renderer->measure_group_box_margin(renderer, label.c_str()));
+	wz_widget_set_margin(wz_widget_get_content_widget(getWidget()), renderer->measure_group_box_margin(renderer, fontFace.c_str(), fontSize, label.c_str()));
 }
 
 void GroupBoxPrivate::draw(wzRect clip)
 {
-	renderer->draw_group_box(renderer, clip, frame, label.c_str());
+	renderer->draw_group_box(renderer, clip, frame, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -894,12 +921,12 @@ LabelPrivate::~LabelPrivate()
 
 wzSize LabelPrivate::measure()
 {
-	return renderer->measure_label(renderer, text.c_str());
+	return renderer->measure_label(renderer, fontFace.c_str(), fontSize, text.c_str());
 }
 
 void LabelPrivate::draw(wzRect clip)
 {
-	renderer->draw_label(renderer, clip, label, text.c_str(), r, g, b);
+	renderer->draw_label(renderer, clip, label, fontFace.c_str(), fontSize, text.c_str(), r, g, b);
 }
 
 //------------------------------------------------------------------------------
@@ -970,7 +997,7 @@ ListPrivate::~ListPrivate()
 
 void ListPrivate::draw(wzRect clip)
 {
-	renderer->draw_list(renderer, clip, list, items);
+	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, items);
 }
 
 void ListPrivate::setItems(const char **items, int nItems)
@@ -1031,12 +1058,12 @@ RadioButtonPrivate::~RadioButtonPrivate()
 
 wzSize RadioButtonPrivate::measure()
 {
-	return renderer->measure_radio_button(renderer, label.c_str());
+	return renderer->measure_radio_button(renderer, fontFace.c_str(), fontSize, label.c_str());
 }
 
 void RadioButtonPrivate::draw(wzRect clip)
 {
-	renderer->draw_radio_button(renderer, clip, button, label.c_str());
+	renderer->draw_radio_button(renderer, clip, button, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -1401,13 +1428,13 @@ TextEditPrivate::~TextEditPrivate()
 
 wzSize TextEditPrivate::measure()
 {
-	return renderer->measure_text_edit(renderer, wz_text_edit_get_border(textEdit), wz_text_edit_get_text(textEdit));
+	return renderer->measure_text_edit(renderer, wz_text_edit_get_border(textEdit), fontFace.c_str(), fontSize, wz_text_edit_get_text(textEdit));
 }
 
 void TextEditPrivate::draw(wzRect clip)
 {
 	MainWindowPrivate *mainWindow = (MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_main_window(getWidget()));
-	renderer->draw_text_edit(renderer, clip, textEdit, mainWindow->showCursor);
+	renderer->draw_text_edit(renderer, clip, textEdit, fontFace.c_str(), fontSize, mainWindow->showCursor);
 }
 
 //------------------------------------------------------------------------------
@@ -1460,12 +1487,12 @@ WindowPrivate::~WindowPrivate()
 
 void WindowPrivate::draw(wzRect clip)
 {
-	renderer->draw_window(renderer, clip, window, title.c_str());
+	renderer->draw_window(renderer, clip, window, fontFace.c_str(), fontSize, title.c_str());
 }
 
 void WindowPrivate::refreshHeaderHeight()
 {
-	wz_window_set_header_height(window, renderer->measure_window_header_height(renderer, title.c_str()));
+	wz_window_set_header_height(window, renderer->measure_window_header_height(renderer, fontFace.c_str(), fontSize, title.c_str()));
 }
 
 //------------------------------------------------------------------------------

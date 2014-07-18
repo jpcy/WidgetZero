@@ -65,7 +65,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 
 	if (textEdit->scroll > 0)
 	{
-		wz_main_window_measure_text(textEdit->base.mainWindow, &textEdit->text, textEdit->scroll, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, textEdit->scroll, &width, NULL);
 		row->x0 = (float)-width;
 	}
 	else
@@ -73,7 +73,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 		row->x0 = 0;
 	}
 
-	wz_main_window_measure_text(textEdit->base.mainWindow, &textEdit->text, 0, &width, NULL);
+	wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, 0, &width, NULL);
 	row->x1 = (float)width;
 
 	row->baseline_y_delta = 1;
@@ -83,7 +83,7 @@ static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *
 
 static float wz_stb_textedit_getwidth(STB_TEXTEDIT_STRING *textEdit, int n, int i)
 {
-	return (float)wz_main_window_text_get_pixel_delta(textEdit->base.mainWindow, &textEdit->text, i);
+	return (float)wz_main_window_text_get_pixel_delta(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, i);
 }
 
 static int wz_stb_textedit_keytotext(int key)
@@ -190,12 +190,12 @@ static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
 	if (delta > 0)
 	{
 		// Text width from the scroll position to the cursor.
-		wz_main_window_measure_text(textEdit->base.mainWindow, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
 	}
 	else if (delta < 0)
 	{
 		// Text width from the cursor to the scroll position.
-		wz_main_window_measure_text(textEdit->base.mainWindow, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
 		width = -width;
 	}
 	

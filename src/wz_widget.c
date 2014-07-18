@@ -238,7 +238,7 @@ void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
 	wzRect rect;
 
 	WZ_ASSERT(widget);
-	rect = widget->rect;
+	rect = widget->userRect;
 	rect.x = position.x;
 	rect.y = position.y;
 	wz_widget_set_rect(widget, rect);
@@ -273,7 +273,7 @@ void wz_widget_set_width(struct wzWidget *widget, int w)
 	wzRect rect;
 
 	WZ_ASSERT(widget);
-	rect = widget->rect;
+	rect = widget->userRect;
 	rect.w = w;
 	wz_widget_set_rect(widget, rect);
 }
@@ -283,7 +283,7 @@ void wz_widget_set_height(struct wzWidget *widget, int h)
 	wzRect rect;
 
 	WZ_ASSERT(widget);
-	rect = widget->rect;
+	rect = widget->userRect;
 	rect.h = h;
 	wz_widget_set_rect(widget, rect);
 }
@@ -301,7 +301,7 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 	wzRect rect;
 
 	WZ_ASSERT(widget);
-	rect = widget->rect;
+	rect = widget->userRect;
 	rect.w = size.w;
 	rect.h = size.h;
 	wz_widget_set_rect(widget, rect);

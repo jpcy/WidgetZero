@@ -260,8 +260,8 @@ typedef enum
 }
 wzKey;
 
-typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, const char *text, int n, int *width, int *height);
-typedef int (*wzMainWindowTextGetPixelDeltaCallback)(struct wzMainWindow *mainWindow, const char *text, int index);
+typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
+typedef int (*wzMainWindowTextGetPixelDeltaCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index);
 typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
 

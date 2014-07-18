@@ -90,6 +90,9 @@ public:
 	Widget *setMargin(int margin);
 	Widget *setMargin(int top, int right, int bottom, int left);
 	Widget *setMargin(wzBorder margin);
+	Widget *setFontFace(const std::string &fontFace);
+	Widget *setFontSize(float fontSize);
+	Widget *setFont(const std::string &fontFace, float fontSize);
 
 	WidgetPrivate *p;
 };
