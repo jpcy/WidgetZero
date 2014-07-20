@@ -1559,6 +1559,27 @@ Window::~Window()
 	delete p;
 }
 
+Widget *Window::setFontFace(const std::string &fontFace)
+{
+	Widget::setFontFace(fontFace);
+	((WindowPrivate *)p)->refreshHeaderHeight();
+	return (Widget *)this;
+}
+
+Widget *Window::setFontSize(float fontSize)
+{
+	Widget::setFontSize(fontSize);
+	((WindowPrivate *)p)->refreshHeaderHeight();
+	return (Widget *)this;
+}
+
+Widget *Window::setFont(const std::string &fontFace, float fontSize)
+{
+	Widget::setFont(fontFace, fontSize);
+	((WindowPrivate *)p)->refreshHeaderHeight();
+	return (Widget *)this;
+}
+
 std::string Window::getTitle() const
 {
 	return ((WindowPrivate *)p)->title;

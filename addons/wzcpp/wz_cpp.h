@@ -245,6 +245,9 @@ public:
 	Window(wzRenderer *renderer);
 	Window(wzRenderer *renderer, const std::string &title);
 	~Window();
+	virtual Widget *setFontFace(const std::string &fontFace);
+	virtual Widget *setFontSize(float fontSize);
+	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	std::string getTitle() const;
 	Window *setTitle(const std::string &title);
 	Widget *add(Widget *widget);
