@@ -100,6 +100,9 @@ class Combo : public Widget
 public:
 	Combo(wzRenderer *renderer);
 	~Combo();
+	virtual Widget *setFontFace(const std::string &fontFace);
+	virtual Widget *setFontSize(float fontSize);
+	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	Combo *setItems(const char **items, int nItems);
 };
 

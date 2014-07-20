@@ -135,7 +135,7 @@ public:
 			mainWindow.add(list);
 
 			wz::Combo *combo = new wz::Combo(renderer);
-			combo->setItems(listData, 17)->setRect(800, 50, 150, 20);
+			combo->setItems(listData, 17)->setPosition(800, 50);
 			mainWindow.add(combo);
 		}
 
@@ -183,7 +183,7 @@ public:
 			layout->add(checkbox);
 
 			wz::Combo *combo = new wz::Combo(renderer);
-			combo->setItems(listData, 17)->setAlign(WZ_ALIGN_RIGHT);
+			combo->setItems(listData, 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 			layout->add(combo);
 
 			wz::Button *button2 = new wz::Button(renderer, "Yet Another Button");
@@ -209,7 +209,7 @@ public:
 			tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 
 			wz::Combo *combo = new wz::Combo(renderer);
-			combo->setItems(listData, 17)->setRect(10, 10, 150, 20);
+			combo->setItems(listData, 17)->setPosition(10, 10);
 			firstTab->add(combo);
 
 			secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);

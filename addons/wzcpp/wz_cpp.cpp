@@ -619,6 +619,27 @@ Combo::~Combo()
 	delete p;
 }
 
+Widget *Combo::setFontFace(const std::string &fontFace)
+{
+	Widget::setFontFace(fontFace);
+	((ComboPrivate *)p)->list->setFontFace(fontFace);
+	return (Widget *)this;
+}
+
+Widget *Combo::setFontSize(float fontSize)
+{
+	Widget::setFontSize(fontSize);
+	((ComboPrivate *)p)->list->setFontSize(fontSize);
+	return (Widget *)this;
+}
+
+Widget *Combo::setFont(const std::string &fontFace, float fontSize)
+{
+	Widget::setFont(fontFace, fontSize);
+	((ComboPrivate *)p)->list->setFont(fontFace, fontSize);
+	return (Widget *)this;
+}
+
 Combo *Combo::setItems(const char **items, int nItems)
 {
 	ComboPrivate *cp = (ComboPrivate *)p;

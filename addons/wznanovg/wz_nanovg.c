@@ -423,20 +423,24 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *f
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(items);
 
-	// Calculate size based on the biggest item text plus padding.
-	size.w = size.h = 0;
+	// Use the widest item text.
+	size.w = 0;
 
 	for (i = 0; i < nItems; i++)
 	{
-		wzSize textSize;
-
-		wz_nanovg_measure_text(renderer, fontFace, fontSize, items[i], 0, &textSize.w, &textSize.h);
-		size.w = WZ_MAX(size.w, textSize.w);
-		size.h = WZ_MAX(size.h, textSize.h);
+		int w;
+		wz_nanovg_measure_text(renderer, fontFace, fontSize, items[i], 0, &w, NULL);
+		size.w = WZ_MAX(size.w, w);
 	}
 
+	// Use font height.
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, NULL, 0, NULL, &size.h);
+
+	// Add vertical scroller width.
+	size.w += renderer->measure_scroller(renderer, WZ_SCROLLER_VERTICAL).w;
+
 	// Padding.
-	size.w += 50;
+	size.w += 20;
 	size.h += 4;
 	return size;
 }
