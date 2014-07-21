@@ -35,19 +35,29 @@ SOFTWARE.
 #include "nanovg_gl.h"
 
 #define WZ_NANOVG_MAX_PATH 256
-#define WZ_NANOVG_MAX_FONTS 32
+#define WZ_NANOVG_MAX_IMAGES 1024
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
 
 typedef struct
 {
+	int handle;
+	char filename[WZ_NANOVG_MAX_PATH];
+}
+wzImage;
+
+typedef struct
+{
 	struct NVGcontext *vg;
+	wzImage images[WZ_NANOVG_MAX_IMAGES];
+	int nImages;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
-	int nFonts;
 	float defaultFontSize;
 }
 wzRendererData;
 
 static char errorMessage[WZ_NANOVG_MAX_ERROR_MESSAGE];
+
+static const int buttonIconSpacing = 6;
 
 static const int checkBoxBoxSize = 16;
 static const int checkBoxBoxRightMargin = 8;
@@ -64,9 +74,27 @@ MISC. UTILITY FUNCTIONS
 ================================================================================
 */
 
-static int wz_nanovg_create_font(wzRendererData *rendererData, const char *face)
+static int wz_nanovg_create_image(wzRendererData *rendererData, const char *filename)
 {
 	int i;
+
+	// Check cache.
+	for (i = 0; i < rendererData->nImages; i++)
+	{
+		if (strcmp(rendererData->images[i].filename, filename) == 0)
+			return rendererData->images[i].handle;
+	}
+
+	// Not found, create and cache it.
+	rendererData->images[rendererData->nImages].handle = nvgCreateImage(rendererData->vg, filename);
+	strcpy(rendererData->images[rendererData->nImages].filename, filename);
+	rendererData->nImages++;
+
+	return rendererData->images[rendererData->nImages - 1].handle;
+}
+
+static int wz_nanovg_create_font(wzRendererData *rendererData, const char *face)
+{
 	char fontPath[WZ_NANOVG_MAX_PATH];
 	int id;
 
@@ -170,6 +198,19 @@ static void wz_nanovg_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, i
 	nvgStroke(vg);
 }
 
+static void wz_nanovg_draw_icon(struct NVGcontext *vg, wzRect rect, int icon)
+{
+	int w, h;
+	struct NVGpaint paint;
+
+	nvgImageSize(vg, icon, &w, &h);
+	paint = nvgImagePattern(vg, (float)rect.x, (float)rect.y, (float)w, (float)h, 0, icon, NVG_NOREPEAT, 1);
+	nvgBeginPath(vg);
+	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgFillPaint(vg, paint);
+	nvgFill(vg);
+}
+
 /*
 ================================================================================
 
@@ -267,24 +308,45 @@ static void wz_nanovg_draw_dock_preview(struct wzRenderer *renderer, wzRect rect
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *fontFace, float fontSize, const char *label)
+static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label)
 {
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
 	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
+
+	if (icon && icon[0])
+	{
+		const int handle = wz_nanovg_create_image(rendererData, icon);
+
+		if (handle)
+		{
+			int w, h;
+			nvgImageSize(vg, handle, &w, &h);
+			size.w += w + buttonIconSpacing;
+			size.h = WZ_MAX(size.h, h);
+		}
+	}
+
 	size.w += padding.left + padding.right;
 	size.h += padding.top + padding.bottom;
 	return size;
 }
 
-static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover, pressed;
-	wzRect labelRect;
+	wzRect paddedRect;
+	wzSize iconSize;
+	int iconHandle, labelWidth, iconX, labelX;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(button);
@@ -324,12 +386,56 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 		wz_nanovg_draw_rect(vg, rect, nvgRGB(112, 112, 112));
 	}
 
-	// Label.
-	labelRect.x = rect.x + padding.left;
-	labelRect.y = rect.y + padding.top;
-	labelRect.w = rect.w - (padding.left + padding.right);
-	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_nanovg_printf(rendererData, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
+	// Calculate padded rect.
+	paddedRect.x = rect.x + padding.left;
+	paddedRect.y = rect.y + padding.top;
+	paddedRect.w = rect.w - (padding.left + padding.right);
+	paddedRect.h = rect.h - (padding.top + padding.bottom);
+
+	// Calculate icon and label sizes.
+	iconSize.w = iconSize.h = 0;
+
+	if (icon && icon[0])
+	{
+		iconHandle = wz_nanovg_create_image(rendererData, icon);
+
+		if (iconHandle)
+			nvgImageSize(vg, iconHandle, &iconSize.w, &iconSize.h);
+	}
+
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &labelWidth, NULL);
+
+	// Position the icon and label centered.
+	if (icon && icon[0] && iconHandle && label && label[0])
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + buttonIconSpacing + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + buttonIconSpacing;
+	}
+	else if (icon && icon[0] && iconHandle)
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
+	}
+	else if (label && label[0])
+	{
+		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
+	}
+
+	// Draw the icon.
+	if (icon && icon[0] && iconHandle)
+	{
+		wzRect iconRect;
+		iconRect.x = iconX;
+		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
+		iconRect.w = iconSize.w;
+		iconRect.h = iconSize.h;
+		wz_nanovg_draw_icon(vg, iconRect, iconHandle);
+	}
+
+	// Draw the label.
+	if (label && label[0])
+	{
+		wz_nanovg_printf(rendererData, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), label);
+	}
 
 	nvgRestore(vg);
 }

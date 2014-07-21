@@ -174,7 +174,7 @@ public:
 			textEdit->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(textEdit);
 
-			wz::Button *button = new wz::Button(renderer, "Another Button");
+			wz::Button *button = new wz::Button(renderer, "Another Button", "../examples/data/accept.png");
 			button->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(button);
 

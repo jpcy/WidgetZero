@@ -76,11 +76,13 @@ class Button : public Widget
 {
 public:
 	Button(wzRenderer *renderer);
-	Button(wzRenderer *renderer, const std::string &label);
+	Button(wzRenderer *renderer, const std::string &label, const std::string &icon = std::string());
 	~Button();
 	wzBorder getPadding() const;
 	Button *setPadding(wzBorder padding);
 	Button *setPadding(int top, int right, int bottom, int left);
+	std::string getIcon() const;
+	Button *setIcon(const std::string &icon);
 	std::string getLabel() const;
 	Button *setLabel(const std::string &label);
 };

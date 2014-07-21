@@ -42,8 +42,8 @@ struct wzRenderer
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
 
-	wzSize (*measure_button)(struct wzRenderer *renderer, wzBorder padding, const char *fontFace, float fontSize, const char *label);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *fontFace, float fontSize, const char *label);
+	wzSize (*measure_button)(struct wzRenderer *renderer, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label);
+	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label);
 
 	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *fontFace, float fontSize, const char *label);
