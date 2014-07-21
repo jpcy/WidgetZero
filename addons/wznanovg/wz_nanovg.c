@@ -40,16 +40,8 @@ SOFTWARE.
 
 typedef struct
 {
-	int id;
-	char face[WZ_NANOVG_MAX_PATH];
-}
-wzFont;
-
-typedef struct
-{
 	struct NVGcontext *vg;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
-	wzFont fonts[WZ_NANOVG_MAX_FONTS];
 	int nFonts;
 	float defaultFontSize;
 }
@@ -80,36 +72,26 @@ static int wz_nanovg_create_font(wzRendererData *rendererData, const char *face)
 
 	// Empty face: return the first font.
 	if (!face || !face[0])
-	{
-		WZ_ASSERT(rendererData->nFonts > 0);
 		return 0;
-	}
 
-	// Check the cache.
-	for (i = 0; i < rendererData->nFonts; i++)
-	{
-		if (strcmp(rendererData->fonts[i].face, face) == 0)
-		{
-			return rendererData->fonts[i].id;
-		}
-	}
+	// Try to find it.
+	id = nvgFindFont(rendererData->vg, face);
 
-	// Not cached, create it.
+	if (id != -1)
+		return id;
+
+	// Not found, create it.
 	strcpy(fontPath, rendererData->fontDirectory);
 	strcat(fontPath, "/");
 	strcat(fontPath, face);
 	strcat(fontPath, ".ttf");
 	id = nvgCreateFont(rendererData->vg, face, fontPath);
 
-	// Cache it.
 	if (id != -1)
-	{
-		rendererData->fonts[rendererData->nFonts].id = id;
-		strcpy(rendererData->fonts[rendererData->nFonts].face, face);
-		rendererData->nFonts++;
-	}
+		return id;
 
-	return id;
+	// Failed to create it, return the first font.
+	return 0;
 }
 
 static void wz_nanovg_set_font_face(wzRendererData *rendererData, const char *face)
