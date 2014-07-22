@@ -548,32 +548,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 
 void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
-	int i, deleteIndex;
-
-	WZ_ASSERT(widget);
-	WZ_ASSERT(child);
-
-	// Ensure the child is actually a child of widget before destroying it.
-	deleteIndex = -1;
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		if (widget->children[i] == child)
-		{
-			deleteIndex = i;
-			break;
-		}
-	}
-
-	if (deleteIndex == -1)
-		return;
-
-	wz_arr_delete(widget->children, deleteIndex);
-
-	// The child is no longer connected to the widget hierarchy, so reset some state.
-	child->mainWindow = NULL;
-	child->parent = NULL;
-	child->window = NULL;
+	wz_widget_remove_child_widget_internal(wz_widget_get_content_widget(widget), child);
 }
 
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
@@ -727,6 +702,36 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	{
 		wz_widget_set_stretched_rect_recursive(child);
 	}
+}
+
+void wz_widget_remove_child_widget_internal(struct wzWidget *widget, struct wzWidget *child)
+{
+	int i, deleteIndex;
+
+	WZ_ASSERT(widget);
+	WZ_ASSERT(child);
+
+	// Ensure the child is actually a child of widget before destroying it.
+	deleteIndex = -1;
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		if (widget->children[i] == child)
+		{
+			deleteIndex = i;
+			break;
+		}
+	}
+
+	if (deleteIndex == -1)
+		return;
+
+	wz_arr_delete(widget->children, deleteIndex);
+
+	// The child is no longer connected to the widget hierarchy, so reset some state.
+	child->mainWindow = NULL;
+	child->parent = NULL;
+	child->window = NULL;
 }
 
 void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y)

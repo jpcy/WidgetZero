@@ -68,6 +68,7 @@ public:
 	virtual Widget *setFontFace(const std::string &fontFace);
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
+	virtual Widget *setVisible(bool visible);
 
 	WidgetPrivate *p;
 };
@@ -108,6 +109,14 @@ public:
 	Combo *setItems(const char **items, int nItems);
 };
 
+class Frame : public Widget
+{
+public:
+	Frame(wzRenderer *renderer);
+	~Frame();
+	Widget *add(Widget *widget);
+};
+
 class GroupBox : public Widget
 {
 public:
@@ -138,6 +147,8 @@ public:
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(const char **items, int nItems);
+	List *setSelectedItem(int index);
+	List *addItemSelectedCallback(wzEventCallback callback);
 };
 
 class MainWindow
@@ -145,6 +156,8 @@ class MainWindow
 public:
 	MainWindow(wzRenderer *renderer);
 	~MainWindow();
+	int getWidth() const;
+	int getHeight() const;
 	void setSize(int w, int h);
 	void mouseMove(int x, int y, int dx, int dy);
 	void mouseButtonDown(int button, int x, int y);
@@ -160,6 +173,7 @@ public:
 	bool getShowCursor() const;
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 	void dockWindow(Window *window, wzDockPosition dockPosition);
 
 	MainWindowPrivate *p;

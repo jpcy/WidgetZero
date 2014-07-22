@@ -135,6 +135,7 @@ enum
 };
 
 void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_remove_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
 
 void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position);

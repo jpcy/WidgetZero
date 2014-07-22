@@ -43,6 +43,7 @@ struct WidgetPrivate
 	virtual void handleEvent(wzEvent *e) {}
 
 	void add(Widget *widget);
+	void remove(Widget *widget);
 	
 	wzRenderer *renderer;
 	std::vector<Widget *> children;
@@ -97,6 +98,16 @@ struct ComboPrivate : public WidgetPrivate
 	wzCombo *combo;
 	const char **items;
 	std::auto_ptr<List> list;
+};
+
+struct FramePrivate : public WidgetPrivate
+{
+	FramePrivate(wzRenderer *renderer);
+	~FramePrivate();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
+	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
+
+	wzFrame *frame;
 };
 
 struct GroupBoxPrivate : public WidgetPrivate
@@ -324,6 +335,23 @@ void WidgetPrivate::add(Widget *widget)
 	children.push_back(widget);
 }
 
+void WidgetPrivate::remove(Widget *widget)
+{
+	size_t i;
+
+	for (i = 0; i < children.size(); i++)
+	{
+		if (children[i] == widget)
+			break;
+	}
+
+	if (i < children.size())
+	{
+		wz_widget_remove_child_widget(getWidget(), widget->p->getWidget());
+		children.erase(children.begin() + i);
+	}
+}
+
 //------------------------------------------------------------------------------
 
 Widget::~Widget()
@@ -414,6 +442,12 @@ Widget *Widget::setFont(const std::string &fontFace, float fontSize)
 	p->fontFace = fontFace;
 	p->fontSize = fontSize;
 	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
+Widget *Widget::setVisible(bool visible)
+{
+	wz_widget_set_visible(p->getWidget(), visible);
 	return this;
 }
 
@@ -709,6 +743,44 @@ void DockTabBar::handleEvent(wzEvent *e)
 
 //------------------------------------------------------------------------------
 
+FramePrivate::FramePrivate(wzRenderer *renderer)
+{
+	WZ_ASSERT(renderer);
+	this->renderer = renderer;
+	frame = wz_frame_create();
+	wzWidget *widget = (wzWidget *)frame;
+	wz_widget_set_metadata(widget, this);
+	wz_widget_set_size_args(widget, 200, 200);
+}
+
+FramePrivate::~FramePrivate()
+{
+	if (!wz_widget_get_main_window((wzWidget *)frame))
+	{
+		wz_widget_destroy((wzWidget *)frame);
+	}
+}
+
+//------------------------------------------------------------------------------
+
+Frame::Frame(wzRenderer *renderer)
+{
+	p = new FramePrivate(renderer);
+}
+
+Frame::~Frame()
+{
+	delete p;
+}
+
+Widget *Frame::add(Widget *widget)
+{
+	p->add(widget);
+	return widget;
+}
+
+//------------------------------------------------------------------------------
+
 GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
@@ -928,6 +1000,18 @@ List *List::setItems(const char **items, int nItems)
 	return this;
 }
 
+List *List::setSelectedItem(int index)
+{
+	wz_list_set_selected_item((wzList *)p->getWidget(), index);
+	return this;
+}
+
+List *List::addItemSelectedCallback(wzEventCallback callback)
+{
+	wz_list_add_callback_item_selected((wzList *)p->getWidget(), callback);
+	return this;
+}
+
 //------------------------------------------------------------------------------
 
 static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int *width, int *height)
@@ -1008,6 +1092,16 @@ MainWindow::~MainWindow()
 	delete p;
 }
 
+int MainWindow::getWidth() const
+{
+	return wz_widget_get_width((const wzWidget *)p->mainWindow);
+}
+
+int MainWindow::getHeight() const
+{
+	return wz_widget_get_height((const wzWidget *)p->mainWindow);
+}
+
 void MainWindow::setSize(int w, int h)
 {
 	wz_widget_set_size_args((wzWidget *)p->mainWindow, w, h);
@@ -1082,6 +1176,11 @@ Widget *MainWindow::add(Widget *widget)
 {
 	p->add(widget);
 	return widget;
+}
+
+void MainWindow::remove(Widget *widget)
+{
+	p->remove(widget);
 }
 
 void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
