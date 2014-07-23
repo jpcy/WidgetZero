@@ -47,6 +47,7 @@ struct WidgetPrivate
 	
 	wzRenderer *renderer;
 	std::vector<Widget *> children;
+	std::vector<IEventHandler *> eventHandlers;
 	std::string fontFace;
 	float fontSize;
 };
@@ -313,7 +314,17 @@ static void HandleEvent(wzEvent *e)
 
 	if (metadata)
 	{
-		((WidgetPrivate *)metadata)->handleEvent(e);
+		WidgetPrivate *wp = (WidgetPrivate *)metadata;
+
+		for (size_t i = 0; i < wp->eventHandlers.size(); i++)
+		{
+			if (wp->eventHandlers[i]->eventType == e->base.type)
+			{
+				wp->eventHandlers[i]->call(e);
+			}
+		}
+
+		wp->handleEvent(e);
 	}
 }
 
@@ -327,6 +338,13 @@ WidgetPrivate::~WidgetPrivate()
 	}
 
 	children.clear();
+
+	for (size_t i = 0; i < eventHandlers.size(); i++)
+	{
+		delete eventHandlers[i];
+	}
+
+	eventHandlers.clear();
 }
 
 void WidgetPrivate::add(Widget *widget)
@@ -448,6 +466,12 @@ Widget *Widget::setFont(const std::string &fontFace, float fontSize)
 Widget *Widget::setVisible(bool visible)
 {
 	wz_widget_set_visible(p->getWidget(), visible);
+	return this;
+}
+
+Widget *Widget::addEventHandler(IEventHandler *eventHandler)
+{
+	p->eventHandlers.push_back(eventHandler);
 	return this;
 }
 
@@ -1003,12 +1027,6 @@ List *List::setItems(const char **items, int nItems)
 List *List::setSelectedItem(int index)
 {
 	wz_list_set_selected_item((wzList *)p->getWidget(), index);
-	return this;
-}
-
-List *List::addItemSelectedCallback(wzEventCallback callback)
-{
-	wz_list_add_callback_item_selected((wzList *)p->getWidget(), callback);
 	return this;
 }
 

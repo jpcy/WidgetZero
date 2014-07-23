@@ -107,8 +107,6 @@ static const char *widgetCategoryListData[2] =
 	"Misc."
 };
 
-static void WidgetCategoryChanged(wzEvent *e);
-
 class GUI
 {
 public:
@@ -218,7 +216,7 @@ public:
 		wz::List *list = new wz::List(renderer);
 		list->setItems(widgetCategoryListData, 2)->setMargin(8)->setStretch(WZ_STRETCH)->setFontSize(18);
 		list->setSelectedItem(0);
-		list->addItemSelectedCallback(WidgetCategoryChanged);
+		list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
 		window->add(list);
 	}
 
@@ -278,6 +276,11 @@ public:
 		secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);
 	}
 
+	void widgetCategoryChanged(wzEvent *e)
+	{
+		setFrame(e->list.selectedItem);
+	}
+
 	void setFrame(int index)
 	{
 		if (index == 0)
@@ -297,13 +300,6 @@ public:
 	wz::Frame *buttonsFrame, *miscFrame;
 	wz::RadioButtonGroup radioButtonGroup;
 };
-
-std::auto_ptr<GUI> gui;
-
-static void WidgetCategoryChanged(wzEvent *e)
-{
-	gui->setFrame(e->list.selectedItem);
-}
 
 static void ShowError(const char *message)
 {
@@ -424,7 +420,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	gui.reset(new GUI(windowWidth, windowHeight, renderer));
+	GUI gui(windowWidth, windowHeight, renderer);
 
 	SDL_AddTimer(1000, BenchmarkTimerCallback, NULL);
 	char buffer[1024];
@@ -447,48 +443,48 @@ int main(int argc, char **argv)
 			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
 			{
 				glViewport(0, 0, e.window.data1, e.window.data2);
-				gui->mainWindow.setSize(e.window.data1, e.window.data2);
+				gui.mainWindow.setSize(e.window.data1, e.window.data2);
 			}
 			else if (e.type == SDL_MOUSEMOTION)
 			{
 				benchmark.input.start();
-				gui->mainWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+				gui.mainWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN)
 			{
 				benchmark.input.start();
-				gui->mainWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
+				gui.mainWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEBUTTONUP)
 			{
 				benchmark.input.start();
-				gui->mainWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
+				gui.mainWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_MOUSEWHEEL)
 			{
 				benchmark.input.start();
-				gui->mainWindow.mouseWheelMove(e.wheel.x, e.wheel.y);
+				gui.mainWindow.mouseWheelMove(e.wheel.x, e.wheel.y);
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_KEYDOWN)
 			{
 				benchmark.input.start();
-				gui->mainWindow.keyDown(ConvertKey(e.key.keysym.sym));
+				gui.mainWindow.keyDown(ConvertKey(e.key.keysym.sym));
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_KEYUP)
 			{
 				benchmark.input.start();
-				gui->mainWindow.keyUp(ConvertKey(e.key.keysym.sym));
+				gui.mainWindow.keyUp(ConvertKey(e.key.keysym.sym));
 				benchmark.input.end();
 			}
 			else if (e.type == SDL_TEXTINPUT)
 			{
 				benchmark.input.start();
-				gui->mainWindow.textInput(e.text.text);
+				gui.mainWindow.textInput(e.text.text);
 				benchmark.input.end();
 			}
 		}
@@ -506,30 +502,30 @@ int main(int argc, char **argv)
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			benchmark.draw.start();
-			gui->mainWindow.beginFrame();
-			gui->mainWindow.drawFrame();
+			gui.mainWindow.beginFrame();
+			gui.mainWindow.drawFrame();
 
 			sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui->mainWindow.getHeight() - 20);
+			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 20);
 
 			sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui->mainWindow.getHeight() - 40);
+			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 40);
 
 			sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui->mainWindow.getHeight() - 60);
+			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 60);
 
-			gui->mainWindow.endFrame();
+			gui.mainWindow.endFrame();
 			benchmark.draw.end();
 
 			SDL_GL_SwapWindow(window);
-			SDL_SetCursor(cursors[gui->mainWindow.getCursor()]);
+			SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
 			accumulatedTime -= frameTime;
 			benchmark.frame.end();
 			tick++;
 
 			if ((tick % 30) == 0)
 			{
-				gui->mainWindow.setShowCursor(!gui->mainWindow.getShowCursor());
+				gui.mainWindow.setShowCursor(!gui.mainWindow.getShowCursor());
 			}
 		}
 	}

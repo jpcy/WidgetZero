@@ -30,6 +30,8 @@ SOFTWARE.
 #include <wz.h>
 #include <wz_renderer.h>
 
+#define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
+
 namespace wz {
 
 class Button;
@@ -50,6 +52,28 @@ struct WidgetPrivate;
 class Widget;
 class Window;
 
+struct IEventHandler
+{
+	virtual ~IEventHandler() {}
+	virtual void call(wzEvent *e) = 0;
+
+	wzWidgetEventType eventType;
+};
+
+template<class Object>
+struct EventHandler : public IEventHandler
+{
+	typedef void (Object::*Method)(wzEvent *);
+
+	virtual void call(wzEvent *e)
+	{
+		WZCPP_CALL_OBJECT_METHOD(object, method)(e);
+	}
+
+	Object *object;
+	Method method;
+};
+
 class Widget
 {
 public:
@@ -69,6 +93,19 @@ public:
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	virtual Widget *setVisible(bool visible);
+
+	Widget *addEventHandler(IEventHandler *eventHandler);
+
+	template<class Object>
+	Widget *addEventHandler(wzWidgetEventType eventType, Object *object, void (Object::*method)(wzEvent *))
+	{
+		EventHandler<Object> *eventHandler = new EventHandler<Object>();
+		eventHandler->eventType = eventType;
+		eventHandler->object = object;
+		eventHandler->method = method;
+		addEventHandler(eventHandler);
+		return this;
+	}
 
 	WidgetPrivate *p;
 };
@@ -148,7 +185,6 @@ public:
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(const char **items, int nItems);
 	List *setSelectedItem(int index);
-	List *addItemSelectedCallback(wzEventCallback callback);
 };
 
 class MainWindow
