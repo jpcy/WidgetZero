@@ -26,7 +26,7 @@ SOFTWARE.
 
 #ifndef __cplusplus
 #ifdef _MSC_VER
-typedef int bool;
+typedef unsigned char bool;
 #define false 0
 #define true 1
 #else
@@ -378,6 +378,7 @@ void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior cli
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 void wz_button_set(struct wzButton *button, bool value);
+void wz_button_bind_value(struct wzButton *button, bool *value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 

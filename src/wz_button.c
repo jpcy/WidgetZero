@@ -33,6 +33,7 @@ struct wzButton
 	wzButtonSetBehavior setBehavior;
 	bool isPressed;
 	bool isSet;
+	bool *boundValue;
 	wzEventCallback *pressed_callbacks;
 	wzEventCallback *clicked_callbacks;
 };
@@ -52,6 +53,12 @@ static void wz_button_click(struct wzButton *button)
 			return;
 
 		button->isSet = true;
+	}
+
+	// isSet assigned to, update the bound value.
+	if (button->boundValue)
+	{
+		*button->boundValue = button->isSet;
 	}
 
 	e.button.type = WZ_EVENT_BUTTON_CLICKED;
@@ -166,12 +173,29 @@ void wz_button_set(struct wzButton *button, bool value)
 
 	button->isSet = value;
 
+	// isSet assigned to, update the bound value.
+	if (button->boundValue)
+	{
+		*button->boundValue = button->isSet;
+	}
+
 	if (button->isSet)
 	{
 		wzEvent e;
 		e.button.type = WZ_EVENT_BUTTON_CLICKED;
 		e.button.button = button;
 		wz_invoke_event(&e, button->clicked_callbacks);
+	}
+}
+
+void wz_button_bind_value(struct wzButton *button, bool *value)
+{
+	assert(button);
+	button->boundValue = value;
+
+	if (value)
+	{
+		wz_button_set(button, *value);
 	}
 }
 
