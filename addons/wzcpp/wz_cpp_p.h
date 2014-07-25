@@ -134,6 +134,7 @@ struct LabelPrivate : public WidgetPrivate
 	virtual void draw(wzRect clip);
 
 	wzLabel *label;
+	bool multiline;
 	std::string text;
 	uint8_t r, g, b;
 };

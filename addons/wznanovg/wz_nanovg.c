@@ -638,16 +638,38 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, s
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text)
+static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text)
 {
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, text, 0, &size.w, &size.h);
+	WZ_ASSERT(label);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	if (multiline)
+	{
+		float bounds[4];
+
+		nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
+		wz_nanovg_set_font_face(rendererData, fontFace);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.2f);
+		nvgTextBoxBounds(vg, 0, 0, (float)wz_widget_get_width((const struct wzWidget *)label), text, NULL, bounds);
+		size.w = (int)bounds[2];
+		size.h = (int)bounds[3];
+	}
+	else
+	{
+		wz_nanovg_measure_text(renderer, fontFace, fontSize, text, 0, &size.w, &size.h);
+	}
+
 	return size;
 }
 
-static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, const char *text, uint8_t r, uint8_t g, uint8_t b)
+static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, uint8_t r, uint8_t g, uint8_t b)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -661,7 +683,22 @@ static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struc
 
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
-	wz_nanovg_printf(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(r, g, b), text);
+
+	if (multiline)
+	{
+		nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
+		wz_nanovg_set_font_face(rendererData, fontFace);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.2f);
+		nvgFontBlur(vg, 0);
+		nvgFillColor(vg, nvgRGB(r, g, b));
+		nvgTextBox(vg, (float)rect.x, (float)rect.y, (float)rect.w, text, NULL);
+	}
+	else
+	{
+		wz_nanovg_printf(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(r, g, b), text);
+	}
+
 	nvgRestore(vg);
 }
 

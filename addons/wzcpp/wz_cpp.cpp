@@ -620,7 +620,7 @@ Widget *GroupBox::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-LabelPrivate::LabelPrivate(wzRenderer *renderer) : r(0), g(0), b(0)
+LabelPrivate::LabelPrivate(wzRenderer *renderer) : multiline(false), r(0), g(0), b(0)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -641,12 +641,12 @@ LabelPrivate::~LabelPrivate()
 
 wzSize LabelPrivate::measure()
 {
-	return renderer->measure_label(renderer, fontFace.c_str(), fontSize, text.c_str());
+	return renderer->measure_label(renderer, label, fontFace.c_str(), fontSize, multiline, text.c_str());
 }
 
 void LabelPrivate::draw(wzRect clip)
 {
-	renderer->draw_label(renderer, clip, label, fontFace.c_str(), fontSize, text.c_str(), r, g, b);
+	renderer->draw_label(renderer, clip, label, fontFace.c_str(), fontSize, multiline, text.c_str(), r, g, b);
 }
 
 //------------------------------------------------------------------------------
@@ -689,6 +689,12 @@ Label *Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 	lp->r = r;
 	lp->g = g;
 	lp->b = b;
+	return this;
+}
+
+Label *Label::setMultiline(bool multiline)
+{
+	((LabelPrivate *)p)->multiline = multiline;
 	return this;
 }
 
