@@ -133,6 +133,10 @@ public:
 		layout->add(new wz::Button(renderer, "Button with a label"));
 		layout->add(new wz::Button(renderer, "Button with a label and icon", "../examples/data/accept.png"));
 		layout->add(new wz::Button(renderer, "", "../examples/data/accept.png"));
+
+		wz::Button *toggleButton = new wz::Button(renderer, "Toggle Button");
+		toggleButton->setToggle(true);
+		layout->add(toggleButton);
 	}
 
 	void createMiscFrame()

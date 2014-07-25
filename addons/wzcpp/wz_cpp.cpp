@@ -319,6 +319,12 @@ Button *Button::setLabel(const std::string &label)
 	return this;
 }
 
+Button *Button::setToggle(bool toggle)
+{
+	wz_button_set_set_behavior(((ButtonPrivate *)p)->button, toggle ? WZ_BUTTON_SET_BEHAVIOR_TOGGLE : WZ_BUTTON_SET_BEHAVIOR_DEFAULT);
+	return this;
+}
+
 //------------------------------------------------------------------------------
 
 CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)

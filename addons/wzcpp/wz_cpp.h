@@ -123,6 +123,7 @@ public:
 	Button *setIcon(const std::string &icon);
 	std::string getLabel() const;
 	Button *setLabel(const std::string &label);
+	Button *setToggle(bool toggle);
 };
 
 class Checkbox : public Widget

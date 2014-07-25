@@ -343,7 +343,7 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
-	bool hover, pressed;
+	bool hover, pressed, set;
 	wzRect paddedRect;
 	wzSize iconSize;
 	int iconHandle, labelWidth, iconX, labelX;
@@ -361,9 +361,10 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 
 	hover = wz_widget_get_hover((struct wzWidget *)button);
 	pressed = wz_button_is_pressed(button);
+	set = wz_button_is_set(button); // For toggle buttons.
 
 	// Background.
-	if (pressed && hover)
+	if (set || (pressed && hover))
 	{
 		wz_nanovg_draw_filled_rect(vg, rect, nvgRGB(127, 194, 229));
 	}
