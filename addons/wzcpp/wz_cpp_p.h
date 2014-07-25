@@ -80,9 +80,11 @@ struct CheckboxPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 	virtual wzSize measure();
 	virtual void draw(wzRect clip);
+	virtual void handleEvent(wzEvent *e);
 
 	wzButton *button;
 	std::string label;
+	bool *boundValue;
 };
 
 struct ComboPrivate : public WidgetPrivate

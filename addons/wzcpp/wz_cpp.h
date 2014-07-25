@@ -133,6 +133,7 @@ public:
 	~Checkbox();
 	std::string getLabel() const;
 	Checkbox *setLabel(const std::string &label);
+	Checkbox *bindValue(bool *value);
 };
 
 class Combo : public Widget

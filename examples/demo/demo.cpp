@@ -104,7 +104,7 @@ static const char *listData[17] =
 class GUI
 {
 public:
-	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : mainWindow(renderer), renderer(renderer)
+	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : mainWindow(renderer), renderer(renderer), showProfiling_(false)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
@@ -217,12 +217,20 @@ public:
 		mainWindow.add(window);
 		mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
 
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		window->add(layout);
+
 		wz::List *list = new wz::List(renderer);
 		list->setItems((uint8_t *)&widgetCategories[0], sizeof(WidgetCategoryListItem), widgetCategories.size());
-		list->setMargin(8)->setStretch(WZ_STRETCH)->setFontSize(18);
+		list->setStretch(WZ_STRETCH)->setFontSize(18);
 		list->setSelectedItem(0);
 		list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
-		window->add(list);
+		layout->add(list);
+
+		wz::Checkbox *showProfilingCheckBox = new wz::Checkbox(renderer, "Show profiling");
+		showProfilingCheckBox->bindValue(&showProfiling_);
+		layout->add(showProfilingCheckBox);
 	}
 
 	void createWindow1()
@@ -294,6 +302,8 @@ public:
 		}
 	}
 
+	bool showProfiling() const { return showProfiling_; }
+
 	wz::MainWindow mainWindow;
 
 private:
@@ -307,6 +317,7 @@ private:
 	std::vector<WidgetCategoryListItem> widgetCategories;
 	wz::Frame *buttonsFrame, *miscFrame;
 	wz::RadioButtonGroup radioButtonGroup;
+	bool showProfiling_;
 };
 
 static void ShowError(const char *message)
@@ -513,14 +524,17 @@ int main(int argc, char **argv)
 			gui.mainWindow.beginFrame();
 			gui.mainWindow.drawFrame();
 
-			sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 20);
+			if (gui.showProfiling())
+			{
+				sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
+				renderer->debug_draw_text(renderer, buffer, 0, 0);
 
-			sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 40);
+				sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
+				renderer->debug_draw_text(renderer, buffer, 0, 20);
 
-			sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
-			renderer->debug_draw_text(renderer, buffer, 0, gui.mainWindow.getHeight() - 60);
+				sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
+				renderer->debug_draw_text(renderer, buffer, 0, 40);
+			}
 
 			gui.mainWindow.endFrame();
 			benchmark.draw.end();

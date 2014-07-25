@@ -321,7 +321,7 @@ Button *Button::setLabel(const std::string &label)
 
 //------------------------------------------------------------------------------
 
-CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
+CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer) : boundValue(NULL)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -349,6 +349,14 @@ wzSize CheckboxPrivate::measure()
 void CheckboxPrivate::draw(wzRect clip)
 {
 	renderer->draw_checkbox(renderer, clip, button, fontFace.c_str(), fontSize, label.c_str());
+}
+
+void CheckboxPrivate::handleEvent(wzEvent *e)
+{
+	if (boundValue && e->button.type == WZ_EVENT_BUTTON_CLICKED)
+	{
+		*boundValue = wz_button_is_set(button);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -379,6 +387,14 @@ Checkbox *Checkbox::setLabel(const std::string &label)
 	CheckboxPrivate *cp = (CheckboxPrivate *)p;
 	cp->label = label;
 	wz_widget_resize_to_measured(p->getWidget());
+	return this;
+}
+
+Checkbox *Checkbox::bindValue(bool *value)
+{
+	CheckboxPrivate *cp = (CheckboxPrivate *)p;
+	cp->boundValue = value;
+	wz_button_set(cp->button, *value);
 	return this;
 }
 
