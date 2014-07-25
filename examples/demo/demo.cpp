@@ -108,6 +108,7 @@ public:
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
+		createLabelsFrame();
 		createMiscFrame();
 		createWidgetCategoryWindow();
 		createWindow1();
@@ -115,20 +116,25 @@ public:
 		setFrame(0);
 	}
 
+	bool showProfiling() const { return showProfiling_; }
+
+	wz::MainWindow mainWindow;
+
+private:
 	void createButtonsFrame()
 	{
-		buttonsFrame = new wz::Frame(renderer);
-		buttonsFrame->setStretch(WZ_STRETCH);
-		mainWindow.add(buttonsFrame);
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
 
 		WidgetCategoryListItem category;
 		category.label = "Buttons";
-		category.frame = buttonsFrame;
+		category.frame = frame;
 		widgetCategories.push_back(category);
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
-		buttonsFrame->add(layout);
+		frame->add(layout);
 
 		layout->add(new wz::Button(renderer, "Button with a label"));
 		layout->add(new wz::Button(renderer, "Button with a label and icon", "../examples/data/accept.png"));
@@ -139,52 +145,70 @@ public:
 		layout->add(toggleButton);
 	}
 
+	void createLabelsFrame()
+	{
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
+
+		WidgetCategoryListItem category;
+		category.label = "Labels";
+		category.frame = frame;
+		widgetCategories.push_back(category);
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		layout->add(new wz::Label(renderer, "Normal label"));
+
+		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
+		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
+		layout->add(customLabel);
+	}
+
 	void createMiscFrame()
 	{
-		miscFrame = new wz::Frame(renderer);
-		miscFrame->setStretch(WZ_STRETCH);
-		mainWindow.add(miscFrame);
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
 
 		WidgetCategoryListItem category;
 		category.label = "Misc.";
-		category.frame = miscFrame;
+		category.frame = frame;
 		widgetCategories.push_back(category);
 
 		{
 			wz::Button *button = new wz::Button(renderer, "Test Button");
 			button->setPadding(20, 50, 20, 50)->setPosition(100, 100);
-			miscFrame->add(button);
+			frame->add(button);
 
 			const wzRect buttonRect = button->getRect();
 			wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Toggle me!");
 			checkbox->setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
-			miscFrame->add(checkbox);
+			frame->add(checkbox);
 
 			wz::Scroller *scroller1 = new wz::Scroller(renderer);
 			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setPosition(300, 50)->setHeight(200);
-			miscFrame->add(scroller1);
+			frame->add(scroller1);
 
 			wz::Scroller *scroller2 = new wz::Scroller(renderer);
 			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setPosition(500, 50)->setWidth(200);
-			miscFrame->add(scroller2);
-
-			wz::Label *label = new wz::Label(renderer, "Label test");
-			label->setTextColor(255, 128, 128)->setFont("visitor1", 32)->setPosition(350, 10);
-			miscFrame->add(label);
+			frame->add(scroller2);
 
 			wz::List *list = new wz::List(renderer);
 			list->setItems((uint8_t *)listData, sizeof(const char *), 17)->setRect(400, 300, 150, 150);
-			miscFrame->add(list);
+			frame->add(list);
 
 			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
-			miscFrame->add(combo);
+			frame->add(combo);
 		}
 
 		{
 			wz::GroupBox *groupBox = new wz::GroupBox(renderer, "Test GroupBox");
 			groupBox->setPosition(100, 300);
-			miscFrame->add(groupBox);
+			frame->add(groupBox);
 
 			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 			layout->setSpacing(8)->setStretch(WZ_STRETCH);
@@ -206,7 +230,7 @@ public:
 		{
 			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
 			layout->setSpacing(8)->setRect(50, 550, 400, 100);
-			miscFrame->add(layout);
+			frame->add(layout);
 
 			layout->add(new wz::Button(renderer, "Button A"))->setStretch(WZ_STRETCH_HEIGHT);
 			layout->add(new wz::Button(renderer, "Button B"))->setAlign(WZ_ALIGN_MIDDLE);
@@ -306,11 +330,6 @@ public:
 		}
 	}
 
-	bool showProfiling() const { return showProfiling_; }
-
-	wz::MainWindow mainWindow;
-
-private:
 	struct WidgetCategoryListItem
 	{
 		const char *label;
@@ -319,7 +338,6 @@ private:
 
 	wzRenderer *renderer;
 	std::vector<WidgetCategoryListItem> widgetCategories;
-	wz::Frame *buttonsFrame, *miscFrame;
 	wz::RadioButtonGroup radioButtonGroup;
 	bool showProfiling_;
 };
