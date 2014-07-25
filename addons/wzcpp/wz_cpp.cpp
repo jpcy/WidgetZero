@@ -97,7 +97,8 @@ struct ComboPrivate : public WidgetPrivate
 	virtual void draw(wzRect clip);
 
 	wzCombo *combo;
-	const char **items;
+	uint8_t *itemData;
+	size_t itemStride;
 	std::auto_ptr<List> list;
 };
 
@@ -150,10 +151,11 @@ struct ListPrivate : public WidgetPrivate
 	// Called on init and when the font face or size changed.
 	void refreshItemHeight();
 
-	void setItems(const char **items, int nItems);
+	void setItems(uint8_t *itemData, size_t itemStride, int nItems);
 
 	wzList *list;
-	const char **items;
+	uint8_t *itemData;
+	size_t itemStride;
 	std::auto_ptr<Scroller> scroller;
 };
 
@@ -651,7 +653,7 @@ Checkbox *Checkbox::setLabel(const std::string &label)
 
 //------------------------------------------------------------------------------
 
-ComboPrivate::ComboPrivate(wzRenderer *renderer)
+ComboPrivate::ComboPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -675,13 +677,13 @@ ComboPrivate::~ComboPrivate()
 
 wzSize ComboPrivate::measure()
 {
-	return renderer->measure_combo(renderer, fontFace.c_str(), fontSize, items, wz_list_get_num_items(wz_combo_get_list(combo)));
+	return renderer->measure_combo(renderer, fontFace.c_str(), fontSize, itemData, itemStride, wz_list_get_num_items(wz_combo_get_list(combo)));
 }
 
 void ComboPrivate::draw(wzRect clip)
 {
 	int itemIndex = wz_list_get_selected_item((const wzList *)list->p->getWidget());
-	renderer->draw_combo(renderer, clip, combo, fontFace.c_str(), fontSize, itemIndex >= 0 ? items[itemIndex] : NULL);
+	renderer->draw_combo(renderer, clip, combo, fontFace.c_str(), fontSize, itemIndex >= 0 ? *((const char **)&itemData[itemIndex * itemStride]) : NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -717,11 +719,12 @@ Widget *Combo::setFont(const std::string &fontFace, float fontSize)
 	return (Widget *)this;
 }
 
-Combo *Combo::setItems(const char **items, int nItems)
+Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
 	ComboPrivate *cp = (ComboPrivate *)p;
-	cp->items = items;
-	cp->list->setItems(items, nItems);
+	cp->itemData = itemData;
+	cp->itemStride = itemStride;
+	cp->list->setItems(itemData, itemStride, nItems);
 	wz_widget_resize_to_measured(p->getWidget());
 	return this;
 }
@@ -948,7 +951,7 @@ Label *Label::setTextColor(uint8_t r, uint8_t g, uint8_t b)
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate(wzRenderer *renderer)
+ListPrivate::ListPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -971,7 +974,7 @@ ListPrivate::~ListPrivate()
 
 void ListPrivate::draw(wzRect clip)
 {
-	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, items);
+	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, itemData, itemStride);
 }
 
 void ListPrivate::refreshItemHeight()
@@ -979,9 +982,10 @@ void ListPrivate::refreshItemHeight()
 	wz_list_set_item_height(list, renderer->measure_list_item_height(renderer, list, fontFace.c_str(), fontSize));
 }
 
-void ListPrivate::setItems(const char **items, int nItems)
+void ListPrivate::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	this->items = items;
+	this->itemData = itemData;
+	this->itemStride = itemStride;
 	wz_list_set_num_items(list, nItems);
 }
 
@@ -1018,9 +1022,9 @@ Widget *List::setFont(const std::string &fontFace, float fontSize)
 	return (Widget *)this;
 }
 
-List *List::setItems(const char **items, int nItems)
+List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	((ListPrivate *)p)->setItems(items, nItems);
+	((ListPrivate *)p)->setItems(itemData, itemStride, nItems);
 	return this;
 }
 

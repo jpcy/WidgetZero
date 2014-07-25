@@ -503,13 +503,13 @@ static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, st
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char **items, int nItems)
+static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride, int nItems)
 {
 	wzSize size;
 	int i;
 
 	WZ_ASSERT(renderer);
-	WZ_ASSERT(items);
+	WZ_ASSERT(itemData);
 
 	// Use the widest item text.
 	size.w = 0;
@@ -517,7 +517,7 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *f
 	for (i = 0; i < nItems; i++)
 	{
 		int w;
-		wz_nanovg_measure_text(renderer, fontFace, fontSize, items[i], 0, &w, NULL);
+		wz_nanovg_measure_text(renderer, fontFace, fontSize, *((const char **)&itemData[i * itemStride]), 0, &w, NULL);
 		size.w = WZ_MAX(size.w, w);
 	}
 
@@ -681,7 +681,7 @@ static int wz_nanovg_measure_list_item_height(struct wzRenderer *renderer, struc
 	return size.h + 2; // Add a little padding.
 }
 
-static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, const char **items)
+static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -738,7 +738,7 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct
 			wz_nanovg_draw_filled_rect(vg, itemRect, nvgRGB(188, 229, 252));
 		}
 
-		wz_nanovg_printf(rendererData, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), items[i]);
+		wz_nanovg_printf(rendererData, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), *((const char **)&itemData[i * itemStride]));
 		y += itemHeight;
 	}
 

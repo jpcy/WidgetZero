@@ -143,7 +143,7 @@ public:
 	virtual Widget *setFontFace(const std::string &fontFace);
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
-	Combo *setItems(const char **items, int nItems);
+	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 };
 
 class Frame : public Widget
@@ -183,7 +183,7 @@ public:
 	virtual Widget *setFontFace(const std::string &fontFace);
 	virtual Widget *setFontSize(float fontSize);
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
-	List *setItems(const char **items, int nItems);
+	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 	List *setSelectedItem(int index);
 };
 

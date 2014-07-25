@@ -101,12 +101,6 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static const char *widgetCategoryListData[2] =
-{
-	"Buttons",
-	"Misc."
-};
-
 class GUI
 {
 public:
@@ -127,6 +121,11 @@ public:
 		buttonsFrame->setStretch(WZ_STRETCH);
 		mainWindow.add(buttonsFrame);
 
+		WidgetCategoryListItem category;
+		category.label = "Buttons";
+		category.frame = buttonsFrame;
+		widgetCategories.push_back(category);
+
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		buttonsFrame->add(layout);
@@ -141,6 +140,11 @@ public:
 		miscFrame = new wz::Frame(renderer);
 		miscFrame->setStretch(WZ_STRETCH);
 		mainWindow.add(miscFrame);
+
+		WidgetCategoryListItem category;
+		category.label = "Misc.";
+		category.frame = miscFrame;
+		widgetCategories.push_back(category);
 
 		{
 			wz::Button *button = new wz::Button(renderer, "Test Button");
@@ -165,11 +169,11 @@ public:
 			miscFrame->add(label);
 
 			wz::List *list = new wz::List(renderer);
-			list->setItems(listData, 17)->setRect(400, 300, 150, 150);
+			list->setItems((uint8_t *)listData, sizeof(const char *), 17)->setRect(400, 300, 150, 150);
 			miscFrame->add(list);
 
 			wz::Combo *combo = new wz::Combo(renderer);
-			combo->setItems(listData, 17)->setPosition(800, 50);
+			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
 			miscFrame->add(combo);
 		}
 
@@ -214,7 +218,8 @@ public:
 		mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
 
 		wz::List *list = new wz::List(renderer);
-		list->setItems(widgetCategoryListData, 2)->setMargin(8)->setStretch(WZ_STRETCH)->setFontSize(18);
+		list->setItems((uint8_t *)&widgetCategories[0], sizeof(WidgetCategoryListItem), widgetCategories.size());
+		list->setMargin(8)->setStretch(WZ_STRETCH)->setFontSize(18);
 		list->setSelectedItem(0);
 		list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
 		window->add(list);
@@ -243,7 +248,7 @@ public:
 		layout->add(checkbox);
 
 		wz::Combo *combo = new wz::Combo(renderer);
-		combo->setItems(listData, 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
+		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
 		wz::Button *button2 = new wz::Button(renderer, "Yet Another Button");
@@ -270,7 +275,7 @@ public:
 		tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 
 		wz::Combo *combo = new wz::Combo(renderer);
-		combo->setItems(listData, 17)->setPosition(10, 10);
+		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(10, 10);
 		firstTab->add(combo);
 
 		secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);
@@ -283,20 +288,23 @@ public:
 
 	void setFrame(int index)
 	{
-		if (index == 0)
+		for (size_t i = 0; i < widgetCategories.size(); i++)
 		{
-			buttonsFrame->setVisible(true);
-			miscFrame->setVisible(false);
-		}
-		else
-		{
-			buttonsFrame->setVisible(false);
-			miscFrame->setVisible(true);
+			widgetCategories[i].frame->setVisible(i == index ? true : false);
 		}
 	}
 
 	wz::MainWindow mainWindow;
+
+private:
+	struct WidgetCategoryListItem
+	{
+		const char *label;
+		wz::Frame *frame;
+	};
+
 	wzRenderer *renderer;
+	std::vector<WidgetCategoryListItem> widgetCategories;
 	wz::Frame *buttonsFrame, *miscFrame;
 	wz::RadioButtonGroup radioButtonGroup;
 };
