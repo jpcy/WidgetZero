@@ -47,6 +47,8 @@ struct wzMainWindow
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
 	struct wzWindow *lockInputWindow;
 
+	struct wzWidget *keyboardFocusWidget;
+
 	// This window is currently being moved and may be docked.
 	struct wzWindow *movingWindow;
 
@@ -795,6 +797,9 @@ void wz_main_window_mouse_button_down(struct wzMainWindow *mainWindow, int mouse
 
 	WZ_ASSERT(mainWindow);
 
+	// Clear keyboard focus widget.
+	mainWindow->keyboardFocusWidget = NULL;
+
 	mainWindow->lockInputWindow = wz_main_window_get_hover_window(mainWindow, mouseX, mouseY);
 
 	if (wz_arr_len(mainWindow->lockInputWidgetStack) > 0)
@@ -1103,13 +1108,14 @@ KEY DOWN AND UP
 ================================================================================
 */
 
-static void wz_widget_key_recursive(struct wzWidget *widget, wzKey key, bool down)
+static void wz_main_window_key(struct wzMainWindow *mainWindow, wzKey key, bool down)
 {
-	int i;
+	struct wzWidget *widget;
 
-	WZ_ASSERT(widget);
+	WZ_ASSERT(mainWindow);
+	widget = mainWindow->keyboardFocusWidget;
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget || !wz_widget_get_visible(widget))
 		return;
 
 	if (down && widget->vtable.key_down)
@@ -1120,37 +1126,6 @@ static void wz_widget_key_recursive(struct wzWidget *widget, wzKey key, bool dow
 	{
 		widget->vtable.key_up(widget, key);
 	}
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		if (widget->children[i]->hover)
-		{
-			wz_widget_key_recursive(widget->children[i], key, down);
-		}
-	}
-}
-
-static void wz_main_window_key(struct wzMainWindow *mainWindow, wzKey key, bool down)
-{
-	struct wzWidget *widget;
-
-	WZ_ASSERT(mainWindow);
-
-	if (wz_arr_len(mainWindow->lockInputWidgetStack) > 0)
-	{
-		// Lock input to the top/last item on the stack.
-		widget = mainWindow->lockInputWidgetStack[wz_arr_lastn(mainWindow->lockInputWidgetStack)];
-	}
-	else if (mainWindow->lockInputWindow)
-	{
-		widget = (struct wzWidget *)mainWindow->lockInputWindow;
-	}
-	else
-	{
-		widget = (struct wzWidget *)mainWindow;
-	}
-
-	wz_widget_key_recursive(widget, key, down);
 }
 
 void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key)
@@ -1177,50 +1152,20 @@ TEXT INPUT
 ================================================================================
 */
 
-static void wz_widget_text_input_recursive(struct wzWidget *widget, const char *text)
+void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text)
 {
-	int i;
+	struct wzWidget *widget;
 
-	WZ_ASSERT(widget);
+	WZ_ASSERT(mainWindow);
+	widget = mainWindow->keyboardFocusWidget;
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget || !wz_widget_get_visible(widget))
 		return;
 
 	if (widget->vtable.text_input)
 	{
 		widget->vtable.text_input(widget, text);
 	}
-
-	for (i = 0; i < wz_arr_len(widget->children); i++)
-	{
-		if (widget->children[i]->hover)
-		{
-			wz_widget_text_input_recursive(widget->children[i], text);
-		}
-	}
-}
-
-void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text)
-{
-	struct wzWidget *widget;
-
-	WZ_ASSERT(mainWindow);
-
-	if (wz_arr_len(mainWindow->lockInputWidgetStack) > 0)
-	{
-		// Lock input to the top/last item on the stack.
-		widget = mainWindow->lockInputWidgetStack[wz_arr_lastn(mainWindow->lockInputWidgetStack)];
-	}
-	else if (mainWindow->lockInputWindow)
-	{
-		widget = (struct wzWidget *)mainWindow->lockInputWindow;
-	}
-	else
-	{
-		widget = (struct wzWidget *)mainWindow;
-	}
-
-	wz_widget_text_input_recursive(widget, text);
 }
 
 /*
@@ -1335,6 +1280,18 @@ void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor)
 {
 	WZ_ASSERT(mainWindow);
 	mainWindow->cursor = cursor;
+}
+
+const struct wzWidget *wz_main_window_get_keyboard_focus_widget(const struct wzMainWindow *mainWindow)
+{
+	WZ_ASSERT(mainWindow);
+	return mainWindow->keyboardFocusWidget;
+}
+
+void wz_main_window_set_keyboard_focus_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget)
+{
+	WZ_ASSERT(mainWindow);
+	mainWindow->keyboardFocusWidget = widget;
 }
 
 void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget)

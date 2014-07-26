@@ -28,6 +28,9 @@ SOFTWARE.
 
 void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor);
 
+// Set keyboard focus to this widget.
+void wz_main_window_set_keyboard_focus_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
+
 // Lock input to this widget.
 void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 

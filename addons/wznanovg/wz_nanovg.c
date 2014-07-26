@@ -1054,7 +1054,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	}
 
 	// Cursor.
-	if (showCursor)
+	if (showCursor && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
 	{
 		cursorIndex = wz_text_edit_get_cursor_index(textEdit);
 

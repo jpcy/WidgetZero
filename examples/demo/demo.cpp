@@ -571,7 +571,7 @@ int main(int argc, char **argv)
 			benchmark.frame.end();
 			tick++;
 
-			if ((tick % 30) == 0)
+			if ((tick % 20) == 0)
 			{
 				gui.mainWindow.setShowCursor(!gui.mainWindow.getShowCursor());
 			}

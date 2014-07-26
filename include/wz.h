@@ -287,6 +287,7 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow);
 void wz_main_window_set_dock_tab_bar(struct wzMainWindow *mainWindow, wzDockPosition dockPosition, struct wzTabBar *tabBar);
 struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab);
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
+const struct wzWidget *wz_main_window_get_keyboard_focus_widget(const struct wzMainWindow *mainWindow);
 void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition);
 
 typedef void (*wzWidgetDrawCallback)(struct wzWidget *widget, wzRect clip);
@@ -325,6 +326,7 @@ int wz_widget_get_align(const struct wzWidget *widget);
 bool wz_widget_get_hover(const struct wzWidget *widget);
 void wz_widget_set_visible(struct wzWidget *widget, bool visible);
 bool wz_widget_get_visible(const struct wzWidget *widget);
+bool wz_widget_has_keyboard_focus(const struct wzWidget *widget);
 void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw);

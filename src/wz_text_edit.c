@@ -234,7 +234,12 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 
 	if (mouseButton == 1)
 	{
-		const wzPosition pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
+		wzPosition pos;
+
+		// Set keyboard focus to this widget.
+		wz_main_window_set_keyboard_focus_widget(widget->mainWindow, widget);
+
+		pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
 		stb_textedit_click(textEdit, &textEdit->state, (float)pos.x, (float)pos.y);
 		wz_text_edit_update_scroll_value(textEdit);
 		textEdit->pressed = true;
