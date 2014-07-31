@@ -42,6 +42,8 @@ struct wzMainWindow
 
 	wzCursor cursor;
 
+	bool isShiftKeyDown, isControlKeyDown;
+
 	struct wzWidget **lockInputWidgetStack;
 
 	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
@@ -1130,16 +1132,34 @@ static void wz_main_window_key(struct wzMainWindow *mainWindow, wzKey key, bool 
 
 void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key)
 {
-	if (key == WZ_KEY_UNKNOWN)
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
 		return;
+
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	{
+		mainWindow->isShiftKeyDown = true;
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	{
+		mainWindow->isControlKeyDown = true;
+	}
 
 	wz_main_window_key(mainWindow, key, true);
 }
 
 void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key)
 {
-	if (key == WZ_KEY_UNKNOWN)
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
 		return;
+
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	{
+		mainWindow->isShiftKeyDown = false;
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	{
+		mainWindow->isControlKeyDown = false;
+	}
 
 	wz_main_window_key(mainWindow, key, false);
 }
@@ -1292,6 +1312,18 @@ void wz_main_window_set_keyboard_focus_widget(struct wzMainWindow *mainWindow, s
 {
 	WZ_ASSERT(mainWindow);
 	mainWindow->keyboardFocusWidget = widget;
+}
+
+bool wz_main_window_is_shift_key_down(const struct wzMainWindow *mainWindow)
+{
+	WZ_ASSERT(mainWindow);
+	return mainWindow->isShiftKeyDown;
+}
+
+bool wz_main_window_is_control_key_down(const struct wzMainWindow *mainWindow)
+{
+	WZ_ASSERT(mainWindow);
+	return mainWindow->isControlKeyDown;
 }
 
 void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget)

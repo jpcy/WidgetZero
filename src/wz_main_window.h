@@ -31,6 +31,9 @@ void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor)
 // Set keyboard focus to this widget.
 void wz_main_window_set_keyboard_focus_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 
+bool wz_main_window_is_shift_key_down(const struct wzMainWindow *mainWindow);
+bool wz_main_window_is_control_key_down(const struct wzMainWindow *mainWindow);
+
 // Lock input to this widget.
 void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 

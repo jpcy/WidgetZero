@@ -380,7 +380,11 @@ static wzKey ConvertKey(SDL_Keycode sym)
 		SDLK_HOME, WZ_KEY_HOME,
 		SDLK_END, WZ_KEY_END,
 		SDLK_DELETE, WZ_KEY_DELETE,
-		SDLK_BACKSPACE, WZ_KEY_BACKSPACE
+		SDLK_BACKSPACE, WZ_KEY_BACKSPACE,
+		SDLK_LSHIFT, WZ_KEY_LSHIFT,
+		SDLK_RSHIFT, WZ_KEY_RSHIFT,
+		SDLK_LCTRL, WZ_KEY_LCONTROL,
+		SDLK_RCTRL, WZ_KEY_RCONTROL
 	};
 
 	for (size_t i = 0; i < sizeof(keys) / sizeof(int); i += 2)
@@ -391,12 +395,12 @@ static wzKey ConvertKey(SDL_Keycode sym)
 
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
-				key |= WZ_KEY_SHIFT;
+				key |= WZ_KEY_SHIFT_BIT;
 			}
 
 			if (SDL_GetModState() & KMOD_CTRL)
 			{
-				key |= WZ_KEY_CONTROL;
+				key |= WZ_KEY_CONTROL_BIT;
 			}
 
 			return (wzKey)key;

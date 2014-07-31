@@ -253,12 +253,18 @@ typedef enum
 	WZ_KEY_END,
 	WZ_KEY_DELETE,
 	WZ_KEY_BACKSPACE,
+	WZ_KEY_LSHIFT,
+	WZ_KEY_RSHIFT,
+	WZ_KEY_LCONTROL,
+	WZ_KEY_RCONTROL,
 	WZ_NUM_KEYS,
 
-	WZ_KEY_SHIFT = (1<<10),
-	WZ_KEY_CONTROL = (1<<11)
+	WZ_KEY_SHIFT_BIT = (1<<10),
+	WZ_KEY_CONTROL_BIT = (1<<11)
 }
 wzKey;
+
+#define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
 typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
 typedef int (*wzMainWindowTextGetPixelDeltaCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index);

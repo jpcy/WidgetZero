@@ -200,16 +200,31 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 
 	if (mouseButton == 1)
 	{
+		int oldCursorIndex;
+
 		// Set keyboard focus to this widget.
 		wz_main_window_set_keyboard_focus_widget(widget->mainWindow, widget);
 
 		// Move the cursor to the mouse position.
+		oldCursorIndex = textEdit->cursorIndex;
 		textEdit->cursorIndex = wz_text_edit_index_from_position(textEdit, mouseX, mouseY);
 		wz_text_edit_update_scroll_index(textEdit);
 		textEdit->pressed = true;
 
-		// Start a selection.
-		textEdit->selectionStartIndex = textEdit->cursorIndex;
+		// Start a new selection if there isn't one.
+		if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
+		{
+			if (wz_main_window_is_shift_key_down(widget->mainWindow))
+			{
+				// Shift key down, use the old cursor index as the selection start.
+				textEdit->selectionStartIndex = oldCursorIndex;
+			}
+			else
+			{
+				textEdit->selectionStartIndex = textEdit->cursorIndex;
+			}
+		}
+		
 		textEdit->selectionEndIndex = textEdit->cursorIndex;
 	}
 }
@@ -295,7 +310,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->cursorIndex--;
 		}
 	}
-	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT) && textEdit->cursorIndex > 0)
+	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex > 0)
 	{
 		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
 		{
@@ -330,7 +345,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->cursorIndex++;
 		}
 	}
-	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT) && textEdit->cursorIndex < (int)strlen(&textEdit->text))
+	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex < (int)strlen(&textEdit->text))
 	{
 		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
 		{
@@ -353,7 +368,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 		// Clear the selection.
 		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 	}
-	else if (key == (WZ_KEY_HOME | WZ_KEY_SHIFT))
+	else if (key == (WZ_KEY_HOME | WZ_KEY_SHIFT_BIT))
 	{
 		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
 		{
@@ -376,7 +391,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 		// Clear the selection.
 		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 	}
-	else if (key == (WZ_KEY_END | WZ_KEY_SHIFT))
+	else if (key == (WZ_KEY_END | WZ_KEY_SHIFT_BIT))
 	{
 		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
 		{
