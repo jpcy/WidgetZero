@@ -26,197 +26,163 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_widget.h"
 
-#define STB_TEXTEDIT_CHARTYPE char
-#include "stb_textedit.h"
-
 struct wzTextEdit
 {
 	struct wzWidget base;
 	int maximumTextLength;
 	wzBorder border;
 	bool pressed;
-	int scroll;
-	STB_TexteditState state;
+	int cursorIndex;
+	int scrollIndex;
+	int selectionStartIndex;
+	int selectionEndIndex;
 
 	// Must be last.
 	char text;
 };
 
-/*
-================================================================================
-
-STB TEXTEDIT
-
-================================================================================
-*/
-
-#define STB_TEXTEDIT_STRING struct wzTextEdit
-
-static int wz_stb_textedit_stringlen(STB_TEXTEDIT_STRING *textEdit)
-{
-	return (int)strlen(&textEdit->text);
-}
-
-static void wz_stb_textedit_layoutrow(StbTexteditRow *row, STB_TEXTEDIT_STRING *textEdit, int i)
-{
-	int width;
-
-	row->num_chars = (int)strlen(&textEdit->text) - i;
-
-	if (textEdit->scroll > 0)
-	{
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, textEdit->scroll, &width, NULL);
-		row->x0 = (float)-width;
-	}
-	else
-	{
-		row->x0 = 0;
-	}
-
-	wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, 0, &width, NULL);
-	row->x1 = (float)width;
-
-	row->baseline_y_delta = 1;
-	row->ymin = 0;
-	row->ymax = (float)textEdit->base.rect.h;
-}
-
-static float wz_stb_textedit_getwidth(STB_TEXTEDIT_STRING *textEdit, int n, int i)
-{
-	return (float)wz_main_window_text_get_pixel_delta(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &textEdit->text, i);
-}
-
-static int wz_stb_textedit_keytotext(int key)
-{
-	if (key < WZ_NUM_KEYS)
-		return -1;
-
-	return key;
-}
-
-static char wz_stb_textedit_getchar(STB_TEXTEDIT_STRING *textEdit, int i)
-{
-	return (&textEdit->text)[i];
-}
-
-static void wz_stb_textedit_deletechars(STB_TEXTEDIT_STRING *textEdit, int i, int n)
+static void wz_text_edit_insert_text(struct wzTextEdit *textEdit, int index, const char *text, int n)
 {
 	int length;
 
 	WZ_ASSERT(textEdit);
-	length = (int)strlen(&textEdit->text);
-	memmove(&(&textEdit->text)[i], &(&textEdit->text)[i + n], length - (i + n));
-	(&textEdit->text)[length - n] = 0;
-}
-
-static int wz_stb_textedit_insertchars(STB_TEXTEDIT_STRING *textEdit, int i, STB_TEXTEDIT_CHARTYPE *chars, int n)
-{
-	int length;
-
-	WZ_ASSERT(textEdit);
-	WZ_ASSERT(chars);
+	WZ_ASSERT(text);
 	length = (int)strlen(&textEdit->text);
 
 	// Move the displaced characters to the end.
-	if (i + n < length)
+	if (index + n < length)
 	{
-		memmove(&(&textEdit->text)[i + n], &(&textEdit->text)[i], length - i - (n - 1));
+		memmove(&(&textEdit->text)[index + n], &(&textEdit->text)[index], length - index - (n - 1));
 	}
 
-	// Copy in the inserted characters.
-	memcpy(&(&textEdit->text)[i], chars, n);
+	// Copy in the inserted text.
+	memcpy(&(&textEdit->text)[index], text, n);
 
 	// Null terminate.
 	(&textEdit->text)[length + n] = 0;
-
-	return 1;
 }
 
-#define STB_TEXTEDIT_STRINGLEN(obj) wz_stb_textedit_stringlen(obj)
-#define STB_TEXTEDIT_LAYOUTROW(r, obj, n) wz_stb_textedit_layoutrow(r, obj, n)
-#define STB_TEXTEDIT_GETWIDTH(obj, n, i) wz_stb_textedit_getwidth(obj, n, i)
-#define STB_TEXTEDIT_KEYTOTEXT(k) wz_stb_textedit_keytotext(k)
-#define STB_TEXTEDIT_GETCHAR(obj, i) wz_stb_textedit_getchar(obj, i)
-#define STB_TEXTEDIT_NEWLINE '\n'
-#define STB_TEXTEDIT_DELETECHARS(obj, i, n) wz_stb_textedit_deletechars(obj, i, n)
-#define STB_TEXTEDIT_INSERTCHARS(obj, i, c, n) wz_stb_textedit_insertchars(obj, i, c, n)
-
-#define STB_TEXTEDIT_K_SHIFT WZ_KEY_SHIFT
-#define STB_TEXTEDIT_K_LEFT WZ_KEY_LEFT
-#define STB_TEXTEDIT_K_RIGHT WZ_KEY_RIGHT
-#define STB_TEXTEDIT_K_UP WZ_KEY_UP
-#define STB_TEXTEDIT_K_DOWN WZ_KEY_DOWN
-#define STB_TEXTEDIT_K_LINESTART WZ_KEY_HOME
-#define STB_TEXTEDIT_K_LINEEND WZ_KEY_END
-#define STB_TEXTEDIT_K_TEXTSTART (WZ_KEY_CONTROL|WZ_KEY_HOME)
-#define STB_TEXTEDIT_K_TEXTEND (WZ_KEY_CONTROL|WZ_KEY_END)
-#define STB_TEXTEDIT_K_DELETE WZ_KEY_DELETE
-#define STB_TEXTEDIT_K_BACKSPACE WZ_KEY_BACKSPACE
-#define STB_TEXTEDIT_K_UNDO (WZ_KEY_CONTROL|'z')
-#define STB_TEXTEDIT_K_REDO (WZ_KEY_CONTROL|'y')
-
-#define STB_TEXTEDIT_IMPLEMENTATION
-#include "stb_textedit.h"
-
-/*
-================================================================================
-
-TEXT EDIT WIDGET
-
-================================================================================
-*/
-
-// stb coordinates are relative to the top left of the text.
-static wzPosition wz_text_edit_calculate_relative_mouse_position(const struct wzTextEdit *textEdit, int mouseX, int mouseY)
+static void wz_text_edit_delete_text(struct wzTextEdit *textEdit, int index, int n)
 {
-	wzPosition pos;
+	int length;
 
 	WZ_ASSERT(textEdit);
-	pos = wz_widget_get_absolute_position((const struct wzWidget *)textEdit);
-	pos.x = mouseX - (pos.x + textEdit->border.left);
-	pos.y = mouseY - (pos.y + textEdit->border.top);
-	return pos;
+	length = (int)strlen(&textEdit->text);
+
+	if (index < 0 || index >= length)
+		return;
+
+	memmove(&(&textEdit->text)[index], &(&textEdit->text)[index + n], length - (index + n));
+	(&textEdit->text)[length - n] = 0;
 }
 
-// Relative to text rect.
-static int wz_text_edit_calculate_cursor_x(const struct wzTextEdit *textEdit)
+// Calculate the text index at the given absolute position.
+static int wz_text_edit_index_from_position(const struct wzTextEdit *textEdit, int x, int y)
+{
+	wzRect rect;
+	wzPosition pos;
+	int i, previousWidth, result;
+
+	WZ_ASSERT(textEdit);
+
+	// Calculate relative position.
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)textEdit);
+	pos.x = x - rect.x;
+	pos.y = y - rect.y;
+
+	// Outside widget.
+	if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
+		return textEdit->scrollIndex;
+
+	// Walk through the text until we find two glyphs that the x coordinate straddles.
+	previousWidth = 0;
+	result = textEdit->scrollIndex;
+
+	for (i = 1; i <= (int)strlen(&textEdit->text); i++)
+	{
+		int width, deltaWidth;
+
+		// Calculate the width of the text up to the current character.
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], i, &width, NULL);
+
+		// Check if we've gone beyond the width of the widget.
+		if (width > rect.w - (textEdit->border.left + textEdit->border.right))
+		{
+			result = textEdit->scrollIndex + i - 1;
+			break;
+		}
+
+		// Calculate the change in text width since the last iteration.
+		deltaWidth = width - previousWidth;
+
+		// Check the intersection between the position and the change in text width since the last iteration.
+		if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+		{
+			// Left side of glyph.
+			result = textEdit->scrollIndex + i - 1;
+			break;
+		}
+		else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
+		{
+			// Right side of glyph.
+			result = textEdit->scrollIndex + i;
+			break;
+		}
+
+		// Made it to the end of text string.
+		if (i == (int)strlen(&textEdit->text))
+		{
+			result = i;
+			break;
+		}
+
+		// Store this text width for the next iteration.
+		previousWidth = width;
+	}
+
+	return WZ_CLAMPED(0, result, (int)strlen(&textEdit->text));
+}
+
+// Calculate the x coordinate (relative to text rect) of the cursor, based on the cursor index and scroll index. 
+static int wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index)
 {
 	int width, delta;
 
 	WZ_ASSERT(textEdit);
 	width = 0;
-	delta = textEdit->state.cursor - textEdit->scroll;
+	delta = index - textEdit->scrollIndex;
 
 	if (delta > 0)
 	{
-		// Text width from the scroll position to the cursor.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scroll], delta, &width, NULL);
+		// Text width from the scroll index to the requested index.
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], delta, &width, NULL);
 	}
 	else if (delta < 0)
 	{
-		// Text width from the cursor to the scroll position.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->state.cursor], -delta, &width, NULL);
+		// Text width from the requested index to the scroll index.
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->cursorIndex], -delta, &width, NULL);
 		width = -width;
 	}
 	
 	return width;
 }
 
-static void wz_text_edit_update_scroll_value(struct wzTextEdit *textEdit)
+// Update the scroll index so the cursor is visible.
+static void wz_text_edit_update_scroll_index(struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
 
 	for (;;)
 	{
-		int cursorX = wz_text_edit_calculate_cursor_x(textEdit);
+		int cursorX = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
 
 		if (cursorX > textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right))
 		{
-			textEdit->scroll++;
+			textEdit->scrollIndex++;
 		}
 		else if (cursorX < 0)
 		{
-			textEdit->scroll--;
+			textEdit->scrollIndex--;
 		}
 		else
 		{
@@ -234,15 +200,17 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 
 	if (mouseButton == 1)
 	{
-		wzPosition pos;
-
 		// Set keyboard focus to this widget.
 		wz_main_window_set_keyboard_focus_widget(widget->mainWindow, widget);
 
-		pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
-		stb_textedit_click(textEdit, &textEdit->state, (float)pos.x, (float)pos.y);
-		wz_text_edit_update_scroll_value(textEdit);
+		// Move the cursor to the mouse position.
+		textEdit->cursorIndex = wz_text_edit_index_from_position(textEdit, mouseX, mouseY);
+		wz_text_edit_update_scroll_index(textEdit);
 		textEdit->pressed = true;
+
+		// Start a selection.
+		textEdit->selectionStartIndex = textEdit->cursorIndex;
+		textEdit->selectionEndIndex = textEdit->cursorIndex;
 	}
 }
 
@@ -269,15 +237,36 @@ static void wz_text_edit_mouse_move(struct wzWidget *widget, int mouseX, int mou
 	if (widget->hover)
 		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_IBEAM);
 
-	if (textEdit->pressed)
+	if (textEdit->pressed && WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(widget)))
 	{
-		if (textEdit->pressed && WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(widget)))
-		{
-			const wzPosition pos = wz_text_edit_calculate_relative_mouse_position(textEdit, mouseX, mouseY);
-			stb_textedit_drag(textEdit, &textEdit->state, (float)pos.x, (float)pos.y);
-			wz_text_edit_update_scroll_value(textEdit);
-		}
+		// Move the cursor to the mouse position.
+		textEdit->cursorIndex = wz_text_edit_index_from_position(textEdit, mouseX, mouseY);
+		wz_text_edit_update_scroll_index(textEdit);
+
+		// Set the selection end to the new cursor index.
+		textEdit->selectionEndIndex = textEdit->cursorIndex;
 	}
+}
+
+static void wz_text_edit_delete_selection(struct wzTextEdit *textEdit)
+{
+	int start, end;
+
+	WZ_ASSERT(textEdit);
+
+	// No selection.
+	if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
+		return;
+
+	start = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	end = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	wz_text_edit_delete_text(textEdit, start, end - start);
+
+	// Move the cursor to the start (smallest of start and end, not the real selection start).
+	textEdit->cursorIndex = start;
+
+	// Clear the selection.
+	textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 }
 
 static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
@@ -286,19 +275,176 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 
 	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
-	stb_textedit_key(textEdit, &textEdit->state, (int)key);
-	wz_text_edit_update_scroll_value(textEdit);
+
+	if (key == WZ_KEY_LEFT)
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If the cursor is to the right of the selection start, move the cursor to the start of the selection.
+			if (textEdit->cursorIndex > textEdit->selectionStartIndex)
+			{
+				textEdit->cursorIndex = textEdit->selectionStartIndex;
+			}
+
+			// Clear the selection.
+			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+		}
+		// Move the cursor to the left, if there's room.
+		else if (textEdit->cursorIndex > 0)
+		{
+			textEdit->cursorIndex--;
+		}
+	}
+	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT) && textEdit->cursorIndex > 0)
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If there's already a selection, move the cursor, and the selection end to match.
+			textEdit->cursorIndex--;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+		else
+		{
+			// No selection, start a new one and move the cursor.
+			textEdit->selectionStartIndex = textEdit->cursorIndex;
+			textEdit->cursorIndex--;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+	}
+	else if (key == WZ_KEY_RIGHT)
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If the cursor is to the left of the selection start, move the cursor to the start of the selection.
+			if (textEdit->cursorIndex < textEdit->selectionStartIndex)
+			{
+				textEdit->cursorIndex = textEdit->selectionStartIndex;
+			}
+
+			// Clear the selection.
+			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+		}
+		// Move the cursor to the right, if there's room.
+		else if (textEdit->cursorIndex < (int)strlen(&textEdit->text))
+		{
+			textEdit->cursorIndex++;
+		}
+	}
+	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT) && textEdit->cursorIndex < (int)strlen(&textEdit->text))
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If there's already a selection, move the cursor, and the selection end to match.
+			textEdit->cursorIndex++;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+		else
+		{
+			// No selection, start a new one and move the cursor.
+			textEdit->selectionStartIndex = textEdit->cursorIndex;
+			textEdit->cursorIndex++;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+	}
+	else if (key == WZ_KEY_HOME)
+	{
+		textEdit->cursorIndex = 0;
+
+		// Clear the selection.
+		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+	}
+	else if (key == (WZ_KEY_HOME | WZ_KEY_SHIFT))
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If there's already a selection, move the cursor, and the selection end to match.
+			textEdit->cursorIndex = 0;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+		else
+		{
+			// No selection, start a new one and move the cursor.
+			textEdit->selectionStartIndex = textEdit->cursorIndex;
+			textEdit->cursorIndex = 0;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+	}
+	else if (key == WZ_KEY_END)
+	{
+		textEdit->cursorIndex = (int)strlen(&textEdit->text);
+
+		// Clear the selection.
+		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+	}
+	else if (key == (WZ_KEY_END | WZ_KEY_SHIFT))
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			// If there's already a selection, move the cursor, and the selection end to match.
+			textEdit->cursorIndex = (int)strlen(&textEdit->text);
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+		else
+		{
+			// No selection, start a new one and move the cursor.
+			textEdit->selectionStartIndex = textEdit->cursorIndex;
+			textEdit->cursorIndex = (int)strlen(&textEdit->text);
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
+	}
+	else if (key == WZ_KEY_DELETE)
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			wz_text_edit_delete_selection(textEdit);
+		}
+		else
+		{
+			wz_text_edit_delete_text(textEdit, textEdit->cursorIndex, 1);
+		}
+	}
+	else if (key == WZ_KEY_BACKSPACE && textEdit->cursorIndex > 0)
+	{
+		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+		{
+			wz_text_edit_delete_selection(textEdit);
+		}
+		else
+		{
+			wz_text_edit_delete_text(textEdit, textEdit->cursorIndex - 1, 1);
+			textEdit->cursorIndex--;
+		}
+	}
+	else
+	{
+		return;
+	}
+
+	wz_text_edit_update_scroll_index(textEdit);
 }
 
 static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 {
 	struct wzTextEdit *textEdit;
+	int n;
 
 	WZ_ASSERT(widget);
 	WZ_ASSERT(text);
 	textEdit = (struct wzTextEdit *)widget;
-	stb_textedit_key(textEdit, &textEdit->state, (int)text[0]);
-	wz_text_edit_update_scroll_value(textEdit);
+	n = (int)strlen(text);
+
+	if (n == 0)
+		return;
+
+	// The text replaces the selection.
+	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+	{
+		wz_text_edit_delete_selection(textEdit);
+	}
+
+	wz_text_edit_insert_text(textEdit, textEdit->cursorIndex, text, n);
+	textEdit->cursorIndex += n;
+	wz_text_edit_update_scroll_index(textEdit);
 }
 
 struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
@@ -314,8 +460,6 @@ struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
 	textEdit->base.vtable.key_down = wz_text_edit_key_down;
 	textEdit->base.vtable.text_input = wz_text_edit_text_input;
 	textEdit->maximumTextLength = maximumTextLength;
-
-	stb_textedit_initialize_state(&textEdit->state, 1);
 
 	return textEdit;
 }
@@ -356,23 +500,23 @@ void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text)
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->scroll;
+	return textEdit->scrollIndex;
 }
 
 int wz_text_edit_get_cursor_index(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->state.cursor;
+	return textEdit->cursorIndex;
 }
 
 int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->state.select_start;
+	return textEdit->selectionStartIndex;
 }
 
 int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->state.select_end;
+	return textEdit->selectionEndIndex;
 }
