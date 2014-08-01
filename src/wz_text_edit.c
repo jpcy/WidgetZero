@@ -211,21 +211,23 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 		wz_text_edit_update_scroll_index(textEdit);
 		textEdit->pressed = true;
 
-		// Start a new selection if there isn't one.
-		if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
+		// Handle selecting.
+		if (wz_main_window_is_shift_key_down(widget->mainWindow))
 		{
-			if (wz_main_window_is_shift_key_down(widget->mainWindow))
+			// Start a new selection if there isn't one.
+			if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
 			{
-				// Shift key down, use the old cursor index as the selection start.
+				// Use the old cursor index as the selection start.
 				textEdit->selectionStartIndex = oldCursorIndex;
 			}
-			else
-			{
-				textEdit->selectionStartIndex = textEdit->cursorIndex;
-			}
+
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
 		}
-		
-		textEdit->selectionEndIndex = textEdit->cursorIndex;
+		else
+		{
+			textEdit->selectionStartIndex = textEdit->cursorIndex;
+			textEdit->selectionEndIndex = textEdit->cursorIndex;
+		}
 	}
 }
 
