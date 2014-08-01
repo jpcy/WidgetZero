@@ -983,8 +983,6 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	wzRect textRect;
 	const char *text;
 	int scrollValue;
-	int cursorIndex, cursorX;
-	int selectionStartIndex, selectionEndIndex;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(textEdit);
@@ -1025,27 +1023,13 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	wz_nanovg_printf(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), &text[scrollValue]);
 
 	// Selection.
-	selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
-	selectionEndIndex = wz_text_edit_get_selection_end_index(textEdit);
-
-	if (selectionStartIndex != selectionEndIndex)
+	if (wz_text_edit_has_selection(textEdit))
 	{
-		int start, end, x1, x2;
+		int x1, x2;
 		wzRect selectionRect;
 
-		start = WZ_MIN(selectionStartIndex, selectionEndIndex);
-		end = WZ_MAX(selectionStartIndex, selectionEndIndex);
-
-		if (start < scrollValue)
-		{
-			x1 = 0;
-		}
-		else
-		{
-			x1 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[start], NULL);
-		}
-
-		x2 = (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[end], NULL);
+		x1 = wz_text_edit_get_selection_start_x(textEdit);
+		x2 = wz_text_edit_get_selection_end_x(textEdit);
 		selectionRect.x = textRect.x + x1;
 		selectionRect.y = textRect.y;
 		selectionRect.w = x2 - x1;
@@ -1056,16 +1040,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	// Cursor.
 	if (showCursor && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
 	{
-		cursorIndex = wz_text_edit_get_cursor_index(textEdit);
-
-		if (cursorIndex - scrollValue > 0)
-		{
-			cursorX = textRect.x + (int)nvgTextBounds(vg, 0, 0, &text[scrollValue], &text[cursorIndex], NULL);
-		}
-		else
-		{
-			cursorX = textRect.x;
-		}
+		int cursorX = textRect.x + wz_text_edit_get_cursor_x(textEdit);
 
 		wz_nanovg_clip_to_rect(vg, clip); // Don't clip.
 		nvgBeginPath(vg);

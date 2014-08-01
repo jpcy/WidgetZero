@@ -520,20 +520,33 @@ int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
 	return textEdit->scrollIndex;
 }
 
-int wz_text_edit_get_cursor_index(const struct wzTextEdit *textEdit)
+int wz_text_edit_get_cursor_x(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->cursorIndex;
+	return wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
 }
 
-int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit)
+bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return textEdit->selectionStartIndex;
+	return textEdit->selectionStartIndex != textEdit->selectionEndIndex;
 }
 
-int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit)
+int wz_text_edit_get_selection_start_x(const struct wzTextEdit *textEdit)
 {
+	int index;
+
 	WZ_ASSERT(textEdit);
-	return textEdit->selectionEndIndex;
+	index = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	return WZ_MAX(0, wz_text_edit_position_from_index(textEdit, index));
+}
+
+int wz_text_edit_get_selection_end_x(const struct wzTextEdit *textEdit)
+{
+	int index, max;
+
+	WZ_ASSERT(textEdit);
+	index = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	max = wz_widget_get_width((const struct wzWidget *)textEdit) - (textEdit->border.left + textEdit->border.right);
+	return WZ_MIN(max, wz_text_edit_position_from_index(textEdit, index));
 }
