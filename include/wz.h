@@ -481,6 +481,7 @@ void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int righ
 const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit);
+const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit);
 int wz_text_edit_get_cursor_x(const struct wzTextEdit *textEdit);
 bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit);
 int wz_text_edit_get_selection_start_x(const struct wzTextEdit *textEdit);

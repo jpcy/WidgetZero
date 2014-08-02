@@ -520,6 +520,12 @@ int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
 	return textEdit->scrollIndex;
 }
 
+const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit)
+{
+	WZ_ASSERT(textEdit);
+	return &((&textEdit->text)[textEdit->scrollIndex]);
+}
+
 int wz_text_edit_get_cursor_x(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
