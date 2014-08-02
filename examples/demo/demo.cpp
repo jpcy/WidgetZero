@@ -109,6 +109,7 @@ public:
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
 		createLabelsFrame();
+		createTextEditFrame();
 		createMiscFrame();
 		createWidgetCategoryWindow();
 		createWindow1();
@@ -169,6 +170,30 @@ private:
 		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
 		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
 		layout->add(customLabel);
+	}
+
+	void createTextEditFrame()
+	{
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
+
+		WidgetCategoryListItem category;
+		category.label = "Text Edit";
+		category.frame = frame;
+		widgetCategories.push_back(category);
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::TextEdit *textEdit1 = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested");
+		textEdit1->setWidth(300);
+		layout->add(textEdit1);
+
+		wz::TextEdit *textEdit2 = new wz::TextEdit(renderer, "text edit with a custom font");
+		textEdit2->setFont("visitor1", 32)->setStretch(WZ_STRETCH_WIDTH);
+		layout->add(textEdit2);
 	}
 
 	void createMiscFrame()
