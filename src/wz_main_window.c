@@ -38,7 +38,6 @@ struct wzMainWindow
 	wzEventCallback handle_event;
 
 	wzMainWindowMeasureTextCallback measure_text;
-	wzMainWindowTextGetPixelDeltaCallback text_get_pixel_delta;
 
 	wzCursor cursor;
 
@@ -1234,12 +1233,6 @@ void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, w
 	mainWindow->measure_text = callback;
 }
 
-void wz_main_window_set_text_get_pixel_delta_callback(struct wzMainWindow *mainWindow, wzMainWindowTextGetPixelDeltaCallback callback)
-{
-	WZ_ASSERT(mainWindow);
-	mainWindow->text_get_pixel_delta = callback;
-}
-
 struct wzMainWindow *wz_main_window_create()
 {
 	struct wzMainWindow *mainWindow;
@@ -1418,9 +1411,4 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height)
 {
 	mainWindow->measure_text(mainWindow, widget, text, n, width, height);
-}
-
-int wz_main_window_text_get_pixel_delta(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index)
-{
-	return mainWindow->text_get_pixel_delta(mainWindow, widget, text, index);
 }

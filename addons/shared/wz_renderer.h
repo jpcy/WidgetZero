@@ -34,9 +34,6 @@ struct wzRenderer
 	// width or height can be NULL.
 	void (*measure_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
-	// Return the pixel delta between the index and index + 1 characters.
-	int (*text_get_pixel_delta)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int index);
-
 	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
 
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);

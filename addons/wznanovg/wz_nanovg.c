@@ -246,26 +246,6 @@ static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *font
 	}
 }
 
-static int wz_nanovg_text_get_pixel_delta(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int index)
-{
-	wzRendererData *rendererData;
-	struct NVGcontext *vg;
-	struct NVGglyphPosition positions[2];
-	float x[2];
-
-	WZ_ASSERT(renderer);
-	WZ_ASSERT(text);
-	rendererData = (wzRendererData *)renderer->data;
-	vg = rendererData->vg;
-
-	nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
-	wz_nanovg_set_font_face(rendererData, fontFace);
-	nvgTextGlyphPositions(vg, 0, 0, &text[index], &text[index + 2], positions, 2);
-	x[0] = index == 0 ? 0 : positions[0].minx;
-	x[1] = index == (int)strlen(text) - 1 ? positions[0].maxx : positions[1].minx;
-	return (int)(x[1] - x[0]);
-}
-
 static void wz_nanovg_debug_draw_text(struct wzRenderer *renderer, const char *text, int x, int y)
 {
 	WZ_ASSERT(renderer);
@@ -1143,7 +1123,6 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->begin_frame = wz_nanovg_begin_frame;
 	renderer->end_frame = wz_nanovg_end_frame;
 	renderer->measure_text = wz_nanovg_measure_text;
-	renderer->text_get_pixel_delta = wz_nanovg_text_get_pixel_delta;
 	renderer->debug_draw_text = wz_nanovg_debug_draw_text;
 	renderer->draw_dock_icon = wz_nanovg_draw_dock_icon;
 	renderer->draw_dock_preview = wz_nanovg_draw_dock_preview;

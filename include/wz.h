@@ -267,7 +267,6 @@ wzKey;
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
 typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
-typedef int (*wzMainWindowTextGetPixelDeltaCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index);
 typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
@@ -277,7 +276,6 @@ struct wzMainWindow *wz_main_window_create();
 void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
 void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback);
-void wz_main_window_set_text_get_pixel_delta_callback(struct wzMainWindow *mainWindow, wzMainWindowTextGetPixelDeltaCallback callback);
 void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);
 void wz_main_window_set_draw_dock_preview_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockPreviewCallback callback, void *metadata);
 void wz_main_window_set_dock_icon_size(struct wzMainWindow *mainWindow, wzSize size);

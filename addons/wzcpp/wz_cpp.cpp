@@ -792,13 +792,6 @@ static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *
 	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
 }
 
-static int TextGetPixelDelta(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int index)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	return renderer->text_get_pixel_delta(renderer, wp->fontFace.c_str(), wp->fontSize, text, index);
-}
-
 static void DrawDockIcon(wzRect rect, void *metadata)
 {
 	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
@@ -819,7 +812,6 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
 	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
-	wz_main_window_set_text_get_pixel_delta_callback(mainWindow, TextGetPixelDelta);
 	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
 	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
 

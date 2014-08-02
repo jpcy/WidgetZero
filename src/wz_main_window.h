@@ -53,6 +53,5 @@ void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWind
 void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
 
 void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
-int wz_main_window_text_get_pixel_delta(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int index);
 
 #endif // _WZ_MAIN_WINDOW_H_
