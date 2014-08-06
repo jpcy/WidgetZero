@@ -77,19 +77,15 @@ static void wz_text_edit_delete_text(struct wzTextEdit *textEdit, int index, int
 	(&textEdit->text)[length - n] = 0;
 }
 
-// Calculate the text index at the given absolute position.
-static int wz_text_edit_index_from_position(const struct wzTextEdit *textEdit, int x, int y)
+static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *textEdit, wzPosition pos)
 {
 	wzRect rect;
-	wzPosition pos;
 	int i, previousWidth, result;
 
 	WZ_ASSERT(textEdit);
 
 	// Calculate relative position.
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)textEdit);
-	pos.x = x - rect.x;
-	pos.y = y - rect.y;
 
 	// Outside widget.
 	if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
@@ -211,6 +207,20 @@ static int wz_text_edit_index_from_position(const struct wzTextEdit *textEdit, i
 	}
 
 	return WZ_CLAMPED(0, result, (int)strlen(&textEdit->text));
+}
+
+// Calculate the text index at the given absolute position.
+static int wz_text_edit_index_from_position(const struct wzTextEdit *textEdit, int x, int y)
+{
+	wzRect rect;
+	wzPosition pos;
+
+	// Make position relative.
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)textEdit);
+	pos.x = x - rect.x;
+	pos.y = y - rect.y;
+
+	return wz_text_edit_index_from_relative_position(textEdit, pos);
 }
 
 // Calculate the position of the cursor - relative to text rect - based on the cursor index and scroll index. 
@@ -481,6 +491,21 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->cursorIndex++;
 			textEdit->selectionEndIndex = textEdit->cursorIndex;
 		}
+	}
+	else if (key == WZ_KEY_UP || WZ_KEY_DOWN)
+	{
+		wzPosition cursorPosition;
+		int lineHeight;
+
+		// Get the cursor position.
+		cursorPosition = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
+
+		// Get line height.
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
+
+		// Move the cursor up/down.
+		cursorPosition.y += (key == WZ_KEY_UP ? -lineHeight : lineHeight);
+		textEdit->cursorIndex = wz_text_edit_index_from_relative_position(textEdit, cursorPosition);
 	}
 	else if (key == WZ_KEY_HOME)
 	{
