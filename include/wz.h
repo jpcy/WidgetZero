@@ -266,7 +266,16 @@ wzKey;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
+typedef struct
+{
+	const char *start;
+	size_t length;
+	const char *next;
+}
+wzLineBreakResult;
+
 typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
+typedef wzLineBreakResult (*wzMainWindowLineBreakTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth);
 typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
@@ -276,6 +285,7 @@ struct wzMainWindow *wz_main_window_create();
 void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
 void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback);
+void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow, wzMainWindowLineBreakTextCallback callback);
 void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);
 void wz_main_window_set_draw_dock_preview_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockPreviewCallback callback, void *metadata);
 void wz_main_window_set_dock_icon_size(struct wzMainWindow *mainWindow, wzSize size);
@@ -472,7 +482,8 @@ struct wzWidget *wz_tab_page_create();
 struct wzTabbed *wz_tabbed_create(struct wzTabBar *tabBar);
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzWidget *page);
 
-struct wzTextEdit *wz_text_edit_create(int maximumTextLength);
+struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength);
+bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
 void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left);
@@ -480,10 +491,17 @@ const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit);
 const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit);
-int wz_text_edit_get_cursor_x(const struct wzTextEdit *textEdit);
+
+// y is centered on the line.
+wzPosition wz_text_edit_get_cursor_position(const struct wzTextEdit *textEdit);
+
 bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit);
-int wz_text_edit_get_selection_start_x(const struct wzTextEdit *textEdit);
-int wz_text_edit_get_selection_end_x(const struct wzTextEdit *textEdit);
+
+// y is centered on the line.
+wzPosition wz_text_edit_get_selection_start_position(const struct wzTextEdit *textEdit);
+
+// y is centered on the line.
+wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *textEdit);
 
 #ifdef __cplusplus
 } // extern "C"

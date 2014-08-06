@@ -34,6 +34,8 @@ struct wzRenderer
 	// width or height can be NULL.
 	void (*measure_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
+	wzLineBreakResult (*line_break_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
+
 	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
 
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
@@ -69,7 +71,7 @@ struct wzRenderer
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
 	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
-	wzSize (*measure_text_edit)(struct wzRenderer *renderer, wzBorder border, const char *fontFace, float fontSize, const char *text);
+	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, const char *text);
 	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor);
 
 	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);

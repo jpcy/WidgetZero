@@ -38,6 +38,7 @@ struct wzMainWindow
 	wzEventCallback handle_event;
 
 	wzMainWindowMeasureTextCallback measure_text;
+	wzMainWindowLineBreakTextCallback line_break_text;
 
 	wzCursor cursor;
 
@@ -1233,6 +1234,12 @@ void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, w
 	mainWindow->measure_text = callback;
 }
 
+void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow, wzMainWindowLineBreakTextCallback callback)
+{
+	WZ_ASSERT(mainWindow);
+	mainWindow->line_break_text = callback;
+}
+
 struct wzMainWindow *wz_main_window_create()
 {
 	struct wzMainWindow *mainWindow;
@@ -1411,4 +1418,9 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height)
 {
 	mainWindow->measure_text(mainWindow, widget, text, n, width, height);
+}
+
+wzLineBreakResult wz_main_window_line_break_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth)
+{
+	return mainWindow->line_break_text(mainWindow, widget, text, n, lineWidth);
 }

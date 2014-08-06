@@ -29,6 +29,7 @@ SOFTWARE.
 struct wzTextEdit
 {
 	struct wzWidget base;
+	bool multiline;
 	int maximumTextLength;
 	wzBorder border;
 	bool pressed;
@@ -94,77 +95,192 @@ static int wz_text_edit_index_from_position(const struct wzTextEdit *textEdit, i
 	if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
 		return textEdit->scrollIndex;
 
-	// Walk through the text until we find two glyphs that the x coordinate straddles.
-	previousWidth = 0;
-	result = textEdit->scrollIndex;
-
-	for (i = 1; i <= (int)strlen(&textEdit->text); i++)
+	if (textEdit->multiline)
 	{
-		int width, deltaWidth;
+		int lineHeight;
+		wzLineBreakResult line;
+		int lineY = 0;
 
-		// Calculate the width of the text up to the current character.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], i, &width, NULL);
+		// Get line height.
+		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
 
-		// Check if we've gone beyond the width of the widget.
-		if (width > rect.w - (textEdit->border.left + textEdit->border.right))
+		// Iterate through lines.
+		result = 0;
+		line.next = &textEdit->text;
+
+		for (;;)
 		{
-			result = textEdit->scrollIndex + i - 1;
-			break;
+			line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, rect.w - (textEdit->border.left + textEdit->border.right));
+
+			result = line.start - &textEdit->text;
+
+			if (pos.y > lineY && pos.y < lineY + lineHeight)
+				break; // On this line.
+
+			if (!line.next || !line.next[0])
+				break;
+
+			lineY += lineHeight;
 		}
 
-		// Calculate the change in text width since the last iteration.
-		deltaWidth = width - previousWidth;
+		// Walk through the text until we find two glyphs that the x coordinate straddles.
+		previousWidth = 0;
 
-		// Check the intersection between the position and the change in text width since the last iteration.
-		if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+		for (i = 1; i <= (int)line.length; i++)
 		{
-			// Left side of glyph.
-			result = textEdit->scrollIndex + i - 1;
-			break;
-		}
-		else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
-		{
-			// Right side of glyph.
-			result = textEdit->scrollIndex + i;
-			break;
-		}
+			int width, deltaWidth;
 
-		// Made it to the end of text string.
-		if (i == (int)strlen(&textEdit->text))
-		{
-			result = i;
-			break;
-		}
+			// Calculate the width of the text up to the current character.
+			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.start, i, &width, NULL);
 
-		// Store this text width for the next iteration.
-		previousWidth = width;
+			// Calculate the change in text width since the last iteration.
+			deltaWidth = width - previousWidth;
+
+			// Check the intersection between the position and the change in text width since the last iteration.
+			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+			{
+				// Left side of glyph.
+				result += i - 1;
+				break;
+			}
+			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
+			{
+				// Right side of glyph.
+				result += i;
+				break;
+			}
+
+			// Made it to the end of text string.
+			if (i == line.length)
+			{
+				result += i;
+				break;
+			}
+
+			// Store this text width for the next iteration.
+			previousWidth = width;
+		}
+	}
+	else
+	{
+		// Walk through the text until we find two glyphs that the x coordinate straddles.
+		previousWidth = 0;
+		result = textEdit->scrollIndex;
+
+		for (i = 1; i <= (int)strlen(&textEdit->text); i++)
+		{
+			int width, deltaWidth;
+
+			// Calculate the width of the text up to the current character.
+			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], i, &width, NULL);
+
+			// Check if we've gone beyond the width of the widget.
+			if (width > rect.w - (textEdit->border.left + textEdit->border.right))
+			{
+				result = textEdit->scrollIndex + i - 1;
+				break;
+			}
+
+			// Calculate the change in text width since the last iteration.
+			deltaWidth = width - previousWidth;
+
+			// Check the intersection between the position and the change in text width since the last iteration.
+			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+			{
+				// Left side of glyph.
+				result = textEdit->scrollIndex + i - 1;
+				break;
+			}
+			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
+			{
+				// Right side of glyph.
+				result = textEdit->scrollIndex + i;
+				break;
+			}
+
+			// Made it to the end of text string.
+			if (i == (int)strlen(&textEdit->text))
+			{
+				result = i;
+				break;
+			}
+
+			// Store this text width for the next iteration.
+			previousWidth = width;
+		}
 	}
 
 	return WZ_CLAMPED(0, result, (int)strlen(&textEdit->text));
 }
 
-// Calculate the x coordinate (relative to text rect) of the cursor, based on the cursor index and scroll index. 
-static int wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index)
+// Calculate the position of the cursor - relative to text rect - based on the cursor index and scroll index. 
+static wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index)
 {
-	int width, delta;
+	int lineHeight;
+	wzPosition position;
 
 	WZ_ASSERT(textEdit);
-	width = 0;
-	delta = index - textEdit->scrollIndex;
 
-	if (delta > 0)
+	// Get the line height.
+	wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
+
+	if (textEdit->multiline)
 	{
-		// Text width from the scroll index to the requested index.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], delta, &width, NULL);
+		wzLineBreakResult line;
+		int lineNo = 0;
+
+		// Iterate through lines.
+		line.next = &textEdit->text;
+
+		for (;;)
+		{
+			int lineStartIndex;
+
+			line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right));
+			WZ_ASSERT(line.start);
+			WZ_ASSERT(line.next);
+			lineStartIndex = line.start - &textEdit->text;
+
+			// Is the index on this line?
+			if (index >= lineStartIndex && index <= lineStartIndex + (int)line.length)
+			{
+				int width = 0;
+
+				if (index - lineStartIndex > 0)
+				{
+					wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.start, index - lineStartIndex, &width, NULL);
+				}
+
+				position.x = width;
+				position.y = lineNo * lineHeight + lineHeight / 2;
+				break;
+			}
+
+			lineNo++;
+		}
 	}
-	else if (delta < 0)
+	else
 	{
-		// Text width from the requested index to the scroll index.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->cursorIndex], -delta, &width, NULL);
-		width = -width;
-	}
+		int width;
+		int delta = index - textEdit->scrollIndex;
+
+		if (delta > 0)
+		{
+			// Text width from the scroll index to the requested index.
+			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollIndex], delta, &width, NULL);
+		}
+		else if (delta < 0)
+		{
+			// Text width from the requested index to the scroll index.
+			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->cursorIndex], -delta, &width, NULL);
+			width = -width;
+		}
 	
-	return width;
+		position.x = width;
+		position.y = lineHeight / 2;
+	}
+
+	return position;
 }
 
 // Update the scroll index so the cursor is visible.
@@ -172,9 +288,12 @@ static void wz_text_edit_update_scroll_index(struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
 
+	if (textEdit->multiline) // TODO
+		return;
+
 	for (;;)
 	{
-		int cursorX = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
+		int cursorX = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex).x;
 
 		if (cursorX > textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right))
 		{
@@ -464,7 +583,7 @@ static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 	wz_text_edit_update_scroll_index(textEdit);
 }
 
-struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
+struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength)
 {
 	struct wzTextEdit *textEdit;
 
@@ -476,9 +595,16 @@ struct wzTextEdit *wz_text_edit_create(int maximumTextLength)
 	textEdit->base.vtable.mouse_move = wz_text_edit_mouse_move;
 	textEdit->base.vtable.key_down = wz_text_edit_key_down;
 	textEdit->base.vtable.text_input = wz_text_edit_text_input;
+	textEdit->multiline = multiline;
 	textEdit->maximumTextLength = maximumTextLength;
 
 	return textEdit;
+}
+
+bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit)
+{
+	WZ_ASSERT(textEdit);
+	return textEdit->multiline;
 }
 
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit)
@@ -523,10 +649,18 @@ int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
 const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
-	return &((&textEdit->text)[textEdit->scrollIndex]);
+
+	if (textEdit->multiline)
+	{
+		return &textEdit->text;
+	}
+	else
+	{
+		return &((&textEdit->text)[textEdit->scrollIndex]);
+	}
 }
 
-int wz_text_edit_get_cursor_x(const struct wzTextEdit *textEdit)
+wzPosition wz_text_edit_get_cursor_position(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
 	return wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
@@ -538,21 +672,20 @@ bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit)
 	return textEdit->selectionStartIndex != textEdit->selectionEndIndex;
 }
 
-int wz_text_edit_get_selection_start_x(const struct wzTextEdit *textEdit)
+wzPosition wz_text_edit_get_selection_start_position(const struct wzTextEdit *textEdit)
 {
 	int index;
 
 	WZ_ASSERT(textEdit);
 	index = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	return WZ_MAX(0, wz_text_edit_position_from_index(textEdit, index));
+	return wz_text_edit_position_from_index(textEdit, index);
 }
 
-int wz_text_edit_get_selection_end_x(const struct wzTextEdit *textEdit)
+wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *textEdit)
 {
-	int index, max;
+	int index;
 
 	WZ_ASSERT(textEdit);
 	index = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	max = wz_widget_get_width((const struct wzWidget *)textEdit) - (textEdit->border.left + textEdit->border.right);
-	return WZ_MIN(max, wz_text_edit_position_from_index(textEdit, index));
+	return wz_text_edit_position_from_index(textEdit, index);
 }

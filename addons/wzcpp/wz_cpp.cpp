@@ -792,6 +792,13 @@ static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *
 	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
 }
 
+static wzLineBreakResult LineBreakText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int lineWidth)
+{
+	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
+	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
+	return renderer->line_break_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, lineWidth);
+}
+
 static void DrawDockIcon(wzRect rect, void *metadata)
 {
 	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
@@ -812,6 +819,7 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
 	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
+	wz_main_window_set_line_break_text_callback(mainWindow, LineBreakText);
 	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
 	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
 
@@ -1333,11 +1341,11 @@ Tab *Tabbed::addTab(Tab *tab)
 
 //------------------------------------------------------------------------------
 
-TextEditPrivate::TextEditPrivate(wzRenderer *renderer)
+TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	textEdit = wz_text_edit_create(256);
+	textEdit = wz_text_edit_create(multiline, 256);
 	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer, textEdit));
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
@@ -1355,7 +1363,7 @@ TextEditPrivate::~TextEditPrivate()
 
 wzSize TextEditPrivate::measure()
 {
-	return renderer->measure_text_edit(renderer, wz_text_edit_get_border(textEdit), fontFace.c_str(), fontSize, wz_text_edit_get_text(textEdit));
+	return renderer->measure_text_edit(renderer, textEdit, fontFace.c_str(), fontSize, wz_text_edit_get_text(textEdit));
 }
 
 void TextEditPrivate::draw(wzRect clip)
@@ -1366,14 +1374,14 @@ void TextEditPrivate::draw(wzRect clip)
 
 //------------------------------------------------------------------------------
 
-TextEdit::TextEdit(wzRenderer *renderer)
+TextEdit::TextEdit(wzRenderer *renderer, bool multiline)
 {
-	p = new TextEditPrivate(renderer);
+	p = new TextEditPrivate(renderer, multiline);
 }
 
-TextEdit::TextEdit(wzRenderer *renderer, const std::string &text)
+TextEdit::TextEdit(wzRenderer *renderer, const std::string &text, bool multiline)
 {
-	p = new TextEditPrivate(renderer);
+	p = new TextEditPrivate(renderer, multiline);
 	setText(text);
 }
 

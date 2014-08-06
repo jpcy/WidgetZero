@@ -187,13 +187,17 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::TextEdit *textEdit1 = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested");
+		wz::TextEdit *textEdit1 = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested", false);
 		textEdit1->setWidth(300);
 		layout->add(textEdit1);
 
-		wz::TextEdit *textEdit2 = new wz::TextEdit(renderer, "text edit with a custom font");
+		wz::TextEdit *textEdit2 = new wz::TextEdit(renderer, "text edit with a custom font", false);
 		textEdit2->setFont("visitor1", 32)->setStretch(WZ_STRETCH_WIDTH);
 		layout->add(textEdit2);
+
+		wz::TextEdit *textEdit3 = new wz::TextEdit(renderer, "multiline text edit\n\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", true);
+		textEdit3->setSize(300, 200);
+		layout->add(textEdit3);
 	}
 
 	void createMiscFrame()
@@ -300,7 +304,7 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		window->add(layout);
 
-		wz::TextEdit *textEdit = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested");
+		wz::TextEdit *textEdit = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested", false);
 		textEdit->setStretch(WZ_STRETCH_WIDTH);
 		layout->add(textEdit);
 
