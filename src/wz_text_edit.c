@@ -98,7 +98,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 		int lineY = 0;
 
 		// Get line height.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
+		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
 
 		// Iterate through lines.
 		result = 0;
@@ -232,7 +232,7 @@ static wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *text
 	WZ_ASSERT(textEdit);
 
 	// Get the line height.
-	wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
+	lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
 
 	if (textEdit->multiline)
 	{
@@ -271,7 +271,7 @@ static wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *text
 	}
 	else
 	{
-		int width;
+		int width = 0;
 		int delta = index - textEdit->scrollIndex;
 
 		if (delta > 0)
@@ -492,7 +492,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->selectionEndIndex = textEdit->cursorIndex;
 		}
 	}
-	else if (key == WZ_KEY_UP || WZ_KEY_DOWN)
+	else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
 	{
 		wzPosition cursorPosition;
 		int lineHeight;
@@ -501,7 +501,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 		cursorPosition = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
 
 		// Get line height.
-		wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, NULL, 0, NULL, &lineHeight);
+		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
 
 		// Move the cursor up/down.
 		cursorPosition.y += (key == WZ_KEY_UP ? -lineHeight : lineHeight);

@@ -274,6 +274,7 @@ typedef struct
 }
 wzLineBreakResult;
 
+typedef int (*wzMainWindowGetLineHeightCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
 typedef wzLineBreakResult (*wzMainWindowLineBreakTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth);
 typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
@@ -284,6 +285,7 @@ struct wzMainWindow *wz_main_window_create();
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
 void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
+void wz_main_window_set_get_line_height_callback(struct wzMainWindow *mainWindow, wzMainWindowGetLineHeightCallback callback);
 void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback);
 void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow, wzMainWindowLineBreakTextCallback callback);
 void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);

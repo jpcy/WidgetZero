@@ -236,6 +236,22 @@ static void wz_nanovg_end_frame(struct wzRenderer *renderer)
 	nvgEndFrame(((wzRendererData *)renderer->data)->vg);
 }
 
+static int wz_nanovg_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	float lineHeight;
+
+	WZ_ASSERT(renderer);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgFontSize(vg, fontSize == 0 ? rendererData->defaultFontSize : fontSize);
+	wz_nanovg_set_font_face(rendererData, fontFace);
+	nvgTextMetrics(vg, NULL, NULL, &lineHeight);
+	return (int)lineHeight;
+}
+
 static void wz_nanovg_measure_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height)
 {
 	wzRendererData *rendererData;
@@ -532,8 +548,8 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *f
 		size.w = WZ_MAX(size.w, w);
 	}
 
-	// Use font height.
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, NULL, 0, NULL, &size.h);
+	// Use line height.
+	size.h = wz_nanovg_get_line_height(renderer, fontFace, fontSize);
 
 	// Add vertical scroller width.
 	size.w += renderer->measure_scroller(renderer, WZ_SCROLLER_VERTICAL).w;
@@ -590,13 +606,11 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struc
 
 static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
 {
-	int labelHeight;
 	wzBorder margin;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, NULL, &labelHeight);
 
-	margin.top = (!label || !label[0]) ? 8 : labelHeight + 8;
+	margin.top = (!label || !label[0]) ? 8 : wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 8;
 	margin.bottom = 8;
 	margin.left = 8;
 	margin.right = 8;
@@ -715,12 +729,8 @@ static wzBorder wz_nanovg_get_list_items_border(struct wzRenderer *renderer, str
 
 static int wz_nanovg_measure_list_item_height(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize)
 {
-	wzSize size;
-
 	WZ_ASSERT(renderer);
-	WZ_ASSERT(list);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, NULL, 0, NULL, &size.h);
-	return size.h + 2; // Add a little padding.
+	return wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 2; // Add a little padding.
 }
 
 static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride)
@@ -982,9 +992,8 @@ static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, const str
 	}
 	else
 	{
-		wz_nanovg_measure_text(renderer, fontFace, fontSize, text, 0, NULL, &size.h);
 		size.w = 100;
-		size.h += border.top + border.bottom;
+		size.h = wz_nanovg_get_line_height(renderer, fontFace, fontSize) + border.top + border.bottom;
 	}
 
 	return size;
@@ -1043,8 +1052,8 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 		wz_nanovg_print(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), wz_text_edit_get_visible_text(textEdit), 0);
 	}
 
-	// Calculate line height.
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, NULL, 0, NULL, &lineHeight);
+	// Get line height.
+	lineHeight = wz_nanovg_get_line_height(renderer, fontFace, fontSize);
 
 	// Selection.
 	if (wz_text_edit_has_selection(textEdit))
@@ -1083,11 +1092,8 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 
 static int wz_nanovg_measure_window_header_height(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title)
 {
-	int h;
-
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, title, 0, NULL, &h);
-	return h + 6; // Padding.
+	return wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 6; // Padding.
 }
 
 static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title)
@@ -1183,6 +1189,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	// Set renderer function pointers.
 	renderer->begin_frame = wz_nanovg_begin_frame;
 	renderer->end_frame = wz_nanovg_end_frame;
+	renderer->get_line_height = wz_nanovg_get_line_height;
 	renderer->measure_text = wz_nanovg_measure_text;
 	renderer->line_break_text = wz_nanovg_line_break_text;
 	renderer->debug_draw_text = wz_nanovg_debug_draw_text;

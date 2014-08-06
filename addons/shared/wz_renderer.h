@@ -31,6 +31,8 @@ struct wzRenderer
 	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 	void (*end_frame)(struct wzRenderer *renderer);
 
+	int (*get_line_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize);
+
 	// width or height can be NULL.
 	void (*measure_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
