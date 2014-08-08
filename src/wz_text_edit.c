@@ -118,7 +118,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 
 			result = line.start - &textEdit->text;
 
-			if (pos.y > lineY && pos.y < lineY + lineHeight)
+			if (pos.y >= lineY && pos.y < lineY + lineHeight)
 				break; // On this line.
 
 			if (!line.next || !line.next[0])
