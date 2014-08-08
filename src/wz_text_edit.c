@@ -269,6 +269,9 @@ static void wz_text_edit_mouse_button_down(struct wzWidget *widget, int mouseBut
 	{
 		int oldCursorIndex;
 
+		// Lock input to this widget.
+		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+
 		// Set keyboard focus to this widget.
 		wz_main_window_set_keyboard_focus_widget(widget->mainWindow, widget);
 
@@ -307,6 +310,7 @@ static void wz_text_edit_mouse_button_up(struct wzWidget *widget, int mouseButto
 
 	if (mouseButton == 1)
 	{
+		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 		textEdit->pressed = false;
 	}
 }
