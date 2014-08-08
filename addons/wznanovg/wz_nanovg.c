@@ -1042,32 +1042,94 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	if (!wz_nanovg_clip_to_rect_intersection(vg, clip, textRect))
 		return;
 
+	// Get line height.
+	lineHeight = wz_nanovg_get_line_height(renderer, fontFace, fontSize);
+
 	// Text.
 	if (wz_text_edit_is_multiline(textEdit))
 	{
-		wz_nanovg_print_box(rendererData, textRect, fontFace, fontSize, nvgRGB(0, 0, 0), wz_text_edit_get_text(textEdit), 0);
+		wzLineBreakResult line;
+		int selectionStartIndex, selectionEndIndex, lineY = 0;
+
+		selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
+		selectionEndIndex = wz_text_edit_get_selection_end_index(textEdit);
+		line.next = wz_text_edit_get_text(textEdit);
+
+		for (;;)
+		{
+			line = wz_nanovg_line_break_text(renderer, fontFace, fontSize, line.next, 0, textRect.w);
+
+			if (line.length > 0)
+			{
+				// Draw this line.
+				wz_nanovg_print(rendererData, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, nvgRGB(0, 0, 0), line.start, line.length);
+
+				// Selection.
+				if (wz_text_edit_has_selection(textEdit))
+				{
+					int lineStartIndex;
+					bool startOnThisLine, endOnThisLine, straddleThisLine;
+					wzPosition start, end;
+
+					lineStartIndex = line.start - wz_text_edit_get_text(textEdit);
+					startOnThisLine = selectionStartIndex >= lineStartIndex && selectionStartIndex <= lineStartIndex + (int)line.length;
+					endOnThisLine = selectionEndIndex >= lineStartIndex && selectionEndIndex <= lineStartIndex + (int)line.length;
+					straddleThisLine = selectionStartIndex < lineStartIndex && selectionEndIndex > lineStartIndex + (int)line.length;
+
+					if (startOnThisLine)
+					{
+						start = wz_text_edit_position_from_index(textEdit, selectionStartIndex);
+					}
+					else
+					{
+						start = wz_text_edit_position_from_index(textEdit, lineStartIndex);
+					}
+
+					if (endOnThisLine)
+					{
+						end = wz_text_edit_position_from_index(textEdit, selectionEndIndex);
+					}
+					else
+					{
+						end = wz_text_edit_position_from_index(textEdit, lineStartIndex + (int)line.length);
+					}
+
+					if (startOnThisLine || straddleThisLine || endOnThisLine)
+					{
+						wzRect selectionRect;
+						selectionRect.x = textRect.x + start.x;
+						selectionRect.y = textRect.y + start.y - lineHeight / 2;
+						selectionRect.w = end.x - start.x;
+						selectionRect.h = lineHeight;
+						wz_nanovg_draw_filled_rect(vg, selectionRect, nvgRGBA(0, 0, 255, 65));
+					}
+				}
+			}
+
+			if (!line.next || !line.next[0])
+				break;
+
+			lineY += lineHeight;
+		}
 	}
 	else
 	{
 		wz_nanovg_print(rendererData, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(0, 0, 0), wz_text_edit_get_visible_text(textEdit), 0);
-	}
 
-	// Get line height.
-	lineHeight = wz_nanovg_get_line_height(renderer, fontFace, fontSize);
+		// Selection.
+		if (wz_text_edit_has_selection(textEdit))
+		{
+			wzPosition position1, position2;
+			wzRect selectionRect;
 
-	// Selection.
-	if (wz_text_edit_has_selection(textEdit))
-	{
-		wzPosition position1, position2;
-		wzRect selectionRect;
-
-		position1 = wz_text_edit_get_selection_start_position(textEdit);
-		position2 = wz_text_edit_get_selection_end_position(textEdit);
-		selectionRect.x = textRect.x + position1.x;
-		selectionRect.y = textRect.y + position1.y - lineHeight / 2;
-		selectionRect.w = position2.x - position1.x;
-		selectionRect.h = lineHeight;
-		wz_nanovg_draw_filled_rect(vg, selectionRect, nvgRGBA(0, 0, 255, 65));
+			position1 = wz_text_edit_get_selection_start_position(textEdit);
+			position2 = wz_text_edit_get_selection_end_position(textEdit);
+			selectionRect.x = textRect.x + position1.x;
+			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
+			selectionRect.w = position2.x - position1.x;
+			selectionRect.h = lineHeight;
+			wz_nanovg_draw_filled_rect(vg, selectionRect, nvgRGBA(0, 0, 255, 65));
+		}
 	}
 
 	// Cursor.

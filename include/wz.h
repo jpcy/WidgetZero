@@ -499,11 +499,19 @@ wzPosition wz_text_edit_get_cursor_position(const struct wzTextEdit *textEdit);
 
 bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit);
 
+// start is always < end if wz_text_edit_has_selection
+int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit);
+
 // y is centered on the line.
 wzPosition wz_text_edit_get_selection_start_position(const struct wzTextEdit *textEdit);
 
+// end is always > start if wz_text_edit_has_selection
+int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit);
+
 // y is centered on the line.
 wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *textEdit);
+
+wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index);
 
 #ifdef __cplusplus
 } // extern "C"
