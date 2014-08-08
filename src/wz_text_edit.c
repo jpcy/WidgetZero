@@ -353,6 +353,26 @@ static void wz_text_edit_delete_selection(struct wzTextEdit *textEdit)
 	textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 }
 
+// Helper function for moving the cursor while the selection (shift) key is held.
+static void wz_text_edit_move_cursor_and_selection(struct wzTextEdit *textEdit, int newCursorIndex)
+{
+	WZ_ASSERT(textEdit);
+
+	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+	{
+		// If there's already a selection, move the cursor, and the selection end to match.
+		textEdit->cursorIndex = newCursorIndex;
+		textEdit->selectionEndIndex = textEdit->cursorIndex;
+	}
+	else
+	{
+		// No selection, start a new one and move the cursor.
+		textEdit->selectionStartIndex = textEdit->cursorIndex;
+		textEdit->cursorIndex = newCursorIndex;
+		textEdit->selectionEndIndex = textEdit->cursorIndex;
+	}
+}
+
 static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 {
 	struct wzTextEdit *textEdit;
@@ -381,19 +401,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 	}
 	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex > 0)
 	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If there's already a selection, move the cursor, and the selection end to match.
-			textEdit->cursorIndex--;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-		else
-		{
-			// No selection, start a new one and move the cursor.
-			textEdit->selectionStartIndex = textEdit->cursorIndex;
-			textEdit->cursorIndex--;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
+		wz_text_edit_move_cursor_and_selection(textEdit, textEdit->cursorIndex - 1);
 	}
 	else if (key == WZ_KEY_RIGHT)
 	{
@@ -416,24 +424,12 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 	}
 	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex < (int)strlen(&textEdit->text))
 	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If there's already a selection, move the cursor, and the selection end to match.
-			textEdit->cursorIndex++;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-		else
-		{
-			// No selection, start a new one and move the cursor.
-			textEdit->selectionStartIndex = textEdit->cursorIndex;
-			textEdit->cursorIndex++;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
+		wz_text_edit_move_cursor_and_selection(textEdit, textEdit->cursorIndex + 1);
 	}
-	else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
 	{
 		wzPosition cursorPosition;
-		int lineHeight;
+		int lineHeight, newCursorIndex;
 
 		// Get the cursor position.
 		cursorPosition = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
@@ -442,8 +438,21 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
 
 		// Move the cursor up/down.
-		cursorPosition.y += (key == WZ_KEY_UP ? -lineHeight : lineHeight);
-		textEdit->cursorIndex = wz_text_edit_index_from_relative_position(textEdit, cursorPosition);
+		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
+		newCursorIndex = wz_text_edit_index_from_relative_position(textEdit, cursorPosition);
+
+		// Apply the new cursor index.
+		if ((key & WZ_KEY_SHIFT_BIT) != 0)
+		{
+			wz_text_edit_move_cursor_and_selection(textEdit, newCursorIndex);
+		}
+		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
+		{
+			textEdit->cursorIndex = newCursorIndex;
+
+			// Clear the selection.
+			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+		}
 	}
 	else if (key == WZ_KEY_HOME)
 	{
