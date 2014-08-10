@@ -85,7 +85,7 @@ static int wz_nanovg_create_image(wzRendererData *rendererData, const char *file
 	}
 
 	// Not found, create and cache it.
-	rendererData->images[rendererData->nImages].handle = nvgCreateImage(rendererData->vg, filename);
+	rendererData->images[rendererData->nImages].handle = nvgCreateImage(rendererData->vg, filename, 0);
 	strcpy(rendererData->images[rendererData->nImages].filename, filename);
 	rendererData->nImages++;
 
@@ -1228,7 +1228,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	memset(rendererData, 0, sizeof(wzRendererData));
 
 	// Init nanovg.
-	rendererData->vg = nvgCreateGL2(512, 512, 0);
+	rendererData->vg = nvgCreateGL2(0);
 
 	if (!rendererData->vg)
 	{

@@ -93,9 +93,6 @@ project "WidgetZeroCpp"
 		"addons/shared",
 		"addons/wzcpp"
 	}
-	
-	configuration "vs2012"
-		linkoptions { "/SAFESEH:NO" }
 		
 -----------------------------------------------------------------------------
 
@@ -137,6 +134,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 			"include",
 			"addons/shared",
 			"addons/wznanovg",
+			config.glewPath .. "/include",
 			_includedirs
 		}
 		
