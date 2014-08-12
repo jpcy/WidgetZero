@@ -195,8 +195,8 @@ private:
 		textEdit2->setFont("visitor1", 32)->setStretch(WZ_STRETCH_WIDTH);
 		layout->add(textEdit2);
 
-		wz::TextEdit *textEdit3 = new wz::TextEdit(renderer, "multiline text edit\n\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.", true);
-		textEdit3->setSize(300, 200);
+		wz::TextEdit *textEdit3 = new wz::TextEdit(renderer, "NanoVG is small antialiased vector graphics rendering library for OpenGL. It has lean API modeled after HTML5 canvas API. It is aimed to be a practical and fun toolset for building scalable user interfaces and visualizations.", true);
+		textEdit3->setSize(200, 150);
 		layout->add(textEdit3);
 	}
 

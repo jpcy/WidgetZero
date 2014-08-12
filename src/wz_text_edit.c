@@ -95,15 +95,17 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 	// Calculate relative position.
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)textEdit);
 
-	// Outside widget.
-	if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
-		return textEdit->scrollIndex;
-
 	if (textEdit->multiline)
 	{
 		int lineHeight;
 		wzLineBreakResult line;
 		int lineY = 0;
+
+		// Outside widget.
+		if (pos.y < 0)
+			return 0;
+		else if (pos.y > rect.h)
+			return (int)strlen(&textEdit->text);
 
 		// Get line height.
 		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
@@ -167,6 +169,10 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 	}
 	else
 	{
+		// Outside widget.
+		if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
+			return textEdit->scrollIndex;
+
 		// Walk through the text until we find two glyphs that the x coordinate straddles.
 		previousWidth = 0;
 		result = textEdit->scrollIndex;
