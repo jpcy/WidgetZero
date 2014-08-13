@@ -753,7 +753,13 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 	// Get the line height.
 	lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
 
-	if (textEdit->multiline)
+	if (textEdit->text == 0)
+	{
+		// Text is empty.
+		position.x = 0;
+		position.y = lineHeight / 2;
+	}
+	else if (textEdit->multiline)
 	{
 		wzLineBreakResult line;
 		int lineNo = 0;
@@ -771,7 +777,7 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 			lineStartIndex = line.start - &textEdit->text;
 
 			// Is the index on this line?
-			if (index >= lineStartIndex && index <= lineStartIndex + (int)line.length)
+			if ((index >= lineStartIndex && index <= lineStartIndex + (int)line.length) || !line.next || !line.next[0])
 			{
 				int width = 0;
 

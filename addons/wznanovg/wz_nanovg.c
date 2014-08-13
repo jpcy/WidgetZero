@@ -285,7 +285,7 @@ static wzLineBreakResult wz_nanovg_line_break_text(struct wzRenderer *renderer, 
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
-	if (nvgTextBreakLines(vg, text, n == 0 ? NULL : &text[n], (float)lineWidth, &row, 1) > 0)
+	if (text && nvgTextBreakLines(vg, text, n == 0 ? NULL : &text[n], (float)lineWidth, &row, 1) > 0)
 	{
 		result.start = row.start;
 		result.length = row.end - row.start;
