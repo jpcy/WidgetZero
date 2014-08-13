@@ -497,27 +497,69 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 		}
 	}
-	else if (key == WZ_KEY_HOME)
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME || WZ_KEY_MOD_OFF(key) == WZ_KEY_END)
 	{
-		textEdit->cursorIndex = 0;
+		int newCursorIndex;
 
-		// Clear the selection.
-		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-	}
-	else if (key == (WZ_KEY_HOME | WZ_KEY_SHIFT_BIT))
-	{
-		wz_text_edit_move_cursor_and_selection(textEdit, 0);
-	}
-	else if (key == WZ_KEY_END)
-	{
-		textEdit->cursorIndex = (int)strlen(&textEdit->text);
+		// Go to text start/end.
+		if (!textEdit->multiline || (textEdit->multiline && (key & WZ_KEY_CONTROL_BIT)))
+		{
+			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			{
+				newCursorIndex = 0;
+			}
+			else
+			{
+				newCursorIndex = (int)strlen(&textEdit->text);
+			}
+		}
+		// Go to line start/end.
+		else
+		{
+			// Find the line we're on.
+			wzLineBreakResult line;
+			int lineStartIndex, lineEndIndex;
 
-		// Clear the selection.
-		textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-	}
-	else if (key == (WZ_KEY_END | WZ_KEY_SHIFT_BIT))
-	{
-		wz_text_edit_move_cursor_and_selection(textEdit, (int)strlen(&textEdit->text));
+			line.next = &textEdit->text;
+
+			for (;;)
+			{
+				line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right));
+				WZ_ASSERT(line.start);
+				WZ_ASSERT(line.next);
+
+				lineStartIndex = line.start - &textEdit->text;
+				lineEndIndex = lineStartIndex + line.length;
+
+				// Is the cursor index on this line?
+				if (textEdit->cursorIndex >= lineStartIndex && textEdit->cursorIndex <= lineEndIndex)
+					break;
+
+				if (!line.next || !line.next[0])
+					return;
+			}
+
+			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			{
+				newCursorIndex = lineStartIndex;
+			}
+			else
+			{
+				newCursorIndex = lineEndIndex;
+			}
+		}
+
+		if (key & WZ_KEY_SHIFT_BIT)
+		{
+			wz_text_edit_move_cursor_and_selection(textEdit, newCursorIndex);
+		}
+		else
+		{
+			textEdit->cursorIndex = newCursorIndex;
+
+			// Clear the selection.
+			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+		}
 	}
 	else if (key == WZ_KEY_DELETE)
 	{
