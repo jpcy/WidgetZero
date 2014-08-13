@@ -506,19 +506,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 	}
 	else if (key == (WZ_KEY_HOME | WZ_KEY_SHIFT_BIT))
 	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If there's already a selection, move the cursor, and the selection end to match.
-			textEdit->cursorIndex = 0;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-		else
-		{
-			// No selection, start a new one and move the cursor.
-			textEdit->selectionStartIndex = textEdit->cursorIndex;
-			textEdit->cursorIndex = 0;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
+		wz_text_edit_move_cursor_and_selection(textEdit, 0);
 	}
 	else if (key == WZ_KEY_END)
 	{
@@ -529,19 +517,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 	}
 	else if (key == (WZ_KEY_END | WZ_KEY_SHIFT_BIT))
 	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If there's already a selection, move the cursor, and the selection end to match.
-			textEdit->cursorIndex = (int)strlen(&textEdit->text);
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-		else
-		{
-			// No selection, start a new one and move the cursor.
-			textEdit->selectionStartIndex = textEdit->cursorIndex;
-			textEdit->cursorIndex = (int)strlen(&textEdit->text);
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
+		wz_text_edit_move_cursor_and_selection(textEdit, (int)strlen(&textEdit->text));
 	}
 	else if (key == WZ_KEY_DELETE)
 	{
