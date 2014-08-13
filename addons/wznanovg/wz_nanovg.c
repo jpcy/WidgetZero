@@ -1053,7 +1053,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 
 		selectionStartIndex = wz_text_edit_get_selection_start_index(textEdit);
 		selectionEndIndex = wz_text_edit_get_selection_end_index(textEdit);
-		line.next = wz_text_edit_get_text(textEdit);
+		line.next = wz_text_edit_get_visible_text(textEdit);
 
 		for (;;)
 		{
