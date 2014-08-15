@@ -668,6 +668,19 @@ void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int righ
 	textEdit->border.left = left;
 }
 
+wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit)
+{
+	wzRect textRect;
+
+	WZ_ASSERT(textEdit);
+	textRect = wz_widget_get_absolute_rect((struct wzWidget *)textEdit);
+	textRect.x += textEdit->border.left;
+	textRect.y += textEdit->border.top;
+	textRect.w -= textEdit->border.left + textEdit->border.right;
+	textRect.h -= textEdit->border.top + textEdit->border.bottom;
+	return textRect;
+}
+
 const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);

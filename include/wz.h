@@ -489,6 +489,7 @@ bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
 void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left);
+wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit);
 const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit);

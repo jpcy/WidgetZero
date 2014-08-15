@@ -1033,11 +1033,8 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 		wz_nanovg_draw_rect(vg, rect, nvgRGB(0, 0, 0));
 	}
 
-	// Calculate text rect and clip to it.
-	textRect.x = rect.x + border.left;
-	textRect.y = rect.y + border.top;
-	textRect.w = rect.w - (border.left + border.right);
-	textRect.h = rect.h - (border.top + border.bottom);
+	// Clip to the text rect.
+	textRect = wz_text_edit_get_text_rect(textEdit);
 
 	if (!wz_nanovg_clip_to_rect_intersection(vg, clip, textRect))
 		return;
