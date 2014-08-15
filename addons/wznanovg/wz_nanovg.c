@@ -1005,7 +1005,6 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover;
-	wzBorder border;
 	wzRect textRect;
 	int lineHeight;
 
@@ -1018,7 +1017,6 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	wz_nanovg_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)textEdit);
 	hover = wz_widget_get_hover((struct wzWidget *)textEdit);
-	border = wz_text_edit_get_border(textEdit);
 
 	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, nvgRGB(255, 255, 255));
@@ -1138,7 +1136,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 		position.x += textRect.x;
 		position.y += textRect.y;
 
-		wz_nanovg_clip_to_rect(vg, clip); // Don't clip.
+		wz_nanovg_clip_to_rect(vg, rect);
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
 		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);

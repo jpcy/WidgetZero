@@ -281,6 +281,7 @@ struct TextEditPrivate : public WidgetPrivate
 	virtual void draw(wzRect clip);
 
 	wzTextEdit *textEdit;
+	std::auto_ptr<Scroller> scroller;
 };
 
 struct WindowPrivate : public WidgetPrivate

@@ -1353,7 +1353,13 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	textEdit = wz_text_edit_create(multiline, 256);
+
+	if (multiline)
+	{
+		scroller.reset(new Scroller(renderer));
+	}
+
+	textEdit = wz_text_edit_create(multiline ? (wzScroller *)scroller->p->getWidget() : NULL, multiline, 256);
 	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer, textEdit));
 	wzWidget *widget = (wzWidget *)textEdit;
 	wz_widget_set_metadata(widget, this);
