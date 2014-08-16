@@ -824,6 +824,7 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
 	this->renderer = renderer;
 	mainWindow = wz_main_window_create();
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
+	wz_widget_set_draw_callback((wzWidget *)mainWindow, DrawWidget);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
 	wz_main_window_set_get_line_height_callback(mainWindow, GetLineHeight);
 	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
@@ -847,6 +848,11 @@ MainWindowPrivate::~MainWindowPrivate()
 	}
 
 	wz_widget_destroy((wzWidget *)mainWindow);
+}
+
+void MainWindowPrivate::draw(wzRect /*clip*/)
+{
+	renderer->draw_main_window(renderer, mainWindow);
 }
 
 void MainWindowPrivate::drawDockIcon(wzRect rect)

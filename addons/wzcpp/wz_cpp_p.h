@@ -164,7 +164,7 @@ struct MainWindowPrivate : public WidgetPrivate
 	~MainWindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
 	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
-	void draw();
+	void draw(wzRect clip);
 	void drawDockIcon(wzRect rect);
 	void drawDockPreview(wzRect rect);
 
