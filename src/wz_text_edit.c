@@ -79,7 +79,7 @@ SCROLLER
 static void wz_text_edit_update_scroller(struct wzTextEdit *textEdit)
 {
 	wzRect textEditRect, rect;
-	int lineHeight, nLines, max;
+	int lineHeight, nLines, max, maxHeight;
 
 	WZ_ASSERT(textEdit);
 
@@ -115,6 +115,10 @@ static void wz_text_edit_update_scroller(struct wzTextEdit *textEdit)
 	rect.y = textEdit->border.top;
 	rect.h = textEditRect.h - (textEdit->border.top + textEdit->border.bottom);
 	wz_widget_set_rect_internal((struct wzWidget *)textEdit->scroller, rect);
+
+	// Now that the height has been calculated, update the nub scale.
+	maxHeight = nLines * lineHeight;
+	wz_scroller_set_nub_scale(textEdit->scroller, 1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 }
 
 static void wz_text_edit_scroller_value_changed(wzEvent *e)

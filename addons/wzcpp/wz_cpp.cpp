@@ -1079,7 +1079,6 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 	wz_widget_set_draw_callback((wzWidget *)scroller, DrawWidget);
 	wz_widget_set_measure_callback((wzWidget *)scroller, MeasureWidget);
-	wz_scroller_set_nub_size(scroller, 16);
 
 	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
 	wz_widget_set_size_args(decrementButton->p->getWidget(), 16, 16);

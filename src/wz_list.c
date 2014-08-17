@@ -60,7 +60,7 @@ SCROLLER
 static void wz_list_update_scroller(struct wzList *list)
 {
 	wzRect listRect, rect;
-	int max;
+	int maxHeight, max;
 
 	WZ_ASSERT(list);
 
@@ -68,7 +68,8 @@ static void wz_list_update_scroller(struct wzList *list)
 		return;
 
 	// Update max value.
-	max = list->nItems * list->itemHeight - wz_list_get_items_rect(list).h;
+	maxHeight = list->nItems * list->itemHeight;
+	max = maxHeight - wz_list_get_items_rect(list).h;
 	wz_scroller_set_max_value(list->scroller, max);
 
 	// Fit to the right of items rect. Width doesn't change.
@@ -79,6 +80,9 @@ static void wz_list_update_scroller(struct wzList *list)
 	rect.y = list->itemsBorder.top;
 	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
 	wz_widget_set_rect_internal((struct wzWidget *)list->scroller, rect);
+
+	// Now that the height has been calculated, update the nub scale.
+	wz_scroller_set_nub_scale(list->scroller, 1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 
 	// Hide/show scroller depending on if it's needed.
 	if (max <= 0)

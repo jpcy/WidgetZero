@@ -452,8 +452,7 @@ void wz_scroller_increment_value(struct wzScroller *scroller);
 void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
 int wz_scroller_get_step_value(struct wzScroller *scroller);
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
-int wz_scroller_get_nub_size(struct wzScroller *scroller);
-void wz_scroller_set_nub_size(struct wzScroller *scroller, int size);
+void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
 
