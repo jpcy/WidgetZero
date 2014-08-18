@@ -43,6 +43,9 @@ struct wzTextEdit
 	char text;
 };
 
+static void wz_text_edit_update_scroll_index(struct wzTextEdit *textEdit);
+static void wz_text_edit_delete_selection(struct wzTextEdit *textEdit);
+
 static int wz_calculate_num_lines(struct wzTextEdit *textEdit, int lineWidth)
 {
 	wzLineBreakResult line;
@@ -134,7 +137,7 @@ static void wz_text_edit_scroller_value_changed(wzEvent *e)
 /*
 ================================================================================
 
-PRIVATE FUNCTIONS
+INSERTING / DELETING TEXT
 
 ================================================================================
 */
@@ -163,6 +166,28 @@ static void wz_text_edit_insert_text(struct wzTextEdit *textEdit, int index, con
 	wz_text_edit_update_scroller(textEdit);
 }
 
+static void wz_text_edit_enter_text(struct wzTextEdit *textEdit, const char *text)
+{
+	int n;
+
+	WZ_ASSERT(textEdit);
+	WZ_ASSERT(text);
+	n = (int)strlen(text);
+
+	if (n == 0)
+		return;
+
+	// The text replaces the selection.
+	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
+	{
+		wz_text_edit_delete_selection(textEdit);
+	}
+
+	wz_text_edit_insert_text(textEdit, textEdit->cursorIndex, text, n);
+	textEdit->cursorIndex += n;
+	wz_text_edit_update_scroll_index(textEdit);
+}
+
 static void wz_text_edit_delete_text(struct wzTextEdit *textEdit, int index, int n)
 {
 	int length;
@@ -179,6 +204,35 @@ static void wz_text_edit_delete_text(struct wzTextEdit *textEdit, int index, int
 	// Update the scroller.
 	wz_text_edit_update_scroller(textEdit);
 }
+
+static void wz_text_edit_delete_selection(struct wzTextEdit *textEdit)
+{
+	int start, end;
+
+	WZ_ASSERT(textEdit);
+
+	// No selection.
+	if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
+		return;
+
+	start = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	end = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
+	wz_text_edit_delete_text(textEdit, start, end - start);
+
+	// Move the cursor to the start (smallest of start and end, not the real selection start).
+	textEdit->cursorIndex = start;
+
+	// Clear the selection.
+	textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
+}
+
+/*
+================================================================================
+
+PRIVATE UTILITY FUNCTIONS
+
+================================================================================
+*/
 
 // Returns -1 if an index could not be calculated. e.g. if the position is outside the widget.
 static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *textEdit, wzPosition pos)
@@ -378,6 +432,14 @@ static void wz_text_edit_update_scroll_index(struct wzTextEdit *textEdit)
 	}
 }
 
+/*
+================================================================================
+
+EVENT HANDLING
+
+================================================================================
+*/
+
 static void wz_text_edit_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzTextEdit *textEdit;
@@ -495,27 +557,6 @@ static void wz_text_edit_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 	{
 		wz_scroller_set_value(textEdit->scroller, wz_scroller_get_value(textEdit->scroller) - y);
 	}
-}
-
-static void wz_text_edit_delete_selection(struct wzTextEdit *textEdit)
-{
-	int start, end;
-
-	WZ_ASSERT(textEdit);
-
-	// No selection.
-	if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
-		return;
-
-	start = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	end = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	wz_text_edit_delete_text(textEdit, start, end - start);
-
-	// Move the cursor to the start (smallest of start and end, not the real selection start).
-	textEdit->cursorIndex = start;
-
-	// Clear the selection.
-	textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 }
 
 // Helper function for moving the cursor while the selection (shift) key is held.
@@ -686,6 +727,10 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
 		}
 	}
+	else if (textEdit->multiline && key == WZ_KEY_ENTER)
+	{
+		wz_text_edit_enter_text(textEdit, "\r");
+	}
 	else if (key == WZ_KEY_DELETE)
 	{
 		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
@@ -719,26 +764,9 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 
 static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 {
-	struct wzTextEdit *textEdit;
-	int n;
-
 	WZ_ASSERT(widget);
 	WZ_ASSERT(text);
-	textEdit = (struct wzTextEdit *)widget;
-	n = (int)strlen(text);
-
-	if (n == 0)
-		return;
-
-	// The text replaces the selection.
-	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-	{
-		wz_text_edit_delete_selection(textEdit);
-	}
-
-	wz_text_edit_insert_text(textEdit, textEdit->cursorIndex, text, n);
-	textEdit->cursorIndex += n;
-	wz_text_edit_update_scroll_index(textEdit);
+	wz_text_edit_enter_text((struct wzTextEdit *)widget, text);
 }
 
 /*
