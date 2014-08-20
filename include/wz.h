@@ -484,7 +484,10 @@ struct wzWidget *wz_tab_page_create();
 struct wzTabbed *wz_tabbed_create(struct wzTabBar *tabBar);
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzWidget *page);
 
+typedef bool (*wzTextEditValidateTextCallback)(const char *text);
+
 struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multiline, int maximumTextLength);
+void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback);
 bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);

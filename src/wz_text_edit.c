@@ -32,6 +32,7 @@ struct wzTextEdit
 	struct wzScroller *scroller;
 	bool multiline;
 	int maximumTextLength;
+	wzTextEditValidateTextCallback validate_text;
 	wzBorder border;
 	bool pressed;
 	int cursorIndex;
@@ -764,9 +765,16 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 
 static void wz_text_edit_text_input(struct wzWidget *widget, const char *text)
 {
+	struct wzTextEdit *textEdit;
+
 	WZ_ASSERT(widget);
 	WZ_ASSERT(text);
-	wz_text_edit_enter_text((struct wzTextEdit *)widget, text);
+	textEdit = (struct wzTextEdit *)widget;
+
+	if (!textEdit->validate_text(text))
+		return;
+
+	wz_text_edit_enter_text(textEdit, text);
 }
 
 /*
@@ -805,6 +813,12 @@ struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multili
 	textEdit->multiline = multiline;
 	textEdit->maximumTextLength = maximumTextLength;
 	return textEdit;
+}
+
+void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback)
+{
+	WZ_ASSERT(textEdit);
+	textEdit->validate_text = callback;
 }
 
 bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit)
