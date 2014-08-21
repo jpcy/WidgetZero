@@ -46,6 +46,7 @@ struct wzCombo;
 struct wzFrame;
 struct wzRadioButtonGroup;
 struct wzScroller;
+struct wzSpinner;
 struct wzStackLayout;
 struct wzTextEdit;
 struct wzLabel;
@@ -67,6 +68,7 @@ typedef enum
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
 	WZ_TYPE_SCROLLER,
+	WZ_TYPE_SPINNER,
 	WZ_TYPE_STACK_LAYOUT,
 	WZ_TYPE_TAB_BAR,
 	WZ_TYPE_TAB_PAGE,
@@ -456,6 +458,10 @@ void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
 void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale);
 wzRect wz_scroller_get_nub_rect(struct wzScroller *scroller);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
+
+struct wzSpinner *wz_spinner_create(struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton);
+int wz_spinner_get_value(const struct wzSpinner *spinner);
+void wz_spinner_set_value(struct wzSpinner *spinner, int value);
 
 typedef enum
 {

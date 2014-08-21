@@ -109,6 +109,7 @@ public:
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
 		createLabelsFrame();
+		createSpinnerFrame();
 		createTextEditFrame();
 		createMiscFrame();
 		createWidgetCategoryWindow();
@@ -170,6 +171,30 @@ private:
 		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
 		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
 		layout->add(customLabel);
+	}
+
+	void createSpinnerFrame()
+	{
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
+
+		WidgetCategoryListItem category;
+		category.label = "Spinner";
+		category.frame = frame;
+		widgetCategories.push_back(category);
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::Spinner *spinner = new wz::Spinner(renderer);
+		spinner->setValue(42);
+		layout->add(spinner);
+
+		wz::Spinner *spinner2 = new wz::Spinner(renderer);
+		spinner2->setFont("visitor1", 32);
+		layout->add(spinner2);
 	}
 
 	void createTextEditFrame()

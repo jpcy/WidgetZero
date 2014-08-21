@@ -202,6 +202,21 @@ struct ScrollerPrivate : public WidgetPrivate
 	std::auto_ptr<Button> incrementButton;
 };
 
+struct SpinnerPrivate : public WidgetPrivate
+{
+	SpinnerPrivate(wzRenderer *renderer);
+	~SpinnerPrivate();
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)spinner; }
+	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }
+	virtual wzSize measure();
+	virtual void draw(wzRect clip);
+
+	wzSpinner *spinner;
+	std::auto_ptr<TextEdit> textEdit;
+	std::auto_ptr<Button> decrementButton;
+	std::auto_ptr<Button> incrementButton;
+};
+
 struct StackLayoutPrivate : public WidgetPrivate
 {
 	StackLayoutPrivate();

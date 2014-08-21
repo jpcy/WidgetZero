@@ -875,8 +875,12 @@ const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit)
 
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text)
 {
+	size_t n;
+
 	WZ_ASSERT(textEdit);
-	strncpy(&textEdit->text, text, WZ_MIN((int)strlen(text), textEdit->maximumTextLength));
+	n = WZ_MIN((int)strlen(text), textEdit->maximumTextLength);
+	strncpy(&textEdit->text, text, n);
+	(&textEdit->text)[n] = 0;
 }
 
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)

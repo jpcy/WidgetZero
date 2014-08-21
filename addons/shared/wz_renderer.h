@@ -70,6 +70,10 @@ struct wzRenderer
 	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
 
+	int (*get_spinner_button_width)(struct wzRenderer *renderer);
+	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize);
+	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, struct wzSpinner *spinner);
+
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);
 
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);

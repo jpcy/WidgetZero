@@ -929,6 +929,29 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 	nvgRestore(vg);
 }
 
+static int wz_nanovg_get_spinner_button_width(struct wzRenderer *renderer)
+{
+	return 10;
+}
+
+static wzSize wz_nanovg_measure_spinner(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize)
+{
+	wzBorder border;
+	wzSize size;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(spinner);
+	WZ_ASSERT(textEdit);
+	border = wz_text_edit_get_border(textEdit);
+	size.w = 100;
+	size.h = wz_nanovg_get_line_height(renderer, fontFace, fontSize) + border.top + border.bottom;
+	return size;
+}
+
+static void wz_nanovg_draw_spinner(struct wzRenderer *renderer, wzRect clip, struct wzSpinner *spinner)
+{
+}
+
 static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
@@ -1308,6 +1331,9 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->draw_radio_button = wz_nanovg_draw_radio_button;
 	renderer->measure_scroller = wz_nanovg_measure_scroller;
 	renderer->draw_scroller = wz_nanovg_draw_scroller;
+	renderer->get_spinner_button_width = wz_nanovg_get_spinner_button_width;
+	renderer->measure_spinner = wz_nanovg_measure_spinner;
+	renderer->draw_spinner = wz_nanovg_draw_spinner;
 	renderer->draw_tab_button = wz_nanovg_draw_tab_button;
 	renderer->draw_tab_page = wz_nanovg_draw_tab_page;
 	renderer->get_text_edit_border = wz_nanovg_get_text_edit_border;
