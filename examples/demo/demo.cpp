@@ -108,6 +108,7 @@ public:
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
+		createCheckboxFrame();
 		createGroupBoxFrame();
 		createLabelsFrame();
 		createRadioButtonFrame();
@@ -155,6 +156,18 @@ private:
 		wz::Button *toggleButton = new wz::Button(renderer, "Toggle Button");
 		toggleButton->setToggle(true);
 		layout->add(toggleButton);
+	}
+
+	void createCheckboxFrame()
+	{
+		wz::Frame *frame = createFrame("Checkbox");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Toggle me!");
+		layout->add(checkbox);
 	}
 
 	void createGroupBoxFrame()
@@ -300,11 +313,6 @@ private:
 			wz::Button *button = new wz::Button(renderer, "Test Button");
 			button->setPadding(20, 50, 20, 50)->setPosition(100, 100);
 			frame->add(button);
-
-			const wzRect buttonRect = button->getRect();
-			wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Toggle me!");
-			checkbox->setPosition(buttonRect.x, buttonRect.y + buttonRect.h + 16);
-			frame->add(checkbox);
 
 			wz::Scroller *scroller1 = new wz::Scroller(renderer);
 			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setPosition(300, 50)->setHeight(200);
