@@ -111,6 +111,7 @@ public:
 		createCheckboxFrame();
 		createGroupBoxFrame();
 		createLabelsFrame();
+		createListFrame();
 		createRadioButtonFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
@@ -202,6 +203,23 @@ private:
 		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
 		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
 		layout->add(customLabel);
+	}
+
+	void createListFrame()
+	{
+		wz::Frame *frame = createFrame("List");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::List *list1 = new wz::List(renderer);
+		list1->setItems((uint8_t *)listData, sizeof(const char *), 17)->setSize(120, 200);
+		layout->add(list1);
+
+		wz::List *list2 = new wz::List(renderer);
+		list2->setItems((uint8_t *)listData, sizeof(const char *), 17)->setSize(240, 300)->setFont("visitor1", 32);
+		layout->add(list2);
 	}
 
 	void createRadioButtonFrame()
@@ -321,10 +339,6 @@ private:
 			wz::Scroller *scroller2 = new wz::Scroller(renderer);
 			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setPosition(500, 50)->setWidth(200);
 			frame->add(scroller2);
-
-			wz::List *list = new wz::List(renderer);
-			list->setItems((uint8_t *)listData, sizeof(const char *), 17)->setRect(400, 300, 150, 150);
-			frame->add(list);
 
 			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
