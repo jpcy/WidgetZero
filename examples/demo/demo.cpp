@@ -108,6 +108,7 @@ public:
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		createButtonsFrame();
+		createGroupBoxFrame();
 		createLabelsFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
@@ -124,16 +125,23 @@ public:
 	wz::MainWindow mainWindow;
 
 private:
-	void createButtonsFrame()
+	wz::Frame *createFrame(const char *label)
 	{
 		wz::Frame *frame = new wz::Frame(renderer);
 		frame->setStretch(WZ_STRETCH);
 		mainWindow.add(frame);
 
 		WidgetCategoryListItem category;
-		category.label = "Buttons";
+		category.label = label;
 		category.frame = frame;
 		widgetCategories.push_back(category);
+
+		return frame;
+	}
+
+	void createButtonsFrame()
+	{
+		wz::Frame *frame = createFrame("Buttons");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -148,16 +156,24 @@ private:
 		layout->add(toggleButton);
 	}
 
+	void createGroupBoxFrame()
+	{
+		wz::Frame *frame = createFrame("GroupBox");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::GroupBox *groupBox1 = new wz::GroupBox(renderer, "With a Label");
+		layout->add(groupBox1);
+
+		wz::GroupBox *groupBox = new wz::GroupBox(renderer);
+		layout->add(groupBox);
+	}
+
 	void createLabelsFrame()
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
-		frame->setStretch(WZ_STRETCH);
-		mainWindow.add(frame);
-
-		WidgetCategoryListItem category;
-		category.label = "Labels";
-		category.frame = frame;
-		widgetCategories.push_back(category);
+		wz::Frame *frame = createFrame("Labels");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -176,14 +192,7 @@ private:
 
 	void createSpinnerFrame()
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
-		frame->setStretch(WZ_STRETCH);
-		mainWindow.add(frame);
-
-		WidgetCategoryListItem category;
-		category.label = "Spinner";
-		category.frame = frame;
-		widgetCategories.push_back(category);
+		wz::Frame *frame = createFrame("Spinner");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -200,14 +209,7 @@ private:
 
 	void createTextEditFrame()
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
-		frame->setStretch(WZ_STRETCH);
-		mainWindow.add(frame);
-
-		WidgetCategoryListItem category;
-		category.label = "Text Edit";
-		category.frame = frame;
-		widgetCategories.push_back(category);
+		wz::Frame *frame = createFrame("Text Edit");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -228,14 +230,7 @@ private:
 
 	void createStackLayoutFrame()
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
-		frame->setStretch(WZ_STRETCH);
-		mainWindow.add(frame);
-
-		WidgetCategoryListItem category;
-		category.label = "Stack Layout";
-		category.frame = frame;
-		widgetCategories.push_back(category);
+		wz::Frame *frame = createFrame("Stack Layout");
 
 		wz::StackLayout *frameLayout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -277,14 +272,7 @@ private:
 
 	void createMiscFrame()
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
-		frame->setStretch(WZ_STRETCH);
-		mainWindow.add(frame);
-
-		WidgetCategoryListItem category;
-		category.label = "Misc.";
-		category.frame = frame;
-		widgetCategories.push_back(category);
+		wz::Frame *frame = createFrame("Misc.");
 
 		{
 			wz::Button *button = new wz::Button(renderer, "Test Button");
