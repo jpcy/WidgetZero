@@ -113,6 +113,7 @@ public:
 		createLabelsFrame();
 		createListFrame();
 		createRadioButtonFrame();
+		createScrollerFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
 		createStackLayoutFrame();
@@ -243,6 +244,23 @@ private:
 		layout->add(rb3);
 	}
 
+	void createScrollerFrame()
+	{
+		wz::Frame *frame = createFrame("Scroller");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::Scroller *scroller1 = new wz::Scroller(renderer);
+		scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setHeight(200);
+		layout->add(scroller1);
+
+		wz::Scroller *scroller2 = new wz::Scroller(renderer);
+		scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setWidth(200);
+		layout->add(scroller2);
+	}
+
 	void createSpinnerFrame()
 	{
 		wz::Frame *frame = createFrame("Spinner");
@@ -331,14 +349,6 @@ private:
 			wz::Button *button = new wz::Button(renderer, "Test Button");
 			button->setPadding(20, 50, 20, 50)->setPosition(100, 100);
 			frame->add(button);
-
-			wz::Scroller *scroller1 = new wz::Scroller(renderer);
-			scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setPosition(300, 50)->setHeight(200);
-			frame->add(scroller1);
-
-			wz::Scroller *scroller2 = new wz::Scroller(renderer);
-			scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setPosition(500, 50)->setWidth(200);
-			frame->add(scroller2);
 
 			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
