@@ -898,6 +898,33 @@ MOUSE MOVE
 ================================================================================
 */
 
+// Clear widget hover on everything but ignoreWindow and it's children.
+static void wz_widget_clear_hover_recursive(struct wzWindow *ignoreWindow, struct wzWidget *widget)
+{
+	int i;
+
+	WZ_ASSERT(widget);
+
+	if (widget == (struct wzWidget *)ignoreWindow)
+		return;
+
+	if (widget->hover)
+	{
+		// Stop hovering.
+		widget->hover = false;
+
+		if (widget->vtable.mouse_hover_off)
+		{
+			widget->vtable.mouse_hover_off(widget);
+		}
+	}
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_clear_hover_recursive(ignoreWindow, widget->children[i]);
+	}
+}
+
 // Sets wzWidget.ignore
 static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int mouseX, int mouseY)
 {
@@ -1046,6 +1073,10 @@ void wz_main_window_mouse_move(struct wzMainWindow *mainWindow, int mouseX, int 
 	}
 
 	mainWindow->lockInputWindow = wz_main_window_get_hover_window(mainWindow, mouseX, mouseY);
+
+	// Clear hover on everything but the lockInputWindow and it's children.
+	wz_widget_clear_hover_recursive(mainWindow->lockInputWindow, (struct wzWidget *)mainWindow);
+
 	wz_widget_mouse_move_recursive(mainWindow->lockInputWindow, (struct wzWidget *)mainWindow, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
