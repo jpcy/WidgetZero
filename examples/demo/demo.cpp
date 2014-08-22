@@ -217,11 +217,11 @@ private:
 		layout->add(new wz::Label(renderer, "Normal label"));
 
 		wz::Label *multilineLabel = new wz::Label(renderer, "Multiline label with color. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-		multilineLabel->setMultiline(true)->setTextColor(0, 128, 0)->setWidth(400);
+		multilineLabel->setMultiline(true)->setTextColor(0, 0.5f, 0)->setWidth(400);
 		layout->add(multilineLabel);
 
 		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
-		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
+		customLabel->setTextColor(1, 0.5f, 0.5f)->setFont("visitor1", 32);
 		layout->add(customLabel);
 	}
 

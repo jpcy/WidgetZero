@@ -322,6 +322,16 @@ static void wz_nanovg_debug_draw_text(struct wzRenderer *renderer, const char *t
 	wz_nanovg_print((wzRendererData *)renderer->data, x, y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, NULL, 0, nvgRGB(0, 0, 0), text, 0);
 }
 
+wzColor wz_nanovg_get_default_text_color(struct wzRenderer *renderer)
+{
+	wzColor color;
+	color.r = color_text.r;
+	color.g = color_text.g;
+	color.b = color_text.b;
+	color.a = color_text.a;
+	return color;
+}
+
 static void wz_nanovg_draw_dock_icon(struct wzRenderer *renderer, wzRect rect)
 {
 	struct NVGcontext *vg;
@@ -720,7 +730,7 @@ static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const struct 
 	return size;
 }
 
-static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, uint8_t r, uint8_t g, uint8_t b)
+static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, wzColor color)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -737,11 +747,11 @@ static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struc
 
 	if (multiline)
 	{
-		wz_nanovg_print_box(rendererData, rect, fontFace, fontSize, nvgRGB(r, g, b), text, 0);
+		wz_nanovg_print_box(rendererData, rect, fontFace, fontSize, nvgRGBAf(color.r, color.g, color.b, color.a), text, 0);
 	}
 	else
 	{
-		wz_nanovg_print(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGB(r, g, b), text, 0);
+		wz_nanovg_print(rendererData, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, nvgRGBAf(color.r, color.g, color.b, color.a), text, 0);
 	}
 
 	nvgRestore(vg);
@@ -1311,6 +1321,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->measure_text = wz_nanovg_measure_text;
 	renderer->line_break_text = wz_nanovg_line_break_text;
 	renderer->debug_draw_text = wz_nanovg_debug_draw_text;
+	renderer->get_default_text_color = wz_nanovg_get_default_text_color;
 	renderer->draw_dock_icon = wz_nanovg_draw_dock_icon;
 	renderer->draw_dock_preview = wz_nanovg_draw_dock_preview;
 	renderer->measure_button = wz_nanovg_measure_button;

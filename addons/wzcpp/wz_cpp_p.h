@@ -136,7 +136,7 @@ struct LabelPrivate : public WidgetPrivate
 	wzLabel *label;
 	bool multiline;
 	std::string text;
-	uint8_t r, g, b;
+	wzColor color;
 };
 
 struct ListPrivate : public WidgetPrivate

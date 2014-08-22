@@ -174,7 +174,7 @@ public:
 	Label(wzRenderer *renderer, const std::string &text);
 	~Label();
 	Label *setText(const char *format, ...);
-	Label *setTextColor(uint8_t r, uint8_t g, uint8_t b);
+	Label *setTextColor(float r, float g, float b, float a = 1.0f);
 	Label *setMultiline(bool multiline);
 };
 

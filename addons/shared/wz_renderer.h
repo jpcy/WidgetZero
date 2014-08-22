@@ -26,6 +26,20 @@ SOFTWARE.
 
 #include <wz.h>
 
+typedef struct
+{
+	union
+	{
+		float rgba;
+
+		struct
+		{
+			float r, g, b, a;
+		};
+	};
+}
+wzColor;
+
 struct wzRenderer
 {
 	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
@@ -39,6 +53,8 @@ struct wzRenderer
 	wzLineBreakResult (*line_break_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 
 	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
+
+	wzColor (*get_default_text_color)(struct wzRenderer *renderer);
 
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
@@ -56,7 +72,7 @@ struct wzRenderer
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *fontFace, float fontSize, const char *label);
 
 	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text);
-	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, uint8_t r, uint8_t g, uint8_t b);
+	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, wzColor color);
 
 	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
 	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);
