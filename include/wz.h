@@ -170,6 +170,7 @@ typedef struct
 {
 	wzWidgetEventType type;
 	struct wzButton *button;
+	bool isSet;
 }
 wzButtonEvent;
 

@@ -118,6 +118,7 @@ public:
 		createSpinnerFrame();
 		createTabbedFrame();
 		createTextEditFrame();
+		createWindowFrame();
 		createStackLayoutFrame();
 		createWidgetCategoryWindow();
 		createWindow1();
@@ -334,6 +335,23 @@ private:
 		layout->add(textEdit3);
 	}
 
+	void createWindowFrame()
+	{
+		wz::Frame *frame = createFrame("Window");
+
+		wz::StackLayout *frameLayout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(frameLayout);
+
+		wz::Checkbox *showWindow1 = new wz::Checkbox(renderer, "Show Window 1");
+		showWindow1->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
+		frameLayout->add(showWindow1);
+
+		wz::Checkbox *showWindow2 = new wz::Checkbox(renderer, "Show Window 2");
+		showWindow2->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
+		frameLayout->add(showWindow2);
+	}
+
 	void createStackLayoutFrame()
 	{
 		wz::Frame *frame = createFrame("Stack Layout");
@@ -401,13 +419,14 @@ private:
 
 	void createWindow1()
 	{
-		wz::Window *window = new wz::Window(renderer, "Test Window");
-		window->setRect(650, 100, 300, 300);
-		mainWindow.add(window);
+		window1 = new wz::Window(renderer, "Test Window");
+		window1->setRect(650, 100, 300, 300);
+		window1->setVisible(false);
+		mainWindow.add(window1);
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
-		window->add(layout);
+		window1->add(layout);
 
 		wz::TextEdit *textEdit = new wz::TextEdit(renderer, "this is a very long string so scrolling can be tested", false);
 		textEdit->setStretch(WZ_STRETCH_WIDTH);
@@ -432,13 +451,14 @@ private:
 
 	void createWindow2()
 	{
-		wz::Window *window = new wz::Window(renderer, "Window with a long title");
-		window->setRect(590, 500, 200, 200);
-		mainWindow.add(window);
+		window2 = new wz::Window(renderer, "Window with a long title");
+		window2->setRect(590, 500, 200, 200);
+		window2->setVisible(false);
+		mainWindow.add(window2);
 
 		wz::Tabbed *tabbed = new wz::Tabbed(renderer);
 		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
-		window->add(tabbed);
+		window2->add(tabbed);
 
 		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
 		firstTab->setLabel("Tab 1");
@@ -453,6 +473,16 @@ private:
 		firstTab->add(combo);
 
 		secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);
+	}
+
+	void showWindow1Toggled(wzEvent *e)
+	{
+		window1->setVisible(e->button.isSet);
+	}
+
+	void showWindow2Toggled(wzEvent *e)
+	{
+		window2->setVisible(e->button.isSet);
 	}
 
 	void widgetCategoryChanged(wzEvent *e)
@@ -475,6 +505,7 @@ private:
 	};
 
 	wzRenderer *renderer;
+	wz::Window *window1, *window2;
 	std::vector<WidgetCategoryListItem> widgetCategories;
 	wz::RadioButtonGroup radioButtonGroup;
 	bool showProfiling_;
