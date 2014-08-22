@@ -107,17 +107,17 @@ public:
 	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : mainWindow(renderer), renderer(renderer), showProfiling_(false)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
-		createButtonsFrame();
+		createButtonFrame();
 		createCheckboxFrame();
+		createComboFrame();
 		createGroupBoxFrame();
-		createLabelsFrame();
+		createLabelFrame();
 		createListFrame();
 		createRadioButtonFrame();
 		createScrollerFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
 		createStackLayoutFrame();
-		createMiscFrame();
 		createWidgetCategoryWindow();
 		createWindow1();
 		createWindow2();
@@ -143,7 +143,7 @@ private:
 		return frame;
 	}
 
-	void createButtonsFrame()
+	void createButtonFrame()
 	{
 		wz::Frame *frame = createFrame("Button");
 
@@ -172,6 +172,23 @@ private:
 		layout->add(checkbox);
 	}
 
+	void createComboFrame()
+	{
+		wz::Frame *frame = createFrame("Combo");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::Combo *combo1 = new wz::Combo(renderer);
+		combo1->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
+		layout->add(combo1);
+
+		wz::Combo *combo2 = new wz::Combo(renderer);
+		combo2->setItems((uint8_t *)listData, sizeof(const char *), 17)->setFont("visitor1", 12);
+		layout->add(combo2);
+	}
+
 	void createGroupBoxFrame()
 	{
 		wz::Frame *frame = createFrame("GroupBox");
@@ -187,7 +204,7 @@ private:
 		layout->add(groupBox);
 	}
 
-	void createLabelsFrame()
+	void createLabelFrame()
 	{
 		wz::Frame *frame = createFrame("Label");
 
@@ -338,21 +355,6 @@ private:
 			layout->add(new wz::Button(renderer, "Align Right"))->setAlign(WZ_ALIGN_RIGHT);
 			layout->add(new wz::Button(renderer, "Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
 			layout->add(new wz::Button(renderer, "Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
-		}
-	}
-
-	void createMiscFrame()
-	{
-		wz::Frame *frame = createFrame("Misc.");
-
-		{
-			wz::Button *button = new wz::Button(renderer, "Test Button");
-			button->setPadding(20, 50, 20, 50)->setPosition(100, 100);
-			frame->add(button);
-
-			wz::Combo *combo = new wz::Combo(renderer);
-			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
-			frame->add(combo);
 		}
 	}
 
