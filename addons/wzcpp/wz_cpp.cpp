@@ -620,7 +620,7 @@ Widget *GroupBox::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-LabelPrivate::LabelPrivate(wzRenderer *renderer) : multiline(false), r(0), g(0), b(0)
+LabelPrivate::LabelPrivate(wzRenderer *renderer) : multiline(false), r(255), g(255), b(255)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;

@@ -111,6 +111,7 @@ public:
 		createLabelsFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
+		createStackLayoutFrame();
 		createMiscFrame();
 		createWidgetCategoryWindow();
 		createWindow1();
@@ -225,6 +226,55 @@ private:
 		layout->add(textEdit3);
 	}
 
+	void createStackLayoutFrame()
+	{
+		wz::Frame *frame = new wz::Frame(renderer);
+		frame->setStretch(WZ_STRETCH);
+		mainWindow.add(frame);
+
+		WidgetCategoryListItem category;
+		category.label = "Stack Layout";
+		category.frame = frame;
+		widgetCategories.push_back(category);
+
+		wz::StackLayout *frameLayout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(frameLayout);
+
+		{
+			wz::Label *label = new wz::Label(renderer, "Horizontal Stack Layout");
+			frameLayout->add(label);
+
+			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
+			layout->setSpacing(8)->setStretch(WZ_STRETCH_WIDTH)->setHeight(100);
+			frameLayout->add(layout);
+
+			layout->add(new wz::Button(renderer, "Default"));
+			layout->add(new wz::Button(renderer, "Align Top"))->setAlign(WZ_ALIGN_TOP);
+			layout->add(new wz::Button(renderer, "Align Middle"))->setAlign(WZ_ALIGN_MIDDLE);
+			layout->add(new wz::Button(renderer, "Align Bottom"))->setAlign(WZ_ALIGN_BOTTOM);
+			layout->add(new wz::Button(renderer, "Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button(renderer, "Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+		}
+
+		{
+			wz::Label *label = new wz::Label(renderer, "Vertical Stack Layout");
+			label->setMargin(16, 0, 0, 0);
+			frameLayout->add(label);
+
+			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+			layout->setSpacing(8)->setStretch(WZ_STRETCH_HEIGHT)->setWidth(300);
+			frameLayout->add(layout);
+
+			layout->add(new wz::Button(renderer, "Default"));
+			layout->add(new wz::Button(renderer, "Align Left"))->setAlign(WZ_ALIGN_LEFT);
+			layout->add(new wz::Button(renderer, "Align Center"))->setAlign(WZ_ALIGN_CENTER);
+			layout->add(new wz::Button(renderer, "Align Right"))->setAlign(WZ_ALIGN_RIGHT);
+			layout->add(new wz::Button(renderer, "Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button(renderer, "Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+		}
+	}
+
 	void createMiscFrame()
 	{
 		wz::Frame *frame = new wz::Frame(renderer);
@@ -283,16 +333,6 @@ private:
 			wz::RadioButton *rb3 = new wz::RadioButton(renderer, "Option 3");
 			rb3->setGroup(&radioButtonGroup);
 			layout->add(rb3);
-		}
-
-		{
-			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
-			layout->setSpacing(8)->setRect(50, 550, 400, 100);
-			frame->add(layout);
-
-			layout->add(new wz::Button(renderer, "Button A"))->setStretch(WZ_STRETCH_HEIGHT);
-			layout->add(new wz::Button(renderer, "Button B"))->setAlign(WZ_ALIGN_MIDDLE);
-			layout->add(new wz::Button(renderer, "Button C"))->setAlign(WZ_ALIGN_BOTTOM);
 		}
 	}
 
