@@ -199,8 +199,6 @@ struct ScrollerPrivate : public WidgetPrivate
 	virtual void draw(wzRect clip);
 
 	wzScroller *scroller;
-	std::auto_ptr<Button> decrementButton;
-	std::auto_ptr<Button> incrementButton;
 };
 
 struct SpinnerPrivate : public WidgetPrivate

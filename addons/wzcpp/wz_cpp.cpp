@@ -1080,17 +1080,11 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	decrementButton.reset(new Button(renderer, "-"));
-	incrementButton.reset(new Button(renderer, "+"));
 
-	scroller = wz_scroller_create((wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
+	scroller = wz_scroller_create();
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 	wz_widget_set_draw_callback((wzWidget *)scroller, DrawWidget);
 	wz_widget_set_measure_callback((wzWidget *)scroller, MeasureWidget);
-
-	// Width will be ignored for vertical scrollers, height for horizontal. The scroller width/height will be automatically used for the buttons.
-	wz_widget_set_size_args(decrementButton->p->getWidget(), 16, 16);
-	wz_widget_set_size_args(incrementButton->p->getWidget(), 16, 16);
 }
 
 ScrollerPrivate::~ScrollerPrivate()

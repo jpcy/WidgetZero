@@ -944,7 +944,8 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
-	wzRect rect, nubRect;
+	wzRect rect;
+	wzScrollerType type;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(scroller);
@@ -954,14 +955,67 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)scroller);
+	type = wz_scroller_get_type(scroller);
 	
 	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, color_foreground);
 
+	// Decrement button.
+	{
+		const wzRect r = wz_scroller_get_decrement_button_rect(scroller);
+		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
+		wz_nanovg_draw_rect(vg, r, color_border);
+
+		nvgBeginPath(vg);
+
+		if (type == WZ_SCROLLER_VERTICAL)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.5f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
+		}
+
+		nvgFillColor(vg, color_border);
+		nvgFill(vg);
+	}
+
+	// Increment button.
+	{
+		const wzRect r = wz_scroller_get_increment_button_rect(scroller);
+		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
+		wz_nanovg_draw_rect(vg, r, color_border);
+
+		nvgBeginPath(vg);
+
+		if (type == WZ_SCROLLER_VERTICAL)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.5f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
+		}
+
+		nvgFillColor(vg, color_border);
+		nvgFill(vg);
+	}
+
 	// Nub.
-	nubRect = wz_scroller_get_nub_rect(scroller);
-	wz_nanovg_draw_filled_rect(vg, nubRect, color_foreground);
-	wz_nanovg_draw_rect(vg, nubRect, color_border);
+	{
+		const wzRect r = wz_scroller_get_nub_rect(scroller);
+		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
+		wz_nanovg_draw_rect(vg, r, color_border);
+	}
 
 	nvgRestore(vg);
 }
