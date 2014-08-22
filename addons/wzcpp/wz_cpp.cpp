@@ -702,7 +702,7 @@ Label *Label::setMultiline(bool multiline)
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0)
+ListPrivate::ListPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0), drawItemCallback(NULL)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -725,7 +725,7 @@ ListPrivate::~ListPrivate()
 
 void ListPrivate::draw(wzRect clip)
 {
-	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, itemData, itemStride);
+	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, itemData, itemStride, drawItemCallback);
 }
 
 void ListPrivate::refreshItemHeight()
@@ -782,6 +782,12 @@ List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 List *List::setSelectedItem(int index)
 {
 	wz_list_set_selected_item((wzList *)p->getWidget(), index);
+	return this;
+}
+
+List *List::setDrawItemCallback(wzDrawListItemCallback callback)
+{
+	((ListPrivate *)p)->drawItemCallback = callback;
 	return this;
 }
 

@@ -40,6 +40,8 @@ typedef struct
 }
 wzColor;
 
+typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+
 struct wzRenderer
 {
 	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
@@ -51,8 +53,6 @@ struct wzRenderer
 	void (*measure_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
 	wzLineBreakResult (*line_break_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
-
-	void (*debug_draw_text)(struct wzRenderer *renderer, const char *text, int x, int y);
 
 	wzColor (*get_default_text_color)(struct wzRenderer *renderer);
 
@@ -76,7 +76,7 @@ struct wzRenderer
 
 	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
 	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);
-	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride);
+	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *data, size_t itemStride, wzDrawListItemCallback draw_item);
 
 	void (*draw_main_window)(struct wzRenderer *renderer, struct wzMainWindow *mainWindow);
 

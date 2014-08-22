@@ -188,6 +188,7 @@ public:
 	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 	List *setSelectedItem(int index);
+	List *setDrawItemCallback(wzDrawListItemCallback callback);
 };
 
 class MainWindow

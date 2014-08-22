@@ -135,6 +135,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 			"addons/shared",
 			"addons/wznanovg",
 			config.glewPath .. "/include",
+			config.nanovgPath .. "/src",
 			_includedirs
 		}
 		

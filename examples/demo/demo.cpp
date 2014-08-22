@@ -80,6 +80,13 @@ struct Benchmark
 
 static Benchmark benchmark;
 
+static const char *customListData[3] =
+{
+	"../examples/data/accept.png",
+	"../examples/data/delete.png",
+	"../examples/data/error.png"
+};
+
 static const char *listData[17] =
 {
 	"Monday",
@@ -100,6 +107,19 @@ static const char *listData[17] =
 	"Nine",
 	"Ten"
 };
+
+static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+{
+	int image, width, height;
+	wzRect rect;
+	
+	image = wz_nanovg_create_image(renderer, (const char *)itemData, &width, &height);
+	rect.x = clip.x + 4;
+	rect.y = clip.y + (int)(clip.h / 2.0f - height / 2.0f);
+	rect.w = width;
+	rect.h = height;
+	wz_nanovg_draw_image(wz_nanovg_get_context(renderer), rect, image);
+}
 
 class GUI
 {
@@ -240,6 +260,10 @@ private:
 		wz::List *list2 = new wz::List(renderer);
 		list2->setItems((uint8_t *)listData, sizeof(const char *), 17)->setSize(240, 300)->setFont("visitor1", 32);
 		layout->add(list2);
+
+		wz::List *list3 = new wz::List(renderer);
+		list3->setItems((uint8_t *)customListData, sizeof(const char *), 3)->setDrawItemCallback(CustomDrawListItemCallback)->setSize(50, 200);
+		layout->add(list3);
 	}
 
 	void createRadioButtonFrame()
@@ -725,13 +749,13 @@ int main(int argc, char **argv)
 			if (gui.showProfiling())
 			{
 				sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
-				renderer->debug_draw_text(renderer, buffer, 0, 0);
+				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 0, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 
 				sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
-				renderer->debug_draw_text(renderer, buffer, 0, 20);
+				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 20, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 
 				sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
-				renderer->debug_draw_text(renderer, buffer, 0, 40);
+				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 40, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 			}
 
 			gui.mainWindow.endFrame();

@@ -156,6 +156,7 @@ struct ListPrivate : public WidgetPrivate
 	uint8_t *itemData;
 	size_t itemStride;
 	std::auto_ptr<Scroller> scroller;
+	wzDrawListItemCallback drawItemCallback;
 };
 
 struct MainWindowPrivate : public WidgetPrivate
