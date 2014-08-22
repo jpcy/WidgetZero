@@ -110,6 +110,7 @@ public:
 		createButtonsFrame();
 		createGroupBoxFrame();
 		createLabelsFrame();
+		createRadioButtonFrame();
 		createSpinnerFrame();
 		createTextEditFrame();
 		createStackLayoutFrame();
@@ -141,7 +142,7 @@ private:
 
 	void createButtonsFrame()
 	{
-		wz::Frame *frame = createFrame("Buttons");
+		wz::Frame *frame = createFrame("Button");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -173,7 +174,7 @@ private:
 
 	void createLabelsFrame()
 	{
-		wz::Frame *frame = createFrame("Labels");
+		wz::Frame *frame = createFrame("Label");
 
 		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
@@ -188,6 +189,27 @@ private:
 		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
 		customLabel->setTextColor(255, 128, 128)->setFont("visitor1", 32);
 		layout->add(customLabel);
+	}
+
+	void createRadioButtonFrame()
+	{
+		wz::Frame *frame = createFrame("Radio Button");
+
+		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(layout);
+
+		wz::RadioButton *rb1 = new wz::RadioButton(renderer, "Option 1");
+		rb1->setGroup(&radioButtonGroup);
+		layout->add(rb1);
+
+		wz::RadioButton *rb2 = new wz::RadioButton(renderer, "Option 2");
+		rb2->setGroup(&radioButtonGroup);
+		layout->add(rb2);
+
+		wz::RadioButton *rb3 = new wz::RadioButton(renderer, "Option 3");
+		rb3->setGroup(&radioButtonGroup);
+		layout->add(rb3);
 	}
 
 	void createSpinnerFrame()
@@ -299,28 +321,6 @@ private:
 			wz::Combo *combo = new wz::Combo(renderer);
 			combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
 			frame->add(combo);
-		}
-
-		{
-			wz::GroupBox *groupBox = new wz::GroupBox(renderer, "Test GroupBox");
-			groupBox->setPosition(100, 300);
-			frame->add(groupBox);
-
-			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-			layout->setSpacing(8)->setStretch(WZ_STRETCH);
-			groupBox->add(layout);
-
-			wz::RadioButton *rb1 = new wz::RadioButton(renderer, "Option 1");
-			rb1->setGroup(&radioButtonGroup);
-			layout->add(rb1);
-
-			wz::RadioButton *rb2 = new wz::RadioButton(renderer, "Option 2");
-			rb2->setGroup(&radioButtonGroup);
-			layout->add(rb2);
-
-			wz::RadioButton *rb3 = new wz::RadioButton(renderer, "Option 3");
-			rb3->setGroup(&radioButtonGroup);
-			layout->add(rb3);
 		}
 	}
 
