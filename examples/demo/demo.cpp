@@ -116,6 +116,7 @@ public:
 		createRadioButtonFrame();
 		createScrollerFrame();
 		createSpinnerFrame();
+		createTabbedFrame();
 		createTextEditFrame();
 		createStackLayoutFrame();
 		createWidgetCategoryWindow();
@@ -293,6 +294,23 @@ private:
 		wz::Spinner *spinner2 = new wz::Spinner(renderer);
 		spinner2->setFont("visitor1", 32);
 		layout->add(spinner2);
+	}
+
+	void createTabbedFrame()
+	{
+		wz::Frame *frame = createFrame("Tabbed");
+
+		wz::Tabbed *tabbed = new wz::Tabbed(renderer);
+		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
+		frame->add(tabbed);
+
+		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
+		firstTab->setLabel("Tab 1");
+
+		wz::Tab *secondTab = tabbed->addTab(new wz::Tab());
+		secondTab->setLabel("Another Tab");
+
+		tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 	}
 
 	void createTextEditFrame()
