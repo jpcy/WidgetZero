@@ -555,30 +555,16 @@ GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	frame = wz_frame_create();
-	wzWidget *widget = (wzWidget *)frame;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_widget_set_size_args(widget, 200, 200);
-	refreshMargin();
+	groupBox = wz_group_box_create(renderer);
+	wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
 }
 
 GroupBoxPrivate::~GroupBoxPrivate()
 {
-	if (!wz_widget_get_main_window((wzWidget *)frame))
+	if (!wz_widget_get_main_window((wzWidget *)groupBox))
 	{
-		wz_widget_destroy((wzWidget *)frame);
+		wz_widget_destroy((wzWidget *)groupBox);
 	}
-}
-
-void GroupBoxPrivate::refreshMargin()
-{
-	wz_widget_set_margin(wz_widget_get_content_widget(getWidget()), renderer->measure_group_box_margin(renderer, fontFace.c_str(), fontSize, label.c_str()));
-}
-
-void GroupBoxPrivate::draw(wzRect clip)
-{
-	renderer->draw_group_box(renderer, clip, frame, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -599,16 +585,14 @@ GroupBox::~GroupBox()
 	delete p;
 }
 
-std::string GroupBox::getLabel() const
+const char *GroupBox::getLabel() const
 {
-	return ((GroupBoxPrivate *)p)->label;
+	return wz_group_box_get_label((wzGroupBox *)p->getWidget());
 }
 
 GroupBox *GroupBox::setLabel(const std::string &label)
 {
-	GroupBoxPrivate *gp = (GroupBoxPrivate *)p;
-	gp->label = label;
-	gp->refreshMargin();
+	wz_group_box_set_label((wzGroupBox *)p->getWidget(), label.c_str());
 	return this;
 }
 
@@ -830,7 +814,7 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	mainWindow = wz_main_window_create();
+	mainWindow = wz_main_window_create(renderer);
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
 	wz_widget_set_draw_callback((wzWidget *)mainWindow, DrawWidget);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);

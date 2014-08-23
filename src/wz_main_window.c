@@ -1278,7 +1278,7 @@ void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow
 	mainWindow->line_break_text = callback;
 }
 
-struct wzMainWindow *wz_main_window_create()
+struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 {
 	struct wzMainWindow *mainWindow;
 	int i;
@@ -1287,6 +1287,7 @@ struct wzMainWindow *wz_main_window_create()
 	mainWindow = (struct wzMainWindow *)malloc(sizeof(struct wzMainWindow));
 	memset(mainWindow, 0, sizeof(struct wzMainWindow));
 	mainWindow->base.type = WZ_TYPE_MAIN_WINDOW;
+	mainWindow->base.renderer = renderer;
 	mainWindow->base.mainWindow = mainWindow;
 	mainWindow->base.vtable.set_rect = wz_main_window_set_rect;
 	mainWindow->base.vtable.get_content_widget = wz_main_window_get_content_widget;

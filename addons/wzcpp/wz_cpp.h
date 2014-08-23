@@ -28,7 +28,6 @@ SOFTWARE.
 #include <string>
 #include <vector>
 #include <wz.h>
-#include <wz_renderer.h>
 
 #define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
@@ -162,7 +161,7 @@ public:
 	GroupBox(wzRenderer *renderer);
 	GroupBox(wzRenderer *renderer, const std::string &label);
 	~GroupBox();
-	std::string getLabel() const;
+	const char *getLabel() const;
 	GroupBox *setLabel(const std::string &label);
 	Widget *add(Widget *widget);
 };

@@ -440,6 +440,30 @@ int wz_widget_get_align(const struct wzWidget *widget)
 	return widget->align;
 }
 
+void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
+{
+	WZ_ASSERT(widget);
+	strcpy(widget->fontFace, fontFace);
+}
+
+const char *wz_widget_get_font_face(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->fontFace;
+}
+
+void wz_widget_set_font_size(struct wzWidget *widget, float fontSize)
+{
+	WZ_ASSERT(widget);
+	widget->fontSize = fontSize;
+}
+
+float wz_widget_get_font_size(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->fontSize;
+}
+
 bool wz_widget_get_hover(const struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);

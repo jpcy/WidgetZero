@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include <GL/glew.h>
 #include <nanovg.h>
-#include <wz_renderer.h>
+#include <wz.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 	}
 
 	// Create the main window.
-	mainWindow = wz_main_window_create();
+	mainWindow = wz_main_window_create(renderer);
 	wz_widget_set_size_args((struct wzWidget *)mainWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	// Create a button.

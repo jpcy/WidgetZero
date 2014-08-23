@@ -111,7 +111,12 @@ struct wzWidget
 	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
 	bool inputNotClippedToParent;
 
+	char fontFace[256];
+	float fontSize;
+
 	wzWidgetVtable vtable;
+
+	struct wzRenderer *renderer;
 
 	struct wzMainWindow *mainWindow;
 

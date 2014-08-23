@@ -90,7 +90,6 @@ project "WidgetZeroCpp"
 	includedirs
 	{
 		"include",
-		"addons/shared",
 		"addons/wzcpp"
 	}
 		
@@ -99,18 +98,15 @@ project "WidgetZeroCpp"
 project "WidgetZeroNanoVG"
 	kind "StaticLib"
 
-	files { "addons/wznanovg/*.*", "addons/shared/*.h" }
+	files { "addons/wznanovg/*.*" }
 	
 	includedirs
 	{
 		"include",
-		"addons/shared",
 		"addons/wznanovg",
 		config.glewPath .. "/include",
 		config.nanovgPath .. "/src"
 	}
-	
-	vpaths { ["*"] = { "addons/shared", "addons/wznanovg" } }
 		
 -----------------------------------------------------------------------------
 
@@ -132,7 +128,6 @@ function createExampleProject(_name, _language, _includedirs, _links)
 		includedirs
 		{
 			"include",
-			"addons/shared",
 			"addons/wznanovg",
 			config.glewPath .. "/include",
 			config.nanovgPath .. "/src",

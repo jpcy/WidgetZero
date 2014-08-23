@@ -114,14 +114,10 @@ struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate(wzRenderer *renderer);
 	~GroupBoxPrivate();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
-	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
-	virtual void draw(wzRect clip);
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox; }
+	virtual wzWidget *getWidget() { return (wzWidget *)groupBox; }
 
-	void refreshMargin();
-
-	wzFrame *frame;
-	std::string label;
+	wzGroupBox *groupBox;
 };
 
 struct LabelPrivate : public WidgetPrivate

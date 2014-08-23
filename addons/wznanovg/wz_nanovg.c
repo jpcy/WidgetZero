@@ -682,32 +682,39 @@ static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, 
 	return margin;
 }
 
-static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, struct wzFrame *frame, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
+	const char *label;
 
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
-	rect = wz_widget_get_absolute_rect((struct wzWidget *)frame);
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)groupBox);
 	
 	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, color_background);
 
 	// Border.
+	label = wz_group_box_get_label(groupBox);
+
 	if (!label || !label[0])
 	{
 		wz_nanovg_draw_rect(vg, rect, color_border);
 	}
 	else
 	{
+		const char *fontFace;
+		float fontSize;
 		int textLeftMargin, textBorderSpacing;
 		int textWidth, textHeight;
 
+		fontFace = wz_widget_get_font_face((const struct wzWidget *)groupBox);
+		fontSize = wz_widget_get_font_size((const struct wzWidget *)groupBox);
 		textLeftMargin = 20;
 		textBorderSpacing = 5;
 		wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &textWidth, &textHeight);
@@ -1095,7 +1102,7 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 
 static int wz_nanovg_get_spinner_button_width(struct wzRenderer *renderer)
 {
-	return 10;
+	return 16;
 }
 
 static wzSize wz_nanovg_measure_spinner(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize)
