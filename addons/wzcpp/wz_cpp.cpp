@@ -826,7 +826,7 @@ static void DrawDockPreview(wzRect rect, void *metadata)
 	mainWindow->drawDockPreview(rect);
 }
 
-MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer) : showCursor(false)
+MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
@@ -935,11 +935,6 @@ void MainWindow::textInput(const char *text)
 	wz_main_window_text_input(p->mainWindow, text);
 }
 
-void MainWindow::setShowCursor(bool showCursor)
-{
-	p->showCursor = showCursor;
-}
-
 void MainWindow::beginFrame()
 {
 	p->renderer->begin_frame(p->renderer, p->mainWindow);
@@ -953,11 +948,6 @@ void MainWindow::drawFrame()
 void MainWindow::endFrame()
 {
 	p->renderer->end_frame(p->renderer);
-}
-
-bool MainWindow::getShowCursor() const
-{
-	return p->showCursor;
 }
 
 wzCursor MainWindow::getCursor() const
@@ -1471,7 +1461,7 @@ wzSize TextEditPrivate::measure()
 void TextEditPrivate::draw(wzRect clip)
 {
 	MainWindowPrivate *mainWindow = (MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_main_window(getWidget()));
-	renderer->draw_text_edit(renderer, clip, textEdit, fontFace.c_str(), fontSize, mainWindow->showCursor);
+	renderer->draw_text_edit(renderer, clip, textEdit, fontFace.c_str(), fontSize);
 }
 
 //------------------------------------------------------------------------------

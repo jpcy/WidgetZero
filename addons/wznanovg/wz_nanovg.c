@@ -45,6 +45,7 @@ wzImage;
 typedef struct
 {
 	struct NVGcontext *vg;
+	bool showTextCursor;
 	wzImage images[WZ_NANOVG_MAX_IMAGES];
 	int nImages;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
@@ -275,6 +276,15 @@ static void wz_nanovg_begin_frame(struct wzRenderer *renderer, const struct wzMa
 static void wz_nanovg_end_frame(struct wzRenderer *renderer)
 {
 	nvgEndFrame(((wzRendererData *)renderer->data)->vg);
+}
+
+static void wz_nanovg_toggle_text_cursor(struct wzRenderer *renderer)
+{
+	wzRendererData *rendererData;
+
+	WZ_ASSERT(renderer);
+	rendererData = (wzRendererData *)renderer->data;
+	rendererData->showTextCursor = !rendererData->showTextCursor;
 }
 
 static int wz_nanovg_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize)
@@ -1214,7 +1224,7 @@ static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, const str
 	return size;
 }
 
-static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor)
+static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -1343,7 +1353,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	}
 
 	// Cursor.
-	if (showCursor && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
+	if (rendererData->showTextCursor && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
 	{
 		wzPosition position;
 		
@@ -1436,6 +1446,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer = malloc(sizeof(struct wzRenderer));
 	rendererData = renderer->data = malloc(sizeof(wzRendererData));
 	memset(rendererData, 0, sizeof(wzRendererData));
+	rendererData->showTextCursor = true;
 
 	// Init nanovg.
 	rendererData->vg = nvgCreateGL2(0);
@@ -1461,6 +1472,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	// Set renderer function pointers.
 	renderer->begin_frame = wz_nanovg_begin_frame;
 	renderer->end_frame = wz_nanovg_end_frame;
+	renderer->toggle_text_cursor = wz_nanovg_toggle_text_cursor;
 	renderer->get_line_height = wz_nanovg_get_line_height;
 	renderer->measure_text = wz_nanovg_measure_text;
 	renderer->line_break_text = wz_nanovg_line_break_text;

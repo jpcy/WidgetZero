@@ -47,6 +47,8 @@ struct wzRenderer
 	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 	void (*end_frame)(struct wzRenderer *renderer);
 
+	void (*toggle_text_cursor)(struct wzRenderer *renderer);
+
 	int (*get_line_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize);
 
 	// width or height can be NULL.
@@ -96,7 +98,7 @@ struct wzRenderer
 
 	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, const char *text);
-	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, bool showCursor);
+	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize);
 
 	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);
 	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title);

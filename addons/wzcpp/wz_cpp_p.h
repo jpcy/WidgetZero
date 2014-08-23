@@ -172,7 +172,6 @@ struct MainWindowPrivate : public WidgetPrivate
 	wzMainWindow *mainWindow;
 	wzRenderer *renderer;
 	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
-	bool showCursor;
 };
 
 struct RadioButtonPrivate : public WidgetPrivate

@@ -206,11 +206,9 @@ public:
 	void keyDown(wzKey key);
 	void keyUp(wzKey key);
 	void textInput(const char *text);
-	void setShowCursor(bool showCursor);
 	void beginFrame();
 	void drawFrame();
 	void endFrame();
-	bool getShowCursor() const;
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);

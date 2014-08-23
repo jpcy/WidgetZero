@@ -769,7 +769,7 @@ int main(int argc, char **argv)
 
 			if ((tick % 20) == 0)
 			{
-				gui.mainWindow.setShowCursor(!gui.mainWindow.getShowCursor());
+				renderer->toggle_text_cursor(renderer);
 			}
 		}
 	}
