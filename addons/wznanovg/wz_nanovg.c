@@ -962,9 +962,30 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 
 	// Decrement button.
 	{
-		const wzRect r = wz_scroller_get_decrement_button_rect(scroller);
-		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
-		wz_nanovg_draw_rect(vg, r, color_border);
+		wzRect r;
+		bool hover, pressed;
+		NVGcolor color, borderColor;
+		
+		wz_scroller_get_decrement_button_state(scroller, &r, &hover, &pressed);
+
+		if (pressed && hover)
+		{
+			color = color_pressed;
+			borderColor = color_borderSet;
+		}
+		else if (hover)
+		{
+			color = color_hover;
+			borderColor = color_borderHover;
+		}
+		else
+		{
+			color = color_foreground;
+			borderColor = color_border;
+		}
+
+		wz_nanovg_draw_filled_rect(vg, r, color);
+		wz_nanovg_draw_rect(vg, r, borderColor);
 
 		nvgBeginPath(vg);
 
@@ -981,15 +1002,36 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
 		}
 
-		nvgFillColor(vg, color_border);
+		nvgFillColor(vg, borderColor);
 		nvgFill(vg);
 	}
 
 	// Increment button.
 	{
-		const wzRect r = wz_scroller_get_increment_button_rect(scroller);
-		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
-		wz_nanovg_draw_rect(vg, r, color_border);
+		wzRect r;
+		bool hover, pressed;
+		NVGcolor color, borderColor;
+
+		wz_scroller_get_increment_button_state(scroller, &r, &hover, &pressed);
+
+		if (pressed && hover)
+		{
+			color = color_pressed;
+			borderColor = color_borderSet;
+		}
+		else if (hover)
+		{
+			color = color_hover;
+			borderColor = color_borderHover;
+		}
+		else
+		{
+			color = color_foreground;
+			borderColor = color_border;
+		}
+
+		wz_nanovg_draw_filled_rect(vg, r, color);
+		wz_nanovg_draw_rect(vg, r, borderColor);
 
 		nvgBeginPath(vg);
 
@@ -1006,15 +1048,36 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
 		}
 
-		nvgFillColor(vg, color_border);
+		nvgFillColor(vg, borderColor);
 		nvgFill(vg);
 	}
 
 	// Nub.
 	{
-		const wzRect r = wz_scroller_get_nub_rect(scroller);
-		wz_nanovg_draw_filled_rect(vg, r, color_foreground);
-		wz_nanovg_draw_rect(vg, r, color_border);
+		wzRect r;
+		bool hover, pressed;
+		NVGcolor color, borderColor;
+
+		wz_scroller_get_nub_state(scroller, &r, &hover, &pressed);
+
+		if (pressed)
+		{
+			color = color_pressed;
+			borderColor = color_borderSet;
+		}
+		else if (hover)
+		{
+			color = color_hover;
+			borderColor = color_borderHover;
+		}
+		else
+		{
+			color = color_foreground;
+			borderColor = color_border;
+		}
+
+		wz_nanovg_draw_filled_rect(vg, r, color);
+		wz_nanovg_draw_rect(vg, r, borderColor);
 	}
 
 	nvgRestore(vg);

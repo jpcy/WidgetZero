@@ -463,22 +463,46 @@ void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale)
 	wz_scroller_nub_update_rect(scroller->nub);
 }
 
-wzRect wz_scroller_get_decrement_button_rect(const struct wzScroller *scroller)
+void wz_scroller_get_decrement_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
 {
 	WZ_ASSERT(scroller);
-	return wz_widget_get_absolute_rect((const struct wzWidget *)scroller->decrementButton);
+
+	if (rect)
+		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->decrementButton);
+
+	if (hover)
+		*hover = wz_widget_get_hover((const struct wzWidget *)scroller->decrementButton);
+
+	if (pressed)
+		*pressed = wz_button_is_pressed(scroller->decrementButton);
 }
 
-wzRect wz_scroller_get_increment_button_rect(const struct wzScroller *scroller)
+void wz_scroller_get_increment_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
 {
 	WZ_ASSERT(scroller);
-	return wz_widget_get_absolute_rect((const struct wzWidget *)scroller->incrementButton);
+
+	if (rect)
+		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->incrementButton);
+
+	if (hover)
+		*hover = wz_widget_get_hover((const struct wzWidget *)scroller->incrementButton);
+
+	if (pressed)
+		*pressed = wz_button_is_pressed(scroller->incrementButton);
 }
 
-wzRect wz_scroller_get_nub_rect(const struct wzScroller *scroller)
+void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
 {
 	WZ_ASSERT(scroller);
-	return wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
+
+	if (rect)
+		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
+
+	if (hover)
+		*hover = wz_widget_get_hover((const struct wzWidget *)scroller->nub);
+
+	if (pressed)
+		*pressed = scroller->nub->isPressed;
 }
 
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback)
