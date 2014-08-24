@@ -1099,13 +1099,7 @@ SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
 	decrementButton.reset(new Button(renderer, "-"));
 	incrementButton.reset(new Button(renderer, "+"));
 
-	spinner = wz_spinner_create((wzTextEdit *)textEdit->p->getWidget(), (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
-	wz_widget_set_metadata((wzWidget *)spinner, this);
-	wz_widget_set_draw_callback((wzWidget *)spinner, DrawWidget);
-	wz_widget_set_measure_callback((wzWidget *)spinner, MeasureWidget);
-
-	wz_widget_set_width(decrementButton->p->getWidget(), renderer->get_spinner_button_width(renderer));
-	wz_widget_set_width(incrementButton->p->getWidget(), renderer->get_spinner_button_width(renderer));
+	spinner = wz_spinner_create(renderer, (wzTextEdit *)textEdit->p->getWidget(), (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
 }
 
 SpinnerPrivate::~SpinnerPrivate()
@@ -1114,16 +1108,6 @@ SpinnerPrivate::~SpinnerPrivate()
 	{
 		wz_widget_destroy((wzWidget *)spinner);
 	}
-}
-
-wzSize SpinnerPrivate::measure()
-{
-	return renderer->measure_spinner(renderer, spinner, (const wzTextEdit *)textEdit->p->getWidget(), fontFace.c_str(), fontSize);
-}
-
-void SpinnerPrivate::draw(wzRect clip)
-{
-	renderer->draw_spinner(renderer, clip, spinner);
 }
 
 //------------------------------------------------------------------------------
@@ -1136,27 +1120,6 @@ Spinner::Spinner(wzRenderer *renderer)
 Spinner::~Spinner()
 {
 	delete p;
-}
-
-Widget *Spinner::setFontFace(const std::string &fontFace)
-{
-	Widget::setFontFace(fontFace);
-	((SpinnerPrivate *)p)->textEdit->setFontFace(fontFace);
-	return (Widget *)this;
-}
-
-Widget *Spinner::setFontSize(float fontSize)
-{
-	Widget::setFontSize(fontSize);
-	((SpinnerPrivate *)p)->textEdit->setFontSize(fontSize);
-	return (Widget *)this;
-}
-
-Widget *Spinner::setFont(const std::string &fontFace, float fontSize)
-{
-	Widget::setFont(fontFace, fontSize);
-	((SpinnerPrivate *)p)->textEdit->setFont(fontFace, fontSize);
-	return (Widget *)this;
 }
 
 Spinner *Spinner::setValue(int value)

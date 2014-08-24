@@ -495,7 +495,7 @@ void wz_scroller_get_increment_button_state(const struct wzScroller *scroller, w
 void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
 
-struct wzSpinner *wz_spinner_create(struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton);
+struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton);
 int wz_spinner_get_value(const struct wzSpinner *spinner);
 void wz_spinner_set_value(struct wzSpinner *spinner, int value);
 
@@ -608,7 +608,7 @@ struct wzRenderer
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
 
 	int (*get_spinner_button_width)(struct wzRenderer *renderer);
-	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize);
+	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);
 	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, struct wzSpinner *spinner);
 
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);

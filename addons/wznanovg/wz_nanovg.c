@@ -1119,15 +1119,19 @@ static int wz_nanovg_get_spinner_button_width(struct wzRenderer *renderer)
 	return 16;
 }
 
-static wzSize wz_nanovg_measure_spinner(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize)
+static wzSize wz_nanovg_measure_spinner(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit)
 {
 	wzBorder border;
+	const char *fontFace;
+	float fontSize;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(spinner);
 	WZ_ASSERT(textEdit);
 	border = wz_text_edit_get_border(textEdit);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)spinner);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)spinner);
 	size.w = 100;
 	size.h = wz_nanovg_get_line_height(renderer, fontFace, fontSize) + border.top + border.bottom;
 	return size;

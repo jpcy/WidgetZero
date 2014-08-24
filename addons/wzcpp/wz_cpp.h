@@ -257,9 +257,6 @@ class Spinner : public Widget
 public:
 	Spinner(wzRenderer *renderer);
 	~Spinner();
-	virtual Widget *setFontFace(const std::string &fontFace);
-	virtual Widget *setFontSize(float fontSize);
-	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	Spinner *setValue(int value);
 	int getValue() const;
 };

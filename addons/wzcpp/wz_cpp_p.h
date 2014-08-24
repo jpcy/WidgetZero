@@ -195,8 +195,6 @@ struct SpinnerPrivate : public WidgetPrivate
 	~SpinnerPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)spinner; }
 	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzSpinner *spinner;
 	std::auto_ptr<TextEdit> textEdit;

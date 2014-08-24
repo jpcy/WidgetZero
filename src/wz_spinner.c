@@ -63,7 +63,7 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 
 	// Update decrement button rect.
 	buttonRect.y = 0;
-	buttonRect.w = WZ_MAX(wz_widget_get_width((struct wzWidget *)spinner->decrementButton), wz_widget_get_width((struct wzWidget *)spinner->incrementButton));
+	buttonRect.w = spinner->base.renderer->get_spinner_button_width(spinner->base.renderer);
 	buttonRect.h = rect.h / 2;
 	buttonRect.x = rect.w - buttonRect.w;
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->decrementButton, buttonRect);
@@ -95,6 +95,18 @@ static void wz_spinner_increment_button_clicked(wzEvent *e)
 	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) + 1);
 }
 
+static wzSize wz_spinner_measure(struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->renderer->measure_spinner(widget->renderer, (struct wzSpinner *)widget, ((struct wzSpinner *)widget)->textEdit);
+}
+
+static void wz_spinner_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_spinner(widget->renderer, clip, (struct wzSpinner *)widget);
+}
+
 static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	WZ_ASSERT(widget);
@@ -102,7 +114,7 @@ static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_spinner_update_child_rects((struct wzSpinner *)widget);
 }
 
-struct wzSpinner *wz_spinner_create(struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton)
+struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton)
 {
 	struct wzSpinner *spinner;
 	wzBorder textEditBorder;
@@ -115,6 +127,9 @@ struct wzSpinner *wz_spinner_create(struct wzTextEdit *textEdit, struct wzButton
 	spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
 	memset(spinner, 0, sizeof(struct wzSpinner));
 	spinner->base.type = WZ_TYPE_SPINNER;
+	spinner->base.renderer = renderer;
+	spinner->base.vtable.measure = wz_spinner_measure;
+	spinner->base.vtable.draw = wz_spinner_draw;
 	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 
 	spinner->textEdit = textEdit;
