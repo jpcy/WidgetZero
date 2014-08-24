@@ -1037,11 +1037,7 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-
-	scroller = wz_scroller_create();
-	wz_widget_set_metadata((wzWidget *)scroller, this);
-	wz_widget_set_draw_callback((wzWidget *)scroller, DrawWidget);
-	wz_widget_set_measure_callback((wzWidget *)scroller, MeasureWidget);
+	scroller = wz_scroller_create(renderer);
 }
 
 ScrollerPrivate::~ScrollerPrivate()
@@ -1050,16 +1046,6 @@ ScrollerPrivate::~ScrollerPrivate()
 	{
 		wz_widget_destroy((wzWidget *)scroller);
 	}
-}
-
-wzSize ScrollerPrivate::measure()
-{
-	return renderer->measure_scroller(renderer, wz_scroller_get_type(scroller));
-}
-
-void ScrollerPrivate::draw(wzRect clip)
-{
-	renderer->draw_scroller(renderer, clip, scroller);
 }
 
 //------------------------------------------------------------------------------

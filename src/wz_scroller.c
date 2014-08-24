@@ -327,6 +327,18 @@ static void wz_scroller_increment_button_clicked(wzEvent *e)
 	wz_scroller_increment_value((struct wzScroller *)e->base.widget->parent);
 }
 
+static wzSize wz_scroller_measure(struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->renderer->measure_scroller(widget->renderer, wz_scroller_get_type((struct wzScroller *)widget));
+}
+
+static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_scroller(widget->renderer, clip, (struct wzScroller *)widget);
+}
+
 static void wz_scroller_destroy(struct wzWidget *widget)
 {
 	struct wzScroller *scroller;
@@ -348,17 +360,17 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller);
 }
 
-struct wzScroller *wz_scroller_create(struct wzButton *decrementButton, struct wzButton *incrementButton)
+struct wzScroller *wz_scroller_create(struct wzRenderer *renderer)
 {
 	struct wzScroller *scroller;
-
-	WZ_ASSERT(decrementButton);
-	WZ_ASSERT(incrementButton);
 
 	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
+	scroller->base.renderer = renderer;
 	scroller->base.vtable.destroy = wz_scroller_destroy;
+	scroller->base.vtable.measure = wz_scroller_measure;
+	scroller->base.vtable.draw = wz_scroller_draw;
 	scroller->base.vtable.mouse_button_down = wz_scroller_mouse_button_down;
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;

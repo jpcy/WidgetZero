@@ -185,8 +185,6 @@ struct ScrollerPrivate : public WidgetPrivate
 	~ScrollerPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzScroller *scroller;
 };
