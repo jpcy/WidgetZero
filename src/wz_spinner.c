@@ -114,13 +114,11 @@ static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_spinner_update_child_rects((struct wzSpinner *)widget);
 }
 
-struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzTextEdit *textEdit, struct wzButton *decrementButton, struct wzButton *incrementButton)
+struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzButton *decrementButton, struct wzButton *incrementButton)
 {
 	struct wzSpinner *spinner;
 	wzBorder textEditBorder;
 
-	WZ_ASSERT(textEdit);
-	WZ_ASSERT(!wz_text_edit_is_multiline(textEdit));
 	WZ_ASSERT(decrementButton);
 	WZ_ASSERT(incrementButton);
 
@@ -132,9 +130,14 @@ struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzTextEd
 	spinner->base.vtable.draw = wz_spinner_draw;
 	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 
-	spinner->textEdit = textEdit;
+	spinner->textEdit = wz_text_edit_create(renderer, false, 256);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
+
+	// Shrink the text edit border to exclude the increment and decrement buttons.
+	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
+	textEditBorder.right += renderer->get_spinner_button_width(renderer);
+	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
 	spinner->decrementButton = decrementButton;
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->decrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
@@ -145,11 +148,6 @@ struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzTextEd
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->incrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);
-
-	// Shrink the text edit border to exclude the increment and decrement buttons.
-	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
-	textEditBorder.right += WZ_MAX(wz_widget_get_width((struct wzWidget *)spinner->decrementButton), wz_widget_get_width((struct wzWidget *)spinner->incrementButton));
-	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
 	wz_spinner_update_child_rects(spinner);
 

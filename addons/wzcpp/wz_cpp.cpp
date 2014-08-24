@@ -1092,11 +1092,10 @@ SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	textEdit.reset(new TextEdit(renderer, false));
 	decrementButton.reset(new Button(renderer, "-"));
 	incrementButton.reset(new Button(renderer, "+"));
 
-	spinner = wz_spinner_create(renderer, (wzTextEdit *)textEdit->p->getWidget(), (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
+	spinner = wz_spinner_create(renderer, (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
 }
 
 SpinnerPrivate::~SpinnerPrivate()
