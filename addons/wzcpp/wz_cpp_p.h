@@ -126,13 +126,8 @@ struct LabelPrivate : public WidgetPrivate
 	~LabelPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzLabel *label;
-	bool multiline;
-	std::string text;
-	wzColor color;
 };
 
 struct ListPrivate : public WidgetPrivate

@@ -604,16 +604,11 @@ Widget *GroupBox::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-LabelPrivate::LabelPrivate(wzRenderer *renderer) : multiline(false)
+LabelPrivate::LabelPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	color = renderer->get_default_text_color(renderer);
-	label = wz_label_create();
-	wzWidget *widget = (wzWidget *)label;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_widget_set_measure_callback(widget, MeasureWidget);
+	label = wz_label_create(renderer);
 }
 
 LabelPrivate::~LabelPrivate()
@@ -622,16 +617,6 @@ LabelPrivate::~LabelPrivate()
 	{
 		wz_widget_destroy((wzWidget *)label);
 	}
-}
-
-wzSize LabelPrivate::measure()
-{
-	return renderer->measure_label(renderer, label, fontFace.c_str(), fontSize, multiline, text.c_str());
-}
-
-void LabelPrivate::draw(wzRect clip)
-{
-	renderer->draw_label(renderer, clip, label, fontFace.c_str(), fontSize, multiline, text.c_str(), color);
 }
 
 //------------------------------------------------------------------------------
@@ -660,27 +645,25 @@ Label *Label::setText(const char *format, ...)
 	va_start(args, format);
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
-
-	LabelPrivate *lp = (LabelPrivate *)p;
-	lp->text = buffer;
-	wz_widget_resize_to_measured(p->getWidget());
-
+	
+	wz_label_set_text((wzLabel *)p->getWidget(), buffer);
 	return this;
 }
 
 Label *Label::setTextColor(float r, float g, float b, float a)
 {
-	LabelPrivate *lp = (LabelPrivate *)p;
-	lp->color.r = r;
-	lp->color.g = g;
-	lp->color.b = b;
-	lp->color.a = a;
+	wzColor color;
+	color.r = r;
+	color.g = g;
+	color.b = b;
+	color.a = a;
+	wz_label_set_text_color((wzLabel *)p->getWidget(), color);
 	return this;
 }
 
 Label *Label::setMultiline(bool multiline)
 {
-	((LabelPrivate *)p)->multiline = multiline;
+	wz_label_set_multiline((wzLabel *)p->getWidget(), multiline);
 	return this;
 }
 

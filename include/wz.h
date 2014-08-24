@@ -438,7 +438,13 @@ struct wzGroupBox *wz_group_box_create(struct wzRenderer *renderer);
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
 
-struct wzLabel *wz_label_create();
+struct wzLabel *wz_label_create(struct wzRenderer *renderer);
+void wz_label_set_multiline(struct wzLabel *label, bool multiline);
+bool wz_label_get_multiline(const struct wzLabel *label);
+void wz_label_set_text(struct wzLabel *label, const char *text);
+const char *wz_label_get_text(const struct wzLabel *label);
+void wz_label_set_text_color(struct wzLabel *label, wzColor color);
+wzColor wz_label_get_text_color(const struct wzLabel *label);
 
 struct wzList *wz_list_create(struct wzScroller *scroller);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
@@ -586,8 +592,8 @@ struct wzRenderer
 	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox);
 
-	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text);
-	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, wzColor color);
+	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label);
+	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label);
 
 	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
 	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);

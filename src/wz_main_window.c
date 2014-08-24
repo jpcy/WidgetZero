@@ -1301,7 +1301,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		mainWindow->dockIcons[i] = wz_label_create(mainWindow);
+		mainWindow->dockIcons[i] = wz_label_create(renderer);
 		widget = (struct wzWidget *)mainWindow->dockIcons[i];
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
@@ -1313,7 +1313,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	wz_main_window_update_dock_icon_positions(mainWindow);
 
 	// Create dock preview widget.
-	mainWindow->dockPreview = wz_label_create(mainWindow);
+	mainWindow->dockPreview = wz_label_create(renderer);
 	widget = (struct wzWidget *)mainWindow->dockPreview;
 	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
 	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);

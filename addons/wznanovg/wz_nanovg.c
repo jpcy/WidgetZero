@@ -733,18 +733,24 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, c
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text)
+static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const struct wzLabel *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
+	const char *fontFace;
+	float fontSize;
+	const char *text;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(label);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)label);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)label);
+	text = wz_label_get_text(label);
 
-	if (multiline)
+	if (wz_label_get_multiline(label))
 	{
 		float bounds[4];
 
@@ -764,22 +770,30 @@ static wzSize wz_nanovg_measure_label(struct wzRenderer *renderer, const struct 
 	return size;
 }
 
-static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label, const char *fontFace, float fontSize, bool multiline, const char *text, wzColor color)
+static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
+	const char *fontFace;
+	float fontSize;
+	const char *text;
+	wzColor color;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(label);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)label);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)label);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)label);
+	text = wz_label_get_text(label);
+	color = wz_label_get_text_color(label);
 
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
 
-	if (multiline)
+	if (wz_label_get_multiline(label))
 	{
 		wz_nanovg_print_box(renderer, rect, fontFace, fontSize, nvgRGBAf(color.r, color.g, color.b, color.a), text, 0);
 	}
