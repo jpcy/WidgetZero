@@ -177,14 +177,14 @@ Widget *Widget::setMargin(wzBorder margin)
 Widget *Widget::setFontFace(const std::string &fontFace)
 {
 	p->fontFace = fontFace;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_widget_set_font_face(p->getWidget(), fontFace.c_str());
 	return this;
 }
 
 Widget *Widget::setFontSize(float fontSize)
 {
 	p->fontSize = fontSize;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_widget_set_font_size(p->getWidget(), fontSize);
 	return this;
 }
 
@@ -192,7 +192,7 @@ Widget *Widget::setFont(const std::string &fontFace, float fontSize)
 {
 	p->fontFace = fontFace;
 	p->fontSize = fontSize;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_widget_set_font(p->getWidget(), fontFace.c_str(), fontSize);
 	return this;
 }
 

@@ -444,6 +444,7 @@ void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
 {
 	WZ_ASSERT(widget);
 	strcpy(widget->fontFace, fontFace);
+	wz_widget_resize_to_measured(widget);
 }
 
 const char *wz_widget_get_font_face(const struct wzWidget *widget)
@@ -456,12 +457,21 @@ void wz_widget_set_font_size(struct wzWidget *widget, float fontSize)
 {
 	WZ_ASSERT(widget);
 	widget->fontSize = fontSize;
+	wz_widget_resize_to_measured(widget);
 }
 
 float wz_widget_get_font_size(const struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->fontSize;
+}
+
+void wz_widget_set_font(struct wzWidget *widget, const char *fontFace, float fontSize)
+{
+	WZ_ASSERT(widget);
+	strcpy(widget->fontFace, fontFace);
+	widget->fontSize = fontSize;
+	wz_widget_resize_to_measured(widget);
 }
 
 bool wz_widget_get_hover(const struct wzWidget *widget)
