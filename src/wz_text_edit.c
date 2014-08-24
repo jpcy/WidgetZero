@@ -61,7 +61,7 @@ static int wz_calculate_num_lines(struct wzTextEdit *textEdit, int lineWidth)
 
 	for (;;)
 	{
-		line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, lineWidth);
+		line = textEdit->base.renderer->line_break_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.next, 0, lineWidth);
 
 		if (!line.next || !line.next[0])
 			break;
@@ -94,7 +94,7 @@ static void wz_text_edit_update_scroller(struct wzTextEdit *textEdit)
 		return; // Not added yet
 
 	// Hide/show scroller depending on if it's needed.
-	lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
+	lineHeight = textEdit->base.renderer->get_line_height(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base));
 	nLines = wz_calculate_num_lines(textEdit, textEdit->base.rect.w - (textEdit->border.left + textEdit->border.right));
 
 	if (lineHeight * nLines > textEdit->base.rect.h - (textEdit->border.top + textEdit->border.bottom))
@@ -252,7 +252,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 		wzLineBreakResult line;
 
 		// Get line height.
-		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
+		lineHeight = textEdit->base.renderer->get_line_height(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base));
 
 		// Set line starting position. May be outside the widget.
 		lineY = lineHeight * -textEdit->scrollValue;
@@ -263,7 +263,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 
 		for (;;)
 		{
-			line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
+			line = textEdit->base.renderer->line_break_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
 
 			result = line.start - &textEdit->text;
 
@@ -284,7 +284,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 			int width, deltaWidth;
 
 			// Calculate the width of the text up to the current character.
-			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.start, i, &width, NULL);
+			textEdit->base.renderer->measure_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.start, i, &width, NULL);
 
 			// Calculate the change in text width since the last iteration.
 			deltaWidth = width - previousWidth;
@@ -329,7 +329,7 @@ static int wz_text_edit_index_from_relative_position(const struct wzTextEdit *te
 			int width, deltaWidth;
 
 			// Calculate the width of the text up to the current character.
-			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollValue], i, &width, NULL);
+			textEdit->base.renderer->measure_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), &(&textEdit->text)[textEdit->scrollValue], i, &width, NULL);
 
 			// Check if we've gone beyond the width of the widget.
 			if (width > wz_text_edit_get_text_rect(textEdit).w)
@@ -440,6 +440,18 @@ EVENT HANDLING
 
 ================================================================================
 */
+
+static wzSize wz_text_edit_measure(struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->renderer->measure_text_edit(widget->renderer, (struct wzTextEdit *)widget);
+}
+
+static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_text_edit(widget->renderer, clip, (struct wzTextEdit *)widget);
+}
 
 static void wz_text_edit_set_rect(struct wzWidget *widget, wzRect rect)
 {
@@ -642,7 +654,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 		cursorPosition = wz_text_edit_position_from_index(textEdit, textEdit->cursorIndex);
 
 		// Get line height.
-		lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
+		lineHeight = textEdit->base.renderer->get_line_height(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base));
 
 		// Move the cursor up/down.
 		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
@@ -691,7 +703,7 @@ static void wz_text_edit_key_down(struct wzWidget *widget, wzKey key)
 
 			for (;;)
 			{
-				line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
+				line = textEdit->base.renderer->line_break_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
 				WZ_ASSERT(line.start);
 				WZ_ASSERT(line.next);
 
@@ -785,13 +797,16 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multiline, int maximumTextLength)
+struct wzTextEdit *wz_text_edit_create(struct wzRenderer *renderer, bool multiline, int maximumTextLength)
 {
 	struct wzTextEdit *textEdit;
 
 	textEdit = (struct wzTextEdit *)malloc(sizeof(struct wzTextEdit) + maximumTextLength);
 	memset(textEdit, 0, sizeof(struct wzTextEdit) + maximumTextLength);
 	textEdit->base.type = WZ_TYPE_TEXT_EDIT;
+	textEdit->base.renderer = renderer;
+	textEdit->base.vtable.measure = wz_text_edit_measure;
+	textEdit->base.vtable.draw = wz_text_edit_draw;
 	textEdit->base.vtable.set_rect = wz_text_edit_set_rect;
 	textEdit->base.vtable.mouse_button_down = wz_text_edit_mouse_button_down;
 	textEdit->base.vtable.mouse_button_up = wz_text_edit_mouse_button_up;
@@ -800,10 +815,9 @@ struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multili
 	textEdit->base.vtable.key_down = wz_text_edit_key_down;
 	textEdit->base.vtable.text_input = wz_text_edit_text_input;
 
-	textEdit->scroller = scroller;
-
-	if (textEdit->scroller)
+	if (multiline)
 	{
+		textEdit->scroller = wz_scroller_create(renderer);
 		wz_scroller_set_type(textEdit->scroller, WZ_SCROLLER_VERTICAL);
 		wz_widget_add_child_widget_internal((struct wzWidget *)textEdit, (struct wzWidget *)textEdit->scroller);
 		wz_text_edit_update_scroller(textEdit);
@@ -812,6 +826,7 @@ struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multili
 
 	textEdit->multiline = multiline;
 	textEdit->maximumTextLength = maximumTextLength;
+	textEdit->border = renderer->get_text_edit_border(renderer, textEdit);
 	return textEdit;
 }
 
@@ -881,6 +896,7 @@ void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text)
 	n = WZ_MIN((int)strlen(text), textEdit->maximumTextLength);
 	strncpy(&textEdit->text, text, n);
 	(&textEdit->text)[n] = 0;
+	wz_widget_resize_to_measured(&textEdit->base);
 }
 
 int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit)
@@ -902,7 +918,7 @@ const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit)
 
 		for (;;)
 		{
-			line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
+			line = textEdit->base.renderer->line_break_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
 
 			if (lineIndex == textEdit->scrollValue)
 				return line.start;
@@ -972,7 +988,7 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 	WZ_ASSERT(textEdit);
 
 	// Get the line height.
-	lineHeight = wz_main_window_get_line_height(textEdit->base.mainWindow, (struct wzWidget *)textEdit);
+	lineHeight = textEdit->base.renderer->get_line_height(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base));
 
 	if (textEdit->text == 0)
 	{
@@ -992,7 +1008,7 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 		{
 			int lineStartIndex;
 
-			line = wz_main_window_line_break_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
+			line = textEdit->base.renderer->line_break_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.next, 0, wz_text_edit_get_text_rect(textEdit).w);
 			WZ_ASSERT(line.start);
 			WZ_ASSERT(line.next);
 			lineStartIndex = line.start - &textEdit->text;
@@ -1004,7 +1020,7 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 
 				if (index - lineStartIndex > 0)
 				{
-					wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, line.start, index - lineStartIndex, &width, NULL);
+					textEdit->base.renderer->measure_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), line.start, index - lineStartIndex, &width, NULL);
 				}
 
 				position.x = width;
@@ -1023,12 +1039,12 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 		if (delta > 0)
 		{
 			// Text width from the scroll index to the requested index.
-			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->scrollValue], delta, &width, NULL);
+			textEdit->base.renderer->measure_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), &(&textEdit->text)[textEdit->scrollValue], delta, &width, NULL);
 		}
 		else if (delta < 0)
 		{
 			// Text width from the requested index to the scroll index.
-			wz_main_window_measure_text(textEdit->base.mainWindow, (struct wzWidget *)textEdit, &(&textEdit->text)[textEdit->cursorIndex], -delta, &width, NULL);
+			textEdit->base.renderer->measure_text(textEdit->base.renderer, wz_widget_get_font_face(&textEdit->base), wz_widget_get_font_size(&textEdit->base), &(&textEdit->text)[textEdit->cursorIndex], -delta, &width, NULL);
 			width = -width;
 		}
 	

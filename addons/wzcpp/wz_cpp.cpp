@@ -801,9 +801,6 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
 	wz_widget_set_draw_callback((wzWidget *)mainWindow, DrawWidget);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
-	wz_main_window_set_get_line_height_callback(mainWindow, GetLineHeight);
-	wz_main_window_set_measure_text_callback(mainWindow, MeasureText);
-	wz_main_window_set_line_break_text_callback(mainWindow, LineBreakText);
 	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
 	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
 
@@ -1347,18 +1344,7 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-
-	if (multiline)
-	{
-		scroller.reset(new Scroller(renderer));
-	}
-
-	textEdit = wz_text_edit_create(multiline ? (wzScroller *)scroller->p->getWidget() : NULL, multiline, 256);
-	wz_text_edit_set_border(textEdit, renderer->get_text_edit_border(renderer, textEdit));
-	wzWidget *widget = (wzWidget *)textEdit;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_widget_set_measure_callback(widget, MeasureWidget);
+	textEdit = wz_text_edit_create(renderer, multiline, 256);
 }
 
 TextEditPrivate::~TextEditPrivate()
@@ -1367,17 +1353,6 @@ TextEditPrivate::~TextEditPrivate()
 	{
 		wz_widget_destroy((wzWidget *)textEdit);
 	}
-}
-
-wzSize TextEditPrivate::measure()
-{
-	return renderer->measure_text_edit(renderer, textEdit, fontFace.c_str(), fontSize, wz_text_edit_get_text(textEdit));
-}
-
-void TextEditPrivate::draw(wzRect clip)
-{
-	MainWindowPrivate *mainWindow = (MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)wz_widget_get_main_window(getWidget()));
-	renderer->draw_text_edit(renderer, clip, textEdit, fontFace.c_str(), fontSize);
 }
 
 //------------------------------------------------------------------------------
@@ -1400,9 +1375,7 @@ TextEdit::~TextEdit()
 
 TextEdit *TextEdit::setText(const std::string &text)
 {
-	TextEditPrivate *tp = (TextEditPrivate *)p;
-	wz_text_edit_set_text(tp->textEdit, text.c_str());
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_text_edit_set_text((wzTextEdit *)p->getWidget(), text.c_str());
 	return this;
 }
 

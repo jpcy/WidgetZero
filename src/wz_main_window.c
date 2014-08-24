@@ -37,10 +37,6 @@ struct wzMainWindow
 	// Centralized event handler.
 	wzEventCallback handle_event;
 
-	wzMainWindowGetLineHeightCallback get_line_height;
-	wzMainWindowMeasureTextCallback measure_text;
-	wzMainWindowLineBreakTextCallback line_break_text;
-
 	wzCursor cursor;
 
 	bool isShiftKeyDown, isControlKeyDown;
@@ -1260,24 +1256,6 @@ static struct wzWidget *wz_main_window_get_content_widget(struct wzWidget *widge
 	return ((struct wzMainWindow *)widget)->content;
 }
 
-void wz_main_window_set_get_line_height_callback(struct wzMainWindow *mainWindow, wzMainWindowGetLineHeightCallback callback)
-{
-	WZ_ASSERT(mainWindow);
-	mainWindow->get_line_height = callback;
-}
-
-void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback)
-{
-	WZ_ASSERT(mainWindow);
-	mainWindow->measure_text = callback;
-}
-
-void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow, wzMainWindowLineBreakTextCallback callback)
-{
-	WZ_ASSERT(mainWindow);
-	mainWindow->line_break_text = callback;
-}
-
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 {
 	struct wzMainWindow *mainWindow;
@@ -1452,31 +1430,4 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 	}
 
 	wz_widget_set_rect_internal(mainWindow->content, rect);
-}
-
-int wz_main_window_get_line_height(struct wzMainWindow *mainWindow, struct wzWidget *widget)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(widget);
-	WZ_ASSERT(widget->mainWindow == mainWindow);
-
-	return mainWindow->get_line_height(mainWindow, widget);
-}
-
-void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(widget);
-	WZ_ASSERT(widget->mainWindow == mainWindow);
-
-	mainWindow->measure_text(mainWindow, widget, text, n, width, height);
-}
-
-wzLineBreakResult wz_main_window_line_break_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(widget);
-	WZ_ASSERT(widget->mainWindow == mainWindow);
-
-	return mainWindow->line_break_text(mainWindow, widget, text, n, lineWidth);
 }

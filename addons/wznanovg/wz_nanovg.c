@@ -1226,14 +1226,18 @@ static wzBorder wz_nanovg_get_text_edit_border(struct wzRenderer *renderer, cons
 	return b;
 }
 
-static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, const char *text)
+static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, const struct wzTextEdit *textEdit)
 {
 	wzBorder border;
+	const char *fontFace;
+	float fontSize;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(textEdit);
 	border = wz_text_edit_get_border(textEdit);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)textEdit);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)textEdit);
 
 	if (wz_text_edit_is_multiline(textEdit))
 	{
@@ -1249,12 +1253,14 @@ static wzSize wz_nanovg_measure_text_edit(struct wzRenderer *renderer, const str
 	return size;
 }
 
-static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize)
+static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover;
+	const char *fontFace;
+	float fontSize;
 	wzRect textRect;
 	int lineHeight;
 
@@ -1267,6 +1273,8 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	wz_nanovg_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)textEdit);
 	hover = wz_widget_get_hover((struct wzWidget *)textEdit);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)textEdit);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)textEdit);
 
 	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, color_background);

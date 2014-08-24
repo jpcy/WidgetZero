@@ -52,10 +52,4 @@ void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWind
 
 void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
 
-int wz_main_window_get_line_height(struct wzMainWindow *mainWindow, struct wzWidget *widget);
-
-void wz_main_window_measure_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
-
-wzLineBreakResult wz_main_window_line_break_text(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth);
-
 #endif // _WZ_MAIN_WINDOW_H_

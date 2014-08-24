@@ -277,11 +277,8 @@ struct TextEditPrivate : public WidgetPrivate
 	~TextEditPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
 	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzTextEdit *textEdit;
-	std::auto_ptr<Scroller> scroller;
 };
 
 struct WindowPrivate : public WidgetPrivate

@@ -297,9 +297,6 @@ typedef struct
 }
 wzLineBreakResult;
 
-typedef int (*wzMainWindowGetLineHeightCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget);
-typedef void (*wzMainWindowMeasureTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int *width, int *height);
-typedef wzLineBreakResult (*wzMainWindowLineBreakTextCallback)(struct wzMainWindow *mainWindow, struct wzWidget *widget, const char *text, int n, int lineWidth);
 typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
 typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
 
@@ -308,9 +305,6 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
 void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
-void wz_main_window_set_get_line_height_callback(struct wzMainWindow *mainWindow, wzMainWindowGetLineHeightCallback callback);
-void wz_main_window_set_measure_text_callback(struct wzMainWindow *mainWindow, wzMainWindowMeasureTextCallback callback);
-void wz_main_window_set_line_break_text_callback(struct wzMainWindow *mainWindow, wzMainWindowLineBreakTextCallback callback);
 void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);
 void wz_main_window_set_draw_dock_preview_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockPreviewCallback callback, void *metadata);
 void wz_main_window_set_dock_icon_size(struct wzMainWindow *mainWindow, wzSize size);
@@ -529,7 +523,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton *tab, struct wzW
 
 typedef bool (*wzTextEditValidateTextCallback)(const char *text);
 
-struct wzTextEdit *wz_text_edit_create(struct wzScroller *scroller, bool multiline, int maximumTextLength);
+struct wzTextEdit *wz_text_edit_create(struct wzRenderer *renderer, bool multiline, int maximumTextLength);
 void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback);
 bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
@@ -617,8 +611,8 @@ struct wzRenderer
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
 	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
-	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize, const char *text);
-	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit, const char *fontFace, float fontSize);
+	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
+	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit);
 
 	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);
 	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title);
