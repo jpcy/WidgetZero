@@ -179,8 +179,6 @@ struct SpinnerPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }
 
 	wzSpinner *spinner;
-	std::auto_ptr<Button> decrementButton;
-	std::auto_ptr<Button> incrementButton;
 };
 
 struct StackLayoutPrivate : public WidgetPrivate

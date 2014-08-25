@@ -114,13 +114,10 @@ static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_spinner_update_child_rects((struct wzSpinner *)widget);
 }
 
-struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzButton *decrementButton, struct wzButton *incrementButton)
+struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer)
 {
 	struct wzSpinner *spinner;
 	wzBorder textEditBorder;
-
-	WZ_ASSERT(decrementButton);
-	WZ_ASSERT(incrementButton);
 
 	spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
 	memset(spinner, 0, sizeof(struct wzSpinner));
@@ -139,12 +136,14 @@ struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer, struct wzButton
 	textEditBorder.right += renderer->get_spinner_button_width(renderer);
 	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
-	spinner->decrementButton = decrementButton;
+	spinner->decrementButton = wz_button_create(renderer);
+	wz_button_set_label(spinner->decrementButton, "-");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->decrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
-	spinner->incrementButton = incrementButton;
+	spinner->incrementButton = wz_button_create(renderer);
+	wz_button_set_label(spinner->incrementButton, "+");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->incrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);

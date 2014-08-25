@@ -1039,10 +1039,7 @@ SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	decrementButton.reset(new Button(renderer, "-"));
-	incrementButton.reset(new Button(renderer, "+"));
-
-	spinner = wz_spinner_create(renderer, (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
+	spinner = wz_spinner_create(renderer);
 	wz_widget_set_metadata((wzWidget *)spinner, this);
 }
 
