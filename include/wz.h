@@ -450,7 +450,7 @@ const char *wz_label_get_text(const struct wzLabel *label);
 void wz_label_set_text_color(struct wzLabel *label, wzColor color);
 wzColor wz_label_get_text_color(const struct wzLabel *label);
 
-struct wzList *wz_list_create(struct wzScroller *scroller);
+struct wzList *wz_list_create(struct wzRenderer *renderer);
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);

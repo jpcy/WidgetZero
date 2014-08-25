@@ -633,9 +633,7 @@ ListPrivate::ListPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0), 
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	scroller.reset(new Scroller(renderer));
-
-	list = wz_list_create((wzScroller *)scroller->p->getWidget());
+	list = wz_list_create(renderer);
 	wz_list_set_items_border(list, renderer->get_list_items_border(renderer, list));
 	wz_widget_set_metadata((wzWidget *)list, this);
 	wz_widget_set_draw_callback((wzWidget *)list, DrawWidget);
