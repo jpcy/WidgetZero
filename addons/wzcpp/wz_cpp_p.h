@@ -203,8 +203,6 @@ public:
 
 protected:
 	wzTabBar *tabBar_;
-	std::auto_ptr<Button> decrementButton_;
-	std::auto_ptr<Button> incrementButton_;
 };
 
 class DockTabBar : public TabBar

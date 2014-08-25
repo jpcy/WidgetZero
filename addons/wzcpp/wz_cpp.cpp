@@ -1136,13 +1136,7 @@ TabBar::TabBar(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	decrementButton_.reset(new Button(renderer, "<"));
-	wz_widget_set_width(decrementButton_->p->getWidget(), 14);
-
-	incrementButton_.reset(new Button(renderer, ">"));
-	wz_widget_set_width(incrementButton_->p->getWidget(), 14);
-
-	tabBar_ = wz_tab_bar_create((wzButton *)decrementButton_->p->getWidget(), (wzButton *)incrementButton_->p->getWidget());
+	tabBar_ = wz_tab_bar_create(renderer);
 	wz_widget_set_metadata((wzWidget *)tabBar_, this);
 }
 
