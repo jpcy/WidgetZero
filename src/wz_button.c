@@ -26,17 +26,82 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_widget.h"
 
+typedef enum
+{
+	WZ_BUTTON_STYLE_DEFAULT,
+	WZ_BUTTON_STYLE_CHECK,
+	WZ_BUTTON_STYLE_RADIO,
+	WZ_BUTTON_STYLE_TAB,
+}
+wzButtonStyle;
+
 struct wzButton
 {
 	struct wzWidget base;
+	wzButtonStyle style;
 	wzButtonClickBehavior clickBehavior;
 	wzButtonSetBehavior setBehavior;
+	wzBorder padding;
+	char label[128];
+	char icon[128];
 	bool isPressed;
 	bool isSet;
 	bool *boundValue;
 	wzEventCallback *pressed_callbacks;
 	wzEventCallback *clicked_callbacks;
 };
+
+static wzSize wz_button_measure(struct wzWidget *widget)
+{
+	struct wzButton *button = (struct wzButton *)widget;
+	WZ_ASSERT(button);
+
+	if (button->style == WZ_BUTTON_STYLE_CHECK)
+	{
+		return widget->renderer->measure_checkbox(widget->renderer, button);
+	}
+	else if (button->style == WZ_BUTTON_STYLE_RADIO)
+	{
+		return widget->renderer->measure_radio_button(widget->renderer, button);
+	}
+	else if (button->style == WZ_BUTTON_STYLE_TAB)
+	{
+	}
+
+	return widget->renderer->measure_button(widget->renderer, button);
+}
+
+static void wz_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	struct wzButton *button = (struct wzButton *)widget;
+	WZ_ASSERT(button);
+
+	if (button->style == WZ_BUTTON_STYLE_CHECK)
+	{
+		widget->renderer->draw_checkbox(widget->renderer, clip, button);
+	}
+	else if (button->style == WZ_BUTTON_STYLE_RADIO)
+	{
+		widget->renderer->draw_radio_button(widget->renderer, clip, button);
+	}
+	else if (button->style == WZ_BUTTON_STYLE_TAB)
+	{
+	}
+	else
+	{
+		widget->renderer->draw_button(widget->renderer, clip, button);
+	}
+}
+
+static void wz_button_destroy(struct wzWidget *widget)
+{
+	struct wzButton *button;
+
+	WZ_ASSERT(widget);
+	button = (struct wzButton *)widget;
+	wz_arr_free(button->pressed_callbacks);
+	wz_arr_free(button->clicked_callbacks);
+}
 
 static void wz_button_click(struct wzButton *button)
 {
@@ -112,27 +177,42 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static void wz_button_destroy(struct wzWidget *widget)
+static struct wzButton *wz_button_create_internal(struct wzRenderer *renderer, wzButtonStyle style)
 {
-	struct wzButton *button;
-
-	WZ_ASSERT(widget);
-	button = (struct wzButton *)widget;
-	wz_arr_free(button->pressed_callbacks);
-	wz_arr_free(button->clicked_callbacks);
-}
-
-struct wzButton *wz_button_create()
-{
-	struct wzButton *button;
-
-	button = (struct wzButton *)malloc(sizeof(struct wzButton));
+	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
+	button->base.renderer = renderer;
+	button->base.vtable.measure = wz_button_measure;
+	button->base.vtable.draw = wz_button_draw;
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
+	button->style = style;
+	button->padding = renderer->get_button_padding(renderer, button);
 	return button;
+}
+
+struct wzButton *wz_button_create(struct wzRenderer *renderer)
+{
+	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_DEFAULT);
+}
+
+struct wzButton *wz_check_box_create(struct wzRenderer *renderer)
+{
+	struct wzButton *button = wz_button_create_internal(renderer, WZ_BUTTON_STYLE_CHECK);
+	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	return button;
+}
+
+struct wzButton *wz_radio_button_create(struct wzRenderer *renderer)
+{
+	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_RADIO);
+}
+
+struct wzButton *wz_tab_button_create(struct wzRenderer *renderer)
+{
+	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_TAB);
 }
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
@@ -145,6 +225,45 @@ void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior set
 {
 	WZ_ASSERT(button);
 	button->setBehavior = setBehavior;
+}
+
+void wz_button_set_label(struct wzButton *button, const char *label)
+{
+	WZ_ASSERT(button);
+	strcpy(button->label, label);
+	wz_widget_resize_to_measured(&button->base);
+}
+
+const char *wz_button_get_label(const struct wzButton *button)
+{
+	WZ_ASSERT(button);
+	return button->label;
+}
+
+void wz_button_set_icon(struct wzButton *button, const char *icon)
+{
+	WZ_ASSERT(button);
+	strcpy(button->icon, icon);
+	wz_widget_resize_to_measured(&button->base);
+}
+
+const char *wz_button_get_icon(const struct wzButton *button)
+{
+	WZ_ASSERT(button);
+	return button->icon;
+}
+
+void wz_button_set_padding(struct wzButton *button, wzBorder padding)
+{
+	WZ_ASSERT(button);
+	button->padding = padding;
+	wz_widget_resize_to_measured(&button->base);
+}
+
+wzBorder wz_button_get_padding(const struct wzButton *button)
+{
+	WZ_ASSERT(button);
+	return button->padding;
 }
 
 bool wz_button_is_pressed(const struct wzButton *button)

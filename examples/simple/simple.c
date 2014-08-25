@@ -81,14 +81,9 @@ int InitializeSDL()
 		return 1;
 	}
 
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	return 0;
-}
-
-static void DrawButton(struct wzWidget *widget, wzRect clip)
-{
-	renderer->draw_button(renderer, clip, (struct wzButton *)widget, wzBorder_zero, NULL, NULL, 24.0f, wz_widget_get_metadata(widget));
 }
 
 int main(int argc, char **argv)
@@ -115,10 +110,10 @@ int main(int argc, char **argv)
 	wz_widget_set_size_args((struct wzWidget *)mainWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	// Create a button.
-	button = wz_button_create();
+	button = wz_button_create(renderer);
 	wz_widget_set_rect_args((struct wzWidget *)button, WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
-	wz_widget_set_metadata((struct wzWidget *)button, "Click me!");
-	wz_widget_set_draw_callback((struct wzWidget *)button, DrawButton);
+	wz_button_set_label(button, "Click me!");
+	wz_widget_set_font_size((struct wzWidget *)button, 24.0f);
 	wz_widget_add_child_widget((struct wzWidget *)mainWindow, (struct wzWidget *)button);
 
 	for (;;)

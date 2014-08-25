@@ -412,9 +412,18 @@ typedef enum
 }
 wzButtonSetBehavior;
 
-struct wzButton *wz_button_create();
+struct wzButton *wz_button_create(struct wzRenderer *renderer);
+struct wzButton *wz_check_box_create(struct wzRenderer *renderer);
+struct wzButton *wz_radio_button_create(struct wzRenderer *renderer);
+struct wzButton *wz_tab_button_create(struct wzRenderer *renderer);
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
+void wz_button_set_label(struct wzButton *button, const char *label);
+const char *wz_button_get_label(const struct wzButton *button);
+void wz_button_set_icon(struct wzButton *button, const char *icon);
+const char *wz_button_get_icon(const struct wzButton *button);
+void wz_button_set_padding(struct wzButton *button, wzBorder padding);
+wzBorder wz_button_get_padding(const struct wzButton *button);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);
 void wz_button_set(struct wzButton *button, bool value);
@@ -575,11 +584,12 @@ struct wzRenderer
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
 
-	wzSize (*measure_button)(struct wzRenderer *renderer, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label);
+	wzBorder (*get_button_padding)(struct wzRenderer *renderer, const struct wzButton *button);
+	wzSize (*measure_button)(struct wzRenderer *renderer, const struct wzButton *button);
+	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button);
 
-	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
-	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *fontFace, float fontSize, const char *label);
+	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const struct wzButton *checkbox);
+	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox);
 
 	wzSize (*measure_combo)(struct wzRenderer *renderer, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride, int nItems);
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *fontFace, float fontSize, const char *item);
@@ -596,8 +606,8 @@ struct wzRenderer
 
 	void (*draw_main_window)(struct wzRenderer *renderer, struct wzMainWindow *mainWindow);
 
-	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
-	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *fontFace, float fontSize, const char *label);
+	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const struct wzButton *button);
+	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button);
 
 	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);

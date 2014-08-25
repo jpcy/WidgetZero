@@ -56,20 +56,8 @@ struct ButtonPrivate : public WidgetPrivate
 	~ButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
-
-	enum DrawStyle
-	{
-		Normal,
-		Tab
-	};
 
 	wzButton *button;
-	DrawStyle drawStyle;
-	wzBorder padding;
-	std::string icon;
-	std::string label;
 };
 
 struct CheckboxPrivate : public WidgetPrivate
@@ -78,11 +66,8 @@ struct CheckboxPrivate : public WidgetPrivate
 	~CheckboxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzButton *button;
-	std::string label;
 };
 
 struct ComboPrivate : public WidgetPrivate
@@ -171,11 +156,8 @@ struct RadioButtonPrivate : public WidgetPrivate
 	~RadioButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzButton *button;
-	std::string label;
 	RadioButtonGroup *group;
 };
 

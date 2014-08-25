@@ -210,16 +210,12 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 
 //------------------------------------------------------------------------------
 
-ButtonPrivate::ButtonPrivate(wzRenderer *renderer) : drawStyle(Normal)
+ButtonPrivate::ButtonPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	padding.left = padding.right = 8;
-	padding.top = padding.bottom = 4;
 	this->renderer = renderer;
-	button = wz_button_create();
+	button = wz_button_create(renderer);
 	wz_widget_set_metadata((wzWidget *)button, this);
-	wz_widget_set_draw_callback((wzWidget *)button, DrawWidget);
-	wz_widget_set_measure_callback((wzWidget *)button, MeasureWidget);
 }
 
 ButtonPrivate::~ButtonPrivate()
@@ -227,23 +223,6 @@ ButtonPrivate::~ButtonPrivate()
 	if (!wz_widget_get_main_window((wzWidget *)button))
 	{
 		wz_widget_destroy((wzWidget *)button);
-	}
-}
-
-wzSize ButtonPrivate::measure()
-{
-	return renderer->measure_button(renderer, padding, icon.c_str(), fontFace.c_str(), fontSize, label.c_str());
-}
-
-void ButtonPrivate::draw(wzRect clip)
-{
-	if (drawStyle == Normal)
-	{
-		renderer->draw_button(renderer, clip, button, padding, icon.c_str(), fontFace.c_str(), fontSize, label.c_str());
-	}
-	else if (drawStyle == Tab)
-	{
-		renderer->draw_tab_button(renderer, clip, button, padding, fontFace.c_str(), fontSize, label.c_str());
 	}
 }
 
@@ -272,56 +251,51 @@ Button::~Button()
 
 wzBorder Button::getPadding() const
 {
-	return ((ButtonPrivate *)p)->padding;
+	return wz_button_get_padding((const wzButton *)p->getWidget());
 }
 
 Button *Button::setPadding(wzBorder padding)
 {
-	((ButtonPrivate *)p)->padding = padding;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_button_set_padding((wzButton *)p->getWidget(), padding);
 	return this;
 }
 
 Button *Button::setPadding(int top, int right, int bottom, int left)
 {
-	ButtonPrivate *bp = (ButtonPrivate *)p;
-	bp->padding.top = top;
-	bp->padding.right = right;
-	bp->padding.bottom = bottom;
-	bp->padding.left = left;
-	wz_widget_resize_to_measured(p->getWidget());
+	wzBorder padding;
+	padding.top = top;
+	padding.right = right;
+	padding.bottom = bottom;
+	padding.left = left;
+	wz_button_set_padding((wzButton *)p->getWidget(), padding);
 	return this;
 }
 
-std::string Button::getIcon() const
+const char *Button::getIcon() const
 {
-	return ((ButtonPrivate *)p)->icon;
+	return wz_button_get_icon((const wzButton *)p->getWidget());
 }
 
 Button *Button::setIcon(const std::string &icon)
 {
-	ButtonPrivate *bp = (ButtonPrivate *)p;
-	bp->icon = icon;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_button_set_icon((wzButton *)p->getWidget(), icon.c_str());
 	return this;
 }
 
-std::string Button::getLabel() const
+const char *Button::getLabel() const
 {
-	return ((ButtonPrivate *)p)->label;
+	return wz_button_get_label((const wzButton *)p->getWidget());
 }
 
 Button *Button::setLabel(const std::string &label)
 {
-	ButtonPrivate *bp = (ButtonPrivate *)p;
-	bp->label = label;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
 	return this;
 }
 
 Button *Button::setToggle(bool toggle)
 {
-	wz_button_set_set_behavior(((ButtonPrivate *)p)->button, toggle ? WZ_BUTTON_SET_BEHAVIOR_TOGGLE : WZ_BUTTON_SET_BEHAVIOR_DEFAULT);
+	wz_button_set_set_behavior((wzButton *)p->getWidget(), toggle ? WZ_BUTTON_SET_BEHAVIOR_TOGGLE : WZ_BUTTON_SET_BEHAVIOR_DEFAULT);
 	return this;
 }
 
@@ -331,12 +305,8 @@ CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	button = wz_button_create();
-	wzWidget *widget = (wzWidget *)button;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_widget_set_measure_callback(widget, MeasureWidget);
-	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	button = wz_check_box_create(renderer);
+	wz_widget_set_metadata((wzWidget *)button, this);
 }
 
 CheckboxPrivate::~CheckboxPrivate()
@@ -345,16 +315,6 @@ CheckboxPrivate::~CheckboxPrivate()
 	{
 		wz_widget_destroy((wzWidget *)button);
 	}
-}
-
-wzSize CheckboxPrivate::measure()
-{
-	return renderer->measure_checkbox(renderer, fontFace.c_str(), fontSize, label.c_str());
-}
-
-void CheckboxPrivate::draw(wzRect clip)
-{
-	renderer->draw_checkbox(renderer, clip, button, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -375,22 +335,20 @@ Checkbox::~Checkbox()
 	delete p;
 }
 
-std::string Checkbox::getLabel() const
+const char *Checkbox::getLabel() const
 {
-	return ((CheckboxPrivate *)p)->label;
+	return wz_button_get_label((const wzButton *)p->getWidget());
 }
 
 Checkbox *Checkbox::setLabel(const std::string &label)
 {
-	CheckboxPrivate *cp = (CheckboxPrivate *)p;
-	cp->label = label;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
 	return this;
 }
 
 Checkbox *Checkbox::bindValue(bool *value)
 {
-	wz_button_bind_value(((CheckboxPrivate *)p)->button, value);
+	wz_button_bind_value((wzButton *)p->getWidget(), value);
 	return this;
 }
 
@@ -485,7 +443,7 @@ void DockTabBar::handleEvent(wzEvent *e)
 		// Create a new tab.
 		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata(e->create.extra);
 		Button *tab = new Button(renderer);
-		((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
+		//((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
 		tab->setLabel(window->title);
 		children.push_back(tab);
 		e->create.widget = tab->p->getWidget();
@@ -556,6 +514,7 @@ GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	groupBox = wz_group_box_create(renderer);
+	wz_widget_set_metadata((wzWidget *)groupBox, this);
 	wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
 }
 
@@ -609,6 +568,7 @@ LabelPrivate::LabelPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	label = wz_label_create(renderer);
+	wz_widget_set_metadata((wzWidget *)label, this);
 }
 
 LabelPrivate::~LabelPrivate()
@@ -953,10 +913,8 @@ RadioButtonPrivate::RadioButtonPrivate(wzRenderer *renderer) : group(NULL)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	button = wz_button_create();
+	button = wz_radio_button_create(renderer);
 	wz_widget_set_metadata((wzWidget *)button, this);
-	wz_widget_set_draw_callback((wzWidget *)button, DrawWidget);
-	wz_widget_set_measure_callback((wzWidget *)button, MeasureWidget);
 }
 
 RadioButtonPrivate::~RadioButtonPrivate()
@@ -965,16 +923,6 @@ RadioButtonPrivate::~RadioButtonPrivate()
 	{
 		wz_widget_destroy((wzWidget *)button);
 	}
-}
-
-wzSize RadioButtonPrivate::measure()
-{
-	return renderer->measure_radio_button(renderer, fontFace.c_str(), fontSize, label.c_str());
-}
-
-void RadioButtonPrivate::draw(wzRect clip)
-{
-	renderer->draw_radio_button(renderer, clip, button, fontFace.c_str(), fontSize, label.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -995,16 +943,14 @@ RadioButton::~RadioButton()
 	delete p;
 }
 
-std::string RadioButton::getLabel() const
+const char *RadioButton::getLabel() const
 {
-	return ((RadioButtonPrivate *)p)->label;
+	return wz_button_get_label((const wzButton *)p->getWidget());
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	RadioButtonPrivate *rp = (RadioButtonPrivate *)p;
-	rp->label = label;
-	wz_widget_resize_to_measured(p->getWidget());
+	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
 	return this;
 }
 
@@ -1035,6 +981,7 @@ ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	scroller = wz_scroller_create(renderer);
+	wz_widget_set_metadata((wzWidget *)scroller, this);
 }
 
 ScrollerPrivate::~ScrollerPrivate()
@@ -1096,6 +1043,7 @@ SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
 	incrementButton.reset(new Button(renderer, "+"));
 
 	spinner = wz_spinner_create(renderer, (wzButton *)decrementButton->p->getWidget(), (wzButton *)incrementButton->p->getWidget());
+	wz_widget_set_metadata((wzWidget *)spinner, this);
 }
 
 SpinnerPrivate::~SpinnerPrivate()
@@ -1216,7 +1164,7 @@ void TabBar::draw(wzRect clip)
 Button *TabBar::createTab()
 {
 	Button *tab = new Button(renderer);
-	((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
+	//((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
 	children.push_back(tab);
 	return tab;
 }
@@ -1344,6 +1292,7 @@ TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	textEdit = wz_text_edit_create(renderer, multiline, 256);
+	wz_widget_set_metadata((wzWidget *)textEdit, this);
 }
 
 TextEditPrivate::~TextEditPrivate()

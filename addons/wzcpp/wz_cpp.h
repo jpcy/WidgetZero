@@ -118,9 +118,9 @@ public:
 	wzBorder getPadding() const;
 	Button *setPadding(wzBorder padding);
 	Button *setPadding(int top, int right, int bottom, int left);
-	std::string getIcon() const;
+	const char *getIcon() const;
 	Button *setIcon(const std::string &icon);
-	std::string getLabel() const;
+	const char *getLabel() const;
 	Button *setLabel(const std::string &label);
 	Button *setToggle(bool toggle);
 };
@@ -131,7 +131,7 @@ public:
 	Checkbox(wzRenderer *renderer);
 	Checkbox(wzRenderer *renderer, const std::string &label);
 	~Checkbox();
-	std::string getLabel() const;
+	const char *getLabel() const;
 	Checkbox *setLabel(const std::string &label);
 	Checkbox *bindValue(bool *value);
 };
@@ -233,7 +233,7 @@ public:
 	RadioButton(wzRenderer *renderer);
 	RadioButton(wzRenderer *renderer, const std::string &label);
 	~RadioButton();
-	std::string getLabel() const;
+	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);
 
 	// NULL to remove the radio button from it's group.

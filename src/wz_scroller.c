@@ -377,12 +377,12 @@ struct wzScroller *wz_scroller_create(struct wzRenderer *renderer)
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
 	scroller->stepValue = 1;
 
-	scroller->decrementButton = wz_button_create();
+	scroller->decrementButton = wz_button_create(renderer);
 	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	wz_scroller_decrement_button_update_rect(scroller);
 
-	scroller->incrementButton = wz_button_create();
+	scroller->incrementButton = wz_button_create(renderer);
 	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 	wz_scroller_increment_button_update_rect(scroller);

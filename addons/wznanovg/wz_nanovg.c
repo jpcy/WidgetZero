@@ -389,23 +389,40 @@ static void wz_nanovg_draw_dock_preview(struct wzRenderer *renderer, wzRect rect
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label)
+static wzBorder wz_nanovg_get_button_padding(struct wzRenderer *renderer, const struct wzButton *button)
+{
+	wzBorder padding;
+	padding.left = padding.right = 8;
+	padding.top = padding.bottom = 4;
+	return padding;
+}
+
+static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, const struct wzButton *button)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
+	const char *fontFace;
+	float fontSize;
+	const char *icon;
+	wzBorder padding;
 	wzSize size;
 
 	WZ_ASSERT(renderer);
+	WZ_ASSERT(button);
 	rendererData = (wzRendererData *)renderer->data;
 	vg = rendererData->vg;
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)button);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)button);
+	icon = wz_button_get_icon(button);
+	padding = wz_button_get_padding(button);
 
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, fontFace, fontSize, wz_button_get_label(button), 0, &size.w, &size.h);
 
 	if (icon && icon[0])
 	{
 		int handle, w, h;
 
-		handle = wz_nanovg_create_image(renderer, icon, &w, &h);
+		handle = wz_nanovg_create_image(renderer, wz_button_get_icon(button), &w, &h);
 
 		if (handle)
 		{
@@ -419,13 +436,17 @@ static wzSize wz_nanovg_measure_button(struct wzRenderer *renderer, wzBorder pad
 	return size;
 }
 
-static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, wzBorder padding, const char *icon, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
+	const char *fontFace;
+	float fontSize;
 	bool hover, pressed, set;
+	wzBorder padding;
 	wzRect paddedRect;
+	const char *label, *icon;
 	wzSize iconSize;
 	int iconHandle, labelWidth, iconX, labelX;
 
@@ -440,6 +461,8 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 	if (!wz_nanovg_clip_to_rect_intersection(vg, clip, rect))
 		return;
 
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)button);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)button);
 	hover = wz_widget_get_hover((struct wzWidget *)button);
 	pressed = wz_button_is_pressed(button);
 	set = wz_button_is_set(button); // For toggle buttons.
@@ -477,12 +500,15 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 	}
 
 	// Calculate padded rect.
+	padding = wz_button_get_padding(button);
 	paddedRect.x = rect.x + padding.left;
 	paddedRect.y = rect.y + padding.top;
 	paddedRect.w = rect.w - (padding.left + padding.right);
 	paddedRect.h = rect.h - (padding.top + padding.bottom);
 
 	// Calculate icon and label sizes.
+	label = wz_button_get_label(button);
+	icon = wz_button_get_icon(button);
 	iconSize.w = iconSize.h = 0;
 
 	if (icon && icon[0])
@@ -527,17 +553,17 @@ static void wz_nanovg_draw_button(struct wzRenderer *renderer, wzRect clip, stru
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_checkbox(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
+static wzSize wz_nanovg_measure_checkbox(struct wzRenderer *renderer, const struct wzButton *checkbox)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, wz_widget_get_font_face((const struct wzWidget *)checkbox), wz_widget_get_font_size((const struct wzWidget *)checkbox), wz_button_get_label(checkbox), 0, &size.w, &size.h);
 	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
 	return size;
 }
 
-static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -585,7 +611,7 @@ static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, st
 	}
 
 	// Label.
-	wz_nanovg_print(renderer, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, label, 0);
+	wz_nanovg_print(renderer, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)checkbox), wz_widget_get_font_size((const struct wzWidget *)checkbox), color_text, wz_button_get_label(checkbox), 0);
 
 	nvgRestore(vg);
 }
@@ -899,18 +925,18 @@ static void wz_nanovg_draw_main_window(struct wzRenderer *renderer, struct wzMai
 	wz_nanovg_draw_filled_rect(((wzRendererData *)renderer->data)->vg, wz_widget_get_absolute_rect((struct wzWidget *)mainWindow), color_background);
 }
 
-static wzSize wz_nanovg_measure_radio_button(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
+static wzSize wz_nanovg_measure_radio_button(struct wzRenderer *renderer, const struct wzButton *button)
 {
 	wzSize size;
 
 	WZ_ASSERT(renderer);
-	wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &size.w, &size.h);
+	wz_nanovg_measure_text(renderer, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), wz_button_get_label(button), 0, &size.w, &size.h);
 	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
 	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
 	return size;
 }
 
-static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *button)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -946,7 +972,7 @@ static void wz_nanovg_draw_radio_button(struct wzRenderer *renderer, wzRect clip
 	nvgStroke(vg);
 
 	// Label.
-	wz_nanovg_print(renderer, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, label, 0);
+	wz_nanovg_print(renderer, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), color_text, wz_button_get_label(button), 0);
 
 	nvgRestore(vg);
 }
@@ -1512,6 +1538,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->get_default_text_color = wz_nanovg_get_default_text_color;
 	renderer->draw_dock_icon = wz_nanovg_draw_dock_icon;
 	renderer->draw_dock_preview = wz_nanovg_draw_dock_preview;
+	renderer->get_button_padding = wz_nanovg_get_button_padding;
 	renderer->measure_button = wz_nanovg_measure_button;
 	renderer->draw_button = wz_nanovg_draw_button;
 	renderer->measure_checkbox = wz_nanovg_measure_checkbox;
