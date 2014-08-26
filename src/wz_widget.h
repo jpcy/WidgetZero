@@ -40,6 +40,8 @@ typedef struct
 	// Some additional widget state may been to be cleared when a widget is hidden.
 	void (*set_visible)(struct wzWidget *widget, bool visible);
 
+	void (*font_changed)(struct wzWidget *widget, const char *fontFace, float fontSize);
+
 	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);

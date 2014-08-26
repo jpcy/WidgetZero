@@ -629,15 +629,12 @@ Label *Label::setMultiline(bool multiline)
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0), drawItemCallback(NULL)
+ListPrivate::ListPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	list = wz_list_create(renderer);
-	wz_list_set_items_border(list, renderer->get_list_items_border(renderer, list));
 	wz_widget_set_metadata((wzWidget *)list, this);
-	wz_widget_set_draw_callback((wzWidget *)list, DrawWidget);
-	refreshItemHeight();
 }
 
 ListPrivate::~ListPrivate()
@@ -646,23 +643,6 @@ ListPrivate::~ListPrivate()
 	{
 		wz_widget_destroy((wzWidget *)list);
 	}
-}
-
-void ListPrivate::draw(wzRect clip)
-{
-	renderer->draw_list(renderer, clip, list, fontFace.c_str(), fontSize, itemData, itemStride, drawItemCallback);
-}
-
-void ListPrivate::refreshItemHeight()
-{
-	wz_list_set_item_height(list, renderer->measure_list_item_height(renderer, list, fontFace.c_str(), fontSize));
-}
-
-void ListPrivate::setItems(uint8_t *itemData, size_t itemStride, int nItems)
-{
-	this->itemData = itemData;
-	this->itemStride = itemStride;
-	wz_list_set_num_items(list, nItems);
 }
 
 //------------------------------------------------------------------------------
@@ -677,30 +657,11 @@ List::~List()
 	delete p;
 }
 
-Widget *List::setFontFace(const std::string &fontFace)
-{
-	Widget::setFontFace(fontFace);
-	((ListPrivate *)p)->refreshItemHeight();
-	return (Widget *)this;
-}
-
-Widget *List::setFontSize(float fontSize)
-{
-	Widget::setFontSize(fontSize);
-	((ListPrivate *)p)->refreshItemHeight();
-	return (Widget *)this;
-}
-
-Widget *List::setFont(const std::string &fontFace, float fontSize)
-{
-	Widget::setFont(fontFace, fontSize);
-	((ListPrivate *)p)->refreshItemHeight();
-	return (Widget *)this;
-}
-
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	((ListPrivate *)p)->setItems(itemData, itemStride, nItems);
+	wz_list_set_item_data((wzList *)p->getWidget(), itemData);
+	wz_list_set_item_stride((wzList *)p->getWidget(), itemStride);
+	wz_list_set_num_items((wzList *)p->getWidget(), nItems);
 	return this;
 }
 
@@ -712,7 +673,7 @@ List *List::setSelectedItem(int index)
 
 List *List::setDrawItemCallback(wzDrawListItemCallback callback)
 {
-	((ListPrivate *)p)->drawItemCallback = callback;
+	wz_list_set_draw_item_callback((wzList *)p->getWidget(), callback);
 	return this;
 }
 

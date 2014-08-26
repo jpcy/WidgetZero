@@ -121,17 +121,8 @@ struct ListPrivate : public WidgetPrivate
 	~ListPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
 	virtual wzWidget *getWidget() { return (wzWidget *)list; }
-	virtual void draw(wzRect clip);
-
-	// Called on init and when the font face or size changed.
-	void refreshItemHeight();
-
-	void setItems(uint8_t *itemData, size_t itemStride, int nItems);
 
 	wzList *list;
-	uint8_t *itemData;
-	size_t itemStride;
-	wzDrawListItemCallback drawItemCallback;
 };
 
 struct MainWindowPrivate : public WidgetPrivate

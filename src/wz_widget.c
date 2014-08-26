@@ -445,6 +445,11 @@ void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
 	WZ_ASSERT(widget);
 	strcpy(widget->fontFace, fontFace);
 	wz_widget_resize_to_measured(widget);
+
+	if (widget->vtable.font_changed)
+	{
+		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
+	}
 }
 
 const char *wz_widget_get_font_face(const struct wzWidget *widget)
@@ -458,6 +463,11 @@ void wz_widget_set_font_size(struct wzWidget *widget, float fontSize)
 	WZ_ASSERT(widget);
 	widget->fontSize = fontSize;
 	wz_widget_resize_to_measured(widget);
+
+	if (widget->vtable.font_changed)
+	{
+		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
+	}
 }
 
 float wz_widget_get_font_size(const struct wzWidget *widget)
@@ -472,6 +482,11 @@ void wz_widget_set_font(struct wzWidget *widget, const char *fontFace, float fon
 	strcpy(widget->fontFace, fontFace);
 	widget->fontSize = fontSize;
 	wz_widget_resize_to_measured(widget);
+
+	if (widget->vtable.font_changed)
+	{
+		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
+	}
 }
 
 bool wz_widget_get_hover(const struct wzWidget *widget)

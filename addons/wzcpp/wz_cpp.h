@@ -182,9 +182,6 @@ class List : public Widget
 public:
 	List(wzRenderer *renderer);
 	~List();
-	virtual Widget *setFontFace(const std::string &fontFace);
-	virtual Widget *setFontSize(float fontSize);
-	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 	List *setSelectedItem(int index);
 	List *setDrawItemCallback(wzDrawListItemCallback callback);

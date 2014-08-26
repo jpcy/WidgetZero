@@ -450,8 +450,9 @@ const char *wz_label_get_text(const struct wzLabel *label);
 void wz_label_set_text_color(struct wzLabel *label, wzColor color);
 wzColor wz_label_get_text_color(const struct wzLabel *label);
 
+typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+
 struct wzList *wz_list_create(struct wzRenderer *renderer);
-struct wzScroller *wz_list_get_scroller(struct wzList *list);
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
 wzBorder wz_list_get_items_border(const struct wzList *list);
@@ -460,6 +461,12 @@ wzRect wz_list_get_items_rect(const struct wzList *list);
 // rect will be absolute - ancestor window position is taken into account.
 wzRect wz_list_get_absolute_items_rect(const struct wzList *list);
 
+void wz_list_set_draw_item_callback(struct wzList *list, wzDrawListItemCallback callback);
+wzDrawListItemCallback wz_list_get_draw_item_callback(const struct wzList *list);
+void wz_list_set_item_data(struct wzList *list, uint8_t *itemData);
+uint8_t *wz_list_get_item_data(const struct wzList *list);
+void wz_list_set_item_stride(struct wzList *list, int itemStride);
+int wz_list_get_item_stride(const struct wzList *list);
 void wz_list_set_item_height(struct wzList *list, int itemHeight);
 int wz_list_get_item_height(const struct wzList *list);
 void wz_list_set_num_items(struct wzList *list, int nItems);
@@ -469,6 +476,7 @@ void wz_list_set_selected_item(struct wzList *list, int selectedItem);
 int wz_list_get_selected_item(const struct wzList *list);
 int wz_list_get_pressed_item(const struct wzList *list);
 int wz_list_get_hovered_item(const struct wzList *list);
+int wz_list_get_scroll_value(const struct wzList *list);
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback);
 
 struct wzRadioButtonGroup *wz_radio_button_group_create();
@@ -563,8 +571,6 @@ wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *text
 
 wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index);
 
-typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
-
 struct wzRenderer
 {
 	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
@@ -600,9 +606,9 @@ struct wzRenderer
 	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label);
 	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label);
 
-	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, struct wzList *list);
-	int (*measure_list_item_height)(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize);
-	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *data, size_t itemStride, wzDrawListItemCallback draw_item);
+	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, const struct wzList *list);
+	int (*measure_list_item_height)(struct wzRenderer *renderer, const struct wzList *list);
+	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list);
 
 	void (*draw_main_window)(struct wzRenderer *renderer, struct wzMainWindow *mainWindow);
 

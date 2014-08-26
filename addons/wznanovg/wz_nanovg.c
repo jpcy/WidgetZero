@@ -831,26 +831,33 @@ static void wz_nanovg_draw_label(struct wzRenderer *renderer, wzRect clip, struc
 	nvgRestore(vg);
 }
 
-static wzBorder wz_nanovg_get_list_items_border(struct wzRenderer *renderer, struct wzList *list)
+static wzBorder wz_nanovg_get_list_items_border(struct wzRenderer *renderer, const struct wzList *list)
 {
 	wzBorder b;
 	b.left = b.top = b.right = b.bottom = 2;
 	return b;
 }
 
-static int wz_nanovg_measure_list_item_height(struct wzRenderer *renderer, struct wzList *list, const char *fontFace, float fontSize)
+static int wz_nanovg_measure_list_item_height(struct wzRenderer *renderer, const struct wzList *list)
 {
 	WZ_ASSERT(renderer);
-	return wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 2; // Add a little padding.
+	WZ_ASSERT(list);
+
+	// Add a little padding.
+	return wz_nanovg_get_line_height(renderer, wz_widget_get_font_face((const struct wzWidget *)list), wz_widget_get_font_size((const struct wzWidget *)list)) + 2;
 }
 
-static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, uint8_t *data, size_t itemStride, wzDrawListItemCallback draw_item)
+static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct wzList *list)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect, itemsRect;
+	const char *fontFace;
+	float fontSize;
 	int itemHeight, itemLeftPadding;
-	int nItems, scrollerValue, y, i;
+	uint8_t *data;
+	int itemStride, nItems, scrollerValue, y, i;
+	wzDrawListItemCallback draw_item;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(list);
@@ -860,6 +867,8 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct
 	nvgSave(vg);
 	wz_nanovg_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)list);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)list);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)list);
 	
 	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, color_background);
@@ -875,9 +884,12 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, struct
 	if (!wz_nanovg_clip_to_rect_intersection(vg, clip, itemsRect))
 		return;
 
+	data = wz_list_get_item_data(list);
+	itemStride = wz_list_get_item_stride(list);
 	nItems = wz_list_get_num_items(list);
-	scrollerValue = wz_scroller_get_value(wz_list_get_scroller(list));
+	scrollerValue = wz_list_get_scroll_value(list);
 	y = itemsRect.y - (scrollerValue % itemHeight);
+	draw_item = wz_list_get_draw_item_callback(list);
 
 	for (i = wz_list_get_first_item(list); i < nItems; i++)
 	{

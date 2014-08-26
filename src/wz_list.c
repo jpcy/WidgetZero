@@ -31,6 +31,9 @@ struct wzList
 {
 	struct wzWidget base;
 	wzBorder itemsBorder;
+	wzDrawListItemCallback draw_item;
+	uint8_t *itemData;
+	int itemStride;
 	int itemHeight;
 	int nItems;
 	int firstItem;
@@ -112,6 +115,21 @@ LIST WIDGET
 ================================================================================
 */
 
+static void wz_list_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_list(widget->renderer, clip, (struct wzList *)widget);
+}
+
+static void wz_list_destroy(struct wzWidget *widget)
+{
+	struct wzList *list;
+
+	WZ_ASSERT(widget);
+	list = (struct wzList *)widget;
+	wz_arr_free(list->item_selected_callbacks);
+}
+
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
@@ -133,6 +151,13 @@ static void wz_list_set_visible(struct wzWidget *widget, bool visible)
 		struct wzList *list = (struct wzList *)widget;
 		list->hoveredItem = -1;
 	}
+}
+
+static void wz_list_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
+{
+	struct wzList *list = (struct wzList *)widget;
+	WZ_ASSERT(widget);
+	wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
 }
 
 static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int mouseY)
@@ -268,29 +293,23 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
-static void wz_list_destroy(struct wzWidget *widget)
-{
-	struct wzList *list;
-
-	WZ_ASSERT(widget);
-	list = (struct wzList *)widget;
-	wz_arr_free(list->item_selected_callbacks);
-}
-
 struct wzList *wz_list_create(struct wzRenderer *renderer)
 {
 	struct wzList *list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
 	list->base.renderer = renderer;
+	list->base.vtable.draw = wz_list_draw;
 	list->base.vtable.destroy = wz_list_destroy;
 	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.set_visible = wz_list_set_visible;
+	list->base.vtable.font_changed = wz_list_font_changed;
 	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
 	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
 	list->base.vtable.mouse_move = wz_list_mouse_move;
 	list->base.vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
 	list->base.vtable.mouse_hover_off = wz_list_mouse_hover_off;
+	list->itemsBorder = renderer->get_list_items_border(renderer, list);
 	list->selectedItem = -1;
 	list->pressedItem = -1;
 	list->hoveredItem = -1;
@@ -301,6 +320,9 @@ struct wzList *wz_list_create(struct wzRenderer *renderer)
 	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
+
+	// Item height is also used as a scroller step value, so don't set it until after the scroller has been created.
+	wz_list_set_item_height(list, renderer->measure_list_item_height(renderer, list));
 
 	return list;
 }
@@ -366,6 +388,42 @@ wzRect wz_list_get_absolute_items_rect(const struct wzList *list)
 	rect.y += offset.y;
 	
 	return rect;
+}
+
+void wz_list_set_draw_item_callback(struct wzList *list, wzDrawListItemCallback callback)
+{
+	WZ_ASSERT(list);
+	list->draw_item = callback;
+}
+
+wzDrawListItemCallback wz_list_get_draw_item_callback(const struct wzList *list)
+{
+	WZ_ASSERT(list);
+	return list->draw_item;
+}
+
+void wz_list_set_item_data(struct wzList *list, uint8_t *itemData)
+{
+	WZ_ASSERT(list);
+	list->itemData = itemData;
+}
+
+uint8_t *wz_list_get_item_data(const struct wzList *list)
+{
+	WZ_ASSERT(list);
+	return list->itemData;
+}
+
+void wz_list_set_item_stride(struct wzList *list, int itemStride)
+{
+	WZ_ASSERT(list);
+	list->itemStride = itemStride;
+}
+
+int wz_list_get_item_stride(const struct wzList *list)
+{
+	WZ_ASSERT(list);
+	return list->itemStride;
 }
 
 void wz_list_set_item_height(struct wzList *list, int itemHeight)
@@ -434,6 +492,12 @@ int wz_list_get_hovered_item(const struct wzList *list)
 {
 	WZ_ASSERT(list);
 	return list->hoveredItem;
+}
+
+int wz_list_get_scroll_value(const struct wzList *list)
+{
+	WZ_ASSERT(list);
+	return wz_scroller_get_value(list->scroller);
 }
 
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback)
