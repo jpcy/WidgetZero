@@ -249,12 +249,8 @@ struct WindowPrivate : public WidgetPrivate
 	virtual ~WindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }
-	virtual void draw(wzRect clip);
-
-	void refreshHeaderHeight();
 
 	wzWindow *window;
-	std::string title;
 };
 
 } // namespace wz

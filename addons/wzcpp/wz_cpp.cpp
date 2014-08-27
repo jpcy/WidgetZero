@@ -405,7 +405,7 @@ void DockTabBar::handleEvent(wzEvent *e)
 		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata(e->create.extra);
 		Button *tab = new Button(renderer);
 		//((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
-		tab->setLabel(window->title);
+		tab->setLabel(wz_window_get_title((const wzWindow *)window->getWidget()));
 		children.push_back(tab);
 		e->create.widget = tab->p->getWidget();
 	}
@@ -1244,12 +1244,8 @@ WindowPrivate::WindowPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	window = wz_window_create();
-	wzWidget *widget = (wzWidget *)window;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_window_set_border_size(window, 4);
-	refreshHeaderHeight();
+	window = wz_window_create(renderer);
+	wz_widget_set_metadata((wzWidget *)window, this);
 }
 
 WindowPrivate::~WindowPrivate()
@@ -1258,16 +1254,6 @@ WindowPrivate::~WindowPrivate()
 	{
 		wz_widget_destroy((wzWidget *)window);
 	}
-}
-
-void WindowPrivate::draw(wzRect clip)
-{
-	renderer->draw_window(renderer, clip, window, fontFace.c_str(), fontSize, title.c_str());
-}
-
-void WindowPrivate::refreshHeaderHeight()
-{
-	wz_window_set_header_height(window, renderer->measure_window_header_height(renderer, fontFace.c_str(), fontSize, title.c_str()));
 }
 
 //------------------------------------------------------------------------------
@@ -1288,37 +1274,14 @@ Window::~Window()
 	delete p;
 }
 
-Widget *Window::setFontFace(const std::string &fontFace)
+const char *Window::getTitle() const
 {
-	Widget::setFontFace(fontFace);
-	((WindowPrivate *)p)->refreshHeaderHeight();
-	return (Widget *)this;
-}
-
-Widget *Window::setFontSize(float fontSize)
-{
-	Widget::setFontSize(fontSize);
-	((WindowPrivate *)p)->refreshHeaderHeight();
-	return (Widget *)this;
-}
-
-Widget *Window::setFont(const std::string &fontFace, float fontSize)
-{
-	Widget::setFont(fontFace, fontSize);
-	((WindowPrivate *)p)->refreshHeaderHeight();
-	return (Widget *)this;
-}
-
-std::string Window::getTitle() const
-{
-	return ((WindowPrivate *)p)->title;
+	return wz_window_get_title((wzWindow *)p->getWidget());
 }
 
 Window *Window::setTitle(const std::string &title)
 {
-	WindowPrivate *wp = (WindowPrivate *)p;
-	wp->title = title;
-	wp->refreshHeaderHeight();
+	wz_window_set_title((wzWindow *)p->getWidget(), title.c_str());
 	return this;
 }
 

@@ -50,6 +50,7 @@ struct wzWindow
 	int drawPriority;
 	int headerHeight;
 	int borderSize;
+	char title[256];
 	
 	struct wzWidget *content;
 
@@ -64,6 +65,20 @@ struct wzWindow
 	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
 	wzSize sizeBeforeDocking;
 };
+
+static void wz_window_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_window(widget->renderer, clip, (struct wzWindow *)widget);
+}
+
+static void wz_window_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
+{
+	struct wzWindow *window = (struct wzWindow *)widget;
+	WZ_ASSERT(window);
+	window->headerHeight = widget->renderer->measure_window_header_height(widget->renderer, window);
+	wz_widget_refresh_rect(widget);
+}
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
 static void wz_window_calculate_border_rects(struct wzWindow *window, wzRect *rects)
@@ -391,20 +406,24 @@ static struct wzWidget *wz_window_get_content_widget(struct wzWidget *widget)
 	return ((struct wzWindow *)widget)->content;
 }
 
-struct wzWindow *wz_window_create()
+struct wzWindow *wz_window_create(struct wzRenderer *renderer)
 {
-	struct wzWindow *window;
-
-	window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
+	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
 	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
+	window->base.renderer = renderer;
+	window->base.vtable.draw = wz_window_draw;
+	window->base.vtable.font_changed = wz_window_font_changed;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
 	window->base.vtable.mouse_move = wz_window_mouse_move;
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
 	window->base.vtable.get_content_widget = wz_window_get_content_widget;
+
+	window->borderSize = renderer->get_window_border_size(renderer, window);
+	window->headerHeight = renderer->measure_window_header_height(renderer, window);
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
@@ -413,23 +432,10 @@ struct wzWindow *wz_window_create()
 	return window;
 }
 
-void wz_window_set_header_height(struct wzWindow *window, int height)
-{
-	WZ_ASSERT(window);
-	window->headerHeight = height;
-	wz_widget_refresh_rect((struct wzWidget *)window);
-}
-
 int wz_window_get_header_height(struct wzWindow *window)
 {
 	WZ_ASSERT(window);
 	return window->headerHeight;
-}
-
-void wz_window_set_border_size(struct wzWindow *window, int size)
-{
-	WZ_ASSERT(window);
-	window->borderSize = size;
 }
 
 int wz_window_get_border_size(struct wzWindow *window)
@@ -448,6 +454,18 @@ wzRect wz_window_get_header_rect(struct wzWindow *window)
 	rect.w = window->base.rect.w - window->borderSize * 2;
 	rect.h = window->headerHeight;
 	return rect;
+}
+
+void wz_window_set_title(struct wzWindow *window, const char *title)
+{
+	WZ_ASSERT(window);
+	strcpy(window->title, title);
+}
+
+const char *wz_window_get_title(const struct wzWindow *window)
+{
+	WZ_ASSERT(window);
+	return window->title;
 }
 
 // Save the window size before docking so it can be restored if the window is undocked later.

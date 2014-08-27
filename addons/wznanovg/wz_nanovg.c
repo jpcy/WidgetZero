@@ -1468,13 +1468,21 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	nvgRestore(vg);
 }
 
-static int wz_nanovg_measure_window_header_height(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title)
+static int wz_nanovg_get_window_border_size(struct wzRenderer *renderer, const struct wzWindow *window)
 {
 	WZ_ASSERT(renderer);
-	return wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 6; // Padding.
+	WZ_ASSERT(window);
+	return 4;
 }
 
-static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title)
+static int wz_nanovg_measure_window_header_height(struct wzRenderer *renderer, const struct wzWindow *window)
+{
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(window);
+	return wz_nanovg_get_line_height(renderer, wz_widget_get_font_face((const struct wzWidget *)window), wz_widget_get_font_size((const struct wzWidget *)window)) + 6; // Padding.
+}
+
+static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
@@ -1519,7 +1527,7 @@ static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, stru
 	{
 		wz_nanovg_clip_to_rect(vg, headerRect);
 		wz_nanovg_draw_filled_rect(vg, headerRect, color_windowHeaderBackground);
-		wz_nanovg_print(renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, title, 0);
+		wz_nanovg_print(renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)window), wz_widget_get_font_size((const struct wzWidget *)window), color_text, wz_window_get_title(window), 0);
 	}
 
 	nvgRestore(vg);
@@ -1602,6 +1610,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->get_text_edit_border = wz_nanovg_get_text_edit_border;
 	renderer->measure_text_edit = wz_nanovg_measure_text_edit;
 	renderer->draw_text_edit = wz_nanovg_draw_text_edit;
+	renderer->get_window_border_size = wz_nanovg_get_window_border_size;
 	renderer->measure_window_header_height = wz_nanovg_measure_window_header_height;
 	renderer->draw_window = wz_nanovg_draw_window;
 

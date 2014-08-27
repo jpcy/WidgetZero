@@ -382,12 +382,12 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
 struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget);
 
-struct wzWindow *wz_window_create();
-void wz_window_set_header_height(struct wzWindow *window, int height);
+struct wzWindow *wz_window_create(struct wzRenderer *renderer);
 int wz_window_get_header_height(struct wzWindow *window);
-void wz_window_set_border_size(struct wzWindow *window, int size);
 int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
+void wz_window_set_title(struct wzWindow *window, const char *title);
+const char *wz_window_get_title(const struct wzWindow *window);
 
 typedef enum
 {
@@ -629,8 +629,9 @@ struct wzRenderer
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
 	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit);
 
-	int (*measure_window_header_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *title);
-	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window, const char *fontFace, float fontSize, const char *title);
+	int (*get_window_border_size)(struct wzRenderer *renderer, const struct wzWindow *window);
+	int (*measure_window_header_height)(struct wzRenderer *renderer, const struct wzWindow *window);
+	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window);
 
 	void *data;
 };
