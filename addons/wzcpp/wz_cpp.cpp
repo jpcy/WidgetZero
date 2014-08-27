@@ -31,16 +31,6 @@ namespace wz {
 
 //------------------------------------------------------------------------------
 
-static void DrawWidget(wzWidget *widget, wzRect clip)
-{
-	((WidgetPrivate *)wz_widget_get_metadata(widget))->draw(clip);
-}
-
-static wzSize MeasureWidget(wzWidget *widget)
-{
-	return ((WidgetPrivate *)wz_widget_get_metadata(widget))->measure();
-}
-
 static void HandleEvent(wzEvent *e)
 {
 	void *metadata = wz_widget_get_metadata(e->base.widget);
@@ -601,69 +591,18 @@ List *List::setDrawItemCallback(wzDrawListItemCallback callback)
 
 //------------------------------------------------------------------------------
 
-static int GetLineHeight(wzMainWindow *mainWindow, wzWidget *widget)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	return renderer->get_line_height(renderer, wp->fontFace.c_str(), wp->fontSize);
-}
-
-static void MeasureText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int *width, int *height)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	renderer->measure_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, width, height);
-}
-
-static wzLineBreakResult LineBreakText(wzMainWindow *mainWindow, wzWidget *widget, const char *text, int n, int lineWidth)
-{
-	wzRenderer *renderer = ((MainWindowPrivate *)wz_widget_get_metadata((wzWidget *)mainWindow))->renderer;
-	WidgetPrivate *wp = (WidgetPrivate *)wz_widget_get_metadata(widget);
-	return renderer->line_break_text(renderer, wp->fontFace.c_str(), wp->fontSize, text, n, lineWidth);
-}
-
-static void DrawDockIcon(wzRect rect, void *metadata)
-{
-	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
-	mainWindow->drawDockIcon(rect);
-}
-
-static void DrawDockPreview(wzRect rect, void *metadata)
-{
-	MainWindowPrivate *mainWindow = (MainWindowPrivate *)metadata;
-	mainWindow->drawDockPreview(rect);
-}
-
 MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
 	mainWindow = wz_main_window_create(renderer);
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
-	wz_widget_set_draw_callback((wzWidget *)mainWindow, DrawWidget);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
-	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
-	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
 }
 
 MainWindowPrivate::~MainWindowPrivate()
 {
 	wz_widget_destroy((wzWidget *)mainWindow);
-}
-
-void MainWindowPrivate::draw(wzRect /*clip*/)
-{
-	renderer->draw_main_window(renderer, mainWindow);
-}
-
-void MainWindowPrivate::drawDockIcon(wzRect rect)
-{
-	renderer->draw_dock_icon(renderer, rect);
-}
-
-void MainWindowPrivate::drawDockPreview(wzRect rect)
-{
-	renderer->draw_dock_preview(renderer, rect);
 }
 
 //------------------------------------------------------------------------------

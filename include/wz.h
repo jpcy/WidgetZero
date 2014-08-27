@@ -295,18 +295,11 @@ typedef struct
 }
 wzLineBreakResult;
 
-typedef void (*wzMainWindowDrawDockIconCallback)(wzRect rect, void *metadata);
-typedef void (*wzMainWindowDrawDockPreviewCallback)(wzRect rect, void *metadata);
-
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
 
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
 void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
 
-void wz_main_window_set_draw_dock_icon_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockIconCallback callback, void *metadata);
-void wz_main_window_set_draw_dock_preview_callback(struct wzMainWindow *mainWindow, wzMainWindowDrawDockPreviewCallback callback, void *metadata);
-void wz_main_window_set_dock_icon_size(struct wzMainWindow *mainWindow, wzSize size);
-void wz_main_window_set_dock_icon_size_args(struct wzMainWindow *mainWindow, int w, int h);
 void wz_main_window_mouse_button_down(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
 void wz_main_window_mouse_button_up(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
 void wz_main_window_mouse_move(struct wzMainWindow *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -581,6 +574,7 @@ struct wzRenderer
 
 	wzColor (*get_default_text_color)(struct wzRenderer *renderer);
 
+	wzSize (*get_dock_icon_size)(struct wzRenderer *renderer);
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
 

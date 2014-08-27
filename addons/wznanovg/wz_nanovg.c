@@ -362,6 +362,13 @@ wzColor wz_nanovg_get_default_text_color(struct wzRenderer *renderer)
 	return color;
 }
 
+static wzSize wz_nanovg_get_dock_icon_size(struct wzRenderer *renderer)
+{
+	wzSize size;
+	size.w = size.h = 48;
+	return size;
+}
+
 static void wz_nanovg_draw_dock_icon(struct wzRenderer *renderer, wzRect rect)
 {
 	struct NVGcontext *vg;
@@ -1592,6 +1599,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->measure_text = wz_nanovg_measure_text;
 	renderer->line_break_text = wz_nanovg_line_break_text;
 	renderer->get_default_text_color = wz_nanovg_get_default_text_color;
+	renderer->get_dock_icon_size = wz_nanovg_get_dock_icon_size;
 	renderer->draw_dock_icon = wz_nanovg_draw_dock_icon;
 	renderer->draw_dock_preview = wz_nanovg_draw_dock_preview;
 	renderer->get_button_padding = wz_nanovg_get_button_padding;

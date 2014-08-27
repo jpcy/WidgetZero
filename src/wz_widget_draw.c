@@ -249,7 +249,7 @@ void wz_widget_draw_main_window(struct wzMainWindow *mainWindow)
 
 	WZ_ASSERT(mainWindow);
 
-	// Draw the mainWindow and ancestors with draw priority < window. Don't recurse into windows.
+	// Draw the main window (not really, vtable.draw is NULL) and ancestors with draw priority < window. Don't recurse into windows.
 	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_draw_priority_less_than_window, wz_widget_is_not_window);
 
 	// Get a list of windows (excluding top).
