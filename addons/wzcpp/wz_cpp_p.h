@@ -27,7 +27,6 @@ SOFTWARE.
 
 namespace wz {
 
-class DockTabBar;
 struct ListPrivate;
 
 struct WidgetPrivate
@@ -132,7 +131,6 @@ struct MainWindowPrivate : public WidgetPrivate
 
 	wzMainWindow *mainWindow;
 	wzRenderer *renderer;
-	DockTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
 };
 
 struct RadioButtonPrivate : public WidgetPrivate
@@ -174,25 +172,6 @@ struct StackLayoutPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)layout; }
 	
 	wzStackLayout *layout;
-};
-
-class TabBar : public WidgetPrivate
-{
-public:
-	TabBar(wzRenderer *renderer);
-	~TabBar();
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-
-protected:
-	wzTabBar *tabBar_;
-};
-
-class DockTabBar : public TabBar
-{
-public:
-	DockTabBar(wzRenderer *renderer);
-	virtual void handleEvent(wzEvent *e);
 };
 
 // Wraps tab button and page.

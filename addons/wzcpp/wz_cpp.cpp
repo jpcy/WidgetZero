@@ -393,16 +393,6 @@ Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 
 //------------------------------------------------------------------------------
 
-DockTabBar::DockTabBar(wzRenderer *renderer) : TabBar(renderer)
-{
-}
-
-void DockTabBar::handleEvent(wzEvent *e)
-{
-}
-
-//------------------------------------------------------------------------------
-
 FramePrivate::FramePrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
@@ -654,22 +644,10 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
 	wz_main_window_set_draw_dock_icon_callback(mainWindow, DrawDockIcon, this);
 	wz_main_window_set_draw_dock_preview_callback(mainWindow, DrawDockPreview, this);
-
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		dockTabBars[i] = new DockTabBar(renderer);
-		wz_main_window_set_dock_tab_bar(mainWindow, (wzDockPosition)i, (wzTabBar *)dockTabBars[i]->getWidget());
-		wz_widget_set_height(dockTabBars[i]->getWidget(), 20);
-	}
 }
 
 MainWindowPrivate::~MainWindowPrivate()
 {
-	for (size_t i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		delete dockTabBars[i];
-	}
-
 	wz_widget_destroy((wzWidget *)mainWindow);
 }
 
@@ -1019,24 +997,6 @@ Widget *StackLayout::add(Widget *widget)
 {
 	p->add(widget);
 	return widget;
-}
-
-//------------------------------------------------------------------------------
-
-TabBar::TabBar(wzRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
-	tabBar_ = wz_tab_bar_create(renderer);
-	wz_widget_set_metadata((wzWidget *)tabBar_, this);
-}
-
-TabBar::~TabBar()
-{
-	if (!wz_widget_get_main_window((wzWidget *)tabBar_))
-	{
-		wz_widget_destroy((wzWidget *)tabBar_);
-	}
 }
 
 //------------------------------------------------------------------------------

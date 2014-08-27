@@ -170,25 +170,6 @@ static void wz_main_window_dock_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-void wz_main_window_set_dock_tab_bar(struct wzMainWindow *mainWindow, wzDockPosition dockPosition, struct wzTabBar *tabBar)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(tabBar);
-
-	if (mainWindow->dockTabBars[dockPosition])
-		return;
-
-	mainWindow->dockTabBars[dockPosition] = tabBar;
-	wz_widget_set_visible((struct wzWidget *)tabBar, false);
-	wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
-	wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, (struct wzWidget *)tabBar);
-	wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
-
-	// Override scroll button draw priority.
-	wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
-	wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
-}
-
 struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab)
 {
 	WZ_ASSERT(mainWindow);
@@ -1293,6 +1274,21 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
 	wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, widget);
+
+	// Create dock tab bars.
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		struct wzTabBar *tabBar = wz_tab_bar_create(renderer);
+		mainWindow->dockTabBars[i] = tabBar;
+		wz_widget_set_visible((struct wzWidget *)tabBar, false);
+		wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
+		wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, (struct wzWidget *)tabBar);
+		wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
+
+		// Override scroll button draw priority.
+		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
+		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
+	}
 
 	return mainWindow;
 }
