@@ -210,15 +210,12 @@ static void wz_main_window_refresh_dock_tab_bar(struct wzMainWindow *mainWindow,
 		{
 			struct wzWindow *window = mainWindow->dockedWindows[dockPosition][i];
 
-			// Create the button.
-			struct wzButton *tab = wz_button_create(mainWindow->base.renderer);
+			// Create a new tab.
+			struct wzButton *tab = wz_tab_bar_create_tab(tabBar);
 			wz_button_set_label(tab, wz_window_get_title(window));
 
 			// Set the tab internal metadata to the window.
 			wz_widget_set_internal_metadata((struct wzWidget *)tab, window);
-
-			// Add the tab to the tab bar.
-			wz_tab_bar_add_tab(tabBar, tab);
 
 			// If this window is selected (visible), select the corresponding tab.
 			if (wz_widget_get_visible((struct wzWidget *)window))

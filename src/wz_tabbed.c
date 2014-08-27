@@ -151,8 +151,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	WZ_ASSERT(page);
 
 	// Add the tab.
-	*tab = wz_button_create(tabbed->base.renderer);
-	wz_tab_bar_add_tab(tabbed->tabBar, *tab);
+	*tab = wz_tab_bar_create_tab(tabbed->tabBar);
 
 	// Add the page widget.
 	*page = wz_tab_page_create(tabbed->base.renderer);

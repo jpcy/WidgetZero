@@ -246,14 +246,15 @@ struct wzTabBar *wz_tab_bar_create(struct wzRenderer *renderer)
 	return tabBar;
 }
 
-void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
+struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar)
 {
+	struct wzButton *tab;
 	wzRect rect;
 	int i;
 	wzEvent e;
 
 	WZ_ASSERT(tabBar);
-	WZ_ASSERT(tab);
+	tab = wz_button_create(tabBar->base.renderer);
 
 	// Position to the right of the last tab.
 	rect.x = rect.y = 0;
@@ -289,9 +290,11 @@ void wz_tab_bar_add_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tab;
 	wz_invoke_event(&e, NULL);
+
+	return tab;
 }
 
-void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)
+void wz_tab_bar_destroy_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 {
 	int i, deleteIndex;
 	wzEvent e;
