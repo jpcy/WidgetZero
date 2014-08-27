@@ -317,15 +317,9 @@ void wz_tab_bar_remove_tab(struct wzTabBar *tabBar, struct wzButton *tab)
 	e.tabBar.tab = tabBar->tabs[deleteIndex];
 	wz_invoke_event(&e, NULL);
 
-	// Remove our references to the tab.
+	// Delete the tab.
 	wz_arr_delete(tabBar->tabs, deleteIndex);
-	wz_widget_remove_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
-
-	// Invoke the destroy widget event.
-	e.destroy.type = WZ_EVENT_DESTROY_WIDGET;
-	e.destroy.parent = (struct wzWidget *)tabBar;
-	e.destroy.widget = (struct wzWidget *)tab;
-	wz_invoke_event(&e, NULL);
+	wz_widget_destroy_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
 }
 
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
@@ -344,13 +338,8 @@ void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar)
 		e.tabBar.tab = tabBar->tabs[i];
 		wz_invoke_event(&e, NULL);
 
-		wz_widget_remove_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->tabs[i]);
-
-		// Invoke the destroy widget event.
-		e.destroy.type = WZ_EVENT_DESTROY_WIDGET;
-		e.destroy.parent = (struct wzWidget *)tabBar;
-		e.destroy.widget = (struct wzWidget *)tabBar->tabs[i];
-		wz_invoke_event(&e, NULL);
+		// Destroy the tab.
+		wz_widget_destroy_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->tabs[i]);
 	}
 
 	wz_arr_deleten(tabBar->tabs, 0, wz_arr_len(tabBar->tabs));

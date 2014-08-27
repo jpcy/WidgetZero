@@ -399,35 +399,6 @@ DockTabBar::DockTabBar(wzRenderer *renderer) : TabBar(renderer)
 
 void DockTabBar::handleEvent(wzEvent *e)
 {
-	if (e->base.type == WZ_EVENT_CREATE_WIDGET)
-	{
-		// Create a new tab.
-		WindowPrivate *window = (WindowPrivate *)wz_widget_get_metadata(e->create.extra);
-		Button *tab = new Button(renderer);
-		//((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
-		tab->setLabel(wz_window_get_title((const wzWindow *)window->getWidget()));
-		children.push_back(tab);
-		e->create.widget = tab->p->getWidget();
-	}
-	else if (e->base.type == WZ_EVENT_DESTROY_WIDGET)
-	{
-		// Remove the corresponding Button instance.
-		for (size_t i = 0; i < children.size(); i++)
-		{
-			if (children[i]->p->getWidget() == (wzWidget *)e->tabBar.tab)
-			{
-				Widget *tab = children[i];
-				children.erase(children.begin() + i);
-				delete tab;
-				return;
-			}
-		}
-	}
-	else if (e->base.type == WZ_EVENT_TAB_BAR_TAB_ADDED)
-	{
-		ButtonPrivate *tab = (ButtonPrivate *)wz_widget_get_metadata((wzWidget *)e->tabBar.tab);
-		wz_widget_resize_to_measured(tab->getWidget());
-	}
 }
 
 //------------------------------------------------------------------------------

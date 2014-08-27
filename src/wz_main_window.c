@@ -227,29 +227,25 @@ static void wz_main_window_refresh_dock_tab_bar(struct wzMainWindow *mainWindow,
 		// Add one tab for each window.
 		for (i = 0; i < wz_arr_len(mainWindow->dockedWindows[dockPosition]); i++)
 		{
-			wzEvent e;
-			struct wzButton *tab;
+			struct wzWindow *window = mainWindow->dockedWindows[dockPosition][i];
 
-			// Have the consumer create the tab.
-			e.create.type = WZ_EVENT_CREATE_WIDGET;
-			e.create.widget = NULL;
-			e.create.parent = (struct wzWidget *)tabBar;
-			e.create.extra = (struct wzWidget *)mainWindow->dockedWindows[dockPosition][i];
-			wz_invoke_event(&e, NULL);
-			tab = (struct wzButton *)e.create.widget;
-			WZ_ASSERT(tab); // Consumer didn't handle the event.
+			// Create the button.
+			struct wzButton *tab = wz_button_create(mainWindow->base.renderer);
+			wz_button_set_label(tab, wz_window_get_title(window));
 
 			// Set the tab internal metadata to the window.
-			wz_widget_set_internal_metadata((struct wzWidget *)tab, mainWindow->dockedWindows[dockPosition][i]);
+			wz_widget_set_internal_metadata((struct wzWidget *)tab, window);
 
 			// Add the tab to the tab bar.
 			wz_tab_bar_add_tab(tabBar, tab);
 
 			// If this window is selected (visible), select the corresponding tab.
-			if (wz_widget_get_visible((struct wzWidget *)mainWindow->dockedWindows[dockPosition][i]))
+			if (wz_widget_get_visible((struct wzWidget *)window))
 			{
 				wz_tab_bar_select_tab(tabBar, tab);
 			}
+
+			wz_widget_resize_to_measured((struct wzWidget *)tab); // FIXME?
 		}
 
 		// Show the tab bar.
