@@ -530,7 +530,7 @@ struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
 void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
 
-struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer, struct wzTabBar *tabBar);
+struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer);
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
 
 typedef bool (*wzTextEditValidateTextCallback)(const char *text);
@@ -616,6 +616,8 @@ struct wzRenderer
 	int (*get_spinner_button_width)(struct wzRenderer *renderer);
 	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);
 	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, struct wzSpinner *spinner);
+
+	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
 
 	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);
 

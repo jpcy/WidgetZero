@@ -211,7 +211,6 @@ struct TabbedPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }
 
 	wzTabbed *tabbed;
-	std::auto_ptr<TabBar> tabBar;
 };
 
 struct TextEditPrivate : public WidgetPrivate

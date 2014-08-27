@@ -1204,6 +1204,11 @@ static void wz_nanovg_draw_spinner(struct wzRenderer *renderer, wzRect clip, str
 {
 }
 
+int wz_nanovg_get_tab_bar_height(struct wzRenderer *renderer, const struct wzTabBar *tabBar)
+{
+	return 20;
+}
+
 static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label)
 {
 	wzRendererData *rendererData;
@@ -1605,6 +1610,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->get_spinner_button_width = wz_nanovg_get_spinner_button_width;
 	renderer->measure_spinner = wz_nanovg_measure_spinner;
 	renderer->draw_spinner = wz_nanovg_draw_spinner;
+	renderer->get_tab_bar_height = wz_nanovg_get_tab_bar_height;
 	renderer->draw_tab_button = wz_nanovg_draw_tab_button;
 	renderer->draw_tab_page = wz_nanovg_draw_tab_page;
 	renderer->get_text_edit_border = wz_nanovg_get_text_edit_border;

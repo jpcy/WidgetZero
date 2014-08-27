@@ -223,6 +223,7 @@ struct wzTabBar *wz_tab_bar_create(struct wzRenderer *renderer)
 	tabBar->base.vtable.destroy = wz_tab_bar_destroy;
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
 	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
+	tabBar->base.rect.h = renderer->get_tab_bar_height(renderer, tabBar);
 
 	// Custom draw priority so the scroll buttons always overlap the tabs.
 	defaultScrollButtonWidth = 14;

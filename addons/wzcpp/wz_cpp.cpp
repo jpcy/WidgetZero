@@ -1069,10 +1069,7 @@ TabbedPrivate::TabbedPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	tabBar.reset(new TabBar(renderer));
-	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
-
-	tabbed = wz_tabbed_create(renderer, (wzTabBar *)tabBar->getWidget());
+	tabbed = wz_tabbed_create(renderer);
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
 }
 

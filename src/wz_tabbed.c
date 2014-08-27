@@ -125,7 +125,7 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer, struct wzTabBar *tabBar)
+struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer)
 {
 	struct wzTabbed *tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
 	memset(tabbed, 0, sizeof(struct wzTabbed));
@@ -134,8 +134,7 @@ struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer, struct wzTabBar *
 	tabbed->base.vtable.destroy = wz_tabbed_destroy;
 	tabbed->base.vtable.set_rect = wz_tabbed_set_rect;
 
-	WZ_ASSERT(tabBar);
-	tabbed->tabBar = tabBar;
+	tabbed->tabBar = wz_tab_bar_create(renderer);
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
 	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
 
