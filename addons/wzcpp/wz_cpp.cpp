@@ -1068,10 +1068,6 @@ TabBar::~TabBar()
 	}
 }
 
-void TabBar::draw(wzRect clip)
-{
-}
-
 Button *TabBar::createTab()
 {
 	Button *tab = new Button(renderer);
@@ -1086,14 +1082,8 @@ TabPage::TabPage(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	widget_ = wz_tab_page_create();
+	widget_ = wz_tab_page_create(renderer);
 	wz_widget_set_metadata(widget_, this);
-	wz_widget_set_draw_callback(widget_, DrawWidget);
-}
-
-void TabPage::draw(wzRect clip)
-{
-	renderer->draw_tab_page(renderer, clip, widget_);
 }
 
 //------------------------------------------------------------------------------
@@ -1163,10 +1153,6 @@ TabbedPrivate::~TabbedPrivate()
 	{
 		wz_widget_destroy((wzWidget *)tabbed);
 	}
-}
-
-void TabbedPrivate::draw(wzRect clip)
-{
 }
 
 //------------------------------------------------------------------------------

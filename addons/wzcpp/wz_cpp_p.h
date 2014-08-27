@@ -183,7 +183,6 @@ public:
 	~TabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	virtual void draw(wzRect clip);
 	Button *createTab();
 
 protected:
@@ -203,7 +202,6 @@ public:
 	TabPage(wzRenderer *renderer);
 	virtual const wzWidget *getWidget() const { return widget_; }
 	virtual wzWidget *getWidget() { return widget_; }
-	virtual void draw(wzRect clip);
 
 private:
 	wzWidget *widget_;
@@ -226,7 +224,6 @@ struct TabbedPrivate : public WidgetPrivate
 	~TabbedPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }
-	virtual void draw(wzRect clip);
 
 	wzTabbed *tabbed;
 	std::auto_ptr<TabBar> tabBar;

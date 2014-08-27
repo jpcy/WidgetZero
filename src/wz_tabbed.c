@@ -47,16 +47,25 @@ TAB PAGE WIDGET
 ================================================================================
 */
 
+static void wz_tab_page_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_tab_page(widget->renderer, clip, widget);
+}
+
 static wzRect wz_tab_page_get_children_clip_rect(struct wzWidget *widget)
 {
+	WZ_ASSERT(widget);
 	return wz_widget_get_absolute_rect(widget);
 }
 
-struct wzWidget *wz_tab_page_create()
+struct wzWidget *wz_tab_page_create(struct wzRenderer *renderer)
 {
 	struct wzWidget *page = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(page, 0, sizeof(struct wzWidget));
 	page->type = WZ_TYPE_TAB_PAGE;
+	page->renderer = renderer;
+	page->vtable.draw = wz_tab_page_draw;
 	page->vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
 	return page;
 }
