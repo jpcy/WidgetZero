@@ -222,8 +222,6 @@ static void wz_main_window_refresh_dock_tab_bar(struct wzMainWindow *mainWindow,
 			{
 				wz_tab_bar_select_tab(tabBar, tab);
 			}
-
-			wz_widget_resize_to_measured((struct wzWidget *)tab); // FIXME?
 		}
 
 		// Show the tab bar.
