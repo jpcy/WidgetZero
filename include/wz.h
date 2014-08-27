@@ -431,9 +431,8 @@ void wz_button_bind_value(struct wzButton *button, bool *value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 
-struct wzCombo *wz_combo_create();
-void wz_combo_set_list(struct wzCombo *combo, struct wzList *list);
-struct wzList *wz_combo_get_list(struct wzCombo *combo);
+struct wzCombo *wz_combo_create(struct wzRenderer *renderer);
+struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
 struct wzFrame *wz_frame_create();
@@ -597,8 +596,8 @@ struct wzRenderer
 	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const struct wzButton *checkbox);
 	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox);
 
-	wzSize (*measure_combo)(struct wzRenderer *renderer, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride, int nItems);
-	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *fontFace, float fontSize, const char *item);
+	wzSize (*measure_combo)(struct wzRenderer *renderer, const struct wzCombo *combo);
+	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo);
 
 	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox);

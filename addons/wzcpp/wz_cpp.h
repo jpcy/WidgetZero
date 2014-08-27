@@ -141,9 +141,6 @@ class Combo : public Widget
 public:
 	Combo(wzRenderer *renderer);
 	~Combo();
-	virtual Widget *setFontFace(const std::string &fontFace);
-	virtual Widget *setFontSize(float fontSize);
-	virtual Widget *setFont(const std::string &fontFace, float fontSize);
 	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 };
 

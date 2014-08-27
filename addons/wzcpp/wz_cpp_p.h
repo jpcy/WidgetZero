@@ -76,13 +76,8 @@ struct ComboPrivate : public WidgetPrivate
 	~ComboPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
-	virtual wzSize measure();
-	virtual void draw(wzRect clip);
 
 	wzCombo *combo;
-	uint8_t *itemData;
-	size_t itemStride;
-	std::auto_ptr<List> list;
 };
 
 struct FramePrivate : public WidgetPrivate

@@ -616,13 +616,25 @@ static void wz_nanovg_draw_checkbox(struct wzRenderer *renderer, wzRect clip, st
 	nvgRestore(vg);
 }
 
-static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *fontFace, float fontSize, uint8_t *itemData, size_t itemStride, int nItems)
+static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const struct wzCombo *combo)
 {
+	const char *fontFace;
+	float fontSize;
+	struct wzList *list;
+	uint8_t *itemData;
+	int itemStride, nItems;
 	wzSize size;
 	int i;
 
 	WZ_ASSERT(renderer);
-	WZ_ASSERT(itemData);
+	WZ_ASSERT(combo);
+
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)combo);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)combo);
+	list = wz_combo_get_list(combo);
+	itemData = wz_list_get_item_data(list);
+	itemStride = wz_list_get_item_stride(list);
+	nItems = wz_list_get_num_items(list);
 
 	// Use the widest item text.
 	size.w = 0;
@@ -646,12 +658,17 @@ static wzSize wz_nanovg_measure_combo(struct wzRenderer *renderer, const char *f
 	return size;
 }
 
-static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo, const char *fontFace, float fontSize, const char *item)
+static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
 	bool hover;
+	const char *fontFace;
+	float fontSize;
+	struct wzList *list;
+	uint8_t *itemData;
+	int itemStride, nItems, selectedItemIndex;
 
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(combo);
@@ -662,6 +679,14 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struc
 	wz_nanovg_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 	hover = wz_widget_get_hover((struct wzWidget *)combo);
+
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)combo);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)combo);
+	list = wz_combo_get_list(combo);
+	itemData = wz_list_get_item_data(list);
+	itemStride = wz_list_get_item_stride(list);
+	nItems = wz_list_get_num_items(list);
+	selectedItemIndex = wz_list_get_selected_item(list);
 
 	// Background.
 	if (hover)
@@ -688,8 +713,8 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struc
 	}
 
 	// Selected item.
-	if (item)
-		wz_nanovg_print(renderer, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, item, 0);
+	if (selectedItemIndex >= 0)
+		wz_nanovg_print(renderer, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
 
 	nvgRestore(vg);
 }

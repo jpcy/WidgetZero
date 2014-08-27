@@ -354,18 +354,12 @@ Checkbox *Checkbox::bindValue(bool *value)
 
 //------------------------------------------------------------------------------
 
-ComboPrivate::ComboPrivate(wzRenderer *renderer) : itemData(NULL), itemStride(0)
+ComboPrivate::ComboPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	combo = wz_combo_create();
-	wzWidget *widget = (wzWidget *)combo;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_draw_callback(widget, DrawWidget);
-	wz_widget_set_measure_callback(widget, MeasureWidget);
-
-	list.reset(new List(renderer));
-	wz_combo_set_list(combo, (wzList *)list->p->getWidget());
+	combo = wz_combo_create(renderer);
+	wz_widget_set_metadata((wzWidget *)combo, this);
 }
 
 ComboPrivate::~ComboPrivate()
@@ -374,17 +368,6 @@ ComboPrivate::~ComboPrivate()
 	{
 		wz_widget_destroy((wzWidget *)combo);
 	}
-}
-
-wzSize ComboPrivate::measure()
-{
-	return renderer->measure_combo(renderer, fontFace.c_str(), fontSize, itemData, itemStride, wz_list_get_num_items(wz_combo_get_list(combo)));
-}
-
-void ComboPrivate::draw(wzRect clip)
-{
-	int itemIndex = wz_list_get_selected_item((const wzList *)list->p->getWidget());
-	renderer->draw_combo(renderer, clip, combo, fontFace.c_str(), fontSize, itemIndex >= 0 ? *((const char **)&itemData[itemIndex * itemStride]) : NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -399,34 +382,12 @@ Combo::~Combo()
 	delete p;
 }
 
-Widget *Combo::setFontFace(const std::string &fontFace)
-{
-	Widget::setFontFace(fontFace);
-	((ComboPrivate *)p)->list->setFontFace(fontFace);
-	return (Widget *)this;
-}
-
-Widget *Combo::setFontSize(float fontSize)
-{
-	Widget::setFontSize(fontSize);
-	((ComboPrivate *)p)->list->setFontSize(fontSize);
-	return (Widget *)this;
-}
-
-Widget *Combo::setFont(const std::string &fontFace, float fontSize)
-{
-	Widget::setFont(fontFace, fontSize);
-	((ComboPrivate *)p)->list->setFont(fontFace, fontSize);
-	return (Widget *)this;
-}
-
 Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	ComboPrivate *cp = (ComboPrivate *)p;
-	cp->itemData = itemData;
-	cp->itemStride = itemStride;
-	cp->list->setItems(itemData, itemStride, nItems);
-	wz_widget_resize_to_measured(p->getWidget());
+	wzList *list = wz_combo_get_list((wzCombo *)p->getWidget());
+	wz_list_set_item_data(list, itemData);
+	wz_list_set_item_stride(list, itemStride);
+	wz_list_set_num_items(list, nItems);
 	return this;
 }
 
