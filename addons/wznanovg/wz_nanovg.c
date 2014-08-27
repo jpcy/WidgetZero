@@ -1209,12 +1209,15 @@ int wz_nanovg_get_tab_bar_height(struct wzRenderer *renderer, const struct wzTab
 	return 20;
 }
 
-static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label)
+static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton)
 {
 	wzRendererData *rendererData;
 	struct NVGcontext *vg;
 	wzRect rect;
+	const char *fontFace;
+	float fontSize;
 	bool hover, set;
+	wzBorder padding;
 	wzRect labelRect;
 
 	WZ_ASSERT(renderer);
@@ -1226,6 +1229,8 @@ static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, 
 	wz_nanovg_clip_to_rect(vg, clip);
 
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)tabButton);
+	fontFace = wz_widget_get_font_face((const struct wzWidget *)tabButton);
+	fontSize = wz_widget_get_font_size((const struct wzWidget *)tabButton);
 	hover = wz_widget_get_hover((struct wzWidget *)tabButton);
 	set = wz_button_is_set(tabButton);
 
@@ -1259,11 +1264,12 @@ static void wz_nanovg_draw_tab_button(struct wzRenderer *renderer, wzRect clip, 
 	}
 
 	// Label.
+	padding = wz_button_get_padding(tabButton);
 	labelRect.x = rect.x + padding.left;
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_nanovg_print(renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, label, 0);
+	wz_nanovg_print(renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, wz_button_get_label(tabButton), 0);
 
 	nvgRestore(vg);
 }

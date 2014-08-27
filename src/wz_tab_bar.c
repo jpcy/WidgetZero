@@ -254,7 +254,7 @@ struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar)
 	wzEvent e;
 
 	WZ_ASSERT(tabBar);
-	tab = wz_button_create(tabBar->base.renderer);
+	tab = wz_tab_button_create(tabBar->base.renderer);
 
 	// Position to the right of the last tab.
 	rect.x = rect.y = 0;

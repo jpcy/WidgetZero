@@ -64,9 +64,6 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 	{
 		return widget->renderer->measure_radio_button(widget->renderer, button);
 	}
-	else if (button->style == WZ_BUTTON_STYLE_TAB)
-	{
-	}
 
 	return widget->renderer->measure_button(widget->renderer, button);
 }
@@ -86,6 +83,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	}
 	else if (button->style == WZ_BUTTON_STYLE_TAB)
 	{
+		widget->renderer->draw_tab_button(widget->renderer, clip, button);
 	}
 	else
 	{

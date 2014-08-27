@@ -618,7 +618,7 @@ struct wzRenderer
 
 	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
 
-	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton, wzBorder padding, const char *fontFace, float fontSize, const char *label);
+	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton);
 
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
 
