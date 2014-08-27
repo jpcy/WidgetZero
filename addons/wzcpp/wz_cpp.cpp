@@ -1068,40 +1068,6 @@ TabBar::~TabBar()
 	}
 }
 
-Button *TabBar::createTab()
-{
-	Button *tab = new Button(renderer);
-	//((ButtonPrivate *)tab->p)->drawStyle = ButtonPrivate::Tab;
-	children.push_back(tab);
-	return tab;
-}
-
-//------------------------------------------------------------------------------
-
-TabPage::TabPage(wzRenderer *renderer) 
-{
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
-	widget_ = wz_tab_page_create(renderer);
-	wz_widget_set_metadata(widget_, this);
-}
-
-//------------------------------------------------------------------------------
-
-TabPrivate::TabPrivate()
-{
-}
-
-TabPrivate::~TabPrivate()
-{
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
-
-	children.clear();
-}
-
 //------------------------------------------------------------------------------
 
 Tab::Tab()
@@ -1116,14 +1082,13 @@ Tab::~Tab()
 
 Tab *Tab::setLabel(const std::string &label)
 {
-	p->button->setLabel(label);
+	wz_button_set_label(p->button, label.c_str());
 	return this;
 }
 
 Widget *Tab::add(Widget *widget)
 {
-	wz_widget_add_child_widget(p->page->getWidget(), widget->p->getWidget());
-	p->children.push_back(widget);
+	wz_widget_add_child_widget(p->page, widget->p->getWidget());
 	return widget;
 }
 
@@ -1136,19 +1101,12 @@ TabbedPrivate::TabbedPrivate(wzRenderer *renderer)
 	tabBar.reset(new TabBar(renderer));
 	wz_widget_set_rect_args(tabBar->getWidget(), 0, 0, 0, 20);
 
-	tabbed = wz_tabbed_create((wzTabBar *)tabBar->getWidget());
+	tabbed = wz_tabbed_create(renderer, (wzTabBar *)tabBar->getWidget());
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
 }
 
 TabbedPrivate::~TabbedPrivate()
 {
-	for (size_t i = 0; i < tabPages.size(); i++)
-	{
-		delete tabPages[i];
-	}
-
-	tabPages.clear();
-
 	if (!wz_widget_get_main_window((wzWidget *)tabbed))
 	{
 		wz_widget_destroy((wzWidget *)tabbed);
@@ -1169,16 +1127,7 @@ Tabbed::~Tabbed()
 
 Tab *Tabbed::addTab(Tab *tab)
 {
-	TabbedPrivate *tp = (TabbedPrivate *)p;
-	
-	Button *tabButton = tp->tabBar->createTab();
-
-	TabPage *tabPage = new TabPage(p->renderer);
-	tp->tabPages.push_back(tabPage);
-
-	wz_tabbed_add_tab(tp->tabbed, (wzButton *)tabButton->p->getWidget(), tabPage->getWidget());
-	tab->p->button = tabButton;
-	tab->p->page = tabPage;
+	wz_tabbed_add_tab((wzTabbed *)p->getWidget(), &tab->p->button, &tab->p->page);
 	return tab;
 }
 

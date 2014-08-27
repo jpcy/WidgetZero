@@ -183,7 +183,6 @@ public:
 	~TabBar();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabBar_; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabBar_; }
-	Button *createTab();
 
 protected:
 	wzTabBar *tabBar_;
@@ -196,26 +195,12 @@ public:
 	virtual void handleEvent(wzEvent *e);
 };
 
-class TabPage : public WidgetPrivate
-{
-public:
-	TabPage(wzRenderer *renderer);
-	virtual const wzWidget *getWidget() const { return widget_; }
-	virtual wzWidget *getWidget() { return widget_; }
-
-private:
-	wzWidget *widget_;
-};
-
 // Wraps tab button and page.
 struct TabPrivate
 {
-	TabPrivate();
-	~TabPrivate();
-
-	Button *button;
-	TabPage *page;
-	std::vector<Widget *> children;
+	TabPrivate() : button(NULL), page(NULL) {}
+	wzButton *button;
+	wzWidget *page;
 };
 
 struct TabbedPrivate : public WidgetPrivate
@@ -227,7 +212,6 @@ struct TabbedPrivate : public WidgetPrivate
 
 	wzTabbed *tabbed;
 	std::auto_ptr<TabBar> tabBar;
-	std::vector<TabPage *> tabPages;
 };
 
 struct TextEditPrivate : public WidgetPrivate
