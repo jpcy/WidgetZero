@@ -1058,100 +1058,7 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)scroller);
 	type = wz_scroller_get_type(scroller);
 	
-	// Background.
 	wz_nanovg_draw_filled_rect(vg, rect, color_foreground);
-
-	// Decrement button.
-	{
-		wzRect r;
-		bool hover, pressed;
-		NVGcolor color, borderColor;
-		
-		wz_scroller_get_decrement_button_state(scroller, &r, &hover, &pressed);
-
-		if (pressed && hover)
-		{
-			color = color_pressed;
-			borderColor = color_borderSet;
-		}
-		else if (hover)
-		{
-			color = color_hover;
-			borderColor = color_borderHover;
-		}
-		else
-		{
-			color = color_foreground;
-			borderColor = color_border;
-		}
-
-		wz_nanovg_draw_filled_rect(vg, r, color);
-		wz_nanovg_draw_rect(vg, r, borderColor);
-
-		nvgBeginPath(vg);
-
-		if (type == WZ_SCROLLER_VERTICAL)
-		{
-			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
-		}
-		else
-		{
-			nvgMoveTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.5f); // left
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // bottom
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
-		}
-
-		nvgFillColor(vg, borderColor);
-		nvgFill(vg);
-	}
-
-	// Increment button.
-	{
-		wzRect r;
-		bool hover, pressed;
-		NVGcolor color, borderColor;
-
-		wz_scroller_get_increment_button_state(scroller, &r, &hover, &pressed);
-
-		if (pressed && hover)
-		{
-			color = color_pressed;
-			borderColor = color_borderSet;
-		}
-		else if (hover)
-		{
-			color = color_hover;
-			borderColor = color_borderHover;
-		}
-		else
-		{
-			color = color_foreground;
-			borderColor = color_border;
-		}
-
-		wz_nanovg_draw_filled_rect(vg, r, color);
-		wz_nanovg_draw_rect(vg, r, borderColor);
-
-		nvgBeginPath(vg);
-
-		if (type == WZ_SCROLLER_VERTICAL)
-		{
-			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
-		}
-		else
-		{
-			nvgMoveTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.5f); // right
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // top
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
-		}
-
-		nvgFillColor(vg, borderColor);
-		nvgFill(vg);
-	}
 
 	// Nub.
 	{
@@ -1181,6 +1088,84 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, st
 		wz_nanovg_draw_rect(vg, r, borderColor);
 	}
 
+	nvgRestore(vg);
+}
+
+static void wz_nanovg_draw_scroller_button(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller, struct wzButton *button, bool decrement)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	wzRect r;
+	wzScrollerType type;
+	bool hover, pressed;
+	NVGcolor color, borderColor;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(scroller);
+	WZ_ASSERT(button);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgSave(vg);
+	wz_nanovg_clip_to_rect(vg, clip);
+	r = wz_widget_get_absolute_rect((const struct wzWidget *)button);
+	type = wz_scroller_get_type(scroller);
+	hover = wz_widget_get_hover((const struct wzWidget *)button);
+	pressed = wz_button_is_pressed(button);
+
+	if (pressed && hover)
+	{
+		color = color_pressed;
+		borderColor = color_borderSet;
+	}
+	else if (hover)
+	{
+		color = color_hover;
+		borderColor = color_borderHover;
+	}
+	else
+	{
+		color = color_foreground;
+		borderColor = color_border;
+	}
+
+	wz_nanovg_draw_filled_rect(vg, r, color);
+	wz_nanovg_draw_rect(vg, r, borderColor);
+	nvgBeginPath(vg);
+
+	if (type == WZ_SCROLLER_VERTICAL)
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+		}
+	}
+	else
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.5f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.5f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
+		}
+	}
+
+	nvgFillColor(vg, borderColor);
+	nvgFill(vg);
 	nvgRestore(vg);
 }
 
@@ -1621,6 +1606,7 @@ struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const ch
 	renderer->draw_radio_button = wz_nanovg_draw_radio_button;
 	renderer->measure_scroller = wz_nanovg_measure_scroller;
 	renderer->draw_scroller = wz_nanovg_draw_scroller;
+	renderer->draw_scroller_button = wz_nanovg_draw_scroller_button;
 	renderer->get_spinner_button_width = wz_nanovg_get_spinner_button_width;
 	renderer->measure_spinner = wz_nanovg_measure_spinner;
 	renderer->draw_spinner = wz_nanovg_draw_spinner;

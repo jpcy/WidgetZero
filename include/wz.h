@@ -491,8 +491,6 @@ void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
 int wz_scroller_get_step_value(struct wzScroller *scroller);
 void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
 void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale);
-void wz_scroller_get_decrement_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed);
-void wz_scroller_get_increment_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed);
 void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
 
@@ -605,6 +603,7 @@ struct wzRenderer
 
 	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
+	void (*draw_scroller_button)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller, struct wzButton *button, bool decrement);
 
 	int (*get_spinner_button_width)(struct wzRenderer *renderer);
 	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);

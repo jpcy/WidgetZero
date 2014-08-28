@@ -230,6 +230,12 @@ DECREMENT AND INCREMENT BUTTONS
 ================================================================================
 */
 
+static void wz_scroller_decrement_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_scroller_button(widget->renderer, clip, (struct wzScroller *)widget->parent, (struct wzButton *)widget, true);
+}
+
 static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller)
 {
 	wzSize scrollerSize;
@@ -251,6 +257,12 @@ static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller
 	}
 
 	wz_widget_set_rect_internal((struct wzWidget *)scroller->decrementButton, rect);
+}
+
+static void wz_scroller_increment_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_scroller_button(widget->renderer, clip, (struct wzScroller *)widget->parent, (struct wzButton *)widget, false);
 }
 
 static void wz_scroller_increment_button_update_rect(struct wzScroller *scroller)
@@ -378,11 +390,13 @@ struct wzScroller *wz_scroller_create(struct wzRenderer *renderer)
 	scroller->stepValue = 1;
 
 	scroller->decrementButton = wz_button_create(renderer);
+	wz_widget_set_draw_callback((struct wzWidget *)scroller->decrementButton, wz_scroller_decrement_button_draw);
 	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	wz_scroller_decrement_button_update_rect(scroller);
 
 	scroller->incrementButton = wz_button_create(renderer);
+	wz_widget_set_draw_callback((struct wzWidget *)scroller->incrementButton, wz_scroller_increment_button_draw);
 	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 	wz_scroller_increment_button_update_rect(scroller);
@@ -473,34 +487,6 @@ void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale)
 	WZ_ASSERT(scroller);
 	scroller->nubScale = nubScale;
 	wz_scroller_nub_update_rect(scroller->nub);
-}
-
-void wz_scroller_get_decrement_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
-{
-	WZ_ASSERT(scroller);
-
-	if (rect)
-		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->decrementButton);
-
-	if (hover)
-		*hover = wz_widget_get_hover((const struct wzWidget *)scroller->decrementButton);
-
-	if (pressed)
-		*pressed = wz_button_is_pressed(scroller->decrementButton);
-}
-
-void wz_scroller_get_increment_button_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
-{
-	WZ_ASSERT(scroller);
-
-	if (rect)
-		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->incrementButton);
-
-	if (hover)
-		*hover = wz_widget_get_hover((const struct wzWidget *)scroller->incrementButton);
-
-	if (pressed)
-		*pressed = wz_button_is_pressed(scroller->incrementButton);
 }
 
 void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed)
