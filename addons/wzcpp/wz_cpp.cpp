@@ -479,7 +479,7 @@ LabelPrivate::LabelPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	label = wz_label_create(renderer);
+	label = wz_label_create();
 	wz_widget_set_metadata((wzWidget *)label, this);
 }
 

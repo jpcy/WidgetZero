@@ -431,7 +431,7 @@ struct wzGroupBox *wz_group_box_create(struct wzRenderer *renderer);
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
 
-struct wzLabel *wz_label_create(struct wzRenderer *renderer);
+struct wzLabel *wz_label_create();
 void wz_label_set_multiline(struct wzLabel *label, bool multiline);
 bool wz_label_get_multiline(const struct wzLabel *label);
 void wz_label_set_text(struct wzLabel *label, const char *text);

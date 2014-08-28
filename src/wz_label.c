@@ -31,6 +31,7 @@ struct wzLabel
 	char text[512];
 	bool multiline;
 	wzColor textColor;
+	bool isTextColorUserSet;
 };
 
 static wzSize wz_label_measure(struct wzWidget *widget)
@@ -45,15 +46,25 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 	widget->renderer->draw_label(widget->renderer, clip, (struct wzLabel *)widget);
 }
 
-struct wzLabel *wz_label_create(struct wzRenderer *renderer)
+static void wz_label_renderer_changed(struct wzWidget *widget)
+{
+	struct wzLabel *label = (struct wzLabel *)widget;
+	WZ_ASSERT(label);
+
+	if (!label->isTextColorUserSet)
+	{
+		label->textColor = widget->renderer->get_default_text_color(widget->renderer);
+	}
+}
+
+struct wzLabel *wz_label_create()
 {
 	struct wzLabel *label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
 	memset(label, 0, sizeof(struct wzLabel));
 	label->base.type = WZ_TYPE_LABEL;
-	label->base.renderer = renderer;
 	label->base.vtable.measure = wz_label_measure;
 	label->base.vtable.draw = wz_label_draw;
-	label->textColor = renderer->get_default_text_color(renderer);
+	label->base.vtable.renderer_changed = wz_label_renderer_changed;
 	return label;
 }
 
@@ -86,6 +97,7 @@ void wz_label_set_text_color(struct wzLabel *label, wzColor color)
 {
 	WZ_ASSERT(label);
 	label->textColor = color;
+	label->isTextColorUserSet = true;
 }
 
 wzColor wz_label_get_text_color(const struct wzLabel *label)
