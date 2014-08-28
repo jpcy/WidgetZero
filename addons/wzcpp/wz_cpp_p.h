@@ -87,7 +87,7 @@ struct FramePrivate : public WidgetPrivate
 
 struct GroupBoxPrivate : public WidgetPrivate
 {
-	GroupBoxPrivate(wzRenderer *renderer);
+	GroupBoxPrivate();
 	~GroupBoxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox; }
 	virtual wzWidget *getWidget() { return (wzWidget *)groupBox; }

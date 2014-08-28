@@ -223,11 +223,11 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::GroupBox *groupBox1 = new wz::GroupBox(renderer, "With a Label");
+		wz::GroupBox *groupBox1 = new wz::GroupBox("With a Label");
 		groupBox1->add(new wz::Label("Default margin"));
 		layout->add(groupBox1);
 
-		wz::GroupBox *groupBox = new wz::GroupBox(renderer);
+		wz::GroupBox *groupBox = new wz::GroupBox();
 		layout->add(groupBox);
 	}
 

@@ -427,7 +427,7 @@ bool wz_combo_is_open(struct wzCombo *combo);
 
 struct wzFrame *wz_frame_create();
 
-struct wzGroupBox *wz_group_box_create(struct wzRenderer *renderer);
+struct wzGroupBox *wz_group_box_create();
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
 

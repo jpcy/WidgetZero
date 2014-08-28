@@ -411,10 +411,9 @@ Widget *Frame::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
+GroupBoxPrivate::GroupBoxPrivate()
 {
-	WZ_ASSERT(renderer);
-	groupBox = wz_group_box_create(renderer);
+	groupBox = wz_group_box_create();
 	wz_widget_set_metadata((wzWidget *)groupBox, this);
 	wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
 }
@@ -429,14 +428,14 @@ GroupBoxPrivate::~GroupBoxPrivate()
 
 //------------------------------------------------------------------------------
 
-GroupBox::GroupBox(wzRenderer *renderer)
+GroupBox::GroupBox()
 {
-	p = new GroupBoxPrivate(renderer);
+	p = new GroupBoxPrivate();
 }
 
-GroupBox::GroupBox(wzRenderer *renderer, const std::string &label)
+GroupBox::GroupBox(const std::string &label)
 {
-	p = new GroupBoxPrivate(renderer);
+	p = new GroupBoxPrivate();
 	setLabel(label);
 }
 

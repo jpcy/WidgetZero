@@ -155,8 +155,8 @@ public:
 class GroupBox : public Widget
 {
 public:
-	GroupBox(wzRenderer *renderer);
-	GroupBox(wzRenderer *renderer, const std::string &label);
+	GroupBox();
+	GroupBox(const std::string &label);
 	~GroupBox();
 	const char *getLabel() const;
 	GroupBox *setLabel(const std::string &label);
