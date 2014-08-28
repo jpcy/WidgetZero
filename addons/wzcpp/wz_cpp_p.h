@@ -31,7 +31,6 @@ struct ListPrivate;
 
 struct WidgetPrivate
 {
-	WidgetPrivate() : fontSize(0) {}
 	virtual ~WidgetPrivate();
 	virtual const wzWidget *getWidget() const { return NULL; }
 	virtual wzWidget *getWidget() { return NULL; }
@@ -42,16 +41,13 @@ struct WidgetPrivate
 	void add(Widget *widget);
 	void remove(Widget *widget);
 	
-	wzRenderer *renderer;
 	std::vector<Widget *> children;
 	std::vector<IEventHandler *> eventHandlers;
-	std::string fontFace;
-	float fontSize;
 };
 
 struct ButtonPrivate : public WidgetPrivate
 {
-	ButtonPrivate(wzRenderer *renderer);
+	ButtonPrivate();
 	~ButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
@@ -61,7 +57,7 @@ struct ButtonPrivate : public WidgetPrivate
 
 struct CheckboxPrivate : public WidgetPrivate
 {
-	CheckboxPrivate(wzRenderer *renderer);
+	CheckboxPrivate();
 	~CheckboxPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
@@ -101,7 +97,7 @@ struct GroupBoxPrivate : public WidgetPrivate
 
 struct LabelPrivate : public WidgetPrivate
 {
-	LabelPrivate(wzRenderer *renderer);
+	LabelPrivate();
 	~LabelPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
 	virtual wzWidget *getWidget() { return (wzWidget *)label; }
@@ -132,7 +128,7 @@ struct MainWindowPrivate : public WidgetPrivate
 
 struct RadioButtonPrivate : public WidgetPrivate
 {
-	RadioButtonPrivate(wzRenderer *renderer);
+	RadioButtonPrivate();
 	~RadioButtonPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }

@@ -112,8 +112,8 @@ public:
 class Button : public Widget
 {
 public:
-	Button(wzRenderer *renderer);
-	Button(wzRenderer *renderer, const std::string &label, const std::string &icon = std::string());
+	Button();
+	Button(const std::string &label, const std::string &icon = std::string());
 	~Button();
 	wzBorder getPadding() const;
 	Button *setPadding(wzBorder padding);
@@ -128,8 +128,8 @@ public:
 class Checkbox : public Widget
 {
 public:
-	Checkbox(wzRenderer *renderer);
-	Checkbox(wzRenderer *renderer, const std::string &label);
+	Checkbox();
+	Checkbox( const std::string &label);
 	~Checkbox();
 	const char *getLabel() const;
 	Checkbox *setLabel(const std::string &label);
@@ -166,8 +166,8 @@ public:
 class Label : public Widget
 {
 public:
-	Label(wzRenderer *renderer);
-	Label(wzRenderer *renderer, const std::string &text);
+	Label();
+	Label(const std::string &text);
 	~Label();
 	Label *setText(const char *format, ...);
 	Label *setTextColor(float r, float g, float b, float a = 1.0f);
@@ -224,8 +224,8 @@ private:
 class RadioButton : public Widget
 {
 public:
-	RadioButton(wzRenderer *renderer);
-	RadioButton(wzRenderer *renderer, const std::string &label);
+	RadioButton();
+	RadioButton(const std::string &label);
 	~RadioButton();
 	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);

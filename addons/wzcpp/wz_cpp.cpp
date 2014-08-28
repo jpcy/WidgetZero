@@ -166,22 +166,18 @@ Widget *Widget::setMargin(wzBorder margin)
 
 Widget *Widget::setFontFace(const std::string &fontFace)
 {
-	p->fontFace = fontFace;
 	wz_widget_set_font_face(p->getWidget(), fontFace.c_str());
 	return this;
 }
 
 Widget *Widget::setFontSize(float fontSize)
 {
-	p->fontSize = fontSize;
 	wz_widget_set_font_size(p->getWidget(), fontSize);
 	return this;
 }
 
 Widget *Widget::setFont(const std::string &fontFace, float fontSize)
 {
-	p->fontFace = fontFace;
-	p->fontSize = fontSize;
 	wz_widget_set_font(p->getWidget(), fontFace.c_str(), fontSize);
 	return this;
 }
@@ -200,10 +196,8 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 
 //------------------------------------------------------------------------------
 
-ButtonPrivate::ButtonPrivate(wzRenderer *renderer)
+ButtonPrivate::ButtonPrivate()
 {
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
@@ -218,14 +212,14 @@ ButtonPrivate::~ButtonPrivate()
 
 //------------------------------------------------------------------------------
 
-Button::Button(wzRenderer *renderer)
+Button::Button()
 {
-	p = new ButtonPrivate(renderer);
+	p = new ButtonPrivate();
 }
 
-Button::Button(wzRenderer *renderer, const std::string &label, const std::string &icon)
+Button::Button(const std::string &label, const std::string &icon)
 {
-	p = new ButtonPrivate(renderer);
+	p = new ButtonPrivate();
 
 	if (!label.empty())
 		setLabel(label);
@@ -291,10 +285,8 @@ Button *Button::setToggle(bool toggle)
 
 //------------------------------------------------------------------------------
 
-CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
+CheckboxPrivate::CheckboxPrivate()
 {
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	button = wz_check_box_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
@@ -309,14 +301,14 @@ CheckboxPrivate::~CheckboxPrivate()
 
 //------------------------------------------------------------------------------
 
-Checkbox::Checkbox(wzRenderer *renderer)
+Checkbox::Checkbox()
 {
-	p = new CheckboxPrivate(renderer);
+	p = new CheckboxPrivate();
 }
 
-Checkbox::Checkbox(wzRenderer *renderer, const std::string &label)
+Checkbox::Checkbox(const std::string &label)
 {
-	p = new CheckboxPrivate(renderer);
+	p = new CheckboxPrivate();
 	setLabel(label);
 }
 
@@ -347,7 +339,6 @@ Checkbox *Checkbox::bindValue(bool *value)
 ComboPrivate::ComboPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	combo = wz_combo_create(renderer);
 	wz_widget_set_metadata((wzWidget *)combo, this);
 }
@@ -386,7 +377,6 @@ Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 FramePrivate::FramePrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	frame = wz_frame_create();
 	wzWidget *widget = (wzWidget *)frame;
 	wz_widget_set_metadata(widget, this);
@@ -424,7 +414,6 @@ Widget *Frame::add(Widget *widget)
 GroupBoxPrivate::GroupBoxPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	groupBox = wz_group_box_create(renderer);
 	wz_widget_set_metadata((wzWidget *)groupBox, this);
 	wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
@@ -475,10 +464,8 @@ Widget *GroupBox::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-LabelPrivate::LabelPrivate(wzRenderer *renderer)
+LabelPrivate::LabelPrivate()
 {
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	label = wz_label_create();
 	wz_widget_set_metadata((wzWidget *)label, this);
 }
@@ -493,14 +480,14 @@ LabelPrivate::~LabelPrivate()
 
 //------------------------------------------------------------------------------
 
-Label::Label(wzRenderer *renderer)
+Label::Label()
 {
-	p = new LabelPrivate(renderer);
+	p = new LabelPrivate();
 }
 
-Label::Label(wzRenderer *renderer, const std::string &text)
+Label::Label(const std::string &text)
 {
-	p = new LabelPrivate(renderer);
+	p = new LabelPrivate();
 	setText(text.c_str());
 }
 
@@ -544,7 +531,6 @@ Label *Label::setMultiline(bool multiline)
 ListPrivate::ListPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	list = wz_list_create(renderer);
 	wz_widget_set_metadata((wzWidget *)list, this);
 }
@@ -717,10 +703,8 @@ RadioButtonGroup::~RadioButtonGroup()
 
 //------------------------------------------------------------------------------
 
-RadioButtonPrivate::RadioButtonPrivate(wzRenderer *renderer) : group(NULL)
+RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
 {
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	button = wz_radio_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
@@ -735,14 +719,14 @@ RadioButtonPrivate::~RadioButtonPrivate()
 
 //------------------------------------------------------------------------------
 
-RadioButton::RadioButton(wzRenderer *renderer)
+RadioButton::RadioButton()
 {
-	p = new RadioButtonPrivate(renderer);
+	p = new RadioButtonPrivate();
 }
 
-RadioButton::RadioButton(wzRenderer *renderer, const std::string &label)
+RadioButton::RadioButton(const std::string &label)
 {
-	p = new RadioButtonPrivate(renderer);
+	p = new RadioButtonPrivate();
 	setLabel(label);
 }
 
@@ -787,7 +771,6 @@ RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	scroller = wz_scroller_create(renderer);
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 }
@@ -846,7 +829,6 @@ int Scroller::getValue() const
 SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	spinner = wz_spinner_create(renderer);
 	wz_widget_set_metadata((wzWidget *)spinner, this);
 }
@@ -967,7 +949,6 @@ Widget *Tab::add(Widget *widget)
 TabbedPrivate::TabbedPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	tabbed = wz_tabbed_create(renderer);
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
 }
@@ -1003,7 +984,6 @@ Tab *Tabbed::addTab(Tab *tab)
 TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	textEdit = wz_text_edit_create(renderer, multiline, 256);
 	wz_widget_set_metadata((wzWidget *)textEdit, this);
 }
@@ -1045,7 +1025,6 @@ TextEdit *TextEdit::setText(const std::string &text)
 WindowPrivate::WindowPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	this->renderer = renderer;
 	window = wz_window_create(renderer);
 	wz_widget_set_metadata((wzWidget *)window, this);
 }

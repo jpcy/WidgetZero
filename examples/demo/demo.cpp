@@ -173,15 +173,15 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		layout->add(new wz::Button(renderer, "Button with a label"));
-		layout->add(new wz::Button(renderer, "Button with a label and icon", "../examples/data/accept.png"));
-		layout->add(new wz::Button(renderer, "", "../examples/data/accept.png"));
+		layout->add(new wz::Button("Button with a label"));
+		layout->add(new wz::Button("Button with a label and icon", "../examples/data/accept.png"));
+		layout->add(new wz::Button("", "../examples/data/accept.png"));
 
-		wz::Button *paddedButton = new wz::Button(renderer, "Custom padding");
+		wz::Button *paddedButton = new wz::Button("Custom padding");
 		paddedButton->setPadding(20, 40, 20, 40);
 		layout->add(paddedButton);
 
-		wz::Button *toggleButton = new wz::Button(renderer, "Toggle Button");
+		wz::Button *toggleButton = new wz::Button("Toggle Button");
 		toggleButton->setToggle(true);
 		layout->add(toggleButton);
 	}
@@ -194,7 +194,7 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Toggle me!");
+		wz::Checkbox *checkbox = new wz::Checkbox("Toggle me!");
 		layout->add(checkbox);
 	}
 
@@ -224,7 +224,7 @@ private:
 		frame->add(layout);
 
 		wz::GroupBox *groupBox1 = new wz::GroupBox(renderer, "With a Label");
-		groupBox1->add(new wz::Label(renderer, "Default margin"));
+		groupBox1->add(new wz::Label("Default margin"));
 		layout->add(groupBox1);
 
 		wz::GroupBox *groupBox = new wz::GroupBox(renderer);
@@ -239,13 +239,13 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		layout->add(new wz::Label(renderer, "Normal label"));
+		layout->add(new wz::Label("Normal label"));
 
-		wz::Label *multilineLabel = new wz::Label(renderer, "Multiline label with color. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+		wz::Label *multilineLabel = new wz::Label("Multiline label with color. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 		multilineLabel->setMultiline(true)->setTextColor(0, 0.5f, 0)->setWidth(400);
 		layout->add(multilineLabel);
 
-		wz::Label *customLabel = new wz::Label(renderer, "Label with custom font and color");
+		wz::Label *customLabel = new wz::Label("Label with custom font and color");
 		customLabel->setTextColor(1, 0.5f, 0.5f)->setFont("visitor1", 32);
 		layout->add(customLabel);
 	}
@@ -279,15 +279,15 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::RadioButton *rb1 = new wz::RadioButton(renderer, "Option 1");
+		wz::RadioButton *rb1 = new wz::RadioButton("Option 1");
 		rb1->setGroup(&radioButtonGroup);
 		layout->add(rb1);
 
-		wz::RadioButton *rb2 = new wz::RadioButton(renderer, "Option 2");
+		wz::RadioButton *rb2 = new wz::RadioButton("Option 2");
 		rb2->setGroup(&radioButtonGroup);
 		layout->add(rb2);
 
-		wz::RadioButton *rb3 = new wz::RadioButton(renderer, "Option 3");
+		wz::RadioButton *rb3 = new wz::RadioButton("Option 3");
 		rb3->setGroup(&radioButtonGroup);
 		layout->add(rb3);
 	}
@@ -372,11 +372,11 @@ private:
 		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(frameLayout);
 
-		wz::Checkbox *showWindow1 = new wz::Checkbox(renderer, "Show Window 1");
+		wz::Checkbox *showWindow1 = new wz::Checkbox("Show Window 1");
 		showWindow1->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
 		frameLayout->add(showWindow1);
 
-		wz::Checkbox *showWindow2 = new wz::Checkbox(renderer, "Show Window 2");
+		wz::Checkbox *showWindow2 = new wz::Checkbox("Show Window 2");
 		showWindow2->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
 		frameLayout->add(showWindow2);
 	}
@@ -390,23 +390,23 @@ private:
 		frame->add(frameLayout);
 
 		{
-			wz::Label *label = new wz::Label(renderer, "Horizontal Stack Layout");
+			wz::Label *label = new wz::Label("Horizontal Stack Layout");
 			frameLayout->add(label);
 
 			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
 			layout->setSpacing(8)->setStretch(WZ_STRETCH_WIDTH)->setHeight(100);
 			frameLayout->add(layout);
 
-			layout->add(new wz::Button(renderer, "Default"));
-			layout->add(new wz::Button(renderer, "Align Top"))->setAlign(WZ_ALIGN_TOP);
-			layout->add(new wz::Button(renderer, "Align Middle"))->setAlign(WZ_ALIGN_MIDDLE);
-			layout->add(new wz::Button(renderer, "Align Bottom"))->setAlign(WZ_ALIGN_BOTTOM);
-			layout->add(new wz::Button(renderer, "Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
-			layout->add(new wz::Button(renderer, "Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+			layout->add(new wz::Button("Default"));
+			layout->add(new wz::Button("Align Top"))->setAlign(WZ_ALIGN_TOP);
+			layout->add(new wz::Button("Align Middle"))->setAlign(WZ_ALIGN_MIDDLE);
+			layout->add(new wz::Button("Align Bottom"))->setAlign(WZ_ALIGN_BOTTOM);
+			layout->add(new wz::Button("Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button("Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
 		}
 
 		{
-			wz::Label *label = new wz::Label(renderer, "Vertical Stack Layout");
+			wz::Label *label = new wz::Label("Vertical Stack Layout");
 			label->setMargin(16, 0, 0, 0);
 			frameLayout->add(label);
 
@@ -414,12 +414,12 @@ private:
 			layout->setSpacing(8)->setStretch(WZ_STRETCH_HEIGHT)->setWidth(300);
 			frameLayout->add(layout);
 
-			layout->add(new wz::Button(renderer, "Default"));
-			layout->add(new wz::Button(renderer, "Align Left"))->setAlign(WZ_ALIGN_LEFT);
-			layout->add(new wz::Button(renderer, "Align Center"))->setAlign(WZ_ALIGN_CENTER);
-			layout->add(new wz::Button(renderer, "Align Right"))->setAlign(WZ_ALIGN_RIGHT);
-			layout->add(new wz::Button(renderer, "Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
-			layout->add(new wz::Button(renderer, "Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+			layout->add(new wz::Button("Default"));
+			layout->add(new wz::Button("Align Left"))->setAlign(WZ_ALIGN_LEFT);
+			layout->add(new wz::Button("Align Center"))->setAlign(WZ_ALIGN_CENTER);
+			layout->add(new wz::Button("Align Right"))->setAlign(WZ_ALIGN_RIGHT);
+			layout->add(new wz::Button("Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button("Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
 		}
 	}
 
@@ -441,7 +441,7 @@ private:
 		list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
 		layout->add(list);
 
-		wz::Checkbox *showProfilingCheckBox = new wz::Checkbox(renderer, "Show profiling");
+		wz::Checkbox *showProfilingCheckBox = new wz::Checkbox("Show profiling");
 		showProfilingCheckBox->bindValue(&showProfiling_);
 		layout->add(showProfilingCheckBox);
 	}
@@ -461,11 +461,11 @@ private:
 		textEdit->setStretch(WZ_STRETCH_WIDTH);
 		layout->add(textEdit);
 
-		wz::Button *button = new wz::Button(renderer, "Another Button", "../examples/data/accept.png");
+		wz::Button *button = new wz::Button("Another Button", "../examples/data/accept.png");
 		button->setStretch(WZ_STRETCH_WIDTH);
 		layout->add(button);
 
-		wz::Checkbox *checkbox = new wz::Checkbox(renderer, "Checkbox");
+		wz::Checkbox *checkbox = new wz::Checkbox("Checkbox");
 		checkbox->setAlign(WZ_ALIGN_CENTER);
 		layout->add(checkbox);
 
@@ -473,7 +473,7 @@ private:
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
-		wz::Button *button2 = new wz::Button(renderer, "Yet Another Button");
+		wz::Button *button2 = new wz::Button("Yet Another Button");
 		button2->setStretch(WZ_STRETCH);
 		layout->add(button2);
 	}
@@ -501,7 +501,7 @@ private:
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(10, 10);
 		firstTab->add(combo);
 
-		secondTab->add(new wz::Button(renderer, "Button Button Button"))->setPosition(10, 10);
+		secondTab->add(new wz::Button("Button Button Button"))->setPosition(10, 10);
 	}
 
 	void showWindow1Toggled(wzEvent *e)
