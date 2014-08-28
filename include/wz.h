@@ -586,7 +586,7 @@ struct wzRenderer
 	wzSize (*measure_combo)(struct wzRenderer *renderer, const struct wzCombo *combo);
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo);
 
-	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label);
+	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const struct wzGroupBox *groupBox);
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox);
 
 	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label);

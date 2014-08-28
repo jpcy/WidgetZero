@@ -726,13 +726,15 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, struc
 	nvgRestore(vg);
 }
 
-static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *label)
+static wzBorder wz_nanovg_measure_group_box_margin(struct wzRenderer *renderer, const struct wzGroupBox *groupBox)
 {
 	wzBorder margin;
+	const char *label;
 
 	WZ_ASSERT(renderer);
-
-	margin.top = (!label || !label[0]) ? 8 : wz_nanovg_get_line_height(renderer, fontFace, fontSize) + 8;
+	WZ_ASSERT(groupBox);
+	label = wz_group_box_get_label(groupBox);
+	margin.top = (!label || !label[0]) ? 8 : wz_nanovg_get_line_height(renderer, wz_widget_get_font_face((const struct wzWidget *)groupBox), wz_widget_get_font_size((const struct wzWidget *)groupBox)) + 8;
 	margin.bottom = 8;
 	margin.left = 8;
 	margin.right = 8;

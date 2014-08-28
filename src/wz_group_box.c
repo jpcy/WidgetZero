@@ -57,6 +57,7 @@ struct wzGroupBox *wz_group_box_create(struct wzRenderer *renderer)
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(groupBox->content, 0, sizeof(struct wzWidget));
 	groupBox->content->stretch = WZ_STRETCH;
+	wz_widget_set_margin(groupBox->content, renderer->measure_group_box_margin(renderer, groupBox));
 	wz_widget_add_child_widget_internal((struct wzWidget *)groupBox, groupBox->content);
 
 	return groupBox;
@@ -66,6 +67,9 @@ void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label)
 {
 	WZ_ASSERT(groupBox);
 	strcpy(groupBox->label, label);
+
+	// Update the margin.
+	wz_widget_set_margin(groupBox->content, groupBox->base.renderer->measure_group_box_margin(groupBox->base.renderer, groupBox));
 }
 
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox)

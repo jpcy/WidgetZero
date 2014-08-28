@@ -220,6 +220,7 @@ private:
 		frame->add(layout);
 
 		wz::GroupBox *groupBox1 = new wz::GroupBox(renderer, "With a Label");
+		groupBox1->add(new wz::Label(renderer, "Default margin"));
 		layout->add(groupBox1);
 
 		wz::GroupBox *groupBox = new wz::GroupBox(renderer);
