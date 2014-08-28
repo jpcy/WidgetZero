@@ -91,6 +91,13 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	}
 }
 
+static void wz_button_renderer_changed(struct wzWidget *widget)
+{
+	struct wzButton *button = (struct wzButton *)widget;
+	WZ_ASSERT(button);
+	button->padding = widget->renderer->get_button_padding(widget->renderer, button);
+}
+
 static void wz_button_destroy(struct wzWidget *widget)
 {
 	struct wzButton *button;
@@ -175,42 +182,41 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static struct wzButton *wz_button_create_internal(struct wzRenderer *renderer, wzButtonStyle style)
+static struct wzButton *wz_button_create_internal(wzButtonStyle style)
 {
 	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
-	button->base.renderer = renderer;
 	button->base.vtable.measure = wz_button_measure;
 	button->base.vtable.draw = wz_button_draw;
+	button->base.vtable.renderer_changed = wz_button_renderer_changed;
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 	button->style = style;
-	button->padding = renderer->get_button_padding(renderer, button);
 	return button;
 }
 
-struct wzButton *wz_button_create(struct wzRenderer *renderer)
+struct wzButton *wz_button_create()
 {
-	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_DEFAULT);
+	return wz_button_create_internal(WZ_BUTTON_STYLE_DEFAULT);
 }
 
-struct wzButton *wz_check_box_create(struct wzRenderer *renderer)
+struct wzButton *wz_check_box_create()
 {
-	struct wzButton *button = wz_button_create_internal(renderer, WZ_BUTTON_STYLE_CHECK);
+	struct wzButton *button = wz_button_create_internal(WZ_BUTTON_STYLE_CHECK);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	return button;
 }
 
-struct wzButton *wz_radio_button_create(struct wzRenderer *renderer)
+struct wzButton *wz_radio_button_create()
 {
-	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_RADIO);
+	return wz_button_create_internal(WZ_BUTTON_STYLE_RADIO);
 }
 
-struct wzButton *wz_tab_button_create(struct wzRenderer *renderer)
+struct wzButton *wz_tab_button_create()
 {
-	return wz_button_create_internal(renderer, WZ_BUTTON_STYLE_TAB);
+	return wz_button_create_internal(WZ_BUTTON_STYLE_TAB);
 }
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)

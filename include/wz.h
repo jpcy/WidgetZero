@@ -402,10 +402,10 @@ typedef enum
 }
 wzButtonSetBehavior;
 
-struct wzButton *wz_button_create(struct wzRenderer *renderer);
-struct wzButton *wz_check_box_create(struct wzRenderer *renderer);
-struct wzButton *wz_radio_button_create(struct wzRenderer *renderer);
-struct wzButton *wz_tab_button_create(struct wzRenderer *renderer);
+struct wzButton *wz_button_create();
+struct wzButton *wz_check_box_create();
+struct wzButton *wz_radio_button_create();
+struct wzButton *wz_tab_button_create();
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 void wz_button_set_label(struct wzButton *button, const char *label);

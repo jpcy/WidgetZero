@@ -34,6 +34,9 @@ typedef struct
 
 	void (*destroy)(struct wzWidget *widget);
 
+	// wzWidget.renderer has been changed
+	void (*renderer_changed)(struct wzWidget *widget);
+
 	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct wzWidget *widget, wzRect rect);
 

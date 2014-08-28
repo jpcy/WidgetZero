@@ -204,7 +204,7 @@ ButtonPrivate::ButtonPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	button = wz_button_create(renderer);
+	button = wz_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
 
@@ -295,7 +295,7 @@ CheckboxPrivate::CheckboxPrivate(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	button = wz_check_box_create(renderer);
+	button = wz_check_box_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
 
@@ -721,7 +721,7 @@ RadioButtonPrivate::RadioButtonPrivate(wzRenderer *renderer) : group(NULL)
 {
 	WZ_ASSERT(renderer);
 	this->renderer = renderer;
-	button = wz_radio_button_create(renderer);
+	button = wz_radio_button_create();
 	wz_widget_set_metadata((wzWidget *)button, this);
 }
 

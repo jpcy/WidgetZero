@@ -145,13 +145,13 @@ struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer)
 	textEditBorder.right += renderer->get_spinner_button_width(renderer);
 	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
-	spinner->decrementButton = wz_button_create(renderer);
+	spinner->decrementButton = wz_button_create();
 	wz_button_set_label(spinner->decrementButton, "-");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->decrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
-	spinner->incrementButton = wz_button_create(renderer);
+	spinner->incrementButton = wz_button_create();
 	wz_button_set_label(spinner->incrementButton, "+");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->incrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);

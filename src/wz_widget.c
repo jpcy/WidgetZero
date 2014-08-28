@@ -561,6 +561,20 @@ static struct wzMainWindow *wz_widget_find_main_window(struct wzWidget *widget)
 	return NULL;
 }
 
+static void wz_widget_set_renderer(struct wzWidget *widget, struct wzRenderer *renderer)
+{
+	struct wzRenderer *oldRenderer;
+
+	WZ_ASSERT(widget);
+	oldRenderer = widget->renderer;
+	widget->renderer = renderer;
+
+	if (oldRenderer != widget->renderer && widget->vtable.renderer_changed)
+	{
+		widget->vtable.renderer_changed(widget);
+	}
+}
+
 // Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget_internal.
 // Example: scroller does this with it's button children.
 static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widget, struct wzMainWindow *mainWindow, struct wzWindow *window)
@@ -574,6 +588,13 @@ static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widg
 		struct wzWidget *child = widget->children[i];
 		child->mainWindow = mainWindow;
 		child->window = window;
+
+		// Set the renderer too.
+		if (mainWindow)
+		{
+			wz_widget_set_renderer(child, ((struct wzWidget *)mainWindow)->renderer);
+		}
+
 		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
 	}
 }
@@ -675,7 +696,7 @@ void wz_widget_resize_to_measured(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->vtable.measure)
+	if (widget->renderer && widget->vtable.measure)
 	{
 		wzSize size = widget->vtable.measure(widget);
 
@@ -738,7 +759,13 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	// Find the closest ancestor window.
 	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
 
-	// Set children mainWindow and window.
+	// Set the renderer.
+	if (child->mainWindow)
+	{
+		wz_widget_set_renderer(child, ((struct wzWidget *)child->mainWindow)->renderer);
+	}
+
+	// Set children mainWindow, window and renderer.
 	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
 
 	child->parent = widget;
