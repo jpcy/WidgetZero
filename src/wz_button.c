@@ -42,6 +42,7 @@ struct wzButton
 	wzButtonClickBehavior clickBehavior;
 	wzButtonSetBehavior setBehavior;
 	wzBorder padding;
+	bool isPaddingUserSet;
 	char label[128];
 	char icon[128];
 	bool isPressed;
@@ -95,7 +96,12 @@ static void wz_button_renderer_changed(struct wzWidget *widget)
 {
 	struct wzButton *button = (struct wzButton *)widget;
 	WZ_ASSERT(button);
-	button->padding = widget->renderer->get_button_padding(widget->renderer, button);
+
+	// Don't stomp on user set padding.
+	if (!button->isPaddingUserSet)
+	{
+		button->padding = widget->renderer->get_button_padding(widget->renderer, button);
+	}
 }
 
 static void wz_button_destroy(struct wzWidget *widget)
@@ -261,6 +267,7 @@ void wz_button_set_padding(struct wzButton *button, wzBorder padding)
 {
 	WZ_ASSERT(button);
 	button->padding = padding;
+	button->isPaddingUserSet = true;
 	wz_widget_resize_to_measured(&button->base);
 }
 
