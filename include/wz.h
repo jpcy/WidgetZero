@@ -510,7 +510,7 @@ void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLay
 void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
 
-struct wzTabBar *wz_tab_bar_create(struct wzRenderer *renderer);
+struct wzTabBar *wz_tab_bar_create();
 struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar);
 void wz_tab_bar_destroy_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);

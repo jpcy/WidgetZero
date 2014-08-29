@@ -167,6 +167,13 @@ static void wz_tab_bar_destroy(struct wzWidget *widget)
 	wz_arr_free(tabBar->tab_changed_callbacks);
 }
 
+static void wz_tab_bar_renderer_changed(struct wzWidget *widget)
+{
+	struct wzTabBar *tabBar = (struct wzTabBar *)widget;
+	WZ_ASSERT(tabBar);
+	tabBar->base.rect.h = widget->renderer->get_tab_bar_height(widget->renderer, tabBar);
+}
+
 static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	int i;
@@ -211,7 +218,7 @@ static void wz_tab_bar_increment_button_clicked(wzEvent *e)
 	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue + 1);
 }
 
-struct wzTabBar *wz_tab_bar_create(struct wzRenderer *renderer)
+struct wzTabBar *wz_tab_bar_create()
 {
 	struct wzTabBar *tabBar;
 	int defaultScrollButtonWidth;
@@ -219,11 +226,10 @@ struct wzTabBar *wz_tab_bar_create(struct wzRenderer *renderer)
 	tabBar = (struct wzTabBar *)malloc(sizeof(struct wzTabBar));
 	memset(tabBar, 0, sizeof(struct wzTabBar));
 	tabBar->base.type = WZ_TYPE_TAB_BAR;
-	tabBar->base.renderer = renderer;
 	tabBar->base.vtable.destroy = wz_tab_bar_destroy;
+	tabBar->base.vtable.renderer_changed = wz_tab_bar_renderer_changed;
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
 	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
-	tabBar->base.rect.h = renderer->get_tab_bar_height(renderer, tabBar);
 
 	// Custom draw priority so the scroll buttons always overlap the tabs.
 	defaultScrollButtonWidth = 14;

@@ -1218,7 +1218,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	// Create dock tab bars.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		struct wzTabBar *tabBar = wz_tab_bar_create(renderer);
+		struct wzTabBar *tabBar = wz_tab_bar_create();
 		mainWindow->dockTabBars[i] = tabBar;
 		wz_widget_set_visible((struct wzWidget *)tabBar, false);
 		wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);

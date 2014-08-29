@@ -134,7 +134,7 @@ struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer)
 	tabbed->base.vtable.destroy = wz_tabbed_destroy;
 	tabbed->base.vtable.set_rect = wz_tabbed_set_rect;
 
-	tabbed->tabBar = wz_tab_bar_create(renderer);
+	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
 	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
 
