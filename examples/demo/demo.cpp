@@ -108,7 +108,7 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
 {
 	int image, width, height;
 	wzRect rect;

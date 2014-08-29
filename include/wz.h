@@ -373,9 +373,9 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget);
 
 struct wzWindow *wz_window_create();
-int wz_window_get_header_height(struct wzWindow *window);
-int wz_window_get_border_size(struct wzWindow *window);
-wzRect wz_window_get_header_rect(struct wzWindow *window);
+int wz_window_get_header_height(const struct wzWindow *window);
+int wz_window_get_border_size(const struct wzWindow *window);
+wzRect wz_window_get_header_rect(const struct wzWindow *window);
 void wz_window_set_title(struct wzWindow *window, const char *title);
 const char *wz_window_get_title(const struct wzWindow *window);
 
@@ -439,7 +439,7 @@ const char *wz_label_get_text(const struct wzLabel *label);
 void wz_label_set_text_color(struct wzLabel *label, wzColor color);
 wzColor wz_label_get_text_color(const struct wzLabel *label);
 
-typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
 struct wzList *wz_list_create();
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
@@ -482,7 +482,7 @@ wzScrollerType;
 
 struct wzScroller *wz_scroller_create();
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
-wzScrollerType wz_scroller_get_type(struct wzScroller *scroller);
+wzScrollerType wz_scroller_get_type(const struct wzScroller *scroller);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
 void wz_scroller_decrement_value(struct wzScroller *scroller);
@@ -578,42 +578,42 @@ struct wzRenderer
 
 	wzBorder (*get_button_padding)(struct wzRenderer *renderer, const struct wzButton *button);
 	wzSize (*measure_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button);
+	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
 
 	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const struct wzButton *checkbox);
-	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, struct wzButton *checkbox);
+	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *checkbox);
 
 	wzSize (*measure_combo)(struct wzRenderer *renderer, const struct wzCombo *combo);
-	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, struct wzCombo *combo);
+	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, const struct wzCombo *combo);
 
 	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const struct wzGroupBox *groupBox);
 	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox);
 
 	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label);
-	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, struct wzLabel *label);
+	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, const struct wzLabel *label);
 
 	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, const struct wzList *list);
 	int (*measure_list_item_height)(struct wzRenderer *renderer, const struct wzList *list);
-	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, struct wzList *list);
+	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list);
 
-	void (*draw_main_window)(struct wzRenderer *renderer, struct wzMainWindow *mainWindow);
+	void (*draw_main_window)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 
 	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *button);
+	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
 
 	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
-	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller);
-	void (*draw_scroller_button)(struct wzRenderer *renderer, wzRect clip, struct wzScroller *scroller, struct wzButton *button, bool decrement);
+	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller);
+	void (*draw_scroller_button)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller, const struct wzButton *button, bool decrement);
 
 	int (*get_spinner_button_width)(struct wzRenderer *renderer);
 	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);
-	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, struct wzSpinner *spinner);
+	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner);
 
 	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
 
-	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, struct wzButton *tabButton);
+	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *tabButton);
 
-	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, struct wzWidget *tabPage);
+	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, const struct wzWidget *tabPage);
 
 	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
 	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
@@ -621,7 +621,7 @@ struct wzRenderer
 
 	int (*get_window_border_size)(struct wzRenderer *renderer, const struct wzWindow *window);
 	int (*measure_window_header_height)(struct wzRenderer *renderer, const struct wzWindow *window);
-	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, struct wzWindow *window);
+	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, const struct wzWindow *window);
 
 	void *data;
 };

@@ -438,19 +438,19 @@ struct wzWindow *wz_window_create()
 	return window;
 }
 
-int wz_window_get_header_height(struct wzWindow *window)
+int wz_window_get_header_height(const struct wzWindow *window)
 {
 	WZ_ASSERT(window);
 	return window->headerHeight;
 }
 
-int wz_window_get_border_size(struct wzWindow *window)
+int wz_window_get_border_size(const struct wzWindow *window)
 {
 	WZ_ASSERT(window);
 	return window->borderSize;
 }
 
-wzRect wz_window_get_header_rect(struct wzWindow *window)
+wzRect wz_window_get_header_rect(const struct wzWindow *window)
 {
 	wzRect rect;
 
