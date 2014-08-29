@@ -421,7 +421,7 @@ void wz_button_bind_value(struct wzButton *button, bool *value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 
-struct wzCombo *wz_combo_create(struct wzRenderer *renderer);
+struct wzCombo *wz_combo_create();
 struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 

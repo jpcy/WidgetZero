@@ -161,12 +161,11 @@ static void wz_combo_list_item_selected(wzEvent *e)
 	combo->isOpen = false;
 }
 
-struct wzCombo *wz_combo_create(struct wzRenderer *renderer)
+struct wzCombo *wz_combo_create()
 {
 	struct wzCombo *combo = (struct wzCombo *)malloc(sizeof(struct wzCombo));
 	memset(combo, 0, sizeof(struct wzCombo));
 	combo->base.type = WZ_TYPE_COMBO;
-	combo->base.renderer = renderer;
 	combo->base.vtable.measure = wz_combo_measure;
 	combo->base.vtable.draw = wz_combo_draw;
 	combo->base.vtable.set_rect = wz_combo_set_rect;

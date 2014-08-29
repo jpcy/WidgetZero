@@ -67,7 +67,7 @@ struct CheckboxPrivate : public WidgetPrivate
 
 struct ComboPrivate : public WidgetPrivate
 {
-	ComboPrivate(wzRenderer *renderer);
+	ComboPrivate();
 	~ComboPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
 	virtual wzWidget *getWidget() { return (wzWidget *)combo; }

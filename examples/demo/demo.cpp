@@ -206,11 +206,11 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Combo *combo1 = new wz::Combo(renderer);
+		wz::Combo *combo1 = new wz::Combo();
 		combo1->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(800, 50);
 		layout->add(combo1);
 
-		wz::Combo *combo2 = new wz::Combo(renderer);
+		wz::Combo *combo2 = new wz::Combo();
 		combo2->setItems((uint8_t *)listData, sizeof(const char *), 17)->setFont("visitor1", 12);
 		layout->add(combo2);
 	}
@@ -469,7 +469,7 @@ private:
 		checkbox->setAlign(WZ_ALIGN_CENTER);
 		layout->add(checkbox);
 
-		wz::Combo *combo = new wz::Combo(renderer);
+		wz::Combo *combo = new wz::Combo();
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
@@ -497,7 +497,7 @@ private:
 
 		tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 
-		wz::Combo *combo = new wz::Combo(renderer);
+		wz::Combo *combo = new wz::Combo();
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setPosition(10, 10);
 		firstTab->add(combo);
 

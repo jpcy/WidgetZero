@@ -139,7 +139,7 @@ public:
 class Combo : public Widget
 {
 public:
-	Combo(wzRenderer *renderer);
+	Combo();
 	~Combo();
 	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 };

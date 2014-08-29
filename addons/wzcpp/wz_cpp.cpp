@@ -336,10 +336,9 @@ Checkbox *Checkbox::bindValue(bool *value)
 
 //------------------------------------------------------------------------------
 
-ComboPrivate::ComboPrivate(wzRenderer *renderer)
+ComboPrivate::ComboPrivate()
 {
-	WZ_ASSERT(renderer);
-	combo = wz_combo_create(renderer);
+	combo = wz_combo_create();
 	wz_widget_set_metadata((wzWidget *)combo, this);
 }
 
@@ -353,9 +352,9 @@ ComboPrivate::~ComboPrivate()
 
 //------------------------------------------------------------------------------
 
-Combo::Combo(wzRenderer *renderer)
+Combo::Combo()
 {
-	p = new ComboPrivate(renderer);
+	p = new ComboPrivate();
 }
 
 Combo::~Combo()
