@@ -87,7 +87,7 @@ static void wz_text_edit_update_scroller(struct wzTextEdit *textEdit)
 
 	WZ_ASSERT(textEdit);
 
-	if (!textEdit->scroller || !textEdit->multiline)
+	if (!textEdit->multiline)
 		return;
 
 	if (!textEdit->base.mainWindow)
@@ -573,7 +573,7 @@ static void wz_text_edit_mouse_wheel_move(struct wzWidget *widget, int x, int y)
 	WZ_ASSERT(widget);
 	textEdit = (struct wzTextEdit *)widget;
 
-	if (textEdit->multiline && textEdit->scroller && wz_widget_get_visible((struct wzWidget *)textEdit->scroller))
+	if (textEdit->multiline && wz_widget_get_visible((struct wzWidget *)textEdit->scroller))
 	{
 		wz_scroller_set_value(textEdit->scroller, wz_scroller_get_value(textEdit->scroller) - y);
 	}
@@ -880,7 +880,7 @@ wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit)
 	textRect.w -= textEdit->border.left + textEdit->border.right;
 	textRect.h -= textEdit->border.top + textEdit->border.bottom;
 
-	if (textEdit->multiline && textEdit->scroller && wz_widget_get_visible((const struct wzWidget *)textEdit->scroller))
+	if (textEdit->multiline && wz_widget_get_visible((const struct wzWidget *)textEdit->scroller))
 	{
 		textRect.w -= wz_widget_get_width((const struct wzWidget *)textEdit->scroller);
 	}

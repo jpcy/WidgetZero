@@ -138,11 +138,6 @@ static void wz_scroller_nub_update_rect(struct wzScrollerNub *nub)
 	wzRect rect;
 
 	WZ_ASSERT(nub);
-
-	// Buttons not set yet.
-	if (!nub->scroller->decrementButton || !nub->scroller->incrementButton)
-		return;
-
 	scrollerSize = wz_widget_get_size(nub->base.parent);
 	decrementButtonSize = wz_widget_get_size((struct wzWidget *)nub->scroller->decrementButton);
 	incrementButtonSize = wz_widget_get_size((struct wzWidget *)nub->scroller->incrementButton);
@@ -240,9 +235,6 @@ static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller
 {
 	wzSize scrollerSize;
 	wzRect rect;
-
-	if (!scroller->decrementButton)
-		return;
 
 	scrollerSize = wz_widget_get_size((struct wzWidget *)scroller);
 	rect.x = rect.y = 0;

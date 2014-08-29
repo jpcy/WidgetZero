@@ -55,9 +55,6 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	if (!combo->base.mainWindow)
 		return;
 
-	if (!combo->list)
-		return;
-
 	rect = wz_widget_get_rect((struct wzWidget *)combo);
 	absRect = wz_widget_get_absolute_rect((struct wzWidget *)combo);
 

@@ -67,9 +67,6 @@ static void wz_list_update_scroller(struct wzList *list)
 
 	WZ_ASSERT(list);
 
-	if (!list->scroller)
-		return;
-
 	// Update max value.
 	maxHeight = list->nItems * list->itemHeight;
 	max = maxHeight - wz_list_get_items_rect(list).h;
@@ -439,10 +436,6 @@ void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
 	WZ_ASSERT(list);
 	list->itemHeight = itemHeight;
-
-	if (!list->scroller)
-		return;
-
 	wz_scroller_set_step_value(list->scroller, itemHeight);
 	wz_list_update_scroller(list);
 }

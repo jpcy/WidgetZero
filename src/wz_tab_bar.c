@@ -56,9 +56,6 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 
 	WZ_ASSERT(tabBar);
 
-	if (!tabBar->decrementButton || !tabBar->incrementButton)
-		return;
-
 	// Total tab widths.
 	totalTabWidth = 0;
 
