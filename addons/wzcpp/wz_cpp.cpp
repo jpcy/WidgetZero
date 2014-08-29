@@ -1015,10 +1015,9 @@ TextEdit *TextEdit::setText(const std::string &text)
 
 //------------------------------------------------------------------------------
 
-WindowPrivate::WindowPrivate(wzRenderer *renderer)
+WindowPrivate::WindowPrivate()
 {
-	WZ_ASSERT(renderer);
-	window = wz_window_create(renderer);
+	window = wz_window_create();
 	wz_widget_set_metadata((wzWidget *)window, this);
 }
 
@@ -1032,14 +1031,14 @@ WindowPrivate::~WindowPrivate()
 
 //------------------------------------------------------------------------------
 
-Window::Window(wzRenderer *renderer)
+Window::Window()
 {
-	p = new WindowPrivate(renderer);
+	p = new WindowPrivate();
 }
 
-Window::Window(wzRenderer *renderer, const std::string &title)
+Window::Window(const std::string &title)
 {
-	p = new WindowPrivate(renderer);
+	p = new WindowPrivate();
 	setTitle(title);
 }
 

@@ -298,8 +298,8 @@ public:
 class Window : public Widget
 {
 public:
-	Window(wzRenderer *renderer);
-	Window(wzRenderer *renderer, const std::string &title);
+	Window();
+	Window(const std::string &title);
 	~Window();
 	const char *getTitle() const;
 	Window *setTitle(const std::string &title);

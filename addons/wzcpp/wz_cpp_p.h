@@ -197,7 +197,7 @@ struct TextEditPrivate : public WidgetPrivate
 
 struct WindowPrivate : public WidgetPrivate
 {
-	WindowPrivate(wzRenderer *renderer);
+	WindowPrivate();
 	virtual ~WindowPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
 	virtual wzWidget *getWidget() { return (wzWidget *)window; }

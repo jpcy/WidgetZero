@@ -72,6 +72,15 @@ static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 	widget->renderer->draw_window(widget->renderer, clip, (struct wzWindow *)widget);
 }
 
+static void wz_window_renderer_changed(struct wzWidget *widget)
+{
+	struct wzWindow *window = (struct wzWindow *)widget;
+	WZ_ASSERT(window);
+	window->borderSize = widget->renderer->get_window_border_size(widget->renderer, window);
+	window->headerHeight = widget->renderer->measure_window_header_height(widget->renderer, window);
+	wz_widget_refresh_rect(widget);
+}
+
 static void wz_window_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
 {
 	struct wzWindow *window = (struct wzWindow *)widget;
@@ -406,14 +415,14 @@ static struct wzWidget *wz_window_get_content_widget(struct wzWidget *widget)
 	return ((struct wzWindow *)widget)->content;
 }
 
-struct wzWindow *wz_window_create(struct wzRenderer *renderer)
+struct wzWindow *wz_window_create()
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
 	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
-	window->base.renderer = renderer;
 	window->base.vtable.draw = wz_window_draw;
+	window->base.vtable.renderer_changed = wz_window_renderer_changed;
 	window->base.vtable.font_changed = wz_window_font_changed;
 	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
 	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
@@ -421,9 +430,6 @@ struct wzWindow *wz_window_create(struct wzRenderer *renderer)
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
 	window->base.vtable.get_content_widget = wz_window_get_content_widget;
-
-	window->borderSize = renderer->get_window_border_size(renderer, window);
-	window->headerHeight = renderer->measure_window_header_height(renderer, window);
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));

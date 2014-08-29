@@ -425,7 +425,7 @@ private:
 
 	void createWidgetCategoryWindow()
 	{
-		wz::Window *window = new wz::Window(renderer, "Widgets");
+		wz::Window *window = new wz::Window("Widgets");
 		window->setWidth(200);
 		mainWindow.add(window);
 		mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
@@ -448,7 +448,7 @@ private:
 
 	void createWindow1()
 	{
-		window1 = new wz::Window(renderer, "Test Window");
+		window1 = new wz::Window("Test Window");
 		window1->setRect(650, 100, 300, 300);
 		window1->setVisible(false);
 		mainWindow.add(window1);
@@ -480,7 +480,7 @@ private:
 
 	void createWindow2()
 	{
-		window2 = new wz::Window(renderer, "Window with a long title");
+		window2 = new wz::Window("Window with a long title");
 		window2->setRect(590, 500, 200, 200);
 		window2->setVisible(false);
 		mainWindow.add(window2);

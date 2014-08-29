@@ -372,7 +372,7 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
 struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget);
 
-struct wzWindow *wz_window_create(struct wzRenderer *renderer);
+struct wzWindow *wz_window_create();
 int wz_window_get_header_height(struct wzWindow *window);
 int wz_window_get_border_size(struct wzWindow *window);
 wzRect wz_window_get_header_rect(struct wzWindow *window);
