@@ -520,7 +520,7 @@ struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
 void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
 void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
 
-struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer);
+struct wzTabbed *wz_tabbed_create();
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
 
 typedef bool (*wzTextEditValidateTextCallback)(const char *text);

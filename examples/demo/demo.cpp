@@ -330,7 +330,7 @@ private:
 	{
 		wz::Frame *frame = createFrame("Tabbed");
 
-		wz::Tabbed *tabbed = new wz::Tabbed(renderer);
+		wz::Tabbed *tabbed = new wz::Tabbed();
 		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(tabbed);
 
@@ -485,7 +485,7 @@ private:
 		window2->setVisible(false);
 		mainWindow.add(window2);
 
-		wz::Tabbed *tabbed = new wz::Tabbed(renderer);
+		wz::Tabbed *tabbed = new wz::Tabbed();
 		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
 		window2->add(tabbed);
 

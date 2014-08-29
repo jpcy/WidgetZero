@@ -125,12 +125,11 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-struct wzTabbed *wz_tabbed_create(struct wzRenderer *renderer)
+struct wzTabbed *wz_tabbed_create()
 {
 	struct wzTabbed *tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
 	memset(tabbed, 0, sizeof(struct wzTabbed));
 	tabbed->base.type = WZ_TYPE_TABBED;
-	tabbed->base.renderer = renderer;
 	tabbed->base.vtable.destroy = wz_tabbed_destroy;
 	tabbed->base.vtable.set_rect = wz_tabbed_set_rect;
 

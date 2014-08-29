@@ -177,7 +177,7 @@ struct TabPrivate
 
 struct TabbedPrivate : public WidgetPrivate
 {
-	TabbedPrivate(wzRenderer *renderer);
+	TabbedPrivate();
 	~TabbedPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed; }
 	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }

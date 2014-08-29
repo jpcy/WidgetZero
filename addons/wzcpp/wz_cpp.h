@@ -281,7 +281,7 @@ public:
 class Tabbed : public Widget
 {
 public:
-	Tabbed(wzRenderer *renderer);
+	Tabbed();
 	~Tabbed();
 	Tab *addTab(Tab *tab);
 };

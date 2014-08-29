@@ -941,10 +941,9 @@ Widget *Tab::add(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-TabbedPrivate::TabbedPrivate(wzRenderer *renderer)
+TabbedPrivate::TabbedPrivate()
 {
-	WZ_ASSERT(renderer);
-	tabbed = wz_tabbed_create(renderer);
+	tabbed = wz_tabbed_create();
 	wz_widget_set_metadata((wzWidget *)tabbed, this);
 }
 
@@ -958,9 +957,9 @@ TabbedPrivate::~TabbedPrivate()
 
 //------------------------------------------------------------------------------
 
-Tabbed::Tabbed(wzRenderer *renderer)
+Tabbed::Tabbed()
 {
-	p = new TabbedPrivate(renderer);
+	p = new TabbedPrivate();
 }
 
 Tabbed::~Tabbed()
