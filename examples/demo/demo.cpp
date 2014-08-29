@@ -258,15 +258,15 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::List *list1 = new wz::List(renderer);
+		wz::List *list1 = new wz::List();
 		list1->setItems((uint8_t *)listData, sizeof(const char *), 17)->setSize(120, 200);
 		layout->add(list1);
 
-		wz::List *list2 = new wz::List(renderer);
+		wz::List *list2 = new wz::List();
 		list2->setItems((uint8_t *)listData, sizeof(const char *), 17)->setSize(240, 300)->setFont("visitor1", 32);
 		layout->add(list2);
 
-		wz::List *list3 = new wz::List(renderer);
+		wz::List *list3 = new wz::List();
 		list3->setItems((uint8_t *)customListData, sizeof(const char *), 3)->setDrawItemCallback(CustomDrawListItemCallback)->setSize(50, 200);
 		layout->add(list3);
 	}
@@ -434,7 +434,7 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		window->add(layout);
 
-		wz::List *list = new wz::List(renderer);
+		wz::List *list = new wz::List();
 		list->setItems((uint8_t *)&widgetCategories[0], sizeof(WidgetCategoryListItem), widgetCategories.size());
 		list->setStretch(WZ_STRETCH)->setFontSize(18);
 		list->setSelectedItem(0);

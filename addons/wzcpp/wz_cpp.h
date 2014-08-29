@@ -177,7 +177,7 @@ public:
 class List : public Widget
 {
 public:
-	List(wzRenderer *renderer);
+	List();
 	~List();
 	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 	List *setSelectedItem(int index);

@@ -527,10 +527,9 @@ Label *Label::setMultiline(bool multiline)
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate(wzRenderer *renderer)
+ListPrivate::ListPrivate()
 {
-	WZ_ASSERT(renderer);
-	list = wz_list_create(renderer);
+	list = wz_list_create();
 	wz_widget_set_metadata((wzWidget *)list, this);
 }
 
@@ -544,9 +543,9 @@ ListPrivate::~ListPrivate()
 
 //------------------------------------------------------------------------------
 
-List::List(wzRenderer *renderer)
+List::List()
 {
-	p = new ListPrivate(renderer);
+	p = new ListPrivate();
 }
 
 List::~List()

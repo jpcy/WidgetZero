@@ -441,7 +441,7 @@ wzColor wz_label_get_text_color(const struct wzLabel *label);
 
 typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
-struct wzList *wz_list_create(struct wzRenderer *renderer);
+struct wzList *wz_list_create();
 void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
 void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
 wzBorder wz_list_get_items_border(const struct wzList *list);

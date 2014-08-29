@@ -174,7 +174,7 @@ struct wzCombo *wz_combo_create(struct wzRenderer *renderer)
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
 	combo->base.vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
-	combo->list = wz_list_create(renderer);
+	combo->list = wz_list_create();
 	wz_widget_set_draw_priority((struct wzWidget *)combo->list, WZ_DRAW_PRIORITY_COMBO_DROPDOWN);
 	wz_widget_add_child_widget_internal((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);

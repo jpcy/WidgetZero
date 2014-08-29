@@ -130,6 +130,14 @@ static void wz_list_destroy(struct wzWidget *widget)
 	wz_arr_free(list->item_selected_callbacks);
 }
 
+static void wz_list_renderer_changed(struct wzWidget *widget)
+{
+	struct wzList *list = (struct wzList *)widget;
+	WZ_ASSERT(list);
+	list->itemsBorder = widget->renderer->get_list_items_border(widget->renderer, list);
+	wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+}
+
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzList *list;
@@ -157,7 +165,12 @@ static void wz_list_font_changed(struct wzWidget *widget, const char *fontFace, 
 {
 	struct wzList *list = (struct wzList *)widget;
 	WZ_ASSERT(widget);
-	wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+
+	if (widget->renderer)
+	{
+		// Doesn't matter if we can't call this yet, since wz_list_renderer_changed will call it too.
+		wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+	}
 }
 
 static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int mouseY)
@@ -293,14 +306,14 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
-struct wzList *wz_list_create(struct wzRenderer *renderer)
+struct wzList *wz_list_create()
 {
 	struct wzList *list = (struct wzList *)malloc(sizeof(struct wzList));
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
-	list->base.renderer = renderer;
 	list->base.vtable.draw = wz_list_draw;
 	list->base.vtable.destroy = wz_list_destroy;
+	list->base.vtable.renderer_changed = wz_list_renderer_changed;
 	list->base.vtable.set_rect = wz_list_set_rect;
 	list->base.vtable.set_visible = wz_list_set_visible;
 	list->base.vtable.font_changed = wz_list_font_changed;
@@ -309,7 +322,6 @@ struct wzList *wz_list_create(struct wzRenderer *renderer)
 	list->base.vtable.mouse_move = wz_list_mouse_move;
 	list->base.vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
 	list->base.vtable.mouse_hover_off = wz_list_mouse_hover_off;
-	list->itemsBorder = renderer->get_list_items_border(renderer, list);
 	list->selectedItem = -1;
 	list->pressedItem = -1;
 	list->hoveredItem = -1;
@@ -320,9 +332,6 @@ struct wzList *wz_list_create(struct wzRenderer *renderer)
 	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
-
-	// Item height is also used as a scroller step value, so don't set it until after the scroller has been created.
-	wz_list_set_item_height(list, renderer->measure_list_item_height(renderer, list));
 
 	return list;
 }

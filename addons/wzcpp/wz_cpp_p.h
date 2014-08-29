@@ -107,7 +107,7 @@ struct LabelPrivate : public WidgetPrivate
 
 struct ListPrivate : public WidgetPrivate
 {
-	ListPrivate(wzRenderer *renderer);
+	ListPrivate();
 	~ListPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
 	virtual wzWidget *getWidget() { return (wzWidget *)list; }
