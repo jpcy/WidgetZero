@@ -315,7 +315,7 @@ struct wzList *wz_list_create(struct wzRenderer *renderer)
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
 
-	list->scroller = wz_scroller_create(renderer);
+	list->scroller = wz_scroller_create();
 	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
 	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);

@@ -139,7 +139,7 @@ struct RadioButtonPrivate : public WidgetPrivate
 
 struct ScrollerPrivate : public WidgetPrivate
 {
-	ScrollerPrivate(wzRenderer *renderer);
+	ScrollerPrivate();
 	~ScrollerPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
 	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }

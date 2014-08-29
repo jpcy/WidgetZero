@@ -300,11 +300,11 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Scroller *scroller1 = new wz::Scroller(renderer);
+		wz::Scroller *scroller1 = new wz::Scroller();
 		scroller1->setType(WZ_SCROLLER_VERTICAL)->setMaxValue(100)->setValue(20)->setStepValue(10)->setHeight(200);
 		layout->add(scroller1);
 
-		wz::Scroller *scroller2 = new wz::Scroller(renderer);
+		wz::Scroller *scroller2 = new wz::Scroller();
 		scroller2->setType(WZ_SCROLLER_HORIZONTAL)->setMaxValue(100)->setValue(50)->setStepValue(10)->setWidth(200);
 		layout->add(scroller2);
 	}

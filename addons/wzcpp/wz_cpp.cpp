@@ -767,10 +767,9 @@ RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 
 //------------------------------------------------------------------------------
 
-ScrollerPrivate::ScrollerPrivate(wzRenderer *renderer)
+ScrollerPrivate::ScrollerPrivate()
 {
-	WZ_ASSERT(renderer);
-	scroller = wz_scroller_create(renderer);
+	scroller = wz_scroller_create();
 	wz_widget_set_metadata((wzWidget *)scroller, this);
 }
 
@@ -784,9 +783,9 @@ ScrollerPrivate::~ScrollerPrivate()
 
 //------------------------------------------------------------------------------
 
-Scroller::Scroller(wzRenderer *renderer)
+Scroller::Scroller()
 {
-	p = new ScrollerPrivate(renderer);
+	p = new ScrollerPrivate();
 }
 
 Scroller::~Scroller()

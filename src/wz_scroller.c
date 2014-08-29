@@ -372,14 +372,11 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller);
 }
 
-struct wzScroller *wz_scroller_create(struct wzRenderer *renderer)
+struct wzScroller *wz_scroller_create()
 {
-	struct wzScroller *scroller;
-
-	scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
+	struct wzScroller *scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
-	scroller->base.renderer = renderer;
 	scroller->base.vtable.destroy = wz_scroller_destroy;
 	scroller->base.vtable.measure = wz_scroller_measure;
 	scroller->base.vtable.draw = wz_scroller_draw;

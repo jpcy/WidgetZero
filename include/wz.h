@@ -480,7 +480,7 @@ typedef enum
 }
 wzScrollerType;
 
-struct wzScroller *wz_scroller_create(struct wzRenderer *renderer);
+struct wzScroller *wz_scroller_create();
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
 wzScrollerType wz_scroller_get_type(struct wzScroller *scroller);
 int wz_scroller_get_value(const struct wzScroller *scroller);

@@ -237,7 +237,7 @@ public:
 class Scroller : public Widget
 {
 public:
-	Scroller(wzRenderer *renderer);
+	Scroller();
 	~Scroller();
 	Scroller *setType(wzScrollerType type);
 	Scroller *setValue(int value);
