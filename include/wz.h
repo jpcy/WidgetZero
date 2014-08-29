@@ -525,7 +525,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 
 typedef bool (*wzTextEditValidateTextCallback)(const char *text);
 
-struct wzTextEdit *wz_text_edit_create(struct wzRenderer *renderer, bool multiline, int maximumTextLength);
+struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength);
 void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback);
 bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);

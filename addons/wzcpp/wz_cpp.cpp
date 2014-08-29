@@ -977,10 +977,9 @@ Tab *Tabbed::addTab(Tab *tab)
 
 //------------------------------------------------------------------------------
 
-TextEditPrivate::TextEditPrivate(wzRenderer *renderer, bool multiline)
+TextEditPrivate::TextEditPrivate(bool multiline)
 {
-	WZ_ASSERT(renderer);
-	textEdit = wz_text_edit_create(renderer, multiline, 256);
+	textEdit = wz_text_edit_create(multiline, 256);
 	wz_widget_set_metadata((wzWidget *)textEdit, this);
 }
 
@@ -994,14 +993,14 @@ TextEditPrivate::~TextEditPrivate()
 
 //------------------------------------------------------------------------------
 
-TextEdit::TextEdit(wzRenderer *renderer, bool multiline)
+TextEdit::TextEdit(bool multiline)
 {
-	p = new TextEditPrivate(renderer, multiline);
+	p = new TextEditPrivate(multiline);
 }
 
-TextEdit::TextEdit(wzRenderer *renderer, const std::string &text, bool multiline)
+TextEdit::TextEdit(const std::string &text, bool multiline)
 {
-	p = new TextEditPrivate(renderer, multiline);
+	p = new TextEditPrivate(multiline);
 	setText(text);
 }
 

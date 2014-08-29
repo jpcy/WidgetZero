@@ -453,6 +453,13 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 	widget->renderer->draw_text_edit(widget->renderer, clip, (struct wzTextEdit *)widget);
 }
 
+static void wz_text_edit_renderer_changed(struct wzWidget *widget)
+{
+	struct wzTextEdit *textEdit = (struct wzTextEdit *)widget;
+	WZ_ASSERT(textEdit);
+	textEdit->border = widget->renderer->get_text_edit_border(widget->renderer, textEdit);
+}
+
 static void wz_text_edit_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzTextEdit *textEdit;
@@ -797,16 +804,16 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzTextEdit *wz_text_edit_create(struct wzRenderer *renderer, bool multiline, int maximumTextLength)
+struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength)
 {
 	struct wzTextEdit *textEdit;
 
 	textEdit = (struct wzTextEdit *)malloc(sizeof(struct wzTextEdit) + maximumTextLength);
 	memset(textEdit, 0, sizeof(struct wzTextEdit) + maximumTextLength);
 	textEdit->base.type = WZ_TYPE_TEXT_EDIT;
-	textEdit->base.renderer = renderer;
 	textEdit->base.vtable.measure = wz_text_edit_measure;
 	textEdit->base.vtable.draw = wz_text_edit_draw;
+	textEdit->base.vtable.renderer_changed = wz_text_edit_renderer_changed;
 	textEdit->base.vtable.set_rect = wz_text_edit_set_rect;
 	textEdit->base.vtable.mouse_button_down = wz_text_edit_mouse_button_down;
 	textEdit->base.vtable.mouse_button_up = wz_text_edit_mouse_button_up;
@@ -826,7 +833,6 @@ struct wzTextEdit *wz_text_edit_create(struct wzRenderer *renderer, bool multili
 
 	textEdit->multiline = multiline;
 	textEdit->maximumTextLength = maximumTextLength;
-	textEdit->border = renderer->get_text_edit_border(renderer, textEdit);
 	return textEdit;
 }
 

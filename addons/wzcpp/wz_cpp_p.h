@@ -187,7 +187,7 @@ struct TabbedPrivate : public WidgetPrivate
 
 struct TextEditPrivate : public WidgetPrivate
 {
-	TextEditPrivate(wzRenderer *renderer, bool multiline);
+	TextEditPrivate(bool multiline);
 	~TextEditPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
 	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }

@@ -289,8 +289,8 @@ public:
 class TextEdit : public Widget
 {
 public:
-	TextEdit(wzRenderer *renderer, bool multiline);
-	TextEdit(wzRenderer *renderer, const std::string &text, bool multiline);
+	TextEdit(bool multiline);
+	TextEdit(const std::string &text, bool multiline);
 	~TextEdit();
 	TextEdit *setText(const std::string &text);
 };
