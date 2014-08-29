@@ -249,7 +249,7 @@ public:
 class Spinner : public Widget
 {
 public:
-	Spinner(wzRenderer *renderer);
+	Spinner();
 	~Spinner();
 	Spinner *setValue(int value);
 	int getValue() const;

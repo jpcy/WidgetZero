@@ -494,7 +494,7 @@ void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale);
 void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *rect, bool *hover, bool *pressed);
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
 
-struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer);
+struct wzSpinner *wz_spinner_create();
 int wz_spinner_get_value(const struct wzSpinner *spinner);
 void wz_spinner_set_value(struct wzSpinner *spinner, int value);
 

@@ -317,11 +317,11 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Spinner *spinner = new wz::Spinner(renderer);
+		wz::Spinner *spinner = new wz::Spinner();
 		spinner->setValue(42);
 		layout->add(spinner);
 
-		wz::Spinner *spinner2 = new wz::Spinner(renderer);
+		wz::Spinner *spinner2 = new wz::Spinner();
 		spinner2->setFont("visitor1", 32);
 		layout->add(spinner2);
 	}

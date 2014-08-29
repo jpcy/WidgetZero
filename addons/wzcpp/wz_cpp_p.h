@@ -149,7 +149,7 @@ struct ScrollerPrivate : public WidgetPrivate
 
 struct SpinnerPrivate : public WidgetPrivate
 {
-	SpinnerPrivate(wzRenderer *renderer);
+	SpinnerPrivate();
 	~SpinnerPrivate();
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)spinner; }
 	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }

@@ -822,10 +822,9 @@ int Scroller::getValue() const
 
 //------------------------------------------------------------------------------
 
-SpinnerPrivate::SpinnerPrivate(wzRenderer *renderer)
+SpinnerPrivate::SpinnerPrivate()
 {
-	WZ_ASSERT(renderer);
-	spinner = wz_spinner_create(renderer);
+	spinner = wz_spinner_create();
 	wz_widget_set_metadata((wzWidget *)spinner, this);
 }
 
@@ -839,9 +838,9 @@ SpinnerPrivate::~SpinnerPrivate()
 
 //------------------------------------------------------------------------------
 
-Spinner::Spinner(wzRenderer *renderer)
+Spinner::Spinner()
 {
-	p = new SpinnerPrivate(renderer);
+	p = new SpinnerPrivate();
 }
 
 Spinner::~Spinner()

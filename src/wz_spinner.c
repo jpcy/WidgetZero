@@ -53,6 +53,10 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 	wzRect rect, textEditRect, buttonRect;
 
 	WZ_ASSERT(spinner);
+
+	if (!spinner->base.renderer)
+		return; // Not fully initialized yet.
+
 	rect = wz_widget_get_rect((const struct wzWidget *)spinner);
 
 	// Update text edit rect.
@@ -107,6 +111,22 @@ static void wz_spinner_draw(struct wzWidget *widget, wzRect clip)
 	widget->renderer->draw_spinner(widget->renderer, clip, (struct wzSpinner *)widget);
 }
 
+static void wz_spinner_renderer_changed(struct wzWidget *widget)
+{
+	struct wzSpinner *spinner;
+	wzBorder textEditBorder;
+
+	WZ_ASSERT(widget);
+	spinner = (struct wzSpinner *)widget;
+
+	// Shrink the text edit border to exclude the increment and decrement buttons.
+	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
+	textEditBorder.right += widget->renderer->get_spinner_button_width(widget->renderer);
+	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
+
+	wz_spinner_update_child_rects(spinner);
+}
+
 static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	WZ_ASSERT(widget);
@@ -122,28 +142,20 @@ static void wz_spinner_font_changed(struct wzWidget *widget, const char *fontFac
 	wz_widget_set_font((struct wzWidget *)spinner->textEdit, fontFace, fontSize);
 }
 
-struct wzSpinner *wz_spinner_create(struct wzRenderer *renderer)
+struct wzSpinner *wz_spinner_create()
 {
-	struct wzSpinner *spinner;
-	wzBorder textEditBorder;
-
-	spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
+	struct wzSpinner *spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
 	memset(spinner, 0, sizeof(struct wzSpinner));
 	spinner->base.type = WZ_TYPE_SPINNER;
-	spinner->base.renderer = renderer;
 	spinner->base.vtable.measure = wz_spinner_measure;
 	spinner->base.vtable.draw = wz_spinner_draw;
+	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
 	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 	spinner->base.vtable.font_changed = wz_spinner_font_changed;
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
-
-	// Shrink the text edit border to exclude the increment and decrement buttons.
-	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
-	textEditBorder.right += renderer->get_spinner_button_width(renderer);
-	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
 	spinner->decrementButton = wz_button_create();
 	wz_button_set_label(spinner->decrementButton, "-");
