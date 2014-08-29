@@ -308,7 +308,6 @@ void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
 void wz_main_window_draw(struct wzMainWindow *mainWindow);
-struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab);
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
 const struct wzWidget *wz_main_window_get_keyboard_focus_widget(const struct wzMainWindow *mainWindow);
 void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition);

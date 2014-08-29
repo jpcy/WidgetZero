@@ -167,13 +167,6 @@ static void wz_main_window_dock_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-struct wzWindow *wz_main_window_get_dock_tab_window(struct wzMainWindow *mainWindow, struct wzButton *tab)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(tab);
-	return (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)tab);
-}
-
 static void wz_main_window_refresh_dock_tab_bar(struct wzMainWindow *mainWindow, wzDockPosition dockPosition)
 {
 	struct wzTabBar *tabBar;
