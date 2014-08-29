@@ -326,7 +326,7 @@ struct wzList *wz_list_create()
 
 	list->scroller = wz_scroller_create();
 	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
-	wz_widget_add_child_widget_internal((struct wzWidget *)list, (struct wzWidget *)list->scroller);
+	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
 

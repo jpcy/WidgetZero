@@ -150,6 +150,7 @@ public:
 	Frame(wzRenderer *renderer);
 	~Frame();
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 };
 
 class GroupBox : public Widget
@@ -161,6 +162,7 @@ public:
 	const char *getLabel() const;
 	GroupBox *setLabel(const std::string &label);
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 };
 
 class Label : public Widget
@@ -265,6 +267,7 @@ public:
 	StackLayout *setSpacing(int spacing);
 	int getSpacing() const;
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 };
 
 class Tab
@@ -274,6 +277,7 @@ public:
 	~Tab();
 	Tab *setLabel(const std::string &label);
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 
 	TabPrivate *p;
 };
@@ -304,6 +308,7 @@ public:
 	const char *getTitle() const;
 	Window *setTitle(const std::string &title);
 	Widget *add(Widget *widget);
+	void remove(Widget *widget);
 };
 
 } // namespace wz

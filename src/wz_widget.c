@@ -575,7 +575,7 @@ static void wz_widget_set_renderer(struct wzWidget *widget, struct wzRenderer *r
 	}
 }
 
-// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget_internal.
+// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
 // Example: scroller does this with it's button children.
 static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widget, struct wzMainWindow *mainWindow, struct wzWindow *window)
 {
@@ -597,49 +597,6 @@ static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widg
 
 		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
 	}
-}
-
-void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
-{
-	WZ_ASSERT(widget);
-	WZ_ASSERT(child);
-
-	// MainWindows cannot be added as children.
-	if (child->type == WZ_TYPE_MAIN_WINDOW)
-		return;
-
-	// Windows can only be children of mainWindow.
-	if (child->type == WZ_TYPE_WINDOW && widget->type != WZ_TYPE_MAIN_WINDOW)
-		return;
-
-	// Special case for add windows to mainWindow: add directly, not to the content widget.
-	if (wz_widget_get_type(widget) == WZ_TYPE_MAIN_WINDOW && wz_widget_get_type(child) == WZ_TYPE_WINDOW)
-	{
-		wz_widget_add_child_widget_internal(widget, child);
-		return;
-	}
-
-	wz_widget_add_child_widget_internal(wz_widget_get_content_widget(widget), child);
-}
-
-void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
-{
-	wz_widget_remove_child_widget_internal(wz_widget_get_content_widget(widget), child);
-}
-
-void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
-{
-	int n;
-
-	WZ_ASSERT(widget);
-	n = wz_arr_len(widget->children);
-	wz_widget_remove_child_widget(widget, child);
-
-	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see wz_widget_remove_child_widget.
-	if (n == wz_arr_len(widget->children))
-		return;
-
-	wz_widget_destroy(child);
 }
 
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
@@ -670,18 +627,6 @@ struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->window;
-}
-
-struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->vtable.get_content_widget)
-	{
-		return widget->vtable.get_content_widget(widget);
-	}
-
-	return widget;
 }
 
 /*
@@ -748,7 +693,7 @@ INTERNAL WIDGET FUNCTIONS
 ================================================================================
 */
 
-void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
 	WZ_ASSERT(widget);
 	WZ_ASSERT(child);
@@ -786,7 +731,7 @@ void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidge
 	}
 }
 
-void wz_widget_remove_child_widget_internal(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
 	int i, deleteIndex;
 
@@ -814,6 +759,21 @@ void wz_widget_remove_child_widget_internal(struct wzWidget *widget, struct wzWi
 	child->mainWindow = NULL;
 	child->parent = NULL;
 	child->window = NULL;
+}
+
+void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
+{
+	int n;
+
+	WZ_ASSERT(widget);
+	n = wz_arr_len(widget->children);
+	wz_widget_remove_child_widget(widget, child);
+
+	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see wz_widget_remove_child_widget.
+	if (n == wz_arr_len(widget->children))
+		return;
+
+	wz_widget_destroy(child);
 }
 
 void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y)

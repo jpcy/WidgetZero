@@ -32,12 +32,6 @@ struct wzGroupBox
 	char label[128];
 };
 
-static struct wzWidget *wz_group_box_get_content_widget(struct wzWidget *widget)
-{
-	WZ_ASSERT(widget);
-	return ((struct wzGroupBox *)widget)->content;
-}
-
 static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 {
 	WZ_ASSERT(widget);
@@ -56,7 +50,6 @@ struct wzGroupBox *wz_group_box_create()
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
 	memset(groupBox, 0, sizeof(struct wzGroupBox));
 	groupBox->base.type = WZ_TYPE_GROUP_BOX;
-	groupBox->base.vtable.get_content_widget = wz_group_box_get_content_widget;
 	groupBox->base.vtable.draw = wz_group_box_draw;
 	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
 
@@ -64,7 +57,7 @@ struct wzGroupBox *wz_group_box_create()
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(groupBox->content, 0, sizeof(struct wzWidget));
 	groupBox->content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget_internal((struct wzWidget *)groupBox, groupBox->content);
+	wz_widget_add_child_widget((struct wzWidget *)groupBox, groupBox->content);
 
 	return groupBox;
 }
@@ -85,4 +78,22 @@ const char *wz_group_box_get_label(const struct wzGroupBox *groupBox)
 {
 	WZ_ASSERT(groupBox);
 	return groupBox->label;
+}
+
+void wz_group_box_add(struct wzGroupBox *groupBox, struct wzWidget *widget)
+{
+	WZ_ASSERT(groupBox);
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget(groupBox->content, widget);
+}
+
+void wz_group_box_remove(struct wzGroupBox *groupBox, struct wzWidget *widget)
+{
+	WZ_ASSERT(groupBox);
+	WZ_ASSERT(widget);
+	wz_widget_remove_child_widget(groupBox->content, widget);
 }

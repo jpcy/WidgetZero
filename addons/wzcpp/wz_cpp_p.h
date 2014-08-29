@@ -38,10 +38,6 @@ struct WidgetPrivate
 	virtual void draw(wzRect clip) {}
 	virtual void handleEvent(wzEvent *e) {}
 
-	void add(Widget *widget);
-	void remove(Widget *widget);
-	
-	std::vector<Widget *> children;
 	std::vector<IEventHandler *> eventHandlers;
 };
 

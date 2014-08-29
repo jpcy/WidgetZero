@@ -233,7 +233,7 @@ struct wzTabBar *wz_tab_bar_create()
 	tabBar->decrementButton = wz_button_create();
 	wz_button_set_label(tabBar->decrementButton, "<");
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, false);
 	wz_widget_set_draw_priority((struct wzWidget *)tabBar->decrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
@@ -241,7 +241,7 @@ struct wzTabBar *wz_tab_bar_create()
 	tabBar->incrementButton = wz_button_create();
 	wz_button_set_label(tabBar->incrementButton, ">");
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, false);
 	wz_widget_set_draw_priority((struct wzWidget *)tabBar->incrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
@@ -274,7 +274,7 @@ struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar)
 	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
 	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabBar, (struct wzWidget *)tab);
+	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
 	wz_arr_push(tabBar->tabs, tab);
 	wz_widget_set_rect_internal((struct wzWidget *)tab, rect);
 

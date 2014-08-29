@@ -289,3 +289,21 @@ int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout)
 	WZ_ASSERT(stackLayout);
 	return stackLayout->spacing;
 }
+
+void wz_stack_layout_add(struct wzStackLayout *stackLayout, struct wzWidget *widget)
+{
+	WZ_ASSERT(stackLayout);
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget((struct wzWidget *)stackLayout, widget);
+}
+
+void wz_stack_layout_remove(struct wzStackLayout *stackLayout, struct wzWidget *widget)
+{
+	WZ_ASSERT(stackLayout);
+	WZ_ASSERT(widget);
+	wz_widget_remove_child_widget((struct wzWidget *)stackLayout, widget);
+}

@@ -70,6 +70,28 @@ static struct wzWidget *wz_tab_page_create(struct wzRenderer *renderer)
 	return page;
 }
 
+void wz_tab_page_add(struct wzWidget *tabPage, struct wzWidget *widget)
+{
+	WZ_ASSERT(tabPage);
+	WZ_ASSERT(widget);
+
+	if (tabPage->type != WZ_TYPE_TAB_PAGE || widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget(tabPage, widget);
+}
+
+void wz_tab_page_remove(struct wzWidget *tabPage, struct wzWidget *widget)
+{
+	WZ_ASSERT(tabPage);
+	WZ_ASSERT(widget);
+
+	if (tabPage->type != WZ_TYPE_TAB_PAGE)
+		return;
+
+	wz_widget_remove_child_widget(tabPage, widget);
+}
+
 /*
 ================================================================================
 
@@ -135,7 +157,7 @@ struct wzTabbed *wz_tabbed_create()
 
 	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
+	wz_widget_add_child_widget((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
 
 	return tabbed;
 }
@@ -155,7 +177,7 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	// Add the page widget.
 	*page = wz_tab_page_create(tabbed->base.renderer);
 	wz_widget_set_visible(*page, wz_tab_bar_get_selected_tab(tabbed->tabBar) == *tab);
-	wz_widget_add_child_widget_internal((struct wzWidget *)tabbed, *page);
+	wz_widget_add_child_widget((struct wzWidget *)tabbed, *page);
 
 	// Set the page widget rect.
 	tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);

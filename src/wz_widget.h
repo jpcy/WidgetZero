@@ -57,8 +57,6 @@ typedef struct
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
 	wzRect (*get_children_clip_rect)(struct wzWidget *widget);
-
-	struct wzWidget *(*get_content_widget)(struct wzWidget *widget);
 }
 wzWidgetVtable;
 
@@ -125,7 +123,7 @@ struct wzWidget
 
 	struct wzMainWindow *mainWindow;
 
-	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in wz_widget_add_child_widget_internal.
+	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in wz_widget_add_child_widget.
 	struct wzWindow *window;
 
 	struct wzWidget *parent;
@@ -145,8 +143,9 @@ enum
 	WZ_NUM_COMPASS_POINTS
 };
 
-void wz_widget_add_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
-void wz_widget_remove_child_widget_internal(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y);
 void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position);

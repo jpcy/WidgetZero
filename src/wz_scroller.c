@@ -381,17 +381,17 @@ struct wzScroller *wz_scroller_create()
 	scroller->decrementButton = wz_button_create();
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->decrementButton, wz_scroller_decrement_button_draw);
 	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	wz_scroller_decrement_button_update_rect(scroller);
 
 	scroller->incrementButton = wz_button_create();
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->incrementButton, wz_scroller_increment_button_draw);
 	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);
 	wz_scroller_increment_button_update_rect(scroller);
 
 	scroller->nub = wz_scroller_nub_create(scroller);
-	wz_widget_add_child_widget_internal((struct wzWidget *)scroller, (struct wzWidget *)scroller->nub);
+	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->nub);
 
 	return scroller;
 }

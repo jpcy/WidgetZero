@@ -905,7 +905,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	// Don't do this if the inherited widget draw priority is higher than window draw priority.
 	if (widget->window && wz_widget_calculate_inherited_draw_priority(widget) < WZ_DRAW_PRIORITY_WINDOW)
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_widget_get_content_widget((struct wzWidget *)widget->window)));
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}
 	else
 	{
@@ -1159,12 +1159,6 @@ static void wz_main_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_main_window_update_content_rect(mainWindow);
 }
 
-static struct wzWidget *wz_main_window_get_content_widget(struct wzWidget *widget)
-{
-	WZ_ASSERT(widget);
-	return ((struct wzMainWindow *)widget)->content;
-}
-
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 {
 	struct wzMainWindow *mainWindow;
@@ -1177,13 +1171,12 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	mainWindow->base.renderer = renderer;
 	mainWindow->base.mainWindow = mainWindow;
 	mainWindow->base.vtable.set_rect = wz_main_window_set_rect;
-	mainWindow->base.vtable.get_content_widget = wz_main_window_get_content_widget;
 
 	// Create content widget.
 	mainWindow->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(mainWindow->content, 0, sizeof(struct wzWidget));
 	mainWindow->content->mainWindow = mainWindow;
-	wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, mainWindow->content);
+	wz_widget_add_child_widget((struct wzWidget *)mainWindow, mainWindow->content);
 
 	// Create dock icon widgets.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -1195,7 +1188,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
 		wz_widget_set_size_internal((struct wzWidget *)mainWindow->dockIcons[i], renderer->get_dock_icon_size(renderer));
 		wz_widget_set_visible(widget, false);
-		wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, widget);
+		wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
 	}
 
 	wz_main_window_update_dock_icon_positions(mainWindow);
@@ -1206,7 +1199,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
 	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
-	wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, widget);
+	wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
 
 	// Create dock tab bars.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
@@ -1215,7 +1208,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 		mainWindow->dockTabBars[i] = tabBar;
 		wz_widget_set_visible((struct wzWidget *)tabBar, false);
 		wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
-		wz_widget_add_child_widget_internal((struct wzWidget *)mainWindow, (struct wzWidget *)tabBar);
+		wz_widget_add_child_widget((struct wzWidget *)mainWindow, (struct wzWidget *)tabBar);
 		wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
 
 		// Override scroll button draw priority.
@@ -1230,6 +1223,41 @@ void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventC
 {
 	WZ_ASSERT(mainWindow);
 	mainWindow->handle_event = callback;
+}
+
+void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget)
+{
+	WZ_ASSERT(mainWindow);
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW)
+		return;
+
+	// Special case for windows: add directly, not to the content widget.
+	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
+	{
+		wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
+	}
+	else
+	{
+		wz_widget_add_child_widget(mainWindow->content, widget);
+	}
+}
+
+void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *widget)
+{
+	WZ_ASSERT(mainWindow);
+	WZ_ASSERT(widget);
+
+	// Special case for windows: remove directly, not from the content widget.
+	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
+	{
+		wz_widget_remove_child_widget((struct wzWidget *)mainWindow, widget);
+	}
+	else
+	{
+		wz_widget_remove_child_widget(mainWindow->content, widget);
+	}
 }
 
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow)

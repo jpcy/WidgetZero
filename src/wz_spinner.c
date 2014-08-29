@@ -155,19 +155,19 @@ struct wzSpinner *wz_spinner_create()
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
-	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
+	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
 
 	spinner->decrementButton = wz_button_create();
 	wz_button_set_label(spinner->decrementButton, "-");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->decrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
 	spinner->incrementButton = wz_button_create();
 	wz_button_set_label(spinner->incrementButton, "+");
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->incrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
-	wz_widget_add_child_widget_internal((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);
+	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);
 
 	wz_spinner_update_child_rects(spinner);
 

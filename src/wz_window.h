@@ -28,6 +28,8 @@ SOFTWARE.
 
 struct wzWindow;
 
+struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
+
 // Tell the window it's being docked.
 void wz_window_dock(struct wzWindow *window);
 

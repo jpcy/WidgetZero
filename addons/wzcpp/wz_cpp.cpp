@@ -55,42 +55,12 @@ static void HandleEvent(wzEvent *e)
 
 WidgetPrivate::~WidgetPrivate()
 {
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		delete children[i];
-	}
-
-	children.clear();
-
 	for (size_t i = 0; i < eventHandlers.size(); i++)
 	{
 		delete eventHandlers[i];
 	}
 
 	eventHandlers.clear();
-}
-
-void WidgetPrivate::add(Widget *widget)
-{
-	wz_widget_add_child_widget(getWidget(), widget->p->getWidget());
-	children.push_back(widget);
-}
-
-void WidgetPrivate::remove(Widget *widget)
-{
-	size_t i;
-
-	for (i = 0; i < children.size(); i++)
-	{
-		if (children[i] == widget)
-			break;
-	}
-
-	if (i < children.size())
-	{
-		wz_widget_remove_child_widget(getWidget(), widget->p->getWidget());
-		children.erase(children.begin() + i);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -404,8 +374,13 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	p->add(widget);
+	wz_frame_add((wzFrame *)p->getWidget(), widget->p->getWidget());
 	return widget;
+}
+
+void Frame::remove(Widget *widget)
+{
+	wz_frame_remove((wzFrame *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -456,8 +431,13 @@ GroupBox *GroupBox::setLabel(const std::string &label)
 
 Widget *GroupBox::add(Widget *widget)
 {
-	p->add(widget);
+	wz_group_box_add((wzGroupBox *)p->getWidget(), widget->p->getWidget());
 	return widget;
+}
+
+void GroupBox::remove(Widget *widget)
+{
+	wz_group_box_remove((wzGroupBox *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -672,13 +652,13 @@ wzCursor MainWindow::getCursor() const
 
 Widget *MainWindow::add(Widget *widget)
 {
-	p->add(widget);
+	wz_main_window_add(p->mainWindow, widget->p->getWidget());
 	return widget;
 }
 
 void MainWindow::remove(Widget *widget)
 {
-	p->remove(widget);
+	wz_main_window_remove(p->mainWindow, widget->p->getWidget());
 }
 
 void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
@@ -911,8 +891,13 @@ int StackLayout::getSpacing() const
 
 Widget *StackLayout::add(Widget *widget)
 {
-	p->add(widget);
+	wz_stack_layout_add((wzStackLayout *)p->getWidget(), widget->p->getWidget());
 	return widget;
+}
+
+void StackLayout::remove(Widget *widget)
+{
+	wz_stack_layout_remove((wzStackLayout *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -935,8 +920,13 @@ Tab *Tab::setLabel(const std::string &label)
 
 Widget *Tab::add(Widget *widget)
 {
-	wz_widget_add_child_widget(p->page, widget->p->getWidget());
+	wz_tab_page_add(p->page, widget->p->getWidget());
 	return widget;
+}
+
+void Tab::remove(Widget *widget)
+{
+	wz_tab_page_remove(p->page, widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -1060,8 +1050,13 @@ Window *Window::setTitle(const std::string &title)
 
 Widget *Window::add(Widget *widget)
 {
-	p->add(widget);
+	wz_window_add((wzWindow *)p->getWidget(), widget->p->getWidget());
 	return widget;
+}
+
+void Window::remove(Widget *widget)
+{
+	wz_window_remove((wzWindow *)p->getWidget(), widget->p->getWidget());
 }
 
 } // namespace wz

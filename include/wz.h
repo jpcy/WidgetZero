@@ -308,6 +308,8 @@ void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
 void wz_main_window_draw(struct wzMainWindow *mainWindow);
+void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget);
+void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
 const struct wzWidget *wz_main_window_get_keyboard_focus_widget(const struct wzMainWindow *mainWindow);
 void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition);
@@ -358,9 +360,6 @@ void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_metadata(struct wzWidget *widget);
 void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw);
 void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure);
-void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
-void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child);
-void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);
 
 // Determine whether the widget is an descendant of a widget with the provided type.
 bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
@@ -369,14 +368,14 @@ struct wzWidget *wz_widget_get_parent(struct wzWidget *widget);
 
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
-struct wzWidget *wz_widget_get_content_widget(struct wzWidget *widget);
-
 struct wzWindow *wz_window_create();
 int wz_window_get_header_height(const struct wzWindow *window);
 int wz_window_get_border_size(const struct wzWindow *window);
 wzRect wz_window_get_header_rect(const struct wzWindow *window);
 void wz_window_set_title(struct wzWindow *window, const char *title);
 const char *wz_window_get_title(const struct wzWindow *window);
+void wz_window_add(struct wzWindow *window, struct wzWidget *widget);
+void wz_window_remove(struct wzWindow *window, struct wzWidget *widget);
 
 typedef enum
 {
@@ -425,10 +424,14 @@ struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
 struct wzFrame *wz_frame_create();
+void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget);
+void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget);
 
 struct wzGroupBox *wz_group_box_create();
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
+void wz_group_box_add(struct wzGroupBox *groupBox, struct wzWidget *widget);
+void wz_group_box_remove(struct wzGroupBox *groupBox, struct wzWidget *widget);
 
 struct wzLabel *wz_label_create();
 void wz_label_set_multiline(struct wzLabel *label, bool multiline);
@@ -508,6 +511,8 @@ struct wzStackLayout *wz_stack_layout_create();
 void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction);
 void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
+void wz_stack_layout_add(struct wzStackLayout *stackLayout, struct wzWidget *widget);
+void wz_stack_layout_remove(struct wzStackLayout *stackLayout, struct wzWidget *widget);
 
 struct wzTabBar *wz_tab_bar_create();
 struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar);
@@ -521,6 +526,8 @@ void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallbac
 
 struct wzTabbed *wz_tabbed_create();
 void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
+void wz_tab_page_add(struct wzWidget *tabPage, struct wzWidget *widget);
+void wz_tab_page_remove(struct wzWidget *tabPage, struct wzWidget *widget);
 
 typedef bool (*wzTextEditValidateTextCallback)(const char *text);
 

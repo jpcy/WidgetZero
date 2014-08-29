@@ -31,12 +31,6 @@ struct wzFrame
 	struct wzWidget *content;
 };
 
-static struct wzWidget *wz_frame_get_content_widget(struct wzWidget *widget)
-{
-	WZ_ASSERT(widget);
-	return ((struct wzFrame *)widget)->content;
-}
-
 struct wzFrame *wz_frame_create()
 {
 	struct wzFrame *frame;
@@ -44,13 +38,30 @@ struct wzFrame *wz_frame_create()
 	frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
 	memset(frame, 0, sizeof(struct wzFrame));
 	frame->base.type = WZ_TYPE_FRAME;
-	frame->base.vtable.get_content_widget = wz_frame_get_content_widget;
 
 	// Create content widget.
 	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(frame->content, 0, sizeof(struct wzWidget));
 	frame->content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget_internal((struct wzWidget *)frame, frame->content);
+	wz_widget_add_child_widget((struct wzWidget *)frame, frame->content);
 
 	return frame;
+}
+
+void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
+{
+	WZ_ASSERT(frame);
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget(frame->content, widget);
+}
+
+void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget)
+{
+	WZ_ASSERT(frame);
+	WZ_ASSERT(widget);
+	wz_widget_remove_child_widget(frame->content, widget);
 }
