@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_GL_H_
-#define _WZ_GL_H_
+#ifndef WZ_GL_H
+#define WZ_GL_H
 
 #include <GL/glew.h>
 #include <nanovg.h>
@@ -53,4 +53,4 @@ void wz_nanovg_draw_image(struct NVGcontext *vg, wzRect rect, int image);
 } // extern "C"
 #endif
 
-#endif // _WZ_GL_H_
+#endif // WZ_GL_H

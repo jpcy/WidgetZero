@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_MAIN_WINDOW_H_
-#define _WZ_MAIN_WINDOW_H_
+#ifndef WZ_MAIN_WINDOW_H
+#define WZ_MAIN_WINDOW_H
 
 #include <wz.h>
 
@@ -52,4 +52,4 @@ void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWind
 
 void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
 
-#endif // _WZ_MAIN_WINDOW_H_
+#endif // WZ_MAIN_WINDOW_H

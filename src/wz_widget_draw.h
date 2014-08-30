@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_WIDGET_DRAW_H_
-#define _WZ_WIDGET_DRAW_H_
+#ifndef WZ_WIDGET_DRAW_H
+#define WZ_WIDGET_DRAW_H
 
 struct wzMainWindow;
 
 void wz_widget_draw_main_window(struct wzMainWindow *mainWindow);
 
-#endif // _WZ_WIDGET_DRAW_H_
+#endif // WZ_WIDGET_DRAW_H

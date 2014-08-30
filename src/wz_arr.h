@@ -10,8 +10,8 @@
    Documentation: http://nothings.org/stb/stb_h.html
    Unit tests:    http://nothings.org/stb/stb.c
 */
-#ifndef _WZ_ARR_H_
-#define _WZ_ARR_H_
+#ifndef WZ_ARR_H
+#define WZ_ARR_H
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -200,4 +200,4 @@ void wz__arr_insertn_(void **p, int size, int loc, int n  STB__PARAMS);
   #define wz__arr_insertn(p,s,i,n) wz__arr_insertn_(p,s,i,n,__FILE__,__LINE__)
 #endif
 
-#endif // _WZ_ARR_H_
+#endif // WZ_ARR_H

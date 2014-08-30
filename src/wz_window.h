@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef _WZ_WINDOW_H_
-#define _WZ_WINDOW_H_
+#ifndef WZ_WINDOW_H
+#define WZ_WINDOW_H
 
 #define WZ_MAX_WINDOWS 256
 
@@ -36,4 +36,4 @@ void wz_window_dock(struct wzWindow *window);
 int wz_window_get_draw_priority(const struct wzWindow *window);
 void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority);
 
-#endif // _WZ_WINDOW_H_
+#endif // WZ_WINDOW_H
