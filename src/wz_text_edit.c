@@ -854,21 +854,6 @@ wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit)
 	return textEdit->border;
 }
 
-void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border)
-{
-	WZ_ASSERT(textEdit);
-	textEdit->border = border;
-}
-
-void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left)
-{
-	WZ_ASSERT(textEdit);
-	textEdit->border.top = top;
-	textEdit->border.right = right;
-	textEdit->border.bottom = bottom;
-	textEdit->border.left = left;
-}
-
 wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit)
 {
 	wzRect textRect;
@@ -1059,4 +1044,18 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 	}
 
 	return position;
+}
+
+/*
+================================================================================
+
+PRIVATE INTERFACE
+
+================================================================================
+*/
+
+void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border)
+{
+	WZ_ASSERT(textEdit);
+	textEdit->border = border;
 }

@@ -339,23 +339,6 @@ struct wzScroller *wz_list_get_scroller(struct wzList *list)
 	return list->scroller;
 }
 
-void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder)
-{
-	WZ_ASSERT(list);
-	list->itemsBorder = itemsBorder;
-	wz_list_update_scroller(list);
-}
-
-void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left)
-{
-	wzBorder border;
-	border.top = top;
-	border.right = right;
-	border.bottom = bottom;
-	border.left = left;
-	wz_list_set_items_border(list, border);
-}
-
 wzBorder wz_list_get_items_border(const struct wzList *list)
 {
 	WZ_ASSERT(list);

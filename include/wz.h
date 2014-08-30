@@ -444,8 +444,6 @@ wzColor wz_label_get_text_color(const struct wzLabel *label);
 typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
 struct wzList *wz_list_create();
-void wz_list_set_items_border(struct wzList *list, wzBorder itemsBorder);
-void wz_list_set_items_border_args(struct wzList *list, int top, int right, int bottom, int left);
 wzBorder wz_list_get_items_border(const struct wzList *list);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 
@@ -535,8 +533,6 @@ struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength);
 void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback);
 bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
 wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
-void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
-void wz_text_edit_set_border_args(struct wzTextEdit *textEdit, int top, int right, int bottom, int left);
 wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit);
 const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
 void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
