@@ -114,7 +114,7 @@ static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip,
 	wzRect rect;
 	
 	image = wz_nanovg_create_image(renderer, (const char *)itemData, &width, &height);
-	rect.x = clip.x + 4;
+	rect.x = clip.x + (int)(clip.w / 2.0f - width / 2.0f);
 	rect.y = clip.y + (int)(clip.h / 2.0f - height / 2.0f);
 	rect.w = width;
 	rect.h = height;
@@ -267,7 +267,7 @@ private:
 		layout->add(list2);
 
 		wz::List *list3 = new wz::List();
-		list3->setItems((uint8_t *)customListData, sizeof(const char *), 3)->setDrawItemCallback(CustomDrawListItemCallback)->setSize(50, 200);
+		list3->setItems((uint8_t *)customListData, sizeof(const char *), 3)->setItemHeight(40)->setDrawItemCallback(CustomDrawListItemCallback)->setSize(50, 200);
 		layout->add(list3);
 	}
 

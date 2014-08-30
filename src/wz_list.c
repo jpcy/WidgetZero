@@ -35,6 +35,7 @@ struct wzList
 	uint8_t *itemData;
 	int itemStride;
 	int itemHeight;
+	bool isItemHeightUserSet;
 	int nItems;
 	int firstItem;
 	int selectedItem;
@@ -107,6 +108,22 @@ static void wz_list_scroller_value_changed(wzEvent *e)
 /*
 ================================================================================
 
+PRIVATE UTILITY FUNCTIONS
+
+================================================================================
+*/
+
+static void wz_list_set_item_height_internal(struct wzList *list, int itemHeight)
+{
+	WZ_ASSERT(list);
+	list->itemHeight = itemHeight;
+	wz_scroller_set_step_value(list->scroller, itemHeight);
+	wz_list_update_scroller(list);
+}
+
+/*
+================================================================================
+
 LIST WIDGET
 
 ================================================================================
@@ -132,7 +149,12 @@ static void wz_list_renderer_changed(struct wzWidget *widget)
 	struct wzList *list = (struct wzList *)widget;
 	WZ_ASSERT(list);
 	list->itemsBorder = widget->renderer->get_list_items_border(widget->renderer, list);
-	wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+
+	// Don't stomp on user set value.
+	if (!list->isItemHeightUserSet)
+	{
+		wz_list_set_item_height_internal(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+	}
 }
 
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
@@ -163,10 +185,11 @@ static void wz_list_font_changed(struct wzWidget *widget, const char *fontFace, 
 	struct wzList *list = (struct wzList *)widget;
 	WZ_ASSERT(widget);
 
-	if (widget->renderer)
+	// Don't stomp on user set value.
+	if (widget->renderer && !list->isItemHeightUserSet)
 	{
-		// Doesn't matter if we can't call this yet, since wz_list_renderer_changed will call it too.
-		wz_list_set_item_height(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+		// Doesn't matter if we can't call this yet (NULL renderer), since wz_list_renderer_changed will call it too.
+		wz_list_set_item_height_internal(list, widget->renderer->measure_list_item_height(widget->renderer, list));
 	}
 }
 
@@ -417,10 +440,8 @@ int wz_list_get_item_stride(const struct wzList *list)
 
 void wz_list_set_item_height(struct wzList *list, int itemHeight)
 {
-	WZ_ASSERT(list);
-	list->itemHeight = itemHeight;
-	wz_scroller_set_step_value(list->scroller, itemHeight);
-	wz_list_update_scroller(list);
+	list->isItemHeightUserSet = true;
+	wz_list_set_item_height_internal(list, itemHeight);
 }
 
 int wz_list_get_item_height(const struct wzList *list)

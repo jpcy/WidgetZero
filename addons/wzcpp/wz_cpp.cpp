@@ -546,6 +546,12 @@ List *List::setSelectedItem(int index)
 	return this;
 }
 
+List *List::setItemHeight(int height)
+{
+	wz_list_set_item_height((wzList *)p->getWidget(), height);
+	return this;
+}
+
 List *List::setDrawItemCallback(wzDrawListItemCallback callback)
 {
 	wz_list_set_draw_item_callback((wzList *)p->getWidget(), callback);
