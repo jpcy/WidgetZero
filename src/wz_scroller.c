@@ -293,9 +293,20 @@ SCROLLER WIDGET
 static void wz_scroller_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzScroller *scroller;
+	wzRect nubRect;
 
 	WZ_ASSERT(widget);
 	scroller = (struct wzScroller *)widget;
+	nubRect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
+
+	if ((scroller->scrollerType == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->scrollerType == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
+	{
+		wz_scroller_set_value(scroller, scroller->value - scroller->stepValue * 3);
+	}
+	else if ((scroller->scrollerType == WZ_SCROLLER_VERTICAL && mouseY > nubRect.y + nubRect.h) || (scroller->scrollerType == WZ_SCROLLER_HORIZONTAL && mouseX > nubRect.x + nubRect.w))
+	{
+		wz_scroller_set_value(scroller, scroller->value + scroller->stepValue * 3);
+	}
 }
 
 static void wz_scroller_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
