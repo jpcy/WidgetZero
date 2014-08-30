@@ -24,11 +24,12 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
+#include "wz_string.h"
 
 struct wzLabel
 {
 	struct wzWidget base;
-	char text[512];
+	wzString text;
 	bool multiline;
 	wzColor textColor;
 	bool isTextColorUserSet;
@@ -57,6 +58,12 @@ static void wz_label_renderer_changed(struct wzWidget *widget)
 	}
 }
 
+static void wz_label_destroy(struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	wz_string_free(((struct wzLabel *)widget)->text);
+}
+
 struct wzLabel *wz_label_create()
 {
 	struct wzLabel *label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
@@ -65,6 +72,8 @@ struct wzLabel *wz_label_create()
 	label->base.vtable.measure = wz_label_measure;
 	label->base.vtable.draw = wz_label_draw;
 	label->base.vtable.renderer_changed = wz_label_renderer_changed;
+	label->base.vtable.destroy = wz_label_destroy;
+	label->text = wz_string_empty();
 	return label;
 }
 
@@ -83,7 +92,7 @@ bool wz_label_get_multiline(const struct wzLabel *label)
 void wz_label_set_text(struct wzLabel *label, const char *text)
 {
 	WZ_ASSERT(label);
-	strcpy(label->text, text);
+	label->text = wz_string_copy(label->text, text);
 	wz_widget_resize_to_measured(&label->base);
 }
 
