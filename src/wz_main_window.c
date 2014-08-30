@@ -155,6 +155,10 @@ static void wz_main_window_dock_tab_bar_tab_changed(wzEvent *e)
 	// Get the window corresponding to the tab.
 	window = (struct wzWindow *)wz_widget_get_internal_metadata((struct wzWidget *)e->tabBar.tab);
 
+	// Internal metadata won't be set yet when first adding a tab.
+	if (window == NULL)
+		return;
+
 	// Set the window to visible, hide all the other windows at this dock position.
 	wz_widget_set_visible((struct wzWidget *)window, true);
 
