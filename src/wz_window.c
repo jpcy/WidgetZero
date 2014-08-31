@@ -26,6 +26,7 @@ SOFTWARE.
 #include <string.h>
 #include "wz_main_window.h"
 #include "wz_widget.h"
+#include "wz_string.h"
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
 
@@ -50,7 +51,7 @@ struct wzWindow
 	int drawPriority;
 	int headerHeight;
 	int borderSize;
-	char title[256];
+	wzString title;
 	
 	struct wzWidget *content;
 
@@ -409,6 +410,13 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_widget_set_rect_internal(window->content, contentRect);
 }
 
+static void wz_window_destroy(struct wzWidget *widget)
+{
+	struct wzWindow *window = (struct wzWindow *)widget;
+	WZ_ASSERT(window);
+	wz_string_free(window->title);
+}
+
 struct wzWindow *wz_window_create()
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
@@ -423,6 +431,8 @@ struct wzWindow *wz_window_create()
 	window->base.vtable.mouse_move = wz_window_mouse_move;
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
+	window->base.vtable.destroy = wz_window_destroy;
+	window->title = wz_string_empty();
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
@@ -458,7 +468,7 @@ wzRect wz_window_get_header_rect(const struct wzWindow *window)
 void wz_window_set_title(struct wzWindow *window, const char *title)
 {
 	WZ_ASSERT(window);
-	strcpy(window->title, title);
+	window->title = wz_string_copy(window->title, title);
 }
 
 const char *wz_window_get_title(const struct wzWindow *window)

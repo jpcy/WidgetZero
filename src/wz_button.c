@@ -25,6 +25,7 @@ SOFTWARE.
 #include <string.h>
 #include "wz_main_window.h"
 #include "wz_widget.h"
+#include "wz_string.h"
 
 typedef enum
 {
@@ -43,8 +44,8 @@ struct wzButton
 	wzButtonSetBehavior setBehavior;
 	wzBorder padding;
 	bool isPaddingUserSet;
-	char label[128];
-	char icon[128];
+	wzString label;
+	wzString icon;
 	bool isPressed;
 	bool isSet;
 	bool *boundValue;
@@ -110,6 +111,8 @@ static void wz_button_destroy(struct wzWidget *widget)
 
 	WZ_ASSERT(widget);
 	button = (struct wzButton *)widget;
+	wz_string_free(button->label);
+	wz_string_free(button->icon);
 	wz_arr_free(button->pressed_callbacks);
 	wz_arr_free(button->clicked_callbacks);
 }
@@ -200,6 +203,8 @@ static struct wzButton *wz_button_create_internal(wzButtonStyle style)
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 	button->style = style;
+	button->label = wz_string_empty();
+	button->icon = wz_string_empty();
 	return button;
 }
 
@@ -240,7 +245,7 @@ void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior set
 void wz_button_set_label(struct wzButton *button, const char *label)
 {
 	WZ_ASSERT(button);
-	strcpy(button->label, label);
+	button->label = wz_string_copy(button->label, label);
 	wz_widget_resize_to_measured(&button->base);
 }
 
@@ -253,7 +258,7 @@ const char *wz_button_get_label(const struct wzButton *button)
 void wz_button_set_icon(struct wzButton *button, const char *icon)
 {
 	WZ_ASSERT(button);
-	strcpy(button->icon, icon);
+	button->icon = wz_string_copy(button->icon, icon);
 	wz_widget_resize_to_measured(&button->base);
 }
 

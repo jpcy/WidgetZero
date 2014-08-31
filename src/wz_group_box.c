@@ -24,12 +24,13 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
+#include "wz_string.h"
 
 struct wzGroupBox
 {
 	struct wzWidget base;
 	struct wzWidget *content;
-	char label[128];
+	wzString label;
 };
 
 static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
@@ -45,6 +46,13 @@ static void wz_group_box_renderer_changed(struct wzWidget *widget)
 	wz_widget_set_margin(groupBox->content, widget->renderer->measure_group_box_margin(widget->renderer, groupBox));
 }
 
+static void wz_group_box_destroy(struct wzWidget *widget)
+{
+	struct wzGroupBox *groupBox = (struct wzGroupBox *)widget;
+	WZ_ASSERT(groupBox);
+	wz_string_free(groupBox->label);
+}
+
 struct wzGroupBox *wz_group_box_create()
 {
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
@@ -52,6 +60,8 @@ struct wzGroupBox *wz_group_box_create()
 	groupBox->base.type = WZ_TYPE_GROUP_BOX;
 	groupBox->base.vtable.draw = wz_group_box_draw;
 	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
+	groupBox->base.vtable.destroy = wz_group_box_destroy;
+	groupBox->label = wz_string_empty();
 
 	// Create content widget.
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
@@ -65,7 +75,7 @@ struct wzGroupBox *wz_group_box_create()
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label)
 {
 	WZ_ASSERT(groupBox);
-	strcpy(groupBox->label, label);
+	groupBox->label = wz_string_copy(groupBox->label, label);
 
 	// Update the margin.
 	if (groupBox->base.renderer)
