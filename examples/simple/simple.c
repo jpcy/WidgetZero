@@ -28,6 +28,9 @@ SOFTWARE.
 #include <wz.h>
 #include <wz_nanovg.h>
 
+#define NANOVG_GL2_IMPLEMENTATION
+#include "nanovg_gl.h"
+
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
@@ -97,7 +100,7 @@ int main(int argc, char **argv)
 		return errorCode;
 
 	// Create the NanoVG renderer.
-	renderer = wz_nanovg_create_renderer("../examples/data", "DejaVuSans", 16.0f);
+	renderer = wz_nanovg_create_renderer(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{

@@ -28,9 +28,6 @@ SOFTWARE.
 #include <wz.h>
 #include <wz_nanovg.h>
 
-#define NANOVG_GL2_IMPLEMENTATION
-#include "nanovg_gl.h"
-
 #define WZ_NANOVG_MAX_PATH 256
 #define WZ_NANOVG_MAX_IMAGES 1024
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
@@ -44,6 +41,7 @@ wzImage;
 
 typedef struct
 {
+	wzNanoVgGlDestroy destroy;
 	struct NVGcontext *vg;
 	bool showTextCursor;
 	wzImage images[WZ_NANOVG_MAX_IMAGES];
@@ -1546,19 +1544,23 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
+struct wzRenderer *wz_nanovg_create_renderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
 {
 	struct wzRenderer *renderer;
 	wzRendererData *rendererData;
+
+	WZ_ASSERT(create);
+	WZ_ASSERT(destroy);
 
 	// Alloc renderer.
 	renderer = malloc(sizeof(struct wzRenderer));
 	rendererData = renderer->data = malloc(sizeof(wzRendererData));
 	memset(rendererData, 0, sizeof(wzRendererData));
+	rendererData->destroy = destroy;
 	rendererData->showTextCursor = true;
 
 	// Init nanovg.
-	rendererData->vg = nvgCreateGL2(0);
+	rendererData->vg = create(0);
 
 	if (!rendererData->vg)
 	{
@@ -1635,7 +1637,7 @@ void wz_nanovg_destroy_renderer(struct wzRenderer *renderer)
 
 		if (rendererData->vg)
 		{
-			nvgDeleteGL2(rendererData->vg);
+			rendererData->destroy(rendererData->vg);
 		}
 
 		free(renderer->data);

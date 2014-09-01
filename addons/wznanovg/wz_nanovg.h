@@ -34,7 +34,10 @@ extern "C" {
 
 struct NVGcontext;
 
-struct wzRenderer *wz_nanovg_create_renderer(const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
+typedef NVGcontext *(*wzNanoVgGlCreate)(int flags);
+typedef void (*wzNanoVgGlDestroy)(NVGcontext* ctx);
+
+struct wzRenderer *wz_nanovg_create_renderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
 void wz_nanovg_destroy_renderer(struct wzRenderer *renderer);
 const char *wz_nanovg_get_error();
 struct NVGcontext *wz_nanovg_get_context(struct wzRenderer *renderer);

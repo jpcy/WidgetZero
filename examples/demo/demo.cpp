@@ -30,6 +30,9 @@ SOFTWARE.
 #include <wz_cpp.h>
 #include <wz_nanovg.h>
 
+#define NANOVG_GL2_IMPLEMENTATION
+#include "nanovg_gl.h"
+
 static const float frameTime = 1000 / 60.0f;
 
 struct BenchmarkSample
@@ -658,7 +661,7 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
 	// Create the NanoVG renderer.
-	wzRenderer *renderer = wz_nanovg_create_renderer("../examples/data", "DejaVuSans", 16.0f);
+	wzRenderer *renderer = wz_nanovg_create_renderer(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
