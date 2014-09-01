@@ -46,6 +46,7 @@ struct wzWindow;
 struct wzWidget;
 struct wzButton;
 struct wzCombo;
+struct wzDummy;
 struct wzFrame;
 struct wzGroupBox;
 struct wzRadioButtonGroup;
@@ -68,6 +69,7 @@ typedef enum
 	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
+	WZ_TYPE_DUMMY,
 	WZ_TYPE_FRAME,
 	WZ_TYPE_GROUP_BOX,
 	WZ_TYPE_LABEL,
@@ -422,6 +424,8 @@ void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback cal
 struct wzCombo *wz_combo_create();
 struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
+
+struct wzDummy *wz_dummy_create();
 
 struct wzFrame *wz_frame_create();
 void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget);
