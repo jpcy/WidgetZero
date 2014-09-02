@@ -78,6 +78,12 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->incrementButton, buttonRect);
 }
 
+static void wz_spinner_decrement_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_spinner_button(widget->renderer, clip, (struct wzSpinner *)widget->parent, (struct wzButton *)widget, true);
+}
+
 static void wz_spinner_decrement_button_clicked(wzEvent *e)
 {
 	struct wzSpinner *spinner;
@@ -87,6 +93,12 @@ static void wz_spinner_decrement_button_clicked(wzEvent *e)
 	WZ_ASSERT(e->base.widget->parent);
 	spinner = (struct wzSpinner *)e->base.widget->parent;
 	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) - 1);
+}
+
+static void wz_spinner_increment_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	WZ_ASSERT(widget);
+	widget->renderer->draw_spinner_button(widget->renderer, clip, (struct wzSpinner *)widget->parent, (struct wzButton *)widget, false);
 }
 
 static void wz_spinner_increment_button_clicked(wzEvent *e)
@@ -159,13 +171,13 @@ struct wzSpinner *wz_spinner_create()
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
 
 	spinner->decrementButton = wz_button_create();
-	wz_button_set_label(spinner->decrementButton, "-");
+	wz_widget_set_draw_callback((struct wzWidget *)spinner->decrementButton, wz_spinner_decrement_button_draw);
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->decrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
 	spinner->incrementButton = wz_button_create();
-	wz_button_set_label(spinner->incrementButton, "+");
+	wz_widget_set_draw_callback((struct wzWidget *)spinner->incrementButton, wz_spinner_increment_button_draw);
 	wz_widget_set_draw_priority((struct wzWidget *)spinner->incrementButton, WZ_DRAW_PRIORITY_SPINNER_BUTTON);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);

@@ -614,6 +614,7 @@ struct wzRenderer
 	int (*get_spinner_button_width)(struct wzRenderer *renderer);
 	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);
 	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner);
+	void (*draw_spinner_button)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner, const struct wzButton *button, bool decrement);
 
 	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
 

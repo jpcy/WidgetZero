@@ -1196,6 +1196,64 @@ static void wz_nanovg_draw_spinner(struct wzRenderer *renderer, wzRect clip, con
 {
 }
 
+static void wz_nanovg_draw_spinner_button(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner, const struct wzButton *button, bool decrement)
+{
+	wzRendererData *rendererData;
+	struct NVGcontext *vg;
+	wzRect r;
+	bool hover, pressed;
+	NVGcolor color, borderColor;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(spinner);
+	WZ_ASSERT(button);
+	rendererData = (wzRendererData *)renderer->data;
+	vg = rendererData->vg;
+
+	nvgSave(vg);
+	wz_nanovg_clip_to_rect(vg, clip);
+	r = wz_widget_get_absolute_rect((const struct wzWidget *)button);
+	hover = wz_widget_get_hover((const struct wzWidget *)button);
+	pressed = wz_button_is_pressed(button);
+
+	if (pressed && hover)
+	{
+		color = color_pressed;
+		borderColor = color_borderSet;
+	}
+	else if (hover)
+	{
+		color = color_hover;
+		borderColor = color_borderHover;
+	}
+	else
+	{
+		color = color_foreground;
+		borderColor = color_border;
+	}
+
+	wz_nanovg_draw_filled_rect(vg, r, color);
+	wz_nanovg_draw_rect(vg, r, borderColor);
+	nvgBeginPath(vg);
+
+	if (decrement)
+	{
+		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
+		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
+		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+	}
+	else
+	{
+		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
+		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
+		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+	}
+
+	nvgFillColor(vg, borderColor);
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
 int wz_nanovg_get_tab_bar_height(struct wzRenderer *renderer, const struct wzTabBar *tabBar)
 {
 	return 20;
@@ -1614,6 +1672,7 @@ struct wzRenderer *wz_nanovg_create_renderer(wzNanoVgGlCreate create, wzNanoVgGl
 	renderer->get_spinner_button_width = wz_nanovg_get_spinner_button_width;
 	renderer->measure_spinner = wz_nanovg_measure_spinner;
 	renderer->draw_spinner = wz_nanovg_draw_spinner;
+	renderer->draw_spinner_button = wz_nanovg_draw_spinner_button;
 	renderer->get_tab_bar_height = wz_nanovg_get_tab_bar_height;
 	renderer->draw_tab_button = wz_nanovg_draw_tab_button;
 	renderer->draw_tab_page = wz_nanovg_draw_tab_page;
