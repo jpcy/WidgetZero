@@ -32,11 +32,8 @@ struct ListPrivate;
 struct WidgetPrivate
 {
 	virtual ~WidgetPrivate();
-	virtual const wzWidget *getWidget() const { return NULL; }
-	virtual wzWidget *getWidget() { return NULL; }
-	virtual wzSize measure() { wzSize s; s.w = s.h = 0; return s; }
-	virtual void draw(wzRect clip) {}
-	virtual void handleEvent(wzEvent *e) {}
+	virtual const wzWidget *getWidget() const = 0;
+	virtual wzWidget *getWidget() = 0;
 
 	std::vector<IEventHandler *> eventHandlers;
 };
@@ -119,6 +116,7 @@ struct MainWindowPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
 
 	wzMainWindow *mainWindow;
+	wzMenuBar *menuBar;
 	wzRenderer *renderer;
 };
 

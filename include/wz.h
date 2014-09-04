@@ -49,13 +49,15 @@ struct wzCombo;
 struct wzDummy;
 struct wzFrame;
 struct wzGroupBox;
+struct wzLabel;
+struct wzList;
+struct wzMenuBar;
+struct wzMenuBarButton;
 struct wzRadioButtonGroup;
 struct wzScroller;
 struct wzSpinner;
 struct wzStackLayout;
 struct wzTextEdit;
-struct wzLabel;
-struct wzList;
 
 #ifndef WZ_ASSERT
 #include <assert.h>
@@ -74,6 +76,8 @@ typedef enum
 	WZ_TYPE_GROUP_BOX,
 	WZ_TYPE_LABEL,
 	WZ_TYPE_LIST,
+	WZ_TYPE_MENU_BAR,
+	WZ_TYPE_MENU_BAR_BUTTON,
 	WZ_TYPE_SCROLLER,
 	WZ_TYPE_SPINNER,
 	WZ_TYPE_STACK_LAYOUT,
@@ -310,6 +314,7 @@ void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
 void wz_main_window_draw(struct wzMainWindow *mainWindow);
+void wz_main_window_set_menu_bar(struct wzMainWindow *mainWindow, struct wzMenuBar *menuBar);
 void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
@@ -472,6 +477,13 @@ int wz_list_get_hovered_item(const struct wzList *list);
 int wz_list_get_scroll_value(const struct wzList *list);
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback);
 
+struct wzMenuBar *wz_menu_bar_create();
+struct wzMenuBarButton *wz_menu_bar_create_button(struct wzMenuBar *menuBar);
+
+void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *label);
+const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button);
+bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button);
+
 struct wzRadioButtonGroup *wz_radio_button_group_create();
 void wz_radio_button_group_destroy(struct wzRadioButtonGroup *group);
 void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct wzButton *button);
@@ -603,6 +615,12 @@ struct wzRenderer
 	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list);
 
 	void (*draw_main_window)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
+
+	int (*calculate_menu_bar_height)(struct wzRenderer *renderer, const struct wzMenuBar *menuBar);
+	void (*draw_menu_bar)(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBar *menuBar);
+
+	wzSize (*measure_menu_bar_button)(struct wzRenderer *renderer, const struct wzMenuBarButton *button);
+	void (*draw_menu_bar_button)(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBarButton *button);
 
 	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const struct wzButton *button);
 	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);

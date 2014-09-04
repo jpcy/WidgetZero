@@ -46,8 +46,6 @@ static void HandleEvent(wzEvent *e)
 				wp->eventHandlers[i]->call(e);
 			}
 		}
-
-		wp->handleEvent(e);
 	}
 }
 
@@ -567,6 +565,9 @@ MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
 	mainWindow = wz_main_window_create(renderer);
 	wz_widget_set_metadata((wzWidget *)mainWindow, this);
 	wz_main_window_set_event_callback(mainWindow, HandleEvent);
+
+	menuBar = wz_menu_bar_create();
+	wz_main_window_set_menu_bar(mainWindow, menuBar);
 }
 
 MainWindowPrivate::~MainWindowPrivate()
@@ -665,6 +666,12 @@ Widget *MainWindow::add(Widget *widget)
 void MainWindow::remove(Widget *widget)
 {
 	wz_main_window_remove(p->mainWindow, widget->p->getWidget());
+}
+
+void MainWindow::createMenuButton(const std::string &label)
+{
+	wzMenuBarButton *button = wz_menu_bar_create_button(p->menuBar);
+	wz_menu_bar_button_set_label(button, label.c_str());
 }
 
 void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)

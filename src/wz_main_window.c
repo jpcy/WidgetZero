@@ -64,6 +64,8 @@ struct wzMainWindow
 	struct wzTabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
 
 	bool ignoreDockTabBarChangedEvent;
+
+	struct wzMenuBar *menuBar;
 };
 
 /*
@@ -344,11 +346,13 @@ static wzRect wz_main_window_calculate_dock_window_rect(struct wzMainWindow *mai
 {
 	int nDockedWindows;
 	wzRect rect;
+	int menuBarHeight;
 
 	// e.g. north dock max height is mainWindow height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
 	WZ_ASSERT(mainWindow);
+	menuBarHeight = mainWindow->menuBar ? wz_widget_get_height((const struct wzWidget *)mainWindow->menuBar) : 0;
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
 	nDockedWindows = wz_arr_len(mainWindow->dockedWindows[dockPosition]);
@@ -369,9 +373,9 @@ static wzRect wz_main_window_calculate_dock_window_rect(struct wzMainWindow *mai
 		if (dockPosition == WZ_DOCK_POSITION_NORTH)
 		{
 			rect.x = 0;
-			rect.y = 0;
+			rect.y = menuBarHeight;
 			rect.w = mainWindow->base.rect.w;
-			rect.h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier));
+			rect.h = WZ_MIN(windowSize.h, (int)(mainWindow->base.rect.h * maxPreviewSizeMultiplier)) - menuBarHeight;
 		}
 		else if (dockPosition == WZ_DOCK_POSITION_SOUTH)
 		{
@@ -385,16 +389,16 @@ static wzRect wz_main_window_calculate_dock_window_rect(struct wzMainWindow *mai
 		{
 			const int w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
 			rect.x = mainWindow->base.rect.w - w;
-			rect.y = 0;
+			rect.y = menuBarHeight;
 			rect.w = w;
-			rect.h = mainWindow->base.rect.h;
+			rect.h = mainWindow->base.rect.h - menuBarHeight;
 		}
 		else if (dockPosition == WZ_DOCK_POSITION_WEST)
 		{
 			rect.x = 0;
-			rect.y = 0;
+			rect.y = menuBarHeight;
 			rect.w = WZ_MIN(windowSize.w, (int)(mainWindow->base.rect.w * maxPreviewSizeMultiplier));
-			rect.h = mainWindow->base.rect.h;
+			rect.h = mainWindow->base.rect.h - menuBarHeight;
 		}
 	}
 
@@ -616,6 +620,24 @@ static void wz_main_window_update_dock_preview_visible(struct wzMainWindow *main
 	}
 
 	wz_widget_set_visible((struct wzWidget *)mainWindow->dockPreview, showDockPreview);
+}
+
+/*
+================================================================================
+
+MENU BAR
+
+================================================================================
+*/
+
+static void wz_main_window_update_menu_bar_rect(struct wzMainWindow *mainWindow)
+{
+	WZ_ASSERT(mainWindow);
+
+	if (!mainWindow->menuBar)
+		return;
+
+	wz_widget_set_width((struct wzWidget *)mainWindow->menuBar, mainWindow->base.rect.w);
 }
 
 /*
@@ -1158,6 +1180,8 @@ static void wz_main_window_set_rect(struct wzWidget *widget, wzRect rect)
 	mainWindow = (struct wzMainWindow *)widget;
 	mainWindow->base.rect.w = rect.w;
 	mainWindow->base.rect.h = rect.h;
+
+	wz_main_window_update_menu_bar_rect(mainWindow);
 	wz_main_window_update_dock_icon_positions(mainWindow);
 	wz_main_window_update_docking_rects(mainWindow);
 	wz_main_window_update_content_rect(mainWindow);
@@ -1227,6 +1251,14 @@ void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventC
 {
 	WZ_ASSERT(mainWindow);
 	mainWindow->handle_event = callback;
+}
+
+void wz_main_window_set_menu_bar(struct wzMainWindow *mainWindow, struct wzMenuBar *menuBar)
+{
+	WZ_ASSERT(mainWindow);
+	mainWindow->menuBar = menuBar;
+	wz_widget_set_width((struct wzWidget *)menuBar, mainWindow->base.rect.w);
+	wz_widget_add_child_widget((struct wzWidget *)mainWindow, (struct wzWidget *)menuBar);
 }
 
 void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget)
@@ -1356,6 +1388,14 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 
 	WZ_ASSERT(mainWindow);
 	rect = mainWindow->base.rect;
+
+	// Adjust the content rect based on the menu bar height.
+	if (mainWindow->menuBar)
+	{
+		const int h = wz_widget_get_height((struct wzWidget *)mainWindow->menuBar);
+		rect.y += h;
+		rect.h -= h;
+	}
 
 	// Adjust the content rect based on docked windows.
 	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)

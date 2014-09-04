@@ -969,6 +969,66 @@ static void wz_nanovg_draw_main_window(struct wzRenderer *renderer, const struct
 	wz_nanovg_draw_filled_rect(((wzRendererData *)renderer->data)->vg, wz_widget_get_absolute_rect((const struct wzWidget *)mainWindow), color_background);
 }
 
+static int wz_nanovg_calculate_menu_bar_height(struct wzRenderer *renderer, const struct wzMenuBar *menuBar)
+{
+	return wz_nanovg_get_line_height(renderer, wz_widget_get_font_face((const struct wzWidget *)menuBar), wz_widget_get_font_size((const struct wzWidget *)menuBar)) + 6;
+}
+
+static void wz_nanovg_draw_menu_bar(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBar *menuBar)
+{
+	struct NVGcontext *vg;
+	wzRect rect;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(menuBar);
+	vg = ((wzRendererData *)renderer->data)->vg;
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)menuBar);
+
+	nvgSave(vg);
+	wz_nanovg_clip_to_rect(vg, clip);
+	wz_nanovg_draw_filled_rect(vg, rect, color_foreground);
+	nvgRestore(vg);
+}
+
+static wzSize wz_nanovg_measure_menu_bar_button(struct wzRenderer *renderer, const struct wzMenuBarButton *button)
+{
+	wzSize size;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(button);
+	wz_nanovg_measure_text(renderer, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), wz_menu_bar_button_get_label(button), 0, &size.w, &size.h);
+	size.w += 12;
+	return size;
+}
+
+static void wz_nanovg_draw_menu_bar_button(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBarButton *button)
+{
+	struct NVGcontext *vg;
+	wzRect rect;
+
+	WZ_ASSERT(renderer);
+	WZ_ASSERT(button);
+	vg = ((wzRendererData *)renderer->data)->vg;
+
+	nvgSave(vg);
+	wz_nanovg_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)button);
+
+	if (wz_menu_bar_button_is_pressed(button))
+	{
+		wz_nanovg_draw_filled_rect(vg, rect, color_set);
+	}
+
+	if (wz_widget_get_hover((const struct wzWidget *)button))
+	{
+		wz_nanovg_draw_rect(vg, rect, color_borderHover);
+	}
+
+	wz_nanovg_print(renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), color_text, wz_menu_bar_button_get_label(button), 0);
+
+	nvgRestore(vg);
+}
+
 static wzSize wz_nanovg_measure_radio_button(struct wzRenderer *renderer, const struct wzButton *button)
 {
 	wzSize size;
@@ -1664,6 +1724,10 @@ struct wzRenderer *wz_nanovg_create_renderer(wzNanoVgGlCreate create, wzNanoVgGl
 	renderer->measure_list_item_height = wz_nanovg_measure_list_item_height;
 	renderer->draw_list = wz_nanovg_draw_list;
 	renderer->draw_main_window = wz_nanovg_draw_main_window;
+	renderer->calculate_menu_bar_height = wz_nanovg_calculate_menu_bar_height;
+	renderer->draw_menu_bar = wz_nanovg_draw_menu_bar;
+	renderer->measure_menu_bar_button = wz_nanovg_measure_menu_bar_button;
+	renderer->draw_menu_bar_button = wz_nanovg_draw_menu_bar_button;
 	renderer->measure_radio_button = wz_nanovg_measure_radio_button;
 	renderer->draw_radio_button = wz_nanovg_draw_radio_button;
 	renderer->measure_scroller = wz_nanovg_measure_scroller;

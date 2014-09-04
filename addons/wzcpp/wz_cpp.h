@@ -208,6 +208,7 @@ public:
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
+	void createMenuButton(const std::string &label);
 	void dockWindow(Window *window, wzDockPosition dockPosition);
 
 	MainWindowPrivate *p;

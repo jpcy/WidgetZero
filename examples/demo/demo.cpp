@@ -130,6 +130,11 @@ public:
 	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : mainWindow(renderer), renderer(renderer), showProfiling_(false)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
+		mainWindow.createMenuButton("File");
+		mainWindow.createMenuButton("Edit");
+		mainWindow.createMenuButton("View");
+		mainWindow.createMenuButton("Options");
+		mainWindow.createMenuButton("Window");
 		createButtonFrame();
 		createCheckboxFrame();
 		createComboFrame();
