@@ -26,7 +26,6 @@ SOFTWARE.
 #include <GL/glew.h>
 #include <SDL.h>
 #include <wz.h>
-#include <wz_nanovg.h>
 
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
@@ -99,12 +98,12 @@ int main(int argc, char **argv)
 	if (errorCode)
 		return errorCode;
 
-	// Create the NanoVG renderer.
-	renderer = wz_nanovg_create_renderer(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
+	// Create the renderer.
+	renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
-		ShowError(wz_nanovg_get_error());
+		ShowError(wz_renderer_get_error());
 		return 1;
 	}
 
@@ -149,12 +148,12 @@ int main(int argc, char **argv)
 			break;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		renderer->begin_frame(renderer, mainWindow);
+		wz_renderer_begin_frame(renderer, mainWindow);
 		wz_main_window_draw(mainWindow);
-		renderer->end_frame(renderer);
+		wz_renderer_end_frame(renderer);
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	wz_nanovg_destroy_renderer(renderer);
+	wz_renderer_destroy(renderer);
 	return 0;
 }

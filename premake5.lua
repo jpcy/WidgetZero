@@ -76,7 +76,13 @@ solution "WidgetZero"
 project "WidgetZero"
 	kind "StaticLib"
 	files { "src/*.*", "include/*.*" }
-	includedirs { "include" }
+	
+	includedirs
+	{
+		"include",
+		config.nanovgPath .. "/src"
+	}
+	
 	vpaths { ["*"] = { "src", "include" } }
 		
 -----------------------------------------------------------------------------
@@ -91,21 +97,6 @@ project "WidgetZeroCpp"
 	{
 		"include",
 		"addons/wzcpp"
-	}
-		
------------------------------------------------------------------------------
-
-project "WidgetZeroNanoVG"
-	kind "StaticLib"
-
-	files { "addons/wznanovg/*.*" }
-	
-	includedirs
-	{
-		"include",
-		"addons/wznanovg",
-		config.glewPath .. "/include",
-		config.nanovgPath .. "/src"
 	}
 		
 -----------------------------------------------------------------------------
@@ -128,7 +119,6 @@ function createExampleProject(_name, _language, _includedirs, _links)
 		includedirs
 		{
 			"include",
-			"addons/wznanovg",
 			config.glewPath .. "/include",
 			config.nanovgPath .. "/src",
 			_includedirs
@@ -155,7 +145,6 @@ function createExampleProject(_name, _language, _includedirs, _links)
 			"SDL2main",
 			"NanoVG",
 			"WidgetZero",
-			"WidgetZeroNanoVG",
 			_links
 		}
 		

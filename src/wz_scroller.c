@@ -24,6 +24,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include "wz_main_window.h"
+#include "wz_renderer.h"
 #include "wz_widget.h"
 
 #define WZ_MINIMUM_NUB_SIZE 8

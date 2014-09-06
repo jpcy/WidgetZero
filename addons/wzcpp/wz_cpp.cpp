@@ -639,7 +639,7 @@ void MainWindow::textInput(const char *text)
 
 void MainWindow::beginFrame()
 {
-	p->renderer->begin_frame(p->renderer, p->mainWindow);
+	wz_renderer_begin_frame(p->renderer, p->mainWindow);
 }
 
 void MainWindow::drawFrame()
@@ -649,7 +649,7 @@ void MainWindow::drawFrame()
 
 void MainWindow::endFrame()
 {
-	p->renderer->end_frame(p->renderer);
+	wz_renderer_end_frame(p->renderer);
 }
 
 wzCursor MainWindow::getCursor() const

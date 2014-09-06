@@ -40,6 +40,8 @@ typedef unsigned char bool;
 extern "C" {
 #endif
 
+typedef struct NVGcontext NVGcontext;
+
 struct wzRenderer;
 struct wzMainWindow;
 struct wzWindow;
@@ -574,82 +576,26 @@ wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *text
 
 wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index);
 
-struct wzRenderer
-{
-	void (*begin_frame)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
-	void (*end_frame)(struct wzRenderer *renderer);
+typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
+typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
 
-	void (*toggle_text_cursor)(struct wzRenderer *renderer);
+struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
+void wz_renderer_destroy(struct wzRenderer *renderer);
+const char *wz_renderer_get_error();
+struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
+void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
+void wz_renderer_end_frame(struct wzRenderer *renderer);
+void wz_renderer_toggle_text_cursor(struct wzRenderer *renderer);
 
-	int (*get_line_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize);
-
-	// width or height can be NULL.
-	void (*measure_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
-
-	wzLineBreakResult (*line_break_text)(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
-
-	wzColor (*get_default_text_color)(struct wzRenderer *renderer);
-
-	wzSize (*get_dock_icon_size)(struct wzRenderer *renderer);
-	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
-	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
-
-	wzBorder (*get_button_padding)(struct wzRenderer *renderer, const struct wzButton *button);
-	wzSize (*measure_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
-
-	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const struct wzButton *checkbox);
-	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *checkbox);
-
-	wzSize (*measure_combo)(struct wzRenderer *renderer, const struct wzCombo *combo);
-	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, const struct wzCombo *combo);
-
-	wzBorder (*measure_group_box_margin)(struct wzRenderer *renderer, const struct wzGroupBox *groupBox);
-	void (*draw_group_box)(struct wzRenderer *renderer, wzRect clip, const struct wzGroupBox *groupBox);
-
-	wzSize (*measure_label)(struct wzRenderer *renderer, const struct wzLabel *label);
-	void (*draw_label)(struct wzRenderer *renderer, wzRect clip, const struct wzLabel *label);
-
-	wzBorder (*get_list_items_border)(struct wzRenderer *renderer, const struct wzList *list);
-	int (*measure_list_item_height)(struct wzRenderer *renderer, const struct wzList *list);
-	void (*draw_list)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list);
-
-	void (*draw_main_window)(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
-
-	int (*calculate_menu_bar_height)(struct wzRenderer *renderer, const struct wzMenuBar *menuBar);
-	void (*draw_menu_bar)(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBar *menuBar);
-
-	wzSize (*measure_menu_bar_button)(struct wzRenderer *renderer, const struct wzMenuBarButton *button);
-	void (*draw_menu_bar_button)(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBarButton *button);
-
-	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
-
-	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
-	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller);
-	void (*draw_scroller_button)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller, const struct wzButton *button, bool decrement);
-
-	int (*get_spinner_button_width)(struct wzRenderer *renderer);
-	wzSize (*measure_spinner)(struct wzRenderer *renderer, const struct wzSpinner *spinner, const struct wzTextEdit *textEdit);
-	void (*draw_spinner)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner);
-	void (*draw_spinner_button)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner, const struct wzButton *button, bool decrement);
-
-	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
-
-	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *tabButton);
-
-	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, const struct wzWidget *tabPage);
-
-	wzBorder (*get_text_edit_border)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
-	wzSize (*measure_text_edit)(struct wzRenderer *renderer, const struct wzTextEdit *textEdit);
-	void (*draw_text_edit)(struct wzRenderer *renderer, wzRect clip, const struct wzTextEdit *textEdit);
-
-	int (*get_window_border_size)(struct wzRenderer *renderer, const struct wzWindow *window);
-	int (*measure_window_header_height)(struct wzRenderer *renderer, const struct wzWindow *window);
-	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, const struct wzWindow *window);
-
-	void *data;
-};
+int wz_renderer_create_image(struct wzRenderer *renderer, const char *filename, int *width, int *height);
+void wz_renderer_print_box(struct wzRenderer *renderer, wzRect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
+void wz_renderer_print(struct wzRenderer *renderer, int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
+void wz_renderer_clip_to_rect(struct NVGcontext *vg, wzRect rect);
+bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, wzRect rect2);
+void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
+void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
+void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2, struct NVGcolor color);
+void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image);
 
 #ifdef __cplusplus
 } // extern "C"

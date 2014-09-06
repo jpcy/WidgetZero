@@ -28,7 +28,6 @@ SOFTWARE.
 #include <GL/glew.h>
 #include <SDL.h>
 #include <wz_cpp.h>
-#include <wz_nanovg.h>
 
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
@@ -116,12 +115,12 @@ static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip,
 	int image, width, height;
 	wzRect rect;
 	
-	image = wz_nanovg_create_image(renderer, (const char *)itemData, &width, &height);
+	image = wz_renderer_create_image(renderer, (const char *)itemData, &width, &height);
 	rect.x = clip.x + (int)(clip.w / 2.0f - width / 2.0f);
 	rect.y = clip.y + (int)(clip.h / 2.0f - height / 2.0f);
 	rect.w = width;
 	rect.h = height;
-	wz_nanovg_draw_image(wz_nanovg_get_context(renderer), rect, image);
+	wz_renderer_draw_image(wz_renderer_get_context(renderer), rect, image);
 }
 
 class GUI
@@ -665,12 +664,12 @@ int main(int argc, char **argv)
 	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
-	// Create the NanoVG renderer.
-	wzRenderer *renderer = wz_nanovg_create_renderer(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
+	// Create the renderer.
+	wzRenderer *renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
-		ShowError(wz_nanovg_get_error());
+		ShowError(wz_renderer_get_error());
 		return 1;
 	}
 
@@ -762,13 +761,13 @@ int main(int argc, char **argv)
 			if (gui.showProfiling())
 			{
 				sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
-				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 0, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
+				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 0, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 
 				sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
-				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 20, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
+				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 20, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 
 				sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
-				wz_nanovg_print(renderer, gui.mainWindow.getWidth(), 40, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
+				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 40, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 			}
 
 			gui.mainWindow.endFrame();
@@ -782,11 +781,11 @@ int main(int argc, char **argv)
 
 			if ((tick % 20) == 0)
 			{
-				renderer->toggle_text_cursor(renderer);
+				wz_renderer_toggle_text_cursor(renderer);
 			}
 		}
 	}
 
-	wz_nanovg_destroy_renderer(renderer);
+	wz_renderer_destroy(renderer);
 	return 0;
 }

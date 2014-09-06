@@ -23,6 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
+#include "wz_renderer.h"
 #include "wz_widget.h"
 
 typedef struct
