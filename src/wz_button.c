@@ -28,23 +28,19 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_string.h"
 
-typedef enum
-{
-	WZ_BUTTON_STYLE_DEFAULT,
-	WZ_BUTTON_STYLE_CHECK,
-	WZ_BUTTON_STYLE_RADIO,
-	WZ_BUTTON_STYLE_TAB,
-}
-wzButtonStyle;
+static const int buttonIconSpacing = 6;
+static const int checkBoxBoxSize = 16;
+static const int checkBoxBoxRightMargin = 8;
+static const int radioButtonOuterRadius = 8;
+static const int radioButtonInnerRadius = 4;
+static const int radioButtonSpacing = 8;
 
 struct wzButton
 {
 	struct wzWidget base;
-	wzButtonStyle style;
 	wzButtonClickBehavior clickBehavior;
 	wzButtonSetBehavior setBehavior;
 	wzBorder padding;
-	bool isPaddingUserSet;
 	wzString label;
 	wzString icon;
 	bool isPressed;
@@ -54,57 +50,298 @@ struct wzButton
 	wzEventCallback *clicked_callbacks;
 };
 
+/*
+================================================================================
+
+MEASURING
+
+================================================================================
+*/
+
 static wzSize wz_button_measure(struct wzWidget *widget)
 {
+	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
-	WZ_ASSERT(button);
 
-	if (button->style == WZ_BUTTON_STYLE_CHECK)
+	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+
+	if (button->icon[0])
 	{
-		return widget->renderer->measure_checkbox(widget->renderer, button);
-	}
-	else if (button->style == WZ_BUTTON_STYLE_RADIO)
-	{
-		return widget->renderer->measure_radio_button(widget->renderer, button);
+		int handle, w, h;
+
+		handle = wz_renderer_create_image(widget->renderer, button->icon, &w, &h);
+
+		if (handle)
+		{
+			size.w += w + buttonIconSpacing;
+			size.h = WZ_MAX(size.h, h);
+		}
 	}
 
-	return widget->renderer->measure_button(widget->renderer, button);
+	size.w += button->padding.left + button->padding.right;
+	size.h += button->padding.top + button->padding.bottom;
+	return size;
 }
+
+static wzSize wz_check_box_measure(struct wzWidget *widget)
+{
+	wzSize size;
+	struct wzButton *button = (struct wzButton *)widget;
+	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
+	return size;
+}
+
+static wzSize wz_radio_button_measure(struct wzWidget *widget)
+{
+	wzSize size;
+	struct wzButton *button = (struct wzButton *)widget;
+	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
+	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
+	return size;
+}
+
+/*
+================================================================================
+
+DRAWING
+
+================================================================================
+*/
 
 static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 {
+	wzRect rect;
+	wzRect paddedRect;
+	wzSize iconSize;
+	int iconHandle, labelWidth, iconX, labelX;
 	struct wzButton *button = (struct wzButton *)widget;
-	WZ_ASSERT(button);
+	struct NVGcontext *vg = widget->renderer->vg;
 
-	if (button->style == WZ_BUTTON_STYLE_CHECK)
+	nvgSave(vg);
+	rect = wz_widget_get_absolute_rect(widget);
+
+	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
+		return;
+
+	// Background.
+	if (button->isSet)
 	{
-		widget->renderer->draw_checkbox(widget->renderer, clip, button);
+		wz_renderer_draw_filled_rect(vg, rect, color_set);
 	}
-	else if (button->style == WZ_BUTTON_STYLE_RADIO)
+	else if (button->isPressed && widget->hover)
 	{
-		widget->renderer->draw_radio_button(widget->renderer, clip, button);
+		wz_renderer_draw_filled_rect(vg, rect, color_pressed);
 	}
-	else if (button->style == WZ_BUTTON_STYLE_TAB)
+	else if (widget->hover)
 	{
-		widget->renderer->draw_tab_button(widget->renderer, clip, button);
+		wz_renderer_draw_filled_rect(vg, rect, color_hover);
 	}
 	else
 	{
-		widget->renderer->draw_button(widget->renderer, clip, button);
+		wz_renderer_draw_filled_rect(vg, rect, color_foreground);
 	}
-}
 
-static void wz_button_renderer_changed(struct wzWidget *widget)
-{
-	struct wzButton *button = (struct wzButton *)widget;
-	WZ_ASSERT(button);
-
-	// Don't stomp on user set padding.
-	if (!button->isPaddingUserSet)
+	// Border.
+	if (button->isPressed && widget->hover)
 	{
-		button->padding = widget->renderer->get_button_padding(widget->renderer, button);
+		wz_renderer_draw_rect(vg, rect, color_borderSet);
 	}
+	else if (widget->hover)
+	{
+		wz_renderer_draw_rect(vg, rect, color_borderHover);
+	}
+	else
+	{
+		wz_renderer_draw_rect(vg, rect, color_border);
+	}
+
+	// Calculate padded rect.
+	paddedRect.x = rect.x + button->padding.left;
+	paddedRect.y = rect.y + button->padding.top;
+	paddedRect.w = rect.w - (button->padding.left + button->padding.right);
+	paddedRect.h = rect.h - (button->padding.top + button->padding.bottom);
+
+	// Calculate icon and label sizes.
+	iconSize.w = iconSize.h = 0;
+
+	if (button->icon[0])
+	{
+		iconHandle = wz_renderer_create_image(widget->renderer, button->icon, &iconSize.w, &iconSize.h);
+	}
+
+	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &labelWidth, NULL);
+
+	// Position the icon and label centered.
+	if (button->icon[0] && iconHandle && button->label[0])
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + buttonIconSpacing + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + buttonIconSpacing;
+	}
+	else if (button->icon[0] && iconHandle)
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
+	}
+	else if (button->label[0])
+	{
+		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
+	}
+
+	// Draw the icon.
+	if (button->icon[0] && iconHandle)
+	{
+		wzRect iconRect;
+		iconRect.x = iconX;
+		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
+		iconRect.w = iconSize.w;
+		iconRect.h = iconSize.h;
+		wz_renderer_draw_image(vg, iconRect, iconHandle);
+	}
+
+	// Draw the label.
+	if (button->label[0])
+	{
+		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+	}
+
+	nvgRestore(vg);
 }
+
+static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
+{
+	wzRect rect;
+	wzRect boxRect;
+	struct wzButton *button = (struct wzButton *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect(widget);
+
+	// Box.
+	boxRect.x = rect.x;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f);
+	boxRect.w = checkBoxBoxSize;
+	boxRect.h = checkBoxBoxSize;
+
+	// Box background.
+	if (button->isPressed && widget->hover)
+	{
+		wz_renderer_draw_filled_rect(vg, boxRect, color_pressed);
+	}
+	else if (widget->hover)
+	{
+		wz_renderer_draw_filled_rect(vg, boxRect, color_hover);
+	}
+
+	// Box border.
+	wz_renderer_draw_rect(vg, boxRect, color_border);
+
+	// Box checkmark.
+	if (button->isSet)
+	{
+		boxRect.x = rect.x + 4;
+		boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f) + 4;
+		boxRect.w = checkBoxBoxSize / 2;
+		boxRect.h = checkBoxBoxSize / 2;
+		wz_renderer_draw_filled_rect(vg, boxRect, color_set);
+	}
+
+	// Label.
+	wz_renderer_print(widget->renderer, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+
+	nvgRestore(vg);
+}
+
+static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	wzRect rect;
+	struct wzButton *button = (struct wzButton *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+
+	nvgSave(vg);
+	rect = wz_widget_get_absolute_rect((const struct wzWidget *)button);
+
+	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
+		return;
+
+	// Inner circle.
+	if (button->isSet)
+	{
+		nvgBeginPath(vg);
+		nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonInnerRadius);
+		nvgFillColor(vg, color_set);
+		nvgFill(vg);
+	}
+
+	// Outer circle.
+	nvgBeginPath(vg);
+	nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonOuterRadius);
+	nvgStrokeColor(vg, widget->hover ? color_borderHover : color_border);
+	nvgStroke(vg);
+
+	// Label.
+	wz_renderer_print(widget->renderer, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+
+	nvgRestore(vg);
+}
+
+static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
+{
+	wzRect rect, labelRect;
+	struct wzButton *button = (struct wzButton *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect(widget);
+
+	// Background.
+	if (button->isSet)
+	{
+		wz_renderer_draw_filled_rect(vg, rect, color_set);
+	}
+	else if (widget->hover)
+	{
+		wz_renderer_draw_filled_rect(vg, rect, color_hover);
+	}
+	else
+	{
+		wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+	}
+
+	// Border.
+	if (button->isSet)
+	{
+		wz_renderer_draw_rect(vg, rect, color_borderSet);
+	}
+	else if (widget->hover)
+	{
+		wz_renderer_draw_rect(vg, rect, color_borderHover);
+	}
+	else
+	{
+		wz_renderer_draw_rect(vg, rect, color_border);
+	}
+
+	// Label.
+	labelRect.x = rect.x + button->padding.left;
+	labelRect.y = rect.y + button->padding.top;
+	labelRect.w = rect.w - (button->padding.left + button->padding.right);
+	labelRect.h = rect.h - (button->padding.top + button->padding.bottom);
+	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+
+	nvgRestore(vg);
+}
+
+/*
+================================================================================
+
+VTABLE FUNCTIONS
+
+================================================================================
+*/
 
 static void wz_button_destroy(struct wzWidget *widget)
 {
@@ -192,43 +429,53 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 	}
 }
 
-static struct wzButton *wz_button_create_internal(wzButtonStyle style)
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
+struct wzButton *wz_button_create()
 {
 	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
 	button->base.vtable.measure = wz_button_measure;
 	button->base.vtable.draw = wz_button_draw;
-	button->base.vtable.renderer_changed = wz_button_renderer_changed;
 	button->base.vtable.destroy = wz_button_destroy;
 	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
-	button->style = style;
+	button->padding.left = button->padding.right = 8;
+	button->padding.top = button->padding.bottom = 4;
 	button->label = wz_string_empty();
 	button->icon = wz_string_empty();
 	return button;
 }
 
-struct wzButton *wz_button_create()
-{
-	return wz_button_create_internal(WZ_BUTTON_STYLE_DEFAULT);
-}
-
 struct wzButton *wz_check_box_create()
 {
-	struct wzButton *button = wz_button_create_internal(WZ_BUTTON_STYLE_CHECK);
+	struct wzButton *button = wz_button_create();
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	button->base.vtable.measure = wz_check_box_measure;
+	button->base.vtable.draw = wz_check_box_draw;
 	return button;
 }
 
 struct wzButton *wz_radio_button_create()
 {
-	return wz_button_create_internal(WZ_BUTTON_STYLE_RADIO);
+	struct wzButton *button = wz_button_create();
+	button->base.vtable.measure = wz_radio_button_measure;
+	button->base.vtable.draw = wz_radio_button_draw;
+	return button;
 }
 
 struct wzButton *wz_tab_button_create()
 {
-	return wz_button_create_internal(WZ_BUTTON_STYLE_TAB);
+	struct wzButton *button = wz_button_create();
+	button->base.vtable.draw = wz_tab_button_draw;
+	return button;
 }
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
@@ -273,7 +520,6 @@ void wz_button_set_padding(struct wzButton *button, wzBorder padding)
 {
 	WZ_ASSERT(button);
 	button->padding = padding;
-	button->isPaddingUserSet = true;
 	wz_widget_resize_to_measured(&button->base);
 }
 

@@ -27,6 +27,21 @@ SOFTWARE.
 #include <nanovg.h>
 #include <wz.h>
 
+extern const NVGcolor color_hover;
+extern const NVGcolor color_set;
+extern const NVGcolor color_pressed;
+extern const NVGcolor color_border;
+extern const NVGcolor color_borderHover;
+extern const NVGcolor color_borderSet;
+extern const NVGcolor color_background;
+extern const NVGcolor color_foreground;
+extern const NVGcolor color_text;
+extern const NVGcolor color_textSelection;
+extern const NVGcolor color_textCursor;
+extern const NVGcolor color_dockPreview;
+extern const NVGcolor color_windowHeaderBackground;
+extern const NVGcolor color_windowBorder;
+
 struct wzRenderer
 {
 	int (*get_line_height)(struct wzRenderer *renderer, const char *fontFace, float fontSize);
@@ -41,13 +56,6 @@ struct wzRenderer
 	wzSize (*get_dock_icon_size)(struct wzRenderer *renderer);
 	void (*draw_dock_icon)(struct wzRenderer *renderer, wzRect rect);
 	void (*draw_dock_preview)(struct wzRenderer *renderer, wzRect rect);
-
-	wzBorder (*get_button_padding)(struct wzRenderer *renderer, const struct wzButton *button);
-	wzSize (*measure_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
-
-	wzSize (*measure_checkbox)(struct wzRenderer *renderer, const struct wzButton *checkbox);
-	void (*draw_checkbox)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *checkbox);
 
 	wzSize (*measure_combo)(struct wzRenderer *renderer, const struct wzCombo *combo);
 	void (*draw_combo)(struct wzRenderer *renderer, wzRect clip, const struct wzCombo *combo);
@@ -70,9 +78,6 @@ struct wzRenderer
 	wzSize (*measure_menu_bar_button)(struct wzRenderer *renderer, const struct wzMenuBarButton *button);
 	void (*draw_menu_bar_button)(struct wzRenderer *renderer, wzRect clip, const struct wzMenuBarButton *button);
 
-	wzSize (*measure_radio_button)(struct wzRenderer *renderer, const struct wzButton *button);
-	void (*draw_radio_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *button);
-
 	wzSize (*measure_scroller)(struct wzRenderer *renderer, wzScrollerType scrollerType);
 	void (*draw_scroller)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller);
 	void (*draw_scroller_button)(struct wzRenderer *renderer, wzRect clip, const struct wzScroller *scroller, const struct wzButton *button, bool decrement);
@@ -83,8 +88,6 @@ struct wzRenderer
 	void (*draw_spinner_button)(struct wzRenderer *renderer, wzRect clip, const struct wzSpinner *spinner, const struct wzButton *button, bool decrement);
 
 	int (*get_tab_bar_height)(struct wzRenderer *renderer, const struct wzTabBar *tabBar);
-
-	void (*draw_tab_button)(struct wzRenderer *renderer, wzRect clip, const struct wzButton *tabButton);
 
 	void (*draw_tab_page)(struct wzRenderer *renderer, wzRect clip, const struct wzWidget *tabPage);
 
@@ -97,6 +100,7 @@ struct wzRenderer
 	void (*draw_window)(struct wzRenderer *renderer, wzRect clip, const struct wzWindow *window);
 
 	void *data;
+	struct NVGcontext *vg;
 };
 
 #endif // WZ_RENDERER_H
