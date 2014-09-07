@@ -96,6 +96,7 @@ project "WidgetZeroCpp"
 	includedirs
 	{
 		"include",
+		config.nanovgPath .. "/src",
 		"addons/wzcpp"
 	}
 		

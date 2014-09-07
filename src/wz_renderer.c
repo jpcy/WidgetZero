@@ -53,21 +53,6 @@ wzRendererData;
 
 static char errorMessage[WZ_NANOVG_MAX_ERROR_MESSAGE];
 
-const NVGcolor color_hover = { 0.2510f, 0.2510f, 0.3176f, 1 };
-const NVGcolor color_set = { 0.1529f, 0.5569f, 0.7412f, 1 };
-const NVGcolor color_pressed = { 0.1765f, 0.1765f, 0.2157f, 1 };
-const NVGcolor color_border = { 0.4000f, 0.4000f, 0.4000f, 1 };
-const NVGcolor color_borderHover = { 0.5f, 0.76f, 0.9f, 1 };
-const NVGcolor color_borderSet = { 0.17f, 0.38f, 0.55f, 1 };
-const NVGcolor color_background = { 0.2000f, 0.2000f, 0.2000f, 1 };
-const NVGcolor color_foreground = { 0.2510f, 0.2510f, 0.2510f, 1 };
-const NVGcolor color_text = { 0.8f, 0.8f, 0.8f, 1 };
-const NVGcolor color_textSelection = { 0.1529f, 0.5569f, 0.7412f, 0.5f };
-const NVGcolor color_textCursor = { 1, 1, 1, 1 };
-const NVGcolor color_dockPreview = { 0, 0, 1, 0.25f };
-const NVGcolor color_windowHeaderBackground = { 0.2039f, 0.2863f, 0.3686f, 1 };
-const NVGcolor color_windowBorder = { 0.2784f, 0.4000f, 0.4902f, 1 };
-
 /*
 ================================================================================
 
@@ -344,10 +329,10 @@ static wzLineBreakResult wz_nanovg_line_break_text(struct wzRenderer *renderer, 
 wzColor wz_nanovg_get_default_text_color(struct wzRenderer *renderer)
 {
 	wzColor color;
-	color.r = color_text.r;
-	color.g = color_text.g;
-	color.b = color_text.b;
-	color.a = color_text.a;
+	color.r = renderer->style.textColor.r;
+	color.g = renderer->style.textColor.g;
+	color.b = renderer->style.textColor.b;
+	color.a = renderer->style.textColor.a;
 	return color;
 }
 
@@ -381,7 +366,7 @@ static void wz_nanovg_draw_dock_preview(struct wzRenderer *renderer, wzRect rect
 	vg = ((wzRendererData *)renderer->data)->vg;
 
 	nvgSave(vg);
-	wz_renderer_draw_filled_rect(vg, rect, color_dockPreview);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.dockPreviewColor);
 	nvgRestore(vg);
 }
 
@@ -460,30 +445,30 @@ static void wz_nanovg_draw_combo(struct wzRenderer *renderer, wzRect clip, const
 	// Background.
 	if (hover)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_hover);
+		wz_renderer_draw_filled_rect(vg, rect, renderer->style.hoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+		wz_renderer_draw_filled_rect(vg, rect, renderer->style.foregroundColor);
 	}
 
 	// Border.
 	if (hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderSet);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderSetColor);
 	}
 	else if (hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderHover);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderHoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_rect(vg, rect, color_border);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderColor);
 	}
 
 	// Selected item.
 	if (selectedItemIndex >= 0)
-		wz_renderer_print(renderer, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
+		wz_renderer_print(renderer, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, renderer->style.textColor, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
 
 	nvgRestore(vg);
 }
@@ -519,14 +504,14 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, c
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)groupBox);
 	
 	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, color_background);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.backgroundColor);
 
 	// Border.
 	label = wz_group_box_get_label(groupBox);
 
 	if (!label || !label[0])
 	{
-		wz_renderer_draw_rect(vg, rect, color_border);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderColor);
 	}
 	else
 	{
@@ -542,14 +527,14 @@ static void wz_nanovg_draw_group_box(struct wzRenderer *renderer, wzRect clip, c
 		wz_nanovg_measure_text(renderer, fontFace, fontSize, label, 0, &textWidth, &textHeight);
 
 		// Left, right, bottom, top left, top right.
-		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, color_border);
-		wz_renderer_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, color_border);
-		wz_renderer_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, color_border);
-		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + textLeftMargin - textBorderSpacing, rect.y + textHeight / 2, color_border);
-		wz_renderer_draw_line(vg, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, color_border);
+		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, renderer->style.borderColor);
+		wz_renderer_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, renderer->style.borderColor);
+		wz_renderer_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, renderer->style.borderColor);
+		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + textLeftMargin - textBorderSpacing, rect.y + textHeight / 2, renderer->style.borderColor);
+		wz_renderer_draw_line(vg, rect.x + textLeftMargin + textWidth + textBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, renderer->style.borderColor);
 
 		// Label.
-		wz_renderer_print(renderer, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, color_text, label, 0);
+		wz_renderer_print(renderer, rect.x + textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, renderer->style.textColor, label, 0);
 	}
 
 	nvgRestore(vg);
@@ -667,10 +652,10 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, const 
 	fontSize = wz_widget_get_font_size((const struct wzWidget *)list);
 	
 	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, color_background);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.backgroundColor);
 
 	// Border.
-	wz_renderer_draw_rect(vg, rect, color_border);
+	wz_renderer_draw_rect(vg, rect, renderer->style.borderColor);
 
 	// Items.
 	itemHeight = wz_list_get_item_height(list);
@@ -704,11 +689,11 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, const 
 
 		if (i == wz_list_get_selected_item(list))
 		{
-			wz_renderer_draw_filled_rect(vg, itemRect, color_set);
+			wz_renderer_draw_filled_rect(vg, itemRect, renderer->style.setColor);
 		}
 		else if (i == wz_list_get_pressed_item(list) || i == wz_list_get_hovered_item(list))
 		{
-			wz_renderer_draw_filled_rect(vg, itemRect, color_hover);
+			wz_renderer_draw_filled_rect(vg, itemRect, renderer->style.hoverColor);
 		}
 
 		if (draw_item)
@@ -717,7 +702,7 @@ static void wz_nanovg_draw_list(struct wzRenderer *renderer, wzRect clip, const 
 		}
 		else
 		{
-			wz_renderer_print(renderer, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, (const char *)itemData, 0);
+			wz_renderer_print(renderer, itemsRect.x + itemLeftPadding, y + itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, renderer->style.textColor, (const char *)itemData, 0);
 		}
 
 		y += itemHeight;
@@ -730,7 +715,7 @@ static void wz_nanovg_draw_main_window(struct wzRenderer *renderer, const struct
 {
 	WZ_ASSERT(renderer);
 	WZ_ASSERT(mainWindow);
-	wz_renderer_draw_filled_rect(((wzRendererData *)renderer->data)->vg, wz_widget_get_absolute_rect((const struct wzWidget *)mainWindow), color_background);
+	wz_renderer_draw_filled_rect(((wzRendererData *)renderer->data)->vg, wz_widget_get_absolute_rect((const struct wzWidget *)mainWindow), renderer->style.backgroundColor);
 }
 
 static int wz_nanovg_calculate_menu_bar_height(struct wzRenderer *renderer, const struct wzMenuBar *menuBar)
@@ -750,7 +735,7 @@ static void wz_nanovg_draw_menu_bar(struct wzRenderer *renderer, wzRect clip, co
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
-	wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.foregroundColor);
 	nvgRestore(vg);
 }
 
@@ -780,15 +765,15 @@ static void wz_nanovg_draw_menu_bar_button(struct wzRenderer *renderer, wzRect c
 
 	if (wz_menu_bar_button_is_pressed(button))
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_set);
+		wz_renderer_draw_filled_rect(vg, rect, renderer->style.setColor);
 	}
 
 	if (wz_widget_get_hover((const struct wzWidget *)button))
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderHover);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderHoverColor);
 	}
 
-	wz_renderer_print(renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), color_text, wz_menu_bar_button_get_label(button), 0);
+	wz_renderer_print(renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)button), wz_widget_get_font_size((const struct wzWidget *)button), renderer->style.textColor, wz_menu_bar_button_get_label(button), 0);
 
 	nvgRestore(vg);
 }
@@ -830,7 +815,7 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, co
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller);
 	type = wz_scroller_get_type(scroller);
 	
-	wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.foregroundColor);
 
 	// Nub.
 	{
@@ -842,18 +827,18 @@ static void wz_nanovg_draw_scroller(struct wzRenderer *renderer, wzRect clip, co
 
 		if (pressed)
 		{
-			color = color_pressed;
-			borderColor = color_borderSet;
+			color = renderer->style.pressedColor;
+			borderColor = renderer->style.borderSetColor;
 		}
 		else if (hover)
 		{
-			color = color_hover;
-			borderColor = color_borderHover;
+			color = renderer->style.hoverColor;
+			borderColor = renderer->style.borderHoverColor;
 		}
 		else
 		{
-			color = color_foreground;
-			borderColor = color_border;
+			color = renderer->style.foregroundColor;
+			borderColor = renderer->style.borderColor;
 		}
 
 		wz_renderer_draw_filled_rect(vg, r, color);
@@ -887,18 +872,18 @@ static void wz_nanovg_draw_scroller_button(struct wzRenderer *renderer, wzRect c
 
 	if (pressed && hover)
 	{
-		color = color_pressed;
-		borderColor = color_borderSet;
+		color = renderer->style.pressedColor;
+		borderColor = renderer->style.borderSetColor;
 	}
 	else if (hover)
 	{
-		color = color_hover;
-		borderColor = color_borderHover;
+		color = renderer->style.hoverColor;
+		borderColor = renderer->style.borderHoverColor;
 	}
 	else
 	{
-		color = color_foreground;
-		borderColor = color_border;
+		color = renderer->style.foregroundColor;
+		borderColor = renderer->style.borderColor;
 	}
 
 	wz_renderer_draw_filled_rect(vg, r, color);
@@ -990,18 +975,18 @@ static void wz_nanovg_draw_spinner_button(struct wzRenderer *renderer, wzRect cl
 
 	if (pressed && hover)
 	{
-		color = color_pressed;
-		borderColor = color_borderSet;
+		color = renderer->style.pressedColor;
+		borderColor = renderer->style.borderSetColor;
 	}
 	else if (hover)
 	{
-		color = color_hover;
-		borderColor = color_borderHover;
+		color = renderer->style.hoverColor;
+		borderColor = renderer->style.borderHoverColor;
 	}
 	else
 	{
-		color = color_foreground;
-		borderColor = color_border;
+		color = renderer->style.foregroundColor;
+		borderColor = renderer->style.borderColor;
 	}
 
 	wz_renderer_draw_filled_rect(vg, r, color);
@@ -1045,8 +1030,8 @@ static void wz_nanovg_draw_tab_page(struct wzRenderer *renderer, wzRect clip, co
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)tabPage);
-	wz_renderer_draw_filled_rect(vg, rect, color_foreground);
-	wz_renderer_draw_rect(vg, rect, color_border);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.foregroundColor);
+	wz_renderer_draw_rect(vg, rect, renderer->style.borderColor);
 	nvgRestore(vg);
 }
 
@@ -1108,16 +1093,16 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	fontSize = wz_widget_get_font_size((const struct wzWidget *)textEdit);
 
 	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, color_background);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.backgroundColor);
 
 	// Border.
 	if (hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderHover);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderHoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_rect(vg, rect, color_border);
+		wz_renderer_draw_rect(vg, rect, renderer->style.borderColor);
 	}
 
 	// Clip to the text rect.
@@ -1146,7 +1131,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 			if (line.length > 0)
 			{
 				// Draw this line.
-				wz_renderer_print(renderer, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, color_text, line.start, line.length);
+				wz_renderer_print(renderer, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, fontFace, fontSize, renderer->style.textColor, line.start, line.length);
 
 				// Selection.
 				if (wz_text_edit_has_selection(textEdit))
@@ -1185,7 +1170,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 						selectionRect.y = textRect.y + start.y - lineHeight / 2;
 						selectionRect.w = end.x - start.x;
 						selectionRect.h = lineHeight;
-						wz_renderer_draw_filled_rect(vg, selectionRect, color_textSelection);
+						wz_renderer_draw_filled_rect(vg, selectionRect, renderer->style.textSelectionColor);
 					}
 				}
 			}
@@ -1198,7 +1183,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 	}
 	else
 	{
-		wz_renderer_print(renderer, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, color_text, wz_text_edit_get_visible_text(textEdit), 0);
+		wz_renderer_print(renderer, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, renderer->style.textColor, wz_text_edit_get_visible_text(textEdit), 0);
 
 		// Selection.
 		if (wz_text_edit_has_selection(textEdit))
@@ -1212,7 +1197,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
 			selectionRect.w = position2.x - position1.x;
 			selectionRect.h = lineHeight;
-			wz_renderer_draw_filled_rect(vg, selectionRect, color_textSelection);
+			wz_renderer_draw_filled_rect(vg, selectionRect, renderer->style.textSelectionColor);
 		}
 	}
 
@@ -1229,7 +1214,7 @@ static void wz_nanovg_draw_text_edit(struct wzRenderer *renderer, wzRect clip, c
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
 		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);
-		nvgStrokeColor(vg, color_textCursor);
+		nvgStrokeColor(vg, renderer->style.textCursorColor);
 		nvgStroke(vg);
 	}
 
@@ -1268,25 +1253,25 @@ static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, cons
 	borderSize = wz_window_get_border_size(window);
 	
 	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, color_background);
+	wz_renderer_draw_filled_rect(vg, rect, renderer->style.backgroundColor);
 
 	// Border top.
 	borderRect = rect;
 	borderRect.h = borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, color_windowBorder);
+	wz_renderer_draw_filled_rect(vg, borderRect, renderer->style.windowBorderColor);
 
 	// Border bottom.
 	borderRect.y = rect.y + rect.h - borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, color_windowBorder);
+	wz_renderer_draw_filled_rect(vg, borderRect, renderer->style.windowBorderColor);
 
 	// Border left.
 	borderRect = rect;
 	borderRect.w = borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, color_windowBorder);
+	wz_renderer_draw_filled_rect(vg, borderRect, renderer->style.windowBorderColor);
 
 	// Border right.
 	borderRect.x = rect.x + rect.w - borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, color_windowBorder);
+	wz_renderer_draw_filled_rect(vg, borderRect, renderer->style.windowBorderColor);
 
 	// Header.
 	headerRect = wz_window_get_header_rect(window);
@@ -1294,8 +1279,8 @@ static void wz_nanovg_draw_window(struct wzRenderer *renderer, wzRect clip, cons
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
 		wz_renderer_clip_to_rect(vg, headerRect);
-		wz_renderer_draw_filled_rect(vg, headerRect, color_windowHeaderBackground);
-		wz_renderer_print(renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)window), wz_widget_get_font_size((const struct wzWidget *)window), color_text, wz_window_get_title(window), 0);
+		wz_renderer_draw_filled_rect(vg, headerRect, renderer->style.windowHeaderBackgroundColor);
+		wz_renderer_print(renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face((const struct wzWidget *)window), wz_widget_get_font_size((const struct wzWidget *)window), renderer->style.textColor, wz_window_get_title(window), 0);
 	}
 
 	nvgRestore(vg);
@@ -1384,6 +1369,28 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->measure_window_header_height = wz_nanovg_measure_window_header_height;
 	renderer->draw_window = wz_nanovg_draw_window;
 
+	// Setup default style.
+	renderer->style.hoverColor = nvgRGBf(0.2510f, 0.2510f, 0.3176f);
+	renderer->style.setColor = nvgRGBf(0.1529f, 0.5569f, 0.7412f);
+	renderer->style.pressedColor = nvgRGBf(0.1765f, 0.1765f, 0.2157f);
+	renderer->style.borderColor = nvgRGBf(0.4000f, 0.4000f, 0.4000f);
+	renderer->style.borderHoverColor = nvgRGBf(0.5f, 0.76f, 0.9f);
+	renderer->style.borderSetColor = nvgRGBf(0.17f, 0.38f, 0.55f);
+	renderer->style.backgroundColor = nvgRGBf(0.2000f, 0.2000f, 0.2000f);
+	renderer->style.foregroundColor = nvgRGBf(0.2510f, 0.2510f, 0.2510f);
+	renderer->style.textColor = nvgRGBf(0.8f, 0.8f, 0.8f);
+	renderer->style.textSelectionColor = nvgRGBAf(0.1529f, 0.5569f, 0.7412f, 0.5f);
+	renderer->style.textCursorColor = nvgRGBf(1, 1, 1);
+	renderer->style.dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
+	renderer->style.windowHeaderBackgroundColor = nvgRGBf(0.2039f, 0.2863f, 0.3686f);
+	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
+	renderer->style.buttonIconSpacing = 6;
+	renderer->style.checkBoxBoxSize = 16;
+	renderer->style.checkBoxBoxRightMargin = 8;
+	renderer->style.radioButtonOuterRadius = 8;
+	renderer->style.radioButtonInnerRadius = 4;
+	renderer->style.radioButtonSpacing = 8;
+
 	return renderer;
 }
 
@@ -1414,4 +1421,16 @@ struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	return ((wzRendererData *)renderer->data)->vg;
+}
+
+void wz_renderer_set_style(struct wzRenderer *renderer, wzRendererStyle style)
+{
+	WZ_ASSERT(renderer);
+	renderer->style = style;
+}
+
+wzRendererStyle wz_renderer_get_style(const struct wzRenderer *renderer)
+{
+	WZ_ASSERT(renderer);
+	return renderer->style;
 }

@@ -36,6 +36,13 @@ typedef unsigned char bool;
 #endif
 #endif
 
+#ifndef WZ_ASSERT
+#include <assert.h>
+#define WZ_ASSERT assert
+#endif
+
+#include <nanovg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,11 +67,6 @@ struct wzScroller;
 struct wzSpinner;
 struct wzStackLayout;
 struct wzTextEdit;
-
-#ifndef WZ_ASSERT
-#include <assert.h>
-#define WZ_ASSERT assert
-#endif
 
 typedef enum
 {
@@ -579,10 +581,38 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
 typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
 
+typedef struct
+{
+	NVGcolor hoverColor;
+	NVGcolor setColor;
+	NVGcolor pressedColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	NVGcolor borderSetColor;
+	NVGcolor backgroundColor;
+	NVGcolor foregroundColor;
+	NVGcolor textColor;
+	NVGcolor textSelectionColor;
+	NVGcolor textCursorColor;
+	NVGcolor dockPreviewColor;
+	NVGcolor windowHeaderBackgroundColor;
+	NVGcolor windowBorderColor;
+
+	int buttonIconSpacing;
+	int checkBoxBoxSize;
+	int checkBoxBoxRightMargin;
+	int radioButtonOuterRadius;
+	int radioButtonInnerRadius;
+	int radioButtonSpacing;
+}
+wzRendererStyle;
+
 struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
 void wz_renderer_destroy(struct wzRenderer *renderer);
 const char *wz_renderer_get_error();
 struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
+void wz_renderer_set_style(struct wzRenderer *renderer, wzRendererStyle style);
+wzRendererStyle wz_renderer_get_style(const struct wzRenderer *renderer);
 void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 void wz_renderer_end_frame(struct wzRenderer *renderer);
 void wz_renderer_toggle_text_cursor(struct wzRenderer *renderer);

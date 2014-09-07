@@ -24,23 +24,7 @@ SOFTWARE.
 #ifndef WZ_RENDERER_H
 #define WZ_RENDERER_H
 
-#include <nanovg.h>
 #include <wz.h>
-
-extern const NVGcolor color_hover;
-extern const NVGcolor color_set;
-extern const NVGcolor color_pressed;
-extern const NVGcolor color_border;
-extern const NVGcolor color_borderHover;
-extern const NVGcolor color_borderSet;
-extern const NVGcolor color_background;
-extern const NVGcolor color_foreground;
-extern const NVGcolor color_text;
-extern const NVGcolor color_textSelection;
-extern const NVGcolor color_textCursor;
-extern const NVGcolor color_dockPreview;
-extern const NVGcolor color_windowHeaderBackground;
-extern const NVGcolor color_windowBorder;
 
 struct wzRenderer
 {
@@ -101,6 +85,7 @@ struct wzRenderer
 
 	void *data;
 	struct NVGcontext *vg;
+	wzRendererStyle style;
 };
 
 #endif // WZ_RENDERER_H

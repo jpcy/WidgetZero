@@ -28,13 +28,6 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_string.h"
 
-static const int buttonIconSpacing = 6;
-static const int checkBoxBoxSize = 16;
-static const int checkBoxBoxRightMargin = 8;
-static const int radioButtonOuterRadius = 8;
-static const int radioButtonInnerRadius = 4;
-static const int radioButtonSpacing = 8;
-
 struct wzButton
 {
 	struct wzWidget base;
@@ -73,7 +66,7 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 
 		if (handle)
 		{
-			size.w += w + buttonIconSpacing;
+			size.w += w + widget->renderer->style.buttonIconSpacing;
 			size.h = WZ_MAX(size.h, h);
 		}
 	}
@@ -88,7 +81,7 @@ static wzSize wz_check_box_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
 	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
-	size.w += checkBoxBoxSize + checkBoxBoxRightMargin;
+	size.w += widget->renderer->style.checkBoxBoxSize + widget->renderer->style.checkBoxBoxRightMargin;
 	return size;
 }
 
@@ -96,9 +89,10 @@ static wzSize wz_radio_button_measure(struct wzWidget *widget)
 {
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
+	const wzRendererStyle *style = &widget->renderer->style;
 	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
-	size.w += radioButtonOuterRadius * 2 + radioButtonSpacing;
-	size.h = WZ_MAX(size.h, radioButtonOuterRadius);
+	size.w += style->radioButtonOuterRadius * 2 + style->radioButtonSpacing;
+	size.h = WZ_MAX(size.h, style->radioButtonOuterRadius);
 	return size;
 }
 
@@ -118,6 +112,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	int iconHandle, labelWidth, iconX, labelX;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
 
 	nvgSave(vg);
 	rect = wz_widget_get_absolute_rect(widget);
@@ -128,33 +123,33 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Background.
 	if (button->isSet)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_set);
+		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
 	}
 	else if (button->isPressed && widget->hover)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_pressed);
+		wz_renderer_draw_filled_rect(vg, rect, style->pressedColor);
 	}
 	else if (widget->hover)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_hover);
+		wz_renderer_draw_filled_rect(vg, rect, style->hoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+		wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
 	}
 
 	// Border.
 	if (button->isPressed && widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderSet);
+		wz_renderer_draw_rect(vg, rect, style->borderSetColor);
 	}
 	else if (widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderHover);
+		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_rect(vg, rect, color_border);
+		wz_renderer_draw_rect(vg, rect, style->borderColor);
 	}
 
 	// Calculate padded rect.
@@ -176,8 +171,8 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Position the icon and label centered.
 	if (button->icon[0] && iconHandle && button->label[0])
 	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + buttonIconSpacing + labelWidth) / 2.0f);
-		labelX = iconX + iconSize.w + buttonIconSpacing;
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + style->buttonIconSpacing + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + style->buttonIconSpacing;
 	}
 	else if (button->icon[0] && iconHandle)
 	{
@@ -202,7 +197,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Draw the label.
 	if (button->label[0])
 	{
-		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 	}
 
 	nvgRestore(vg);
@@ -214,6 +209,7 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 	wzRect boxRect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -221,35 +217,35 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 
 	// Box.
 	boxRect.x = rect.x;
-	boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f);
-	boxRect.w = checkBoxBoxSize;
-	boxRect.h = checkBoxBoxSize;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - style->checkBoxBoxSize / 2.0f);
+	boxRect.w = style->checkBoxBoxSize;
+	boxRect.h = style->checkBoxBoxSize;
 
 	// Box background.
 	if (button->isPressed && widget->hover)
 	{
-		wz_renderer_draw_filled_rect(vg, boxRect, color_pressed);
+		wz_renderer_draw_filled_rect(vg, boxRect, style->pressedColor);
 	}
 	else if (widget->hover)
 	{
-		wz_renderer_draw_filled_rect(vg, boxRect, color_hover);
+		wz_renderer_draw_filled_rect(vg, boxRect, style->hoverColor);
 	}
 
 	// Box border.
-	wz_renderer_draw_rect(vg, boxRect, color_border);
+	wz_renderer_draw_rect(vg, boxRect, style->borderColor);
 
 	// Box checkmark.
 	if (button->isSet)
 	{
 		boxRect.x = rect.x + 4;
-		boxRect.y = (int)(rect.y + rect.h / 2.0f - checkBoxBoxSize / 2.0f) + 4;
-		boxRect.w = checkBoxBoxSize / 2;
-		boxRect.h = checkBoxBoxSize / 2;
-		wz_renderer_draw_filled_rect(vg, boxRect, color_set);
+		boxRect.y = (int)(rect.y + rect.h / 2.0f - style->checkBoxBoxSize / 2.0f) + 4;
+		boxRect.w = style->checkBoxBoxSize / 2;
+		boxRect.h = style->checkBoxBoxSize / 2;
+		wz_renderer_draw_filled_rect(vg, boxRect, style->setColor);
 	}
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + checkBoxBoxSize + checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+	wz_renderer_print(widget->renderer, rect.x + style->checkBoxBoxSize + style->checkBoxBoxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 
 	nvgRestore(vg);
 }
@@ -259,6 +255,7 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
 
 	nvgSave(vg);
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)button);
@@ -270,19 +267,19 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	if (button->isSet)
 	{
 		nvgBeginPath(vg);
-		nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonInnerRadius);
-		nvgFillColor(vg, color_set);
+		nvgCircle(vg, (float)(rect.x + style->radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)style->radioButtonInnerRadius);
+		nvgFillColor(vg, style->setColor);
 		nvgFill(vg);
 	}
 
 	// Outer circle.
 	nvgBeginPath(vg);
-	nvgCircle(vg, (float)(rect.x + radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)radioButtonOuterRadius);
-	nvgStrokeColor(vg, widget->hover ? color_borderHover : color_border);
+	nvgCircle(vg, (float)(rect.x + style->radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)style->radioButtonOuterRadius);
+	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
 	nvgStroke(vg);
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + radioButtonOuterRadius * 2 + radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+	wz_renderer_print(widget->renderer, rect.x + style->radioButtonOuterRadius * 2 + style->radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 
 	nvgRestore(vg);
 }
@@ -292,6 +289,7 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect, labelRect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -300,29 +298,29 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 	// Background.
 	if (button->isSet)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_set);
+		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
 	}
 	else if (widget->hover)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_hover);
+		wz_renderer_draw_filled_rect(vg, rect, style->hoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_filled_rect(vg, rect, color_foreground);
+		wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
 	}
 
 	// Border.
 	if (button->isSet)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderSet);
+		wz_renderer_draw_rect(vg, rect, style->borderSetColor);
 	}
 	else if (widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, color_borderHover);
+		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
 	}
 	else
 	{
-		wz_renderer_draw_rect(vg, rect, color_border);
+		wz_renderer_draw_rect(vg, rect, style->borderColor);
 	}
 
 	// Label.
@@ -330,7 +328,7 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 	labelRect.y = rect.y + button->padding.top;
 	labelRect.w = rect.w - (button->padding.left + button->padding.right);
 	labelRect.h = rect.h - (button->padding.top + button->padding.bottom);
-	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, color_text, button->label, 0);
+	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 
 	nvgRestore(vg);
 }
