@@ -69,7 +69,7 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 
 	// Update decrement button rect.
 	buttonRect.y = 0;
-	buttonRect.w = spinner->base.renderer->get_spinner_button_width(spinner->base.renderer);
+	buttonRect.w = 16;
 	buttonRect.h = rect.h / 2;
 	buttonRect.x = rect.w - buttonRect.w;
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->decrementButton, buttonRect);
@@ -79,10 +79,59 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->incrementButton, buttonRect);
 }
 
+static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool decrement)
+{
+	NVGcolor color, borderColor;
+	const struct wzButton *button = (struct wzButton *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect r = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	
+	if (wz_button_is_pressed(button) && widget->hover)
+	{
+		color = style->pressedColor;
+		borderColor = style->borderSetColor;
+	}
+	else if (widget->hover)
+	{
+		color = style->hoverColor;
+		borderColor = style->borderHoverColor;
+	}
+	else
+	{
+		color = style->foregroundColor;
+		borderColor = style->borderColor;
+	}
+
+	wz_renderer_draw_filled_rect(vg, r, color);
+	wz_renderer_draw_rect(vg, r, borderColor);
+	nvgBeginPath(vg);
+
+	if (decrement)
+	{
+		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
+		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
+		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+	}
+	else
+	{
+		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
+		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
+		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+	}
+
+	nvgFillColor(vg, borderColor);
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
 static void wz_spinner_decrement_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	WZ_ASSERT(widget);
-	widget->renderer->draw_spinner_button(widget->renderer, clip, (struct wzSpinner *)widget->parent, (struct wzButton *)widget, true);
+	wz_spinner_draw_button(widget, clip, true);
 }
 
 static void wz_spinner_decrement_button_clicked(wzEvent *e)
@@ -99,7 +148,7 @@ static void wz_spinner_decrement_button_clicked(wzEvent *e)
 static void wz_spinner_increment_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	WZ_ASSERT(widget);
-	widget->renderer->draw_spinner_button(widget->renderer, clip, (struct wzSpinner *)widget->parent, (struct wzButton *)widget, false);
+	wz_spinner_draw_button(widget, clip, false);
 }
 
 static void wz_spinner_increment_button_clicked(wzEvent *e)
@@ -115,14 +164,14 @@ static void wz_spinner_increment_button_clicked(wzEvent *e)
 
 static wzSize wz_spinner_measure(struct wzWidget *widget)
 {
-	WZ_ASSERT(widget);
-	return widget->renderer->measure_spinner(widget->renderer, (struct wzSpinner *)widget, ((struct wzSpinner *)widget)->textEdit);
-}
+	wzBorder border;
+	wzSize size;
+	struct wzSpinner *spinner = (struct wzSpinner *)widget;
 
-static void wz_spinner_draw(struct wzWidget *widget, wzRect clip)
-{
-	WZ_ASSERT(widget);
-	widget->renderer->draw_spinner(widget->renderer, clip, (struct wzSpinner *)widget);
+	border = wz_text_edit_get_border(spinner->textEdit);
+	size.w = 100;
+	size.h = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + border.top + border.bottom;
+	return size;
 }
 
 static void wz_spinner_renderer_changed(struct wzWidget *widget)
@@ -135,7 +184,7 @@ static void wz_spinner_renderer_changed(struct wzWidget *widget)
 
 	// Shrink the text edit border to exclude the increment and decrement buttons.
 	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
-	textEditBorder.right += widget->renderer->get_spinner_button_width(widget->renderer);
+	textEditBorder.right += 16;
 	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 
 	wz_spinner_update_child_rects(spinner);
@@ -162,7 +211,6 @@ struct wzSpinner *wz_spinner_create()
 	memset(spinner, 0, sizeof(struct wzSpinner));
 	spinner->base.type = WZ_TYPE_SPINNER;
 	spinner->base.vtable.measure = wz_spinner_measure;
-	spinner->base.vtable.draw = wz_spinner_draw;
 	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
 	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 	spinner->base.vtable.font_changed = wz_spinner_font_changed;

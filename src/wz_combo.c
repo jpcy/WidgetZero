@@ -23,6 +23,7 @@ SOFTWARE.
 */
 #include <stdlib.h>
 #include <string.h>
+#include "wz_list.h"
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
@@ -36,14 +37,79 @@ struct wzCombo
 
 static wzSize wz_combo_measure(struct wzWidget *widget)
 {
-	WZ_ASSERT(widget);
-	return widget->renderer->measure_combo(widget->renderer, (struct wzCombo *)widget);
+	wzSize size;
+	int i;
+	struct wzWidget *scroller;
+	struct wzCombo *combo = (struct wzCombo *)widget;
+	uint8_t *itemData = wz_list_get_item_data(combo->list);
+	int itemStride = wz_list_get_item_stride(combo->list);
+	int nItems = wz_list_get_num_items(combo->list);
+
+	// Use the widest item text.
+	size.w = 0;
+
+	for (i = 0; i < nItems; i++)
+	{
+		int w;
+		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, *((const char **)&itemData[i * itemStride]), 0, &w, NULL);
+		size.w = WZ_MAX(size.w, w);
+	}
+
+	// Use line height.
+	size.h = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize);
+
+	// Add scroller width.
+	scroller = (struct wzWidget *)wz_list_get_scroller(combo->list);
+	size.w += scroller->vtable.measure(scroller).w;
+
+	// Padding.
+	size.w += 20;
+	size.h += 4;
+	return size;
 }
 
 static void wz_combo_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_combo(widget->renderer, clip, (struct wzCombo *)widget);
+	wzRect rect;
+	struct wzCombo *combo = (struct wzCombo *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	uint8_t *itemData = wz_list_get_item_data(combo->list);
+	int itemStride = wz_list_get_item_stride(combo->list);
+	int nItems = wz_list_get_num_items(combo->list);
+	int selectedItemIndex = wz_list_get_selected_item(combo->list);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect(widget);
+
+	// Background.
+	if (widget->hover)
+	{
+		wz_renderer_draw_filled_rect(vg, rect, style->hoverColor);
+	}
+	else
+	{
+		wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
+	}
+
+	// Border.
+	if (widget->hover)
+	{
+		wz_renderer_draw_rect(vg, rect, style->borderSetColor);
+	}
+	else
+	{
+		wz_renderer_draw_rect(vg, rect, style->borderColor);
+	}
+
+	// Selected item.
+	if (selectedItemIndex >= 0)
+	{
+		wz_renderer_print(widget->renderer, rect.x + 10, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
+	}
+
+	nvgRestore(vg);
 }
 
 static void wz_combo_update_list_rect(struct wzCombo *combo)

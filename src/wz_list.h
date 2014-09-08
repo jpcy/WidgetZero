@@ -21,32 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_RENDERER_H
-#define WZ_RENDERER_H
+#ifndef WZ_LIST_H
+#define WZ_LIST_H
 
-#include <wz.h>
+struct wzList;
+struct wzScroller;
 
-#define WZ_NANOVG_MAX_PATH 256
-#define WZ_NANOVG_MAX_IMAGES 1024
-#define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
+struct wzScroller *wz_list_get_scroller(struct wzList *list);
 
-typedef struct
-{
-	int handle;
-	char filename[WZ_NANOVG_MAX_PATH];
-}
-wzImage;
-
-struct wzRenderer
-{
-	wzNanoVgGlDestroy destroy;
-	struct NVGcontext *vg;
-	wzRendererStyle style;
-	wzImage images[WZ_NANOVG_MAX_IMAGES];
-	int nImages;
-	char fontDirectory[WZ_NANOVG_MAX_PATH];
-	float defaultFontSize;
-	bool showTextCursor;
-};
-
-#endif // WZ_RENDERER_H
+#endif // WZ_LIST_H

@@ -36,15 +36,59 @@ struct wzGroupBox
 
 static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_group_box(widget->renderer, clip, (struct wzGroupBox *)widget);
+	wzRect rect;
+	struct wzGroupBox *groupBox = (struct wzGroupBox *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	rect = wz_widget_get_absolute_rect(widget);
+	
+	// Background.
+	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
+
+	// Border.
+	if (!groupBox->label[0])
+	{
+		wz_renderer_draw_rect(vg, rect, style->borderColor);
+	}
+	else
+	{
+		int textWidth, textHeight;
+		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, groupBox->label, 0, &textWidth, &textHeight);
+
+		// Left, right, bottom, top left, top right.
+		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, style->borderColor);
+		wz_renderer_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, style->borderColor);
+		wz_renderer_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, style->borderColor);
+		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + style->groupBoxTextLeftMargin - style->groupBoxTextBorderSpacing, rect.y + textHeight / 2, style->borderColor);
+		wz_renderer_draw_line(vg, rect.x + style->groupBoxTextLeftMargin + textWidth + style->groupBoxTextBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, style->borderColor);
+
+		// Label.
+		wz_renderer_print(widget->renderer, rect.x + style->groupBoxTextLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, style->textColor, groupBox->label, 0);
+	}
+
+	nvgRestore(vg);
+}
+
+static void wz_group_box_refresh_margin(struct wzGroupBox *groupBox)
+{
+	wzBorder margin;
+	const wzRendererStyle *style = &groupBox->base.renderer->style;
+	margin.top = margin.bottom = margin.left = margin.right = style->groupBoxMargin;
+
+	if (groupBox->label[0])
+	{
+		margin.top = wz_renderer_get_line_height(groupBox->base.renderer, groupBox->base.fontFace, groupBox->base.fontSize) + style->groupBoxMargin;
+	}
+
+	wz_widget_set_margin(groupBox->content, margin);
 }
 
 static void wz_group_box_renderer_changed(struct wzWidget *widget)
 {
-	struct wzGroupBox *groupBox = (struct wzGroupBox *)widget;
-	WZ_ASSERT(groupBox);
-	wz_widget_set_margin(groupBox->content, widget->renderer->measure_group_box_margin(widget->renderer, groupBox));
+	wz_group_box_refresh_margin((struct wzGroupBox *)widget);
 }
 
 static void wz_group_box_destroy(struct wzWidget *widget)
@@ -81,7 +125,7 @@ void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label)
 	// Update the margin.
 	if (groupBox->base.renderer)
 	{
-		wz_widget_set_margin(groupBox->content, groupBox->base.renderer->measure_group_box_margin(groupBox->base.renderer, groupBox));
+		wz_group_box_refresh_margin(groupBox);
 	}
 }
 

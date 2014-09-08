@@ -169,7 +169,7 @@ static void wz_tab_bar_renderer_changed(struct wzWidget *widget)
 {
 	struct wzTabBar *tabBar = (struct wzTabBar *)widget;
 	WZ_ASSERT(tabBar);
-	tabBar->base.rect.h = widget->renderer->get_tab_bar_height(widget->renderer, tabBar);
+	tabBar->base.rect.h = 20;
 }
 
 static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)

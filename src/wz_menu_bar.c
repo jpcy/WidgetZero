@@ -55,14 +55,37 @@ MENU BAR BUTTON
 
 static wzSize wz_menu_bar_button_measure(struct wzWidget *widget)
 {
-	WZ_ASSERT(widget);
-	return widget->renderer->measure_menu_bar_button(widget->renderer, (struct wzMenuBarButton *)widget);
+	wzSize size;
+	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
+
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	size.w += 12;
+	return size;
 }
 
 static void wz_menu_bar_button_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_menu_bar_button(widget->renderer, clip, (struct wzMenuBarButton *)widget);
+	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+
+	if (button->isPressed)
+	{
+		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
+	}
+
+	if (widget->hover)
+	{
+		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
+	}
+
+	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
+
+	nvgRestore(vg);
 }
 
 static void wz_menu_bar_button_destroy(struct wzWidget *widget)
@@ -167,14 +190,19 @@ MENU BAR
 
 static void wz_menu_bar_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_menu_bar(widget->renderer, clip, (struct wzMenuBar *)widget);
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	wz_renderer_draw_filled_rect(vg, rect, widget->renderer->style.foregroundColor);
+	nvgRestore(vg);
 }
 
 static void wz_menu_bar_renderer_changed(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_set_height(widget, widget->renderer->calculate_menu_bar_height(widget->renderer, (struct wzMenuBar *)widget));
+	wz_widget_set_height(widget, wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + widget->renderer->style.menuBarPadding);
 }
 
 struct wzMenuBar *wz_menu_bar_create()

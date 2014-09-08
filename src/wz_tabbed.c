@@ -50,8 +50,15 @@ TAB PAGE WIDGET
 
 static void wz_tab_page_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_tab_page(widget->renderer, clip, widget);
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
+	wz_renderer_draw_rect(vg, rect, style->borderColor);
+	nvgRestore(vg);
 }
 
 static wzRect wz_tab_page_get_children_clip_rect(struct wzWidget *widget)

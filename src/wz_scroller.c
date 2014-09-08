@@ -226,10 +226,78 @@ DECREMENT AND INCREMENT BUTTONS
 ================================================================================
 */
 
+static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool decrement)
+{
+	NVGcolor color, borderColor;
+	struct wzButton *button = (struct wzButton *)widget;
+	struct wzScroller *scroller = (struct wzScroller *)widget->parent;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect r = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	
+	if (wz_button_is_pressed(button) && widget->hover)
+	{
+		color = style->pressedColor;
+		borderColor = style->borderSetColor;
+	}
+	else if (widget->hover)
+	{
+		color = style->hoverColor;
+		borderColor = style->borderHoverColor;
+	}
+	else
+	{
+		color = style->foregroundColor;
+		borderColor = style->borderColor;
+	}
+
+	wz_renderer_draw_filled_rect(vg, r, color);
+	wz_renderer_draw_rect(vg, r, borderColor);
+	nvgBeginPath(vg);
+
+	if (wz_scroller_get_type(scroller) == WZ_SCROLLER_VERTICAL)
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+		}
+	}
+	else
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.5f); // left
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // bottom
+			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
+		}
+		else
+		{
+			nvgMoveTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.5f); // right
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // top
+			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
+		}
+	}
+
+	nvgFillColor(vg, borderColor);
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
 static void wz_scroller_decrement_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	WZ_ASSERT(widget);
-	widget->renderer->draw_scroller_button(widget->renderer, clip, (struct wzScroller *)widget->parent, (struct wzButton *)widget, true);
+	wz_scroller_button_draw(widget, clip, true);
 }
 
 static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller)
@@ -255,7 +323,7 @@ static void wz_scroller_decrement_button_update_rect(struct wzScroller *scroller
 static void wz_scroller_increment_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	WZ_ASSERT(widget);
-	widget->renderer->draw_scroller_button(widget->renderer, clip, (struct wzScroller *)widget->parent, (struct wzButton *)widget, false);
+	wz_scroller_button_draw(widget, clip, false);
 }
 
 static void wz_scroller_increment_button_update_rect(struct wzScroller *scroller)
@@ -351,14 +419,63 @@ static void wz_scroller_increment_button_clicked(wzEvent *e)
 
 static wzSize wz_scroller_measure(struct wzWidget *widget)
 {
-	WZ_ASSERT(widget);
-	return widget->renderer->measure_scroller(widget->renderer, wz_scroller_get_type((struct wzScroller *)widget));
+	wzSize size;
+	struct wzScroller *scroller = (struct wzScroller *)widget;
+
+	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+	{
+		size.w = 16;
+		size.h = 0;
+	}
+	else
+	{
+		size.w = 0;
+		size.h = 16;
+	}
+
+	return size;
 }
 
 static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_scroller(widget->renderer, clip, (struct wzScroller *)widget);
+	const struct wzScroller *scroller = (struct wzScroller *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
+
+	// Nub.
+	{
+		wzRect r;
+		bool hover, pressed;
+		NVGcolor color, borderColor;
+
+		wz_scroller_get_nub_state(scroller, &r, &hover, &pressed);
+
+		if (pressed)
+		{
+			color = style->pressedColor;
+			borderColor = style->borderSetColor;
+		}
+		else if (hover)
+		{
+			color = style->hoverColor;
+			borderColor = style->borderHoverColor;
+		}
+		else
+		{
+			color = style->foregroundColor;
+			borderColor = style->borderColor;
+		}
+
+		wz_renderer_draw_filled_rect(vg, r, color);
+		wz_renderer_draw_rect(vg, r, borderColor);
+	}
+
+	nvgRestore(vg);
 }
 
 static void wz_scroller_destroy(struct wzWidget *widget)

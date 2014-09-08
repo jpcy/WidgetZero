@@ -56,7 +56,7 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
 
-	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
 
 	if (button->icon[0])
 	{
@@ -80,7 +80,7 @@ static wzSize wz_check_box_measure(struct wzWidget *widget)
 {
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
-	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
 	size.w += widget->renderer->style.checkBoxBoxSize + widget->renderer->style.checkBoxBoxRightMargin;
 	return size;
 }
@@ -90,7 +90,7 @@ static wzSize wz_radio_button_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
 	const wzRendererStyle *style = &widget->renderer->style;
-	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
 	size.w += style->radioButtonOuterRadius * 2 + style->radioButtonSpacing;
 	size.h = WZ_MAX(size.h, style->radioButtonOuterRadius);
 	return size;
@@ -166,7 +166,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 		iconHandle = wz_renderer_create_image(widget->renderer, button->icon, &iconSize.w, &iconSize.h);
 	}
 
-	widget->renderer->measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &labelWidth, NULL);
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &labelWidth, NULL);
 
 	// Position the icon and label centered.
 	if (button->icon[0] && iconHandle && button->label[0])

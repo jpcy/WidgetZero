@@ -546,9 +546,16 @@ DOCK ICON
 
 static void wz_main_window_draw_dock_icon(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRect rect = wz_widget_get_rect(widget);
 	clip = clip; // Never clipped, so just ignore that parameter.
-	widget->renderer->draw_dock_icon(widget->renderer, wz_widget_get_rect(widget));
+
+	nvgSave(vg);
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, 3);
+	nvgFillColor(vg, nvgRGBA(64, 64, 64, 128));
+	nvgFill(vg);
+	nvgRestore(vg);
 }
 
 static void wz_main_window_update_dock_icon_positions(struct wzMainWindow *mainWindow)
@@ -580,9 +587,12 @@ DOCK PREVIEW
 
 static void wz_main_window_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
+	struct NVGcontext *vg = widget->renderer->vg;
 	clip = clip; // Never clipped, so just ignore that parameter.
-	widget->renderer->draw_dock_preview(widget->renderer, wz_widget_get_rect(widget));
+
+	nvgSave(vg);
+	wz_renderer_draw_filled_rect(vg, wz_widget_get_rect(widget), widget->renderer->style.dockPreviewColor);
+	nvgRestore(vg);
 }
 
 static void wz_widget_update_dock_preview_rect(struct wzMainWindow *mainWindow, wzDockPosition dockPosition)
@@ -1160,8 +1170,8 @@ DRAWING
 
 void wz_main_window_draw(struct wzMainWindow *mainWindow)
 {
-	mainWindow->base.renderer->draw_main_window(mainWindow->base.renderer, mainWindow);
-
+	struct NVGcontext *vg = mainWindow->base.renderer->vg;
+	wz_renderer_draw_filled_rect(vg, wz_widget_get_absolute_rect((const struct wzWidget *)mainWindow), mainWindow->base.renderer->style.backgroundColor);
 	wz_widget_draw_main_window(mainWindow);
 }
 
@@ -1215,7 +1225,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
 		wz_widget_set_measure_callback(widget, NULL);
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
-		wz_widget_set_size_internal((struct wzWidget *)mainWindow->dockIcons[i], renderer->get_dock_icon_size(renderer));
+		wz_widget_set_size_args_internal((struct wzWidget *)mainWindow->dockIcons[i], 48, 48);
 		wz_widget_set_visible(widget, false);
 		wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
 	}

@@ -297,14 +297,6 @@ wzKey;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
-typedef struct
-{
-	const char *start;
-	size_t length;
-	const char *next;
-}
-wzLineBreakResult;
-
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
 
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
@@ -601,6 +593,11 @@ typedef struct
 	int buttonIconSpacing;
 	int checkBoxBoxSize;
 	int checkBoxBoxRightMargin;
+	int groupBoxMargin;
+	int groupBoxTextLeftMargin;
+	int groupBoxTextBorderSpacing;
+	int listItemLeftPadding;
+	int menuBarPadding;
 	int radioButtonOuterRadius;
 	int radioButtonInnerRadius;
 	int radioButtonSpacing;
@@ -618,6 +615,7 @@ void wz_renderer_end_frame(struct wzRenderer *renderer);
 void wz_renderer_toggle_text_cursor(struct wzRenderer *renderer);
 
 int wz_renderer_create_image(struct wzRenderer *renderer, const char *filename, int *width, int *height);
+void wz_renderer_set_font_face(struct wzRenderer *renderer, const char *face);
 void wz_renderer_print_box(struct wzRenderer *renderer, wzRect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
 void wz_renderer_print(struct wzRenderer *renderer, int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
 void wz_renderer_clip_to_rect(struct NVGcontext *vg, wzRect rect);
@@ -626,6 +624,21 @@ void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVG
 void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
 void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2, struct NVGcolor color);
 void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image);
+
+int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize);
+
+// width or height can be NULL.
+void wz_renderer_measure_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
+
+typedef struct
+{
+	const char *start;
+	size_t length;
+	const char *next;
+}
+wzLineBreakResult;
+
+wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 
 #ifdef __cplusplus
 } // extern "C"

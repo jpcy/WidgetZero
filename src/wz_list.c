@@ -132,30 +132,86 @@ LIST WIDGET
 
 static void wz_list_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_list(widget->renderer, clip, (struct wzList *)widget);
+	int y, i;
+	struct wzList *list = (struct wzList *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const wzRect itemsRect = wz_list_get_absolute_items_rect(list);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+	
+	// Background.
+	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
+
+	// Border.
+	wz_renderer_draw_rect(vg, rect, style->borderColor);
+
+	// Items.
+	if (!wz_renderer_clip_to_rect_intersection(vg, clip, itemsRect))
+		return;
+
+	y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
+
+	for (i = wz_list_get_first_item(list); i < list->nItems; i++)
+	{
+		wzRect itemRect;
+		const uint8_t *itemData;
+
+		// Outside widget?
+		if (y > itemsRect.y + itemsRect.h)
+			break;
+
+		itemRect.x = itemsRect.x;
+		itemRect.y = y;
+		itemRect.w = itemsRect.w;
+		itemRect.h = list->itemHeight;
+		itemData = *((uint8_t **)&list->itemData[i * list->itemStride]);
+
+		if (i == list->selectedItem)
+		{
+			wz_renderer_draw_filled_rect(vg, itemRect, style->setColor);
+		}
+		else if (i == list->pressedItem || i == list->hoveredItem)
+		{
+			wz_renderer_draw_filled_rect(vg, itemRect, style->hoverColor);
+		}
+
+		if (list->draw_item)
+		{
+			list->draw_item(widget->renderer, itemRect, list, widget->fontFace, widget->fontSize, i, itemData);
+		}
+		else
+		{
+			wz_renderer_print(widget->renderer, itemsRect.x + style->listItemLeftPadding, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, (const char *)itemData, 0);
+		}
+
+		y += list->itemHeight;
+	}
+
+	nvgRestore(vg);
 }
 
 static void wz_list_destroy(struct wzWidget *widget)
 {
-	struct wzList *list;
-
-	WZ_ASSERT(widget);
-	list = (struct wzList *)widget;
+	struct wzList *list = (struct wzList *)widget;
 	wz_arr_free(list->item_selected_callbacks);
+}
+
+static void wz_list_refresh_item_height(struct wzList *list)
+{
+	// Don't stomp on user set value.
+	if (list->isItemHeightUserSet)
+		return;
+
+	// Add a little padding.
+	wz_list_set_item_height_internal(list, wz_renderer_get_line_height(list->base.renderer, list->base.fontFace, list->base.fontSize) + 2);
 }
 
 static void wz_list_renderer_changed(struct wzWidget *widget)
 {
-	struct wzList *list = (struct wzList *)widget;
-	WZ_ASSERT(list);
-	list->itemsBorder = widget->renderer->get_list_items_border(widget->renderer, list);
-
-	// Don't stomp on user set value.
-	if (!list->isItemHeightUserSet)
-	{
-		wz_list_set_item_height_internal(list, widget->renderer->measure_list_item_height(widget->renderer, list));
-	}
+	wz_list_refresh_item_height((struct wzList *)widget);
 }
 
 static void wz_list_set_rect(struct wzWidget *widget, wzRect rect)
@@ -183,14 +239,12 @@ static void wz_list_set_visible(struct wzWidget *widget, bool visible)
 
 static void wz_list_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
 {
-	struct wzList *list = (struct wzList *)widget;
 	WZ_ASSERT(widget);
 
-	// Don't stomp on user set value.
-	if (widget->renderer && !list->isItemHeightUserSet)
+	// Doesn't matter if we can't call this yet (NULL renderer), since wz_list_renderer_changed will call it too.
+	if (widget->renderer)
 	{
-		// Doesn't matter if we can't call this yet (NULL renderer), since wz_list_renderer_changed will call it too.
-		wz_list_set_item_height_internal(list, widget->renderer->measure_list_item_height(widget->renderer, list));
+		wz_list_refresh_item_height((struct wzList *)widget);
 	}
 }
 
@@ -347,6 +401,7 @@ struct wzList *wz_list_create()
 	list->pressedItem = -1;
 	list->hoveredItem = -1;
 	list->mouseOverItem = -1;
+	list->itemsBorder.top = list->itemsBorder.right = list->itemsBorder.bottom = list->itemsBorder.left = 2;
 
 	list->scroller = wz_scroller_create();
 	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
@@ -355,12 +410,6 @@ struct wzList *wz_list_create()
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
 
 	return list;
-}
-
-struct wzScroller *wz_list_get_scroller(struct wzList *list)
-{
-	WZ_ASSERT(list);
-	return list->scroller;
 }
 
 wzBorder wz_list_get_items_border(const struct wzList *list)
@@ -511,4 +560,9 @@ void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback cal
 {
 	WZ_ASSERT(list);
 	wz_arr_push(list->item_selected_callbacks, callback);
+}
+
+struct wzScroller *wz_list_get_scroller(struct wzList *list)
+{
+	return list->scroller;
 }

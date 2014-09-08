@@ -38,14 +38,49 @@ struct wzLabel
 
 static wzSize wz_label_measure(struct wzWidget *widget)
 {
-	WZ_ASSERT(widget);
-	return widget->renderer->measure_label(widget->renderer, (struct wzLabel *)widget);
+	wzSize size;
+	struct wzLabel *label = (struct wzLabel *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+
+	if (label->multiline)
+	{
+		float bounds[4];
+
+		nvgFontSize(vg, widget->fontSize == 0 ? widget->renderer->defaultFontSize : widget->fontSize);
+		wz_renderer_set_font_face(widget->renderer, widget->fontFace);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.2f);
+		nvgTextBoxBounds(vg, 0, 0, (float)widget->rect.w, label->text, NULL, bounds);
+		size.w = (int)bounds[2];
+		size.h = (int)bounds[3];
+	}
+	else
+	{
+		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, label->text, 0, &size.w, &size.h);
+	}
+
+	return size;
 }
 
 static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_label(widget->renderer, clip, (struct wzLabel *)widget);
+	struct wzLabel *label = (struct wzLabel *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect(vg, clip);
+
+	if (label->multiline)
+	{
+		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, nvgRGBAf(label->textColor.r, label->textColor.g, label->textColor.b, label->textColor.a), label->text, 0);
+	}
+	else
+	{
+		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, nvgRGBAf(label->textColor.r, label->textColor.g, label->textColor.b, label->textColor.a), label->text, 0);
+	}
+
+	nvgRestore(vg);
 }
 
 static void wz_label_renderer_changed(struct wzWidget *widget)
@@ -55,7 +90,10 @@ static void wz_label_renderer_changed(struct wzWidget *widget)
 
 	if (!label->isTextColorUserSet)
 	{
-		label->textColor = widget->renderer->get_default_text_color(widget->renderer);
+		label->textColor.r = widget->renderer->style.textColor.r;
+		label->textColor.g = widget->renderer->style.textColor.g;
+		label->textColor.b = widget->renderer->style.textColor.b;
+		label->textColor.a = widget->renderer->style.textColor.a;
 	}
 }
 

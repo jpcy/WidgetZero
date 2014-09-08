@@ -70,24 +70,66 @@ struct wzWindow
 
 static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 {
-	WZ_ASSERT(widget);
-	widget->renderer->draw_window(widget->renderer, clip, (struct wzWindow *)widget);
+	wzRect borderRect, headerRect;
+	const struct wzWindow *window = (struct wzWindow *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+
+	nvgSave(vg);
+	
+	// Background.
+	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
+
+	// Border top.
+	borderRect = rect;
+	borderRect.h = window->borderSize;
+	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+
+	// Border bottom.
+	borderRect.y = rect.y + rect.h - window->borderSize;
+	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+
+	// Border left.
+	borderRect = rect;
+	borderRect.w = window->borderSize;
+	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+
+	// Border right.
+	borderRect.x = rect.x + rect.w - window->borderSize;
+	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+
+	// Header.
+	headerRect = wz_window_get_header_rect(window);
+
+	if (headerRect.w > 0 && headerRect.h > 0)
+	{
+		wz_renderer_clip_to_rect(vg, headerRect);
+		wz_renderer_draw_filled_rect(vg, headerRect, style->windowHeaderBackgroundColor);
+		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, window->title, 0);
+	}
+
+	nvgRestore(vg);
+}
+
+static void wz_window_refresh_header_height(struct wzWidget *widget)
+{
+	struct wzWindow *window = (struct wzWindow *)widget;
+	window->headerHeight = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + 6; // Padding.
 }
 
 static void wz_window_renderer_changed(struct wzWidget *widget)
 {
 	struct wzWindow *window = (struct wzWindow *)widget;
 	WZ_ASSERT(window);
-	window->borderSize = widget->renderer->get_window_border_size(widget->renderer, window);
-	window->headerHeight = widget->renderer->measure_window_header_height(widget->renderer, window);
+	window->borderSize = 4;
+	wz_window_refresh_header_height(widget);
 	wz_widget_refresh_rect(widget);
 }
 
 static void wz_window_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
 {
-	struct wzWindow *window = (struct wzWindow *)widget;
-	WZ_ASSERT(window);
-	window->headerHeight = widget->renderer->measure_window_header_height(widget->renderer, window);
+	wz_window_refresh_header_height(widget);
 	wz_widget_refresh_rect(widget);
 }
 
