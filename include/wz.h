@@ -119,20 +119,6 @@ wzBorder;
 
 extern const wzBorder wzBorder_zero;
 
-typedef struct
-{
-	union
-	{
-		float rgba;
-
-		struct
-		{
-			float r, g, b, a;
-		};
-	};
-}
-wzColor;
-
 enum
 {
 	WZ_STRETCH_NONE,
@@ -443,8 +429,8 @@ void wz_label_set_multiline(struct wzLabel *label, bool multiline);
 bool wz_label_get_multiline(const struct wzLabel *label);
 void wz_label_set_text(struct wzLabel *label, const char *text);
 const char *wz_label_get_text(const struct wzLabel *label);
-void wz_label_set_text_color(struct wzLabel *label, wzColor color);
-wzColor wz_label_get_text_color(const struct wzLabel *label);
+void wz_label_set_text_color(struct wzLabel *label, NVGcolor color);
+NVGcolor wz_label_get_text_color(const struct wzLabel *label);
 
 typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 

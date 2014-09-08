@@ -32,7 +32,7 @@ struct wzLabel
 	struct wzWidget base;
 	wzString text;
 	bool multiline;
-	wzColor textColor;
+	NVGcolor textColor;
 	bool isTextColorUserSet;
 };
 
@@ -73,11 +73,11 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 
 	if (label->multiline)
 	{
-		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, nvgRGBAf(label->textColor.r, label->textColor.g, label->textColor.b, label->textColor.a), label->text, 0);
+		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, label->textColor, label->text, 0);
 	}
 	else
 	{
-		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, nvgRGBAf(label->textColor.r, label->textColor.g, label->textColor.b, label->textColor.a), label->text, 0);
+		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, label->textColor, label->text, 0);
 	}
 
 	nvgRestore(vg);
@@ -90,10 +90,7 @@ static void wz_label_renderer_changed(struct wzWidget *widget)
 
 	if (!label->isTextColorUserSet)
 	{
-		label->textColor.r = widget->renderer->style.textColor.r;
-		label->textColor.g = widget->renderer->style.textColor.g;
-		label->textColor.b = widget->renderer->style.textColor.b;
-		label->textColor.a = widget->renderer->style.textColor.a;
+		label->textColor = widget->renderer->style.textColor;
 	}
 }
 
@@ -141,14 +138,14 @@ const char *wz_label_get_text(const struct wzLabel *label)
 	return label->text;
 }
 
-void wz_label_set_text_color(struct wzLabel *label, wzColor color)
+void wz_label_set_text_color(struct wzLabel *label, NVGcolor color)
 {
 	WZ_ASSERT(label);
 	label->textColor = color;
 	label->isTextColorUserSet = true;
 }
 
-wzColor wz_label_get_text_color(const struct wzLabel *label)
+NVGcolor wz_label_get_text_color(const struct wzLabel *label)
 {
 	return label->textColor;
 }

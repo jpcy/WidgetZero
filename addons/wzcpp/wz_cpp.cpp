@@ -487,7 +487,7 @@ Label *Label::setText(const char *format, ...)
 
 Label *Label::setTextColor(float r, float g, float b, float a)
 {
-	wzColor color;
+	NVGcolor color;
 	color.r = r;
 	color.g = g;
 	color.b = b;
