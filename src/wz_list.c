@@ -206,7 +206,7 @@ static void wz_list_refresh_item_height(struct wzList *list)
 		return;
 
 	// Add a little padding.
-	wz_list_set_item_height_internal(list, wz_renderer_get_line_height(list->base.renderer, list->base.fontFace, list->base.fontSize) + 2);
+	wz_list_set_item_height_internal(list, wz_widget_get_line_height((struct wzWidget *)list) + 2);
 }
 
 static void wz_list_renderer_changed(struct wzWidget *widget)

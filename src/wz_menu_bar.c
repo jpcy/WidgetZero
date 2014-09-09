@@ -58,7 +58,7 @@ static wzSize wz_menu_bar_button_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
 
-	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, button->label, 0, &size.w, &size.h);
+	wz_widget_measure_text(widget, button->label, 0, &size.w, &size.h);
 	size.w += 12;
 	return size;
 }
@@ -202,7 +202,7 @@ static void wz_menu_bar_draw(struct wzWidget *widget, wzRect clip)
 static void wz_menu_bar_renderer_changed(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_set_height(widget, wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + widget->renderer->style.menuBarPadding);
+	wz_widget_set_height(widget, wz_widget_get_line_height(widget) + widget->renderer->style.menuBarPadding);
 }
 
 struct wzMenuBar *wz_menu_bar_create()

@@ -56,7 +56,7 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	else
 	{
 		int textWidth, textHeight;
-		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, groupBox->label, 0, &textWidth, &textHeight);
+		wz_widget_measure_text(widget, groupBox->label, 0, &textWidth, &textHeight);
 
 		// Left, right, bottom, top left, top right.
 		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, style->borderColor);
@@ -80,7 +80,7 @@ static void wz_group_box_refresh_margin(struct wzGroupBox *groupBox)
 
 	if (groupBox->label[0])
 	{
-		margin.top = wz_renderer_get_line_height(groupBox->base.renderer, groupBox->base.fontFace, groupBox->base.fontSize) + style->groupBoxMargin;
+		margin.top = wz_widget_get_line_height((struct wzWidget *)groupBox) + style->groupBoxMargin;
 	}
 
 	wz_widget_set_margin(groupBox->content, margin);

@@ -51,12 +51,12 @@ static wzSize wz_combo_measure(struct wzWidget *widget)
 	for (i = 0; i < nItems; i++)
 	{
 		int w;
-		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, *((const char **)&itemData[i * itemStride]), 0, &w, NULL);
+		wz_widget_measure_text(widget, *((const char **)&itemData[i * itemStride]), 0, &w, NULL);
 		size.w = WZ_MAX(size.w, w);
 	}
 
 	// Use line height.
-	size.h = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize);
+	size.h = wz_widget_get_line_height(widget);
 
 	// Add scroller width.
 	scroller = (struct wzWidget *)wz_list_get_scroller(combo->list);

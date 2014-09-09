@@ -176,4 +176,10 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget);
 // Used when widgets need to be seen to inherit the draw priority of their ancestors. e.g. combo descendants: list, scroller, buttons used by scroller.
 int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget);
 
+// Shortcut for wz_renderer_get_line_height, using the widget's renderer, font face and font size.
+int wz_widget_get_line_height(const struct wzWidget *widget);
+
+// Shortcut for wz_renderer_measure_text, using the widget's renderer, font face and font size.
+void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height);
+
 #endif

@@ -964,3 +964,15 @@ int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget)
 
 	return drawPriority;
 }
+
+int wz_widget_get_line_height(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize);
+}
+
+void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height)
+{
+	WZ_ASSERT(widget);
+	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, text, n, width, height);
+}

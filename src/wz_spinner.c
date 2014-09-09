@@ -170,7 +170,7 @@ static wzSize wz_spinner_measure(struct wzWidget *widget)
 
 	border = wz_text_edit_get_border(spinner->textEdit);
 	size.w = 100;
-	size.h = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + border.top + border.bottom;
+	size.h = wz_widget_get_line_height(widget) + border.top + border.bottom;
 	return size;
 }
 

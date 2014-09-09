@@ -115,7 +115,7 @@ static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 static void wz_window_refresh_header_height(struct wzWidget *widget)
 {
 	struct wzWindow *window = (struct wzWindow *)widget;
-	window->headerHeight = wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize) + 6; // Padding.
+	window->headerHeight = wz_widget_get_line_height(widget) + 6; // Padding.
 }
 
 static void wz_window_renderer_changed(struct wzWidget *widget)

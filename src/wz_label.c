@@ -56,7 +56,7 @@ static wzSize wz_label_measure(struct wzWidget *widget)
 	}
 	else
 	{
-		wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, label->text, 0, &size.w, &size.h);
+		wz_widget_measure_text(widget, label->text, 0, &size.w, &size.h);
 	}
 
 	return size;
