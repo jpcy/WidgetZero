@@ -87,21 +87,6 @@ project "WidgetZero"
 		
 -----------------------------------------------------------------------------
 
-project "WidgetZeroCpp"
-	language "C++"
-	kind "StaticLib"
-
-	files { "addons/wzcpp/*.*" }
-	
-	includedirs
-	{
-		"include",
-		config.nanovgPath .. "/src",
-		"addons/wzcpp"
-	}
-		
------------------------------------------------------------------------------
-
 project "NanoVG"
 	kind "StaticLib"
 	files { config.nanovgPath .. "/src/*.*" }
@@ -109,7 +94,7 @@ project "NanoVG"
 		
 -----------------------------------------------------------------------------
 
-function createExampleProject(_name, _language, _includedirs, _links)
+function createExampleProject(_name, _language)
 	project("Example_" .. _name)
 		language(_language)
 		kind "WindowedApp"
@@ -121,8 +106,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 		{
 			"include",
 			config.glewPath .. "/include",
-			config.nanovgPath .. "/src",
-			_includedirs
+			config.nanovgPath .. "/src"
 		}
 		
 		configuration "linux"
@@ -145,8 +129,7 @@ function createExampleProject(_name, _language, _includedirs, _links)
 			"SDL2",
 			"SDL2main",
 			"NanoVG",
-			"WidgetZero",
-			_links
+			"WidgetZero"
 		}
 		
 		if _language == "C++" then
@@ -157,5 +140,5 @@ end
 
 -----------------------------------------------------------------------------
 
-createExampleProject("demo", "C++", "addons/wzcpp", "WidgetZeroCpp")
-createExampleProject("simple", "C", nil, nil)
+createExampleProject("demo", "C++")
+createExampleProject("simple", "C")

@@ -21,15 +21,325 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include <stdarg.h>
+#pragma once
+
 #include <stdint.h>
+#include <memory>
 #include <string>
-#include <sstream>
-#include <wz_cpp_p.h>
+#include <vector>
+#include <wz.h>
+
+#define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
 namespace wz {
 
-//------------------------------------------------------------------------------
+class Button;
+class Checkbox;
+class Combo;
+struct MainWindowPrivate;
+class GroupBox;
+class Label;
+class List;
+class RadioButton;
+class Scroller;
+class StackLayout;
+class Tab;
+struct TabPrivate;
+class Tabbed;
+class TextEdit;
+struct WidgetPrivate;
+class Widget;
+class Window;
+
+struct IEventHandler
+{
+	virtual ~IEventHandler() {}
+	virtual void call(wzEvent *e) = 0;
+
+	wzWidgetEventType eventType;
+};
+
+template<class Object>
+struct EventHandler : public IEventHandler
+{
+	typedef void (Object::*Method)(wzEvent *);
+
+	virtual void call(wzEvent *e)
+	{
+		WZCPP_CALL_OBJECT_METHOD(object, method)(e);
+	}
+
+	Object *object;
+	Method method;
+};
+
+class Widget
+{
+public:
+	virtual ~Widget();
+	virtual wzRect getRect() const;
+	virtual Widget *setPosition(int x, int y);
+	virtual Widget *setWidth(int w);
+	virtual Widget *setHeight(int h);
+	virtual Widget *setSize(int w, int h);
+	virtual Widget *setRect(int x, int y, int w, int h);
+	virtual Widget *setStretch(int stretch);
+	virtual Widget *setAlign(int align);
+	virtual Widget *setMargin(int margin);
+	virtual Widget *setMargin(int top, int right, int bottom, int left);
+	virtual Widget *setMargin(wzBorder margin);
+	virtual Widget *setFontFace(const std::string &fontFace);
+	virtual Widget *setFontSize(float fontSize);
+	virtual Widget *setFont(const std::string &fontFace, float fontSize);
+	virtual Widget *setVisible(bool visible);
+
+	Widget *addEventHandler(IEventHandler *eventHandler);
+
+	template<class Object>
+	Widget *addEventHandler(wzWidgetEventType eventType, Object *object, void (Object::*method)(wzEvent *))
+	{
+		EventHandler<Object> *eventHandler = new EventHandler<Object>();
+		eventHandler->eventType = eventType;
+		eventHandler->object = object;
+		eventHandler->method = method;
+		addEventHandler(eventHandler);
+		return this;
+	}
+
+	WidgetPrivate *p;
+};
+
+class Button : public Widget
+{
+public:
+	Button();
+	Button(const std::string &label, const std::string &icon = std::string());
+	~Button();
+	wzBorder getPadding() const;
+	Button *setPadding(wzBorder padding);
+	Button *setPadding(int top, int right, int bottom, int left);
+	const char *getIcon() const;
+	Button *setIcon(const std::string &icon);
+	const char *getLabel() const;
+	Button *setLabel(const std::string &label);
+	Button *setToggle(bool toggle);
+};
+
+class Checkbox : public Widget
+{
+public:
+	Checkbox();
+	Checkbox( const std::string &label);
+	~Checkbox();
+	const char *getLabel() const;
+	Checkbox *setLabel(const std::string &label);
+	Checkbox *bindValue(bool *value);
+};
+
+class Combo : public Widget
+{
+public:
+	Combo();
+	~Combo();
+	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
+};
+
+class Frame : public Widget
+{
+public:
+	Frame(wzRenderer *renderer);
+	~Frame();
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class GroupBox : public Widget
+{
+public:
+	GroupBox();
+	GroupBox(const std::string &label);
+	~GroupBox();
+	const char *getLabel() const;
+	GroupBox *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class Label : public Widget
+{
+public:
+	Label();
+	Label(const std::string &text);
+	~Label();
+	Label *setText(const char *format, ...);
+	Label *setTextColor(float r, float g, float b, float a = 1.0f);
+	Label *setMultiline(bool multiline);
+};
+
+class List : public Widget
+{
+public:
+	List();
+	~List();
+	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
+	List *setSelectedItem(int index);
+	List *setItemHeight(int height);
+	List *setDrawItemCallback(wzDrawListItemCallback callback);
+};
+
+class MainWindow
+{
+public:
+	MainWindow(wzRenderer *renderer);
+	~MainWindow();
+	int getWidth() const;
+	int getHeight() const;
+	void setSize(int w, int h);
+	void mouseMove(int x, int y, int dx, int dy);
+	void mouseButtonDown(int button, int x, int y);
+	void mouseButtonUp(int button, int x, int y);
+	void mouseWheelMove(int x, int y);
+	void keyDown(wzKey key);
+	void keyUp(wzKey key);
+	void textInput(const char *text);
+	void beginFrame();
+	void drawFrame();
+	void endFrame();
+	wzCursor getCursor() const;
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+	void createMenuButton(const std::string &label);
+	void dockWindow(Window *window, wzDockPosition dockPosition);
+
+	MainWindowPrivate *p;
+};
+
+class RadioButtonGroup
+{
+public:
+	RadioButtonGroup()
+	{
+		group_ = wz_radio_button_group_create();
+	}
+
+	~RadioButtonGroup()
+	{
+		wz_radio_button_group_destroy(group_);
+	}
+
+	wzRadioButtonGroup *get() { return group_; }
+
+private:
+	wzRadioButtonGroup *group_;
+};
+
+class RadioButton : public Widget
+{
+public:
+	RadioButton();
+	RadioButton(const std::string &label);
+	~RadioButton();
+	const char *getLabel() const;
+	RadioButton *setLabel(const std::string &label);
+
+	// NULL to remove the radio button from it's group.
+	RadioButton *setGroup(RadioButtonGroup *group);
+};
+
+class Scroller : public Widget
+{
+public:
+	Scroller();
+	~Scroller();
+	Scroller *setType(wzScrollerType type);
+	Scroller *setValue(int value);
+	Scroller *setStepValue(int stepValue);
+	Scroller *setMaxValue(int maxValue);	
+	int getValue() const;
+};
+
+class Spinner : public Widget
+{
+public:
+	Spinner();
+	~Spinner();
+	Spinner *setValue(int value);
+	int getValue() const;
+};
+
+class StackLayout : public Widget
+{
+public:
+	StackLayout();
+	StackLayout(wzStackLayoutDirection direction);
+	~StackLayout();
+	StackLayout *setDirection(wzStackLayoutDirection direction);
+	StackLayout *setSpacing(int spacing);
+	int getSpacing() const;
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class Tab
+{
+public:
+	Tab();
+	~Tab();
+	Tab *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+
+	TabPrivate *p;
+};
+
+class Tabbed : public Widget
+{
+public:
+	Tabbed();
+	~Tabbed();
+	Tab *addTab(Tab *tab);
+};
+
+class TextEdit : public Widget
+{
+public:
+	TextEdit(bool multiline);
+	TextEdit(const std::string &text, bool multiline);
+	~TextEdit();
+	TextEdit *setText(const std::string &text);
+};
+
+class Window : public Widget
+{
+public:
+	Window();
+	Window(const std::string &title);
+	~Window();
+	const char *getTitle() const;
+	Window *setTitle(const std::string &title);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+#ifdef WZ_CPP_IMPLEMENTATION
+
+struct WidgetPrivate
+{
+	virtual ~WidgetPrivate()
+	{
+		for (size_t i = 0; i < eventHandlers.size(); i++)
+		{
+			delete eventHandlers[i];
+		}
+
+		eventHandlers.clear();
+	}
+
+	virtual const wzWidget *getWidget() const = 0;
+	virtual wzWidget *getWidget() = 0;
+
+	std::vector<IEventHandler *> eventHandlers;
+};
 
 static void HandleEvent(wzEvent *e)
 {
@@ -49,17 +359,351 @@ static void HandleEvent(wzEvent *e)
 	}
 }
 
-//------------------------------------------------------------------------------
-
-WidgetPrivate::~WidgetPrivate()
+struct ButtonPrivate : public WidgetPrivate
 {
-	for (size_t i = 0; i < eventHandlers.size(); i++)
+	ButtonPrivate()
 	{
-		delete eventHandlers[i];
+		button = wz_button_create();
+		wz_widget_set_metadata((wzWidget *)button, this);
 	}
 
-	eventHandlers.clear();
-}
+	~ButtonPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)button))
+		{
+			wz_widget_destroy((wzWidget *)button);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+
+	wzButton *button;
+};
+
+struct CheckboxPrivate : public WidgetPrivate
+{
+	CheckboxPrivate()
+	{
+		button = wz_check_box_create();
+		wz_widget_set_metadata((wzWidget *)button, this);
+	}
+
+	~CheckboxPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)button))
+		{
+			wz_widget_destroy((wzWidget *)button);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+
+	wzButton *button;
+};
+
+struct ComboPrivate : public WidgetPrivate
+{
+	ComboPrivate()
+	{
+		combo = wz_combo_create();
+		wz_widget_set_metadata((wzWidget *)combo, this);
+	}
+
+	~ComboPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)combo))
+		{
+			wz_widget_destroy((wzWidget *)combo);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
+	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
+
+	wzCombo *combo;
+};
+
+struct FramePrivate : public WidgetPrivate
+{
+	FramePrivate(wzRenderer *renderer)
+	{
+		WZ_ASSERT(renderer);
+		frame = wz_frame_create();
+		wzWidget *widget = (wzWidget *)frame;
+		wz_widget_set_metadata(widget, this);
+		wz_widget_set_size_args(widget, 200, 200);
+	}
+
+	~FramePrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)frame))
+		{
+			wz_widget_destroy((wzWidget *)frame);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
+	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
+
+	wzFrame *frame;
+};
+
+struct GroupBoxPrivate : public WidgetPrivate
+{
+	GroupBoxPrivate()
+	{
+		groupBox = wz_group_box_create();
+		wz_widget_set_metadata((wzWidget *)groupBox, this);
+		wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
+	}
+
+	~GroupBoxPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)groupBox))
+		{
+			wz_widget_destroy((wzWidget *)groupBox);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox; }
+	virtual wzWidget *getWidget() { return (wzWidget *)groupBox; }
+
+	wzGroupBox *groupBox;
+};
+
+struct LabelPrivate : public WidgetPrivate
+{
+	LabelPrivate()
+	{
+		label = wz_label_create();
+		wz_widget_set_metadata((wzWidget *)label, this);
+	}
+
+	~LabelPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)label))
+		{
+			wz_widget_destroy((wzWidget *)label);
+		}
+	}
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
+	virtual wzWidget *getWidget() { return (wzWidget *)label; }
+
+	wzLabel *label;
+};
+
+struct ListPrivate : public WidgetPrivate
+{
+	ListPrivate()
+	{
+		list = wz_list_create();
+		wz_widget_set_metadata((wzWidget *)list, this);
+	}
+
+	~ListPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)list))
+		{
+			wz_widget_destroy((wzWidget *)list);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
+	virtual wzWidget *getWidget() { return (wzWidget *)list; }
+
+	wzList *list;
+};
+
+struct MainWindowPrivate : public WidgetPrivate
+{
+	MainWindowPrivate(wzRenderer *renderer)
+	{
+		WZ_ASSERT(renderer);
+		this->renderer = renderer;
+		mainWindow = wz_main_window_create(renderer);
+		wz_widget_set_metadata((wzWidget *)mainWindow, this);
+		wz_main_window_set_event_callback(mainWindow, HandleEvent);
+
+		menuBar = wz_menu_bar_create();
+		wz_main_window_set_menu_bar(mainWindow, menuBar);
+	}
+
+	~MainWindowPrivate()
+	{
+		wz_widget_destroy((wzWidget *)mainWindow);
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
+	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
+
+	wzMainWindow *mainWindow;
+	wzMenuBar *menuBar;
+	wzRenderer *renderer;
+};
+
+struct RadioButtonPrivate : public WidgetPrivate
+{
+	RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
+	{
+		button = wz_radio_button_create();
+		wz_widget_set_metadata((wzWidget *)button, this);
+	}
+
+	RadioButtonPrivate::~RadioButtonPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)button))
+		{
+			wz_widget_destroy((wzWidget *)button);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+
+	wzButton *button;
+	RadioButtonGroup *group;
+};
+
+struct ScrollerPrivate : public WidgetPrivate
+{
+	ScrollerPrivate()
+	{
+		scroller = wz_scroller_create();
+		wz_widget_set_metadata((wzWidget *)scroller, this);
+	}
+
+	~ScrollerPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)scroller))
+		{
+			wz_widget_destroy((wzWidget *)scroller);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
+	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
+
+	wzScroller *scroller;
+};
+
+struct SpinnerPrivate : public WidgetPrivate
+{
+	SpinnerPrivate()
+	{
+		spinner = wz_spinner_create();
+		wz_widget_set_metadata((wzWidget *)spinner, this);
+	}
+
+	~SpinnerPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)spinner))
+		{
+			wz_widget_destroy((wzWidget *)spinner);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)spinner; }
+	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }
+
+	wzSpinner *spinner;
+};
+
+struct StackLayoutPrivate : public WidgetPrivate
+{
+	StackLayoutPrivate::StackLayoutPrivate()
+	{
+		layout = wz_stack_layout_create();
+	}
+
+	StackLayoutPrivate::~StackLayoutPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)layout))
+		{
+			wz_widget_destroy((wzWidget *)layout);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (wzWidget *)layout; }
+	virtual wzWidget *getWidget() { return (wzWidget *)layout; }
+	
+	wzStackLayout *layout;
+};
+
+// Wraps tab button and page.
+struct TabPrivate
+{
+	TabPrivate() : button(NULL), page(NULL) {}
+	wzButton *button;
+	wzWidget *page;
+};
+
+struct TabbedPrivate : public WidgetPrivate
+{
+	TabbedPrivate()
+	{
+		tabbed = wz_tabbed_create();
+		wz_widget_set_metadata((wzWidget *)tabbed, this);
+	}
+
+	~TabbedPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)tabbed))
+		{
+			wz_widget_destroy((wzWidget *)tabbed);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed; }
+	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }
+
+	wzTabbed *tabbed;
+};
+
+struct TextEditPrivate : public WidgetPrivate
+{
+	TextEditPrivate(bool multiline)
+	{
+		textEdit = wz_text_edit_create(multiline, 256);
+		wz_widget_set_metadata((wzWidget *)textEdit, this);
+	}
+
+	~TextEditPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)textEdit))
+		{
+			wz_widget_destroy((wzWidget *)textEdit);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
+	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
+
+	wzTextEdit *textEdit;
+};
+
+struct WindowPrivate : public WidgetPrivate
+{
+	WindowPrivate()
+	{
+		window = wz_window_create();
+		wz_widget_set_metadata((wzWidget *)window, this);
+	}
+
+	~WindowPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)window))
+		{
+			wz_widget_destroy((wzWidget *)window);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
+	virtual wzWidget *getWidget() { return (wzWidget *)window; }
+
+	wzWindow *window;
+};
 
 //------------------------------------------------------------------------------
 
@@ -164,22 +808,6 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 
 //------------------------------------------------------------------------------
 
-ButtonPrivate::ButtonPrivate()
-{
-	button = wz_button_create();
-	wz_widget_set_metadata((wzWidget *)button, this);
-}
-
-ButtonPrivate::~ButtonPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)button))
-	{
-		wz_widget_destroy((wzWidget *)button);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Button::Button()
 {
 	p = new ButtonPrivate();
@@ -253,22 +881,6 @@ Button *Button::setToggle(bool toggle)
 
 //------------------------------------------------------------------------------
 
-CheckboxPrivate::CheckboxPrivate()
-{
-	button = wz_check_box_create();
-	wz_widget_set_metadata((wzWidget *)button, this);
-}
-
-CheckboxPrivate::~CheckboxPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)button))
-	{
-		wz_widget_destroy((wzWidget *)button);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Checkbox::Checkbox()
 {
 	p = new CheckboxPrivate();
@@ -304,22 +916,6 @@ Checkbox *Checkbox::bindValue(bool *value)
 
 //------------------------------------------------------------------------------
 
-ComboPrivate::ComboPrivate()
-{
-	combo = wz_combo_create();
-	wz_widget_set_metadata((wzWidget *)combo, this);
-}
-
-ComboPrivate::~ComboPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)combo))
-	{
-		wz_widget_destroy((wzWidget *)combo);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Combo::Combo()
 {
 	p = new ComboPrivate();
@@ -337,25 +933,6 @@ Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 	wz_list_set_item_stride(list, itemStride);
 	wz_list_set_num_items(list, nItems);
 	return this;
-}
-
-//------------------------------------------------------------------------------
-
-FramePrivate::FramePrivate(wzRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	frame = wz_frame_create();
-	wzWidget *widget = (wzWidget *)frame;
-	wz_widget_set_metadata(widget, this);
-	wz_widget_set_size_args(widget, 200, 200);
-}
-
-FramePrivate::~FramePrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)frame))
-	{
-		wz_widget_destroy((wzWidget *)frame);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -379,23 +956,6 @@ Widget *Frame::add(Widget *widget)
 void Frame::remove(Widget *widget)
 {
 	wz_frame_remove((wzFrame *)p->getWidget(), widget->p->getWidget());
-}
-
-//------------------------------------------------------------------------------
-
-GroupBoxPrivate::GroupBoxPrivate()
-{
-	groupBox = wz_group_box_create();
-	wz_widget_set_metadata((wzWidget *)groupBox, this);
-	wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
-}
-
-GroupBoxPrivate::~GroupBoxPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)groupBox))
-	{
-		wz_widget_destroy((wzWidget *)groupBox);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -436,22 +996,6 @@ Widget *GroupBox::add(Widget *widget)
 void GroupBox::remove(Widget *widget)
 {
 	wz_group_box_remove((wzGroupBox *)p->getWidget(), widget->p->getWidget());
-}
-
-//------------------------------------------------------------------------------
-
-LabelPrivate::LabelPrivate()
-{
-	label = wz_label_create();
-	wz_widget_set_metadata((wzWidget *)label, this);
-}
-
-LabelPrivate::~LabelPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)label))
-	{
-		wz_widget_destroy((wzWidget *)label);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -504,22 +1048,6 @@ Label *Label::setMultiline(bool multiline)
 
 //------------------------------------------------------------------------------
 
-ListPrivate::ListPrivate()
-{
-	list = wz_list_create();
-	wz_widget_set_metadata((wzWidget *)list, this);
-}
-
-ListPrivate::~ListPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)list))
-	{
-		wz_widget_destroy((wzWidget *)list);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 List::List()
 {
 	p = new ListPrivate();
@@ -554,25 +1082,6 @@ List *List::setDrawItemCallback(wzDrawListItemCallback callback)
 {
 	wz_list_set_draw_item_callback((wzList *)p->getWidget(), callback);
 	return this;
-}
-
-//------------------------------------------------------------------------------
-
-MainWindowPrivate::MainWindowPrivate(wzRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	this->renderer = renderer;
-	mainWindow = wz_main_window_create(renderer);
-	wz_widget_set_metadata((wzWidget *)mainWindow, this);
-	wz_main_window_set_event_callback(mainWindow, HandleEvent);
-
-	menuBar = wz_menu_bar_create();
-	wz_main_window_set_menu_bar(mainWindow, menuBar);
-}
-
-MainWindowPrivate::~MainWindowPrivate()
-{
-	wz_widget_destroy((wzWidget *)mainWindow);
 }
 
 //------------------------------------------------------------------------------
@@ -681,34 +1190,6 @@ void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
 
 //------------------------------------------------------------------------------
 
-RadioButtonGroup::RadioButtonGroup()
-{
-	group_ = wz_radio_button_group_create();
-}
-
-RadioButtonGroup::~RadioButtonGroup()
-{
-	wz_radio_button_group_destroy(group_);
-}
-
-//------------------------------------------------------------------------------
-
-RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
-{
-	button = wz_radio_button_create();
-	wz_widget_set_metadata((wzWidget *)button, this);
-}
-
-RadioButtonPrivate::~RadioButtonPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)button))
-	{
-		wz_widget_destroy((wzWidget *)button);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 RadioButton::RadioButton()
 {
 	p = new RadioButtonPrivate();
@@ -758,22 +1239,6 @@ RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
 
 //------------------------------------------------------------------------------
 
-ScrollerPrivate::ScrollerPrivate()
-{
-	scroller = wz_scroller_create();
-	wz_widget_set_metadata((wzWidget *)scroller, this);
-}
-
-ScrollerPrivate::~ScrollerPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)scroller))
-	{
-		wz_widget_destroy((wzWidget *)scroller);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Scroller::Scroller()
 {
 	p = new ScrollerPrivate();
@@ -815,22 +1280,6 @@ int Scroller::getValue() const
 
 //------------------------------------------------------------------------------
 
-SpinnerPrivate::SpinnerPrivate()
-{
-	spinner = wz_spinner_create();
-	wz_widget_set_metadata((wzWidget *)spinner, this);
-}
-
-SpinnerPrivate::~SpinnerPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)spinner))
-	{
-		wz_widget_destroy((wzWidget *)spinner);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Spinner::Spinner()
 {
 	p = new SpinnerPrivate();
@@ -850,21 +1299,6 @@ Spinner *Spinner::setValue(int value)
 int Spinner::getValue() const
 {
 	return wz_spinner_get_value(((SpinnerPrivate *)p)->spinner);
-}
-
-//------------------------------------------------------------------------------
-
-StackLayoutPrivate::StackLayoutPrivate()
-{
-	layout = wz_stack_layout_create();
-}
-
-StackLayoutPrivate::~StackLayoutPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)layout))
-	{
-		wz_widget_destroy((wzWidget *)layout);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -944,22 +1378,6 @@ void Tab::remove(Widget *widget)
 
 //------------------------------------------------------------------------------
 
-TabbedPrivate::TabbedPrivate()
-{
-	tabbed = wz_tabbed_create();
-	wz_widget_set_metadata((wzWidget *)tabbed, this);
-}
-
-TabbedPrivate::~TabbedPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)tabbed))
-	{
-		wz_widget_destroy((wzWidget *)tabbed);
-	}
-}
-
-//------------------------------------------------------------------------------
-
 Tabbed::Tabbed()
 {
 	p = new TabbedPrivate();
@@ -974,22 +1392,6 @@ Tab *Tabbed::addTab(Tab *tab)
 {
 	wz_tabbed_add_tab((wzTabbed *)p->getWidget(), &tab->p->button, &tab->p->page);
 	return tab;
-}
-
-//------------------------------------------------------------------------------
-
-TextEditPrivate::TextEditPrivate(bool multiline)
-{
-	textEdit = wz_text_edit_create(multiline, 256);
-	wz_widget_set_metadata((wzWidget *)textEdit, this);
-}
-
-TextEditPrivate::~TextEditPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)textEdit))
-	{
-		wz_widget_destroy((wzWidget *)textEdit);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -1014,22 +1416,6 @@ TextEdit *TextEdit::setText(const std::string &text)
 {
 	wz_text_edit_set_text((wzTextEdit *)p->getWidget(), text.c_str());
 	return this;
-}
-
-//------------------------------------------------------------------------------
-
-WindowPrivate::WindowPrivate()
-{
-	window = wz_window_create();
-	wz_widget_set_metadata((wzWidget *)window, this);
-}
-
-WindowPrivate::~WindowPrivate()
-{
-	if (!wz_widget_get_main_window((wzWidget *)window))
-	{
-		wz_widget_destroy((wzWidget *)window);
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -1071,5 +1457,7 @@ void Window::remove(Widget *widget)
 {
 	wz_window_remove((wzWindow *)p->getWidget(), widget->p->getWidget());
 }
+
+#endif // WZ_CPP_IMPLEMENTATION
 
 } // namespace wz

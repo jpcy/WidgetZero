@@ -27,6 +27,8 @@ SOFTWARE.
 #include <memory>
 #include <GL/glew.h>
 #include <SDL.h>
+
+#define WZ_CPP_IMPLEMENTATION
 #include <wz_cpp.h>
 
 #define NANOVG_GL2_IMPLEMENTATION
