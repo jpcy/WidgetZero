@@ -283,6 +283,24 @@ wzKey;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
+typedef struct
+{
+	NVGcolor textColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	NVGcolor bgColor1, bgColor2;
+	NVGcolor bgPressedColor1, bgPressedColor2;
+	NVGcolor bgSetColor1, bgSetColor2;
+	int iconSpacing;
+}
+wzButtonStyle;
+
+typedef union
+{
+	wzButtonStyle button;
+}
+wzWidgetStyle;
+
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
 
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
@@ -336,6 +354,8 @@ void wz_widget_set_stretch(struct wzWidget *widget, int stretch);
 int wz_widget_get_stretch(const struct wzWidget *widget);
 void wz_widget_set_align(struct wzWidget *widget, int align);
 int wz_widget_get_align(const struct wzWidget *widget);
+void wz_widget_set_style(struct wzWidget *widget, wzWidgetStyle style);
+wzWidgetStyle wz_widget_get_style(const struct wzWidget *widget);
 void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace);
 const char *wz_widget_get_font_face(const struct wzWidget *widget);
 void wz_widget_set_font_size(struct wzWidget *widget, float fontSize);
@@ -576,7 +596,6 @@ typedef struct
 	NVGcolor windowHeaderBackgroundColor;
 	NVGcolor windowBorderColor;
 
-	int buttonIconSpacing;
 	int checkBoxBoxSize;
 	int checkBoxBoxRightMargin;
 	int groupBoxMargin;
@@ -590,7 +609,7 @@ typedef struct
 }
 wzRendererStyle;
 
-struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
+struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
 void wz_renderer_destroy(struct wzRenderer *renderer);
 const char *wz_renderer_get_error();
 struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);

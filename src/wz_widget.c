@@ -440,6 +440,18 @@ int wz_widget_get_align(const struct wzWidget *widget)
 	return widget->align;
 }
 
+void wz_widget_set_style(struct wzWidget *widget, wzWidgetStyle style)
+{
+	WZ_ASSERT(widget);
+	widget->style = style;
+}
+
+wzWidgetStyle wz_widget_get_style(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->style;
+}
+
 void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
 {
 	WZ_ASSERT(widget);

@@ -61,7 +61,7 @@ static int wz_nanovg_create_font(struct wzRenderer *renderer, const char *face)
 	return 0;
 }
 
-struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
+struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
 {
 	struct wzRenderer *renderer;
 
@@ -76,7 +76,7 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->defaultFontSize = defaultFontSize;
 
 	// Init nanovg.
-	renderer->vg = create(0);
+	renderer->vg = create(flags);
 
 	if (!renderer->vg)
 	{
@@ -110,7 +110,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->style.dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
 	renderer->style.windowHeaderBackgroundColor = nvgRGBf(0.2039f, 0.2863f, 0.3686f);
 	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
-	renderer->style.buttonIconSpacing = 6;
 	renderer->style.checkBoxBoxSize = 16;
 	renderer->style.checkBoxBoxRightMargin = 8;
 	renderer->style.groupBoxMargin = 8;

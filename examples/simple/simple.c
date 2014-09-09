@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 		return errorCode;
 
 	// Create the renderer.
-	renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, "../examples/data", "DejaVuSans", 16.0f);
+	renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{

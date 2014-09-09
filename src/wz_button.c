@@ -66,7 +66,7 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 
 		if (handle)
 		{
-			size.w += w + widget->renderer->style.buttonIconSpacing;
+			size.w += w + widget->style.button.iconSpacing;
 			size.h = WZ_MAX(size.h, h);
 		}
 	}
@@ -106,51 +106,47 @@ DRAWING
 
 static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 {
-	wzRect rect;
+	NVGcolor bgColor1, bgColor2;
 	wzRect paddedRect;
 	wzSize iconSize;
 	int iconHandle, labelWidth, iconX, labelX;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzButtonStyle *style = &widget->style.button;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
-	rect = wz_widget_get_absolute_rect(widget);
 
 	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
 		return;
 
-	// Background.
-	if (button->isSet)
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
-	}
-	else if (button->isPressed && widget->hover)
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->pressedColor);
-	}
-	else if (widget->hover)
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->hoverColor);
-	}
-	else
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
-	}
-
-	// Border.
+	// Background color.
 	if (button->isPressed && widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, style->borderSetColor);
+		bgColor1 = style->bgPressedColor1;
+		bgColor2 = style->bgPressedColor2;
 	}
-	else if (widget->hover)
+	else if (button->isSet)
 	{
-		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
+		bgColor1 = style->bgSetColor1;
+		bgColor2 = style->bgSetColor2;
 	}
 	else
 	{
-		wz_renderer_draw_rect(vg, rect, style->borderColor);
+		bgColor1 = style->bgColor1;
+		bgColor2 = style->bgColor2;
 	}
+
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, 5.0f);
+
+	// Background.
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
+	nvgFill(vg);
+
+	// Border.
+	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgStroke(vg);
 
 	// Calculate padded rect.
 	paddedRect.x = rect.x + button->padding.left;
@@ -171,8 +167,8 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Position the icon and label centered.
 	if (button->icon[0] && iconHandle && button->label[0])
 	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + style->buttonIconSpacing + labelWidth) / 2.0f);
-		labelX = iconX + iconSize.w + style->buttonIconSpacing;
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + style->iconSpacing + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + style->iconSpacing;
 	}
 	else if (button->icon[0] && iconHandle)
 	{
@@ -438,6 +434,8 @@ PUBLIC INTERFACE
 struct wzButton *wz_button_create()
 {
 	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
+	wzButtonStyle *style = &button->base.style.button;
+
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
 	button->base.vtable.measure = wz_button_measure;
@@ -449,6 +447,18 @@ struct wzButton *wz_button_create()
 	button->padding.top = button->padding.bottom = 4;
 	button->label = wz_string_empty();
 	button->icon = wz_string_empty();
+
+	style->textColor = WZ_STYLE_DEFAULT_TEXT_COLOR;
+	style->borderColor = WZ_STYLE_DEFAULT_BORDER_COLOR;
+	style->borderHoverColor = WZ_STYLE_DEFAULT_HOVER_COLOR;
+	style->bgColor1 = nvgRGB(80, 80, 80);
+	style->bgColor2 = nvgRGB(70, 70, 70);
+	style->bgPressedColor1 = nvgRGB(60, 60, 60);
+	style->bgPressedColor2 = nvgRGB(50, 50, 50);
+	style->bgSetColor1 = nvgRGB(150, 150, 150);
+	style->bgSetColor2 = nvgRGB(140, 140, 140);
+	style->iconSpacing = 6;
+
 	return button;
 }
 
