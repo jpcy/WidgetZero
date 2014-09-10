@@ -77,9 +77,13 @@ private:
 
 struct Benchmark
 {
+	Benchmark() : frameCount(0), fps(0) {}
+
 	BenchmarkSample draw;
 	BenchmarkSample frame;
 	BenchmarkSample input;
+	int frameCount;
+	int fps;
 };
 
 static Benchmark benchmark;
@@ -570,6 +574,8 @@ static Uint32 BenchmarkTimerCallback(Uint32 interval, void *param)
 	benchmark.draw.calculateAverage();
 	benchmark.frame.calculateAverage();
 	benchmark.input.calculateAverage();
+	benchmark.fps = benchmark.frameCount;
+	benchmark.frameCount = 0;
     
 	SDL_Event ev;
     ev.type = SDL_USEREVENT;
@@ -763,10 +769,17 @@ int main(int argc, char **argv)
 
 		while (accumulatedTime > frameTime)
 		{
+			uint32_t frameStartTime = SDL_GetTicks();
 			benchmark.frame.start();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			benchmark.draw.start();
+
+			if ((tick % 20) == 0)
+			{
+				wz_renderer_toggle_text_cursor(renderer);
+			}
+
 			gui.mainWindow.beginFrame();
 			gui.mainWindow.drawFrame();
 
@@ -780,6 +793,9 @@ int main(int argc, char **argv)
 
 				sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
 				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 40, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
+
+				sprintf(buffer, "FPS: %d", benchmark.fps);
+				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 60, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
 			}
 
 			gui.mainWindow.endFrame();
@@ -787,14 +803,10 @@ int main(int argc, char **argv)
 
 			SDL_GL_SwapWindow(window);
 			SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
-			accumulatedTime -= frameTime;
 			benchmark.frame.end();
 			tick++;
-
-			if ((tick % 20) == 0)
-			{
-				wz_renderer_toggle_text_cursor(renderer);
-			}
+			benchmark.frameCount++;
+			accumulatedTime -= std::max((float)(SDL_GetTicks() - frameStartTime), frameTime);
 		}
 	}
 
