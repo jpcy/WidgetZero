@@ -295,9 +295,23 @@ typedef struct
 }
 wzButtonStyle;
 
+typedef struct
+{
+	NVGcolor textColor;
+	NVGcolor checkColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	int boxSize;
+	int boxRightMargin;
+	int boxInternalMargin;
+	float checkThickness;
+}
+wzCheckBoxStyle;
+
 typedef union
 {
 	wzButtonStyle button;
+	wzCheckBoxStyle checkBox;
 }
 wzWidgetStyle;
 
@@ -596,8 +610,6 @@ typedef struct
 	NVGcolor windowHeaderBackgroundColor;
 	NVGcolor windowBorderColor;
 
-	int checkBoxBoxSize;
-	int checkBoxBoxRightMargin;
 	int groupBoxMargin;
 	int groupBoxTextLeftMargin;
 	int groupBoxTextBorderSpacing;

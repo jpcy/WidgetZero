@@ -110,8 +110,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->style.dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
 	renderer->style.windowHeaderBackgroundColor = nvgRGBf(0.2039f, 0.2863f, 0.3686f);
 	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
-	renderer->style.checkBoxBoxSize = 16;
-	renderer->style.checkBoxBoxRightMargin = 8;
 	renderer->style.groupBoxMargin = 8;
 	renderer->style.groupBoxTextLeftMargin = 20;
 	renderer->style.groupBoxTextBorderSpacing = 5;
@@ -321,7 +319,7 @@ bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, 
 void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color)
 {
 	nvgBeginPath(vg);
-	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
 	nvgFillColor(vg, color);
 	nvgFill(vg);
 }
@@ -329,7 +327,7 @@ void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVG
 void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color)
 {
 	nvgBeginPath(vg);
-	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 0.5f, rect.h - 0.5f);
+	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
 	nvgStrokeColor(vg, color);
 	nvgStroke(vg);
 }
