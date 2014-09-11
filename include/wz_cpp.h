@@ -547,13 +547,13 @@ struct MainWindowPrivate : public WidgetPrivate
 
 struct RadioButtonPrivate : public WidgetPrivate
 {
-	RadioButtonPrivate::RadioButtonPrivate() : group(NULL)
+	RadioButtonPrivate() : group(NULL)
 	{
 		button = wz_radio_button_create();
 		wz_widget_set_metadata((wzWidget *)button, this);
 	}
 
-	RadioButtonPrivate::~RadioButtonPrivate()
+	~RadioButtonPrivate()
 	{
 		if (!wz_widget_get_main_window((wzWidget *)button))
 		{
@@ -614,12 +614,12 @@ struct SpinnerPrivate : public WidgetPrivate
 
 struct StackLayoutPrivate : public WidgetPrivate
 {
-	StackLayoutPrivate::StackLayoutPrivate()
+	StackLayoutPrivate()
 	{
 		layout = wz_stack_layout_create();
 	}
 
-	StackLayoutPrivate::~StackLayoutPrivate()
+	~StackLayoutPrivate()
 	{
 		if (!wz_widget_get_main_window((wzWidget *)layout))
 		{
