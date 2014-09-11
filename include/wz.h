@@ -252,6 +252,8 @@ wzDockPosition;
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define WZ_CLAMPED(min, value, max) WZ_MAX(min, WZ_MIN(max, value))
+#define WZ_ABS(a) ((a) >= 0 ? (a) : (-a))
+#define WZ_SIGN(a) ((a) >= 0 ? 1 : -1)
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
 
@@ -308,10 +310,24 @@ typedef struct
 }
 wzCheckBoxStyle;
 
+typedef struct
+{
+	NVGcolor iconColor;
+	NVGcolor iconHoverColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	NVGcolor bgColor1, bgColor2;
+	NVGcolor bgPressedColor1, bgPressedColor2;
+	int nubIconMargin;
+	int nubIconSpacing;
+}
+wzScrollerStyle;
+
 typedef union
 {
 	wzButtonStyle button;
 	wzCheckBoxStyle checkBox;
+	wzScrollerStyle scroller;
 }
 wzWidgetStyle;
 
@@ -641,6 +657,16 @@ void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVG
 void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
 void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2, struct NVGcolor color);
 void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image);
+
+enum
+{
+	WZ_CORNER_TL = 1<<0,
+	WZ_CORNER_TR = 1<<1,
+	WZ_CORNER_BR = 1<<2,
+	WZ_CORNER_BL = 1<<3
+};
+
+void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int roundedCorners);
 
 int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize);
 

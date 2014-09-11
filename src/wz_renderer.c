@@ -353,3 +353,65 @@ void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image)
 	nvgFillPaint(vg, paint);
 	nvgFill(vg);
 }
+
+void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int roundedCorners)
+{
+	const float x = rect.x + 0.5f;
+	const float y = rect.y + 0.5f;
+	const float w = rect.w - 1.0f;
+	const float h = rect.h - 1.0f;
+	const float rx = WZ_MIN(r, WZ_ABS(w) * 0.5f) * WZ_SIGN(w);
+	const float ry = WZ_MIN(r, WZ_ABS(h) * 0.5f) * WZ_SIGN(h);
+	const float NVG_KAPPA90 = 0.5522847493f;
+
+	nvgBeginPath(vg);
+	
+	if (roundedCorners & WZ_CORNER_TL)
+	{
+		nvgMoveTo(vg, x, y + ry);
+	}
+	else
+	{
+		nvgMoveTo(vg, x, y);
+	}
+
+	if (roundedCorners & WZ_CORNER_BL)
+	{
+		nvgLineTo(vg, x, y + h - ry); // left straight
+		nvgBezierTo(vg, x, y+h-ry*(1-NVG_KAPPA90), x+rx*(1-NVG_KAPPA90), y+h, x+rx, y+h); // bottom left arc
+	}
+	else
+	{
+		nvgLineTo(vg, x, y + h);
+	}
+
+	if (roundedCorners & WZ_CORNER_BR)
+	{
+		nvgLineTo(vg, x+w-rx, y+h); // bottom straight
+		nvgBezierTo(vg, x+w-rx*(1-NVG_KAPPA90), y+h, x+w, y+h-ry*(1-NVG_KAPPA90), x+w, y+h-ry); // bottom right arc
+	}
+	else
+	{
+		nvgLineTo(vg, x + w, y + h);
+	}
+
+	if (roundedCorners & WZ_CORNER_TR)
+	{
+		nvgLineTo(vg, x+w, y+ry); // right straight
+		nvgBezierTo(vg, x+w, y+ry*(1-NVG_KAPPA90), x+w-rx*(1-NVG_KAPPA90), y, x+w-rx, y); // top right arc
+	}
+	else
+	{
+		nvgLineTo(vg, x + w, y);
+	}
+
+	if (roundedCorners & WZ_CORNER_TL)
+	{
+		nvgLineTo(vg, x+rx, y); // top straight
+		nvgBezierTo(vg, x+rx*(1-NVG_KAPPA90), y, x, y+ry*(1-NVG_KAPPA90), x, y+ry); // top left arc
+	}
+	else
+	{
+		nvgLineTo(vg, x, y);
+	}
+}
