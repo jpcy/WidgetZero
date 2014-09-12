@@ -347,7 +347,7 @@ void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image)
 	struct NVGpaint paint;
 
 	nvgImageSize(vg, image, &w, &h);
-	paint = nvgImagePattern(vg, (float)rect.x, (float)rect.y, (float)w, (float)h, 0, image, NVG_NOREPEAT, 1);
+	paint = nvgImagePattern(vg, (float)rect.x, (float)rect.y, (float)w, (float)h, 0, image, 1);
 	nvgBeginPath(vg);
 	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
 	nvgFillPaint(vg, paint);
