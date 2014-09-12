@@ -322,6 +322,18 @@ wzGroupBoxStyle;
 
 typedef struct
 {
+	NVGcolor textColor;
+	NVGcolor setColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	int outerRadius;
+	int innerRadius;
+	int spacing;
+}
+wzRadioButtonStyle;
+
+typedef struct
+{
 	NVGcolor iconColor;
 	NVGcolor iconHoverColor;
 	NVGcolor borderColor;
@@ -338,6 +350,7 @@ typedef union
 	wzButtonStyle button;
 	wzCheckBoxStyle checkBox;
 	wzGroupBoxStyle groupBox;
+	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
 }
 wzWidgetStyle;
@@ -639,9 +652,6 @@ typedef struct
 
 	int listItemLeftPadding;
 	int menuBarPadding;
-	int radioButtonOuterRadius;
-	int radioButtonInnerRadius;
-	int radioButtonSpacing;
 }
 wzRendererStyle;
 

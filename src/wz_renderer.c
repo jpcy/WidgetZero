@@ -112,9 +112,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
 	renderer->style.listItemLeftPadding = 4;
 	renderer->style.menuBarPadding = 6;
-	renderer->style.radioButtonOuterRadius = 8;
-	renderer->style.radioButtonInnerRadius = 4;
-	renderer->style.radioButtonSpacing = 8;
 
 	return renderer;
 }

@@ -89,10 +89,10 @@ static wzSize wz_radio_button_measure(struct wzWidget *widget)
 {
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRadioButtonStyle *style = &widget->style.radioButton;
 	wz_widget_measure_text(widget, button->label, 0, &size.w, &size.h);
-	size.w += style->radioButtonOuterRadius * 2 + style->radioButtonSpacing;
-	size.h = WZ_MAX(size.h, style->radioButtonOuterRadius);
+	size.w += style->outerRadius * 2 + style->spacing;
+	size.h = WZ_MAX(size.h, style->outerRadius);
 	return size;
 }
 
@@ -250,7 +250,7 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzRadioButtonStyle *style = &widget->style.radioButton;
 
 	nvgSave(vg);
 	rect = wz_widget_get_absolute_rect((const struct wzWidget *)button);
@@ -262,19 +262,19 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	if (button->isSet)
 	{
 		nvgBeginPath(vg);
-		nvgCircle(vg, (float)(rect.x + style->radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)style->radioButtonInnerRadius);
+		nvgCircle(vg, (float)(rect.x + style->outerRadius), rect.y + rect.h / 2.0f, (float)style->innerRadius);
 		nvgFillColor(vg, style->setColor);
 		nvgFill(vg);
 	}
 
 	// Outer circle.
 	nvgBeginPath(vg);
-	nvgCircle(vg, (float)(rect.x + style->radioButtonOuterRadius), rect.y + rect.h / 2.0f, (float)style->radioButtonOuterRadius);
+	nvgCircle(vg, (float)(rect.x + style->outerRadius), rect.y + rect.h / 2.0f, (float)style->outerRadius - 0.5f);
 	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
 	nvgStroke(vg);
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + style->radioButtonOuterRadius * 2 + style->radioButtonSpacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
+	wz_renderer_print(widget->renderer, rect.x + style->outerRadius * 2 + style->spacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 
 	nvgRestore(vg);
 }
@@ -485,8 +485,19 @@ struct wzButton *wz_check_box_create()
 struct wzButton *wz_radio_button_create()
 {
 	struct wzButton *button = wz_button_create();
+	wzRadioButtonStyle *style = &button->base.style.radioButton;
+
 	button->base.vtable.measure = wz_radio_button_measure;
 	button->base.vtable.draw = wz_radio_button_draw;
+
+	style->textColor = WZ_STYLE_TEXT_COLOR;
+	style->setColor = nvgRGBf(0.1529f, 0.5569f, 0.7412f);
+	style->borderColor = WZ_STYLE_LIGHT_BORDER_COLOR;
+	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
+	style->outerRadius = 8;
+	style->innerRadius = 4;
+	style->spacing = 8;
+
 	return button;
 }
 
