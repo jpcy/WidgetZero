@@ -39,34 +39,54 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect;
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzGroupBoxStyle *style = &widget->style.groupBox;
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
 	rect = wz_widget_get_absolute_rect(widget);
 	
-	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
-
-	// Border.
 	if (!groupBox->label[0])
 	{
-		wz_renderer_draw_rect(vg, rect, style->borderColor);
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, 5.0f);
+		nvgStrokeColor(vg, style->borderColor);
+		nvgStroke(vg);
 	}
 	else
 	{
+		const float r = 5;
+		const float NVG_KAPPA90 = 0.5522847493f;
+		wzRect borderRect;
+		float x, y, w, h, rx, ry;
 		int textWidth, textHeight;
-		wz_widget_measure_text(widget, groupBox->label, 0, &textWidth, &textHeight);
 
-		// Left, right, bottom, top left, top right.
-		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x, rect.y + rect.h, style->borderColor);
-		wz_renderer_draw_line(vg, rect.x + rect.w, rect.y + textHeight / 2, rect.x + rect.w, rect.y + rect.h, style->borderColor);
-		wz_renderer_draw_line(vg, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h, style->borderColor);
-		wz_renderer_draw_line(vg, rect.x, rect.y + textHeight / 2, rect.x + style->groupBoxTextLeftMargin - style->groupBoxTextBorderSpacing, rect.y + textHeight / 2, style->borderColor);
-		wz_renderer_draw_line(vg, rect.x + style->groupBoxTextLeftMargin + textWidth + style->groupBoxTextBorderSpacing * 2, rect.y + textHeight / 2, rect.x + rect.w, rect.y + textHeight / 2, style->borderColor);
+		wz_widget_measure_text(widget, groupBox->label, 0, &textWidth, &textHeight);
+		borderRect = rect;
+		borderRect.y += textHeight / 2;
+		borderRect.h -= textHeight / 2;
+		x = borderRect.x + 0.5f;
+		y = borderRect.y + 0.5f;
+		w = borderRect.w - 1.0f;
+		h = borderRect.h - 1.0f;
+		rx = WZ_MIN(r, WZ_ABS(w) * 0.5f) * WZ_SIGN(w);
+		ry = WZ_MIN(r, WZ_ABS(h) * 0.5f) * WZ_SIGN(h);
+
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, x + style->textLeftMargin - style->textBorderSpacing, y);
+		nvgLineTo(vg, x+rx, y); // top straight (left of text)
+		nvgBezierTo(vg, x+rx*(1-NVG_KAPPA90), y, x, y+ry*(1-NVG_KAPPA90), x, y+ry); // top left arc
+		nvgLineTo(vg, x, y + h - ry); // left straight
+		nvgBezierTo(vg, x, y+h-ry*(1-NVG_KAPPA90), x+rx*(1-NVG_KAPPA90), y+h, x+rx, y+h); // bottom left arc
+		nvgLineTo(vg, x+w-rx, y+h); // bottom straight
+		nvgBezierTo(vg, x+w-rx*(1-NVG_KAPPA90), y+h, x+w, y+h-ry*(1-NVG_KAPPA90), x+w, y+h-ry); // bottom right arc
+		nvgLineTo(vg, x+w, y+ry); // right straight
+		nvgBezierTo(vg, x+w, y+ry*(1-NVG_KAPPA90), x+w-rx*(1-NVG_KAPPA90), y, x+w-rx, y); // top right arc
+		nvgLineTo(vg, x + style->textLeftMargin + textWidth + style->textBorderSpacing, y); // top straight (right of text)
+		nvgStrokeColor(vg, style->borderColor);
+		nvgStroke(vg);
 
 		// Label.
-		wz_renderer_print(widget->renderer, rect.x + style->groupBoxTextLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, style->textColor, groupBox->label, 0);
+		wz_renderer_print(widget->renderer, rect.x + style->textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, style->textColor, groupBox->label, 0);
 	}
 
 	nvgRestore(vg);
@@ -75,12 +95,12 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 static void wz_group_box_refresh_margin(struct wzGroupBox *groupBox)
 {
 	wzBorder margin;
-	const wzRendererStyle *style = &groupBox->base.renderer->style;
-	margin.top = margin.bottom = margin.left = margin.right = style->groupBoxMargin;
+	const wzGroupBoxStyle *style = &groupBox->base.style.groupBox;
+	margin.top = margin.bottom = margin.left = margin.right = style->margin;
 
 	if (groupBox->label[0])
 	{
-		margin.top = wz_widget_get_line_height((struct wzWidget *)groupBox) + style->groupBoxMargin;
+		margin.top = wz_widget_get_line_height((struct wzWidget *)groupBox) + style->margin;
 	}
 
 	wz_widget_set_margin(groupBox->content, margin);
@@ -101,12 +121,20 @@ static void wz_group_box_destroy(struct wzWidget *widget)
 struct wzGroupBox *wz_group_box_create()
 {
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
+	wzGroupBoxStyle *style = &groupBox->base.style.groupBox;
+
 	memset(groupBox, 0, sizeof(struct wzGroupBox));
 	groupBox->base.type = WZ_TYPE_GROUP_BOX;
 	groupBox->base.vtable.draw = wz_group_box_draw;
 	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
 	groupBox->base.vtable.destroy = wz_group_box_destroy;
 	groupBox->label = wz_string_empty();
+
+	style->textColor = nvgRGBf(1, 1, 1);
+	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
+	style->margin = 8;
+	style->textLeftMargin = 20;
+	style->textBorderSpacing = 5;
 
 	// Create content widget.
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
