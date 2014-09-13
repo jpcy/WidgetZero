@@ -27,8 +27,17 @@ SOFTWARE.
 #include <SDL.h>
 #include <wz.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244) // "conversion from 'int' to 'float', possible loss of data"
+#endif
+
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480

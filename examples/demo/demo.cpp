@@ -31,8 +31,17 @@ SOFTWARE.
 #define WZ_CPP_IMPLEMENTATION
 #include <wz_cpp.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244) // "conversion from 'int' to 'float', possible loss of data"
+#endif
+
 #define NANOVG_GL2_IMPLEMENTATION
 #include "nanovg_gl.h"
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static const float frameTime = 1000 / 60.0f;
 
