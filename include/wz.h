@@ -300,6 +300,20 @@ wzButtonStyle;
 typedef struct
 {
 	NVGcolor textColor;
+	NVGcolor iconColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	NVGcolor bgColor1, bgColor2;
+	int paddingX, paddingY;
+	int buttonWidth;
+	wzSize iconSize;
+	float cornerRadius;
+}
+wzComboStyle;
+
+typedef struct
+{
+	NVGcolor textColor;
 	NVGcolor checkColor;
 	NVGcolor borderColor;
 	NVGcolor borderHoverColor;
@@ -349,6 +363,7 @@ typedef union
 {
 	wzButtonStyle button;
 	wzCheckBoxStyle checkBox;
+	wzComboStyle combo;
 	wzGroupBoxStyle groupBox;
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
