@@ -138,7 +138,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	}
 
 	nvgBeginPath(vg);
-	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, 5.0f);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
 
 	// Background.
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
@@ -457,6 +457,7 @@ struct wzButton *wz_button_create()
 	style->bgSetColor1 = nvgRGB(150, 150, 150);
 	style->bgSetColor2 = nvgRGB(140, 140, 140);
 	style->iconSpacing = 6;
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return button;
 }

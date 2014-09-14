@@ -294,6 +294,7 @@ typedef struct
 	NVGcolor bgPressedColor1, bgPressedColor2;
 	NVGcolor bgSetColor1, bgSetColor2;
 	int iconSpacing;
+	float cornerRadius;
 }
 wzButtonStyle;
 
@@ -331,6 +332,7 @@ typedef struct
 	int margin;
 	int textLeftMargin;
 	int textBorderSpacing;
+	float cornerRadius;
 }
 wzGroupBoxStyle;
 
@@ -356,6 +358,7 @@ typedef struct
 	NVGcolor bgPressedColor1, bgPressedColor2;
 	int nubIconMargin;
 	int nubIconSpacing;
+	float cornerRadius;
 }
 wzScrollerStyle;
 

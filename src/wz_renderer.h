@@ -34,7 +34,7 @@ SOFTWARE.
 #define WZ_STYLE_DARK_BORDER_COLOR nvgRGB(25, 25, 25)
 #define WZ_STYLE_LIGHT_BORDER_COLOR nvgRGBf(0.8f, 0.8f, 0.8f)
 #define WZ_STYLE_HOVER_COLOR nvgRGBf(0.5f, 0.76f, 0.9f)
-#define WZ_STYLE_CORNER_RADIUS 5.0f
+#define WZ_STYLE_CORNER_RADIUS 4.0f
 
 typedef struct
 {

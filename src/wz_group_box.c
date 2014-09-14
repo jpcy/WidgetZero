@@ -48,7 +48,7 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	if (!groupBox->label[0])
 	{
 		nvgBeginPath(vg);
-		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, 5.0f);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
 		nvgStrokeColor(vg, style->borderColor);
 		nvgStroke(vg);
 	}
@@ -135,6 +135,7 @@ struct wzGroupBox *wz_group_box_create()
 	style->margin = 8;
 	style->textLeftMargin = 20;
 	style->textBorderSpacing = 5;
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	// Create content widget.
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));

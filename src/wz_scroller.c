@@ -277,7 +277,7 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 		}
 	}
 
-	wz_renderer_create_rect_path(vg, r, 5, roundedCorners);
+	wz_renderer_create_rect_path(vg, r, style->cornerRadius, roundedCorners);
 
 	// Background.
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
@@ -600,6 +600,7 @@ struct wzScroller *wz_scroller_create()
 	style->bgPressedColor2 = nvgRGB(50, 50, 50);
 	style->nubIconMargin = 4;
 	style->nubIconSpacing = 4;
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	scroller->decrementButton = wz_button_create();
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->decrementButton, wz_scroller_decrement_button_draw);
