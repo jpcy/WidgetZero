@@ -230,7 +230,7 @@ DECREMENT AND INCREMENT BUTTONS
 static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool decrement)
 {
 	NVGcolor bgColor1, bgColor2;
-	int roundedCorners;
+	int sides, roundedCorners;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct wzScroller *scroller = (struct wzScroller *)widget->parent;
 	struct NVGcontext *vg = widget->renderer->vg;
@@ -258,10 +258,12 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 	{
 		if (decrement)
 		{
+			sides = WZ_SIDE_LEFT | WZ_SIDE_TOP | WZ_SIDE_RIGHT;
 			roundedCorners = WZ_CORNER_TL | WZ_CORNER_TR;
 		}
 		else
 		{
+			sides = WZ_SIDE_LEFT | WZ_SIDE_BOTTOM | WZ_SIDE_RIGHT;
 			roundedCorners = WZ_CORNER_BL | WZ_CORNER_BR;
 		}
 	}
@@ -269,21 +271,23 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 	{
 		if (decrement)
 		{
+			sides = WZ_SIDE_TOP | WZ_SIDE_LEFT | WZ_SIDE_BOTTOM;
 			roundedCorners = WZ_CORNER_TL | WZ_CORNER_BL;
 		}
 		else
 		{
+			sides = WZ_SIDE_TOP | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM;
 			roundedCorners = WZ_CORNER_TR | WZ_CORNER_BR;
 		}
 	}
 
-	wz_renderer_create_rect_path(vg, r, style->cornerRadius, WZ_SIDE_ALL, roundedCorners);
-
 	// Background.
+	wz_renderer_create_rect_path(vg, r, style->cornerRadius, WZ_SIDE_ALL, roundedCorners);
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
 	nvgFill(vg);
 
 	// Border.
+	wz_renderer_create_rect_path(vg, r, style->cornerRadius, sides, roundedCorners);
 	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
 	nvgStroke(vg);
 
