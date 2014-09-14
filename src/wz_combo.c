@@ -275,7 +275,7 @@ struct wzCombo *wz_combo_create()
 	style->buttonWidth = 24;
 	style->iconSize.w = 8;
 	style->iconSize.h = 4;
-	style->cornerRadius = 5;
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return combo;
 }
