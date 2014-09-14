@@ -277,7 +277,7 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 		}
 	}
 
-	wz_renderer_create_rect_path(vg, r, style->cornerRadius, roundedCorners);
+	wz_renderer_create_rect_path(vg, r, style->cornerRadius, WZ_SIDE_ALL, roundedCorners);
 
 	// Background.
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));

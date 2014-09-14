@@ -348,7 +348,7 @@ void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image)
 	nvgFill(vg);
 }
 
-void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int roundedCorners)
+void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int sides, int roundedCorners)
 {
 	const float x = rect.x + 0.5f;
 	const float y = rect.y + 0.5f;
@@ -371,40 +371,97 @@ void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, i
 
 	if (roundedCorners & WZ_CORNER_BL)
 	{
-		nvgLineTo(vg, x, y + h - ry); // left straight
+		// left straight
+		if (sides & WZ_SIDE_LEFT)
+		{
+			nvgLineTo(vg, x, y + h - ry);
+		}
+		else
+		{
+			nvgMoveTo(vg, x, y + h - ry);
+		}
+
 		nvgBezierTo(vg, x, y+h-ry*(1-NVG_KAPPA90), x+rx*(1-NVG_KAPPA90), y+h, x+rx, y+h); // bottom left arc
 	}
 	else
 	{
-		nvgLineTo(vg, x, y + h);
+		if (sides & WZ_SIDE_LEFT)
+		{
+			nvgLineTo(vg, x, y + h);
+		}
+		else
+		{
+			nvgMoveTo(vg, x, y + h);
+		}
 	}
 
 	if (roundedCorners & WZ_CORNER_BR)
 	{
-		nvgLineTo(vg, x+w-rx, y+h); // bottom straight
+		// bottom straight
+		if (sides & WZ_SIDE_BOTTOM)
+		{
+			nvgLineTo(vg, x+w-rx, y+h);
+		}
+		else
+		{
+			nvgMoveTo(vg, x+w-rx, y+h);
+		}
+
 		nvgBezierTo(vg, x+w-rx*(1-NVG_KAPPA90), y+h, x+w, y+h-ry*(1-NVG_KAPPA90), x+w, y+h-ry); // bottom right arc
 	}
 	else
 	{
-		nvgLineTo(vg, x + w, y + h);
+		if (sides & WZ_SIDE_BOTTOM)
+		{
+			nvgLineTo(vg, x + w, y + h);
+		}
+		else
+		{
+			nvgMoveTo(vg, x + w, y + h);
+		}
 	}
 
 	if (roundedCorners & WZ_CORNER_TR)
 	{
-		nvgLineTo(vg, x+w, y+ry); // right straight
+		// right straight
+		if (sides & WZ_SIDE_RIGHT)
+		{
+			nvgLineTo(vg, x+w, y+ry);
+		}
+		else
+		{
+			nvgMoveTo(vg, x+w, y+ry);
+		}
+
 		nvgBezierTo(vg, x+w, y+ry*(1-NVG_KAPPA90), x+w-rx*(1-NVG_KAPPA90), y, x+w-rx, y); // top right arc
 	}
 	else
 	{
-		nvgLineTo(vg, x + w, y);
+		if (sides & WZ_SIDE_RIGHT)
+		{
+			nvgLineTo(vg, x + w, y);
+		}
+		else
+		{
+			nvgMoveTo(vg, x + w, y);
+		}
 	}
 
 	if (roundedCorners & WZ_CORNER_TL)
 	{
-		nvgLineTo(vg, x+rx, y); // top straight
+		// top straight
+		if (sides & WZ_SIDE_TOP)
+		{
+			nvgLineTo(vg, x+rx, y);
+		}
+		else
+		{
+			nvgMoveTo(vg, x+rx, y);
+		}
+
 		nvgBezierTo(vg, x+rx*(1-NVG_KAPPA90), y, x, y+ry*(1-NVG_KAPPA90), x, y+ry); // top left arc
 	}
-	else
+	else if (sides & WZ_SIDE_TOP)
 	{
 		nvgLineTo(vg, x, y);
 	}

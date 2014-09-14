@@ -709,13 +709,20 @@ void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image);
 
 enum
 {
+	WZ_SIDE_TOP = 1<<0,
+	WZ_SIDE_RIGHT = 1<<1,
+	WZ_SIDE_BOTTOM = 1<<2,
+	WZ_SIDE_LEFT = 1<<3,
+	WZ_SIDE_ALL = WZ_SIDE_TOP | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM | WZ_SIDE_LEFT,
+
 	WZ_CORNER_TL = 1<<0,
 	WZ_CORNER_TR = 1<<1,
 	WZ_CORNER_BR = 1<<2,
-	WZ_CORNER_BL = 1<<3
+	WZ_CORNER_BL = 1<<3,
+	WZ_CORNER_ALL = WZ_CORNER_TL | WZ_CORNER_TR | WZ_CORNER_BR | WZ_CORNER_BL
 };
 
-void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int roundedCorners);
+void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int sides, int roundedCorners);
 
 int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize);
 

@@ -89,7 +89,7 @@ static void wz_combo_draw(struct wzWidget *widget, wzRect clip)
 	// Don't round the bottom corners if the combo is open.
 	if (combo->isOpen)
 	{
-		wz_renderer_create_rect_path(vg, rect, style->cornerRadius, WZ_CORNER_TL | WZ_CORNER_TR);
+		wz_renderer_create_rect_path(vg, rect, style->cornerRadius, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
 	}
 	else
 	{

@@ -54,34 +54,22 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	}
 	else
 	{
-		const float r = 5;
-		const float NVG_KAPPA90 = 0.5522847493f;
-		wzRect borderRect;
-		float x, y, w, h, rx, ry;
 		int textWidth, textHeight;
+		wzRect borderRect;
 
 		wz_widget_measure_text(widget, groupBox->label, 0, &textWidth, &textHeight);
 		borderRect = rect;
 		borderRect.y += textHeight / 2;
 		borderRect.h -= textHeight / 2;
-		x = borderRect.x + 0.5f;
-		y = borderRect.y + 0.5f;
-		w = borderRect.w - 1.0f;
-		h = borderRect.h - 1.0f;
-		rx = WZ_MIN(r, WZ_ABS(w) * 0.5f) * WZ_SIGN(w);
-		ry = WZ_MIN(r, WZ_ABS(h) * 0.5f) * WZ_SIGN(h);
 
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, x + style->textLeftMargin - style->textBorderSpacing, y);
-		nvgLineTo(vg, x+rx, y); // top straight (left of text)
-		nvgBezierTo(vg, x+rx*(1-NVG_KAPPA90), y, x, y+ry*(1-NVG_KAPPA90), x, y+ry); // top left arc
-		nvgLineTo(vg, x, y + h - ry); // left straight
-		nvgBezierTo(vg, x, y+h-ry*(1-NVG_KAPPA90), x+rx*(1-NVG_KAPPA90), y+h, x+rx, y+h); // bottom left arc
-		nvgLineTo(vg, x+w-rx, y+h); // bottom straight
-		nvgBezierTo(vg, x+w-rx*(1-NVG_KAPPA90), y+h, x+w, y+h-ry*(1-NVG_KAPPA90), x+w, y+h-ry); // bottom right arc
-		nvgLineTo(vg, x+w, y+ry); // right straight
-		nvgBezierTo(vg, x+w, y+ry*(1-NVG_KAPPA90), x+w-rx*(1-NVG_KAPPA90), y, x+w-rx, y); // top right arc
-		nvgLineTo(vg, x + style->textLeftMargin + textWidth + style->textBorderSpacing, y); // top straight (right of text)
+		// Border top, left of text.
+		wz_renderer_draw_line(vg, (int)(borderRect.x + style->cornerRadius), borderRect.y, borderRect.x + style->textLeftMargin - style->textBorderSpacing, borderRect.y, style->borderColor);
+
+		// Border top, right of text.
+		wz_renderer_draw_line(vg, borderRect.x + style->textLeftMargin + textWidth + style->textBorderSpacing * 2, borderRect.y, (int)(borderRect.x + borderRect.w - style->cornerRadius), borderRect.y, style->borderColor);
+
+		// The rest of the border.
+		wz_renderer_create_rect_path(vg, borderRect, style->cornerRadius, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
 		nvgStrokeColor(vg, style->borderColor);
 		nvgStroke(vg);
 
