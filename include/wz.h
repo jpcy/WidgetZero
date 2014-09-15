@@ -285,6 +285,14 @@ wzKey;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
+/*
+================================================================================
+
+WIDGET STYLES
+
+================================================================================
+*/
+
 typedef struct
 {
 	NVGcolor textColor;
@@ -339,6 +347,17 @@ wzGroupBoxStyle;
 typedef struct
 {
 	NVGcolor textColor;
+	NVGcolor borderColor;
+	NVGcolor hoverColor;
+	NVGcolor setColor;
+	NVGcolor bgColor1, bgColor2;
+	int itemLeftPadding;
+}
+wzListStyle;
+
+typedef struct
+{
+	NVGcolor textColor;
 	NVGcolor setColor;
 	NVGcolor borderColor;
 	NVGcolor borderHoverColor;
@@ -389,6 +408,7 @@ typedef union
 	wzCheckBoxStyle checkBox;
 	wzComboStyle combo;
 	wzGroupBoxStyle groupBox;
+	wzListStyle list;
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
 	wzSpinnerStyle spinner;
@@ -691,7 +711,6 @@ typedef struct
 	NVGcolor windowHeaderBackgroundColor;
 	NVGcolor windowBorderColor;
 
-	int listItemLeftPadding;
 	int menuBarPadding;
 }
 wzRendererStyle;

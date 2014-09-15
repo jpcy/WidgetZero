@@ -110,7 +110,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer->style.dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
 	renderer->style.windowHeaderBackgroundColor = nvgRGBf(0.2039f, 0.2863f, 0.3686f);
 	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
-	renderer->style.listItemLeftPadding = 4;
 	renderer->style.menuBarPadding = 6;
 
 	return renderer;

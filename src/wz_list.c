@@ -135,7 +135,7 @@ static void wz_list_draw(struct wzWidget *widget, wzRect clip)
 	int y, i;
 	struct wzList *list = (struct wzList *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzListStyle *style = &widget->style.list;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 	const wzRect itemsRect = wz_list_get_absolute_items_rect(list);
 
@@ -143,7 +143,10 @@ static void wz_list_draw(struct wzWidget *widget, wzRect clip)
 	wz_renderer_clip_to_rect(vg, clip);
 	
 	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
+	nvgBeginPath(vg);
+	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, style->bgColor1, style->bgColor2));
+	nvgFill(vg);
 
 	// Border.
 	wz_renderer_draw_rect(vg, rect, style->borderColor);
@@ -184,7 +187,7 @@ static void wz_list_draw(struct wzWidget *widget, wzRect clip)
 		}
 		else
 		{
-			wz_renderer_print(widget->renderer, itemsRect.x + style->listItemLeftPadding, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, (const char *)itemData, 0);
+			wz_renderer_print(widget->renderer, itemsRect.x + style->itemLeftPadding, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, (const char *)itemData, 0);
 		}
 
 		y += list->itemHeight;
@@ -384,6 +387,8 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 struct wzList *wz_list_create()
 {
 	struct wzList *list = (struct wzList *)malloc(sizeof(struct wzList));
+	wzListStyle *style = &list->base.style.list;
+
 	memset(list, 0, sizeof(struct wzList));
 	list->base.type = WZ_TYPE_LIST;
 	list->base.vtable.draw = wz_list_draw;
@@ -408,6 +413,14 @@ struct wzList *wz_list_create()
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
+
+	style->textColor = WZ_STYLE_TEXT_COLOR;
+	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
+	style->bgColor1 = nvgRGB(40, 40, 40);
+	style->bgColor2 = nvgRGB(50, 50, 50);
+	style->setColor = nvgRGB(40, 140, 190);
+	style->hoverColor = nvgRGB(60, 60, 80);
+	style->itemLeftPadding = 4;
 
 	return list;
 }
