@@ -364,6 +364,15 @@ wzScrollerStyle;
 
 typedef struct
 {
+	NVGcolor iconColor;
+	NVGcolor iconHoverColor;
+	int buttonWidth;
+	wzSize iconSize;
+}
+wzSpinnerStyle;
+
+typedef struct
+{
 	NVGcolor textColor;
 	NVGcolor borderColor;
 	NVGcolor borderHoverColor;
@@ -382,6 +391,7 @@ typedef union
 	wzGroupBoxStyle groupBox;
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
+	wzSpinnerStyle spinner;
 	wzTextEditStyle textEdit;
 }
 wzWidgetStyle;

@@ -67,63 +67,46 @@ static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
 	textEditRect.h = rect.h;
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->textEdit, textEditRect);
 
-	// Update decrement button rect.
+	// Update increment button rect.
 	buttonRect.y = 0;
-	buttonRect.w = 16;
+	buttonRect.w = spinner->base.style.spinner.buttonWidth;
 	buttonRect.h = rect.h / 2;
 	buttonRect.x = rect.w - buttonRect.w;
-	wz_widget_set_rect_internal((struct wzWidget *)spinner->decrementButton, buttonRect);
-
-	// Update increment button rect.
-	buttonRect.y = buttonRect.h;
 	wz_widget_set_rect_internal((struct wzWidget *)spinner->incrementButton, buttonRect);
+
+	// Update decrement button rect.
+	buttonRect.y = buttonRect.h;
+	wz_widget_set_rect_internal((struct wzWidget *)spinner->decrementButton, buttonRect);
 }
 
 static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool decrement)
 {
-	NVGcolor color, borderColor;
 	const struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
-	const wzRect r = wz_widget_get_absolute_rect(widget);
+	const wzSpinnerStyle *style = &widget->parent->style.spinner; // Use parent style.
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const int buttonX = rect.x + rect.w - style->buttonWidth;
+	const float buttonCenterX = buttonX + style->buttonWidth * 0.5f;
+	const float buttonCenterY = rect.y + rect.h * 0.5f;
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
-	
-	if (wz_button_is_pressed(button) && widget->hover)
-	{
-		color = style->pressedColor;
-		borderColor = style->borderSetColor;
-	}
-	else if (widget->hover)
-	{
-		color = style->hoverColor;
-		borderColor = style->borderHoverColor;
-	}
-	else
-	{
-		color = style->foregroundColor;
-		borderColor = style->borderColor;
-	}
-
-	wz_renderer_draw_filled_rect(vg, r, color);
-	wz_renderer_draw_rect(vg, r, borderColor);
 	nvgBeginPath(vg);
 
 	if (decrement)
 	{
-		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
-		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
-		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY + style->iconSize.h * 0.5f); // bottom
+		nvgLineTo(vg, buttonCenterX + style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // right
+		nvgLineTo(vg, buttonCenterX - style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // left
 	}
 	else
 	{
-		nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
-		nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
-		nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY - style->iconSize.h * 0.5f); // top
+		nvgLineTo(vg, buttonCenterX - style->iconSize.w * 0.5f, buttonCenterY + style->iconSize.h * 0.5f); // left
+		nvgLineTo(vg, buttonCenterX + style->iconSize.w * 0.5f, buttonCenterY + style->iconSize.h * 0.5f); // right
 	}
 
-	nvgFillColor(vg, borderColor);
+	nvgFillColor(vg, widget->hover ? style->iconHoverColor : style->iconColor);
 	nvgFill(vg);
 	nvgRestore(vg);
 }
@@ -208,12 +191,20 @@ static void wz_spinner_font_changed(struct wzWidget *widget, const char *fontFac
 struct wzSpinner *wz_spinner_create()
 {
 	struct wzSpinner *spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
+	wzSpinnerStyle *style = &spinner->base.style.spinner;
+
 	memset(spinner, 0, sizeof(struct wzSpinner));
 	spinner->base.type = WZ_TYPE_SPINNER;
 	spinner->base.vtable.measure = wz_spinner_measure;
 	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
 	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 	spinner->base.vtable.font_changed = wz_spinner_font_changed;
+
+	style->iconColor = WZ_STYLE_TEXT_COLOR;
+	style->iconHoverColor = WZ_STYLE_HOVER_COLOR;
+	style->buttonWidth = 16;
+	style->iconSize.w = 10;
+	style->iconSize.h = 6;
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
