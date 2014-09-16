@@ -359,6 +359,16 @@ typedef struct
 {
 	NVGcolor textColor;
 	NVGcolor setColor;
+	NVGcolor borderHoverColor;
+	NVGcolor bgColor;
+	int padding;
+}
+wzMenuBarStyle;
+
+typedef struct
+{
+	NVGcolor textColor;
+	NVGcolor setColor;
 	NVGcolor borderColor;
 	NVGcolor borderHoverColor;
 	int outerRadius;
@@ -409,6 +419,7 @@ typedef union
 	wzComboStyle combo;
 	wzGroupBoxStyle groupBox;
 	wzListStyle list;
+	wzMenuBarStyle menuBar;
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
 	wzSpinnerStyle spinner;
@@ -710,8 +721,6 @@ typedef struct
 	NVGcolor dockPreviewColor;
 	NVGcolor windowHeaderBackgroundColor;
 	NVGcolor windowBorderColor;
-
-	int menuBarPadding;
 }
 wzRendererStyle;
 
