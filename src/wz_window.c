@@ -70,42 +70,41 @@ struct wzWindow
 
 static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 {
-	wzRect borderRect, headerRect;
 	const struct wzWindow *window = (struct wzWindow *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzWindowStyle *style = &widget->style.window;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const wzRect contentRect = wz_widget_get_absolute_rect(window->content);
+	const wzRect headerRect = wz_window_get_header_rect(window);
 
 	nvgSave(vg);
-	
-	// Background.
-	wz_renderer_draw_filled_rect(vg, rect, style->backgroundColor);
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, style->cornerRadius);
 
-	// Border top.
-	borderRect = rect;
-	borderRect.h = window->borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+	// Border/header background.
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x + rect.w, (float)rect.y, style->borderBgColor1, style->borderBgColor2));
+	nvgFill(vg);
 
-	// Border bottom.
-	borderRect.y = rect.y + rect.h - window->borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+	// Outer border.
+	nvgStrokeColor(vg, style->borderColor);
+	nvgStroke(vg);
 
-	// Border left.
-	borderRect = rect;
-	borderRect.w = window->borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+	// Inner border.
+	nvgBeginPath(vg);
+	nvgRect(vg, contentRect.x - 1.0f, contentRect.y - 1.0f, contentRect.w + 2.0f, contentRect.h + 2.0f);
+	nvgStrokeColor(vg, style->innerBorderColor);
+	nvgStroke(vg);
 
-	// Border right.
-	borderRect.x = rect.x + rect.w - window->borderSize;
-	wz_renderer_draw_filled_rect(vg, borderRect, style->windowBorderColor);
+	// Background/content.
+	nvgBeginPath(vg);
+	nvgRect(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.w, (float)contentRect.h);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.x, (float)contentRect.y + contentRect.h, style->bgColor1, style->bgColor2));
+	nvgFill(vg);
 
 	// Header.
-	headerRect = wz_window_get_header_rect(window);
-
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
 		wz_renderer_clip_to_rect(vg, headerRect);
-		wz_renderer_draw_filled_rect(vg, headerRect, style->windowHeaderBackgroundColor);
 		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, window->title, 0);
 	}
 
@@ -463,6 +462,8 @@ static void wz_window_destroy(struct wzWidget *widget)
 struct wzWindow *wz_window_create()
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
+	wzWindowStyle *style = &window->base.style.window;
+
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
 	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
@@ -480,6 +481,15 @@ struct wzWindow *wz_window_create()
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
 	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
+
+	style->textColor = WZ_STYLE_TEXT_COLOR;
+	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
+	style->innerBorderColor = nvgRGB(50, 50, 50);
+	style->bgColor1 = nvgRGB(70, 70, 70);
+	style->bgColor2 = nvgRGB(60, 60, 60);
+	style->borderBgColor1 = nvgRGB(52, 73, 94);
+	style->borderBgColor2 = nvgRGB(70, 98, 125);
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return window;
 }

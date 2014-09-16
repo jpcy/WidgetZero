@@ -412,6 +412,17 @@ typedef struct
 }
 wzTextEditStyle;
 
+typedef struct
+{
+	NVGcolor textColor;
+	NVGcolor borderColor;
+	NVGcolor innerBorderColor;
+	NVGcolor bgColor1, bgColor2;
+	NVGcolor borderBgColor1, borderBgColor2;
+	float cornerRadius;
+}
+wzWindowStyle;
+
 typedef union
 {
 	wzButtonStyle button;
@@ -424,6 +435,7 @@ typedef union
 	wzScrollerStyle scroller;
 	wzSpinnerStyle spinner;
 	wzTextEditStyle textEdit;
+	wzWindowStyle window;
 }
 wzWidgetStyle;
 
