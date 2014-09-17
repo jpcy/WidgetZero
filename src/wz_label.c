@@ -90,7 +90,7 @@ static void wz_label_renderer_changed(struct wzWidget *widget)
 
 	if (!label->isTextColorUserSet)
 	{
-		label->textColor = widget->renderer->style.textColor;
+		label->textColor = widget->style.label.textColor;
 	}
 }
 
@@ -110,6 +110,7 @@ struct wzLabel *wz_label_create()
 	label->base.vtable.renderer_changed = wz_label_renderer_changed;
 	label->base.vtable.destroy = wz_label_destroy;
 	label->text = wz_string_empty();
+	label->base.style.label.textColor = WZ_STYLE_TEXT_COLOR;
 	return label;
 }
 

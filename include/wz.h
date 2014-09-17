@@ -347,6 +347,12 @@ wzGroupBoxStyle;
 typedef struct
 {
 	NVGcolor textColor;
+}
+wzLabelStyle;
+
+typedef struct
+{
+	NVGcolor textColor;
 	NVGcolor borderColor;
 	NVGcolor hoverColor;
 	NVGcolor setColor;
@@ -354,6 +360,13 @@ typedef struct
 	int itemLeftPadding;
 }
 wzListStyle;
+
+typedef struct
+{
+	NVGcolor bgColor;
+	NVGcolor dockPreviewColor;
+}
+wzMainWindowStyle;
 
 typedef struct
 {
@@ -402,6 +415,25 @@ wzSpinnerStyle;
 
 typedef struct
 {
+	NVGcolor borderColor;
+	NVGcolor bgColor;
+}
+wzTabbedStyle;
+
+typedef struct
+{
+	NVGcolor textColor;
+	NVGcolor borderColor;
+	NVGcolor borderHoverColor;
+	NVGcolor bgColor1, bgColor2;
+	NVGcolor bgPressedColor1, bgPressedColor2;
+	NVGcolor bgSetColor1, bgSetColor2;
+	float cornerRadius;
+}
+wzTabButtonStyle;
+
+typedef struct
+{
 	NVGcolor textColor;
 	NVGcolor borderColor;
 	NVGcolor borderHoverColor;
@@ -429,11 +461,15 @@ typedef union
 	wzCheckBoxStyle checkBox;
 	wzComboStyle combo;
 	wzGroupBoxStyle groupBox;
+	wzLabelStyle label;
 	wzListStyle list;
+	wzMainWindowStyle mainWindow;
 	wzMenuBarStyle menuBar;
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
 	wzSpinnerStyle spinner;
+	wzTabbedStyle tabbed;
+	wzTabButtonStyle tabButton;
 	wzTextEditStyle textEdit;
 	wzWindowStyle window;
 }
@@ -717,31 +753,10 @@ wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, i
 typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
 typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
 
-typedef struct
-{
-	NVGcolor hoverColor;
-	NVGcolor setColor;
-	NVGcolor pressedColor;
-	NVGcolor borderColor;
-	NVGcolor borderHoverColor;
-	NVGcolor borderSetColor;
-	NVGcolor backgroundColor;
-	NVGcolor foregroundColor;
-	NVGcolor textColor;
-	NVGcolor textSelectionColor;
-	NVGcolor textCursorColor;
-	NVGcolor dockPreviewColor;
-	NVGcolor windowHeaderBackgroundColor;
-	NVGcolor windowBorderColor;
-}
-wzRendererStyle;
-
 struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
 void wz_renderer_destroy(struct wzRenderer *renderer);
 const char *wz_renderer_get_error();
 struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
-void wz_renderer_set_style(struct wzRenderer *renderer, wzRendererStyle style);
-wzRendererStyle wz_renderer_get_style(const struct wzRenderer *renderer);
 void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
 void wz_renderer_end_frame(struct wzRenderer *renderer);
 void wz_renderer_toggle_text_cursor(struct wzRenderer *renderer);

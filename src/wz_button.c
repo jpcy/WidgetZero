@@ -281,42 +281,43 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 
 static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 {
-	wzRect rect, labelRect;
+	NVGcolor bgColor1, bgColor2;
+	wzRect labelRect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRendererStyle *style = &widget->renderer->style;
+	const wzTabButtonStyle *style = &widget->style.tabButton;
+	const wzRect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
-	rect = wz_widget_get_absolute_rect(widget);
+
+	// Background color.
+	if (button->isPressed && widget->hover)
+	{
+		bgColor1 = style->bgPressedColor1;
+		bgColor2 = style->bgPressedColor2;
+	}
+	else if (button->isSet)
+	{
+		bgColor1 = style->bgSetColor1;
+		bgColor2 = style->bgSetColor2;
+	}
+	else
+	{
+		bgColor1 = style->bgColor1;
+		bgColor2 = style->bgColor2;
+	}
+
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
 
 	// Background.
-	if (button->isSet)
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
-	}
-	else if (widget->hover)
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->hoverColor);
-	}
-	else
-	{
-		wz_renderer_draw_filled_rect(vg, rect, style->foregroundColor);
-	}
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
+	nvgFill(vg);
 
 	// Border.
-	if (button->isSet)
-	{
-		wz_renderer_draw_rect(vg, rect, style->borderSetColor);
-	}
-	else if (widget->hover)
-	{
-		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
-	}
-	else
-	{
-		wz_renderer_draw_rect(vg, rect, style->borderColor);
-	}
+	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgStroke(vg);
 
 	// Label.
 	labelRect.x = rect.x + button->padding.left;
@@ -505,7 +506,21 @@ struct wzButton *wz_radio_button_create()
 struct wzButton *wz_tab_button_create()
 {
 	struct wzButton *button = wz_button_create();
+	wzTabButtonStyle *style = &button->base.style.tabButton;
+
 	button->base.vtable.draw = wz_tab_button_draw;
+
+	style->textColor = WZ_STYLE_TEXT_COLOR;
+	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
+	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
+	style->bgColor1 = nvgRGB(80, 80, 80);
+	style->bgColor2 = nvgRGB(70, 70, 70);
+	style->bgPressedColor1 = nvgRGB(60, 60, 60);
+	style->bgPressedColor2 = nvgRGB(50, 50, 50);
+	style->bgSetColor1 = nvgRGB(150, 150, 150);
+	style->bgSetColor2 = nvgRGB(140, 140, 140);
+	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
+
 	return button;
 }
 

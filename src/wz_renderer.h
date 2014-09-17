@@ -47,7 +47,6 @@ struct wzRenderer
 {
 	wzNanoVgGlDestroy destroy;
 	struct NVGcontext *vg;
-	wzRendererStyle style;
 	wzImage images[WZ_NANOVG_MAX_IMAGES];
 	int nImages;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];

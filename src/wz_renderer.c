@@ -95,22 +95,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 		return NULL;
 	}
 
-	// Setup default style.
-	renderer->style.hoverColor = nvgRGBf(0.2510f, 0.2510f, 0.3176f);
-	renderer->style.setColor = nvgRGBf(0.1529f, 0.5569f, 0.7412f);
-	renderer->style.pressedColor = nvgRGBf(0.1765f, 0.1765f, 0.2157f);
-	renderer->style.borderColor = nvgRGBf(0.4000f, 0.4000f, 0.4000f);
-	renderer->style.borderHoverColor = nvgRGBf(0.5f, 0.76f, 0.9f);
-	renderer->style.borderSetColor = nvgRGBf(0.17f, 0.38f, 0.55f);
-	renderer->style.backgroundColor = nvgRGBf(0.2000f, 0.2000f, 0.2000f);
-	renderer->style.foregroundColor = nvgRGBf(0.2510f, 0.2510f, 0.2510f);
-	renderer->style.textColor = nvgRGBf(0.8f, 0.8f, 0.8f);
-	renderer->style.textSelectionColor = nvgRGBAf(0.1529f, 0.5569f, 0.7412f, 0.5f);
-	renderer->style.textCursorColor = nvgRGBf(1, 1, 1);
-	renderer->style.dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
-	renderer->style.windowHeaderBackgroundColor = nvgRGBf(0.2039f, 0.2863f, 0.3686f);
-	renderer->style.windowBorderColor = nvgRGBf(0.2784f, 0.4000f, 0.4902f);
-
 	return renderer;
 }
 
@@ -136,18 +120,6 @@ struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	return renderer->vg;
-}
-
-void wz_renderer_set_style(struct wzRenderer *renderer, wzRendererStyle style)
-{
-	WZ_ASSERT(renderer);
-	renderer->style = style;
-}
-
-wzRendererStyle wz_renderer_get_style(const struct wzRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	return renderer->style;
 }
 
 void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow)
