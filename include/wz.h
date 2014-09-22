@@ -363,7 +363,6 @@ wzListStyle;
 
 typedef struct
 {
-	NVGcolor bgColor;
 	NVGcolor dockPreviewColor;
 }
 wzMainWindowStyle;

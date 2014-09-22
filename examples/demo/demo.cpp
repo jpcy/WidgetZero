@@ -676,7 +676,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	glClearColor(1, 1, 1, 1);
+	glClearColor(0.2510f, 0.2510f, 0.2510f, 1);
 
 	int windowWidth, windowHeight;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);

@@ -1171,8 +1171,6 @@ DRAWING
 
 void wz_main_window_draw(struct wzMainWindow *mainWindow)
 {
-	struct NVGcontext *vg = mainWindow->base.renderer->vg;
-	wz_renderer_draw_filled_rect(vg, wz_widget_get_absolute_rect((const struct wzWidget *)mainWindow), mainWindow->base.style.mainWindow.bgColor);
 	wz_widget_draw_main_window(mainWindow);
 }
 
@@ -1213,7 +1211,6 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	mainWindow->base.vtable.set_rect = wz_main_window_set_rect;
 
 	// Set style.
-	style->bgColor = nvgRGBf(0.2510f, 0.2510f, 0.2510f);
 	style->dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
 
 	// Create content widget.
