@@ -28,23 +28,13 @@ SOFTWARE.
 struct wzFrame
 {
 	struct wzWidget base;
-	struct wzWidget *content;
 };
 
 struct wzFrame *wz_frame_create()
 {
-	struct wzFrame *frame;
-
-	frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
+	struct wzFrame *frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
 	memset(frame, 0, sizeof(struct wzFrame));
 	frame->base.type = WZ_TYPE_FRAME;
-
-	// Create content widget.
-	frame->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
-	memset(frame->content, 0, sizeof(struct wzWidget));
-	frame->content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget((struct wzWidget *)frame, frame->content);
-
 	return frame;
 }
 
@@ -56,12 +46,12 @@ void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(frame->content, widget);
+	wz_widget_add_child_widget(&frame->base, widget);
 }
 
 void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget)
 {
 	WZ_ASSERT(frame);
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(frame->content, widget);
+	wz_widget_remove_child_widget(&frame->base, widget);
 }
