@@ -1,36 +1,11 @@
-config =
-{
-	nanovgPath = nil,
-	sdl2Path = nil
-}
-
-local configFilename = "config.lua"
-
-if not os.isfile(configFilename) then
-	printf("Error: config file \"" .. configFilename .. "\" doesn't exist")
-	os.exit(1)
-else
-	dofile(configFilename)
-end
-
 if os.get() == "windows" then
-	if config.sdl2Path == nil then
-		printf("Error: SDL2 path not set")
-		os.exit(1)
-	end
-	
 	os.mkdir("build");
 	os.mkdir("build/bin_x86");
 	os.mkdir("build/bin_x64");
 
 	-- Copy the SDL2 dlls to the build directory.
-	os.copyfile(config.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
-	os.copyfile(config.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
-end
-
-if config.nanovgPath == nil then
-	printf("Error: NanoVG path not set")
-	os.exit(1)
+	os.copyfile("examples/sdl/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
+	os.copyfile("examples/sdl/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
 end
 
 -----------------------------------------------------------------------------
@@ -66,21 +41,15 @@ solution "WidgetZero"
 project "WidgetZero"
 	kind "StaticLib"
 	files { "src/*.*", "include/*.*" }
-	
-	includedirs
-	{
-		"include",
-		config.nanovgPath .. "/src"
-	}
-	
+	includedirs { "include", "nanovg" }
 	vpaths { ["*"] = { "src", "include" } }
 		
 -----------------------------------------------------------------------------
 
 project "NanoVG"
 	kind "StaticLib"
-	files { config.nanovgPath .. "/src/*.*" }
-	includedirs { config.nanovgPath .. "/src" }
+	files { "nanovg/*.*" }
+	includedirs { "nanovg" }
 		
 -----------------------------------------------------------------------------
 
@@ -89,40 +58,23 @@ function createExampleProject(_name, _language)
 		language(_language)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
-
-		files
-		{
-			"examples/" .. _name .. "/*.*",
-			"examples/gl/*.*"
-		}
-		
-		includedirs
-		{
-			"include",
-			"examples/gl",
-			config.nanovgPath .. "/src"
-		}
+		files { "examples/" .. _name .. "/*.*", "examples/gl/*.*" }
+		includedirs { "include", "nanovg", "examples/gl" }
 		
 		configuration "linux"
 			buildoptions { "`pkg-config --cflags sdl2`" }
 			linkoptions { "`pkg-config --libs sdl2`" }
 			links { "GL", "GLU" }
 		configuration "vs*"
-			includedirs(config.sdl2Path .. "/include")
+			includedirs("examples/sdl/include")
 			links { "glu32", "opengl32" }
 		configuration { "vs*", "not x64" }
-			libdirs(config.sdl2Path .. "/lib/x86")
+			libdirs("examples/sdl/lib/x86")
 		configuration { "vs*",  "x64" }
-			libdirs(config.sdl2Path .. "/lib/x64")
+			libdirs("examples/sdl/lib/x64")
 		configuration {}
 		
-		links
-		{
-			"SDL2",
-			"SDL2main",
-			"NanoVG",
-			"WidgetZero"
-		}
+		links { "SDL2", "SDL2main", "NanoVG", "WidgetZero" }
 		
 		if _language == "C++" then
 			configuration "vs2012"
