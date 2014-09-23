@@ -1,6 +1,5 @@
 config =
 {
-	glewPath = nil,
 	nanovgPath = nil,
 	sdl2Path = nil
 }
@@ -15,11 +14,6 @@ else
 end
 
 if os.get() == "windows" then
-	if config.glewPath == nil then
-		printf("Error: GLEW path not set")
-		os.exit(1)
-	end
-
 	if config.sdl2Path == nil then
 		printf("Error: SDL2 path not set")
 		os.exit(1)
@@ -29,10 +23,6 @@ if os.get() == "windows" then
 	os.mkdir("build/bin_x86");
 	os.mkdir("build/bin_x64");
 
-	-- Copy the GLEW dlls to the build directory.
-	os.copyfile(config.glewPath .. "/bin/Release/Win32/glew32.dll", "build/bin_x86/glew32.dll");
-	os.copyfile(config.glewPath .. "/bin/Release/x64/glew32.dll", "build/bin_x64/glew32.dll");
-	
 	-- Copy the SDL2 dlls to the build directory.
 	os.copyfile(config.sdl2Path .. "/lib/x86/SDL2.dll", "build/bin_x86/SDL2.dll");
 	os.copyfile(config.sdl2Path .. "/lib/x64/SDL2.dll", "build/bin_x64/SDL2.dll");
@@ -100,28 +90,30 @@ function createExampleProject(_name, _language)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
 
-		files { "examples/" .. _name .. "/*.*" }
+		files
+		{
+			"examples/" .. _name .. "/*.*",
+			"examples/gl/*.*"
+		}
 		
 		includedirs
 		{
 			"include",
-			config.glewPath .. "/include",
+			"examples/gl",
 			config.nanovgPath .. "/src"
 		}
 		
 		configuration "linux"
 			buildoptions { "`pkg-config --cflags sdl2`" }
 			linkoptions { "`pkg-config --libs sdl2`" }
-			links { "GL", "GLU", "GLEW" }
+			links { "GL", "GLU" }
 		configuration "vs*"
 			includedirs(config.sdl2Path .. "/include")
-			links { "glu32", "opengl32", "glew32" }
+			links { "glu32", "opengl32" }
 		configuration { "vs*", "not x64" }
 			libdirs(config.sdl2Path .. "/lib/x86")
-			libdirs(config.glewPath .. "/lib/Release/Win32")
 		configuration { "vs*",  "x64" }
 			libdirs(config.sdl2Path .. "/lib/x64")
-			libdirs(config.glewPath .. "/lib/Release/x64")
 		configuration {}
 		
 		links

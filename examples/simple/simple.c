@@ -23,7 +23,13 @@ SOFTWARE.
 */
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL/glew.h>
+
+#ifdef _MSC_VER
+#include <gl2.h>
+#else
+#include <GL/gl.h>
+#endif
+
 #include <SDL.h>
 #include <wz.h>
 
@@ -86,11 +92,13 @@ int InitializeSDL()
 		return 1;
 	}
 
-	if (glewInit() != GLEW_OK)
+#ifdef _MSC_VER
+	if (ogl_LoadFunctions() == ogl_LOAD_FAILED)
 	{
-		ShowError("GLEW init failed");
+		ShowError("ogl_LoadFunctions failed");
 		return 1;
 	}
+#endif
 
 	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);

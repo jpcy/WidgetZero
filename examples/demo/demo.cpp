@@ -25,7 +25,13 @@ SOFTWARE.
 #include <stdarg.h>
 #include <stdint.h>
 #include <memory>
-#include <GL/glew.h>
+
+#ifdef _MSC_VER
+#include <gl2.h>
+#else
+#include <GL/gl.h>
+#endif
+
 #include <SDL.h>
 
 #define WZ_CPP_IMPLEMENTATION
@@ -505,9 +511,21 @@ private:
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
-		wz::Button *button2 = new wz::Button("Yet Another Button");
+		/*wz::Button *button2 = new wz::Button("Yet Another Button");
 		button2->setStretch(WZ_STRETCH);
-		layout->add(button2);
+		layout->add(button2);*/
+
+		wz::Tabbed *tabbed = new wz::Tabbed();
+		tabbed->setStretch(WZ_STRETCH);
+		layout->add(tabbed);
+
+		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
+		firstTab->setLabel("Tab 1");
+
+		wz::Tab *secondTab = tabbed->addTab(new wz::Tab());
+		secondTab->setLabel("Another Tab");
+
+		tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
 	}
 
 	void createWindow2()
@@ -670,11 +688,13 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (glewInit() != GLEW_OK)
+#ifdef _MSC_VER
+	if (ogl_LoadFunctions() == ogl_LOAD_FAILED)
 	{
-		ShowError("GLEW init failed");
+		ShowError("ogl_LoadFunctions failed");
 		return 1;
 	}
+#endif
 
 	glClearColor(0.2510f, 0.2510f, 0.2510f, 1);
 
