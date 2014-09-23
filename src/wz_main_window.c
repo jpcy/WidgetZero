@@ -26,7 +26,6 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
-#include "wz_widget_draw.h"
 #include "wz_window.h"
 
 struct wzMainWindow
@@ -896,11 +895,14 @@ static void wz_widget_ignore_overlapping_children(struct wzWidget *widget, int m
 
 			if (wz_intersect_rects(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
-				// Ignore the one with lower draw priority.
-				if (widget->children[i]->drawPriority < widget->children[j]->drawPriority)
+				// Ignore the one that isn't set to overlap.
+				if (widget->children[i]->overlap)
+				{
+					widget->children[j]->ignore = true;
+				}
+				else if (widget->children[j]->overlap)
 				{
 					widget->children[i]->ignore = true;
-					break;
 				}
 			}
 		}
@@ -940,8 +942,7 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent window.
-	// Don't do this if the inherited widget draw priority is higher than window draw priority.
-	if (widget->window && wz_widget_calculate_inherited_draw_priority(widget) < WZ_DRAW_PRIORITY_WINDOW)
+	if (widget->window)
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}
@@ -1169,9 +1170,154 @@ DRAWING
 ================================================================================
 */
 
+typedef bool (*wzWidgetPredicate)(const struct wzWidget *);
+
+static bool wz_widget_true(const struct wzWidget *widget)
+{
+	widget = widget;
+	return true;
+}
+
+static bool wz_widget_is_combo_dropdown(const struct wzWidget *widget)
+{
+	return widget->type == WZ_TYPE_LIST && widget->parent && widget->parent->type == WZ_TYPE_COMBO;
+}
+
+static bool wz_widget_is_not_combo_dropdown(const struct wzWidget *widget)
+{
+	return !wz_widget_is_combo_dropdown(widget);
+}
+
+static bool wz_widget_is_not_window(const struct wzWidget *widget)
+{
+	return widget->type != WZ_TYPE_WINDOW;
+}
+
+static void wz_widget_draw_recursive(struct wzWidget *widget, wzRect clip, wzWidgetPredicate draw_predicate, wzWidgetPredicate recurse_predicate)
+{
+	int i;
+
+	if (!wz_widget_get_visible(widget))
+		return;
+
+	// Don't render the widget if it's outside its parent window.
+	if (!wz_widget_overlaps_parent_window(widget))
+		return;
+
+	if (draw_predicate(widget) && !widget->drawManually && widget->vtable.draw)
+	{
+		widget->vtable.draw(widget, clip);
+	}
+
+	// Update clip rect.
+	if (widget->vtable.get_children_clip_rect)
+	{
+		if (!wz_intersect_rects(clip, widget->vtable.get_children_clip_rect(widget), &clip))
+		{
+			// Reset to mainWindow clip rect.
+			clip = wz_widget_get_rect((struct wzWidget *)widget->mainWindow);
+		}
+	}
+
+	if (!recurse_predicate(widget))
+		return;
+
+	for (i = 0; i < wz_arr_len(widget->children); i++)
+	{
+		wz_widget_draw_recursive(widget->children[i], clip, draw_predicate, recurse_predicate);
+	}
+}
+
+static void wz_widget_draw(struct wzWidget *widget, wzWidgetPredicate draw_predicate, wzWidgetPredicate recurse_predicate)
+{
+	WZ_ASSERT(widget);
+	wz_widget_draw_recursive(widget, wz_widget_get_rect(widget), draw_predicate, recurse_predicate);
+}
+
+static int wz_compare_window_draw_priorities_docked(const void *a, const void *b)
+{
+	const struct wzWindow *window1, *window2;
+	bool window1Docked, window2Docked;
+
+	window1 = *((const struct wzWindow **)a);
+	window2 = *((const struct wzWindow **)b);
+	window1Docked = wz_main_window_get_window_dock_position(((const struct wzWidget *)window1)->mainWindow, window1) != WZ_DOCK_POSITION_NONE;
+	window2Docked = wz_main_window_get_window_dock_position(((const struct wzWidget *)window2)->mainWindow, window2) != WZ_DOCK_POSITION_NONE;
+
+	if (window1Docked && !window2Docked)
+	{
+		return -1;
+	}
+	else if (window2Docked && !window1Docked)
+	{
+		return 1;
+	}
+
+	return wz_window_get_draw_priority(window1) - wz_window_get_draw_priority(window2);
+}
+
+static void wz_widget_draw_if_visible(struct wzWidget *widget)
+{
+	if (wz_widget_get_visible(widget))
+	{
+		wzRect clip;
+		clip.x = clip.y = clip.w = clip.h = 0;
+		widget->vtable.draw(widget, clip);
+	}
+}
+
 void wz_main_window_draw(struct wzMainWindow *mainWindow)
 {
-	wz_widget_draw_main_window(mainWindow);
+	struct wzWindow *windows[WZ_MAX_WINDOWS];
+	int nWindows;
+	int i;
+
+	WZ_ASSERT(mainWindow);
+
+	// Draw the main window (not really, vtable.draw is NULL) and ancestors, except for combo box dropdown lists. Don't recurse into windows.
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_is_not_combo_dropdown, wz_widget_is_not_window);
+
+	// Get a list of windows (excluding top).
+	nWindows = 0;
+
+	for (i = 0; i < wz_arr_len(((struct wzWidget *)mainWindow)->children); i++)
+	{
+		struct wzWidget *widget = ((struct wzWidget *)mainWindow)->children[i];
+	
+		if (widget->type == WZ_TYPE_WINDOW)
+		{
+			windows[nWindows] = (struct wzWindow *)widget;
+			nWindows++;
+		}
+	}
+
+	// Sort them in ascending order by draw priority.
+	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_window_draw_priorities_docked);
+
+	// For each window, draw the window and all ancestors, except for combo box dropdown lists.
+	for (i = 0; i < nWindows; i++)
+	{
+		struct wzWidget *widget = (struct wzWidget *)windows[i];
+
+		if (wz_widget_get_visible(widget) && widget->vtable.draw)
+		{
+			widget->vtable.draw(widget, ((struct wzWidget *)mainWindow)->rect);
+		}
+
+		wz_widget_draw(widget, wz_widget_is_not_combo_dropdown, wz_widget_true);
+	}
+
+	// Draw combo box dropdown lists.
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_is_combo_dropdown, wz_widget_true);
+
+	// Draw dock preview.
+	wz_widget_draw_if_visible((struct wzWidget *)mainWindow->dockPreview);
+
+	// Draw dock icons.
+	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		wz_widget_draw_if_visible((struct wzWidget *)mainWindow->dockIcons[i]);
+	}
 }
 
 /*
@@ -1224,11 +1370,11 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	{
 		mainWindow->dockIcons[i] = wz_dummy_create();
 		widget = (struct wzWidget *)mainWindow->dockIcons[i];
-		wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_ICON);
 		wz_widget_set_measure_callback(widget, NULL);
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
 		wz_widget_set_size_args_internal((struct wzWidget *)mainWindow->dockIcons[i], 48, 48);
 		wz_widget_set_visible(widget, false);
+		wz_widget_set_draw_manually(widget, true);
 		wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
 	}
 
@@ -1237,7 +1383,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	// Create dock preview widget.
 	mainWindow->dockPreview = wz_dummy_create();
 	widget = (struct wzWidget *)mainWindow->dockPreview;
-	wz_widget_set_draw_priority(widget, WZ_DRAW_PRIORITY_DOCK_PREVIEW);
+	wz_widget_set_draw_manually(widget, true);
 	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
 	wz_widget_add_child_widget((struct wzWidget *)mainWindow, widget);
@@ -1248,13 +1394,8 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 		struct wzTabBar *tabBar = wz_tab_bar_create();
 		mainWindow->dockTabBars[i] = tabBar;
 		wz_widget_set_visible((struct wzWidget *)tabBar, false);
-		wz_widget_set_draw_priority((struct wzWidget *)tabBar, WZ_DRAW_PRIORITY_DOCK_TAB_BAR);
 		wz_widget_add_child_widget((struct wzWidget *)mainWindow, (struct wzWidget *)tabBar);
 		wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
-
-		// Override scroll button draw priority.
-		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_decrement_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
-		wz_widget_set_draw_priority((struct wzWidget *)wz_tab_bar_get_increment_button(tabBar), WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON);
 	}
 
 	return mainWindow;

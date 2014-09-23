@@ -919,25 +919,19 @@ struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidg
 	return NULL;
 }
 
-void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority)
+void wz_widget_set_draw_manually(struct wzWidget *widget, bool value)
 {
-	WZ_ASSERT(widget);
-	widget->drawPriority = drawPriority;
+	widget->drawManually = value;
 }
 
-int wz_widget_get_draw_priority(const struct wzWidget *widget)
+void wz_widget_set_overlap(struct wzWidget *widget, bool value)
 {
-	WZ_ASSERT(widget);
-	return widget->drawPriority;
+	widget->overlap = value;
 }
 
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
 {
 	if (!widget->window)
-		return true;
-
-	// Always return true if the inherited widget draw priority is higher than window.
-	if (wz_widget_calculate_inherited_draw_priority(widget) > WZ_DRAW_PRIORITY_WINDOW)
 		return true;
 
 	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
@@ -959,22 +953,6 @@ void *wz_widget_get_internal_metadata(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->internalMetadata;
-}
-
-int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget)
-{
-	int drawPriority = WZ_DRAW_PRIORITY_DEFAULT;
-
-	for (;;)
-	{
-		if (widget == NULL)
-			break;
-
-		drawPriority = WZ_MAX(drawPriority, widget->drawPriority);
-		widget = widget->parent;
-	}
-
-	return drawPriority;
 }
 
 int wz_widget_get_line_height(const struct wzWidget *widget)

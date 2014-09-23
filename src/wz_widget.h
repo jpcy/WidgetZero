@@ -60,28 +60,9 @@ typedef struct
 }
 wzWidgetVtable;
 
-enum
-{
-	WZ_DRAW_PRIORITY_DEFAULT,
-
-	// Widgets can use this range to draw on top over widgets with default draw priority.
-	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START,
-	WZ_DRAW_PRIORITY_WIDGET_CUSTOM_END = WZ_DRAW_PRIORITY_WIDGET_CUSTOM_START + 16,
-	WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON,
-	WZ_DRAW_PRIORITY_SPINNER_BUTTON,
-	WZ_DRAW_PRIORITY_DOCK_TAB_BAR,
-	WZ_DRAW_PRIORITY_DOCK_TAB_BAR_SCROLL_BUTTON,
-	WZ_DRAW_PRIORITY_WINDOW,
-	WZ_DRAW_PRIORITY_COMBO_DROPDOWN,
-	WZ_DRAW_PRIORITY_DOCK_ICON,
-	WZ_DRAW_PRIORITY_DOCK_PREVIEW,
-	WZ_DRAW_PRIORITY_MAX
-};
-
 struct wzWidget
 {
 	wzWidgetType type;
-	int drawPriority;
 
 	// Explicitly set by the user.
 	wzRect userRect;
@@ -112,6 +93,12 @@ struct wzWidget
 
 	// Used internally to ignore siblings that overlap at the mouse cursor.
 	bool ignore;
+
+	// This widget should overlap other widgets when doing mouse cursor logic. e.g. tab bar scroll buttons.
+	bool overlap;
+
+	// Don't draw automatically when wz_main_window_draw walks through the widget hierarchy.
+	bool drawManually;
 
 	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
 	bool inputNotClippedToParent;
@@ -162,10 +149,9 @@ void wz_widget_refresh_rect(struct wzWidget *widget);
 
 struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
 
-// Also sets all ancestor widgets to the same draw priority.
-void wz_widget_set_draw_priority(struct wzWidget *widget, int drawPriority);
+void wz_widget_set_draw_manually(struct wzWidget *widget, bool value);
 
-int wz_widget_get_draw_priority(const struct wzWidget *widget);
+void wz_widget_set_overlap(struct wzWidget *widget, bool value);
 
 bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
 
@@ -173,10 +159,6 @@ void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
 
 void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct wzWidget *widget);
-
-// Calculate the highest draw priority out of this widget and all it's direct ancestors.
-// Used when widgets need to be seen to inherit the draw priority of their ancestors. e.g. combo descendants: list, scroller, buttons used by scroller.
-int wz_widget_calculate_inherited_draw_priority(const struct wzWidget *widget);
 
 // Shortcut for wz_renderer_get_line_height, using the widget's renderer, font face and font size.
 int wz_widget_get_line_height(const struct wzWidget *widget);

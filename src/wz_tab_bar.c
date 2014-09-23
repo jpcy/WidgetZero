@@ -155,6 +155,43 @@ static void wz_tab_bar_button_pressed(wzEvent *e)
 	wz_tab_bar_select_tab((struct wzTabBar *)e->base.widget->parent, (struct wzButton *)e->base.widget);
 }
 
+// Manually draw the tabs and scroll buttons, so the latter can overlap the former.
+static void wz_tab_bar_draw(struct wzWidget *widget, wzRect clip)
+{
+	int i;
+	struct wzWidget *w;
+	struct wzTabBar *tabBar = (struct wzTabBar *)widget;
+
+	if (!wz_intersect_rects(clip, wz_widget_get_absolute_rect(widget), &clip))
+		return;
+
+	// Draw tabs first.
+	for (i = 0; i < wz_arr_len(tabBar->tabs); i++)
+	{
+		w = (struct wzWidget *)tabBar->tabs[i];
+
+		if (wz_widget_get_visible(w) && w->vtable.draw)
+		{
+			w->vtable.draw(w, clip);
+		}
+	}
+
+	// Draw the scroll buttons last so they overlap the tabs.
+	w = (struct wzWidget *)tabBar->decrementButton;
+
+	if (wz_widget_get_visible(w) && w->vtable.draw)
+	{
+		w->vtable.draw(w, clip);
+	}
+
+	w = (struct wzWidget *)tabBar->incrementButton;
+
+	if (wz_widget_get_visible(w) && w->vtable.draw)
+	{
+		w->vtable.draw(w, clip);
+	}
+}
+
 static void wz_tab_bar_destroy(struct wzWidget *widget)
 {
 	struct wzTabBar *tabBar;
@@ -224,6 +261,7 @@ struct wzTabBar *wz_tab_bar_create()
 	tabBar = (struct wzTabBar *)malloc(sizeof(struct wzTabBar));
 	memset(tabBar, 0, sizeof(struct wzTabBar));
 	tabBar->base.type = WZ_TYPE_TAB_BAR;
+	tabBar->base.vtable.draw = wz_tab_bar_draw;
 	tabBar->base.vtable.destroy = wz_tab_bar_destroy;
 	tabBar->base.vtable.renderer_changed = wz_tab_bar_renderer_changed;
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
@@ -237,7 +275,8 @@ struct wzTabBar *wz_tab_bar_create()
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, false);
-	wz_widget_set_draw_priority((struct wzWidget *)tabBar->decrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
+	wz_widget_set_draw_manually((struct wzWidget *)tabBar->decrementButton, true);
+	wz_widget_set_overlap((struct wzWidget *)tabBar->decrementButton, true);
 
 	tabBar->incrementButton = wz_button_create();
 	wz_button_set_label(tabBar->incrementButton, ">");
@@ -245,7 +284,8 @@ struct wzTabBar *wz_tab_bar_create()
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, defaultScrollButtonWidth);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, false);
-	wz_widget_set_draw_priority((struct wzWidget *)tabBar->incrementButton, WZ_DRAW_PRIORITY_TAB_BAR_SCROLL_BUTTON);
+	wz_widget_set_draw_manually((struct wzWidget *)tabBar->incrementButton, true);
+	wz_widget_set_overlap((struct wzWidget *)tabBar->incrementButton, true);
 
 	return tabBar;
 }
@@ -278,6 +318,7 @@ struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar)
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tab);
 	wz_arr_push(tabBar->tabs, tab);
 	wz_widget_set_rect_internal((struct wzWidget *)tab, rect);
+	wz_widget_set_draw_manually((struct wzWidget *)tab, true);
 
 	// Select the first tab added.
 	if (!tabBar->selectedTab)

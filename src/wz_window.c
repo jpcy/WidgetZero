@@ -466,7 +466,6 @@ struct wzWindow *wz_window_create()
 
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
-	window->base.drawPriority = WZ_DRAW_PRIORITY_WINDOW;
 	window->base.vtable.draw = wz_window_draw;
 	window->base.vtable.renderer_changed = wz_window_renderer_changed;
 	window->base.vtable.font_changed = wz_window_font_changed;
