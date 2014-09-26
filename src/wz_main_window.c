@@ -279,7 +279,7 @@ static void wz_main_window_update_docking_rects(struct wzMainWindow *mainWindow)
 	{
 		int nWindows;
 		wzRect tabBarRect, windowRect;
-		int j;
+		int menuBarHeight, j;
 
 		nWindows = wz_arr_len(mainWindow->dockedWindows[i]);
 
@@ -288,6 +288,7 @@ static void wz_main_window_update_docking_rects(struct wzMainWindow *mainWindow)
 
 		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
 		windowRect = wz_widget_get_rect((struct wzWidget *)mainWindow->dockedWindows[i][0]);
+		menuBarHeight = mainWindow->menuBar ? wz_widget_get_height((const struct wzWidget *)mainWindow->menuBar) : 0;
 
 		switch (i)
 		{
@@ -300,10 +301,10 @@ static void wz_main_window_update_docking_rects(struct wzMainWindow *mainWindow)
 			break;
 		case WZ_DOCK_POSITION_EAST:
 			windowRect.x = mainWindow->base.rect.w - windowRect.w;
-			windowRect.h = mainWindow->base.rect.h;
+			windowRect.h = mainWindow->base.rect.h - menuBarHeight;
 			break;
 		case WZ_DOCK_POSITION_WEST:
-			windowRect.h = mainWindow->base.rect.h;
+			windowRect.h = mainWindow->base.rect.h - menuBarHeight;
 			break;
 		}
 
