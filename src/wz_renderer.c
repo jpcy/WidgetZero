@@ -72,7 +72,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	renderer = malloc(sizeof(struct wzRenderer));
 	memset(renderer, 0, sizeof(struct wzRenderer));
 	renderer->destroy = destroy;
-	renderer->showTextCursor = true;
 	renderer->defaultFontSize = defaultFontSize;
 
 	// Init nanovg.
@@ -134,12 +133,6 @@ void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWin
 void wz_renderer_end_frame(struct wzRenderer *renderer)
 {
 	nvgEndFrame(renderer->vg);
-}
-
-void wz_renderer_toggle_text_cursor(struct wzRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	renderer->showTextCursor = !renderer->showTextCursor;
 }
 
 int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize)

@@ -51,7 +51,6 @@ struct wzRenderer
 	int nImages;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
 	float defaultFontSize;
-	bool showTextCursor;
 };
 
 #endif // WZ_RENDERER_H

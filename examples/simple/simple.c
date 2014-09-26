@@ -137,32 +137,26 @@ int main(int argc, char **argv)
 
 	for (;;)
 	{
-		bool quit = false;
 		SDL_Event e;
 
-		while (SDL_PollEvent(&e))
-		{
-			if (e.type == SDL_QUIT)
-			{
-				quit = true;
-				break;
-			}
-			else if (e.type == SDL_MOUSEMOTION)
-			{
-				wz_main_window_mouse_move(mainWindow, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
-			}
-			else if (e.type == SDL_MOUSEBUTTONDOWN)
-			{
-				wz_main_window_mouse_button_down(mainWindow, e.button.button, e.button.x, e.button.y);
-			}
-			else if (e.type == SDL_MOUSEBUTTONUP)
-			{
-				wz_main_window_mouse_button_up(mainWindow, e.button.button, e.button.x, e.button.y);
-			}
-		}
+		SDL_WaitEvent(&e);
 
-		if (quit)
+		if (e.type == SDL_QUIT)
+		{
 			break;
+		}
+		else if (e.type == SDL_MOUSEMOTION)
+		{
+			wz_main_window_mouse_move(mainWindow, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+		}
+		else if (e.type == SDL_MOUSEBUTTONDOWN)
+		{
+			wz_main_window_mouse_button_down(mainWindow, e.button.button, e.button.x, e.button.y);
+		}
+		else if (e.type == SDL_MOUSEBUTTONUP)
+		{
+			wz_main_window_mouse_button_up(mainWindow, e.button.button, e.button.x, e.button.y);
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		wz_renderer_begin_frame(renderer, mainWindow);

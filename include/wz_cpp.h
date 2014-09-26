@@ -207,6 +207,7 @@ public:
 	void beginFrame();
 	void drawFrame();
 	void endFrame();
+	void toggleTextCursor();
 	wzCursor getCursor() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
@@ -1172,6 +1173,11 @@ void MainWindow::drawFrame()
 void MainWindow::endFrame()
 {
 	wz_renderer_end_frame(p->renderer);
+}
+
+void MainWindow::toggleTextCursor()
+{
+	wz_main_window_toggle_text_cursor(p->mainWindow);
 }
 
 wzCursor MainWindow::getCursor() const

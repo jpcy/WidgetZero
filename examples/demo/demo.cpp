@@ -49,59 +49,7 @@ SOFTWARE.
 #pragma warning(pop)
 #endif
 
-static const float frameTime = 1000 / 60.0f;
-
-struct BenchmarkSample
-{
-	BenchmarkSample() : totalMs_(0), num_(0), averageMs_(0), startTime_(0) {}
-
-	void start()
-	{
-		startTime_ = SDL_GetPerformanceCounter();
-	}
-
-	void end()
-	{
-		totalMs_ += SDL_GetPerformanceCounter() - startTime_;
-		num_++;
-	}
-
-	void calculateAverage()
-	{
-		if (totalMs_ == 0)
-		{
-			averageMs_ = 0;
-		}
-		else
-		{
-			averageMs_ = totalMs_ / (float)SDL_GetPerformanceFrequency() * 1000.0f / (float)num_;
-		}
-
-		totalMs_ = 0;
-		num_ = 0;
-	}
-
-	float getAverage() const { return averageMs_; }
-
-private:
-	uint64_t totalMs_;
-	int num_;
-	float averageMs_;
-	uint64_t startTime_;
-};
-
-struct Benchmark
-{
-	Benchmark() : frameCount(0), fps(0) {}
-
-	BenchmarkSample draw;
-	BenchmarkSample frame;
-	BenchmarkSample input;
-	int frameCount;
-	int fps;
-};
-
-static Benchmark benchmark;
+static const int textCursorBlinkInterval = 500;
 
 static const char *customListData[3] =
 {
@@ -511,21 +459,9 @@ private:
 		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
-		/*wz::Button *button2 = new wz::Button("Yet Another Button");
+		wz::Button *button2 = new wz::Button("Yet Another Button");
 		button2->setStretch(WZ_STRETCH);
-		layout->add(button2);*/
-
-		wz::Tabbed *tabbed = new wz::Tabbed();
-		tabbed->setStretch(WZ_STRETCH);
-		layout->add(tabbed);
-
-		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
-		firstTab->setLabel("Tab 1");
-
-		wz::Tab *secondTab = tabbed->addTab(new wz::Tab());
-		secondTab->setLabel("Another Tab");
-
-		tabbed->addTab(new wz::Tab())->setLabel("TabTabTab");
+		layout->add(button2);
 	}
 
 	void createWindow2()
@@ -596,13 +532,9 @@ static void ShowError(const char *message)
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, NULL);
 }
 
-static Uint32 BenchmarkTimerCallback(Uint32 interval, void *param)
+static Uint32 TextCursorBlinkCallback(Uint32 interval, void *param)
 {
-	benchmark.draw.calculateAverage();
-	benchmark.frame.calculateAverage();
-	benchmark.input.calculateAverage();
-	benchmark.fps = benchmark.frameCount;
-	benchmark.frameCount = 0;
+	((wz::MainWindow *)param)->toggleTextCursor();
     
 	SDL_Event ev;
     ev.type = SDL_USEREVENT;
@@ -721,122 +653,59 @@ int main(int argc, char **argv)
 	}
 
 	GUI gui(windowWidth, windowHeight, renderer);
-
-	SDL_AddTimer(1000, BenchmarkTimerCallback, NULL);
-	char buffer[1024];
-	uint32_t lastTime = SDL_GetTicks();
-	float accumulatedTime = 0;
-	int tick = 0;
+	const SDL_TimerID textCursorTimer = SDL_AddTimer(textCursorBlinkInterval, TextCursorBlinkCallback, &gui.mainWindow);
 
 	for (;;)
 	{
-		bool quit = false;
 		SDL_Event e;
 
-		while (SDL_PollEvent(&e))
-		{
-			if (e.type == SDL_QUIT)
-			{
-				quit = true;
-				break;
-			}
-			else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
-			{
-				glViewport(0, 0, e.window.data1, e.window.data2);
-				gui.mainWindow.setSize(e.window.data1, e.window.data2);
-			}
-			else if (e.type == SDL_MOUSEMOTION)
-			{
-				benchmark.input.start();
-				gui.mainWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_MOUSEBUTTONDOWN)
-			{
-				benchmark.input.start();
-				gui.mainWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_MOUSEBUTTONUP)
-			{
-				benchmark.input.start();
-				gui.mainWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_MOUSEWHEEL)
-			{
-				benchmark.input.start();
-				gui.mainWindow.mouseWheelMove(e.wheel.x, e.wheel.y);
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_KEYDOWN)
-			{
-				benchmark.input.start();
-				gui.mainWindow.keyDown(ConvertKey(e.key.keysym.sym));
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_KEYUP)
-			{
-				benchmark.input.start();
-				gui.mainWindow.keyUp(ConvertKey(e.key.keysym.sym));
-				benchmark.input.end();
-			}
-			else if (e.type == SDL_TEXTINPUT)
-			{
-				benchmark.input.start();
-				gui.mainWindow.textInput(e.text.text);
-				benchmark.input.end();
-			}
-		}
+		SDL_WaitEvent(&e);
 
-		if (quit)
+		if (e.type == SDL_QUIT)
+		{
+			SDL_RemoveTimer(textCursorTimer);
 			break;
-
-		uint32_t currentTime = SDL_GetTicks();
-		accumulatedTime += (float)(currentTime - lastTime);
-		lastTime = currentTime;
-
-		while (accumulatedTime > frameTime)
-		{
-			uint32_t frameStartTime = SDL_GetTicks();
-			benchmark.frame.start();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			benchmark.draw.start();
-
-			if ((tick % 20) == 0)
-			{
-				wz_renderer_toggle_text_cursor(renderer);
-			}
-
-			gui.mainWindow.beginFrame();
-			gui.mainWindow.drawFrame();
-
-			if (gui.showProfiling())
-			{
-				sprintf(buffer, "draw: %0.2fms", benchmark.draw.getAverage());
-				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 0, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
-
-				sprintf(buffer, "frame: %0.2fms", benchmark.frame.getAverage());
-				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 20, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
-
-				sprintf(buffer, "input: %0.2fms", benchmark.input.getAverage());
-				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 40, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
-
-				sprintf(buffer, "FPS: %d", benchmark.fps);
-				wz_renderer_print(renderer, gui.mainWindow.getWidth(), 60, NVG_ALIGN_RIGHT | NVG_ALIGN_TOP, NULL, 0, nvgRGBf(1, 1, 1), buffer, 0);
-			}
-
-			gui.mainWindow.endFrame();
-			benchmark.draw.end();
-
-			SDL_GL_SwapWindow(window);
-			SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
-			benchmark.frame.end();
-			tick++;
-			benchmark.frameCount++;
-			accumulatedTime -= std::max((float)(SDL_GetTicks() - frameStartTime), frameTime);
 		}
+		else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED)
+		{
+			glViewport(0, 0, e.window.data1, e.window.data2);
+			gui.mainWindow.setSize(e.window.data1, e.window.data2);
+		}
+		else if (e.type == SDL_MOUSEMOTION)
+		{
+			gui.mainWindow.mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+		}
+		else if (e.type == SDL_MOUSEBUTTONDOWN)
+		{
+			gui.mainWindow.mouseButtonDown(e.button.button, e.button.x, e.button.y);
+		}
+		else if (e.type == SDL_MOUSEBUTTONUP)
+		{
+			gui.mainWindow.mouseButtonUp(e.button.button, e.button.x, e.button.y);
+		}
+		else if (e.type == SDL_MOUSEWHEEL)
+		{
+			gui.mainWindow.mouseWheelMove(e.wheel.x, e.wheel.y);
+		}
+		else if (e.type == SDL_KEYDOWN)
+		{
+			gui.mainWindow.keyDown(ConvertKey(e.key.keysym.sym));
+		}
+		else if (e.type == SDL_KEYUP)
+		{
+			gui.mainWindow.keyUp(ConvertKey(e.key.keysym.sym));
+		}
+		else if (e.type == SDL_TEXTINPUT)
+		{
+			gui.mainWindow.textInput(e.text.text);
+		}
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		gui.mainWindow.beginFrame();
+		gui.mainWindow.drawFrame();
+		gui.mainWindow.endFrame();
+		SDL_GL_SwapWindow(window);
+		SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
 	}
 
 	wz_renderer_destroy(renderer);

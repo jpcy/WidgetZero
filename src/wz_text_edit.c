@@ -581,7 +581,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 	}
 
 	// Cursor.
-	if (widget->renderer->showTextCursor && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
+	if (wz_main_window_text_cursor_is_visible(widget->mainWindow) && wz_widget_has_keyboard_focus((const struct wzWidget *)textEdit))
 	{
 		wzPosition position;
 		

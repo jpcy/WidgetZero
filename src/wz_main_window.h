@@ -52,4 +52,6 @@ void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWind
 
 void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
 
+bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow);
+
 #endif // WZ_MAIN_WINDOW_H

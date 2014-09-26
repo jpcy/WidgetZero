@@ -37,6 +37,8 @@ struct wzMainWindow
 	// Centralized event handler.
 	wzEventCallback handle_event;
 
+	bool isTextCursorVisible;
+
 	wzCursor cursor;
 
 	bool isShiftKeyDown, isControlKeyDown;
@@ -1355,6 +1357,7 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	mainWindow->base.renderer = renderer;
 	mainWindow->base.mainWindow = mainWindow;
 	mainWindow->base.vtable.set_rect = wz_main_window_set_rect;
+	mainWindow->isTextCursorVisible = true;
 
 	// Set style.
 	style->dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
@@ -1448,6 +1451,12 @@ void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *wid
 	{
 		wz_widget_remove_child_widget(mainWindow->content, widget);
 	}
+}
+
+void wz_main_window_toggle_text_cursor(struct wzMainWindow *mainWindow)
+{
+	WZ_ASSERT(mainWindow);
+	mainWindow->isTextCursorVisible = !mainWindow->isTextCursorVisible;
 }
 
 wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow)
@@ -1581,4 +1590,9 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 	}
 
 	wz_widget_set_rect_internal(mainWindow->content, rect);
+}
+
+bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow)
+{
+	return mainWindow->isTextCursorVisible;
 }
