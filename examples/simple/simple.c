@@ -159,9 +159,7 @@ int main(int argc, char **argv)
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		wz_renderer_begin_frame(renderer, mainWindow);
-		wz_main_window_draw(mainWindow);
-		wz_renderer_end_frame(renderer);
+		wz_main_window_draw_frame(mainWindow);
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 

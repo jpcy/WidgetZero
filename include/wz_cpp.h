@@ -205,6 +205,7 @@ public:
 	void keyUp(wzKey key);
 	void textInput(const char *text);
 	void beginFrame();
+	void draw();
 	void drawFrame();
 	void endFrame();
 	void toggleTextCursor();
@@ -1160,19 +1161,14 @@ void MainWindow::textInput(const char *text)
 	wz_main_window_text_input(p->mainWindow, text);
 }
 
-void MainWindow::beginFrame()
-{
-	wz_renderer_begin_frame(p->renderer, p->mainWindow);
-}
-
-void MainWindow::drawFrame()
+void MainWindow::draw()
 {	
 	wz_main_window_draw(p->mainWindow);
 }
 
-void MainWindow::endFrame()
-{
-	wz_renderer_end_frame(p->renderer);
+void MainWindow::drawFrame()
+{	
+	wz_main_window_draw_frame(p->mainWindow);
 }
 
 void MainWindow::toggleTextCursor()

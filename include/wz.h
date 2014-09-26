@@ -487,6 +487,7 @@ void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
 void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
 void wz_main_window_draw(struct wzMainWindow *mainWindow);
+void wz_main_window_draw_frame(struct wzMainWindow *mainWindow);
 void wz_main_window_set_menu_bar(struct wzMainWindow *mainWindow, struct wzMenuBar *menuBar);
 void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget);
 void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *widget);
@@ -757,8 +758,6 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 void wz_renderer_destroy(struct wzRenderer *renderer);
 const char *wz_renderer_get_error();
 struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
-void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow);
-void wz_renderer_end_frame(struct wzRenderer *renderer);
 
 int wz_renderer_create_image(struct wzRenderer *renderer, const char *filename, int *width, int *height);
 void wz_renderer_set_font_face(struct wzRenderer *renderer, const char *face);

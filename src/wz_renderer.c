@@ -121,20 +121,6 @@ struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer)
 	return renderer->vg;
 }
 
-void wz_renderer_begin_frame(struct wzRenderer *renderer, const struct wzMainWindow *mainWindow)
-{
-	wzSize windowSize;
-
-	WZ_ASSERT(renderer);
-	windowSize = wz_widget_get_size((const struct wzWidget *)mainWindow);
-	nvgBeginFrame(renderer->vg, windowSize.w, windowSize.h, 1);
-}
-
-void wz_renderer_end_frame(struct wzRenderer *renderer)
-{
-	nvgEndFrame(renderer->vg);
-}
-
 int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize)
 {
 	float lineHeight;

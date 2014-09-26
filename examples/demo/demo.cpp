@@ -701,9 +701,7 @@ int main(int argc, char **argv)
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		gui.mainWindow.beginFrame();
 		gui.mainWindow.drawFrame();
-		gui.mainWindow.endFrame();
 		SDL_GL_SwapWindow(window);
 		SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
 	}

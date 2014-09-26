@@ -1322,6 +1322,15 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow)
 	}
 }
 
+void wz_main_window_draw_frame(struct wzMainWindow *mainWindow)
+{
+	
+	WZ_ASSERT(mainWindow);
+	nvgBeginFrame(mainWindow->base.renderer->vg, mainWindow->base.rect.w, mainWindow->base.rect.h, 1);
+	wz_main_window_draw(mainWindow);
+	nvgEndFrame(mainWindow->base.renderer->vg);
+}
+
 /*
 ================================================================================
 
