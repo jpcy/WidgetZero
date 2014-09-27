@@ -147,7 +147,7 @@ void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect);
 
 void wz_widget_refresh_rect(struct wzWidget *widget);
 
-struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type);
+struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, wzWidgetType type);
 
 void wz_widget_set_draw_manually(struct wzWidget *widget, bool value);
 

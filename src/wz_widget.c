@@ -899,9 +899,9 @@ void wz_widget_refresh_rect(struct wzWidget *widget)
 	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
 }
 
-struct wzWidget *wz_widget_find_closest_ancestor(struct wzWidget *widget, wzWidgetType type)
+struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, wzWidgetType type)
 {
-	struct wzWidget *temp = widget;
+	struct wzWidget *temp = (struct wzWidget *)widget;
 
 	for (;;)
 	{

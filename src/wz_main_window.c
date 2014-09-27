@@ -945,7 +945,8 @@ static void wz_widget_mouse_move_recursive(struct wzWindow *window, struct wzWid
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent window.
-	if (widget->window)
+	// Special case for combo dropdown list poking outside the window.
+	if (widget->window && !(widget->parent && widget->parent->type == WZ_TYPE_COMBO))
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
 	}
@@ -1181,19 +1182,19 @@ static bool wz_widget_true(const struct wzWidget *widget)
 	return true;
 }
 
-static bool wz_widget_is_combo_dropdown(const struct wzWidget *widget)
+static bool wz_widget_is_combo_ancestor(const struct wzWidget *widget)
 {
-	return widget->type == WZ_TYPE_LIST && widget->parent && widget->parent->type == WZ_TYPE_COMBO;
+	return widget->type != WZ_TYPE_COMBO && wz_widget_find_closest_ancestor(widget, WZ_TYPE_COMBO) != NULL;
 }
 
-static bool wz_widget_is_not_combo_dropdown(const struct wzWidget *widget)
+static bool wz_widget_is_not_combo(const struct wzWidget *widget)
 {
-	return !wz_widget_is_combo_dropdown(widget);
+	return widget->type != WZ_TYPE_COMBO;
 }
 
-static bool wz_widget_is_not_window(const struct wzWidget *widget)
+static bool wz_widget_is_not_window_or_combo(const struct wzWidget *widget)
 {
-	return widget->type != WZ_TYPE_WINDOW;
+	return widget->type != WZ_TYPE_WINDOW && widget->type != WZ_TYPE_COMBO;
 }
 
 static void wz_widget_draw_recursive(struct wzWidget *widget, wzRect clip, wzWidgetPredicate draw_predicate, wzWidgetPredicate recurse_predicate)
@@ -1204,7 +1205,8 @@ static void wz_widget_draw_recursive(struct wzWidget *widget, wzRect clip, wzWid
 		return;
 
 	// Don't render the widget if it's outside its parent window.
-	if (!wz_widget_overlaps_parent_window(widget))
+	// Special case for combo ancestors.
+	if (!wz_widget_overlaps_parent_window(widget) && !wz_widget_is_combo_ancestor(widget))
 		return;
 
 	if (draw_predicate(widget) && !widget->drawManually && widget->vtable.draw)
@@ -1277,8 +1279,8 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow)
 
 	WZ_ASSERT(mainWindow);
 
-	// Draw the main window (not really, vtable.draw is NULL) and ancestors, except for combo box dropdown lists. Don't recurse into windows.
-	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_is_not_combo_dropdown, wz_widget_is_not_window);
+	// Draw the main window (not really, vtable.draw is NULL) and ancestors. Don't recurse into windows or combos.
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_true, wz_widget_is_not_window_or_combo);
 
 	// Get a list of windows (excluding top).
 	nWindows = 0;
@@ -1297,21 +1299,24 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow)
 	// Sort them in ascending order by draw priority.
 	qsort(windows, nWindows, sizeof(struct wzWindow *), wz_compare_window_draw_priorities_docked);
 
-	// For each window, draw the window and all ancestors, except for combo box dropdown lists.
+	// For each window, draw the window and all ancestors. Don't recurse into combos.
 	for (i = 0; i < nWindows; i++)
 	{
 		struct wzWidget *widget = (struct wzWidget *)windows[i];
 
-		if (wz_widget_get_visible(widget) && widget->vtable.draw)
+		if (!wz_widget_get_visible(widget))
+			continue;
+
+		if (widget->vtable.draw)
 		{
 			widget->vtable.draw(widget, ((struct wzWidget *)mainWindow)->rect);
 		}
 
-		wz_widget_draw(widget, wz_widget_is_not_combo_dropdown, wz_widget_true);
+		wz_widget_draw(widget, wz_widget_true, wz_widget_is_not_combo);
 	}
 
 	// Draw combo box dropdown lists.
-	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_is_combo_dropdown, wz_widget_true);
+	wz_widget_draw((struct wzWidget *)mainWindow, wz_widget_is_combo_ancestor, wz_widget_true);
 
 	// Draw dock preview.
 	wz_widget_draw_if_visible((struct wzWidget *)mainWindow->dockPreview);
@@ -1325,7 +1330,6 @@ void wz_main_window_draw(struct wzMainWindow *mainWindow)
 
 void wz_main_window_draw_frame(struct wzMainWindow *mainWindow)
 {
-	
 	WZ_ASSERT(mainWindow);
 	nvgBeginFrame(mainWindow->base.renderer->vg, mainWindow->base.rect.w, mainWindow->base.rect.h, 1);
 	wz_main_window_draw(mainWindow);
