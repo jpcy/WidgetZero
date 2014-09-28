@@ -1200,6 +1200,7 @@ static bool wz_widget_is_not_window_or_combo(const struct wzWidget *widget)
 static void wz_widget_draw_recursive(struct wzWidget *widget, wzRect clip, wzWidgetPredicate draw_predicate, wzWidgetPredicate recurse_predicate)
 {
 	int i;
+	bool drawLastFound = false;
 
 	if (!wz_widget_get_visible(widget))
 		return;
@@ -1227,9 +1228,29 @@ static void wz_widget_draw_recursive(struct wzWidget *widget, wzRect clip, wzWid
 	if (!recurse_predicate(widget))
 		return;
 
+	// Recurse into children, skip children that are flagged to draw last.
 	for (i = 0; i < wz_arr_len(widget->children); i++)
 	{
-		wz_widget_draw_recursive(widget->children[i], clip, draw_predicate, recurse_predicate);
+		if (widget->children[i]->flags & WZ_WIDGET_FLAG_DRAW_LAST)
+		{
+			drawLastFound = true;
+		}
+		else
+		{
+			wz_widget_draw_recursive(widget->children[i], clip, draw_predicate, recurse_predicate);
+		}
+	}
+
+	// Recurse into children that are flagged to draw last.
+	if (drawLastFound)
+	{
+		for (i = 0; i < wz_arr_len(widget->children); i++)
+		{
+			if (widget->children[i]->flags & WZ_WIDGET_FLAG_DRAW_LAST)
+			{
+				wz_widget_draw_recursive(widget->children[i], clip, draw_predicate, recurse_predicate);
+			}
+		}
 	}
 }
 

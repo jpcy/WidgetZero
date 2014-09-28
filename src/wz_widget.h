@@ -63,6 +63,11 @@ typedef struct
 }
 wzWidgetVtable;
 
+enum
+{
+	WZ_WIDGET_FLAG_DRAW_LAST = 1<<0,
+};
+
 struct wzWidget
 {
 	wzWidgetType type;
@@ -88,6 +93,8 @@ struct wzWidget
 
 	// User-set metadata.
 	void *metadata;
+
+	int flags;
 
 	bool hover;
 
@@ -153,6 +160,8 @@ void wz_widget_refresh_rect(struct wzWidget *widget);
 struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, wzWidgetType type);
 
 void wz_widget_set_draw_manually(struct wzWidget *widget, bool value);
+
+void wz_widget_set_draw_last(struct wzWidget *widget, bool value);
 
 void wz_widget_set_overlap(struct wzWidget *widget, bool value);
 

@@ -929,6 +929,18 @@ void wz_widget_set_draw_manually(struct wzWidget *widget, bool value)
 	widget->drawManually = value;
 }
 
+void wz_widget_set_draw_last(struct wzWidget *widget, bool value)
+{
+	if (value)
+	{
+		widget->flags |= WZ_WIDGET_FLAG_DRAW_LAST;
+	}
+	else
+	{
+		widget->flags &= ~WZ_WIDGET_FLAG_DRAW_LAST;
+	}
+}
+
 void wz_widget_set_overlap(struct wzWidget *widget, bool value)
 {
 	widget->overlap = value;
