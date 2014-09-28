@@ -82,6 +82,7 @@ typedef enum
 	WZ_TYPE_LIST,
 	WZ_TYPE_MENU_BAR,
 	WZ_TYPE_MENU_BAR_BUTTON,
+	WZ_TYPE_RADIO_BUTTON,
 	WZ_TYPE_SCROLLER,
 	WZ_TYPE_SPINNER,
 	WZ_TYPE_STACK_LAYOUT,
@@ -586,7 +587,6 @@ wzButtonSetBehavior;
 
 struct wzButton *wz_button_create();
 struct wzButton *wz_check_box_create();
-struct wzButton *wz_radio_button_create();
 struct wzButton *wz_tab_button_create();
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
@@ -661,10 +661,7 @@ void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *la
 const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button);
 bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button);
 
-struct wzRadioButtonGroup *wz_radio_button_group_create();
-void wz_radio_button_group_destroy(struct wzRadioButtonGroup *group);
-void wz_radio_button_group_add_button(struct wzRadioButtonGroup *group, struct wzButton *button);
-void wz_radio_button_group_remove_button(struct wzRadioButtonGroup *group, struct wzButton *button);
+struct wzButton *wz_radio_button_create();
 
 typedef enum
 {

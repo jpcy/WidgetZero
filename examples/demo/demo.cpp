@@ -265,17 +265,9 @@ private:
 		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
 		frame->add(layout);
 
-		wz::RadioButton *rb1 = new wz::RadioButton("Option 1");
-		rb1->setGroup(&radioButtonGroup);
-		layout->add(rb1);
-
-		wz::RadioButton *rb2 = new wz::RadioButton("Option 2");
-		rb2->setGroup(&radioButtonGroup);
-		layout->add(rb2);
-
-		wz::RadioButton *rb3 = new wz::RadioButton("Option 3");
-		rb3->setGroup(&radioButtonGroup);
-		layout->add(rb3);
+		layout->add(new wz::RadioButton("Option 1"));
+		layout->add(new wz::RadioButton("Option 2"));
+		layout->add(new wz::RadioButton("Option 3"));
 	}
 
 	void createScrollerFrame()
@@ -522,7 +514,6 @@ private:
 	wzRenderer *renderer;
 	wz::Window *window1, *window2;
 	std::vector<WidgetCategoryListItem> widgetCategories;
-	wz::RadioButtonGroup radioButtonGroup;
 	bool showProfiling_;
 };
 

@@ -34,6 +34,9 @@ typedef struct
 
 	void (*destroy)(struct wzWidget *widget);
 
+	// The widget was added to a parent widget (see wz_widget_add_child_widget). 
+	void (*added)(struct wzWidget *parent, struct wzWidget *widget);
+
 	// wzWidget.renderer has been changed
 	void (*renderer_changed)(struct wzWidget *widget);
 

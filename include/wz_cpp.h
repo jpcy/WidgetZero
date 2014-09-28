@@ -218,25 +218,6 @@ public:
 	MainWindowPrivate *p;
 };
 
-class RadioButtonGroup
-{
-public:
-	RadioButtonGroup()
-	{
-		group_ = wz_radio_button_group_create();
-	}
-
-	~RadioButtonGroup()
-	{
-		wz_radio_button_group_destroy(group_);
-	}
-
-	wzRadioButtonGroup *get() { return group_; }
-
-private:
-	wzRadioButtonGroup *group_;
-};
-
 class RadioButton : public Widget
 {
 public:
@@ -245,9 +226,6 @@ public:
 	~RadioButton();
 	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);
-
-	// NULL to remove the radio button from it's group.
-	RadioButton *setGroup(RadioButtonGroup *group);
 };
 
 class Scroller : public Widget
@@ -549,7 +527,7 @@ struct MainWindowPrivate : public WidgetPrivate
 
 struct RadioButtonPrivate : public WidgetPrivate
 {
-	RadioButtonPrivate() : group(NULL)
+	RadioButtonPrivate()
 	{
 		button = wz_radio_button_create();
 		wz_widget_set_metadata((wzWidget *)button, this);
@@ -567,7 +545,6 @@ struct RadioButtonPrivate : public WidgetPrivate
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 
 	wzButton *button;
-	RadioButtonGroup *group;
 };
 
 struct ScrollerPrivate : public WidgetPrivate
@@ -1229,26 +1206,6 @@ const char *RadioButton::getLabel() const
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
 	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
-	return this;
-}
-
-RadioButton *RadioButton::setGroup(RadioButtonGroup *group)
-{
-	RadioButtonPrivate *rp = (RadioButtonPrivate *)p;
-
-	if (rp->group != NULL && rp->group != group)
-	{
-		// Switching groups: remove from the old group.
-		wz_radio_button_group_remove_button(group->get(), rp->button);
-	}
-
-	rp->group = group;
-
-	if (group != NULL)
-	{
-		wz_radio_button_group_add_button(group->get(), rp->button);
-	}
-
 	return this;
 }
 

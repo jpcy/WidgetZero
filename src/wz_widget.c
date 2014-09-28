@@ -741,6 +741,11 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	{
 		wz_widget_set_stretched_rect_recursive(child);
 	}
+
+	if (child->vtable.added)
+	{
+		child->vtable.added(widget, child);
+	}
 }
 
 void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
