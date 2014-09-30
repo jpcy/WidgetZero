@@ -48,19 +48,6 @@ TAB PAGE WIDGET
 ================================================================================
 */
 
-static void wz_tab_page_draw(struct wzWidget *widget, wzRect clip)
-{
-	struct NVGcontext *vg = widget->renderer->vg;
-	const wzTabbedStyle *style = &widget->style.tabbed;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
-
-	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
-	wz_renderer_draw_filled_rect(vg, rect, style->bgColor);
-	wz_renderer_draw_rect(vg, rect, style->borderColor);
-	nvgRestore(vg);
-}
-
 static wzRect wz_tab_page_get_children_clip_rect(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
@@ -70,17 +57,10 @@ static wzRect wz_tab_page_get_children_clip_rect(struct wzWidget *widget)
 static struct wzWidget *wz_tab_page_create(struct wzRenderer *renderer)
 {
 	struct wzWidget *page = (struct wzWidget *)malloc(sizeof(struct wzWidget));
-	wzTabbedStyle *style = &page->style.tabbed;
-
 	memset(page, 0, sizeof(struct wzWidget));
 	page->type = WZ_TYPE_TAB_PAGE;
 	page->renderer = renderer;
-	page->vtable.draw = wz_tab_page_draw;
 	page->vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
-
-	style->bgColor = nvgRGB(80, 80, 80);
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-
 	return page;
 }
 
@@ -113,6 +93,90 @@ TABBED WIDGET
 
 ================================================================================
 */
+
+static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
+{
+	int i, selectedTabIndex;
+	wzRect tr; // Tab rect.
+	struct wzTabbed *tabbed = (struct wzTabbed *)widget;
+	struct NVGcontext *vg = widget->renderer->vg;
+	const wzTabbedStyle *style = &widget->style.tabbed;
+	wzRect rect = wz_widget_get_absolute_rect(widget);
+	const struct wzButton *selectedTab = wz_tab_bar_get_selected_tab(tabbed->tabBar);
+
+	// Use the page rect.
+	const int tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);
+	rect.y += tabBarHeight;
+	rect.h -= tabBarHeight;
+
+	nvgSave(vg);
+	wz_renderer_clip_to_rect_intersection(vg, clip, wz_widget_get_absolute_rect(widget));
+
+	// Draw an outline around the selected tab and the tab page.
+	nvgBeginPath(vg);
+
+	// Selected tab.
+	tr = wz_widget_get_absolute_rect((struct wzWidget *)selectedTab);
+	nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
+	nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
+	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
+
+	// The tab page.
+	nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + 0.5f); // tr
+	nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + rect.h - 0.5f); // br
+	nvgLineTo(vg, rect.x + 0.5f, rect.y + rect.h - 0.5f); // bl
+	nvgLineTo(vg, rect.x + 0.5f, rect.y + 0.5f); // tl
+	nvgClosePath(vg);
+	nvgStrokeColor(vg, style->borderColor);
+	nvgStroke(vg);
+
+	// Get the selected tab index.
+	for (i = 0; i < wz_arr_len(tabbed->pages); i++)
+	{
+		if (tabbed->pages[i].tab == selectedTab)
+		{
+			selectedTabIndex = i;
+			break;
+		}
+	}
+
+	// Draw an outline around the non-selected tabs.
+	for (i = 0; i < wz_arr_len(tabbed->pages); i++)
+	{
+		const struct wzButton *tab = tabbed->pages[i].tab;
+
+		if (tab == selectedTab || !wz_widget_get_visible((struct wzWidget *)tab))
+			continue;
+
+		tr = wz_widget_get_absolute_rect((struct wzWidget *)tab);
+		nvgBeginPath(vg);
+
+		// Only draw the left side if this is the leftmost tab.
+		if (i == 0)
+		{
+			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
+			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+		}
+		else
+		{
+			nvgMoveTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+		}
+
+		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
+
+		// If the selected tab is next to this tab, on the right, don't draw the right side.
+		if (selectedTabIndex != i + 1)
+		{
+			nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h - 0.5f); // br
+		}
+
+		nvgStrokeColor(vg, style->borderColor);
+		nvgStroke(vg);
+	}
+
+	nvgRestore(vg);
+}
 
 static void wz_tabbed_destroy(struct wzWidget *widget)
 {
@@ -164,14 +228,20 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 struct wzTabbed *wz_tabbed_create()
 {
 	struct wzTabbed *tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
+	wzTabbedStyle *style = &tabbed->base.style.tabbed;
+
 	memset(tabbed, 0, sizeof(struct wzTabbed));
 	tabbed->base.type = WZ_TYPE_TABBED;
 	tabbed->base.vtable.destroy = wz_tabbed_destroy;
+	tabbed->base.vtable.draw = wz_tabbed_draw;
 	tabbed->base.vtable.set_rect = wz_tabbed_set_rect;
 
 	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
 	wz_widget_add_child_widget((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
+
+	style->bgColor = nvgRGB(80, 80, 80);
+	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
 
 	return tabbed;
 }

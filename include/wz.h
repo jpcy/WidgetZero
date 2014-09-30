@@ -415,22 +415,23 @@ wzSpinnerStyle;
 
 typedef struct
 {
+	NVGcolor textColor;
+	NVGcolor textHoverColor;
+}
+wzTabButtonStyle;
+
+typedef struct
+{
+	int defaultScrollButtonWidth;
+}
+wzTabBarStyle;
+
+typedef struct
+{
 	NVGcolor borderColor;
 	NVGcolor bgColor;
 }
 wzTabbedStyle;
-
-typedef struct
-{
-	NVGcolor textColor;
-	NVGcolor borderColor;
-	NVGcolor borderHoverColor;
-	NVGcolor bgColor1, bgColor2;
-	NVGcolor bgPressedColor1, bgPressedColor2;
-	NVGcolor bgSetColor1, bgSetColor2;
-	float cornerRadius;
-}
-wzTabButtonStyle;
 
 typedef struct
 {
@@ -468,8 +469,9 @@ typedef union
 	wzRadioButtonStyle radioButton;
 	wzScrollerStyle scroller;
 	wzSpinnerStyle spinner;
-	wzTabbedStyle tabbed;
 	wzTabButtonStyle tabButton;
+	wzTabBarStyle tabBar;
+	wzTabbedStyle tabbed;
 	wzTextEditStyle textEdit;
 	wzWindowStyle window;
 }
@@ -587,7 +589,6 @@ wzButtonSetBehavior;
 
 struct wzButton *wz_button_create();
 struct wzButton *wz_check_box_create();
-struct wzButton *wz_tab_button_create();
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 void wz_button_set_label(struct wzButton *button, const char *label);
