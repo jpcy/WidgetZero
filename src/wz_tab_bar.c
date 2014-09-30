@@ -460,3 +460,9 @@ void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallbac
 	WZ_ASSERT(tabBar);
 	wz_arr_push(tabBar->tab_changed_callbacks, callback);
 }
+
+int wz_tab_bar_get_scroll_value(const struct wzTabBar *tabBar)
+{
+	WZ_ASSERT(tabBar);
+	return tabBar->scrollValue;
+}

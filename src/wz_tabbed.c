@@ -115,19 +115,27 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 	// Draw an outline around the selected tab and the tab page.
 	nvgBeginPath(vg);
 
-	// Selected tab.
-	tr = wz_widget_get_absolute_rect((struct wzWidget *)selectedTab);
-	nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
-	nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
+	if (wz_widget_get_visible((struct wzWidget *)selectedTab))
+	{
+		// Selected tab.
+		tr = wz_widget_get_absolute_rect((struct wzWidget *)selectedTab);
+		nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
+		nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
+		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
 
-	// The tab page.
-	nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + 0.5f); // tr
-	nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + rect.h - 0.5f); // br
-	nvgLineTo(vg, rect.x + 0.5f, rect.y + rect.h - 0.5f); // bl
-	nvgLineTo(vg, rect.x + 0.5f, rect.y + 0.5f); // tl
-	nvgClosePath(vg);
+		// The tab page.
+		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + 0.5f); // tr
+		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + rect.h - 0.5f); // br
+		nvgLineTo(vg, rect.x + 0.5f, rect.y + rect.h - 0.5f); // bl
+		nvgLineTo(vg, rect.x + 0.5f, rect.y + 0.5f); // tl
+		nvgClosePath(vg);
+	}
+	else
+	{
+		nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
+	}
+	
 	nvgStrokeColor(vg, style->borderColor);
 	nvgStroke(vg);
 
@@ -153,7 +161,7 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 		nvgBeginPath(vg);
 
 		// Only draw the left side if this is the leftmost tab.
-		if (i == 0)
+		if (i == wz_tab_bar_get_scroll_value(tabbed->tabBar))
 		{
 			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
 			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
