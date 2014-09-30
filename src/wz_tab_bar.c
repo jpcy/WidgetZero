@@ -208,6 +208,14 @@ static void wz_tab_bar_button_pressed(wzEvent *e)
 	wz_tab_bar_select_tab((struct wzTabBar *)e->base.widget->parent, (struct wzButton *)e->base.widget);
 }
 
+static wzSize wz_tab_bar_measure(struct wzWidget *widget)
+{
+	wzSize size;
+	struct wzTabBar *tabBar = (struct wzTabBar *)widget;
+	size.h = wz_widget_get_line_height(widget) + 8; // Padding.
+	return size;
+}
+
 static void wz_tab_bar_destroy(struct wzWidget *widget)
 {
 	struct wzTabBar *tabBar;
@@ -216,13 +224,6 @@ static void wz_tab_bar_destroy(struct wzWidget *widget)
 	tabBar = (struct wzTabBar *)widget;
 	wz_arr_free(tabBar->tabs);
 	wz_arr_free(tabBar->tab_changed_callbacks);
-}
-
-static void wz_tab_bar_renderer_changed(struct wzWidget *widget)
-{
-	struct wzTabBar *tabBar = (struct wzTabBar *)widget;
-	WZ_ASSERT(tabBar);
-	tabBar->base.rect.h = 20;
 }
 
 static void wz_tab_bar_set_rect(struct wzWidget *widget, wzRect rect)
@@ -276,8 +277,8 @@ struct wzTabBar *wz_tab_bar_create()
 
 	memset(tabBar, 0, sizeof(struct wzTabBar));
 	tabBar->base.type = WZ_TYPE_TAB_BAR;
+	tabBar->base.vtable.measure = wz_tab_bar_measure;
 	tabBar->base.vtable.destroy = wz_tab_bar_destroy;
-	tabBar->base.vtable.renderer_changed = wz_tab_bar_renderer_changed;
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
 	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
