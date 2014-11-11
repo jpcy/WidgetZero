@@ -596,6 +596,7 @@ const char *wz_button_get_label(const struct wzButton *button);
 void wz_button_set_icon(struct wzButton *button, const char *icon);
 const char *wz_button_get_icon(const struct wzButton *button);
 void wz_button_set_padding(struct wzButton *button, wzBorder padding);
+void wz_button_set_padding_args(struct wzButton *button, int top, int right, int bottom, int left);
 wzBorder wz_button_get_padding(const struct wzButton *button);
 bool wz_button_is_pressed(const struct wzButton *button);
 bool wz_button_is_set(const struct wzButton *button);

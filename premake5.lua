@@ -84,5 +84,6 @@ end
 
 -----------------------------------------------------------------------------
 
-createExampleProject("demo", "C++")
+createExampleProject("cpp", "C++")
+createExampleProject("demo", "C")
 createExampleProject("simple", "C")

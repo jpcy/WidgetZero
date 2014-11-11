@@ -434,6 +434,16 @@ void wz_button_set_padding(struct wzButton *button, wzBorder padding)
 	wz_widget_resize_to_measured(&button->base);
 }
 
+void wz_button_set_padding_args(struct wzButton *button, int top, int right, int bottom, int left)
+{
+	WZ_ASSERT(button);
+	button->padding.top = top;
+	button->padding.right = right;
+	button->padding.bottom = bottom;
+	button->padding.left = left;
+	wz_widget_resize_to_measured(&button->base);
+}
+
 wzBorder wz_button_get_padding(const struct wzButton *button)
 {
 	WZ_ASSERT(button);
