@@ -215,8 +215,7 @@ struct wzMenuBar *wz_menu_bar_create()
 	menuBar->base.vtable.draw = wz_menu_bar_draw;
 	menuBar->base.vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
-	menuBar->layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(menuBar->layout, WZ_STACK_LAYOUT_HORIZONTAL);
+	menuBar->layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	wz_widget_set_stretch((struct wzWidget *)menuBar->layout, WZ_STRETCH);
 	wz_widget_add_child_widget((struct wzWidget *)menuBar, (struct wzWidget *)menuBar->layout);
 

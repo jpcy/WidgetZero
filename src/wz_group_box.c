@@ -106,7 +106,7 @@ static void wz_group_box_destroy(struct wzWidget *widget)
 	wz_string_free(groupBox->label);
 }
 
-struct wzGroupBox *wz_group_box_create()
+struct wzGroupBox *wz_group_box_create(const char *label)
 {
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
 	wzGroupBoxStyle *style = &groupBox->base.style.groupBox;
@@ -116,7 +116,7 @@ struct wzGroupBox *wz_group_box_create()
 	groupBox->base.vtable.draw = wz_group_box_draw;
 	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
 	groupBox->base.vtable.destroy = wz_group_box_destroy;
-	groupBox->label = wz_string_empty();
+	groupBox->label = label ? wz_string_new(label) : wz_string_empty();
 
 	style->textColor = nvgRGBf(1, 1, 1);
 	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;

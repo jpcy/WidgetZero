@@ -435,7 +435,7 @@ struct GroupBoxPrivate : public WidgetPrivate
 {
 	GroupBoxPrivate()
 	{
-		groupBox = wz_group_box_create();
+		groupBox = wz_group_box_create(NULL);
 		wz_widget_set_metadata((wzWidget *)groupBox, this);
 		wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
 	}
@@ -458,7 +458,7 @@ struct LabelPrivate : public WidgetPrivate
 {
 	LabelPrivate()
 	{
-		label = wz_label_create();
+		label = wz_label_create(NULL);
 		wz_widget_set_metadata((wzWidget *)label, this);
 	}
 
@@ -550,7 +550,7 @@ struct ScrollerPrivate : public WidgetPrivate
 {
 	ScrollerPrivate()
 	{
-		scroller = wz_scroller_create();
+		scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		wz_widget_set_metadata((wzWidget *)scroller, this);
 	}
 
@@ -594,7 +594,7 @@ struct StackLayoutPrivate : public WidgetPrivate
 {
 	StackLayoutPrivate()
 	{
-		layout = wz_stack_layout_create();
+		layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 0);
 	}
 
 	~StackLayoutPrivate()
@@ -667,7 +667,7 @@ struct WindowPrivate : public WidgetPrivate
 {
 	WindowPrivate()
 	{
-		window = wz_window_create();
+		window = wz_window_create(NULL);
 		wz_widget_set_metadata((wzWidget *)window, this);
 	}
 

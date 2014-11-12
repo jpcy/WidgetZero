@@ -578,7 +578,7 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_increment_button_update_rect(scroller);
 }
 
-struct wzScroller *wz_scroller_create()
+struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	struct wzScroller *scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
 	wzScrollerStyle *style = &scroller->base.style.scroller;
@@ -592,7 +592,10 @@ struct wzScroller *wz_scroller_create()
 	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	scroller->base.vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
 	scroller->base.vtable.set_rect = wz_scroller_set_rect;
-	scroller->stepValue = 1;
+	scroller->scrollerType = scrollerType;
+	scroller->stepValue = WZ_MAX(1, stepValue);
+	scroller->maxValue = WZ_MAX(0, maxValue);
+	scroller->value = WZ_CLAMPED(0, value, scroller->maxValue);
 
 	style->iconColor = WZ_STYLE_TEXT_COLOR;
 	style->iconHoverColor = WZ_STYLE_HOVER_COLOR;
@@ -620,6 +623,7 @@ struct wzScroller *wz_scroller_create()
 
 	scroller->nub = wz_scroller_nub_create(scroller);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->nub);
+	wz_scroller_nub_update_rect(scroller->nub);
 
 	return scroller;
 }

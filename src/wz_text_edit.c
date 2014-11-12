@@ -979,8 +979,7 @@ struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength)
 
 	if (multiline)
 	{
-		textEdit->scroller = wz_scroller_create();
-		wz_scroller_set_type(textEdit->scroller, WZ_SCROLLER_VERTICAL);
+		textEdit->scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		wz_widget_add_child_widget((struct wzWidget *)textEdit, (struct wzWidget *)textEdit->scroller);
 		wz_text_edit_update_scroller(textEdit);
 		wz_scroller_add_callback_value_changed(textEdit->scroller, wz_text_edit_scroller_value_changed);

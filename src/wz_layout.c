@@ -259,7 +259,7 @@ static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 }
 
-struct wzStackLayout *wz_stack_layout_create()
+struct wzStackLayout *wz_stack_layout_create(wzStackLayoutDirection direction, int spacing)
 {
 	struct wzStackLayout *stackLayout;
 
@@ -267,6 +267,8 @@ struct wzStackLayout *wz_stack_layout_create()
 	memset(stackLayout, 0, sizeof(struct wzStackLayout));
 	stackLayout->base.type = WZ_TYPE_STACK_LAYOUT;
 	stackLayout->base.vtable.set_rect = wz_stack_layout_set_rect;
+	stackLayout->direction = direction;
+	stackLayout->spacing = spacing;
 	return stackLayout;
 }
 

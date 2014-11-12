@@ -118,9 +118,7 @@ void CreateButtonFrame()
 	
 	frame = CreateFrame("Button");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -155,9 +153,7 @@ void CreateCheckboxFrame()
 	
 	frame = CreateFrame("Checkbox");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -173,9 +169,7 @@ void CreateComboFrame()
 	
 	frame = CreateFrame("Combo");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -199,28 +193,22 @@ void CreateGroupBoxFrame()
 	struct wzFrame *frame;
 	struct wzStackLayout *layout;
 	struct wzGroupBox *groupBox1;
-	struct wzLabel *label;
 	struct wzGroupBox *groupBox2;
 
 	frame = CreateFrame("GroupBox");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	groupBox1 = wz_group_box_create();
-	wz_group_box_set_label(groupBox1, "With a Label");
+	groupBox1 = wz_group_box_create("With a Label");
 	wz_widget_set_size_args((struct wzWidget *)groupBox1, 200, 200);
 	wz_stack_layout_add(layout, (struct wzWidget *)groupBox1);
 	
-	label = wz_label_create();
-	wz_label_set_text(label, "Default margin");
-	wz_group_box_add(groupBox1, (struct wzWidget *)label);
+	wz_group_box_add(groupBox1, (struct wzWidget *)wz_label_create("Default margin"));
 
-	groupBox2 = wz_group_box_create();
+	groupBox2 = wz_group_box_create(NULL);
 	wz_widget_set_size_args((struct wzWidget *)groupBox2, 200, 200);
 	wz_stack_layout_add(layout, (struct wzWidget *)groupBox2);
 }
@@ -233,26 +221,20 @@ void CreateLabelFrame()
 
 	frame = CreateFrame("Label");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	label = wz_label_create();
-	wz_label_set_text(label, "Normal label");
-	wz_stack_layout_add(layout, (struct wzWidget *)label);
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_label_create("Normal label"));
 
-	label = wz_label_create();
+	label = wz_label_create("Multiline label with color. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 	wz_label_set_multiline(label, true);
-	wz_label_set_text(label, "Multiline label with color. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 	wz_label_set_text_color(label, nvgRGBf(0, 0.5f, 0));
 	wz_widget_set_width((struct wzWidget *)label, 400);
 	wz_stack_layout_add(layout, (struct wzWidget *)label);
 
-	label = wz_label_create();
-	wz_label_set_text(label, "Label with custom font and color");
+	label = wz_label_create("Label with custom font and color");
 	wz_label_set_text_color(label, nvgRGBf(1, 0.5f, 0.5f));
 	wz_widget_set_font((struct wzWidget *)label, "visitor1", 32);
 	wz_stack_layout_add(layout, (struct wzWidget *)label);
@@ -266,9 +248,7 @@ void CreateListFrame()
 	
 	frame = CreateFrame("List");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_HORIZONTAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -305,9 +285,7 @@ void CreateRadioButtonFrame()
 	
 	frame = CreateFrame("Radio Button");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -325,26 +303,16 @@ void CreateScrollerFrame()
 	
 	frame = CreateFrame("Scroller");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	scroller = wz_scroller_create();
-	wz_scroller_set_type(scroller, WZ_SCROLLER_VERTICAL);
-	wz_scroller_set_max_value(scroller, 100);
-	wz_scroller_set_step_value(scroller, 10);
-	wz_scroller_set_value(scroller, 20);
+	scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 20, 10, 100);
 	wz_widget_set_height((struct wzWidget *)scroller, 200);
 	wz_stack_layout_add(layout, (struct wzWidget *)scroller);
 
-	scroller = wz_scroller_create();
-	wz_scroller_set_type(scroller, WZ_SCROLLER_HORIZONTAL);
-	wz_scroller_set_max_value(scroller, 100);
-	wz_scroller_set_step_value(scroller, 10);
-	wz_scroller_set_value(scroller, 50);
+	scroller = wz_scroller_create(WZ_SCROLLER_HORIZONTAL, 50, 10, 100);
 	wz_widget_set_width((struct wzWidget *)scroller, 200);
 	wz_stack_layout_add(layout, (struct wzWidget *)scroller);
 }
@@ -357,9 +325,7 @@ void CreateSpinnerFrame()
 	
 	frame = CreateFrame("Spinner");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -405,9 +371,7 @@ void CreateTextEditFrame()
 
 	frame = CreateFrame("Text Edit");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -447,9 +411,7 @@ void CreateWindowFrame()
 	
 	frame = CreateFrame("Window");
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
@@ -470,25 +432,18 @@ void CreateStackLayoutFrame()
 
 	frame = CreateFrame("Stack Layout");
 
-	frameLayout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(frameLayout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(frameLayout, 8);
+	frameLayout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)frameLayout, 8);
 	wz_widget_set_stretch((struct wzWidget *)frameLayout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)frameLayout);
 
 	{
-		struct wzLabel *label;
 		struct wzStackLayout *layout;
 		struct wzButton *button;
 
-		label = wz_label_create();
-		wz_label_set_text(label, "Horizontal Stack Layout");
-		wz_stack_layout_add(frameLayout, (struct wzWidget *)label);
+		wz_stack_layout_add(frameLayout, (struct wzWidget *)wz_label_create("Horizontal Stack Layout"));
 
-		layout = wz_stack_layout_create();
-		wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_HORIZONTAL);
-		wz_stack_layout_set_spacing(layout, 8);
+		layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 8);
 		wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH_WIDTH);
 		wz_widget_set_height((struct wzWidget *)layout, 100);
 		wz_stack_layout_add(frameLayout, (struct wzWidget *)layout);
@@ -521,14 +476,11 @@ void CreateStackLayoutFrame()
 		struct wzStackLayout *layout;
 		struct wzButton *button;
 
-		label = wz_label_create();
-		wz_label_set_text(label, "Vertical Stack Layout");
+		label = wz_label_create("Vertical Stack Layout");
 		wz_widget_set_margin_args((struct wzWidget *)label, 16, 0, 0, 0);
 		wz_stack_layout_add(frameLayout, (struct wzWidget *)label);
 
-		layout = wz_stack_layout_create();
-		wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-		wz_stack_layout_set_spacing(layout, 8);
+		layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 		wz_widget_set_width((struct wzWidget *)layout, 300);
 		wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH_HEIGHT);
 		wz_stack_layout_add(frameLayout, (struct wzWidget *)layout);
@@ -565,15 +517,12 @@ void CreateWindow1()
 	struct wzButton *checkbox;
 	struct wzCombo *combo;
 
-	window1 = wz_window_create();
-	wz_window_set_title(window1, "Test Window");
+	window1 = wz_window_create("Test Window");
 	wz_widget_set_rect_args((struct wzWidget *)window1, 650, 100, 300, 300);
 	wz_widget_set_visible((struct wzWidget *)window1, false);
 	wz_main_window_add(mainWindow, (struct wzWidget *)window1);
 
-	layout = wz_stack_layout_create();
-	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
-	wz_stack_layout_set_spacing(layout, 8);
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
 	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_window_add(window1, (struct wzWidget *)layout);
@@ -612,8 +561,7 @@ void CreateWindow2()
 	struct wzCombo *combo;
 	struct wzButton *button;
 
-	window2 = wz_window_create();
-	wz_window_set_title(window2, "Window with a long title");
+	window2 = wz_window_create("Window with a long title");
 	wz_widget_set_rect_args((struct wzWidget *)window2, 590, 500, 200, 200);
 	wz_widget_set_visible((struct wzWidget *)window2, false);
 	wz_main_window_add(mainWindow, (struct wzWidget *)window2);
@@ -654,8 +602,7 @@ void CreateWidgetCategoryWindow()
 	struct wzWindow *window;
 	struct wzList *list;
 
-	window = wz_window_create();
-	wz_window_set_title(window, "Widgets");
+	window = wz_window_create("Widgets");
 	wz_widget_set_width((struct wzWidget *)window, 200);
 	wz_main_window_add(mainWindow, (struct wzWidget *)window);
 	wz_main_window_dock_window(mainWindow, window, WZ_DOCK_POSITION_WEST);

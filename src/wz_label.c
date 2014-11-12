@@ -100,7 +100,7 @@ static void wz_label_destroy(struct wzWidget *widget)
 	wz_string_free(((struct wzLabel *)widget)->text);
 }
 
-struct wzLabel *wz_label_create()
+struct wzLabel *wz_label_create(const char *text)
 {
 	struct wzLabel *label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
 	memset(label, 0, sizeof(struct wzLabel));
@@ -109,7 +109,7 @@ struct wzLabel *wz_label_create()
 	label->base.vtable.draw = wz_label_draw;
 	label->base.vtable.renderer_changed = wz_label_renderer_changed;
 	label->base.vtable.destroy = wz_label_destroy;
-	label->text = wz_string_empty();
+	label->text = text ? wz_string_new(text) : wz_string_empty();
 	label->base.style.label.textColor = WZ_STYLE_TEXT_COLOR;
 	return label;
 }

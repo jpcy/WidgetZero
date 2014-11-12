@@ -459,7 +459,7 @@ static void wz_window_destroy(struct wzWidget *widget)
 	wz_string_free(window->title);
 }
 
-struct wzWindow *wz_window_create()
+struct wzWindow *wz_window_create(const char *title)
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
 	wzWindowStyle *style = &window->base.style.window;
@@ -475,7 +475,7 @@ struct wzWindow *wz_window_create()
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
 	window->base.vtable.destroy = wz_window_destroy;
-	window->title = wz_string_empty();
+	window->title = title ? wz_string_new(title) : wz_string_empty();
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));

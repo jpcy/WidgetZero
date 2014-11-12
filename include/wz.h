@@ -556,7 +556,7 @@ struct wzWidget *wz_widget_get_parent(struct wzWidget *widget);
 
 struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
 
-struct wzWindow *wz_window_create();
+struct wzWindow *wz_window_create(const char *title);
 int wz_window_get_header_height(const struct wzWindow *window);
 int wz_window_get_border_size(const struct wzWindow *window);
 wzRect wz_window_get_header_rect(const struct wzWindow *window);
@@ -616,13 +616,13 @@ struct wzFrame *wz_frame_create();
 void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget);
 void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget);
 
-struct wzGroupBox *wz_group_box_create();
+struct wzGroupBox *wz_group_box_create(const char *label);
 void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
 void wz_group_box_add(struct wzGroupBox *groupBox, struct wzWidget *widget);
 void wz_group_box_remove(struct wzGroupBox *groupBox, struct wzWidget *widget);
 
-struct wzLabel *wz_label_create();
+struct wzLabel *wz_label_create(const char *text);
 void wz_label_set_multiline(struct wzLabel *label, bool multiline);
 bool wz_label_get_multiline(const struct wzLabel *label);
 void wz_label_set_text(struct wzLabel *label, const char *text);
@@ -673,7 +673,7 @@ typedef enum
 }
 wzScrollerType;
 
-struct wzScroller *wz_scroller_create();
+struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue);
 void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
 wzScrollerType wz_scroller_get_type(const struct wzScroller *scroller);
 int wz_scroller_get_value(const struct wzScroller *scroller);
@@ -698,7 +698,7 @@ typedef enum
 }
 wzStackLayoutDirection;
 
-struct wzStackLayout *wz_stack_layout_create();
+struct wzStackLayout *wz_stack_layout_create(wzStackLayoutDirection direction, int spacing);
 void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction);
 void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
 int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);

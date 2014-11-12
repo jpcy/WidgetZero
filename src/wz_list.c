@@ -408,8 +408,7 @@ struct wzList *wz_list_create()
 	list->mouseOverItem = -1;
 	list->itemsBorder.top = list->itemsBorder.right = list->itemsBorder.bottom = list->itemsBorder.left = 2;
 
-	list->scroller = wz_scroller_create();
-	wz_scroller_set_type(list->scroller, WZ_SCROLLER_VERTICAL);
+	list->scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
 	wz_list_update_scroller(list);
 	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
