@@ -606,13 +606,13 @@ struct wzScroller *wz_scroller_create()
 	style->nubIconSpacing = 4;
 	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
-	scroller->decrementButton = wz_button_create();
+	scroller->decrementButton = wz_button_create(NULL, NULL);
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->decrementButton, wz_scroller_decrement_button_draw);
 	wz_button_add_callback_clicked(scroller->decrementButton, wz_scroller_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->decrementButton);
 	wz_scroller_decrement_button_update_rect(scroller);
 
-	scroller->incrementButton = wz_button_create();
+	scroller->incrementButton = wz_button_create(NULL, NULL);
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->incrementButton, wz_scroller_increment_button_draw);
 	wz_button_add_callback_clicked(scroller->incrementButton, wz_scroller_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)scroller, (struct wzWidget *)scroller->incrementButton);

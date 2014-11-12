@@ -336,7 +336,7 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzButton *wz_button_create()
+struct wzButton *wz_button_create(const char *label, const char *icon)
 {
 	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
 	wzButtonStyle *style = &button->base.style.button;
@@ -350,8 +350,8 @@ struct wzButton *wz_button_create()
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 	button->padding.left = button->padding.right = 8;
 	button->padding.top = button->padding.bottom = 4;
-	button->label = wz_string_empty();
-	button->icon = wz_string_empty();
+	button->label = label ? wz_string_new(label) : wz_string_empty();
+	button->icon = icon ? wz_string_new(icon) : wz_string_empty();
 
 	style->textColor = WZ_STYLE_TEXT_COLOR;
 	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
@@ -368,9 +368,9 @@ struct wzButton *wz_button_create()
 	return button;
 }
 
-struct wzButton *wz_check_box_create()
+struct wzButton *wz_check_box_create(const char *label)
 {
-	struct wzButton *button = wz_button_create();
+	struct wzButton *button = wz_button_create(label, NULL);
 	wzCheckBoxStyle *style = &button->base.style.checkBox;
 
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);

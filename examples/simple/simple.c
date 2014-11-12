@@ -129,9 +129,8 @@ int main(int argc, char **argv)
 	wz_widget_set_size_args((struct wzWidget *)mainWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	// Create a button.
-	button = wz_button_create();
+	button = wz_button_create("Click me!", NULL);
 	wz_widget_set_rect_args((struct wzWidget *)button, WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
-	wz_button_set_label(button, "Click me!");
 	wz_widget_set_font_size((struct wzWidget *)button, 24.0f);
 	wz_main_window_add(mainWindow, (struct wzWidget *)button);
 

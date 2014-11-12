@@ -125,31 +125,19 @@ void CreateButtonFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Button with a label");
-	wz_stack_layout_add(layout, (struct wzWidget *)button);
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_button_create("Button with a label", NULL));
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_button_create("Button with a label and icon", "../examples/data/accept.png"));
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_button_create(NULL, "../examples/data/accept.png"));
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Button with a label and icon");
-	wz_button_set_icon(button, "../examples/data/accept.png");
-	wz_stack_layout_add(layout, (struct wzWidget *)button);
-
-	button = wz_button_create();
-	wz_button_set_icon(button, "../examples/data/accept.png");
-	wz_stack_layout_add(layout, (struct wzWidget *)button);
-
-	button = wz_button_create();
-	wz_button_set_label(button, "Custom padding");
+	button = wz_button_create("Custom padding", NULL);
 	wz_button_set_padding_args(button, 20, 40, 20, 40);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Toggle Button");
+	button = wz_button_create("Toggle Button", NULL);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Custom style");
+	button = wz_button_create("Custom style", NULL);
 	style = wz_widget_get_style((const struct wzWidget *)button);
 	style.button.textColor = nvgRGBf(1, 0, 1);
 	style.button.bgColor1 = nvgRGB(100, 0, 0);
@@ -164,7 +152,6 @@ void CreateCheckboxFrame()
 {
 	struct wzFrame *frame;
 	struct wzStackLayout *layout;
-	struct wzButton *checkbox;
 	
 	frame = CreateFrame("Checkbox");
 
@@ -175,9 +162,7 @@ void CreateCheckboxFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	checkbox = wz_check_box_create();
-	wz_button_set_label(checkbox, "Toggle me!");
-	wz_stack_layout_add(layout, (struct wzWidget *)checkbox);
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_check_box_create("Toggle me!"));
 }
 
 void CreateComboFrame()
@@ -317,7 +302,6 @@ void CreateRadioButtonFrame()
 {
 	struct wzFrame *frame;
 	struct wzStackLayout *layout;
-	struct wzButton *rb;
 	
 	frame = CreateFrame("Radio Button");
 
@@ -328,17 +312,9 @@ void CreateRadioButtonFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	rb = wz_radio_button_create();
-	wz_button_set_label(rb, "Option 1");
-	wz_stack_layout_add(layout, (struct wzWidget *)rb);
-
-	rb = wz_radio_button_create();
-	wz_button_set_label(rb, "Option 2");
-	wz_stack_layout_add(layout, (struct wzWidget *)rb);
-
-	rb = wz_radio_button_create();
-	wz_button_set_label(rb, "Option 3");
-	wz_stack_layout_add(layout, (struct wzWidget *)rb);
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_radio_button_create("Option 1"));
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_radio_button_create("Option 2"));
+	wz_stack_layout_add(layout, (struct wzWidget *)wz_radio_button_create("Option 3"));
 }
 
 void CreateScrollerFrame()
@@ -478,13 +454,11 @@ void CreateWindowFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	showWindow = wz_check_box_create();
-	wz_button_set_label(showWindow, "Show Window 1");
+	showWindow = wz_check_box_create("Show Window 1");
 	wz_button_add_callback_clicked(showWindow, ShowWindow1);
 	wz_stack_layout_add(layout, (struct wzWidget *)showWindow);
 
-	showWindow = wz_check_box_create();
-	wz_button_set_label(showWindow, "Show Window 2");
+	showWindow = wz_check_box_create("Show Window 2");
 	wz_button_add_callback_clicked(showWindow, ShowWindow2);
 	wz_stack_layout_add(layout, (struct wzWidget *)showWindow);
 }
@@ -519,32 +493,25 @@ void CreateStackLayoutFrame()
 		wz_widget_set_height((struct wzWidget *)layout, 100);
 		wz_stack_layout_add(frameLayout, (struct wzWidget *)layout);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Default");
-		wz_stack_layout_add(layout, (struct wzWidget *)button);
+		wz_stack_layout_add(layout, (struct wzWidget *)wz_button_create("Default", NULL));
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Top");
+		button = wz_button_create("Align Top", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_TOP);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Middle");
+		button = wz_button_create("Align Middle", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_MIDDLE);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Bottom");
+		button = wz_button_create("Align Bottom", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_BOTTOM);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Stretch Width");
+		button = wz_button_create("Stretch Width", NULL);
 		wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH_WIDTH);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Stretch Height");
+		button = wz_button_create("Stretch Height", NULL);
 		wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH_HEIGHT);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 	}
@@ -566,32 +533,25 @@ void CreateStackLayoutFrame()
 		wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH_HEIGHT);
 		wz_stack_layout_add(frameLayout, (struct wzWidget *)layout);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Default");
-		wz_stack_layout_add(layout, (struct wzWidget *)button);
+		wz_stack_layout_add(layout, (struct wzWidget *)wz_button_create("Default", NULL));
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Left");
+		button = wz_button_create("Align Left", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_LEFT);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Center");
+		button = wz_button_create("Align Center", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_CENTER);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Align Right");
+		button = wz_button_create("Align Right", NULL);
 		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_RIGHT);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Stretch Width");
+		button = wz_button_create("Stretch Width", NULL);
 		wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH_WIDTH);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-		button = wz_button_create();
-		wz_button_set_label(button, "Stretch Height");
+		button = wz_button_create("Stretch Height", NULL);
 		wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH_HEIGHT);
 		wz_stack_layout_add(layout, (struct wzWidget *)button);
 	}
@@ -623,14 +583,11 @@ void CreateWindow1()
 	wz_widget_set_stretch((struct wzWidget *)textEdit, WZ_STRETCH_WIDTH);
 	wz_stack_layout_add(layout, (struct wzWidget *)textEdit);
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Another Button");
-	wz_button_set_icon(button, "../examples/data/accept.png");
+	button = wz_button_create("Another Button", "../examples/data/accept.png");
 	wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH_WIDTH);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-	checkbox = wz_check_box_create();
-	wz_button_set_label(checkbox, "Checkbox");
+	checkbox = wz_check_box_create("Checkbox");
 	wz_widget_set_align((struct wzWidget *)checkbox, WZ_ALIGN_CENTER);
 	wz_stack_layout_add(layout, (struct wzWidget *)checkbox);
 
@@ -642,8 +599,7 @@ void CreateWindow1()
 	wz_widget_set_font((struct wzWidget *)combo, "visitor1", 12);
 	wz_stack_layout_add(layout, (struct wzWidget *)combo);
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Yet Another Button");
+	button = wz_button_create("Yet Another Button", NULL);
 	wz_widget_set_stretch((struct wzWidget *)button, WZ_STRETCH);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 }
@@ -680,8 +636,7 @@ void CreateWindow2()
 	wz_tabbed_add_tab(tabbed, &tabButton, &tabPage);
 	wz_button_set_label(tabButton, "Another Tab");
 
-	button = wz_button_create();
-	wz_button_set_label(button, "Button Button Button");
+	button = wz_button_create("Button Button Button", NULL);
 	wz_widget_set_position_args((struct wzWidget *)button, 10, 10);
 	wz_tab_page_add(tabPage, (struct wzWidget *)button);
 

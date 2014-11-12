@@ -345,7 +345,7 @@ struct ButtonPrivate : public WidgetPrivate
 {
 	ButtonPrivate()
 	{
-		button = wz_button_create();
+		button = wz_button_create(NULL, NULL);
 		wz_widget_set_metadata((wzWidget *)button, this);
 	}
 
@@ -367,7 +367,7 @@ struct CheckboxPrivate : public WidgetPrivate
 {
 	CheckboxPrivate()
 	{
-		button = wz_check_box_create();
+		button = wz_check_box_create(NULL);
 		wz_widget_set_metadata((wzWidget *)button, this);
 	}
 
@@ -529,7 +529,7 @@ struct RadioButtonPrivate : public WidgetPrivate
 {
 	RadioButtonPrivate()
 	{
-		button = wz_radio_button_create();
+		button = wz_radio_button_create(NULL);
 		wz_widget_set_metadata((wzWidget *)button, this);
 	}
 

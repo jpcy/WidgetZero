@@ -103,9 +103,9 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-struct wzButton *wz_radio_button_create()
+struct wzButton *wz_radio_button_create(const char *label)
 {
-	struct wzButton *button = wz_button_create();
+	struct wzButton *button = wz_button_create(label, NULL);
 	struct wzWidget *widget = (struct wzWidget *)button;
 	wzRadioButtonStyle *style = &widget->style.radioButton;
 

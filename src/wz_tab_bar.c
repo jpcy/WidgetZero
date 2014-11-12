@@ -72,7 +72,7 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 
 static struct wzButton *wz_tab_button_create()
 {
-	struct wzButton *button = wz_button_create();
+	struct wzButton *button = wz_button_create(NULL, NULL);
 	struct wzWidget *widget = (struct wzWidget *)button;
 	wzTabButtonStyle *style = &widget->style.tabButton;
 
@@ -285,8 +285,7 @@ struct wzTabBar *wz_tab_bar_create()
 	style->defaultScrollButtonWidth = 14;
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
-	tabBar->decrementButton = wz_button_create();
-	wz_button_set_label(tabBar->decrementButton, "<");
+	tabBar->decrementButton = wz_button_create("<", NULL);
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, style->defaultScrollButtonWidth);
@@ -294,8 +293,7 @@ struct wzTabBar *wz_tab_bar_create()
 	wz_widget_set_draw_last((struct wzWidget *)tabBar->decrementButton, true);
 	wz_widget_set_overlap((struct wzWidget *)tabBar->decrementButton, true);
 
-	tabBar->incrementButton = wz_button_create();
-	wz_button_set_label(tabBar->incrementButton, ">");
+	tabBar->incrementButton = wz_button_create(">", NULL);
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
 	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, style->defaultScrollButtonWidth);

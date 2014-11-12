@@ -210,13 +210,13 @@ struct wzSpinner *wz_spinner_create()
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
 
-	spinner->decrementButton = wz_button_create();
+	spinner->decrementButton = wz_button_create(NULL, NULL);
 	wz_widget_set_draw_callback((struct wzWidget *)spinner->decrementButton, wz_spinner_decrement_button_draw);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
 	wz_widget_set_overlap((struct wzWidget *)spinner->decrementButton, true);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
-	spinner->incrementButton = wz_button_create();
+	spinner->incrementButton = wz_button_create(NULL, NULL);
 	wz_widget_set_draw_callback((struct wzWidget *)spinner->incrementButton, wz_spinner_increment_button_draw);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
 	wz_widget_set_overlap((struct wzWidget *)spinner->incrementButton, true);

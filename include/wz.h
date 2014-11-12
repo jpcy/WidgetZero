@@ -587,8 +587,8 @@ typedef enum
 }
 wzButtonSetBehavior;
 
-struct wzButton *wz_button_create();
-struct wzButton *wz_check_box_create();
+struct wzButton *wz_button_create(const char *label, const char *icon);
+struct wzButton *wz_check_box_create(const char *label);
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 void wz_button_set_label(struct wzButton *button, const char *label);
@@ -663,7 +663,7 @@ void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *la
 const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button);
 bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button);
 
-struct wzButton *wz_radio_button_create();
+struct wzButton *wz_radio_button_create(const char *label);
 
 typedef enum
 {
