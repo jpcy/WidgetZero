@@ -129,7 +129,7 @@ public:
 private:
 	wz::Frame *createFrame(const char *label)
 	{
-		wz::Frame *frame = new wz::Frame(renderer);
+		wz::Frame *frame = new wz::Frame();
 		frame->setStretch(WZ_STRETCH);
 		mainWindow.add(frame);
 

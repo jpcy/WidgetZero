@@ -149,7 +149,7 @@ public:
 class Frame : public Widget
 {
 public:
-	Frame(wzRenderer *renderer);
+	Frame();
 	~Frame();
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
@@ -409,9 +409,8 @@ struct ComboPrivate : public WidgetPrivate
 
 struct FramePrivate : public WidgetPrivate
 {
-	FramePrivate(wzRenderer *renderer)
+	FramePrivate()
 	{
-		WZ_ASSERT(renderer);
 		frame = wz_frame_create();
 		wzWidget *widget = (wzWidget *)frame;
 		wz_widget_set_metadata(widget, this);
@@ -929,9 +928,9 @@ Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 
 //------------------------------------------------------------------------------
 
-Frame::Frame(wzRenderer *renderer)
+Frame::Frame()
 {
-	p = new FramePrivate(renderer);
+	p = new FramePrivate();
 }
 
 Frame::~Frame()
