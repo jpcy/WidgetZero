@@ -121,7 +121,7 @@ void CreateButtonFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -158,7 +158,7 @@ void CreateCheckboxFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -176,7 +176,7 @@ void CreateComboFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -207,7 +207,7 @@ void CreateGroupBoxFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -236,7 +236,7 @@ void CreateLabelFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -269,7 +269,7 @@ void CreateListFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_HORIZONTAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -308,7 +308,7 @@ void CreateRadioButtonFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -328,7 +328,7 @@ void CreateScrollerFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -360,7 +360,7 @@ void CreateSpinnerFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -383,7 +383,7 @@ void CreateTabbedFrame()
 	frame = CreateFrame("Tabbed");
 
 	tabbed = wz_tabbed_create();
-	wz_widget_set_margin_args((struct wzWidget *)tabbed, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)tabbed, 8);
 	wz_widget_set_stretch((struct wzWidget *)tabbed, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)tabbed);
 
@@ -408,7 +408,7 @@ void CreateTextEditFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -450,7 +450,7 @@ void CreateWindowFrame()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
@@ -473,7 +473,7 @@ void CreateStackLayoutFrame()
 	frameLayout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(frameLayout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(frameLayout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)frameLayout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)frameLayout, 8);
 	wz_widget_set_stretch((struct wzWidget *)frameLayout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)frameLayout);
 
@@ -574,7 +574,7 @@ void CreateWindow1()
 	layout = wz_stack_layout_create();
 	wz_stack_layout_set_direction(layout, WZ_STACK_LAYOUT_VERTICAL);
 	wz_stack_layout_set_spacing(layout, 8);
-	wz_widget_set_margin_args((struct wzWidget *)layout, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_window_add(window1, (struct wzWidget *)layout);
 
@@ -619,7 +619,7 @@ void CreateWindow2()
 	wz_main_window_add(mainWindow, (struct wzWidget *)window2);
 
 	tabbed = wz_tabbed_create();
-	wz_widget_set_margin_args((struct wzWidget *)tabbed, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)tabbed, 8);
 	wz_widget_set_stretch((struct wzWidget *)tabbed, WZ_STRETCH);
 	wz_window_add(window2, (struct wzWidget *)tabbed);
 
@@ -666,7 +666,7 @@ void CreateWidgetCategoryWindow()
 	wz_list_set_item_data(list, (uint8_t *)&widgetCategories[0]);
 	wz_list_set_selected_item(list, 0);
 	wz_list_add_callback_item_selected(list, &WidgetCategoryChanged);
-	wz_widget_set_margin_args((struct wzWidget *)list, 8, 8, 8, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)list, 8);
 	wz_widget_set_stretch((struct wzWidget *)list, WZ_STRETCH);
 	wz_widget_set_font_size((struct wzWidget *)list, 18);
 	wz_window_add(window, (struct wzWidget *)list);

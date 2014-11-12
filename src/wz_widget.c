@@ -398,6 +398,13 @@ void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int 
 	wz_widget_set_margin(widget, margin);
 }
 
+void wz_widget_set_margin_uniform(struct wzWidget *widget, int value)
+{
+	wzBorder margin;
+	margin.top = margin.right = margin.bottom = margin.left = value;
+	wz_widget_set_margin(widget, margin);
+}
+
 wzBorder wz_widget_get_margin(const struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);

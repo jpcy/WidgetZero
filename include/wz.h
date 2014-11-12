@@ -527,6 +527,7 @@ wzRect wz_widget_get_rect(const struct wzWidget *widget);
 wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
 void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin);
 void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left);
+void wz_widget_set_margin_uniform(struct wzWidget *widget, int value);
 wzBorder wz_widget_get_margin(const struct wzWidget *widget);
 void wz_widget_set_stretch(struct wzWidget *widget, int stretch);
 int wz_widget_get_stretch(const struct wzWidget *widget);
