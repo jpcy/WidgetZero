@@ -606,7 +606,7 @@ void wz_button_bind_value(struct wzButton *button, bool *value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
 
-struct wzCombo *wz_combo_create();
+struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
 struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
@@ -632,7 +632,7 @@ NVGcolor wz_label_get_text_color(const struct wzLabel *label);
 
 typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
-struct wzList *wz_list_create();
+struct wzList *wz_list_create(uint8_t *itemData, int itemStride, int nItems);
 wzBorder wz_list_get_items_border(const struct wzList *list);
 wzRect wz_list_get_items_rect(const struct wzList *list);
 

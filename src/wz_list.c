@@ -384,7 +384,7 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
-struct wzList *wz_list_create()
+struct wzList *wz_list_create(uint8_t *itemData, int itemStride, int nItems)
 {
 	struct wzList *list = (struct wzList *)malloc(sizeof(struct wzList));
 	wzListStyle *style = &list->base.style.list;
@@ -402,6 +402,9 @@ struct wzList *wz_list_create()
 	list->base.vtable.mouse_move = wz_list_mouse_move;
 	list->base.vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
 	list->base.vtable.mouse_hover_off = wz_list_mouse_hover_off;
+	list->itemData = itemData;
+	list->itemStride = itemStride;
+	list->nItems = nItems;
 	list->selectedItem = -1;
 	list->pressedItem = -1;
 	list->hoveredItem = -1;

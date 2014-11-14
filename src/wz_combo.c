@@ -243,7 +243,7 @@ static void wz_combo_list_item_selected(wzEvent *e)
 	combo->isOpen = false;
 }
 
-struct wzCombo *wz_combo_create()
+struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
 {
 	struct wzCombo *combo = (struct wzCombo *)malloc(sizeof(struct wzCombo));
 	wzComboStyle *style = &combo->base.style.combo;
@@ -257,7 +257,7 @@ struct wzCombo *wz_combo_create()
 	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
 	combo->base.vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
-	combo->list = wz_list_create();
+	combo->list = wz_list_create(itemData, itemStride, nItems);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
 	wz_widget_set_clip_input_to_parent((struct wzWidget *)combo->list, false);

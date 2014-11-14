@@ -389,7 +389,7 @@ struct ComboPrivate : public WidgetPrivate
 {
 	ComboPrivate()
 	{
-		combo = wz_combo_create();
+		combo = wz_combo_create(NULL, 0, 0);
 		wz_widget_set_metadata((wzWidget *)combo, this);
 	}
 
@@ -479,7 +479,7 @@ struct ListPrivate : public WidgetPrivate
 {
 	ListPrivate()
 	{
-		list = wz_list_create();
+		list = wz_list_create(NULL, 0, 0);
 		wz_widget_set_metadata((wzWidget *)list, this);
 	}
 

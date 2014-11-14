@@ -48,12 +48,14 @@ SOFTWARE.
 
 struct wzMainWindow *mainWindow;
 const int textCursorBlinkInterval = 500;
-const char *customListData[3] =
+const char *customListData[] =
 {
 	"../examples/data/accept.png",
 	"../examples/data/delete.png",
 	"../examples/data/error.png"
 };
+
+#define CUSTOM_LIST_DATA_LENGTH (sizeof(customListData) / sizeof(customListData[0]))
 
 const char *listData[] =
 {
@@ -174,16 +176,10 @@ void CreateComboFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	combo1 = wz_combo_create();
-	wz_list_set_num_items(wz_combo_get_list(combo1), LIST_DATA_LENGTH);
-	wz_list_set_item_stride(wz_combo_get_list(combo1), sizeof(const char *));
-	wz_list_set_item_data(wz_combo_get_list(combo1), (uint8_t *)listData);
+	combo1 = wz_combo_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_stack_layout_add(layout, (struct wzWidget *)combo1);
 
-	combo2 = wz_combo_create();
-	wz_list_set_num_items(wz_combo_get_list(combo2), LIST_DATA_LENGTH);
-	wz_list_set_item_stride(wz_combo_get_list(combo2), sizeof(const char *));
-	wz_list_set_item_data(wz_combo_get_list(combo2), (uint8_t *)listData);
+	combo2 = wz_combo_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_widget_set_font((struct wzWidget *)combo2, "visitor1", 12);
 	wz_stack_layout_add(layout, (struct wzWidget *)combo2);
 }
@@ -253,25 +249,16 @@ void CreateListFrame()
 	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
-	list = wz_list_create();
-	wz_list_set_num_items(list, LIST_DATA_LENGTH);
-	wz_list_set_item_stride(list, sizeof(const char *));
-	wz_list_set_item_data(list, (uint8_t *)listData);
+	list = wz_list_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_widget_set_size_args((struct wzWidget *)list, 120, 200);
 	wz_stack_layout_add(layout, (struct wzWidget *)list);
 
-	list = wz_list_create();
-	wz_list_set_num_items(list, LIST_DATA_LENGTH);
-	wz_list_set_item_stride(list, sizeof(const char *));
-	wz_list_set_item_data(list, (uint8_t *)listData);
+	list = wz_list_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_widget_set_size_args((struct wzWidget *)list, 240, 300);
 	wz_widget_set_font((struct wzWidget *)list, "visitor1", 32);
 	wz_stack_layout_add(layout, (struct wzWidget *)list);
 
-	list = wz_list_create();
-	wz_list_set_num_items(list, 3);
-	wz_list_set_item_stride(list, sizeof(const char *));
-	wz_list_set_item_data(list, (uint8_t *)customListData);
+	list = wz_list_create((uint8_t *)customListData, sizeof(const char *), CUSTOM_LIST_DATA_LENGTH);
 	wz_list_set_item_height(list, 40);
 	wz_list_set_draw_item_callback(list, CustomDrawListItemCallback);
 	wz_widget_set_size_args((struct wzWidget *)list, 50, 200);
@@ -540,10 +527,7 @@ void CreateWindow1()
 	wz_widget_set_align((struct wzWidget *)checkbox, WZ_ALIGN_CENTER);
 	wz_stack_layout_add(layout, (struct wzWidget *)checkbox);
 
-	combo = wz_combo_create();
-	wz_list_set_num_items(wz_combo_get_list(combo), LIST_DATA_LENGTH);
-	wz_list_set_item_stride(wz_combo_get_list(combo), sizeof(const char *));
-	wz_list_set_item_data(wz_combo_get_list(combo), (uint8_t *)listData);
+	combo = wz_combo_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_widget_set_align((struct wzWidget *)combo, WZ_ALIGN_RIGHT);
 	wz_widget_set_font((struct wzWidget *)combo, "visitor1", 12);
 	wz_stack_layout_add(layout, (struct wzWidget *)combo);
@@ -574,10 +558,7 @@ void CreateWindow2()
 	wz_tabbed_add_tab(tabbed, &tabButton, &tabPage);
 	wz_button_set_label(tabButton, "Tab 1");
 
-	combo = wz_combo_create();
-	wz_list_set_num_items(wz_combo_get_list(combo), LIST_DATA_LENGTH);
-	wz_list_set_item_stride(wz_combo_get_list(combo), sizeof(const char *));
-	wz_list_set_item_data(wz_combo_get_list(combo), (uint8_t *)listData);
+	combo = wz_combo_create((uint8_t *)listData, sizeof(const char *), LIST_DATA_LENGTH);
 	wz_widget_set_position_args((struct wzWidget *)combo, 10, 10);
 	wz_tab_page_add(tabPage, (struct wzWidget *)combo);
 
@@ -607,10 +588,7 @@ void CreateWidgetCategoryWindow()
 	wz_main_window_add(mainWindow, (struct wzWidget *)window);
 	wz_main_window_dock_window(mainWindow, window, WZ_DOCK_POSITION_WEST);
 
-	list = wz_list_create();
-	wz_list_set_num_items(list, nWidgetCategories);
-	wz_list_set_item_stride(list, sizeof(struct WidgetCategoryListItem));
-	wz_list_set_item_data(list, (uint8_t *)&widgetCategories[0]);
+	list = wz_list_create((uint8_t *)&widgetCategories[0], sizeof(struct WidgetCategoryListItem), nWidgetCategories);
 	wz_list_set_selected_item(list, 0);
 	wz_list_add_callback_item_selected(list, &WidgetCategoryChanged);
 	wz_widget_set_margin_uniform((struct wzWidget *)list, 8);
