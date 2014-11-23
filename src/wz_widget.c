@@ -45,6 +45,7 @@ wz_intersect_rects is SDL_IntersectRect
 */
 #include <stdlib.h>
 #include <string.h>
+#include "wz_layout.h"
 #include "wz_widget.h"
 
 const wzBorder wzBorder_zero = { 0, 0, 0, 0 };
@@ -100,81 +101,6 @@ bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result)
     result->h = Amax - Amin;
 
     return !wz_is_rect_empty(*result);
-}
-
-/*
-================================================================================
-
-STRETCHING (OUTSIDE LAYOUT)
-
-================================================================================
-*/
-
-// Applies stretching to the provided rect.
-static wzRect wz_widget_calculate_stretched_rect(const struct wzWidget *widget, wzRect rect)
-{
-	WZ_ASSERT(widget);
-
-	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
-	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
-	{
-		wzSize parentSize = wz_widget_get_size(widget->parent);
-
-		if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)
-		{
-			rect.x = widget->margin.left;
-			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
-		}
-
-		if ((widget->stretch & WZ_STRETCH_HEIGHT) != 0)
-		{
-			rect.y = widget->margin.top;
-			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
-		}
-	}
-
-	return rect;
-}
-
-static void wz_widget_set_stretched_rect_recursive(struct wzWidget *widget)
-{
-	int i;
-	bool recurse;
-
-	WZ_ASSERT(widget);
-
-	// Don't do anything to widgets that aren't set to stretch, but still recurse on children.
-	recurse = true;
-
-	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
-	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
-	{
-		wzRect oldRect, newRect;
-
-		oldRect = wz_widget_get_rect(widget);
-		newRect = wz_widget_calculate_stretched_rect(widget, oldRect);
-
-		if (widget->vtable.set_rect)
-		{
-			widget->vtable.set_rect(widget, newRect);
-			oldRect = wz_widget_get_rect(widget);
-		}
-		else
-		{
-			widget->rect = newRect;
-		}
-
-		// Don't recurse if the rect hasn't changed.
-		recurse = (oldRect.x != newRect.x || oldRect.y != newRect.y || oldRect.w != newRect.w || oldRect.h != newRect.h);
-	}
-
-	if (recurse)
-	{
-		for (i = 0; i < wz_arr_len(widget->children); i++)
-		{
-			wz_widget_set_stretched_rect_recursive(widget->children[i]);
-		}
-	}
 }
 
 /*
