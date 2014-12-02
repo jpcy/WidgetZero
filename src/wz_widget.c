@@ -299,19 +299,7 @@ void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
 {
 	WZ_ASSERT(widget);
 	widget->margin = margin;
-
-	if (widget->parent)
-	{
-		// If the parent is a layout widget, refresh it.
-		if (wz_widget_is_layout(widget->parent))
-		{
-			wz_widget_refresh_rect(widget->parent);
-		}
-		else if ((widget->stretch & WZ_STRETCH) != 0)
-		{
-			wz_widget_set_stretched_rect_recursive(widget);
-		}
-	}
+	wz_widget_refresh_rect(widget);
 }
 
 void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left)
@@ -663,17 +651,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 
 	// Resize the widget and children to their measured sizes.
 	wz_widget_measure_and_resize_recursive(child);
-
-	// If the parent is a layout widget, refresh it.
-	if (wz_widget_is_layout(widget))
-	{
-		wz_widget_refresh_rect(widget);
-	}
-	// Stretch child.
-	else if ((child->stretch & WZ_STRETCH) != 0)
-	{
-		wz_widget_set_stretched_rect_recursive(child);
-	}
+	wz_widget_refresh_rect(child);
 
 	if (child->vtable.added)
 	{
@@ -794,10 +772,9 @@ void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
+static void wz_widget_set_rect_internal_recursive(struct wzWidget *widget, wzRect rect)
 {
 	wzRect oldRect;
-	int i;
 
 	WZ_ASSERT(widget);
 	oldRect = widget->rect;
@@ -814,11 +791,25 @@ void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
 		widget->rect = rect;
 	}
 
-	// Stretch children too.
-	for (i = 0; i < wz_arr_len(widget->children); i++)
+	// Don't recurse if the rect hasn't changed.
+	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
 	{
-		wz_widget_set_stretched_rect_recursive(widget->children[i]);
+		int i;
+
+		for (i = 0; i < wz_arr_len(widget->children); i++)
+		{
+			wz_widget_set_rect_internal_recursive(widget->children[i], widget->children[i]->rect);
+		}
 	}
+}
+
+void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
+{
+	wzRect oldRect;
+
+	WZ_ASSERT(widget);
+	oldRect = widget->rect;
+	wz_widget_set_rect_internal_recursive(widget, rect);	
 
 	// If the parent is a layout widget, it may need refreshing.
 	if (widget->parent && wz_widget_is_layout(widget->parent))

@@ -27,6 +27,5 @@ SOFTWARE.
 #include <wz.h>
 
 wzRect wz_widget_calculate_stretched_rect(const struct wzWidget *widget, wzRect rect);
-void wz_widget_set_stretched_rect_recursive(struct wzWidget *widget);
 
 #endif // WZ_LAYOUT_H
