@@ -313,31 +313,69 @@ void wz_stack_layout_remove(struct wzStackLayout *stackLayout, struct wzWidget *
 /*
 ================================================================================
 
-STRETCHING (OUTSIDE LAYOUT)
+ALIGNMENT AND STRETCHING (OUTSIDE LAYOUT)
 
 ================================================================================
 */
 
-// Applies stretching to the provided rect.
-wzRect wz_widget_calculate_stretched_rect(const struct wzWidget *widget, wzRect rect)
+wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget, wzRect rect)
 {
+	wzRect parentRect;
+
 	WZ_ASSERT(widget);
 
-	// Don't stretch if the widget is a child of a layout. The layout will handle stretching logic in that case.
-	if (widget->parent && !wz_widget_is_layout(widget->parent) && (widget->stretch & WZ_STRETCH) != 0)
-	{
-		wzSize parentSize = wz_widget_get_size(widget->parent);
+	// Can't align or stretch to parent rect if there is no parent.
+	if (!widget->parent)
+		return rect;
 
+	// Don't align or stretch if the widget is a child of a layout. The layout will handle the logic in that case.
+	if (widget->parent && wz_widget_is_layout(widget->parent))
+		return rect;
+
+	parentRect = wz_widget_get_rect(widget->parent);
+
+	if (widget->align != WZ_ALIGN_NONE)
+	{
+		// Handle horizontal alignment.
+		if ((widget->align & WZ_ALIGN_LEFT) != 0)
+		{
+			rect.x = widget->margin.left;
+		}
+		else if ((widget->align & WZ_ALIGN_CENTER) != 0)
+		{
+			rect.x = widget->margin.left + (int)((parentRect.w - widget->margin.right) / 2.0f - rect.w / 2.0f);
+		}
+		else if ((widget->align & WZ_ALIGN_RIGHT) != 0)
+		{
+			rect.x = parentRect.w - widget->margin.right - rect.w;
+		}
+
+		// Handle vertical alignment.
+		if ((widget->align & WZ_ALIGN_TOP) != 0)
+		{
+			rect.x = widget->margin.left;
+		}
+		else if ((widget->align & WZ_ALIGN_MIDDLE) != 0)
+		{
+			rect.y = widget->margin.top + (int)((parentRect.h - widget->margin.bottom) / 2.0f - rect.h / 2.0f);
+		}
+		else if ((widget->align & WZ_ALIGN_BOTTOM) != 0)
+		{
+			rect.y = parentRect.h - widget->margin.bottom - rect.h;
+		}
+	}
+	else if ((widget->stretch & WZ_STRETCH) != 0)
+	{
 		if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)
 		{
 			rect.x = widget->margin.left;
-			rect.w = parentSize.w - (widget->margin.left + widget->margin.right);
+			rect.w = parentRect.w - (widget->margin.left + widget->margin.right);
 		}
 
 		if ((widget->stretch & WZ_STRETCH_HEIGHT) != 0)
 		{
 			rect.y = widget->margin.top;
-			rect.h = parentSize.h - (widget->margin.top + widget->margin.bottom);
+			rect.h = parentRect.h - (widget->margin.top + widget->margin.bottom);
 		}
 	}
 

@@ -779,8 +779,8 @@ static void wz_widget_set_rect_internal_recursive(struct wzWidget *widget, wzRec
 	WZ_ASSERT(widget);
 	oldRect = widget->rect;
 
-	// Apply stretching.
-	rect = wz_widget_calculate_stretched_rect(widget, rect);
+	// Apply alignment and stretching.
+	rect = wz_widget_calculate_aligned_stretched_rect(widget, rect);
 
 	if (widget->vtable.set_rect)
 	{

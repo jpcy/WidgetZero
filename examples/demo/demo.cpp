@@ -412,6 +412,61 @@ void CreateWindowFrame()
 	wz_stack_layout_add(layout, (struct wzWidget *)showWindow);
 }
 
+void CreateParentLayoutFrame()
+{
+	struct wzFrame *rootFrame;
+	struct wzStackLayout *layout;
+
+	rootFrame = CreateFrame("Parent Layout");
+
+	layout = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 8);
+	wz_widget_set_margin_uniform((struct wzWidget *)layout, 8);
+	wz_widget_set_stretch((struct wzWidget *)layout, WZ_STRETCH);
+	wz_frame_add(rootFrame, (struct wzWidget *)layout);
+
+	{
+		struct wzFrame *frame;
+		struct wzButton *button;
+
+		frame = wz_frame_create();
+		wz_widget_set_stretch((struct wzWidget *)frame, WZ_STRETCH);
+		wz_stack_layout_add(layout, (struct wzWidget *)frame);
+
+		button = wz_button_create("Align Left", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_LEFT);
+		wz_frame_add(frame, (struct wzWidget *)button);
+
+		button = wz_button_create("Align Center", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_CENTER);
+		wz_frame_add(frame, (struct wzWidget *)button);
+
+		button = wz_button_create("Align Right", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_RIGHT);
+		wz_frame_add(frame, (struct wzWidget *)button);
+	}
+
+	{
+		struct wzFrame *frame;
+		struct wzButton *button;
+
+		frame = wz_frame_create();
+		wz_widget_set_stretch((struct wzWidget *)frame, WZ_STRETCH);
+		wz_stack_layout_add(layout, (struct wzWidget *)frame);
+
+		button = wz_button_create("Align Top", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_TOP);
+		wz_frame_add(frame, (struct wzWidget *)button);
+
+		button = wz_button_create("Align Middle", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_MIDDLE);
+		wz_frame_add(frame, (struct wzWidget *)button);
+
+		button = wz_button_create("Align Bottom", NULL);
+		wz_widget_set_align((struct wzWidget *)button, WZ_ALIGN_BOTTOM);
+		wz_frame_add(frame, (struct wzWidget *)button);
+	}
+}
+
 void CreateStackLayoutFrame()
 {
 	struct wzFrame *frame;
@@ -624,6 +679,7 @@ void CreateGui(int windowWidth, int windowHeight, struct wzRenderer *renderer)
 	CreateTabbedFrame();
 	CreateTextEditFrame();
 	CreateWindowFrame();
+	CreateParentLayoutFrame();
 	CreateStackLayoutFrame();
 	CreateWindow1();
 	CreateWindow2();
