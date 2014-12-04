@@ -50,35 +50,6 @@ static bool wz_spinner_validate_text(const char *text)
 	return true;
 }
 
-static void wz_spinner_update_child_rects(struct wzSpinner *spinner)
-{
-	wzRect rect, textEditRect, buttonRect;
-
-	WZ_ASSERT(spinner);
-
-	if (!spinner->base.renderer)
-		return; // Not fully initialized yet.
-
-	rect = wz_widget_get_rect((const struct wzWidget *)spinner);
-
-	// Update text edit rect.
-	textEditRect.x = textEditRect.y = 0;
-	textEditRect.w = rect.w;
-	textEditRect.h = rect.h;
-	wz_widget_set_rect_internal((struct wzWidget *)spinner->textEdit, textEditRect);
-
-	// Update increment button rect.
-	buttonRect.y = 0;
-	buttonRect.w = spinner->base.style.spinner.buttonWidth;
-	buttonRect.h = rect.h / 2;
-	buttonRect.x = rect.w - buttonRect.w;
-	wz_widget_set_rect_internal((struct wzWidget *)spinner->incrementButton, buttonRect);
-
-	// Update decrement button rect.
-	buttonRect.y = buttonRect.h;
-	wz_widget_set_rect_internal((struct wzWidget *)spinner->decrementButton, buttonRect);
-}
-
 static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool decrement)
 {
 	const struct wzButton *button = (struct wzButton *)widget;
@@ -169,15 +140,6 @@ static void wz_spinner_renderer_changed(struct wzWidget *widget)
 	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
 	textEditBorder.right += 16;
 	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
-
-	wz_spinner_update_child_rects(spinner);
-}
-
-static void wz_spinner_set_rect(struct wzWidget *widget, wzRect rect)
-{
-	WZ_ASSERT(widget);
-	widget->rect = rect;
-	wz_spinner_update_child_rects((struct wzSpinner *)widget);
 }
 
 // Set the text edit font to match.
@@ -197,7 +159,6 @@ struct wzSpinner *wz_spinner_create()
 	spinner->base.type = WZ_TYPE_SPINNER;
 	spinner->base.vtable.measure = wz_spinner_measure;
 	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
-	spinner->base.vtable.set_rect = wz_spinner_set_rect;
 	spinner->base.vtable.font_changed = wz_spinner_font_changed;
 
 	style->iconColor = WZ_STYLE_TEXT_COLOR;
@@ -207,22 +168,29 @@ struct wzSpinner *wz_spinner_create()
 	style->iconSize.h = 6;
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
+	wz_widget_set_stretch((struct wzWidget *)spinner->textEdit, WZ_STRETCH);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
 
 	spinner->decrementButton = wz_button_create(NULL, NULL);
+	wz_widget_set_width((struct wzWidget *)spinner->decrementButton, style->buttonWidth);
+	wz_widget_set_stretch((struct wzWidget *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale((struct wzWidget *)spinner->decrementButton, 1, 0.5f);
+	wz_widget_set_align((struct wzWidget *)spinner->decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
 	wz_widget_set_draw_callback((struct wzWidget *)spinner->decrementButton, wz_spinner_decrement_button_draw);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
 	wz_widget_set_overlap((struct wzWidget *)spinner->decrementButton, true);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
 	spinner->incrementButton = wz_button_create(NULL, NULL);
+	wz_widget_set_width((struct wzWidget *)spinner->incrementButton, style->buttonWidth);
+	wz_widget_set_stretch((struct wzWidget *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale((struct wzWidget *)spinner->incrementButton, 1, 0.5f);
+	wz_widget_set_align((struct wzWidget *)spinner->incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
 	wz_widget_set_draw_callback((struct wzWidget *)spinner->incrementButton, wz_spinner_increment_button_draw);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
 	wz_widget_set_overlap((struct wzWidget *)spinner->incrementButton, true);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);
-
-	wz_spinner_update_child_rects(spinner);
 
 	return spinner;
 }

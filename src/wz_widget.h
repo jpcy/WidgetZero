@@ -80,6 +80,9 @@ struct wzWidget
 	// Only used if the widget is the child of a layout.
 	int stretch;
 
+	float stretchWidthScale;
+	float stretchHeightScale;
+
 	// Only used if the widget is the child of a layout.
 	int align;
 

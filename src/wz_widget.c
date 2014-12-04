@@ -343,6 +343,25 @@ int wz_widget_get_stretch(const struct wzWidget *widget)
 	return widget->stretch;
 }
 
+void wz_widget_set_stretch_scale(struct wzWidget *widget, float width, float height)
+{
+	WZ_ASSERT(widget);
+	widget->stretchWidthScale = width;
+	widget->stretchHeightScale = height;
+}
+
+float wz_widget_get_stretch_width_scale(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->stretchWidthScale;
+}
+
+float wz_widget_get_stretch_height_scale(const struct wzWidget *widget)
+{
+	WZ_ASSERT(widget);
+	return widget->stretchHeightScale;
+}
+
 void wz_widget_set_align(struct wzWidget *widget, int align)
 {
 	WZ_ASSERT(widget);

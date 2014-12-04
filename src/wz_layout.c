@@ -334,49 +334,49 @@ wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget,
 
 	parentRect = wz_widget_get_rect(widget->parent);
 
-	if (widget->align != WZ_ALIGN_NONE)
+	// Handle stretching.
+	if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)
 	{
-		// Handle horizontal alignment.
-		if ((widget->align & WZ_ALIGN_LEFT) != 0)
-		{
-			rect.x = widget->margin.left;
-		}
-		else if ((widget->align & WZ_ALIGN_CENTER) != 0)
-		{
-			rect.x = widget->margin.left + (int)((parentRect.w - widget->margin.right) / 2.0f - rect.w / 2.0f);
-		}
-		else if ((widget->align & WZ_ALIGN_RIGHT) != 0)
-		{
-			rect.x = parentRect.w - widget->margin.right - rect.w;
-		}
+		const float scale = (widget->stretchWidthScale < 0.01f) ? 1 : widget->stretchWidthScale;
 
-		// Handle vertical alignment.
-		if ((widget->align & WZ_ALIGN_TOP) != 0)
-		{
-			rect.x = widget->margin.left;
-		}
-		else if ((widget->align & WZ_ALIGN_MIDDLE) != 0)
-		{
-			rect.y = widget->margin.top + (int)((parentRect.h - widget->margin.bottom) / 2.0f - rect.h / 2.0f);
-		}
-		else if ((widget->align & WZ_ALIGN_BOTTOM) != 0)
-		{
-			rect.y = parentRect.h - widget->margin.bottom - rect.h;
-		}
+		rect.x = widget->margin.left;
+		rect.w = (int)(parentRect.w * scale) - (widget->margin.left + widget->margin.right);
 	}
-	else if ((widget->stretch & WZ_STRETCH) != 0)
-	{
-		if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)
-		{
-			rect.x = widget->margin.left;
-			rect.w = parentRect.w - (widget->margin.left + widget->margin.right);
-		}
 
-		if ((widget->stretch & WZ_STRETCH_HEIGHT) != 0)
-		{
-			rect.y = widget->margin.top;
-			rect.h = parentRect.h - (widget->margin.top + widget->margin.bottom);
-		}
+	if ((widget->stretch & WZ_STRETCH_HEIGHT) != 0)
+	{
+		const float scale = (widget->stretchHeightScale < 0.01f) ? 1 : widget->stretchHeightScale;
+
+		rect.y = widget->margin.top;
+		rect.h = (int)(parentRect.h * scale) - (widget->margin.top + widget->margin.bottom);
+	}
+
+	// Handle horizontal alignment.
+	if ((widget->align & WZ_ALIGN_LEFT) != 0)
+	{
+		rect.x = widget->margin.left;
+	}
+	else if ((widget->align & WZ_ALIGN_CENTER) != 0)
+	{
+		rect.x = widget->margin.left + (int)((parentRect.w - widget->margin.right) / 2.0f - rect.w / 2.0f);
+	}
+	else if ((widget->align & WZ_ALIGN_RIGHT) != 0)
+	{
+		rect.x = parentRect.w - widget->margin.right - rect.w;
+	}
+
+	// Handle vertical alignment.
+	if ((widget->align & WZ_ALIGN_TOP) != 0)
+	{
+		rect.y = widget->margin.top;
+	}
+	else if ((widget->align & WZ_ALIGN_MIDDLE) != 0)
+	{
+		rect.y = widget->margin.top + (int)((parentRect.h - widget->margin.bottom) / 2.0f - rect.h / 2.0f);
+	}
+	else if ((widget->align & WZ_ALIGN_BOTTOM) != 0)
+	{
+		rect.y = parentRect.h - widget->margin.bottom - rect.h;
 	}
 
 	return rect;
