@@ -26,6 +26,7 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
+#include "wz_button.h"
 
 struct wzTabBar
 {

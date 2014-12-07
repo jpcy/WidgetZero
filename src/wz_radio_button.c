@@ -25,6 +25,7 @@ SOFTWARE.
 #include <string.h>
 #include "wz_renderer.h"
 #include "wz_widget.h"
+#include "wz_button.h"
 
 static void wz_radio_button_clicked(wzEvent *e)
 {

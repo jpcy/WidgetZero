@@ -133,8 +133,7 @@ void CreateButtonFrame()
 	wz_button_set_padding_args(button, 20, 40, 20, 40);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
-	button = wz_button_create("Toggle Button", NULL);
-	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	button = wz_toggle_button_create("Toggle Button", NULL);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
 	button = wz_button_create("Custom style", NULL);

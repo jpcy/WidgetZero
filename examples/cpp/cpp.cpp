@@ -157,8 +157,7 @@ private:
 		paddedButton->setPadding(20, 40, 20, 40);
 		layout->add(paddedButton);
 
-		wz::Button *toggleButton = new wz::Button("Toggle Button");
-		toggleButton->setToggle(true);
+		wz::ToggleButton *toggleButton = new wz::ToggleButton("Toggle Button", std::string());
 		layout->add(toggleButton);
 
 		wz::Button *styledButton = new wz::Button("Custom style");

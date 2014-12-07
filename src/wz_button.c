@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_string.h"
+#include "wz_button.h"
 
 struct wzButton
 {
@@ -331,6 +332,26 @@ static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, 
 /*
 ================================================================================
 
+PRIVATE INTERFACE
+
+================================================================================
+*/
+
+void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
+{
+	WZ_ASSERT(button);
+	button->clickBehavior = clickBehavior;
+}
+
+void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior setBehavior)
+{
+	WZ_ASSERT(button);
+	button->setBehavior = setBehavior;
+}
+
+/*
+================================================================================
+
 PUBLIC INTERFACE
 
 ================================================================================
@@ -368,6 +389,13 @@ struct wzButton *wz_button_create(const char *label, const char *icon)
 	return button;
 }
 
+struct wzButton *wz_toggle_button_create(const char *label, const char *icon)
+{
+	struct wzButton *button = wz_button_create(label, icon);
+	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	return button;
+}
+
 struct wzButton *wz_check_box_create(const char *label)
 {
 	struct wzButton *button = wz_button_create(label, NULL);
@@ -387,18 +415,6 @@ struct wzButton *wz_check_box_create(const char *label)
 	style->checkThickness = 2.5f;
 
 	return button;
-}
-
-void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
-{
-	WZ_ASSERT(button);
-	button->clickBehavior = clickBehavior;
-}
-
-void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior setBehavior)
-{
-	WZ_ASSERT(button);
-	button->setBehavior = setBehavior;
 }
 
 void wz_button_set_label(struct wzButton *button, const char *label)

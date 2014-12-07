@@ -47,6 +47,7 @@ class Tab;
 struct TabPrivate;
 class Tabbed;
 class TextEdit;
+class ToggleButton;
 struct WidgetPrivate;
 class Widget;
 class Window;
@@ -124,7 +125,6 @@ public:
 	Button *setIcon(const std::string &icon);
 	const char *getLabel() const;
 	Button *setLabel(const std::string &label);
-	Button *setToggle(bool toggle);
 };
 
 class Checkbox : public Widget
@@ -289,6 +289,21 @@ public:
 	TextEdit(const std::string &text, bool multiline);
 	~TextEdit();
 	TextEdit *setText(const std::string &text);
+};
+
+class ToggleButton : public Widget
+{
+public:
+	ToggleButton();
+	ToggleButton(const std::string &label, const std::string &icon = std::string());
+	~ToggleButton();
+	wzBorder getPadding() const;
+	ToggleButton *setPadding(wzBorder padding);
+	ToggleButton *setPadding(int top, int right, int bottom, int left);
+	const char *getIcon() const;
+	ToggleButton *setIcon(const std::string &icon);
+	const char *getLabel() const;
+	ToggleButton *setLabel(const std::string &label);
 };
 
 class Window : public Widget
@@ -663,6 +678,28 @@ struct TextEditPrivate : public WidgetPrivate
 	wzTextEdit *textEdit;
 };
 
+struct ToggleButtonPrivate : public WidgetPrivate
+{
+	ToggleButtonPrivate()
+	{
+		button = wz_toggle_button_create(NULL, NULL);
+		wz_widget_set_metadata((wzWidget *)button, this);
+	}
+
+	~ToggleButtonPrivate()
+	{
+		if (!wz_widget_get_main_window((wzWidget *)button))
+		{
+			wz_widget_destroy((wzWidget *)button);
+		}
+	}
+
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
+	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+
+	wzButton *button;
+};
+
 struct WindowPrivate : public WidgetPrivate
 {
 	WindowPrivate()
@@ -861,12 +898,6 @@ const char *Button::getLabel() const
 Button *Button::setLabel(const std::string &label)
 {
 	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
-	return this;
-}
-
-Button *Button::setToggle(bool toggle)
-{
-	wz_button_set_set_behavior((wzButton *)p->getWidget(), toggle ? WZ_BUTTON_SET_BEHAVIOR_TOGGLE : WZ_BUTTON_SET_BEHAVIOR_DEFAULT);
 	return this;
 }
 
@@ -1386,6 +1417,73 @@ TextEdit::~TextEdit()
 TextEdit *TextEdit::setText(const std::string &text)
 {
 	wz_text_edit_set_text((wzTextEdit *)p->getWidget(), text.c_str());
+	return this;
+}
+
+//------------------------------------------------------------------------------
+
+ToggleButton::ToggleButton()
+{
+	p = new ToggleButtonPrivate();
+}
+
+ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
+{
+	p = new ToggleButtonPrivate();
+
+	if (!label.empty())
+		setLabel(label);
+
+	if (!icon.empty())
+		setIcon(icon);
+}
+
+ToggleButton::~ToggleButton()
+{
+	delete p;
+}
+
+wzBorder ToggleButton::getPadding() const
+{
+	return wz_button_get_padding((const wzButton *)p->getWidget());
+}
+
+ToggleButton *ToggleButton::setPadding(wzBorder padding)
+{
+	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	return this;
+}
+
+ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
+{
+	wzBorder padding;
+	padding.top = top;
+	padding.right = right;
+	padding.bottom = bottom;
+	padding.left = left;
+	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	return this;
+}
+
+const char *ToggleButton::getIcon() const
+{
+	return wz_button_get_icon((const wzButton *)p->getWidget());
+}
+
+ToggleButton *ToggleButton::setIcon(const std::string &icon)
+{
+	wz_button_set_icon((wzButton *)p->getWidget(), icon.c_str());
+	return this;
+}
+
+const char *ToggleButton::getLabel() const
+{
+	return wz_button_get_label((const wzButton *)p->getWidget());
+}
+
+ToggleButton *ToggleButton::setLabel(const std::string &label)
+{
+	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
 	return this;
 }
 

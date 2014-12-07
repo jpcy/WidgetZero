@@ -568,33 +568,9 @@ const char *wz_window_get_title(const struct wzWindow *window);
 void wz_window_add(struct wzWindow *window, struct wzWidget *widget);
 void wz_window_remove(struct wzWindow *window, struct wzWidget *widget);
 
-typedef enum
-{
-	// Click the button on mouse up (default).
-	WZ_BUTTON_CLICK_BEHAVIOR_UP,
-
-	// Click the button on mouse down
-	WZ_BUTTON_CLICK_BEHAVIOR_DOWN
-}
-wzButtonClickBehavior;
-
-typedef enum
-{
-	// Button is never set.
-	WZ_BUTTON_SET_BEHAVIOR_DEFAULT,
-
-	// Click to toggle whether the button is set.
-	WZ_BUTTON_SET_BEHAVIOR_TOGGLE,
-
-	// Click to set the button. Clicking again does nothing.
-	WZ_BUTTON_SET_BEHAVIOR_STICKY
-}
-wzButtonSetBehavior;
-
 struct wzButton *wz_button_create(const char *label, const char *icon);
+struct wzButton *wz_toggle_button_create(const char *label, const char *icon);
 struct wzButton *wz_check_box_create(const char *label);
-void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
-void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 void wz_button_set_label(struct wzButton *button, const char *label);
 const char *wz_button_get_label(const struct wzButton *button);
 void wz_button_set_icon(struct wzButton *button, const char *icon);
