@@ -54,6 +54,7 @@ struct wzMainWindow;
 struct wzWindow;
 struct wzWidget;
 struct wzButton;
+struct wzCheckBox;
 struct wzCombo;
 struct wzDummy;
 struct wzFrame;
@@ -570,7 +571,6 @@ void wz_window_remove(struct wzWindow *window, struct wzWidget *widget);
 
 struct wzButton *wz_button_create(const char *label, const char *icon);
 struct wzButton *wz_toggle_button_create(const char *label, const char *icon);
-struct wzButton *wz_check_box_create(const char *label);
 void wz_button_set_label(struct wzButton *button, const char *label);
 const char *wz_button_get_label(const struct wzButton *button);
 void wz_button_set_icon(struct wzButton *button, const char *icon);
@@ -584,6 +584,14 @@ void wz_button_set(struct wzButton *button, bool value);
 void wz_button_bind_value(struct wzButton *button, bool *value);
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
+
+struct wzCheckBox *wz_check_box_create(const char *label);
+void wz_check_box_set_label(struct wzCheckBox *checkBox, const char *label);
+const char *wz_check_box_get_label(const struct wzCheckBox *checkBox);
+bool wz_check_box_is_checked(const struct wzCheckBox *checkBox);
+void wz_check_box_check(struct wzCheckBox *checkBox, bool value);
+void wz_check_box_bind_value(struct wzCheckBox *checkBox, bool *value);
+void wz_check_box_add_callback_checked(struct wzCheckBox *checkBox, wzEventCallback callback);
 
 struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
 struct wzList *wz_combo_get_list(const struct wzCombo *combo);

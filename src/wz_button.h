@@ -25,6 +25,7 @@ SOFTWARE.
 #define WZ_BUTTON_H
 
 #include <wz.h>
+#include "wz_string.h"
 
 typedef enum
 {
@@ -48,6 +49,21 @@ typedef enum
 	WZ_BUTTON_SET_BEHAVIOR_STICKY
 }
 wzButtonSetBehavior;
+
+struct wzButton
+{
+	struct wzWidget base;
+	wzButtonClickBehavior clickBehavior;
+	wzButtonSetBehavior setBehavior;
+	wzBorder padding;
+	wzString label;
+	wzString icon;
+	bool isPressed;
+	bool isSet;
+	bool *boundValue;
+	wzEventCallback *pressed_callbacks;
+	wzEventCallback *clicked_callbacks;
+};
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);

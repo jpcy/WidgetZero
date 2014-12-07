@@ -26,23 +26,7 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_widget.h"
 #include "wz_renderer.h"
-#include "wz_string.h"
 #include "wz_button.h"
-
-struct wzButton
-{
-	struct wzWidget base;
-	wzButtonClickBehavior clickBehavior;
-	wzButtonSetBehavior setBehavior;
-	wzBorder padding;
-	wzString label;
-	wzString icon;
-	bool isPressed;
-	bool isSet;
-	bool *boundValue;
-	wzEventCallback *pressed_callbacks;
-	wzEventCallback *clicked_callbacks;
-};
 
 /*
 ================================================================================
@@ -74,15 +58,6 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 
 	size.w += button->padding.left + button->padding.right;
 	size.h += button->padding.top + button->padding.bottom;
-	return size;
-}
-
-static wzSize wz_check_box_measure(struct wzWidget *widget)
-{
-	wzSize size;
-	struct wzButton *button = (struct wzButton *)widget;
-	wz_widget_measure_text(widget, button->label, 0, &size.w, &size.h);
-	size.w += widget->style.checkBox.boxSize + widget->style.checkBox.boxRightMargin;
 	return size;
 }
 
@@ -185,52 +160,6 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	{
 		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 	}
-
-	nvgRestore(vg);
-}
-
-static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
-{
-	wzRect boxRect;
-	struct wzButton *button = (struct wzButton *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
-	const wzCheckBoxStyle *style = &widget->style.checkBox;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
-
-	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
-
-	// Calculate box rect.
-	boxRect.x = rect.x;
-	boxRect.y = (int)(rect.y + rect.h / 2.0f - style->boxSize / 2.0f);
-	boxRect.w = boxRect.h = style->boxSize;
-
-	// Box border.
-	wz_renderer_draw_rect(vg, boxRect, widget->hover ? style->borderHoverColor : style->borderColor);
-
-	// Box checkmark.
-	if (button->isSet)
-	{
-		const float left = (float)boxRect.x + style->boxInternalMargin;
-		const float right = (float)boxRect.x + boxRect.w - style->boxInternalMargin;
-		const float top = (float)boxRect.y + style->boxInternalMargin;
-		const float bottom = (float)boxRect.y + boxRect.h - style->boxInternalMargin;
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, left, top);
-		nvgLineTo(vg, right, bottom);
-		nvgStrokeColor(vg, style->checkColor);
-		nvgStrokeWidth(vg, style->checkThickness);
-		nvgStroke(vg);
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, left, bottom);
-		nvgLineTo(vg, right, top);
-		nvgStroke(vg);
-	}
-
-	// Label.
-	wz_renderer_print(widget->renderer, rect.x + style->boxSize + style->boxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
 
 	nvgRestore(vg);
 }
@@ -396,27 +325,6 @@ struct wzButton *wz_toggle_button_create(const char *label, const char *icon)
 	return button;
 }
 
-struct wzButton *wz_check_box_create(const char *label)
-{
-	struct wzButton *button = wz_button_create(label, NULL);
-	wzCheckBoxStyle *style = &button->base.style.checkBox;
-
-	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	button->base.vtable.measure = wz_check_box_measure;
-	button->base.vtable.draw = wz_check_box_draw;
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->checkColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_LIGHT_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->boxSize = 16;
-	style->boxRightMargin = 8;
-	style->boxInternalMargin = 4;
-	style->checkThickness = 2.5f;
-
-	return button;
-}
-
 void wz_button_set_label(struct wzButton *button, const char *label)
 {
 	WZ_ASSERT(button);
@@ -512,7 +420,7 @@ void wz_button_set(struct wzButton *button, bool value)
 
 void wz_button_bind_value(struct wzButton *button, bool *value)
 {
-	assert(button);
+	WZ_ASSERT(button);
 	button->boundValue = value;
 
 	if (value)

@@ -382,22 +382,22 @@ struct CheckboxPrivate : public WidgetPrivate
 {
 	CheckboxPrivate()
 	{
-		button = wz_check_box_create(NULL);
-		wz_widget_set_metadata((wzWidget *)button, this);
+		checkBox = wz_check_box_create(NULL);
+		wz_widget_set_metadata((wzWidget *)checkBox, this);
 	}
 
 	~CheckboxPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)button))
+		if (!wz_widget_get_main_window((wzWidget *)checkBox))
 		{
-			wz_widget_destroy((wzWidget *)button);
+			wz_widget_destroy((wzWidget *)checkBox);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+	virtual const wzWidget *getWidget() const { return (const wzWidget *)checkBox; }
+	virtual wzWidget *getWidget() { return (wzWidget *)checkBox; }
 
-	wzButton *button;
+	wzCheckBox *checkBox;
 };
 
 struct ComboPrivate : public WidgetPrivate
@@ -921,18 +921,18 @@ Checkbox::~Checkbox()
 
 const char *Checkbox::getLabel() const
 {
-	return wz_button_get_label((const wzButton *)p->getWidget());
+	return wz_check_box_get_label((const wzCheckBox *)p->getWidget());
 }
 
 Checkbox *Checkbox::setLabel(const std::string &label)
 {
-	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
+	wz_check_box_set_label((wzCheckBox *)p->getWidget(), label.c_str());
 	return this;
 }
 
 Checkbox *Checkbox::bindValue(bool *value)
 {
-	wz_button_bind_value((wzButton *)p->getWidget(), value);
+	wz_check_box_bind_value((wzCheckBox *)p->getWidget(), value);
 	return this;
 }
 

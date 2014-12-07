@@ -393,7 +393,7 @@ void CreateWindowFrame()
 {
 	struct wzFrame *frame;
 	struct wzStackLayout *layout;
-	struct wzButton *showWindow;
+	struct wzCheckBox *showWindow;
 	
 	frame = CreateFrame("Window");
 
@@ -403,11 +403,11 @@ void CreateWindowFrame()
 	wz_frame_add(frame, (struct wzWidget *)layout);
 
 	showWindow = wz_check_box_create("Show Window 1");
-	wz_button_add_callback_clicked(showWindow, ShowWindow1);
+	wz_check_box_add_callback_checked(showWindow, ShowWindow1);
 	wz_stack_layout_add(layout, (struct wzWidget *)showWindow);
 
 	showWindow = wz_check_box_create("Show Window 2");
-	wz_button_add_callback_clicked(showWindow, ShowWindow2);
+	wz_check_box_add_callback_checked(showWindow, ShowWindow2);
 	wz_stack_layout_add(layout, (struct wzWidget *)showWindow);
 }
 
@@ -555,7 +555,7 @@ void CreateWindow1()
 	struct wzStackLayout *layout;
 	struct wzTextEdit *textEdit;
 	struct wzButton *button;
-	struct wzButton *checkbox;
+	struct wzCheckBox *checkbox;
 	struct wzCombo *combo;
 
 	window1 = wz_window_create("Test Window");
