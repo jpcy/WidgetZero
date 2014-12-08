@@ -558,7 +558,7 @@ struct RadioButtonPrivate : public WidgetPrivate
 	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
 	virtual wzWidget *getWidget() { return (wzWidget *)button; }
 
-	wzButton *button;
+	wzRadioButton *button;
 };
 
 struct ScrollerPrivate : public WidgetPrivate
@@ -1230,12 +1230,12 @@ RadioButton::~RadioButton()
 
 const char *RadioButton::getLabel() const
 {
-	return wz_button_get_label((const wzButton *)p->getWidget());
+	return wz_radio_button_get_label((const wzRadioButton *)p->getWidget());
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
+	wz_radio_button_set_label((wzRadioButton *)p->getWidget(), label.c_str());
 	return this;
 }
 

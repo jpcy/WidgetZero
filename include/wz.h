@@ -63,7 +63,7 @@ struct wzLabel;
 struct wzList;
 struct wzMenuBar;
 struct wzMenuBarButton;
-struct wzRadioButtonGroup;
+struct wzRadioButton;
 struct wzScroller;
 struct wzSpinner;
 struct wzStackLayout;
@@ -651,7 +651,12 @@ void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *la
 const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button);
 bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button);
 
-struct wzButton *wz_radio_button_create(const char *label);
+struct wzRadioButton *wz_radio_button_create(const char *label);
+void wz_radio_button_set_label(struct wzRadioButton *radioButton, const char *label);
+const char *wz_radio_button_get_label(const struct wzRadioButton *radioButton);
+bool wz_radio_button_is_set(const struct wzRadioButton *radioButton);
+void wz_radio_button_set(struct wzRadioButton *radioButton, bool value);
+void wz_radio_button_add_callback_clicked(struct wzRadioButton *radioButton, wzEventCallback callback);
 
 typedef enum
 {

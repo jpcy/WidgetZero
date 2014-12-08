@@ -27,6 +27,15 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_button.h"
 
+struct wzRadioButton
+{
+	union
+	{
+		struct wzWidget base;
+		struct wzButton button;
+	};
+};
+
 static void wz_radio_button_clicked(wzEvent *e)
 {
 	int i;
@@ -62,9 +71,9 @@ static void wz_radio_button_added(struct wzWidget *parent, struct wzWidget *widg
 static wzSize wz_radio_button_measure(struct wzWidget *widget)
 {
 	wzSize size;
-	struct wzButton *button = (struct wzButton *)widget;
+	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
 	const wzRadioButtonStyle *style = &widget->style.radioButton;
-	wz_widget_measure_text(widget, wz_button_get_label(button), 0, &size.w, &size.h);
+	wz_widget_measure_text(widget, radioButton->button.label, 0, &size.w, &size.h);
 	size.w += style->outerRadius * 2 + style->spacing;
 	size.h = WZ_MAX(size.h, style->outerRadius);
 	return size;
@@ -73,18 +82,18 @@ static wzSize wz_radio_button_measure(struct wzWidget *widget)
 static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	wzRect rect;
-	struct wzButton *button = (struct wzButton *)widget;
+	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 	const wzRadioButtonStyle *style = &widget->style.radioButton;
 
 	nvgSave(vg);
-	rect = wz_widget_get_absolute_rect((const struct wzWidget *)button);
+	rect = wz_widget_get_absolute_rect(widget);
 
 	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
 		return;
 
 	// Inner circle.
-	if (wz_button_is_set(button))
+	if (radioButton->button.isSet)
 	{
 		nvgBeginPath(vg);
 		nvgCircle(vg, (float)(rect.x + style->outerRadius), rect.y + rect.h / 2.0f, (float)style->innerRadius);
@@ -99,23 +108,31 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	nvgStroke(vg);
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + style->outerRadius * 2 + style->spacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, wz_button_get_label(button), 0);
+	wz_renderer_print(widget->renderer, rect.x + style->outerRadius * 2 + style->spacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, radioButton->button.label, 0);
 
 	nvgRestore(vg);
 }
 
-struct wzButton *wz_radio_button_create(const char *label)
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
+struct wzRadioButton *wz_radio_button_create(const char *label)
 {
-	struct wzButton *button = wz_button_create(label, NULL);
-	struct wzWidget *widget = (struct wzWidget *)button;
+	struct wzRadioButton *radioButton = (struct wzRadioButton *)wz_button_create(label, NULL);
+	struct wzWidget *widget = (struct wzWidget *)radioButton;
 	wzRadioButtonStyle *style = &widget->style.radioButton;
 
 	widget->type = WZ_TYPE_RADIO_BUTTON;
 	widget->vtable.added = wz_radio_button_added;
 	widget->vtable.measure = wz_radio_button_measure;
 	widget->vtable.draw = wz_radio_button_draw;
-	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_button_add_callback_clicked(button, wz_radio_button_clicked);
+	wz_button_set_set_behavior(&radioButton->button, WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	wz_button_add_callback_clicked(&radioButton->button, wz_radio_button_clicked);
 
 	style->textColor = WZ_STYLE_TEXT_COLOR;
 	style->setColor = nvgRGBf(0.1529f, 0.5569f, 0.7412f);
@@ -125,5 +142,35 @@ struct wzButton *wz_radio_button_create(const char *label)
 	style->innerRadius = 4;
 	style->spacing = 8;
 
-	return button;
+	return radioButton;
+}
+
+void wz_radio_button_set_label(struct wzRadioButton *radioButton, const char *label)
+{
+	WZ_ASSERT(radioButton);
+	wz_button_set_label(&radioButton->button, label);
+}
+
+const char *wz_radio_button_get_label(const struct wzRadioButton *radioButton)
+{
+	WZ_ASSERT(radioButton);
+	return radioButton->button.label;
+}
+
+bool wz_radio_button_is_set(const struct wzRadioButton *radioButton)
+{
+	WZ_ASSERT(radioButton);
+	return radioButton->button.isSet;
+}
+
+void wz_radio_button_set(struct wzRadioButton *radioButton, bool value)
+{
+	WZ_ASSERT(radioButton);
+	wz_button_set(&radioButton->button, value);
+}
+
+void wz_radio_button_add_callback_clicked(struct wzRadioButton *radioButton, wzEventCallback callback)
+{
+	WZ_ASSERT(radioButton);
+	wz_button_add_callback_clicked(&radioButton->button, callback);
 }
