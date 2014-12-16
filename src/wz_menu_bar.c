@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_string.h"
 #include "wz_widget.h"
+#include "wz_skin.h"
 
 struct wzMenuBarButton
 {
@@ -67,7 +68,6 @@ static void wz_menu_bar_button_draw(struct wzWidget *widget, wzRect clip)
 {
 	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzMenuBarStyle *style = &button->menuBar->base.style.menuBar; // Use parent menubar style.
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
@@ -75,15 +75,15 @@ static void wz_menu_bar_button_draw(struct wzWidget *widget, wzRect clip)
 
 	if (button->isPressed)
 	{
-		wz_renderer_draw_filled_rect(vg, rect, style->setColor);
+		wz_renderer_draw_filled_rect(vg, rect, WZ_SKIN_MENU_BAR_SET_COLOR);
 	}
 
 	if (widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, style->borderHoverColor);
+		wz_renderer_draw_rect(vg, rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
 	}
 
-	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
+	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label, 0);
 
 	nvgRestore(vg);
 }
@@ -195,20 +195,19 @@ static void wz_menu_bar_draw(struct wzWidget *widget, wzRect clip)
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
-	wz_renderer_draw_filled_rect(vg, rect, widget->style.menuBar.bgColor);
+	wz_renderer_draw_filled_rect(vg, rect, WZ_SKIN_MENU_BAR_BG_COLOR);
 	nvgRestore(vg);
 }
 
 static void wz_menu_bar_renderer_changed(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_set_height(widget, wz_widget_get_line_height(widget) + widget->style.menuBar.padding);
+	wz_widget_set_height(widget, wz_widget_get_line_height(widget) + WZ_SKIN_MENU_BAR_PADDING);
 }
 
 struct wzMenuBar *wz_menu_bar_create()
 {
 	struct wzMenuBar *menuBar = (struct wzMenuBar *)malloc(sizeof(struct wzMenuBar));
-	wzMenuBarStyle *style = &menuBar->base.style.menuBar;
 
 	memset(menuBar, 0, sizeof(struct wzMenuBar));
 	menuBar->base.type = WZ_TYPE_MENU_BAR;
@@ -218,12 +217,6 @@ struct wzMenuBar *wz_menu_bar_create()
 	menuBar->layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	wz_widget_set_stretch((struct wzWidget *)menuBar->layout, WZ_STRETCH);
 	wz_widget_add_child_widget((struct wzWidget *)menuBar, (struct wzWidget *)menuBar->layout);
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->setColor = nvgRGB(40, 140, 190);
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->bgColor = nvgRGB(80, 80, 80);
-	style->padding = 6;
 
 	return menuBar;
 }

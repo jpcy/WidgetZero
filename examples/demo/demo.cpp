@@ -116,7 +116,6 @@ void CreateButtonFrame()
 	struct wzFrame *frame;
 	struct wzStackLayout *layout;
 	struct wzButton *button;
-	wzWidgetStyle style;
 	
 	frame = CreateFrame("Button");
 
@@ -134,16 +133,6 @@ void CreateButtonFrame()
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 
 	button = wz_toggle_button_create("Toggle Button", NULL);
-	wz_stack_layout_add(layout, (struct wzWidget *)button);
-
-	button = wz_button_create("Custom style", NULL);
-	style = wz_widget_get_style((const struct wzWidget *)button);
-	style.button.textColor = nvgRGBf(1, 0, 1);
-	style.button.bgColor1 = nvgRGB(100, 0, 0);
-	style.button.bgColor2 = nvgRGB(0, 100, 0);
-	style.button.bgPressedColor1 = nvgRGB(80, 0, 0);
-	style.button.bgPressedColor2 = nvgRGB(0, 80, 0);
-	wz_widget_set_style((struct wzWidget *)button, style);
 	wz_stack_layout_add(layout, (struct wzWidget *)button);
 }
 

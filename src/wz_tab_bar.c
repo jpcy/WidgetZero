@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_widget.h"
 #include "wz_button.h"
+#include "wz_skin.h"
 
 struct wzTabBar
 {
@@ -54,7 +55,6 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 	wzRect labelRect;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzTabButtonStyle *style = &widget->style.tabButton;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 	const wzBorder padding = wz_button_get_padding(button);
 
@@ -66,7 +66,7 @@ static void wz_tab_button_draw(struct wzWidget *widget, wzRect clip)
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? style->textHoverColor : style->textColor, wz_button_get_label(button), 0);
+	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, wz_button_get_label(button), 0);
 
 	nvgRestore(vg);
 }
@@ -75,13 +75,7 @@ static struct wzButton *wz_tab_button_create()
 {
 	struct wzButton *button = wz_button_create(NULL, NULL);
 	struct wzWidget *widget = (struct wzWidget *)button;
-	wzTabButtonStyle *style = &widget->style.tabButton;
-
 	widget->vtable.draw = wz_tab_button_draw;
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->textHoverColor = WZ_STYLE_HOVER_COLOR;
-
 	return button;
 }
 
@@ -146,7 +140,6 @@ static void wz_tab_bar_update_scroll_buttons(struct wzTabBar *tabBar)
 static void wz_tab_bar_update_tabs(struct wzTabBar *tabBar)
 {
 	int x, i;
-	const wzTabBarStyle *style = &tabBar->base.style.tabBar;
 
 	WZ_ASSERT(tabBar);
 
@@ -274,7 +267,6 @@ static void wz_tab_bar_increment_button_clicked(wzEvent *e)
 struct wzTabBar *wz_tab_bar_create()
 {
 	struct wzTabBar *tabBar = (struct wzTabBar *)malloc(sizeof(struct wzTabBar));
-	wzTabBarStyle *style = &tabBar->base.style.tabBar;
 
 	memset(tabBar, 0, sizeof(struct wzTabBar));
 	tabBar->base.type = WZ_TYPE_TAB_BAR;
@@ -283,13 +275,11 @@ struct wzTabBar *wz_tab_bar_create()
 	tabBar->base.vtable.set_rect = wz_tab_bar_set_rect;
 	tabBar->base.vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
-	style->defaultScrollButtonWidth = 14;
-
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	tabBar->decrementButton = wz_button_create("<", NULL);
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->decrementButton);
-	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, style->defaultScrollButtonWidth);
+	wz_widget_set_width_internal((struct wzWidget *)tabBar->decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	wz_widget_set_visible((struct wzWidget *)tabBar->decrementButton, false);
 	wz_widget_set_draw_last((struct wzWidget *)tabBar->decrementButton, true);
 	wz_widget_set_overlap((struct wzWidget *)tabBar->decrementButton, true);
@@ -297,7 +287,7 @@ struct wzTabBar *wz_tab_bar_create()
 	tabBar->incrementButton = wz_button_create(">", NULL);
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget((struct wzWidget *)tabBar, (struct wzWidget *)tabBar->incrementButton);
-	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, style->defaultScrollButtonWidth);
+	wz_widget_set_width_internal((struct wzWidget *)tabBar->incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	wz_widget_set_visible((struct wzWidget *)tabBar->incrementButton, false);
 	wz_widget_set_draw_last((struct wzWidget *)tabBar->incrementButton, true);
 	wz_widget_set_overlap((struct wzWidget *)tabBar->incrementButton, true);

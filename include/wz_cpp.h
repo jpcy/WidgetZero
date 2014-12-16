@@ -89,8 +89,6 @@ public:
 	Widget *setMargin(int margin);
 	Widget *setMargin(int top, int right, int bottom, int left);
 	Widget *setMargin(wzBorder margin);
-	Widget *setStyle(wzWidgetStyle style);
-	wzWidgetStyle getStyle() const;
 	Widget *setFontFace(const std::string &fontFace);
 	Widget *setFontSize(float fontSize);
 	Widget *setFont(const std::string &fontFace, float fontSize);
@@ -791,17 +789,6 @@ Widget *Widget::setMargin(wzBorder margin)
 {
 	wz_widget_set_margin(p->getWidget(), margin);
 	return this;
-}
-
-Widget *Widget::setStyle(wzWidgetStyle style)
-{
-	wz_widget_set_style(p->getWidget(), style);
-	return this;
-}
-
-wzWidgetStyle Widget::getStyle() const
-{
-	return wz_widget_get_style(p->getWidget());
 }
 
 Widget *Widget::setFontFace(const std::string &fontFace)

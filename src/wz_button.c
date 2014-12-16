@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_button.h"
+#include "wz_skin.h"
 
 /*
 ================================================================================
@@ -51,7 +52,7 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 
 		if (handle)
 		{
-			size.w += w + widget->style.button.iconSpacing;
+			size.w += w + WZ_SKIN_BUTTON_ICON_SPACING;
 			size.h = WZ_MAX(size.h, h);
 		}
 	}
@@ -77,7 +78,6 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	int iconHandle, labelWidth, iconX, labelX;
 	struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzButtonStyle *style = &widget->style.button;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
@@ -88,29 +88,29 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Background color.
 	if (button->isPressed && widget->hover)
 	{
-		bgColor1 = style->bgPressedColor1;
-		bgColor2 = style->bgPressedColor2;
+		bgColor1 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR2;
 	}
 	else if (button->isSet)
 	{
-		bgColor1 = style->bgSetColor1;
-		bgColor2 = style->bgSetColor2;
+		bgColor1 = WZ_SKIN_BUTTON_BG_SET_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_SET_COLOR2;
 	}
 	else
 	{
-		bgColor1 = style->bgColor1;
-		bgColor2 = style->bgColor2;
+		bgColor1 = WZ_SKIN_BUTTON_BG_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_COLOR2;
 	}
 
 	nvgBeginPath(vg);
-	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_BUTTON_CORNER_RADIUS);
 
 	// Background.
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
 	nvgFill(vg);
 
 	// Border.
-	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Calculate padded rect.
@@ -132,8 +132,8 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Position the icon and label centered.
 	if (button->icon[0] && iconHandle && button->label[0])
 	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + style->iconSpacing + labelWidth) / 2.0f);
-		labelX = iconX + iconSize.w + style->iconSpacing;
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING;
 	}
 	else if (button->icon[0] && iconHandle)
 	{
@@ -158,7 +158,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Draw the label.
 	if (button->label[0])
 	{
-		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, button->label, 0);
+		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_BUTTON_TEXT_COLOR, button->label, 0);
 	}
 
 	nvgRestore(vg);
@@ -289,7 +289,6 @@ PUBLIC INTERFACE
 struct wzButton *wz_button_create(const char *label, const char *icon)
 {
 	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
-	wzButtonStyle *style = &button->base.style.button;
 
 	memset(button, 0, sizeof(struct wzButton));
 	button->base.type = WZ_TYPE_BUTTON;
@@ -302,18 +301,6 @@ struct wzButton *wz_button_create(const char *label, const char *icon)
 	button->padding.top = button->padding.bottom = 4;
 	button->label = label ? wz_string_new(label) : wz_string_empty();
 	button->icon = icon ? wz_string_new(icon) : wz_string_empty();
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->bgColor1 = nvgRGB(80, 80, 80);
-	style->bgColor2 = nvgRGB(70, 70, 70);
-	style->bgPressedColor1 = nvgRGB(60, 60, 60);
-	style->bgPressedColor2 = nvgRGB(50, 50, 50);
-	style->bgSetColor1 = nvgRGB(150, 150, 150);
-	style->bgSetColor2 = nvgRGB(140, 140, 140);
-	style->iconSpacing = 6;
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return button;
 }

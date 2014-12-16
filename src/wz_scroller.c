@@ -26,6 +26,7 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
+#include "wz_skin.h"
 
 #define WZ_MINIMUM_NUB_SIZE 8
 #define WZ_DEFAULT_NUB_SIZE 16
@@ -234,7 +235,6 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 	struct wzButton *button = (struct wzButton *)widget;
 	struct wzScroller *scroller = (struct wzScroller *)widget->parent;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzScrollerStyle *style = &widget->parent->style.scroller; // Use the parent style.
 	const wzRect r = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
@@ -243,13 +243,13 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 	// Background color.
 	if (wz_button_is_pressed(button) && widget->hover)
 	{
-		bgColor1 = style->bgPressedColor1;
-		bgColor2 = style->bgPressedColor2;
+		bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
+		bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
 	}
 	else
 	{
-		bgColor1 = style->bgColor1;
-		bgColor2 = style->bgColor2;
+		bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
+		bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
 	}
 
 	nvgBeginPath(vg);
@@ -282,13 +282,13 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 	}
 
 	// Background.
-	wz_renderer_create_rect_path(vg, r, style->cornerRadius, WZ_SIDE_ALL, roundedCorners);
+	wz_renderer_create_rect_path(vg, r, WZ_SKIN_SCROLLER_CORNER_RADIUS, WZ_SIDE_ALL, roundedCorners);
 	nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
 	nvgFill(vg);
 
 	// Border.
-	wz_renderer_create_rect_path(vg, r, style->cornerRadius, sides, roundedCorners);
-	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	wz_renderer_create_rect_path(vg, r, WZ_SKIN_SCROLLER_CORNER_RADIUS, sides, roundedCorners);
+	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Icon.
@@ -325,7 +325,7 @@ static void wz_scroller_button_draw(struct wzWidget *widget, wzRect clip, bool d
 		}
 	}
 
-	nvgFillColor(vg, widget->hover ? style->iconHoverColor : style->iconColor);
+	nvgFillColor(vg, widget->hover ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
 	nvgFill(vg);
 	nvgRestore(vg);
 }
@@ -476,7 +476,6 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 {
 	const struct wzScroller *scroller = (struct wzScroller *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzScrollerStyle *style = &widget->style.scroller;
 	wzRect rect = wz_widget_get_absolute_rect(widget);
 	const wzSize decrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->decrementButton);
 	const wzSize incrementButtonSize = wz_widget_get_size((struct wzWidget *)scroller->incrementButton);
@@ -495,7 +494,7 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 		rect.w -= decrementButtonSize.w + incrementButtonSize.w;
 	}
 
-	wz_renderer_draw_filled_rect(vg, rect, style->bgColor1);
+	wz_renderer_draw_filled_rect(vg, rect, WZ_SKIN_SCROLLER_BG_COLOR1);
 
 	// Nub.
 	{
@@ -509,13 +508,13 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 		// Background color.
 		if (pressed)
 		{
-			bgColor1 = style->bgPressedColor1;
-			bgColor2 = style->bgPressedColor2;
+			bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
+			bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
 		}
 		else
 		{
-			bgColor1 = style->bgColor1;
-			bgColor2 = style->bgColor2;
+			bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
+			bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
 		}
 
 		nvgBeginPath(vg);
@@ -526,7 +525,7 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 		nvgFill(vg);
 
 		// Border.
-		nvgStrokeColor(vg, hover || pressed ? style->borderHoverColor : style->borderColor);
+		nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
 		nvgStroke(vg);
 
 		// Icon.
@@ -536,18 +535,18 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 
 			if (scroller->scrollerType == WZ_STACK_LAYOUT_VERTICAL)
 			{
-				const float y = (float)((int)(r.y + r.h * 0.5f) + style->nubIconSpacing * (i - 1));
-				nvgMoveTo(vg, (float)r.x + style->nubIconMargin, y);
-				nvgLineTo(vg, (float)r.x + r.w - style->nubIconMargin, y);
+				const float y = (float)((int)(r.y + r.h * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
+				nvgMoveTo(vg, (float)r.x + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
+				nvgLineTo(vg, (float)r.x + r.w - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
 			}
 			else
 			{
-				const float x = (float)((int)(r.x + r.w * 0.5f) + style->nubIconSpacing * (i - 1));
-				nvgMoveTo(vg, x, (float)r.y + style->nubIconMargin);
-				nvgLineTo(vg, x, (float)r.y + r.h - style->nubIconMargin);
+				const float x = (float)((int)(r.x + r.w * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
+				nvgMoveTo(vg, x, (float)r.y + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
+				nvgLineTo(vg, x, (float)r.y + r.h - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
 			}
 
-			nvgStrokeColor(vg, hover || pressed ? style->iconHoverColor : style->iconColor);
+			nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
 			nvgStrokeWidth(vg, 2);
 			nvgLineCap(vg, NVG_ROUND);
 			nvgStroke(vg);
@@ -581,7 +580,6 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	struct wzScroller *scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
-	wzScrollerStyle *style = &scroller->base.style.scroller;
 
 	memset(scroller, 0, sizeof(struct wzScroller));
 	scroller->base.type = WZ_TYPE_SCROLLER;
@@ -596,18 +594,6 @@ struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, in
 	scroller->stepValue = WZ_MAX(1, stepValue);
 	scroller->maxValue = WZ_MAX(0, maxValue);
 	scroller->value = WZ_CLAMPED(0, value, scroller->maxValue);
-
-	style->iconColor = WZ_STYLE_TEXT_COLOR;
-	style->iconHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->bgColor1 = nvgRGB(80, 80, 80);
-	style->bgColor2 = nvgRGB(70, 70, 70);
-	style->bgPressedColor1 = nvgRGB(60, 60, 60);
-	style->bgPressedColor2 = nvgRGB(50, 50, 50);
-	style->nubIconMargin = 4;
-	style->nubIconSpacing = 4;
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	scroller->decrementButton = wz_button_create(NULL, NULL);
 	wz_widget_set_draw_callback((struct wzWidget *)scroller->decrementButton, wz_scroller_decrement_button_draw);

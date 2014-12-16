@@ -28,6 +28,7 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_string.h"
 #include "wz_button.h"
+#include "wz_skin.h"
 
 struct wzCheckBox
 {
@@ -43,7 +44,7 @@ static wzSize wz_check_box_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzCheckBox *checkBox = (struct wzCheckBox *)widget;
 	wz_widget_measure_text(widget, wz_check_box_get_label(checkBox), 0, &size.w, &size.h);
-	size.w += widget->style.checkBox.boxSize + widget->style.checkBox.boxRightMargin;
+	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
 	return size;
 }
 
@@ -52,7 +53,6 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 	wzRect boxRect;
 	struct wzCheckBox *checkBox = (struct wzCheckBox *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzCheckBoxStyle *style = &widget->style.checkBox;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
@@ -60,25 +60,25 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 
 	// Calculate box rect.
 	boxRect.x = rect.x;
-	boxRect.y = (int)(rect.y + rect.h / 2.0f - style->boxSize / 2.0f);
-	boxRect.w = boxRect.h = style->boxSize;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - WZ_SKIN_CHECK_BOX_BOX_SIZE / 2.0f);
+	boxRect.w = boxRect.h = WZ_SKIN_CHECK_BOX_BOX_SIZE;
 
 	// Box border.
-	wz_renderer_draw_rect(vg, boxRect, widget->hover ? style->borderHoverColor : style->borderColor);
+	wz_renderer_draw_rect(vg, boxRect, widget->hover ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
 
 	// Box checkmark.
 	if (wz_check_box_is_checked(checkBox))
 	{
-		const float left = (float)boxRect.x + style->boxInternalMargin;
-		const float right = (float)boxRect.x + boxRect.w - style->boxInternalMargin;
-		const float top = (float)boxRect.y + style->boxInternalMargin;
-		const float bottom = (float)boxRect.y + boxRect.h - style->boxInternalMargin;
+		const float left = (float)boxRect.x + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float right = (float)boxRect.x + boxRect.w - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float top = (float)boxRect.y + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float bottom = (float)boxRect.y + boxRect.h - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
 
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, left, top);
 		nvgLineTo(vg, right, bottom);
-		nvgStrokeColor(vg, style->checkColor);
-		nvgStrokeWidth(vg, style->checkThickness);
+		nvgStrokeColor(vg, WZ_SKIN_CHECK_BOX_CHECK_COLOR);
+		nvgStrokeWidth(vg, WZ_SKIN_CHECK_BOX_CHECK_THICKNESS);
 		nvgStroke(vg);
 
 		nvgBeginPath(vg);
@@ -88,7 +88,7 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 	}
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + style->boxSize + style->boxRightMargin, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, wz_check_box_get_label(checkBox), 0);
+	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, wz_check_box_get_label(checkBox), 0);
 
 	nvgRestore(vg);
 }
@@ -96,21 +96,9 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 struct wzCheckBox *wz_check_box_create(const char *label)
 {
 	struct wzCheckBox *checkBox = (struct wzCheckBox *)wz_button_create(label, NULL);
-	wzCheckBoxStyle *style = &checkBox->base.style.checkBox;
-
 	wz_button_set_set_behavior(&checkBox->button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	checkBox->base.vtable.measure = wz_check_box_measure;
 	checkBox->base.vtable.draw = wz_check_box_draw;
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->checkColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_LIGHT_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->boxSize = 16;
-	style->boxRightMargin = 8;
-	style->boxInternalMargin = 4;
-	style->checkThickness = 2.5f;
-
 	return checkBox;
 }
 

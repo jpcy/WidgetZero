@@ -26,6 +26,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_string.h"
+#include "wz_skin.h"
 
 struct wzGroupBox
 {
@@ -39,7 +40,6 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect;
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzGroupBoxStyle *style = &widget->style.groupBox;
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -48,8 +48,8 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 	if (!groupBox->label[0])
 	{
 		nvgBeginPath(vg);
-		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
-		nvgStrokeColor(vg, style->borderColor);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_GROUP_BOX_CORNER_RADIUS);
+		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 		nvgStroke(vg);
 	}
 	else
@@ -63,18 +63,18 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 		borderRect.h -= textHeight / 2;
 
 		// Border top, left of text.
-		wz_renderer_draw_line(vg, (int)(borderRect.x + style->cornerRadius), borderRect.y, borderRect.x + style->textLeftMargin - style->textBorderSpacing, borderRect.y, style->borderColor);
+		wz_renderer_draw_line(vg, (int)(borderRect.x + WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN - WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING, borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 
 		// Border top, right of text.
-		wz_renderer_draw_line(vg, borderRect.x + style->textLeftMargin + textWidth + style->textBorderSpacing * 2, borderRect.y, (int)(borderRect.x + borderRect.w - style->cornerRadius), borderRect.y, style->borderColor);
+		wz_renderer_draw_line(vg, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN + textWidth + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING * 2, borderRect.y, (int)(borderRect.x + borderRect.w - WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 
 		// The rest of the border.
-		wz_renderer_create_rect_path(vg, borderRect, style->cornerRadius, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
-		nvgStrokeColor(vg, style->borderColor);
+		wz_renderer_create_rect_path(vg, borderRect, WZ_SKIN_GROUP_BOX_CORNER_RADIUS, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
+		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 		nvgStroke(vg);
 
 		// Label.
-		wz_renderer_print(widget->renderer, rect.x + style->textLeftMargin, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, style->textColor, groupBox->label, 0);
+		wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label, 0);
 	}
 
 	nvgRestore(vg);
@@ -83,12 +83,11 @@ static void wz_group_box_draw(struct wzWidget *widget, wzRect clip)
 static void wz_group_box_refresh_margin(struct wzGroupBox *groupBox)
 {
 	wzBorder margin;
-	const wzGroupBoxStyle *style = &groupBox->base.style.groupBox;
-	margin.top = margin.bottom = margin.left = margin.right = style->margin;
+	margin.top = margin.bottom = margin.left = margin.right = WZ_SKIN_GROUP_BOX_MARGIN;
 
 	if (groupBox->label[0])
 	{
-		margin.top = wz_widget_get_line_height((struct wzWidget *)groupBox) + style->margin;
+		margin.top = wz_widget_get_line_height((struct wzWidget *)groupBox) + WZ_SKIN_GROUP_BOX_MARGIN;
 	}
 
 	wz_widget_set_margin(groupBox->content, margin);
@@ -109,7 +108,6 @@ static void wz_group_box_destroy(struct wzWidget *widget)
 struct wzGroupBox *wz_group_box_create(const char *label)
 {
 	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
-	wzGroupBoxStyle *style = &groupBox->base.style.groupBox;
 
 	memset(groupBox, 0, sizeof(struct wzGroupBox));
 	groupBox->base.type = WZ_TYPE_GROUP_BOX;
@@ -117,13 +115,6 @@ struct wzGroupBox *wz_group_box_create(const char *label)
 	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
 	groupBox->base.vtable.destroy = wz_group_box_destroy;
 	groupBox->label = label ? wz_string_new(label) : wz_string_empty();
-
-	style->textColor = nvgRGBf(1, 1, 1);
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->margin = 8;
-	style->textLeftMargin = 20;
-	style->textBorderSpacing = 5;
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	// Create content widget.
 	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));

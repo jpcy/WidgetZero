@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_widget.h"
 #include "wz_window.h"
+#include "wz_skin.h"
 
 struct wzMainWindow
 {
@@ -590,11 +591,10 @@ DOCK PREVIEW
 static void wz_main_window_draw_dock_preview(struct wzWidget *widget, wzRect clip)
 {
 	struct NVGcontext *vg = widget->renderer->vg;
-	wzMainWindowStyle *style = &widget->parent->style.mainWindow;
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	nvgSave(vg);
-	wz_renderer_draw_filled_rect(vg, wz_widget_get_rect(widget), style->dockPreviewColor);
+	wz_renderer_draw_filled_rect(vg, wz_widget_get_rect(widget), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
 	nvgRestore(vg);
 }
 
@@ -1385,7 +1385,6 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	int i;
 	struct wzWidget *widget;
 	struct wzMainWindow *mainWindow = (struct wzMainWindow *)malloc(sizeof(struct wzMainWindow));
-	wzMainWindowStyle *style = &mainWindow->base.style.mainWindow;
 
 	memset(mainWindow, 0, sizeof(struct wzMainWindow));
 	mainWindow->base.type = WZ_TYPE_MAIN_WINDOW;
@@ -1393,9 +1392,6 @@ struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer)
 	mainWindow->base.mainWindow = mainWindow;
 	mainWindow->base.vtable.set_rect = wz_main_window_set_rect;
 	mainWindow->isTextCursorVisible = true;
-
-	// Set style.
-	style->dockPreviewColor = nvgRGBAf(0, 0, 1, 0.25f);
 
 	// Create content widget.
 	mainWindow->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));

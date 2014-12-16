@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_string.h"
+#include "wz_skin.h"
 
 struct wzTextEdit
 {
@@ -469,7 +470,6 @@ static wzSize wz_text_edit_measure(struct wzWidget *widget)
 static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 {
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzTextEditStyle *style = &widget->style.textEdit;
 	const struct wzTextEdit *textEdit = (struct wzTextEdit *)widget;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 	const wzRect textRect = wz_text_edit_get_text_rect(textEdit);
@@ -479,14 +479,14 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 	wz_renderer_clip_to_rect(vg, clip);
 	
 	nvgBeginPath(vg);
-	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_TEXT_EDIT_CORNER_RADIUS);
 
 	// Background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, style->bgColor1, style->bgColor2));
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_TEXT_EDIT_BG_COLOR1, WZ_SKIN_TEXT_EDIT_BG_COLOR2));
 	nvgFill(vg);
 
 	// Border.
-	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_TEXT_EDIT_BORDER_HOVER_COLOR : WZ_SKIN_TEXT_EDIT_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Clip to the text rect.
@@ -510,7 +510,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 			if (line.length > 0)
 			{
 				// Draw this line.
-				wz_renderer_print(widget->renderer, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, style->textColor, line.start, line.length);
+				wz_renderer_print(widget->renderer, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, line.start, line.length);
 
 				// Selection.
 				if (wz_text_edit_has_selection(textEdit))
@@ -549,7 +549,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 						selectionRect.y = textRect.y + start.y - lineHeight / 2;
 						selectionRect.w = end.x - start.x;
 						selectionRect.h = lineHeight;
-						wz_renderer_draw_filled_rect(vg, selectionRect, style->selectionColor);
+						wz_renderer_draw_filled_rect(vg, selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
 					}
 				}
 			}
@@ -562,7 +562,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 	}
 	else
 	{
-		wz_renderer_print(widget->renderer, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, wz_text_edit_get_visible_text(textEdit), 0);
+		wz_renderer_print(widget->renderer, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, wz_text_edit_get_visible_text(textEdit), 0);
 
 		// Selection.
 		if (wz_text_edit_has_selection(textEdit))
@@ -576,7 +576,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
 			selectionRect.w = position2.x - position1.x;
 			selectionRect.h = lineHeight;
-			wz_renderer_draw_filled_rect(vg, selectionRect, style->selectionColor);
+			wz_renderer_draw_filled_rect(vg, selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
 		}
 	}
 
@@ -593,7 +593,7 @@ static void wz_text_edit_draw(struct wzWidget *widget, wzRect clip)
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
 		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);
-		nvgStrokeColor(vg, style->cursorColor);
+		nvgStrokeColor(vg, WZ_SKIN_TEXT_EDIT_CURSOR_COLOR);
 		nvgStroke(vg);
 	}
 
@@ -961,7 +961,6 @@ PUBLIC INTERFACE
 struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength)
 {
 	struct wzTextEdit *textEdit = (struct wzTextEdit *)malloc(sizeof(struct wzTextEdit) + maximumTextLength);
-	wzTextEditStyle *style = &textEdit->base.style.textEdit;
 
 	memset(textEdit, 0, sizeof(struct wzTextEdit) + maximumTextLength);
 	textEdit->base.type = WZ_TYPE_TEXT_EDIT;
@@ -988,15 +987,6 @@ struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength)
 	textEdit->multiline = multiline;
 	textEdit->maximumTextLength = maximumTextLength;
 	textEdit->text = wz_string_empty();
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->bgColor1 = nvgRGB(80, 80, 80);
-	style->bgColor2 = nvgRGB(70, 70, 70);
-	style->selectionColor = nvgRGBAf(0.1529f, 0.5569f, 0.7412f, 0.5f);
-	style->cursorColor = nvgRGBf(1, 1, 1);
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return textEdit;
 }

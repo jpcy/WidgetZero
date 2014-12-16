@@ -159,16 +159,6 @@ private:
 
 		wz::ToggleButton *toggleButton = new wz::ToggleButton("Toggle Button", std::string());
 		layout->add(toggleButton);
-
-		wz::Button *styledButton = new wz::Button("Custom style");
-		wzWidgetStyle style = styledButton->getStyle();
-		style.button.textColor = nvgRGBf(1, 0, 1);
-		style.button.bgColor1 = nvgRGB(100, 0, 0);
-		style.button.bgColor2 = nvgRGB(0, 100, 0);
-		style.button.bgPressedColor1 = nvgRGB(80, 0, 0);
-		style.button.bgPressedColor2 = nvgRGB(0, 80, 0);
-		styledButton->setStyle(style);
-		layout->add(styledButton);
 	}
 
 	void createCheckboxFrame()

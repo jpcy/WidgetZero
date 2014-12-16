@@ -28,6 +28,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_string.h"
+#include "wz_skin.h"
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
 
@@ -72,40 +73,39 @@ static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 {
 	const struct wzWindow *window = (struct wzWindow *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzWindowStyle *style = &widget->style.window;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 	const wzRect contentRect = wz_widget_get_absolute_rect(window->content);
 	const wzRect headerRect = wz_window_get_header_rect(window);
 
 	nvgSave(vg);
 	nvgBeginPath(vg);
-	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, style->cornerRadius);
+	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, WZ_SKIN_WINDOW_CORNER_RADIUS);
 
 	// Border/header background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x + rect.w, (float)rect.y, style->borderBgColor1, style->borderBgColor2));
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x + rect.w, (float)rect.y, WZ_SKIN_WINDOW_BORDER_BG_COLOR1, WZ_SKIN_WINDOW_BORDER_BG_COLOR2));
 	nvgFill(vg);
 
 	// Outer border.
-	nvgStrokeColor(vg, style->borderColor);
+	nvgStrokeColor(vg, WZ_SKIN_WINDOW_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Inner border.
 	nvgBeginPath(vg);
 	nvgRect(vg, contentRect.x - 1.0f, contentRect.y - 1.0f, contentRect.w + 2.0f, contentRect.h + 2.0f);
-	nvgStrokeColor(vg, style->innerBorderColor);
+	nvgStrokeColor(vg, WZ_SKIN_WINDOW_INNER_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Background/content.
 	nvgBeginPath(vg);
 	nvgRect(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.w, (float)contentRect.h);
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.x, (float)contentRect.y + contentRect.h, style->bgColor1, style->bgColor2));
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.x, (float)contentRect.y + contentRect.h, WZ_SKIN_WINDOW_BG_COLOR1, WZ_SKIN_WINDOW_BG_COLOR2));
 	nvgFill(vg);
 
 	// Header.
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
 		wz_renderer_clip_to_rect(vg, headerRect);
-		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, window->title, 0);
+		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title, 0);
 	}
 
 	nvgRestore(vg);
@@ -462,7 +462,6 @@ static void wz_window_destroy(struct wzWidget *widget)
 struct wzWindow *wz_window_create(const char *title)
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
-	wzWindowStyle *style = &window->base.style.window;
 
 	memset(window, 0, sizeof(struct wzWindow));
 	window->base.type = WZ_TYPE_WINDOW;
@@ -480,15 +479,6 @@ struct wzWindow *wz_window_create(const char *title)
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
 	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->innerBorderColor = nvgRGB(50, 50, 50);
-	style->bgColor1 = nvgRGB(70, 70, 70);
-	style->bgColor2 = nvgRGB(60, 60, 60);
-	style->borderBgColor1 = nvgRGB(52, 73, 94);
-	style->borderBgColor2 = nvgRGB(70, 98, 125);
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return window;
 }

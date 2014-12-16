@@ -27,6 +27,7 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
+#include "wz_skin.h"
 
 struct wzCombo
 {
@@ -41,7 +42,6 @@ static wzSize wz_combo_measure(struct wzWidget *widget)
 	int i;
 	struct wzWidget *scroller;
 	struct wzCombo *combo = (struct wzCombo *)widget;
-	const wzComboStyle *style = &widget->style.combo;
 	uint8_t *itemData = wz_list_get_item_data(combo->list);
 	int itemStride = wz_list_get_item_stride(combo->list);
 	int nItems = wz_list_get_num_items(combo->list);
@@ -61,11 +61,11 @@ static wzSize wz_combo_measure(struct wzWidget *widget)
 
 	// Add scroller width or button width, whichever is largest.
 	scroller = (struct wzWidget *)wz_list_get_scroller(combo->list);
-	size.w += WZ_MAX(scroller->vtable.measure(scroller).w, style->buttonWidth);
+	size.w += WZ_MAX(scroller->vtable.measure(scroller).w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
 	// Padding.
-	size.w += style->paddingX;
-	size.h += style->paddingY;
+	size.w += WZ_SKIN_COMBO_PADDING_X;
+	size.h += WZ_SKIN_COMBO_PADDING_Y;
 	return size;
 }
 
@@ -74,7 +74,6 @@ static void wz_combo_draw(struct wzWidget *widget, wzRect clip)
 	int buttonX;
 	const struct wzCombo *combo = (struct wzCombo *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzComboStyle *style = &widget->style.combo;
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
 	const uint8_t *itemData = wz_list_get_item_data(combo->list);
 	const int itemStride = wz_list_get_item_stride(combo->list);
@@ -89,42 +88,42 @@ static void wz_combo_draw(struct wzWidget *widget, wzRect clip)
 	// Don't round the bottom corners if the combo is open.
 	if (combo->isOpen)
 	{
-		wz_renderer_create_rect_path(vg, rect, style->cornerRadius, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
+		wz_renderer_create_rect_path(vg, rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
 	}
 	else
 	{
-		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, style->cornerRadius);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_COMBO_CORNER_RADIUS);
 	}
 
 	// Background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, style->bgColor1, style->bgColor2));
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_COMBO_BG_COLOR1, WZ_SKIN_COMBO_BG_COLOR2));
 	nvgFill(vg);
 
 	// Border.
-	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Internal border.
-	buttonX = rect.x + rect.w - style->buttonWidth;
-	wz_renderer_draw_line(vg, buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, widget->hover ? style->borderHoverColor : style->borderColor);
+	buttonX = rect.x + rect.w - WZ_SKIN_COMBO_BUTTON_WIDTH;
+	wz_renderer_draw_line(vg, buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
 
 	// Icon.
 	{
-		const float buttonCenterX = buttonX + style->buttonWidth * 0.5f;
+		const float buttonCenterX = buttonX + WZ_SKIN_COMBO_BUTTON_WIDTH * 0.5f;
 		const float buttonCenterY = rect.y + rect.h * 0.5f;
 
 		nvgBeginPath(vg);
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY + style->iconSize.h * 0.5f); // bottom
-		nvgLineTo(vg, buttonCenterX + style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // right
-		nvgLineTo(vg, buttonCenterX - style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // left
-		nvgFillColor(vg, style->iconColor);
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // bottom
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // right
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // left
+		nvgFillColor(vg, WZ_SKIN_COMBO_ICON_COLOR);
 		nvgFill(vg);
 	}
 
 	// Selected item.
 	if (selectedItemIndex >= 0)
 	{
-		wz_renderer_print(widget->renderer, rect.x + style->paddingX / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
+		wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
 	}
 
 	nvgRestore(vg);
@@ -246,7 +245,6 @@ static void wz_combo_list_item_selected(wzEvent *e)
 struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
 {
 	struct wzCombo *combo = (struct wzCombo *)malloc(sizeof(struct wzCombo));
-	wzComboStyle *style = &combo->base.style.combo;
 
 	memset(combo, 0, sizeof(struct wzCombo));
 	combo->base.type = WZ_TYPE_COMBO;
@@ -262,19 +260,6 @@ struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
 	wz_widget_set_clip_input_to_parent((struct wzWidget *)combo->list, false);
 	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->iconColor = WZ_STYLE_TEXT_COLOR;
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->bgColor1 = nvgRGB(80, 80, 80);
-	style->bgColor2 = nvgRGB(70, 70, 70);
-	style->paddingX = 20;
-	style->paddingY = 8;
-	style->buttonWidth = 24;
-	style->iconSize.w = 8;
-	style->iconSize.h = 4;
-	style->cornerRadius = WZ_STYLE_CORNER_RADIUS;
 
 	return combo;
 }

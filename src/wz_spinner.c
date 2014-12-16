@@ -28,6 +28,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_text_edit.h"
+#include "wz_skin.h"
 
 struct wzSpinner
 {
@@ -54,10 +55,9 @@ static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool de
 {
 	const struct wzButton *button = (struct wzButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzSpinnerStyle *style = &widget->parent->style.spinner; // Use parent style.
 	const wzRect rect = wz_widget_get_absolute_rect(widget);
-	const int buttonX = rect.x + rect.w - style->buttonWidth;
-	const float buttonCenterX = buttonX + style->buttonWidth * 0.5f;
+	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
+	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
 	const float buttonCenterY = rect.y + rect.h * 0.5f;
 
 	nvgSave(vg);
@@ -66,18 +66,18 @@ static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool de
 
 	if (decrement)
 	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY + style->iconSize.h * 0.5f); // bottom
-		nvgLineTo(vg, buttonCenterX + style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // right
-		nvgLineTo(vg, buttonCenterX - style->iconSize.w * 0.5f, buttonCenterY - style->iconSize.h * 0.5f); // left
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // bottom
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
 	}
 	else
 	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY - style->iconSize.h * 0.5f); // top
-		nvgLineTo(vg, buttonCenterX - style->iconSize.w * 0.5f, buttonCenterY + style->iconSize.h * 0.5f); // left
-		nvgLineTo(vg, buttonCenterX + style->iconSize.w * 0.5f, buttonCenterY + style->iconSize.h * 0.5f); // right
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // top
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
 	}
 
-	nvgFillColor(vg, widget->hover ? style->iconHoverColor : style->iconColor);
+	nvgFillColor(vg, widget->hover ? WZ_SKIN_SPINNER_ICON_HOVER_COLOR : WZ_SKIN_SPINNER_ICON_COLOR);
 	nvgFill(vg);
 	nvgRestore(vg);
 }
@@ -153,7 +153,6 @@ static void wz_spinner_font_changed(struct wzWidget *widget, const char *fontFac
 struct wzSpinner *wz_spinner_create()
 {
 	struct wzSpinner *spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
-	wzSpinnerStyle *style = &spinner->base.style.spinner;
 
 	memset(spinner, 0, sizeof(struct wzSpinner));
 	spinner->base.type = WZ_TYPE_SPINNER;
@@ -161,19 +160,13 @@ struct wzSpinner *wz_spinner_create()
 	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
 	spinner->base.vtable.font_changed = wz_spinner_font_changed;
 
-	style->iconColor = WZ_STYLE_TEXT_COLOR;
-	style->iconHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->buttonWidth = 16;
-	style->iconSize.w = 10;
-	style->iconSize.h = 6;
-
 	spinner->textEdit = wz_text_edit_create(false, 256);
 	wz_widget_set_stretch((struct wzWidget *)spinner->textEdit, WZ_STRETCH);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
 
 	spinner->decrementButton = wz_button_create(NULL, NULL);
-	wz_widget_set_width((struct wzWidget *)spinner->decrementButton, style->buttonWidth);
+	wz_widget_set_width((struct wzWidget *)spinner->decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	wz_widget_set_stretch((struct wzWidget *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
 	wz_widget_set_stretch_scale((struct wzWidget *)spinner->decrementButton, 1, 0.5f);
 	wz_widget_set_align((struct wzWidget *)spinner->decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
@@ -183,7 +176,7 @@ struct wzSpinner *wz_spinner_create()
 	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
 
 	spinner->incrementButton = wz_button_create(NULL, NULL);
-	wz_widget_set_width((struct wzWidget *)spinner->incrementButton, style->buttonWidth);
+	wz_widget_set_width((struct wzWidget *)spinner->incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	wz_widget_set_stretch((struct wzWidget *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
 	wz_widget_set_stretch_scale((struct wzWidget *)spinner->incrementButton, 1, 0.5f);
 	wz_widget_set_align((struct wzWidget *)spinner->incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);

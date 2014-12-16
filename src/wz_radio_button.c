@@ -26,6 +26,7 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_widget.h"
 #include "wz_button.h"
+#include "wz_skin.h"
 
 struct wzRadioButton
 {
@@ -72,10 +73,9 @@ static wzSize wz_radio_button_measure(struct wzWidget *widget)
 {
 	wzSize size;
 	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
-	const wzRadioButtonStyle *style = &widget->style.radioButton;
 	wz_widget_measure_text(widget, radioButton->button.label, 0, &size.w, &size.h);
-	size.w += style->outerRadius * 2 + style->spacing;
-	size.h = WZ_MAX(size.h, style->outerRadius);
+	size.w += WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING;
+	size.h = WZ_MAX(size.h, WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS);
 	return size;
 }
 
@@ -84,7 +84,6 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	wzRect rect;
 	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRadioButtonStyle *style = &widget->style.radioButton;
 
 	nvgSave(vg);
 	rect = wz_widget_get_absolute_rect(widget);
@@ -96,19 +95,19 @@ static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
 	if (radioButton->button.isSet)
 	{
 		nvgBeginPath(vg);
-		nvgCircle(vg, (float)(rect.x + style->outerRadius), rect.y + rect.h / 2.0f, (float)style->innerRadius);
-		nvgFillColor(vg, style->setColor);
+		nvgCircle(vg, (float)(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS), rect.y + rect.h / 2.0f, (float)WZ_SKIN_RADIO_BUTTON_INNER_RADIUS);
+		nvgFillColor(vg, WZ_SKIN_RADIO_BUTTON_SET_COLOR);
 		nvgFill(vg);
 	}
 
 	// Outer circle.
 	nvgBeginPath(vg);
-	nvgCircle(vg, (float)(rect.x + style->outerRadius), rect.y + rect.h / 2.0f, (float)style->outerRadius - 0.5f);
-	nvgStrokeColor(vg, widget->hover ? style->borderHoverColor : style->borderColor);
+	nvgCircle(vg, (float)(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS), rect.y + rect.h / 2.0f, (float)WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS - 0.5f);
+	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_RADIO_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_RADIO_BUTTON_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + style->outerRadius * 2 + style->spacing, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, style->textColor, radioButton->button.label, 0);
+	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_RADIO_BUTTON_TEXT_COLOR, radioButton->button.label, 0);
 
 	nvgRestore(vg);
 }
@@ -125,7 +124,6 @@ struct wzRadioButton *wz_radio_button_create(const char *label)
 {
 	struct wzRadioButton *radioButton = (struct wzRadioButton *)wz_button_create(label, NULL);
 	struct wzWidget *widget = (struct wzWidget *)radioButton;
-	wzRadioButtonStyle *style = &widget->style.radioButton;
 
 	widget->type = WZ_TYPE_RADIO_BUTTON;
 	widget->vtable.added = wz_radio_button_added;
@@ -133,14 +131,6 @@ struct wzRadioButton *wz_radio_button_create(const char *label)
 	widget->vtable.draw = wz_radio_button_draw;
 	wz_button_set_set_behavior(&radioButton->button, WZ_BUTTON_SET_BEHAVIOR_STICKY);
 	wz_button_add_callback_clicked(&radioButton->button, wz_radio_button_clicked);
-
-	style->textColor = WZ_STYLE_TEXT_COLOR;
-	style->setColor = nvgRGBf(0.1529f, 0.5569f, 0.7412f);
-	style->borderColor = WZ_STYLE_LIGHT_BORDER_COLOR;
-	style->borderHoverColor = WZ_STYLE_HOVER_COLOR;
-	style->outerRadius = 8;
-	style->innerRadius = 4;
-	style->spacing = 8;
 
 	return radioButton;
 }

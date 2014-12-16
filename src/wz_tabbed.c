@@ -25,6 +25,7 @@ SOFTWARE.
 #include <string.h>
 #include "wz_renderer.h"
 #include "wz_widget.h"
+#include "wz_skin.h"
 
 typedef struct
 {
@@ -100,7 +101,6 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 	wzRect tr; // Tab rect.
 	struct wzTabbed *tabbed = (struct wzTabbed *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzTabbedStyle *style = &widget->style.tabbed;
 	wzRect rect = wz_widget_get_absolute_rect(widget);
 	const struct wzButton *selectedTab = wz_tab_bar_get_selected_tab(tabbed->tabBar);
 
@@ -136,7 +136,7 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 		nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
 	}
 	
-	nvgStrokeColor(vg, style->borderColor);
+	nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
 	nvgStroke(vg);
 
 	// Get the selected tab index.
@@ -179,7 +179,7 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 			nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h - 0.5f); // br
 		}
 
-		nvgStrokeColor(vg, style->borderColor);
+		nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
 		nvgStroke(vg);
 	}
 
@@ -236,7 +236,6 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 struct wzTabbed *wz_tabbed_create()
 {
 	struct wzTabbed *tabbed = (struct wzTabbed *)malloc(sizeof(struct wzTabbed));
-	wzTabbedStyle *style = &tabbed->base.style.tabbed;
 
 	memset(tabbed, 0, sizeof(struct wzTabbed));
 	tabbed->base.type = WZ_TYPE_TABBED;
@@ -247,9 +246,6 @@ struct wzTabbed *wz_tabbed_create()
 	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
 	wz_widget_add_child_widget((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
-
-	style->bgColor = nvgRGB(80, 80, 80);
-	style->borderColor = WZ_STYLE_DARK_BORDER_COLOR;
 
 	return tabbed;
 }

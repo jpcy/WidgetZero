@@ -26,6 +26,7 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_string.h"
+#include "wz_skin.h"
 
 struct wzLabel
 {
@@ -83,17 +84,6 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-static void wz_label_renderer_changed(struct wzWidget *widget)
-{
-	struct wzLabel *label = (struct wzLabel *)widget;
-	WZ_ASSERT(label);
-
-	if (!label->isTextColorUserSet)
-	{
-		label->textColor = widget->style.label.textColor;
-	}
-}
-
 static void wz_label_destroy(struct wzWidget *widget)
 {
 	WZ_ASSERT(widget);
@@ -107,10 +97,9 @@ struct wzLabel *wz_label_create(const char *text)
 	label->base.type = WZ_TYPE_LABEL;
 	label->base.vtable.measure = wz_label_measure;
 	label->base.vtable.draw = wz_label_draw;
-	label->base.vtable.renderer_changed = wz_label_renderer_changed;
 	label->base.vtable.destroy = wz_label_destroy;
 	label->text = text ? wz_string_new(text) : wz_string_empty();
-	label->base.style.label.textColor = WZ_STYLE_TEXT_COLOR;
+	label->textColor = WZ_SKIN_LABEL_TEXT_COLOR;
 	return label;
 }
 
