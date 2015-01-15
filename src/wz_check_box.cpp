@@ -26,17 +26,11 @@ SOFTWARE.
 #include "wz_main_window.h"
 #include "wz_widget.h"
 #include "wz_renderer.h"
-#include "wz_string.h"
 #include "wz_button.h"
 #include "wz_skin.h"
 
-struct wzCheckBox
+struct wzCheckBox : public wzButton
 {
-	union
-	{
-		struct wzWidget base;
-		struct wzButton button;
-	};
 };
 
 static wzSize wz_check_box_measure(struct wzWidget *widget)
@@ -96,7 +90,7 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 struct wzCheckBox *wz_check_box_create(const char *label)
 {
 	struct wzCheckBox *checkBox = (struct wzCheckBox *)wz_button_create(label, NULL);
-	wz_button_set_set_behavior(&checkBox->button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	wz_button_set_set_behavior(checkBox, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	checkBox->base.vtable.measure = wz_check_box_measure;
 	checkBox->base.vtable.draw = wz_check_box_draw;
 	return checkBox;
@@ -105,35 +99,35 @@ struct wzCheckBox *wz_check_box_create(const char *label)
 void wz_check_box_set_label(struct wzCheckBox *checkBox, const char *label)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_set_label(&checkBox->button, label);
+	wz_button_set_label(checkBox, label);
 }
 
 const char *wz_check_box_get_label(const struct wzCheckBox *checkBox)
 {
 	WZ_ASSERT(checkBox);
-	return wz_button_get_label(&checkBox->button);
+	return wz_button_get_label(checkBox);
 }
 
 bool wz_check_box_is_checked(const struct wzCheckBox *checkBox)
 {
 	WZ_ASSERT(checkBox);
-	return wz_button_is_set(&checkBox->button);
+	return wz_button_is_set(checkBox);
 }
 
 void wz_check_box_check(struct wzCheckBox *checkBox, bool value)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_set(&checkBox->button, value);
+	wz_button_set(checkBox, value);
 }
 
 void wz_check_box_bind_value(struct wzCheckBox *checkBox, bool *value)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_bind_value(&checkBox->button, value);
+	wz_button_bind_value(checkBox, value);
 }
 
 void wz_check_box_add_callback_checked(struct wzCheckBox *checkBox, wzEventCallback callback)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_add_callback_clicked(&checkBox->button, callback);
+	wz_button_add_callback_clicked(checkBox, callback);
 }

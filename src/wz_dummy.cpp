@@ -24,7 +24,6 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
-#include "wz_string.h"
 
 struct wzDummy
 {

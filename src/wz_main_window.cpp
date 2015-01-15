@@ -150,7 +150,7 @@ static void wz_main_window_dock_tab_bar_tab_changed(wzEvent *e)
 	{
 		if (mainWindow->dockTabBars[i] == e->tabBar.tabBar)
 		{
-			dockPosition = i;
+			dockPosition = (wzDockPosition)i;
 			break;
 		}
 	}
@@ -240,8 +240,7 @@ DOCKING
 void wz_main_window_update_docked_window_rect(struct wzMainWindow *mainWindow, struct wzWindow *window)
 {
 	wzRect rect;
-	wzDockPosition i;
-	int j, k;
+	int i, j, k;
 
 	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(window);
@@ -272,7 +271,7 @@ void wz_main_window_update_docked_window_rect(struct wzMainWindow *mainWindow, s
 // Update the rects of docked windows and dock tab bars.
 static void wz_main_window_update_docking_rects(struct wzMainWindow *mainWindow)
 {
-	wzDockPosition i;
+	int i;
 
 	WZ_ASSERT(mainWindow);
 
@@ -456,8 +455,7 @@ void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow
 
 wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow *mainWindow, const struct wzWindow *window)
 {
-	wzDockPosition i;
-	int j;
+	int i, j;
 
 	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(window);
@@ -468,7 +466,7 @@ wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow
 		{
 			if (mainWindow->dockedWindows[i][j] == window)
 			{
-				return i;
+				return (wzDockPosition)i;
 			}
 		}
 	}
@@ -478,8 +476,8 @@ wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow
 
 void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWindow *window)
 {
-	wzDockPosition dockPosition, i;
-	int j, windowIndex;
+	wzDockPosition dockPosition;
+	int i, j, windowIndex;
 	int nDockedWindows;
 
 	WZ_ASSERT(mainWindow);
@@ -495,7 +493,7 @@ void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWind
 		{
 			if (mainWindow->dockedWindows[i][j] == window)
 			{
-				dockPosition = i;
+				dockPosition = (wzDockPosition)i;
 				windowIndex = j;
 				break;
 			}
@@ -612,7 +610,7 @@ static void wz_widget_update_dock_preview_rect(struct wzMainWindow *mainWindow, 
 
 static void wz_main_window_update_dock_preview_visible(struct wzMainWindow *mainWindow, int mouseX, int mouseY)
 {
-	wzDockPosition i;
+	int i;
 	bool showDockPreview = false;
 
 	WZ_ASSERT(mainWindow);
@@ -626,8 +624,8 @@ static void wz_main_window_update_dock_preview_visible(struct wzMainWindow *main
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
-			mainWindow->windowDockPosition = i;
-			wz_widget_update_dock_preview_rect(mainWindow, i);
+			mainWindow->windowDockPosition = (wzDockPosition)i;
+			wz_widget_update_dock_preview_rect(mainWindow, (wzDockPosition)i);
 			showDockPreview = true;
 			break;
 		}
@@ -1578,7 +1576,7 @@ void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks)
 void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 {
 	wzRect rect;
-	wzDockPosition i;
+	int i;
 
 	WZ_ASSERT(mainWindow);
 	rect = mainWindow->base.rect;
@@ -1601,7 +1599,7 @@ void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow)
 
 		windowRect = wz_widget_get_rect((struct wzWidget *)mainWindow->dockedWindows[i][0]);
 
-		switch (i)
+		switch ((wzDockPosition)i)
 		{
 		case WZ_DOCK_POSITION_NORTH:
 			rect.y += windowRect.h;

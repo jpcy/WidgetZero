@@ -24,8 +24,8 @@ SOFTWARE.
 #ifndef WZ_BUTTON_H
 #define WZ_BUTTON_H
 
+#include <string>
 #include <wz.h>
-#include "wz_string.h"
 
 typedef enum
 {
@@ -56,8 +56,8 @@ struct wzButton
 	wzButtonClickBehavior clickBehavior;
 	wzButtonSetBehavior setBehavior;
 	wzBorder padding;
-	wzString label;
-	wzString icon;
+	std::string label;
+	std::string icon;
 	bool isPressed;
 	bool isSet;
 	bool *boundValue;

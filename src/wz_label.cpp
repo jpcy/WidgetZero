@@ -21,17 +21,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <string>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
 #include "wz_renderer.h"
-#include "wz_string.h"
 #include "wz_skin.h"
 
 struct wzLabel
 {
 	struct wzWidget base;
-	wzString text;
+	std::string text;
 	bool multiline;
 	NVGcolor textColor;
 	bool isTextColorUserSet;
@@ -51,13 +51,13 @@ static wzSize wz_label_measure(struct wzWidget *widget)
 		wz_renderer_set_font_face(widget->renderer, widget->fontFace);
 		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 		nvgTextLineHeight(vg, 1.2f);
-		nvgTextBoxBounds(vg, 0, 0, (float)widget->rect.w, label->text, NULL, bounds);
+		nvgTextBoxBounds(vg, 0, 0, (float)widget->rect.w, label->text.c_str(), NULL, bounds);
 		size.w = (int)bounds[2];
 		size.h = (int)bounds[3];
 	}
 	else
 	{
-		wz_widget_measure_text(widget, label->text, 0, &size.w, &size.h);
+		wz_widget_measure_text(widget, label->text.c_str(), 0, &size.w, &size.h);
 	}
 
 	return size;
@@ -74,20 +74,14 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 
 	if (label->multiline)
 	{
-		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, label->textColor, label->text, 0);
+		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, label->textColor, label->text.c_str(), 0);
 	}
 	else
 	{
-		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, label->textColor, label->text, 0);
+		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, label->textColor, label->text.c_str(), 0);
 	}
 
 	nvgRestore(vg);
-}
-
-static void wz_label_destroy(struct wzWidget *widget)
-{
-	WZ_ASSERT(widget);
-	wz_string_free(((struct wzLabel *)widget)->text);
 }
 
 struct wzLabel *wz_label_create(const char *text)
@@ -97,8 +91,7 @@ struct wzLabel *wz_label_create(const char *text)
 	label->base.type = WZ_TYPE_LABEL;
 	label->base.vtable.measure = wz_label_measure;
 	label->base.vtable.draw = wz_label_draw;
-	label->base.vtable.destroy = wz_label_destroy;
-	label->text = text ? wz_string_new(text) : wz_string_empty();
+	label->text = text ? std::string(text) : std::string();
 	label->textColor = WZ_SKIN_LABEL_TEXT_COLOR;
 	return label;
 }
@@ -118,14 +111,14 @@ bool wz_label_get_multiline(const struct wzLabel *label)
 void wz_label_set_text(struct wzLabel *label, const char *text)
 {
 	WZ_ASSERT(label);
-	label->text = wz_string_copy(label->text, text);
+	label->text = std::string(text);
 	wz_widget_resize_to_measured(&label->base);
 }
 
 const char *wz_label_get_text(const struct wzLabel *label)
 {
 	WZ_ASSERT(label);
-	return label->text;
+	return label->text.c_str();
 }
 
 void wz_label_set_text_color(struct wzLabel *label, NVGcolor color)

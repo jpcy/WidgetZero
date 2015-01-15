@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <string>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_main_window.h"
 #include "wz_renderer.h"
-#include "wz_string.h"
 #include "wz_widget.h"
 #include "wz_skin.h"
 
@@ -33,7 +33,7 @@ struct wzMenuBarButton
 {
 	struct wzWidget base;
 	wzBorder padding;
-	wzString label;
+	std::string label;
 	bool isPressed;
 	bool isSet;
 	wzEventCallback *pressed_callbacks;
@@ -59,7 +59,7 @@ static wzSize wz_menu_bar_button_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
 
-	wz_widget_measure_text(widget, button->label, 0, &size.w, &size.h);
+	wz_widget_measure_text(widget, button->label.c_str(), 0, &size.w, &size.h);
 	size.w += 12;
 	return size;
 }
@@ -83,7 +83,7 @@ static void wz_menu_bar_button_draw(struct wzWidget *widget, wzRect clip)
 		wz_renderer_draw_rect(vg, rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
 	}
 
-	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label, 0);
+	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label.c_str(), 0);
 
 	nvgRestore(vg);
 }
@@ -94,7 +94,6 @@ static void wz_menu_bar_button_destroy(struct wzWidget *widget)
 
 	WZ_ASSERT(widget);
 	button = (struct wzMenuBarButton *)widget;
-	wz_string_free(button->label);
 	wz_arr_free(button->pressed_callbacks);
 }
 
@@ -156,7 +155,7 @@ static struct wzMenuBarButton *wz_menu_bar_button_create(struct wzMenuBar *menuB
 	button->base.vtable.mouse_button_down = wz_menu_bar_button_mouse_button_down;
 	button->base.vtable.mouse_button_up = wz_menu_bar_button_mouse_button_up;
 	button->base.vtable.mouse_hover_on = wz_menu_bar_button_mouse_hover_on;
-	button->label = wz_string_empty();
+	button->label = std::string();
 	button->menuBar = menuBar;
 	return button;
 }
@@ -164,14 +163,14 @@ static struct wzMenuBarButton *wz_menu_bar_button_create(struct wzMenuBar *menuB
 void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *label)
 {
 	WZ_ASSERT(button);
-	button->label = wz_string_copy(button->label, label);
+	button->label = std::string(label);
 	wz_widget_resize_to_measured(&button->base);
 }
 
 const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button)
 {
 	WZ_ASSERT(button);
-	return button->label;
+	return button->label.c_str();
 }
 
 bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button)

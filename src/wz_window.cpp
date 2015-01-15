@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <string>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_main_window.h"
 #include "wz_widget.h"
 #include "wz_renderer.h"
-#include "wz_string.h"
 #include "wz_skin.h"
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
@@ -53,7 +53,7 @@ struct wzWindow
 	int drawPriority;
 	int headerHeight;
 	int borderSize;
-	wzString title;
+	std::string title;
 	
 	struct wzWidget *content;
 
@@ -105,7 +105,7 @@ static void wz_window_draw(struct wzWidget *widget, wzRect clip)
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
 		wz_renderer_clip_to_rect(vg, headerRect);
-		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title, 0);
+		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title.c_str(), 0);
 	}
 
 	nvgRestore(vg);
@@ -241,7 +241,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 		{
 			if (mouseOverBorderRects[i])
 			{
-				window->drag = WZ_DRAG_RESIZE_N + i;
+				window->drag = (wzWindowDrag)(WZ_DRAG_RESIZE_N + i);
 				window->resizeStartPosition.x = mouseX;
 				window->resizeStartPosition.y = mouseY;
 				window->resizeStartRect = window->base.rect;
@@ -316,7 +316,7 @@ static void wz_window_mouse_move(struct wzWidget *widget, int mouseX, int mouseY
 		delta.y = mouseY - window->undockStartPosition.y;
 
 		// Undock and start moving if the mouse has moved far enough.
-		if (sqrt(delta.x * delta.x + delta.y * delta.y) < WZ_WINDOW_UNDOCK_DISTANCE)
+		if ((int)sqrtf((float)(delta.x * delta.x + delta.y * delta.y)) < WZ_WINDOW_UNDOCK_DISTANCE)
 			return;
 
 		wz_main_window_undock_window(widget->mainWindow, window);
@@ -452,13 +452,6 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_widget_set_rect_internal(window->content, contentRect);
 }
 
-static void wz_window_destroy(struct wzWidget *widget)
-{
-	struct wzWindow *window = (struct wzWindow *)widget;
-	WZ_ASSERT(window);
-	wz_string_free(window->title);
-}
-
 struct wzWindow *wz_window_create(const char *title)
 {
 	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
@@ -473,8 +466,7 @@ struct wzWindow *wz_window_create(const char *title)
 	window->base.vtable.mouse_move = wz_window_mouse_move;
 	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	window->base.vtable.set_rect = wz_window_set_rect;
-	window->base.vtable.destroy = wz_window_destroy;
-	window->title = title ? wz_string_new(title) : wz_string_empty();
+	window->title = title ? std::string(title) : std::string();
 
 	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
 	memset(window->content, 0, sizeof(struct wzWidget));
@@ -510,13 +502,13 @@ wzRect wz_window_get_header_rect(const struct wzWindow *window)
 void wz_window_set_title(struct wzWindow *window, const char *title)
 {
 	WZ_ASSERT(window);
-	window->title = wz_string_copy(window->title, title);
+	window->title = std::string(title);
 }
 
 const char *wz_window_get_title(const struct wzWindow *window)
 {
 	WZ_ASSERT(window);
-	return window->title;
+	return window->title.c_str();
 }
 
 void wz_window_add(struct wzWindow *window, struct wzWidget *widget)

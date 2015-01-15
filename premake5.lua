@@ -11,7 +11,7 @@ end
 -----------------------------------------------------------------------------
 
 solution "WidgetZero"
-	language "C"
+	language "C++"
 	location "build"
 	startproject "Example_demo"
 	
@@ -47,15 +47,15 @@ project "WidgetZero"
 -----------------------------------------------------------------------------
 
 project "NanoVG"
+	language "C"
 	kind "StaticLib"
 	files { "nanovg/*.*" }
 	includedirs { "nanovg" }
 		
 -----------------------------------------------------------------------------
 
-function createExampleProject(_name, _language)
+function createExampleProject(_name)
 	project("Example_" .. _name)
-		language(_language)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
 		files { "examples/" .. _name .. "/*.*", "examples/gl/*.*" }
@@ -76,14 +76,12 @@ function createExampleProject(_name, _language)
 		
 		links { "SDL2", "SDL2main", "NanoVG", "WidgetZero" }
 		
-		if _language == "C++" then
-			configuration "vs2012"
-				linkoptions { "/SAFESEH:NO" }
-		end
+		configuration "vs2012"
+			linkoptions { "/SAFESEH:NO" }
 end
 
 -----------------------------------------------------------------------------
 
-createExampleProject("cpp", "C++")
-createExampleProject("demo", "C")
-createExampleProject("simple", "C")
+createExampleProject("cpp")
+createExampleProject("demo")
+createExampleProject("simple")

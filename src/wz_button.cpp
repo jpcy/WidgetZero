@@ -42,13 +42,13 @@ static wzSize wz_button_measure(struct wzWidget *widget)
 	wzSize size;
 	struct wzButton *button = (struct wzButton *)widget;
 
-	wz_widget_measure_text(widget, button->label, 0, &size.w, &size.h);
+	wz_widget_measure_text(widget, button->label.c_str(), 0, &size.w, &size.h);
 
-	if (button->icon[0])
+	if (!button->icon.empty())
 	{
 		int handle, w, h;
 
-		handle = wz_renderer_create_image(widget->renderer, button->icon, &w, &h);
+		handle = wz_renderer_create_image(widget->renderer, button->icon.c_str(), &w, &h);
 
 		if (handle)
 		{
@@ -122,30 +122,30 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Calculate icon and label sizes.
 	iconSize.w = iconSize.h = 0;
 
-	if (button->icon[0])
+	if (!button->icon.empty())
 	{
-		iconHandle = wz_renderer_create_image(widget->renderer, button->icon, &iconSize.w, &iconSize.h);
+		iconHandle = wz_renderer_create_image(widget->renderer, button->icon.c_str(), &iconSize.w, &iconSize.h);
 	}
 
-	wz_widget_measure_text(widget, button->label, 0, &labelWidth, NULL);
+	wz_widget_measure_text(widget, button->label.c_str(), 0, &labelWidth, NULL);
 
 	// Position the icon and label centered.
-	if (button->icon[0] && iconHandle && button->label[0])
+	if (!button->icon.empty() && iconHandle && !button->label.empty())
 	{
 		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING + labelWidth) / 2.0f);
 		labelX = iconX + iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING;
 	}
-	else if (button->icon[0] && iconHandle)
+	else if (!button->icon.empty() && iconHandle)
 	{
 		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
 	}
-	else if (button->label[0])
+	else if (!button->label.empty())
 	{
 		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
 	}
 
 	// Draw the icon.
-	if (button->icon[0] && iconHandle)
+	if (!button->icon.empty() && iconHandle)
 	{
 		wzRect iconRect;
 		iconRect.x = iconX;
@@ -156,9 +156,9 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	}
 
 	// Draw the label.
-	if (button->label[0])
+	if (!button->label.empty())
 	{
-		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_BUTTON_TEXT_COLOR, button->label, 0);
+		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_BUTTON_TEXT_COLOR, button->label.c_str(), 0);
 	}
 
 	nvgRestore(vg);
@@ -178,8 +178,6 @@ static void wz_button_destroy(struct wzWidget *widget)
 
 	WZ_ASSERT(widget);
 	button = (struct wzButton *)widget;
-	wz_string_free(button->label);
-	wz_string_free(button->icon);
 	wz_arr_free(button->pressed_callbacks);
 	wz_arr_free(button->clicked_callbacks);
 }
@@ -299,8 +297,8 @@ struct wzButton *wz_button_create(const char *label, const char *icon)
 	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
 	button->padding.left = button->padding.right = 8;
 	button->padding.top = button->padding.bottom = 4;
-	button->label = label ? wz_string_new(label) : wz_string_empty();
-	button->icon = icon ? wz_string_new(icon) : wz_string_empty();
+	button->label = label ? std::string(label) : std::string();
+	button->icon = icon ? std::string(icon) : std::string();
 
 	return button;
 }
@@ -315,27 +313,27 @@ struct wzButton *wz_toggle_button_create(const char *label, const char *icon)
 void wz_button_set_label(struct wzButton *button, const char *label)
 {
 	WZ_ASSERT(button);
-	button->label = wz_string_copy(button->label, label);
+	button->label = label;
 	wz_widget_resize_to_measured(&button->base);
 }
 
 const char *wz_button_get_label(const struct wzButton *button)
 {
 	WZ_ASSERT(button);
-	return button->label;
+	return button->label.c_str();
 }
 
 void wz_button_set_icon(struct wzButton *button, const char *icon)
 {
 	WZ_ASSERT(button);
-	button->icon = wz_string_copy(button->icon, icon);
+	button->icon = std::string(icon);
 	wz_widget_resize_to_measured(&button->base);
 }
 
 const char *wz_button_get_icon(const struct wzButton *button)
 {
 	WZ_ASSERT(button);
-	return button->icon;
+	return button->icon.c_str();
 }
 
 void wz_button_set_padding(struct wzButton *button, wzBorder padding)
