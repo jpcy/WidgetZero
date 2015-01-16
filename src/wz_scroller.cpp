@@ -562,12 +562,6 @@ struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, in
 	return scroller;
 }
 
-void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType)
-{
-	WZ_ASSERT(scroller);
-	scroller->scrollerType = scrollerType;
-}
-
 wzScrollerType wz_scroller_get_type(const struct wzScroller *scroller)
 {
 	WZ_ASSERT(scroller);

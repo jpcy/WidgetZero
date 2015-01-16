@@ -229,9 +229,8 @@ public:
 class Scroller : public Widget
 {
 public:
-	Scroller();
+	Scroller(wzScrollerType type);
 	~Scroller();
-	Scroller *setType(wzScrollerType type);
 	Scroller *setValue(int value);
 	Scroller *setStepValue(int stepValue);
 	Scroller *setMaxValue(int maxValue);	
@@ -561,9 +560,9 @@ struct RadioButtonPrivate : public WidgetPrivate
 
 struct ScrollerPrivate : public WidgetPrivate
 {
-	ScrollerPrivate()
+	ScrollerPrivate(wzScrollerType type)
 	{
-		scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+		scroller = wz_scroller_create(type, 0, 1, 0);
 		wz_widget_set_metadata((wzWidget *)scroller, this);
 	}
 
@@ -1228,20 +1227,14 @@ RadioButton *RadioButton::setLabel(const std::string &label)
 
 //------------------------------------------------------------------------------
 
-Scroller::Scroller()
+Scroller::Scroller(wzScrollerType type)
 {
-	p = new ScrollerPrivate();
+	p = new ScrollerPrivate(type);
 }
 
 Scroller::~Scroller()
 {
 	delete p;
-}
-
-Scroller *Scroller::setType(wzScrollerType type)
-{
-	wz_scroller_set_type(((ScrollerPrivate *)p)->scroller, type);
-	return this;
 }
 
 Scroller *Scroller::setValue(int value)

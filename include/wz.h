@@ -473,7 +473,6 @@ typedef enum
 wzScrollerType;
 
 struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue);
-void wz_scroller_set_type(struct wzScroller *scroller, wzScrollerType scrollerType);
 wzScrollerType wz_scroller_get_type(const struct wzScroller *scroller);
 int wz_scroller_get_value(const struct wzScroller *scroller);
 void wz_scroller_set_value(struct wzScroller *scroller, int value);
