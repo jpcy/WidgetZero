@@ -69,8 +69,7 @@ struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy
 	WZ_ASSERT(destroy);
 
 	// Alloc renderer.
-	renderer = (struct wzRenderer *)malloc(sizeof(struct wzRenderer));
-	memset(renderer, 0, sizeof(struct wzRenderer));
+	renderer = new struct wzRenderer;
 	renderer->destroy = destroy;
 	renderer->defaultFontSize = defaultFontSize;
 
@@ -106,7 +105,7 @@ void wz_renderer_destroy(struct wzRenderer *renderer)
 			renderer->destroy(renderer->vg);
 		}
 
-		free(renderer);
+		delete renderer;
 	}
 }
 

@@ -30,15 +30,18 @@ SOFTWARE.
 #define WZ_NANOVG_MAX_IMAGES 1024
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
 
-typedef struct
+struct wzImage
 {
+	wzImage() : handle(0) {}
+
 	int handle;
 	char filename[WZ_NANOVG_MAX_PATH];
-}
-wzImage;
+};
 
 struct wzRenderer
 {
+	wzRenderer() : destroy(NULL), vg(NULL), nImages(0), defaultFontSize(0) {}
+
 	wzNanoVgGlDestroy destroy;
 	struct NVGcontext *vg;
 	wzImage images[WZ_NANOVG_MAX_IMAGES];

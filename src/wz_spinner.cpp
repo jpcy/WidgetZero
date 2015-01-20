@@ -30,9 +30,10 @@ SOFTWARE.
 #include "wz_text_edit.h"
 #include "wz_skin.h"
 
-struct wzSpinner
+struct wzSpinner : public wzWidget
 {
-	struct wzWidget base;
+	wzSpinner();
+
 	struct wzTextEdit *textEdit;
 	struct wzButton *decrementButton;
 	struct wzButton *incrementButton;
@@ -150,15 +151,17 @@ static void wz_spinner_font_changed(struct wzWidget *widget, const char *fontFac
 	wz_widget_set_font((struct wzWidget *)spinner->textEdit, fontFace, fontSize);
 }
 
+wzSpinner::wzSpinner()
+{
+	type = WZ_TYPE_SPINNER;
+}
+
 struct wzSpinner *wz_spinner_create()
 {
-	struct wzSpinner *spinner = (struct wzSpinner *)malloc(sizeof(struct wzSpinner));
-
-	memset(spinner, 0, sizeof(struct wzSpinner));
-	spinner->base.type = WZ_TYPE_SPINNER;
-	spinner->base.vtable.measure = wz_spinner_measure;
-	spinner->base.vtable.renderer_changed = wz_spinner_renderer_changed;
-	spinner->base.vtable.font_changed = wz_spinner_font_changed;
+	struct wzSpinner *spinner = new struct wzSpinner;
+	spinner->vtable.measure = wz_spinner_measure;
+	spinner->vtable.renderer_changed = wz_spinner_renderer_changed;
+	spinner->vtable.font_changed = wz_spinner_font_changed;
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
 	wz_widget_set_stretch((struct wzWidget *)spinner->textEdit, WZ_STRETCH);

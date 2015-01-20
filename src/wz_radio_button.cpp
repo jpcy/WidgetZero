@@ -34,13 +34,12 @@ struct wzRadioButton : public wzButton
 
 static void wz_radio_button_clicked(wzEvent *e)
 {
-	int i;
 	struct wzWidget *parent = e->base.widget->parent;
 
 	WZ_ASSERT(parent);
 
 	// Unset all the other radio button siblings.
-	for (i = 0; i < wz_arr_len(parent->children); i++)
+	for (size_t i = 0; i < parent->children.size(); i++)
 	{
 		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != e->base.widget)
 		{
@@ -51,11 +50,9 @@ static void wz_radio_button_clicked(wzEvent *e)
 
 static void wz_radio_button_added(struct wzWidget *parent, struct wzWidget *widget)
 {
-	int i;
-
 	// If this is the only radio button child, set it.
 	// This means that the first radio button will be selected.
-	for (i = 0; i < wz_arr_len(parent->children); i++)
+	for (size_t i = 0; i < parent->children.size(); i++)
 	{
 		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != widget)
 			return;

@@ -29,9 +29,10 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
-struct wzCombo
+struct wzCombo : public wzWidget
 {
-	struct wzWidget base;
+	wzCombo();
+
 	bool isOpen;
 	struct wzList *list;
 };
@@ -136,7 +137,7 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 	int listItemHeight, listNumItems, over;
 
 	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
-	if (!combo->base.mainWindow)
+	if (!combo->mainWindow)
 		return;
 
 	rect = wz_widget_get_rect((struct wzWidget *)combo);
@@ -155,7 +156,7 @@ static void wz_combo_update_list_rect(struct wzCombo *combo)
 
 	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct wzWidget *)combo->base.mainWindow).h;
+	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct wzWidget *)combo->mainWindow).h;
 	
 	if (over > 0)
 	{
@@ -234,7 +235,7 @@ static void wz_combo_list_item_selected(wzEvent *e)
 	combo = (struct wzCombo *)e->base.widget->parent;
 
 	// Unlock input.
-	wz_main_window_pop_lock_input_widget(combo->base.mainWindow, (struct wzWidget *)combo);
+	wz_main_window_pop_lock_input_widget(combo->mainWindow, (struct wzWidget *)combo);
 
 	// Hide dropdown list.
 	wz_widget_set_visible((struct wzWidget *)combo->list, false);
@@ -242,18 +243,21 @@ static void wz_combo_list_item_selected(wzEvent *e)
 	combo->isOpen = false;
 }
 
+wzCombo::wzCombo()
+{
+	type = WZ_TYPE_COMBO;
+	isOpen = false;
+}
+
 struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
 {
-	struct wzCombo *combo = (struct wzCombo *)malloc(sizeof(struct wzCombo));
-
-	memset(combo, 0, sizeof(struct wzCombo));
-	combo->base.type = WZ_TYPE_COMBO;
-	combo->base.vtable.measure = wz_combo_measure;
-	combo->base.vtable.draw = wz_combo_draw;
-	combo->base.vtable.set_rect = wz_combo_set_rect;
-	combo->base.vtable.font_changed = wz_combo_font_changed;
-	combo->base.vtable.mouse_button_down = wz_combo_mouse_button_down;
-	combo->base.vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
+	struct wzCombo *combo = new wzCombo;
+	combo->vtable.measure = wz_combo_measure;
+	combo->vtable.draw = wz_combo_draw;
+	combo->vtable.set_rect = wz_combo_set_rect;
+	combo->vtable.font_changed = wz_combo_font_changed;
+	combo->vtable.mouse_button_down = wz_combo_mouse_button_down;
+	combo->vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	combo->list = wz_list_create(itemData, itemStride, nItems);
 	wz_widget_add_child_widget((struct wzWidget *)combo, (struct wzWidget *)combo->list);

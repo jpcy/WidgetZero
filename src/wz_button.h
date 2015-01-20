@@ -25,6 +25,7 @@ SOFTWARE.
 #define WZ_BUTTON_H
 
 #include <string>
+#include <vector>
 #include <wz.h>
 
 typedef enum
@@ -50,9 +51,10 @@ typedef enum
 }
 wzButtonSetBehavior;
 
-struct wzButton
+struct wzButton : public wzWidget
 {
-	struct wzWidget base;
+	wzButton();
+
 	wzButtonClickBehavior clickBehavior;
 	wzButtonSetBehavior setBehavior;
 	wzBorder padding;
@@ -61,8 +63,8 @@ struct wzButton
 	bool isPressed;
 	bool isSet;
 	bool *boundValue;
-	wzEventCallback *pressed_callbacks;
-	wzEventCallback *clicked_callbacks;
+	std::vector<wzEventCallback> pressed_callbacks;
+	std::vector<wzEventCallback> clicked_callbacks;
 };
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);

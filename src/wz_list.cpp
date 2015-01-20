@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <vector>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,9 +30,10 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
-struct wzList
+struct wzList : public wzWidget
 {
-	struct wzWidget base;
+	wzList();
+
 	wzBorder itemsBorder;
 	wzDrawListItemCallback draw_item;
 	uint8_t *itemData;
@@ -49,7 +51,7 @@ struct wzList
 
 	struct wzScroller *scroller;
 
-	wzEventCallback *item_selected_callbacks;
+	std::vector<wzEventCallback> item_selected_callbacks;
 
 	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
 	wzPosition lastMousePosition;
@@ -196,12 +198,6 @@ static void wz_list_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-static void wz_list_destroy(struct wzWidget *widget)
-{
-	struct wzList *list = (struct wzList *)widget;
-	wz_arr_free(list->item_selected_callbacks);
-}
-
 static void wz_list_refresh_item_height(struct wzList *list)
 {
 	// Don't stomp on user set value.
@@ -258,7 +254,7 @@ static void wz_list_update_mouse_over_item(struct wzList *list, int mouseX, int 
 
 	list->mouseOverItem = -1;
 
-	if (!list->base.hover)
+	if (!list->hover)
 		return;
 
 	itemsRect = wz_list_get_absolute_items_rect(list);
@@ -384,31 +380,35 @@ static void wz_list_mouse_hover_off(struct wzWidget *widget)
 	list->mouseOverItem = -1;
 }
 
+wzList::wzList()
+{
+	draw_item = NULL;
+	itemData = NULL;
+	itemStride = itemHeight = nItems = 0;
+	isItemHeightUserSet = false;
+	firstItem = 0;
+	selectedItem = pressedItem = hoveredItem = mouseOverItem = -1;
+	scroller = NULL;
+	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
+}
+
 struct wzList *wz_list_create(uint8_t *itemData, int itemStride, int nItems)
 {
-	struct wzList *list = (struct wzList *)malloc(sizeof(struct wzList));
-
-	memset(list, 0, sizeof(struct wzList));
-	list->base.type = WZ_TYPE_LIST;
-	list->base.vtable.draw = wz_list_draw;
-	list->base.vtable.destroy = wz_list_destroy;
-	list->base.vtable.renderer_changed = wz_list_renderer_changed;
-	list->base.vtable.set_rect = wz_list_set_rect;
-	list->base.vtable.set_visible = wz_list_set_visible;
-	list->base.vtable.font_changed = wz_list_font_changed;
-	list->base.vtable.mouse_button_down = wz_list_mouse_button_down;
-	list->base.vtable.mouse_button_up = wz_list_mouse_button_up;
-	list->base.vtable.mouse_move = wz_list_mouse_move;
-	list->base.vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
-	list->base.vtable.mouse_hover_off = wz_list_mouse_hover_off;
+	struct wzList *list = new struct wzList;
+	list->type = WZ_TYPE_LIST;
+	list->vtable.draw = wz_list_draw;
+	list->vtable.renderer_changed = wz_list_renderer_changed;
+	list->vtable.set_rect = wz_list_set_rect;
+	list->vtable.set_visible = wz_list_set_visible;
+	list->vtable.font_changed = wz_list_font_changed;
+	list->vtable.mouse_button_down = wz_list_mouse_button_down;
+	list->vtable.mouse_button_up = wz_list_mouse_button_up;
+	list->vtable.mouse_move = wz_list_mouse_move;
+	list->vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
+	list->vtable.mouse_hover_off = wz_list_mouse_hover_off;
 	list->itemData = itemData;
 	list->itemStride = itemStride;
 	list->nItems = nItems;
-	list->selectedItem = -1;
-	list->pressedItem = -1;
-	list->hoveredItem = -1;
-	list->mouseOverItem = -1;
-	list->itemsBorder.top = list->itemsBorder.right = list->itemsBorder.bottom = list->itemsBorder.left = 2;
 
 	list->scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	wz_widget_add_child_widget((struct wzWidget *)list, (struct wzWidget *)list->scroller);
@@ -565,7 +565,7 @@ int wz_list_get_scroll_value(const struct wzList *list)
 void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback)
 {
 	WZ_ASSERT(list);
-	wz_arr_push(list->item_selected_callbacks, callback);
+	list->item_selected_callbacks.push_back(callback);
 }
 
 struct wzScroller *wz_list_get_scroller(struct wzList *list)

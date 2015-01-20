@@ -28,9 +28,14 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_skin.h"
 
-struct wzGroupBox
+struct wzGroupBox : public wzWidget
 {
-	struct wzWidget base;
+	wzGroupBox()
+	{
+		type = WZ_TYPE_GROUP_BOX;
+		content = NULL;
+	}
+
 	struct wzWidget *content;
 	std::string label;
 };
@@ -100,17 +105,13 @@ static void wz_group_box_renderer_changed(struct wzWidget *widget)
 
 struct wzGroupBox *wz_group_box_create(const char *label)
 {
-	struct wzGroupBox *groupBox = (struct wzGroupBox *)malloc(sizeof(struct wzGroupBox));
-
-	memset(groupBox, 0, sizeof(struct wzGroupBox));
-	groupBox->base.type = WZ_TYPE_GROUP_BOX;
-	groupBox->base.vtable.draw = wz_group_box_draw;
-	groupBox->base.vtable.renderer_changed = wz_group_box_renderer_changed;
+	struct wzGroupBox *groupBox = new struct wzGroupBox;
+	groupBox->vtable.draw = wz_group_box_draw;
+	groupBox->vtable.renderer_changed = wz_group_box_renderer_changed;
 	groupBox->label = label ? std::string(label) : std::string();
 
 	// Create content widget.
-	groupBox->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
-	memset(groupBox->content, 0, sizeof(struct wzWidget));
+	groupBox->content = new struct wzWidget;
 	groupBox->content->stretch = WZ_STRETCH;
 	wz_widget_add_child_widget((struct wzWidget *)groupBox, groupBox->content);
 
@@ -123,7 +124,7 @@ void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label)
 	groupBox->label = std::string(label);
 
 	// Update the margin.
-	if (groupBox->base.renderer)
+	if (groupBox->renderer)
 	{
 		wz_group_box_refresh_margin(groupBox);
 	}

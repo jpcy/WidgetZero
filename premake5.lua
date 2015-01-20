@@ -43,6 +43,9 @@ project "WidgetZero"
 	files { "src/*.*", "include/*.*" }
 	includedirs { "include", "nanovg" }
 	vpaths { ["*"] = { "src", "include" } }
+	configuration "vs*"
+		-- disable warning "new behavior: elements of array 'array' will be default initialized"
+		buildoptions { "/wd\"4351\"" }
 		
 -----------------------------------------------------------------------------
 

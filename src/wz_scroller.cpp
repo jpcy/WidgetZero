@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#include <vector>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_main_window.h"
@@ -31,9 +32,10 @@ SOFTWARE.
 #define WZ_MINIMUM_NUB_SIZE 8
 #define WZ_DEFAULT_NUB_SIZE 16
 
-struct wzScrollerNub
+struct wzScrollerNub : public wzWidget
 {
-	struct wzWidget base;
+	wzScrollerNub();
+
 	struct wzScroller *scroller;
 	bool isPressed;
 
@@ -44,14 +46,15 @@ struct wzScrollerNub
 	wzPosition pressMousePosition;
 };
 
-struct wzScroller
+struct wzScroller : public wzWidget
 {
-	struct wzWidget base;
+	wzScroller();
+
 	wzScrollerType scrollerType;
 	int value, stepValue, maxValue;
 	float nubScale;
 	struct wzScrollerNub *nub;
-	wzEventCallback *value_changed_callbacks;
+	std::vector<wzEventCallback> value_changed_callbacks;
 };
 
 /*
@@ -102,7 +105,7 @@ static void wz_nub_mouse_button_down(struct wzWidget *widget, int mouseButton, i
 	nub = (struct wzScrollerNub *)widget;
 	rect = wz_widget_get_absolute_rect((struct wzWidget *)nub);
 
-	if (mouseButton == 1 && nub->base.hover)
+	if (mouseButton == 1 && nub->hover)
 	{
 		nub->isPressed = true;
 		nub->pressPosition.x = rect.x;
@@ -136,7 +139,7 @@ static void wz_nub_mouse_move(struct wzWidget *widget, int mouseX, int mouseY, i
 	WZ_ASSERT(widget);
 	nub = (struct wzScrollerNub *)widget;
 	nubSize = wz_widget_get_size((struct wzWidget *)nub);
-	containerRect = wz_widget_get_absolute_rect(nub->base.parent);
+	containerRect = wz_widget_get_absolute_rect(nub->parent);
 
 	// Handle dragging.
 	if (nub->isPressed)
@@ -166,7 +169,7 @@ static void wz_scroller_nub_update_rect(struct wzScrollerNub *nub)
 	wzRect rect;
 
 	WZ_ASSERT(nub);
-	containerSize = wz_widget_get_size(nub->base.parent);
+	containerSize = wz_widget_get_size(nub->parent);
 
 	if (nub->scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
@@ -228,17 +231,21 @@ static void wz_scroller_nub_update_rect(struct wzScrollerNub *nub)
 	wz_widget_set_rect_internal((struct wzWidget *)nub, rect);
 }
 
+wzScrollerNub::wzScrollerNub()
+{
+	isPressed = false;
+}
+
 static struct wzScrollerNub *wz_scroller_nub_create(struct wzScroller *scroller)
 {
 	struct wzScrollerNub *nub;
 
 	WZ_ASSERT(scroller);
-	nub = (struct wzScrollerNub *)malloc(sizeof(struct wzScrollerNub));
-	memset(nub, 0, sizeof(struct wzScrollerNub));
+	nub = new struct wzScrollerNub;
 	nub->scroller = scroller;
-	nub->base.vtable.mouse_button_down = wz_nub_mouse_button_down;
-	nub->base.vtable.mouse_button_up = wz_nub_mouse_button_up;
-	nub->base.vtable.mouse_move = wz_nub_mouse_move;
+	nub->vtable.mouse_button_down = wz_nub_mouse_button_down;
+	nub->vtable.mouse_button_up = wz_nub_mouse_button_up;
+	nub->vtable.mouse_move = wz_nub_mouse_move;
 	return nub;
 }
 
@@ -495,15 +502,6 @@ static void wz_scroller_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-static void wz_scroller_destroy(struct wzWidget *widget)
-{
-	struct wzScroller *scroller;
-
-	WZ_ASSERT(widget);
-	scroller = (struct wzScroller *)widget;
-	wz_arr_free(scroller->value_changed_callbacks);
-}
-
 static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 {
 	struct wzScroller *scroller;
@@ -514,21 +512,25 @@ static void wz_scroller_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_scroller_nub_update_rect(scroller->nub);
 }
 
+wzScroller::wzScroller()
+{
+	type = WZ_TYPE_SCROLLER;
+	nubScale = 0;
+}
+
 struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	struct wzStackLayout *layout;
 	struct wzButton *decrementButton, *incrementButton;
-	struct wzDummy *nubContainer;
-	struct wzScroller *scroller = (struct wzScroller *)malloc(sizeof(struct wzScroller));
-
-	memset(scroller, 0, sizeof(struct wzScroller));
-	scroller->base.type = WZ_TYPE_SCROLLER;
-	scroller->base.vtable.destroy = wz_scroller_destroy;
-	scroller->base.vtable.measure = wz_scroller_measure;
-	scroller->base.vtable.draw = wz_scroller_draw;
-	scroller->base.vtable.mouse_button_up = wz_scroller_mouse_button_up;
-	scroller->base.vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
-	scroller->base.vtable.set_rect = wz_scroller_set_rect;
+	struct wzWidget *nubContainer;
+	
+	struct wzScroller *scroller = new struct wzScroller;
+	scroller->type = WZ_TYPE_SCROLLER;
+	scroller->vtable.measure = wz_scroller_measure;
+	scroller->vtable.draw = wz_scroller_draw;
+	scroller->vtable.mouse_button_up = wz_scroller_mouse_button_up;
+	scroller->vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
+	scroller->vtable.set_rect = wz_scroller_set_rect;
 	scroller->scrollerType = scrollerType;
 	scroller->stepValue = WZ_MAX(1, stepValue);
 	scroller->maxValue = WZ_MAX(0, maxValue);
@@ -544,7 +546,7 @@ struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, in
 	wz_button_add_callback_clicked(decrementButton, wz_scroller_decrement_button_clicked);
 	wz_stack_layout_add(layout, (struct wzWidget *)decrementButton);
 
-	nubContainer = wz_dummy_create();
+	nubContainer = new wzWidget;
 	((struct wzWidget *)nubContainer)->vtable.mouse_button_down = wz_scroller_nub_container_mouse_button_down;
 	wz_widget_set_stretch((struct wzWidget *)nubContainer, WZ_STRETCH);
 	wz_stack_layout_add(layout, (struct wzWidget *)nubContainer);
@@ -643,7 +645,7 @@ void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *contai
 	WZ_ASSERT(scroller);
 
 	if (containerRect)
-		*containerRect = wz_widget_get_absolute_rect(scroller->nub->base.parent);
+		*containerRect = wz_widget_get_absolute_rect(scroller->nub->parent);
 
 	if (rect)
 		*rect = wz_widget_get_absolute_rect((const struct wzWidget *)scroller->nub);
@@ -658,5 +660,5 @@ void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *contai
 void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback)
 {
 	WZ_ASSERT(scroller);
-	wz_arr_push(scroller->value_changed_callbacks, callback);
+	scroller->value_changed_callbacks.push_back(callback);
 }

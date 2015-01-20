@@ -28,9 +28,10 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_skin.h"
 
-struct wzLabel
+struct wzLabel : public wzWidget
 {
-	struct wzWidget base;
+	wzLabel();
+
 	std::string text;
 	bool multiline;
 	NVGcolor textColor;
@@ -84,15 +85,20 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
+wzLabel::wzLabel()
+{
+	type = WZ_TYPE_LABEL;
+	multiline = false;
+	textColor = WZ_SKIN_LABEL_TEXT_COLOR;
+	isTextColorUserSet = false;
+}
+
 struct wzLabel *wz_label_create(const char *text)
 {
-	struct wzLabel *label = (struct wzLabel *)malloc(sizeof(struct wzLabel));
-	memset(label, 0, sizeof(struct wzLabel));
-	label->base.type = WZ_TYPE_LABEL;
-	label->base.vtable.measure = wz_label_measure;
-	label->base.vtable.draw = wz_label_draw;
+	struct wzLabel *label = new struct wzLabel;
+	label->vtable.measure = wz_label_measure;
+	label->vtable.draw = wz_label_draw;
 	label->text = text ? std::string(text) : std::string();
-	label->textColor = WZ_SKIN_LABEL_TEXT_COLOR;
 	return label;
 }
 
@@ -112,7 +118,7 @@ void wz_label_set_text(struct wzLabel *label, const char *text)
 {
 	WZ_ASSERT(label);
 	label->text = std::string(text);
-	wz_widget_resize_to_measured(&label->base);
+	wz_widget_resize_to_measured(label);
 }
 
 const char *wz_label_get_text(const struct wzLabel *label)

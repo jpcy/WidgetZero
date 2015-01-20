@@ -47,9 +47,10 @@ typedef enum
 }
 wzWindowDrag;
 
-struct wzWindow
+struct wzWindow : public wzWidget
 {
-	struct wzWidget base;
+	wzWindow();
+
 	int drawPriority;
 	int headerHeight;
 	int borderSize;
@@ -121,7 +122,6 @@ static void wz_window_renderer_changed(struct wzWidget *widget)
 {
 	struct wzWindow *window = (struct wzWindow *)widget;
 	WZ_ASSERT(window);
-	window->borderSize = 4;
 	wz_window_refresh_header_height(widget);
 	wz_widget_refresh_rect(widget);
 }
@@ -138,45 +138,45 @@ static void wz_window_calculate_border_rects(struct wzWindow *window, wzRect *re
 	WZ_ASSERT(window);
 	WZ_ASSERT(rects);
 
-	rects[WZ_COMPASS_N] = window->base.rect;
+	rects[WZ_COMPASS_N] = window->rect;
 	rects[WZ_COMPASS_N].x += window->borderSize;
 	rects[WZ_COMPASS_N].w -= window->borderSize * 2;
 	rects[WZ_COMPASS_N].h = window->borderSize;
 
-	rects[WZ_COMPASS_NE] = window->base.rect;
+	rects[WZ_COMPASS_NE] = window->rect;
 	rects[WZ_COMPASS_NE].x += rects[WZ_COMPASS_NE].w - window->borderSize;
 	rects[WZ_COMPASS_NE].w = window->borderSize;
 	rects[WZ_COMPASS_NE].h = window->borderSize;
 
-	rects[WZ_COMPASS_E] = window->base.rect;
+	rects[WZ_COMPASS_E] = window->rect;
 	rects[WZ_COMPASS_E].x += rects[WZ_COMPASS_E].w - window->borderSize;
 	rects[WZ_COMPASS_E].y += window->borderSize;
 	rects[WZ_COMPASS_E].w = window->borderSize;
 	rects[WZ_COMPASS_E].h -= window->borderSize * 2;
 
-	rects[WZ_COMPASS_SE] = window->base.rect;
+	rects[WZ_COMPASS_SE] = window->rect;
 	rects[WZ_COMPASS_SE].x += rects[WZ_COMPASS_SE].w - window->borderSize;
 	rects[WZ_COMPASS_SE].y += rects[WZ_COMPASS_SE].h - window->borderSize;
 	rects[WZ_COMPASS_SE].w = window->borderSize;
 	rects[WZ_COMPASS_SE].h = window->borderSize;
 
-	rects[WZ_COMPASS_S] = window->base.rect;
+	rects[WZ_COMPASS_S] = window->rect;
 	rects[WZ_COMPASS_S].x += window->borderSize;
 	rects[WZ_COMPASS_S].y += rects[WZ_COMPASS_S].h - window->borderSize;
 	rects[WZ_COMPASS_S].w -= window->borderSize * 2;
 	rects[WZ_COMPASS_S].h = window->borderSize;
 
-	rects[WZ_COMPASS_SW] = window->base.rect;
+	rects[WZ_COMPASS_SW] = window->rect;
 	rects[WZ_COMPASS_SW].y += rects[WZ_COMPASS_SW].h - window->borderSize;
 	rects[WZ_COMPASS_SW].w = window->borderSize;
 	rects[WZ_COMPASS_SW].h = window->borderSize;
 
-	rects[WZ_COMPASS_W] = window->base.rect;
+	rects[WZ_COMPASS_W] = window->rect;
 	rects[WZ_COMPASS_W].y += window->borderSize;
 	rects[WZ_COMPASS_W].w = window->borderSize;
 	rects[WZ_COMPASS_W].h -= window->borderSize * 2;
 
-	rects[WZ_COMPASS_NW] = window->base.rect;
+	rects[WZ_COMPASS_NW] = window->rect;
 	rects[WZ_COMPASS_NW].w = window->borderSize;
 	rects[WZ_COMPASS_NW].h = window->borderSize;
 }
@@ -187,7 +187,7 @@ static void wz_window_calculate_mouse_over_border_rects(struct wzWindow *window,
 	wzDockPosition dockPosition;
 
 	WZ_ASSERT(window);
-	dockPosition = wz_main_window_get_window_dock_position(window->base.mainWindow, window);
+	dockPosition = wz_main_window_get_window_dock_position(window->mainWindow, window);
 
 	// Take into account dockPositioning, e.g. north dockPositioned window can only be resized south.
 	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_SOUTH));
@@ -220,7 +220,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 
 			// Don't actually move the window yet if it's docked.
-			if (wz_main_window_get_window_dock_position(window->base.mainWindow, window) == WZ_DOCK_POSITION_NONE)
+			if (wz_main_window_get_window_dock_position(window->mainWindow, window) == WZ_DOCK_POSITION_NONE)
 			{
 				wz_main_window_set_moving_window(widget->mainWindow, window);
 			}
@@ -244,7 +244,7 @@ static void wz_window_mouse_button_down(struct wzWidget *widget, int mouseButton
 				window->drag = (wzWindowDrag)(WZ_DRAG_RESIZE_N + i);
 				window->resizeStartPosition.x = mouseX;
 				window->resizeStartPosition.y = mouseY;
-				window->resizeStartRect = window->base.rect;
+				window->resizeStartRect = window->rect;
 				wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 				return;
 			}
@@ -442,7 +442,7 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 
 	WZ_ASSERT(widget);
 	window = (struct wzWindow *)widget;
-	window->base.rect = rect;
+	window->rect = rect;
 
 	contentRect.x = window->borderSize;
 	contentRect.y = window->borderSize + window->headerHeight;
@@ -452,24 +452,29 @@ static void wz_window_set_rect(struct wzWidget *widget, wzRect rect)
 	wz_widget_set_rect_internal(window->content, contentRect);
 }
 
+wzWindow::wzWindow()
+{
+	type = WZ_TYPE_WINDOW;
+	drawPriority = 0;
+	headerHeight = 0;
+	borderSize = 4;
+	drag = WZ_DRAG_NONE;
+}
+
 struct wzWindow *wz_window_create(const char *title)
 {
-	struct wzWindow *window = (struct wzWindow *)malloc(sizeof(struct wzWindow));
-
-	memset(window, 0, sizeof(struct wzWindow));
-	window->base.type = WZ_TYPE_WINDOW;
-	window->base.vtable.draw = wz_window_draw;
-	window->base.vtable.renderer_changed = wz_window_renderer_changed;
-	window->base.vtable.font_changed = wz_window_font_changed;
-	window->base.vtable.mouse_button_down = wz_window_mouse_button_down;
-	window->base.vtable.mouse_button_up = wz_window_mouse_button_up;
-	window->base.vtable.mouse_move = wz_window_mouse_move;
-	window->base.vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
-	window->base.vtable.set_rect = wz_window_set_rect;
+	struct wzWindow *window = new struct wzWindow;
+	window->vtable.draw = wz_window_draw;
+	window->vtable.renderer_changed = wz_window_renderer_changed;
+	window->vtable.font_changed = wz_window_font_changed;
+	window->vtable.mouse_button_down = wz_window_mouse_button_down;
+	window->vtable.mouse_button_up = wz_window_mouse_button_up;
+	window->vtable.mouse_move = wz_window_mouse_move;
+	window->vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
+	window->vtable.set_rect = wz_window_set_rect;
 	window->title = title ? std::string(title) : std::string();
 
-	window->content = (struct wzWidget *)malloc(sizeof(struct wzWidget));
-	memset(window->content, 0, sizeof(struct wzWidget));
+	window->content = new struct wzWidget;
 	wz_widget_add_child_widget((struct wzWidget *)window, window->content);
 
 	return window;
@@ -492,9 +497,9 @@ wzRect wz_window_get_header_rect(const struct wzWindow *window)
 	wzRect rect;
 
 	WZ_ASSERT(window);
-	rect.x = window->base.rect.x + window->borderSize;
-	rect.y = window->base.rect.y + window->borderSize;
-	rect.w = window->base.rect.w - window->borderSize * 2;
+	rect.x = window->rect.x + window->borderSize;
+	rect.y = window->rect.y + window->borderSize;
+	rect.w = window->rect.w - window->borderSize * 2;
 	rect.h = window->headerHeight;
 	return rect;
 }
@@ -539,8 +544,8 @@ struct wzWidget *wz_window_get_content_widget(struct wzWindow *window)
 void wz_window_dock(struct wzWindow *window)
 {
 	WZ_ASSERT(window);
-	window->sizeBeforeDocking.w = window->base.rect.w;
-	window->sizeBeforeDocking.h = window->base.rect.h;
+	window->sizeBeforeDocking.w = window->rect.w;
+	window->sizeBeforeDocking.h = window->rect.h;
 }
 
 int wz_window_get_draw_priority(const struct wzWindow *window)

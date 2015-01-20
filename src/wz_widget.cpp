@@ -48,7 +48,32 @@ wz_intersect_rects is SDL_IntersectRect
 #include "wz_layout.h"
 #include "wz_widget.h"
 
-const wzBorder wzBorder_zero = { 0, 0, 0, 0 };
+const wzBorder wzBorder_zero;
+
+wzWidget::wzWidget()
+{
+	type = WZ_TYPE_WIDGET;
+	stretch = 0;
+	stretchWidthScale = 0;
+	stretchHeightScale = 0;
+	align = 0;
+	internalMetadata = NULL;
+	metadata = NULL;
+	flags = 0;
+	hover = false;
+	hidden = false;
+	ignore = false;
+	overlap = false;
+	drawManually = false;
+	inputNotClippedToParent = false;
+	fontSize = 0;
+	fontFace[0] = NULL;
+	renderer = NULL;
+	mainWindow = NULL;
+	window = NULL;
+	parent = NULL;
+	memset(&vtable, 0, sizeof(vtable));
+}
 
 /*
 ================================================================================
@@ -113,24 +138,22 @@ PUBLIC WIDGET FUNCTIONS
 
 void wz_widget_destroy(struct wzWidget *widget)
 {
-	int i;
-
 	WZ_ASSERT(widget);
 
 	// Destroy children.
-	for (i = 0; i < wz_arr_len(widget->children); i++)
+	for (size_t i = 0; i < widget->children.size(); i++)
 	{
 		wz_widget_destroy(widget->children[i]);
 	}
 
-	wz_arr_free(widget->children);
+	widget->children.clear();
 
 	if (widget->vtable.destroy)
 	{
 		widget->vtable.destroy(widget);
 	}
 
-	free(widget);
+	delete widget;
 }
 
 struct wzMainWindow *wz_widget_get_main_window(struct wzWidget *widget)
@@ -519,11 +542,9 @@ static void wz_widget_set_renderer(struct wzWidget *widget, struct wzRenderer *r
 // Example: scroller does this with it's button children.
 static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widget, struct wzMainWindow *mainWindow, struct wzWindow *window)
 {
-	int i;
-
 	WZ_ASSERT(widget);
 
-	for (i = 0; i < wz_arr_len(widget->children); i++)
+	for (size_t i = 0; i < widget->children.size(); i++)
 	{
 		struct wzWidget *child = widget->children[i];
 		child->mainWindow = mainWindow;
@@ -614,12 +635,10 @@ void wz_widget_resize_to_measured(struct wzWidget *widget)
 
 static void wz_widget_measure_and_resize_recursive(struct wzWidget *widget)
 {
-	int i;
-
 	WZ_ASSERT(widget);
 	wz_widget_resize_to_measured(widget);
 
-	for (i = 0; i < wz_arr_len(widget->children); i++)
+	for (size_t i = 0; i < widget->children.size(); i++)
 	{
 		wz_widget_measure_and_resize_recursive(widget->children[i]);
 	}
@@ -654,7 +673,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
 
 	child->parent = widget;
-	wz_arr_push(widget->children, child);
+	widget->children.push_back(child);
 
 	// Resize the widget and children to their measured sizes.
 	wz_widget_measure_and_resize_recursive(child);
@@ -668,7 +687,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 
 void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
-	int i, deleteIndex;
+	int deleteIndex;
 
 	WZ_ASSERT(widget);
 	WZ_ASSERT(child);
@@ -676,11 +695,11 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 	// Ensure the child is actually a child of widget before destroying it.
 	deleteIndex = -1;
 
-	for (i = 0; i < wz_arr_len(widget->children); i++)
+	for (size_t i = 0; i < widget->children.size(); i++)
 	{
 		if (widget->children[i] == child)
 		{
-			deleteIndex = i;
+			deleteIndex = (int)i;
 			break;
 		}
 	}
@@ -688,7 +707,7 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 	if (deleteIndex == -1)
 		return;
 
-	wz_arr_delete(widget->children, deleteIndex);
+	widget->children.erase(widget->children.begin() + deleteIndex);
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
 	child->mainWindow = NULL;
@@ -698,14 +717,12 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 
 void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
 {
-	int n;
-
 	WZ_ASSERT(widget);
-	n = wz_arr_len(widget->children);
+	const size_t n = widget->children.size();
 	wz_widget_remove_child_widget(widget, child);
 
 	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see wz_widget_remove_child_widget.
-	if (n == wz_arr_len(widget->children))
+	if (n == widget->children.size())
 		return;
 
 	wz_widget_destroy(child);
@@ -801,9 +818,7 @@ static void wz_widget_set_rect_internal_recursive(struct wzWidget *widget, wzRec
 	// Don't recurse if the rect hasn't changed.
 	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
 	{
-		int i;
-
-		for (i = 0; i < wz_arr_len(widget->children); i++)
+		for (size_t i = 0; i < widget->children.size(); i++)
 		{
 			wz_widget_set_rect_internal_recursive(widget->children[i], widget->children[i]->rect);
 		}

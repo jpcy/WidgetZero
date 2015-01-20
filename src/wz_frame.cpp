@@ -25,17 +25,17 @@ SOFTWARE.
 #include <string.h>
 #include "wz_widget.h"
 
-struct wzFrame
+struct wzFrame : public wzWidget
 {
-	struct wzWidget base;
+	wzFrame()
+	{
+		type = WZ_TYPE_FRAME;
+	}
 };
 
 struct wzFrame *wz_frame_create()
 {
-	struct wzFrame *frame = (struct wzFrame *)malloc(sizeof(struct wzFrame));
-	memset(frame, 0, sizeof(struct wzFrame));
-	frame->base.type = WZ_TYPE_FRAME;
-	return frame;
+	return new struct wzFrame;
 }
 
 void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
@@ -46,12 +46,12 @@ void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(&frame->base, widget);
+	wz_widget_add_child_widget(frame, widget);
 }
 
 void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget)
 {
 	WZ_ASSERT(frame);
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(&frame->base, widget);
+	wz_widget_remove_child_widget(frame, widget);
 }

@@ -172,16 +172,6 @@ VTABLE FUNCTIONS
 ================================================================================
 */
 
-static void wz_button_destroy(struct wzWidget *widget)
-{
-	struct wzButton *button;
-
-	WZ_ASSERT(widget);
-	button = (struct wzButton *)widget;
-	wz_arr_free(button->pressed_callbacks);
-	wz_arr_free(button->clicked_callbacks);
-}
-
 static void wz_button_click(struct wzButton *button)
 {
 	wzEvent e;
@@ -284,22 +274,26 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
+wzButton::wzButton()
+{
+	type = WZ_TYPE_BUTTON;
+	vtable.measure = wz_button_measure;
+	vtable.draw = wz_button_draw;
+	vtable.mouse_button_down = wz_button_mouse_button_down;
+	vtable.mouse_button_up = wz_button_mouse_button_up;
+	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
+	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
+	isPressed = isSet = false;
+	boundValue = NULL;
+	padding.left = padding.right = 8;
+	padding.top = padding.bottom = 4;
+}
+
 struct wzButton *wz_button_create(const char *label, const char *icon)
 {
-	struct wzButton *button = (struct wzButton *)malloc(sizeof(struct wzButton));
-
-	memset(button, 0, sizeof(struct wzButton));
-	button->base.type = WZ_TYPE_BUTTON;
-	button->base.vtable.measure = wz_button_measure;
-	button->base.vtable.draw = wz_button_draw;
-	button->base.vtable.destroy = wz_button_destroy;
-	button->base.vtable.mouse_button_down = wz_button_mouse_button_down;
-	button->base.vtable.mouse_button_up = wz_button_mouse_button_up;
-	button->padding.left = button->padding.right = 8;
-	button->padding.top = button->padding.bottom = 4;
+	struct wzButton *button = new wzButton;
 	button->label = label ? std::string(label) : std::string();
 	button->icon = icon ? std::string(icon) : std::string();
-
 	return button;
 }
 
@@ -314,7 +308,7 @@ void wz_button_set_label(struct wzButton *button, const char *label)
 {
 	WZ_ASSERT(button);
 	button->label = label;
-	wz_widget_resize_to_measured(&button->base);
+	wz_widget_resize_to_measured(button);
 }
 
 const char *wz_button_get_label(const struct wzButton *button)
@@ -327,7 +321,7 @@ void wz_button_set_icon(struct wzButton *button, const char *icon)
 {
 	WZ_ASSERT(button);
 	button->icon = std::string(icon);
-	wz_widget_resize_to_measured(&button->base);
+	wz_widget_resize_to_measured(button);
 }
 
 const char *wz_button_get_icon(const struct wzButton *button)
@@ -340,7 +334,7 @@ void wz_button_set_padding(struct wzButton *button, wzBorder padding)
 {
 	WZ_ASSERT(button);
 	button->padding = padding;
-	wz_widget_resize_to_measured(&button->base);
+	wz_widget_resize_to_measured(button);
 }
 
 void wz_button_set_padding_args(struct wzButton *button, int top, int right, int bottom, int left)
@@ -350,7 +344,7 @@ void wz_button_set_padding_args(struct wzButton *button, int top, int right, int
 	button->padding.right = right;
 	button->padding.bottom = bottom;
 	button->padding.left = left;
-	wz_widget_resize_to_measured(&button->base);
+	wz_widget_resize_to_measured(button);
 }
 
 wzBorder wz_button_get_padding(const struct wzButton *button)
@@ -417,11 +411,11 @@ void wz_button_bind_value(struct wzButton *button, bool *value)
 void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback)
 {
 	WZ_ASSERT(button);
-	wz_arr_push(button->pressed_callbacks, callback);
+	button->pressed_callbacks.push_back(callback);
 }
 
 void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback)
 {
 	WZ_ASSERT(button);
-	wz_arr_push(button->clicked_callbacks, callback);
+	button->clicked_callbacks.push_back(callback);
 }

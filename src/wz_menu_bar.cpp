@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <string>
+#include <vector>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_main_window.h"
@@ -29,20 +30,22 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
-struct wzMenuBarButton
+struct wzMenuBarButton : public wzWidget
 {
-	struct wzWidget base;
+	wzMenuBarButton();
+
 	wzBorder padding;
 	std::string label;
 	bool isPressed;
 	bool isSet;
-	wzEventCallback *pressed_callbacks;
+	std::vector<wzEventCallback> pressed_callbacks;
 	struct wzMenuBar *menuBar;
 };
 
-struct wzMenuBar
+struct wzMenuBar : public wzWidget
 {
-	struct wzWidget base;
+	wzMenuBar();
+
 	struct wzStackLayout *layout;
 };
 
@@ -88,15 +91,6 @@ static void wz_menu_bar_button_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-static void wz_menu_bar_button_destroy(struct wzWidget *widget)
-{
-	struct wzMenuBarButton *button;
-
-	WZ_ASSERT(widget);
-	button = (struct wzMenuBarButton *)widget;
-	wz_arr_free(button->pressed_callbacks);
-}
-
 static void wz_menu_bar_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
@@ -125,15 +119,14 @@ static void wz_menu_bar_button_mouse_button_up(struct wzWidget *widget, int mous
 
 static void wz_menu_bar_button_mouse_hover_on(struct wzWidget *widget)
 {
-	int i;
 	struct wzMenuBarButton *button = (struct wzMenuBarButton *)widget;
 	WZ_ASSERT(button);
 
 	// See if any of the other buttons in the menubar are pressed.
 	// If one is pressed, unpress it and press this one instead.
-	for (i = 0; i < wz_arr_len(button->menuBar->base.children[0]->children); i++)
+	for (size_t i = 0; i < button->menuBar->children[0]->children.size(); i++)
 	{
-		struct wzMenuBarButton *otherButton = (struct wzMenuBarButton *)button->menuBar->base.children[0]->children[i];
+		struct wzMenuBarButton *otherButton = (struct wzMenuBarButton *)button->menuBar->children[0]->children[i];
 
 		if (otherButton == button || !otherButton->isPressed)
 			continue;
@@ -144,18 +137,21 @@ static void wz_menu_bar_button_mouse_hover_on(struct wzWidget *widget)
 	}
 }
 
+wzMenuBarButton::wzMenuBarButton()
+{
+	type = WZ_TYPE_BUTTON;
+	isPressed = isSet = false;
+	menuBar = NULL;
+}
+
 static struct wzMenuBarButton *wz_menu_bar_button_create(struct wzMenuBar *menuBar)
 {
-	struct wzMenuBarButton *button = (struct wzMenuBarButton *)malloc(sizeof(struct wzMenuBarButton));
-	memset(button, 0, sizeof(struct wzMenuBarButton));
-	button->base.type = WZ_TYPE_BUTTON;
-	button->base.vtable.measure = wz_menu_bar_button_measure;
-	button->base.vtable.draw = wz_menu_bar_button_draw;
-	button->base.vtable.destroy = wz_menu_bar_button_destroy;
-	button->base.vtable.mouse_button_down = wz_menu_bar_button_mouse_button_down;
-	button->base.vtable.mouse_button_up = wz_menu_bar_button_mouse_button_up;
-	button->base.vtable.mouse_hover_on = wz_menu_bar_button_mouse_hover_on;
-	button->label = std::string();
+	struct wzMenuBarButton *button = new struct wzMenuBarButton;
+	button->vtable.measure = wz_menu_bar_button_measure;
+	button->vtable.draw = wz_menu_bar_button_draw;
+	button->vtable.mouse_button_down = wz_menu_bar_button_mouse_button_down;
+	button->vtable.mouse_button_up = wz_menu_bar_button_mouse_button_up;
+	button->vtable.mouse_hover_on = wz_menu_bar_button_mouse_hover_on;
 	button->menuBar = menuBar;
 	return button;
 }
@@ -164,7 +160,7 @@ void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *la
 {
 	WZ_ASSERT(button);
 	button->label = std::string(label);
-	wz_widget_resize_to_measured(&button->base);
+	wz_widget_resize_to_measured(button);
 }
 
 const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button)
@@ -204,14 +200,17 @@ static void wz_menu_bar_renderer_changed(struct wzWidget *widget)
 	wz_widget_set_height(widget, wz_widget_get_line_height(widget) + WZ_SKIN_MENU_BAR_PADDING);
 }
 
+wzMenuBar::wzMenuBar()
+{
+	type = WZ_TYPE_MENU_BAR;
+	layout = NULL;
+}
+
 struct wzMenuBar *wz_menu_bar_create()
 {
-	struct wzMenuBar *menuBar = (struct wzMenuBar *)malloc(sizeof(struct wzMenuBar));
-
-	memset(menuBar, 0, sizeof(struct wzMenuBar));
-	menuBar->base.type = WZ_TYPE_MENU_BAR;
-	menuBar->base.vtable.draw = wz_menu_bar_draw;
-	menuBar->base.vtable.renderer_changed = wz_menu_bar_renderer_changed;
+	struct wzMenuBar *menuBar = new struct wzMenuBar;
+	menuBar->vtable.draw = wz_menu_bar_draw;
+	menuBar->vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
 	menuBar->layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	wz_widget_set_stretch((struct wzWidget *)menuBar->layout, WZ_STRETCH);

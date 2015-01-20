@@ -26,26 +26,12 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#ifndef __cplusplus
-#ifdef _MSC_VER
-typedef unsigned char bool;
-#define false 0
-#define true 1
-#else
-#include <stdbool.h>
-#endif
-#endif
-
 #ifndef WZ_ASSERT
 #include <assert.h>
 #define WZ_ASSERT assert
 #endif
 
 #include <nanovg.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 typedef struct NVGcontext NVGcontext;
 
@@ -56,7 +42,6 @@ struct wzWidget;
 struct wzButton;
 struct wzCheckBox;
 struct wzCombo;
-struct wzDummy;
 struct wzFrame;
 struct wzGroupBox;
 struct wzLabel;
@@ -71,12 +56,11 @@ struct wzTextEdit;
 
 typedef enum
 {
-	WZ_TYPE_UNKNOWN,
+	WZ_TYPE_WIDGET,
 	WZ_TYPE_MAIN_WINDOW,
 	WZ_TYPE_WINDOW,
 	WZ_TYPE_BUTTON,
 	WZ_TYPE_COMBO,
-	WZ_TYPE_DUMMY,
 	WZ_TYPE_FRAME,
 	WZ_TYPE_GROUP_BOX,
 	WZ_TYPE_LABEL,
@@ -95,29 +79,29 @@ typedef enum
 }
 wzWidgetType;
 
-typedef struct
+struct wzPosition
 {
+	wzPosition() : x(0), y(0) {}
 	int x, y;
-}
-wzPosition;
+};
 
-typedef struct
+struct wzSize
 {
+	wzSize() : w(0), h(0) {}
 	int w, h;
-}
-wzSize;
+};
 
-typedef struct
+struct wzRect
 {
+	wzRect() : x(0), y(0), w(0), h(0) {}
 	int x, y, w, h;
-}
-wzRect;
+};
 
-typedef struct
+struct wzBorder
 {
+	wzBorder() : top(0), right(0), bottom(0), left(0) {}
 	int top, right, bottom, left;
-}
-wzBorder;
+};
 
 extern const wzBorder wzBorder_zero;
 
@@ -404,8 +388,6 @@ struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
 struct wzList *wz_combo_get_list(const struct wzCombo *combo);
 bool wz_combo_is_open(struct wzCombo *combo);
 
-struct wzDummy *wz_dummy_create();
-
 struct wzFrame *wz_frame_create();
 void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget);
 void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget);
@@ -600,9 +582,5 @@ typedef struct
 wzLineBreakResult;
 
 wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif

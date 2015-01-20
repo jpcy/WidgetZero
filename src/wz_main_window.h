@@ -24,6 +24,7 @@ SOFTWARE.
 #ifndef WZ_MAIN_WINDOW_H
 #define WZ_MAIN_WINDOW_H
 
+#include <vector>
 #include <wz.h>
 
 void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor);
@@ -50,7 +51,8 @@ wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow
 
 void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWindow *window);
 
-void wz_invoke_event(wzEvent *e, wzEventCallback *callbacks);
+void wz_invoke_event(wzEvent *e);
+void wz_invoke_event(wzEvent *e, const std::vector<wzEventCallback> &callbacks);
 
 bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow);
 

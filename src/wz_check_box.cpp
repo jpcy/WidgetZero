@@ -91,8 +91,8 @@ struct wzCheckBox *wz_check_box_create(const char *label)
 {
 	struct wzCheckBox *checkBox = (struct wzCheckBox *)wz_button_create(label, NULL);
 	wz_button_set_set_behavior(checkBox, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	checkBox->base.vtable.measure = wz_check_box_measure;
-	checkBox->base.vtable.draw = wz_check_box_draw;
+	checkBox->vtable.measure = wz_check_box_measure;
+	checkBox->vtable.draw = wz_check_box_draw;
 	return checkBox;
 }
 

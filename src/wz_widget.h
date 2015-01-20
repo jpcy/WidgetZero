@@ -24,8 +24,8 @@ SOFTWARE.
 #ifndef WZ_WIDGET_H
 #define WZ_WIDGET_H
 
+#include <vector>
 #include <wz.h>
-#include "wz_arr.h"
 
 typedef struct
 {
@@ -70,6 +70,8 @@ enum
 
 struct wzWidget
 {
+	wzWidget();
+
 	wzWidgetType type;
 
 	// Explicitly set by the user.
@@ -127,7 +129,7 @@ struct wzWidget
 	struct wzWindow *window;
 
 	struct wzWidget *parent;
-	struct wzWidget **children;
+	std::vector<struct wzWidget *> children;
 };
 
 enum
