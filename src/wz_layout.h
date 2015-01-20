@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_LAYOUT_H
-#define WZ_LAYOUT_H
+#pragma once
 
 #include <wz.h>
 
@@ -32,5 +31,3 @@ namespace wz {
 wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget, wzRect rect);
 
 } // namespace wz
-
-#endif // WZ_LAYOUT_H

@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_MAIN_WINDOW_H
-#define WZ_MAIN_WINDOW_H
+#pragma once
 
 #include <vector>
 #include <wz.h>
@@ -59,5 +58,3 @@ void wz_invoke_event(wzEvent *e, const std::vector<wzEventCallback> &callbacks);
 bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow);
 
 } // namespace wz
-
-#endif // WZ_MAIN_WINDOW_H

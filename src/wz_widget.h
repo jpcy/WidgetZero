@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_WIDGET_H
-#define WZ_WIDGET_H
+#pragma once
 
 #include <vector>
 #include <wz.h>
@@ -184,5 +183,3 @@ int wz_widget_get_line_height(const struct wzWidget *widget);
 void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height);
 
 } // namespace wz
-
-#endif

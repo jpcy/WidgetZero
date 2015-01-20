@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_LIST_H
-#define WZ_LIST_H
+#pragma once
 
 namespace wz {
 
@@ -32,5 +31,3 @@ struct wzScroller;
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
 
 } // namespace wz
-
-#endif // WZ_LIST_H

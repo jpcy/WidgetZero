@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_TEXT_EDIT_H
-#define WZ_TEXT_EDIT_H
+#pragma once
 
 #include <wz.h>
 
@@ -31,6 +30,3 @@ namespace wz {
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
 
 } // namespace wz
-
-#endif // WZ_TEXT_EDIT_H
-

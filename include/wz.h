@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WIDGET_ZERO_H
-#define WIDGET_ZERO_H
+#pragma once
 
 #include <stdint.h>
 
@@ -586,5 +585,3 @@ wzLineBreakResult;
 wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 
 } // namespace wz
-
-#endif

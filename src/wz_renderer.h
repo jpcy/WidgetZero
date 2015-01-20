@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_RENDERER_H
-#define WZ_RENDERER_H
+#pragma once
 
 #include <wz.h>
 
@@ -53,5 +52,3 @@ struct wzRenderer
 };
 
 } // namespace wz
-
-#endif // WZ_RENDERER_H

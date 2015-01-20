@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef WZ_BUTTON_H
-#define WZ_BUTTON_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -73,5 +72,3 @@ void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
 
 } // namespace wz
-
-#endif // WZ_BUTTON_BASE_H
