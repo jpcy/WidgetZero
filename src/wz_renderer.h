@@ -30,6 +30,8 @@ SOFTWARE.
 #define WZ_NANOVG_MAX_IMAGES 1024
 #define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
 
+namespace wz {
+
 struct wzImage
 {
 	wzImage() : handle(0) {}
@@ -49,5 +51,7 @@ struct wzRenderer
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
 	float defaultFontSize;
 };
+
+} // namespace wz
 
 #endif // WZ_RENDERER_H

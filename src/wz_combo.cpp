@@ -29,6 +29,8 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzCombo : public wzWidget
 {
 	wzCombo();
@@ -279,3 +281,5 @@ bool wz_combo_is_open(struct wzCombo *combo)
 	WZ_ASSERT(combo);
 	return combo->isOpen;
 }
+
+} // namespace wz

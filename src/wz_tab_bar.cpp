@@ -30,6 +30,8 @@ SOFTWARE.
 #include "wz_button.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzTabBar : public wzWidget
 {
 	wzTabBar();
@@ -444,3 +446,5 @@ int wz_tab_bar_get_scroll_value(const struct wzTabBar *tabBar)
 	WZ_ASSERT(tabBar);
 	return tabBar->scrollValue;
 }
+
+} // namespace wz

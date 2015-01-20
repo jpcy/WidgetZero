@@ -28,6 +28,8 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzLabel : public wzWidget
 {
 	wzLabel();
@@ -138,3 +140,5 @@ NVGcolor wz_label_get_text_color(const struct wzLabel *label)
 {
 	return label->textColor;
 }
+
+} // namespace wz

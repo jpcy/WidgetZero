@@ -28,6 +28,8 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzGroupBox : public wzWidget
 {
 	wzGroupBox()
@@ -153,3 +155,5 @@ void wz_group_box_remove(struct wzGroupBox *groupBox, struct wzWidget *widget)
 	WZ_ASSERT(widget);
 	wz_widget_remove_child_widget(groupBox->content, widget);
 }
+
+} // namespace wz

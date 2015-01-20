@@ -25,6 +25,8 @@ SOFTWARE.
 #include <string.h>
 #include "wz_widget.h"
 
+namespace wz {
+
 struct wzFrame : public wzWidget
 {
 	wzFrame()
@@ -55,3 +57,5 @@ void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget)
 	WZ_ASSERT(widget);
 	wz_widget_remove_child_widget(frame, widget);
 }
+
+} // namespace wz

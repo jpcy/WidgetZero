@@ -32,6 +32,8 @@ SOFTWARE.
 #define WZ_MINIMUM_NUB_SIZE 8
 #define WZ_DEFAULT_NUB_SIZE 16
 
+namespace wz { 
+
 struct wzScrollerNub : public wzWidget
 {
 	wzScrollerNub();
@@ -662,3 +664,5 @@ void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEvent
 	WZ_ASSERT(scroller);
 	scroller->value_changed_callbacks.push_back(callback);
 }
+
+} // namespace wz

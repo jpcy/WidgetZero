@@ -29,6 +29,8 @@ SOFTWARE.
 #include "wz_button.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzCheckBox : public wzButton
 {
 };
@@ -131,3 +133,5 @@ void wz_check_box_add_callback_checked(struct wzCheckBox *checkBox, wzEventCallb
 	WZ_ASSERT(checkBox);
 	wz_button_add_callback_clicked(checkBox, callback);
 }
+
+} // namespace wz

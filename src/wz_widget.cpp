@@ -48,6 +48,8 @@ wz_intersect_rects is SDL_IntersectRect
 #include "wz_layout.h"
 #include "wz_widget.h"
 
+namespace wz {
+
 const wzBorder wzBorder_zero;
 
 wzWidget::wzWidget()
@@ -929,3 +931,5 @@ void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int
 	WZ_ASSERT(widget);
 	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, text, n, width, height);
 }
+
+} // namespace wz

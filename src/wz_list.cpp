@@ -30,6 +30,8 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzList : public wzWidget
 {
 	wzList();
@@ -572,3 +574,5 @@ struct wzScroller *wz_list_get_scroller(struct wzList *list)
 {
 	return list->scroller;
 }
+
+} // namespace wz

@@ -26,6 +26,8 @@ SOFTWARE.
 
 #define WZ_MAX_WINDOWS 256
 
+namespace wz {
+
 struct wzWindow;
 
 struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
@@ -35,5 +37,7 @@ void wz_window_dock(struct wzWindow *window);
 
 int wz_window_get_draw_priority(const struct wzWindow *window);
 void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority);
+
+} // namespace wz
 
 #endif // WZ_WINDOW_H

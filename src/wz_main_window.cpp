@@ -30,6 +30,8 @@ SOFTWARE.
 #include "wz_window.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzMainWindow : public wzWidget
 {
 	wzMainWindow();
@@ -1624,3 +1626,5 @@ bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow
 {
 	return mainWindow->isTextCursorVisible;
 }
+
+} // namespace wz

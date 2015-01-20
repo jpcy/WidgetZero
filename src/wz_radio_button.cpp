@@ -28,6 +28,8 @@ SOFTWARE.
 #include "wz_button.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzRadioButton : public wzButton
 {
 };
@@ -156,3 +158,5 @@ void wz_radio_button_add_callback_clicked(struct wzRadioButton *radioButton, wzE
 	WZ_ASSERT(radioButton);
 	wz_button_add_callback_clicked(radioButton, callback);
 }
+
+} // namespace wz

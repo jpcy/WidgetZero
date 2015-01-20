@@ -27,6 +27,8 @@ SOFTWARE.
 #include <vector>
 #include <wz.h>
 
+namespace wz {
+
 void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor);
 
 // Set keyboard focus to this widget.
@@ -55,5 +57,7 @@ void wz_invoke_event(wzEvent *e);
 void wz_invoke_event(wzEvent *e, const std::vector<wzEventCallback> &callbacks);
 
 bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow);
+
+} // namespace wz
 
 #endif // WZ_MAIN_WINDOW_H

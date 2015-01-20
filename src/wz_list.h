@@ -24,9 +24,13 @@ SOFTWARE.
 #ifndef WZ_LIST_H
 #define WZ_LIST_H
 
+namespace wz {
+
 struct wzList;
 struct wzScroller;
 
 struct wzScroller *wz_list_get_scroller(struct wzList *list);
+
+} // namespace wz
 
 #endif // WZ_LIST_H

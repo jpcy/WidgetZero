@@ -28,6 +28,8 @@ SOFTWARE.
 #include <vector>
 #include <wz.h>
 
+namespace wz {
+
 typedef enum
 {
 	// Click the button on mouse up (default).
@@ -69,5 +71,7 @@ struct wzButton : public wzWidget
 
 void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
+
+} // namespace wz
 
 #endif // WZ_BUTTON_BASE_H

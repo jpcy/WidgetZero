@@ -35,6 +35,8 @@ SOFTWARE.
 
 typedef struct NVGcontext NVGcontext;
 
+namespace wz {
+
 struct wzRenderer;
 struct wzMainWindow;
 struct wzWindow;
@@ -582,5 +584,7 @@ typedef struct
 wzLineBreakResult;
 
 wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
+
+} // namespace wz
 
 #endif

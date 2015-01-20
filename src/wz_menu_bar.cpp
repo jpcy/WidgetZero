@@ -30,6 +30,8 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzMenuBarButton : public wzWidget
 {
 	wzMenuBarButton();
@@ -229,3 +231,5 @@ struct wzMenuBarButton *wz_menu_bar_create_button(struct wzMenuBar *menuBar)
 	wz_stack_layout_add(menuBar->layout, (struct wzWidget *)button);
 	return button;
 }
+
+} // namespace wz

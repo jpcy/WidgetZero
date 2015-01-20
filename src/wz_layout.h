@@ -26,7 +26,11 @@ SOFTWARE.
 
 #include <wz.h>
 
+namespace wz {
+
 // Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
 wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget, wzRect rect);
+
+} // namespace wz
 
 #endif // WZ_LAYOUT_H

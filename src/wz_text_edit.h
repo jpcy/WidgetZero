@@ -26,7 +26,11 @@ SOFTWARE.
 
 #include <wz.h>
 
+namespace wz {
+
 void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
+
+} // namespace wz
 
 #endif // WZ_TEXT_EDIT_H
 

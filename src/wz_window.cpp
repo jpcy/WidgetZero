@@ -32,6 +32,8 @@ SOFTWARE.
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
 
+namespace wz {
+
 typedef enum
 {
 	WZ_DRAG_NONE,
@@ -559,3 +561,5 @@ void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority)
 	WZ_ASSERT(window);
 	window->drawPriority = drawPriority;
 }
+
+} // namespace wz

@@ -28,6 +28,8 @@ SOFTWARE.
 #include "wz_widget.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 typedef struct
 {
 	struct wzButton *tab;
@@ -267,3 +269,5 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	newPage.page = *page;
 	tabbed->pages.push_back(newPage);
 }
+
+} // namespace wz

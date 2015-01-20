@@ -29,6 +29,8 @@ SOFTWARE.
 #include "wz_renderer.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzTextEdit : public wzWidget
 {
 	wzTextEdit();
@@ -1185,3 +1187,5 @@ void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border)
 	WZ_ASSERT(textEdit);
 	textEdit->border = border;
 }
+
+} // namespace wz

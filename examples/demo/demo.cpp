@@ -79,23 +79,23 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static void CustomDrawListItemCallback(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+static void CustomDrawListItemCallback(struct wz::wzRenderer *renderer, wz::wzRect clip, const struct wz::wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
 {
 	int image, width, height;
-	wzRect rect;
+	wz::wzRect rect;
 	
-	image = wz_renderer_create_image(renderer, (const char *)itemData, &width, &height);
+	image = wz::wz_renderer_create_image(renderer, (const char *)itemData, &width, &height);
 	rect.x = clip.x + (int)(clip.w / 2.0f - width / 2.0f);
 	rect.y = clip.y + (int)(clip.h / 2.0f - height / 2.0f);
 	rect.w = width;
 	rect.h = height;
-	wz_renderer_draw_image(wz_renderer_get_context(renderer), rect, image);
+	wz::wz_renderer_draw_image(wz::wz_renderer_get_context(renderer), rect, image);
 }
 
 class GUI
 {
 public:
-	GUI(int windowWidth, int windowHeight, wzRenderer *renderer) : mainWindow(renderer), renderer(renderer)
+	GUI(int windowWidth, int windowHeight, wz::wzRenderer *renderer) : mainWindow(renderer), renderer(renderer)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		mainWindow.createMenuButton("File");
@@ -129,7 +129,7 @@ private:
 	wz::Frame *createFrame(const char *label)
 	{
 		wz::Frame *frame = new wz::Frame();
-		frame->setStretch(WZ_STRETCH);
+		frame->setStretch(wz::WZ_STRETCH);
 		mainWindow.add(frame);
 
 		WidgetCategoryListItem category;
@@ -144,8 +144,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Button");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		layout->add(new wz::Button("Button with a label"));
@@ -164,8 +164,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Checkbox");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::Checkbox *checkbox = new wz::Checkbox("Toggle me!");
@@ -176,8 +176,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Combo");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::Combo *combo1 = new wz::Combo();
@@ -193,8 +193,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("GroupBox");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::GroupBox *groupBox1 = new wz::GroupBox("With a Label");
@@ -209,8 +209,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Label");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		layout->add(new wz::Label("Normal label"));
@@ -228,8 +228,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("List");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_HORIZONTAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::List *list1 = new wz::List();
@@ -249,8 +249,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Radio Button");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		layout->add(new wz::RadioButton("Option 1"));
@@ -262,15 +262,15 @@ private:
 	{
 		wz::Frame *frame = createFrame("Scroller");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Scroller *scroller1 = new wz::Scroller(WZ_SCROLLER_VERTICAL);
+		wz::Scroller *scroller1 = new wz::Scroller(wz::WZ_SCROLLER_VERTICAL);
 		scroller1->setMaxValue(100)->setValue(20)->setStepValue(10)->setHeight(200);
 		layout->add(scroller1);
 
-		wz::Scroller *scroller2 = new wz::Scroller(WZ_SCROLLER_HORIZONTAL);
+		wz::Scroller *scroller2 = new wz::Scroller(wz::WZ_SCROLLER_HORIZONTAL);
 		scroller2->setMaxValue(100)->setValue(50)->setStepValue(10)->setWidth(200);
 		layout->add(scroller2);
 	}
@@ -279,8 +279,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Spinner");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::Spinner *spinner = new wz::Spinner();
@@ -297,7 +297,7 @@ private:
 		wz::Frame *frame = createFrame("Tabbed");
 
 		wz::Tabbed *tabbed = new wz::Tabbed();
-		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
+		tabbed->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(tabbed);
 
 		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
@@ -313,8 +313,8 @@ private:
 	{
 		wz::Frame *frame = createFrame("Text Edit");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
 		wz::TextEdit *textEdit1 = new wz::TextEdit("this is a very long string so scrolling can be tested", false);
@@ -322,7 +322,7 @@ private:
 		layout->add(textEdit1);
 
 		wz::TextEdit *textEdit2 = new wz::TextEdit("text edit with a custom font", false);
-		textEdit2->setFont("visitor1", 32)->setStretch(WZ_STRETCH_WIDTH);
+		textEdit2->setFont("visitor1", 32)->setStretch(wz::WZ_STRETCH_WIDTH);
 		layout->add(textEdit2);
 
 		wz::TextEdit *textEdit3 = new wz::TextEdit("NanoVG is small antialiased vector graphics rendering library for OpenGL. It has lean API modeled after HTML5 canvas API. It is aimed to be a practical and fun toolset for building scalable user interfaces and visualizations.", true);
@@ -334,16 +334,16 @@ private:
 	{
 		wz::Frame *frame = createFrame("Window");
 
-		wz::StackLayout *frameLayout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *frameLayout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		frameLayout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(frameLayout);
 
 		wz::Checkbox *showWindow1 = new wz::Checkbox("Show Window 1");
-		showWindow1->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
+		showWindow1->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
 		frameLayout->add(showWindow1);
 
 		wz::Checkbox *showWindow2 = new wz::Checkbox("Show Window 2");
-		showWindow2->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
+		showWindow2->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
 		frameLayout->add(showWindow2);
 	}
 
@@ -351,28 +351,28 @@ private:
 	{
 		wz::Frame *rootFrame = createFrame("Parent Layout");
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		rootFrame->add(layout);
 
 		{
 			wz::Frame *frame = new wz::Frame();
-			frame->setStretch(WZ_STRETCH);
+			frame->setStretch(wz::WZ_STRETCH);
 			layout->add(frame);
 
-			frame->add(new wz::Button("Align Left"))->setAlign(WZ_ALIGN_LEFT);
-			frame->add(new wz::Button("Align Center"))->setAlign(WZ_ALIGN_CENTER);
-			frame->add(new wz::Button("Align Right"))->setAlign(WZ_ALIGN_RIGHT);
+			frame->add(new wz::Button("Align Left"))->setAlign(wz::WZ_ALIGN_LEFT);
+			frame->add(new wz::Button("Align Center"))->setAlign(wz::WZ_ALIGN_CENTER);
+			frame->add(new wz::Button("Align Right"))->setAlign(wz::WZ_ALIGN_RIGHT);
 		}
 
 		{
 			wz::Frame *frame = new wz::Frame();
-			frame->setStretch(WZ_STRETCH);
+			frame->setStretch(wz::WZ_STRETCH);
 			layout->add(frame);
 
-			frame->add(new wz::Button("Align Top"))->setAlign(WZ_ALIGN_TOP);
-			frame->add(new wz::Button("Align Middle"))->setAlign(WZ_ALIGN_MIDDLE);
-			frame->add(new wz::Button("Align Bottom"))->setAlign(WZ_ALIGN_BOTTOM);
+			frame->add(new wz::Button("Align Top"))->setAlign(wz::WZ_ALIGN_TOP);
+			frame->add(new wz::Button("Align Middle"))->setAlign(wz::WZ_ALIGN_MIDDLE);
+			frame->add(new wz::Button("Align Bottom"))->setAlign(wz::WZ_ALIGN_BOTTOM);
 		}
 	}
 
@@ -380,24 +380,24 @@ private:
 	{
 		wz::Frame *frame = createFrame("Stack Layout");
 
-		wz::StackLayout *frameLayout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		frameLayout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *frameLayout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		frameLayout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(frameLayout);
 
 		{
 			wz::Label *label = new wz::Label("Horizontal Stack Layout");
 			frameLayout->add(label);
 
-			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_HORIZONTAL);
-			layout->setSpacing(8)->setStretch(WZ_STRETCH_WIDTH)->setHeight(100);
+			wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_HORIZONTAL);
+			layout->setSpacing(8)->setStretch(wz::WZ_STRETCH_WIDTH)->setHeight(100);
 			frameLayout->add(layout);
 
 			layout->add(new wz::Button("Default"));
-			layout->add(new wz::Button("Align Top"))->setAlign(WZ_ALIGN_TOP);
-			layout->add(new wz::Button("Align Middle"))->setAlign(WZ_ALIGN_MIDDLE);
-			layout->add(new wz::Button("Align Bottom"))->setAlign(WZ_ALIGN_BOTTOM);
-			layout->add(new wz::Button("Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
-			layout->add(new wz::Button("Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+			layout->add(new wz::Button("Align Top"))->setAlign(wz::WZ_ALIGN_TOP);
+			layout->add(new wz::Button("Align Middle"))->setAlign(wz::WZ_ALIGN_MIDDLE);
+			layout->add(new wz::Button("Align Bottom"))->setAlign(wz::WZ_ALIGN_BOTTOM);
+			layout->add(new wz::Button("Stretch Width"))->setStretch(wz::WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button("Stretch Height"))->setStretch(wz::WZ_STRETCH_HEIGHT);
 		}
 
 		{
@@ -405,16 +405,16 @@ private:
 			label->setMargin(16, 0, 0, 0);
 			frameLayout->add(label);
 
-			wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-			layout->setSpacing(8)->setStretch(WZ_STRETCH_HEIGHT)->setWidth(300);
+			wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+			layout->setSpacing(8)->setStretch(wz::WZ_STRETCH_HEIGHT)->setWidth(300);
 			frameLayout->add(layout);
 
 			layout->add(new wz::Button("Default"));
-			layout->add(new wz::Button("Align Left"))->setAlign(WZ_ALIGN_LEFT);
-			layout->add(new wz::Button("Align Center"))->setAlign(WZ_ALIGN_CENTER);
-			layout->add(new wz::Button("Align Right"))->setAlign(WZ_ALIGN_RIGHT);
-			layout->add(new wz::Button("Stretch Width"))->setStretch(WZ_STRETCH_WIDTH);
-			layout->add(new wz::Button("Stretch Height"))->setStretch(WZ_STRETCH_HEIGHT);
+			layout->add(new wz::Button("Align Left"))->setAlign(wz::WZ_ALIGN_LEFT);
+			layout->add(new wz::Button("Align Center"))->setAlign(wz::WZ_ALIGN_CENTER);
+			layout->add(new wz::Button("Align Right"))->setAlign(wz::WZ_ALIGN_RIGHT);
+			layout->add(new wz::Button("Stretch Width"))->setStretch(wz::WZ_STRETCH_WIDTH);
+			layout->add(new wz::Button("Stretch Height"))->setStretch(wz::WZ_STRETCH_HEIGHT);
 		}
 	}
 
@@ -423,14 +423,14 @@ private:
 		wz::Window *window = new wz::Window("Widgets");
 		window->setWidth(200);
 		mainWindow.add(window);
-		mainWindow.dockWindow(window, WZ_DOCK_POSITION_WEST);
+		mainWindow.dockWindow(window, wz::WZ_DOCK_POSITION_WEST);
 
 		wz::List *list = new wz::List();
 		list->setMargin(8);
 		list->setItems((uint8_t *)&widgetCategories[0], sizeof(WidgetCategoryListItem), widgetCategories.size());
-		list->setStretch(WZ_STRETCH)->setFontSize(18);
+		list->setStretch(wz::WZ_STRETCH)->setFontSize(18);
 		list->setSelectedItem(0);
-		list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
+		list->addEventHandler(wz::WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
 		window->add(list);
 	}
 
@@ -441,28 +441,28 @@ private:
 		window1->setVisible(false);
 		mainWindow.add(window1);
 
-		wz::StackLayout *layout = new wz::StackLayout(WZ_STACK_LAYOUT_VERTICAL);
-		layout->setSpacing(8)->setMargin(8)->setStretch(WZ_STRETCH);
+		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
+		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		window1->add(layout);
 
 		wz::TextEdit *textEdit = new wz::TextEdit("this is a very long string so scrolling can be tested", false);
-		textEdit->setStretch(WZ_STRETCH_WIDTH);
+		textEdit->setStretch(wz::WZ_STRETCH_WIDTH);
 		layout->add(textEdit);
 
 		wz::Button *button = new wz::Button("Another Button", "../examples/data/accept.png");
-		button->setStretch(WZ_STRETCH_WIDTH);
+		button->setStretch(wz::WZ_STRETCH_WIDTH);
 		layout->add(button);
 
 		wz::Checkbox *checkbox = new wz::Checkbox("Checkbox");
-		checkbox->setAlign(WZ_ALIGN_CENTER);
+		checkbox->setAlign(wz::WZ_ALIGN_CENTER);
 		layout->add(checkbox);
 
 		wz::Combo *combo = new wz::Combo();
-		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
+		combo->setItems((uint8_t *)listData, sizeof(const char *), 17)->setAlign(wz::WZ_ALIGN_RIGHT)->setFont("visitor1", 12);
 		layout->add(combo);
 
 		wz::Button *button2 = new wz::Button("Yet Another Button");
-		button2->setStretch(WZ_STRETCH);
+		button2->setStretch(wz::WZ_STRETCH);
 		layout->add(button2);
 	}
 
@@ -474,7 +474,7 @@ private:
 		mainWindow.add(window2);
 
 		wz::Tabbed *tabbed = new wz::Tabbed();
-		tabbed->setMargin(8)->setStretch(WZ_STRETCH);
+		tabbed->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		window2->add(tabbed);
 
 		wz::Tab *firstTab = tabbed->addTab(new wz::Tab());
@@ -492,17 +492,17 @@ private:
 		secondTab->add(new wz::Button("Button Button Button"))->setPosition(10, 10);
 	}
 
-	void showWindow1Toggled(wzEvent *e)
+	void showWindow1Toggled(wz::wzEvent *e)
 	{
 		window1->setVisible(e->button.isSet);
 	}
 
-	void showWindow2Toggled(wzEvent *e)
+	void showWindow2Toggled(wz::wzEvent *e)
 	{
 		window2->setVisible(e->button.isSet);
 	}
 
-	void widgetCategoryChanged(wzEvent *e)
+	void widgetCategoryChanged(wz::wzEvent *e)
 	{
 		setFrame(e->list.selectedItem);
 	}
@@ -521,7 +521,7 @@ private:
 		wz::Frame *frame;
 	};
 
-	wzRenderer *renderer;
+	wz::wzRenderer *renderer;
 	wz::Window *window1, *window2;
 	std::vector<WidgetCategoryListItem> widgetCategories;
 	bool showProfiling_;
@@ -548,25 +548,25 @@ static Uint32 TextCursorBlinkCallback(Uint32 interval, void *param)
     return interval;
 }
 
-static wzKey ConvertKey(SDL_Keycode sym)
+static wz::wzKey ConvertKey(SDL_Keycode sym)
 {
 	static int keys[] =
 	{
-		SDLK_LEFT, WZ_KEY_LEFT,
-		SDLK_RIGHT, WZ_KEY_RIGHT,
-		SDLK_UP, WZ_KEY_UP,
-		SDLK_DOWN, WZ_KEY_DOWN, 
-		SDLK_HOME, WZ_KEY_HOME,
-		SDLK_END, WZ_KEY_END,
-		SDLK_RETURN, WZ_KEY_ENTER,
-		SDLK_RETURN, WZ_KEY_ENTER,
-		SDLK_KP_ENTER, WZ_KEY_ENTER,
-		SDLK_DELETE, WZ_KEY_DELETE,
-		SDLK_BACKSPACE, WZ_KEY_BACKSPACE,
-		SDLK_LSHIFT, WZ_KEY_LSHIFT,
-		SDLK_RSHIFT, WZ_KEY_RSHIFT,
-		SDLK_LCTRL, WZ_KEY_LCONTROL,
-		SDLK_RCTRL, WZ_KEY_RCONTROL
+		SDLK_LEFT, wz::WZ_KEY_LEFT,
+		SDLK_RIGHT, wz::WZ_KEY_RIGHT,
+		SDLK_UP, wz::WZ_KEY_UP,
+		SDLK_DOWN, wz::WZ_KEY_DOWN, 
+		SDLK_HOME, wz::WZ_KEY_HOME,
+		SDLK_END, wz::WZ_KEY_END,
+		SDLK_RETURN, wz::WZ_KEY_ENTER,
+		SDLK_RETURN, wz::WZ_KEY_ENTER,
+		SDLK_KP_ENTER, wz::WZ_KEY_ENTER,
+		SDLK_DELETE, wz::WZ_KEY_DELETE,
+		SDLK_BACKSPACE, wz::WZ_KEY_BACKSPACE,
+		SDLK_LSHIFT, wz::WZ_KEY_LSHIFT,
+		SDLK_RSHIFT, wz::WZ_KEY_RSHIFT,
+		SDLK_LCTRL, wz::WZ_KEY_LCONTROL,
+		SDLK_RCTRL, wz::WZ_KEY_RCONTROL
 	};
 
 	for (size_t i = 0; i < sizeof(keys) / sizeof(int); i += 2)
@@ -577,19 +577,19 @@ static wzKey ConvertKey(SDL_Keycode sym)
 
 			if (SDL_GetModState() & KMOD_SHIFT)
 			{
-				key |= WZ_KEY_SHIFT_BIT;
+				key |= wz::WZ_KEY_SHIFT_BIT;
 			}
 
 			if (SDL_GetModState() & KMOD_CTRL)
 			{
-				key |= WZ_KEY_CONTROL_BIT;
+				key |= wz::WZ_KEY_CONTROL_BIT;
 			}
 
-			return (wzKey)key;
+			return (wz::wzKey)key;
 		}
 	}
 
-	return WZ_KEY_UNKNOWN;
+	return wz::WZ_KEY_UNKNOWN;
 }
 
 int main(int argc, char **argv)
@@ -636,20 +636,20 @@ int main(int argc, char **argv)
 	glViewport(0, 0, windowWidth, windowHeight);
 
 	// Setup cursors.
-	SDL_Cursor *cursors[WZ_NUM_CURSORS];
-	cursors[WZ_CURSOR_DEFAULT] = SDL_GetDefaultCursor();
-	cursors[WZ_CURSOR_IBEAM] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-	cursors[WZ_CURSOR_RESIZE_N_S] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
-	cursors[WZ_CURSOR_RESIZE_E_W] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
-	cursors[WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
-	cursors[WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+	SDL_Cursor *cursors[wz::WZ_NUM_CURSORS];
+	cursors[wz::WZ_CURSOR_DEFAULT] = SDL_GetDefaultCursor();
+	cursors[wz::WZ_CURSOR_IBEAM] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	cursors[wz::WZ_CURSOR_RESIZE_N_S] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
+	cursors[wz::WZ_CURSOR_RESIZE_E_W] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
+	cursors[wz::WZ_CURSOR_RESIZE_NE_SW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
+	cursors[wz::WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
 	// Create the renderer.
-	wzRenderer *renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, NVG_ANTIALIAS, "../examples/data", "DejaVuSans", 16.0f);
+	wz::wzRenderer *renderer = wz::wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, NVG_ANTIALIAS, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
-		ShowError(wz_renderer_get_error());
+		ShowError(wz::wz_renderer_get_error());
 		return 1;
 	}
 

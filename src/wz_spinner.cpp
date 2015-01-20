@@ -30,6 +30,8 @@ SOFTWARE.
 #include "wz_text_edit.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 struct wzSpinner : public wzWidget
 {
 	wzSpinner();
@@ -208,3 +210,5 @@ void wz_spinner_set_value(struct wzSpinner *spinner, int value)
 	sprintf(buffer, "%d", value);
 	wz_text_edit_set_text(spinner->textEdit, buffer);
 }
+
+} // namespace wz

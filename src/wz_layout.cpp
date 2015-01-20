@@ -25,6 +25,8 @@ SOFTWARE.
 #include <string.h>
 #include "wz_widget.h"
 
+namespace wz {
+
 struct wzStackLayout : public wzWidget
 {
 	wzStackLayout();
@@ -384,3 +386,5 @@ wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget,
 
 	return rect;
 }
+
+} // namespace wz

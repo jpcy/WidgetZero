@@ -27,6 +27,8 @@ SOFTWARE.
 #include <vector>
 #include <wz.h>
 
+namespace wz {
+
 typedef struct
 {
 	wzWidgetDrawCallback draw;
@@ -180,5 +182,7 @@ int wz_widget_get_line_height(const struct wzWidget *widget);
 
 // Shortcut for wz_renderer_measure_text, using the widget's renderer, font face and font size.
 void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height);
+
+} // namespace wz
 
 #endif

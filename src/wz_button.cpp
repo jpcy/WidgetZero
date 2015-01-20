@@ -29,6 +29,8 @@ SOFTWARE.
 #include "wz_button.h"
 #include "wz_skin.h"
 
+namespace wz {
+
 /*
 ================================================================================
 
@@ -419,3 +421,5 @@ void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback cal
 	WZ_ASSERT(button);
 	button->clicked_callbacks.push_back(callback);
 }
+
+} // namespace wz

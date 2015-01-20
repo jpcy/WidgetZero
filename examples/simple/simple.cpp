@@ -113,11 +113,11 @@ int main(int argc, char **argv)
 		return errorCode;
 
 	// Create the renderer.
-	wzRenderer *renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
+	wz::wzRenderer *renderer = wz::wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
-		ShowError(wz_renderer_get_error());
+		ShowError(wz::wz_renderer_get_error());
 		return 1;
 	}
 
@@ -158,6 +158,6 @@ int main(int argc, char **argv)
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	wz_renderer_destroy(renderer);
+	wz::wz_renderer_destroy(renderer);
 	return 0;
 }

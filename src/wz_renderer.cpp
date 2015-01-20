@@ -28,6 +28,8 @@ SOFTWARE.
 #include <wz.h>
 #include "wz_renderer.h"
 
+namespace wz {
+
 static char errorMessage[WZ_NANOVG_MAX_ERROR_MESSAGE];
 
 static int wz_nanovg_create_font(struct wzRenderer *renderer, const char *face)
@@ -414,3 +416,5 @@ void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, i
 		nvgLineTo(vg, x, y);
 	}
 }
+
+} // namespace wz
