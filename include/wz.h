@@ -24,6 +24,7 @@ SOFTWARE.
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 
 #ifndef WZ_ASSERT
 #include <assert.h>
@@ -33,6 +34,8 @@ SOFTWARE.
 #include <nanovg.h>
 
 typedef struct NVGcontext NVGcontext;
+
+#define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
 namespace wz {
 
@@ -271,6 +274,28 @@ typedef enum
 wzKey;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
+
+struct IEventHandler
+{
+	virtual ~IEventHandler() {}
+	virtual void call(wzEvent *e) = 0;
+
+	wzWidgetEventType eventType;
+};
+
+template<class Object>
+struct EventHandler : public IEventHandler
+{
+	typedef void (Object::*Method)(wzEvent *);
+
+	virtual void call(wzEvent *e)
+	{
+		WZCPP_CALL_OBJECT_METHOD(object, method)(e);
+	}
+
+	Object *object;
+	Method method;
+};
 
 struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
 
@@ -583,5 +608,264 @@ typedef struct
 wzLineBreakResult;
 
 wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
+
+class Button;
+class Checkbox;
+class Combo;
+struct MainWindowPrivate;
+class GroupBox;
+class Label;
+class List;
+class RadioButton;
+class Scroller;
+class StackLayout;
+class Tab;
+struct TabPrivate;
+class Tabbed;
+class TextEdit;
+class ToggleButton;
+class Widget;
+class Window;
+
+class Widget
+{
+public:
+	virtual ~Widget();
+	wzRect getRect() const;
+	Widget *setPosition(int x, int y);
+	Widget *setWidth(int w);
+	Widget *setHeight(int h);
+	Widget *setSize(int w, int h);
+	Widget *setRect(int x, int y, int w, int h);
+	Widget *setStretch(int stretch);
+	Widget *setAlign(int align);
+	Widget *setMargin(int margin);
+	Widget *setMargin(int top, int right, int bottom, int left);
+	Widget *setMargin(wzBorder margin);
+	Widget *setFontFace(const std::string &fontFace);
+	Widget *setFontSize(float fontSize);
+	Widget *setFont(const std::string &fontFace, float fontSize);
+	Widget *setVisible(bool visible);
+
+	Widget *addEventHandler(IEventHandler *eventHandler);
+
+	template<class Object>
+	Widget *addEventHandler(wzWidgetEventType eventType, Object *object, void (Object::*method)(wzEvent *))
+	{
+		EventHandler<Object> *eventHandler = new EventHandler<Object>();
+		eventHandler->eventType = eventType;
+		eventHandler->object = object;
+		eventHandler->method = method;
+		addEventHandler(eventHandler);
+		return this;
+	}
+
+	wzWidget *p;
+};
+
+class Button : public Widget
+{
+public:
+	Button();
+	Button(const std::string &label, const std::string &icon = std::string());
+	~Button();
+	wzBorder getPadding() const;
+	Button *setPadding(wzBorder padding);
+	Button *setPadding(int top, int right, int bottom, int left);
+	const char *getIcon() const;
+	Button *setIcon(const std::string &icon);
+	const char *getLabel() const;
+	Button *setLabel(const std::string &label);
+};
+
+class Checkbox : public Widget
+{
+public:
+	Checkbox();
+	Checkbox( const std::string &label);
+	~Checkbox();
+	const char *getLabel() const;
+	Checkbox *setLabel(const std::string &label);
+	Checkbox *bindValue(bool *value);
+};
+
+class Combo : public Widget
+{
+public:
+	Combo();
+	~Combo();
+	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
+};
+
+class Frame : public Widget
+{
+public:
+	Frame();
+	~Frame();
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class GroupBox : public Widget
+{
+public:
+	GroupBox();
+	GroupBox(const std::string &label);
+	~GroupBox();
+	const char *getLabel() const;
+	GroupBox *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class Label : public Widget
+{
+public:
+	Label();
+	Label(const std::string &text);
+	~Label();
+	Label *setText(const char *format, ...);
+	Label *setTextColor(float r, float g, float b, float a = 1.0f);
+	Label *setMultiline(bool multiline);
+};
+
+class List : public Widget
+{
+public:
+	List();
+	~List();
+	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
+	List *setSelectedItem(int index);
+	List *setItemHeight(int height);
+	List *setDrawItemCallback(wzDrawListItemCallback callback);
+};
+
+class MainWindow
+{
+public:
+	MainWindow(wzRenderer *renderer);
+	~MainWindow();
+	int getWidth() const;
+	int getHeight() const;
+	void setSize(int w, int h);
+	void mouseMove(int x, int y, int dx, int dy);
+	void mouseButtonDown(int button, int x, int y);
+	void mouseButtonUp(int button, int x, int y);
+	void mouseWheelMove(int x, int y);
+	void keyDown(wzKey key);
+	void keyUp(wzKey key);
+	void textInput(const char *text);
+	void beginFrame();
+	void draw();
+	void drawFrame();
+	void endFrame();
+	void toggleTextCursor();
+	wzCursor getCursor() const;
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+	void createMenuButton(const std::string &label);
+	void dockWindow(Window *window, wzDockPosition dockPosition);
+
+	MainWindowPrivate *p;
+};
+
+class RadioButton : public Widget
+{
+public:
+	RadioButton();
+	RadioButton(const std::string &label);
+	~RadioButton();
+	const char *getLabel() const;
+	RadioButton *setLabel(const std::string &label);
+};
+
+class Scroller : public Widget
+{
+public:
+	Scroller(wzScrollerType type);
+	~Scroller();
+	Scroller *setValue(int value);
+	Scroller *setStepValue(int stepValue);
+	Scroller *setMaxValue(int maxValue);	
+	int getValue() const;
+};
+
+class Spinner : public Widget
+{
+public:
+	Spinner();
+	~Spinner();
+	Spinner *setValue(int value);
+	int getValue() const;
+};
+
+class StackLayout : public Widget
+{
+public:
+	StackLayout();
+	StackLayout(wzStackLayoutDirection direction);
+	~StackLayout();
+	StackLayout *setDirection(wzStackLayoutDirection direction);
+	StackLayout *setSpacing(int spacing);
+	int getSpacing() const;
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
+
+class Tab
+{
+public:
+	Tab();
+	~Tab();
+	Tab *setLabel(const std::string &label);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+
+	TabPrivate *p;
+};
+
+class Tabbed : public Widget
+{
+public:
+	Tabbed();
+	~Tabbed();
+	Tab *addTab(Tab *tab);
+};
+
+class TextEdit : public Widget
+{
+public:
+	TextEdit(bool multiline);
+	TextEdit(const std::string &text, bool multiline);
+	~TextEdit();
+	TextEdit *setText(const std::string &text);
+};
+
+class ToggleButton : public Widget
+{
+public:
+	ToggleButton();
+	ToggleButton(const std::string &label, const std::string &icon = std::string());
+	~ToggleButton();
+	wzBorder getPadding() const;
+	ToggleButton *setPadding(wzBorder padding);
+	ToggleButton *setPadding(int top, int right, int bottom, int left);
+	const char *getIcon() const;
+	ToggleButton *setIcon(const std::string &icon);
+	const char *getLabel() const;
+	ToggleButton *setLabel(const std::string &label);
+};
+
+class Window : public Widget
+{
+public:
+	Window();
+	Window(const std::string &title);
+	~Window();
+	const char *getTitle() const;
+	Window *setTitle(const std::string &title);
+	Widget *add(Widget *widget);
+	void remove(Widget *widget);
+};
 
 } // namespace wz

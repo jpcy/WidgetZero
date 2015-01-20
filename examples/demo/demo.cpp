@@ -34,8 +34,7 @@ SOFTWARE.
 
 #include <SDL.h>
 
-#define WZ_CPP_IMPLEMENTATION
-#include <wz_cpp.h>
+#include <wz.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)

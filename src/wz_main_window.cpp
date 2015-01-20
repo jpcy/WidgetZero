@@ -1557,6 +1557,27 @@ void wz_invoke_event(wzEvent *e)
 {
 	WZ_ASSERT(e);
 
+	for (size_t i = 0; i < e->base.widget->eventHandlers.size(); i++)
+	{
+		if (e->base.widget->eventHandlers[i]->eventType == e->base.type)
+		{
+			e->base.widget->eventHandlers[i]->call(e);
+		}
+	}
+
+	wzWidget *metadata = (wzWidget *)wz_widget_get_metadata(e->base.widget);
+
+	if (metadata && metadata != e->base.widget)
+	{
+		for (size_t i = 0; i < metadata->eventHandlers.size(); i++)
+		{
+			if (metadata->eventHandlers[i]->eventType == e->base.type)
+			{
+				metadata->eventHandlers[i]->call(e);
+			}
+		}
+	}
+
 	if (e->base.widget->mainWindow && e->base.widget->mainWindow->handle_event)
 	{
 		e->base.widget->mainWindow->handle_event(e);

@@ -73,6 +73,19 @@ struct wzWidget
 {
 	wzWidget();
 
+	virtual ~wzWidget()
+	{
+		for (size_t i = 0; i < eventHandlers.size(); i++)
+		{
+			delete eventHandlers[i];
+		}
+
+		eventHandlers.clear();
+	}
+
+	virtual const wzWidget *getWidget() const { return this; }
+	virtual wzWidget *getWidget() { return this; }
+
 	wzWidgetType type;
 
 	// Explicitly set by the user.
@@ -131,6 +144,8 @@ struct wzWidget
 
 	struct wzWidget *parent;
 	std::vector<struct wzWidget *> children;
+
+	std::vector<IEventHandler *> eventHandlers;
 };
 
 enum
