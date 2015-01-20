@@ -33,6 +33,9 @@ SOFTWARE.
 #include <SDL.h>
 #include <wz.h>
 
+#define WZ_CPP_IMPLEMENTATION
+#include <wz_cpp.h>
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244) // "conversion from 'int' to 'float', possible loss of data"
@@ -52,10 +55,6 @@ SOFTWARE.
 #define BUTTON_HEIGHT 100
 
 SDL_Window *sdlWindow;
-SDL_GLContext glContext;
-struct wzRenderer *renderer;
-struct wzMainWindow *mainWindow;
-struct wzButton *button;
 
 void ShowError(const char *message)
 {
@@ -83,7 +82,7 @@ int InitializeSDL()
 		return 1;
 	}
 
-	glContext = SDL_GL_CreateContext(sdlWindow);
+	SDL_GLContext glContext = SDL_GL_CreateContext(sdlWindow);
 
 	if (!glContext)
 	{
@@ -107,16 +106,14 @@ int InitializeSDL()
 
 int main(int argc, char **argv)
 {
-	int errorCode;
-
 	// SDL init - create a window and GL context.
-	errorCode = InitializeSDL();
+	int errorCode = InitializeSDL();
 
 	if (errorCode)
 		return errorCode;
 
 	// Create the renderer.
-	renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
+	wzRenderer *renderer = wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
 
 	if (!renderer)
 	{
@@ -125,19 +122,18 @@ int main(int argc, char **argv)
 	}
 
 	// Create the main window.
-	mainWindow = wz_main_window_create(renderer);
-	wz_widget_set_size_args((struct wzWidget *)mainWindow, WINDOW_WIDTH, WINDOW_HEIGHT);
+	wz::MainWindow *mainWindow = new wz::MainWindow(renderer);
+	mainWindow->setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	// Create a button.
-	button = wz_button_create("Click me!", NULL);
-	wz_widget_set_rect_args((struct wzWidget *)button, WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
-	wz_widget_set_font_size((struct wzWidget *)button, 24.0f);
-	wz_main_window_add(mainWindow, (struct wzWidget *)button);
+	wz::Button *button = new wz::Button("Click me!");
+	button->setRect(WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
+	button->setFontSize(24);
+	mainWindow->add(button);
 
 	for (;;)
 	{
 		SDL_Event e;
-
 		SDL_WaitEvent(&e);
 
 		if (e.type == SDL_QUIT)
@@ -146,19 +142,19 @@ int main(int argc, char **argv)
 		}
 		else if (e.type == SDL_MOUSEMOTION)
 		{
-			wz_main_window_mouse_move(mainWindow, e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
+			mainWindow->mouseMove(e.motion.x, e.motion.y, e.motion.xrel, e.motion.yrel);
 		}
 		else if (e.type == SDL_MOUSEBUTTONDOWN)
 		{
-			wz_main_window_mouse_button_down(mainWindow, e.button.button, e.button.x, e.button.y);
+			mainWindow->mouseButtonDown(e.button.button, e.button.x, e.button.y);
 		}
 		else if (e.type == SDL_MOUSEBUTTONUP)
 		{
-			wz_main_window_mouse_button_up(mainWindow, e.button.button, e.button.x, e.button.y);
+			mainWindow->mouseButtonUp(e.button.button, e.button.x, e.button.y);
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		wz_main_window_draw_frame(mainWindow);
+		mainWindow->drawFrame();
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
