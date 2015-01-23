@@ -25,9 +25,9 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzList;
-struct wzScroller;
+struct ListImpl;
+struct ScrollerImpl;
 
-struct wzScroller *wz_list_get_scroller(struct wzList *list);
+struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list);
 
 } // namespace wz

@@ -28,33 +28,33 @@ SOFTWARE.
 
 namespace wz {
 
-void wz_main_window_set_cursor(struct wzMainWindow *mainWindow, wzCursor cursor);
+void wz_main_window_set_cursor(struct MainWindowImpl *mainWindow, Cursor cursor);
 
 // Set keyboard focus to this widget.
-void wz_main_window_set_keyboard_focus_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
+void wz_main_window_set_keyboard_focus_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
 
-bool wz_main_window_is_shift_key_down(const struct wzMainWindow *mainWindow);
-bool wz_main_window_is_control_key_down(const struct wzMainWindow *mainWindow);
+bool wz_main_window_is_shift_key_down(const struct MainWindowImpl *mainWindow);
+bool wz_main_window_is_control_key_down(const struct MainWindowImpl *mainWindow);
 
 // Lock input to this widget.
-void wz_main_window_push_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
+void wz_main_window_push_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
 
 // Stop locking input to this widget.
-void wz_main_window_pop_lock_input_widget(struct wzMainWindow *mainWindow, struct wzWidget *widget);
+void wz_main_window_pop_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
 
-void wz_main_window_set_moving_window(struct wzMainWindow *mainWindow, struct wzWindow *window);
+void wz_main_window_set_moving_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
 
-void wz_main_window_update_content_rect(struct wzMainWindow *mainWindow);
+void wz_main_window_update_content_rect(struct MainWindowImpl *mainWindow);
 
-void wz_main_window_update_docked_window_rect(struct wzMainWindow *mainWindow, struct wzWindow *window);
+void wz_main_window_update_docked_window_rect(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
 
-wzDockPosition wz_main_window_get_window_dock_position(const struct wzMainWindow *mainWindow, const struct wzWindow *window);
+DockPosition wz_main_window_get_window_dock_position(const struct MainWindowImpl *mainWindow, const struct WindowImpl *window);
 
-void wz_main_window_undock_window(struct wzMainWindow *mainWindow, struct wzWindow *window);
+void wz_main_window_undock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
 
-void wz_invoke_event(wzEvent *e);
-void wz_invoke_event(wzEvent *e, const std::vector<wzEventCallback> &callbacks);
+void wz_invoke_event(Event *e);
+void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
 
-bool wz_main_window_text_cursor_is_visible(const struct wzMainWindow *mainWindow);
+bool wz_main_window_text_cursor_is_visible(const struct MainWindowImpl *mainWindow);
 
 } // namespace wz

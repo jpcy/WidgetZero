@@ -149,10 +149,10 @@ void wz_renderer_measure_text(struct wzRenderer *renderer, const char *fontFace,
 	}
 }
 
-wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
+LineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
 {
 	struct NVGtextRow row;
-	wzLineBreakResult result;
+	LineBreakResult result;
 
 	WZ_ASSERT(renderer);
 
@@ -216,7 +216,7 @@ void wz_renderer_set_font_face(struct wzRenderer *renderer, const char *face)
 	nvgFontFaceId(renderer->vg, id);
 }
 
-void wz_renderer_print_box(struct wzRenderer *renderer, wzRect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength)
+void wz_renderer_print_box(struct wzRenderer *renderer, Rect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength)
 {
 	WZ_ASSERT(renderer);
 	nvgFontSize(renderer->vg, fontSize == 0 ? renderer->defaultFontSize : fontSize);
@@ -239,15 +239,15 @@ void wz_renderer_print(struct wzRenderer *renderer, int x, int y, int align, con
 	nvgText(renderer->vg, (float)x, (float)y, text, textLength == 0 ? NULL : &text[textLength]);
 }
 
-void wz_renderer_clip_to_rect(struct NVGcontext *vg, wzRect rect)
+void wz_renderer_clip_to_rect(struct NVGcontext *vg, Rect rect)
 {
 	WZ_ASSERT(vg);
 	nvgScissor(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
 }
 
-bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, wzRect rect2)
+bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, Rect rect1, Rect rect2)
 {
-	wzRect intersection;
+	Rect intersection;
 
 	WZ_ASSERT(vg);
 
@@ -260,7 +260,7 @@ bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, 
 	return true;
 }
 
-void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color)
+void wz_renderer_draw_filled_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color)
 {
 	nvgBeginPath(vg);
 	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
@@ -268,7 +268,7 @@ void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVG
 	nvgFill(vg);
 }
 
-void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color)
+void wz_renderer_draw_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color)
 {
 	nvgBeginPath(vg);
 	nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
@@ -285,7 +285,7 @@ void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2
 	nvgStroke(vg);
 }
 
-void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image)
+void wz_renderer_draw_image(struct NVGcontext *vg, Rect rect, int image)
 {
 	int w, h;
 	struct NVGpaint paint;
@@ -298,7 +298,7 @@ void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image)
 	nvgFill(vg);
 }
 
-void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int sides, int roundedCorners)
+void wz_renderer_create_rect_path(struct NVGcontext *vg, Rect rect, float r, int sides, int roundedCorners)
 {
 	const float x = rect.x + 0.5f;
 	const float y = rect.y + 0.5f;

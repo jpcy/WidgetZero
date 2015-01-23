@@ -30,9 +30,9 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzLabel : public wzWidget
+struct LabelImpl : public WidgetImpl
 {
-	wzLabel();
+	LabelImpl();
 
 	std::string text;
 	bool multiline;
@@ -40,10 +40,10 @@ struct wzLabel : public wzWidget
 	bool isTextColorUserSet;
 };
 
-static wzSize wz_label_measure(struct wzWidget *widget)
+static Size wz_label_measure(struct WidgetImpl *widget)
 {
-	wzSize size;
-	struct wzLabel *label = (struct wzLabel *)widget;
+	Size size;
+	struct LabelImpl *label = (struct LabelImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 
 	if (label->multiline)
@@ -66,11 +66,11 @@ static wzSize wz_label_measure(struct wzWidget *widget)
 	return size;
 }
 
-static void wz_label_draw(struct wzWidget *widget, wzRect clip)
+static void wz_label_draw(struct WidgetImpl *widget, Rect clip)
 {
-	struct wzLabel *label = (struct wzLabel *)widget;
+	struct LabelImpl *label = (struct LabelImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -87,7 +87,7 @@ static void wz_label_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-wzLabel::wzLabel()
+LabelImpl::LabelImpl()
 {
 	type = WZ_TYPE_LABEL;
 	multiline = false;
@@ -95,48 +95,48 @@ wzLabel::wzLabel()
 	isTextColorUserSet = false;
 }
 
-struct wzLabel *wz_label_create(const char *text)
+struct LabelImpl *wz_label_create(const char *text)
 {
-	struct wzLabel *label = new struct wzLabel;
+	struct LabelImpl *label = new struct LabelImpl;
 	label->vtable.measure = wz_label_measure;
 	label->vtable.draw = wz_label_draw;
 	label->text = text ? std::string(text) : std::string();
 	return label;
 }
 
-void wz_label_set_multiline(struct wzLabel *label, bool multiline)
+void wz_label_set_multiline(struct LabelImpl *label, bool multiline)
 {
 	WZ_ASSERT(label);
 	label->multiline = multiline;
 }
 
-bool wz_label_get_multiline(const struct wzLabel *label)
+bool wz_label_get_multiline(const struct LabelImpl *label)
 {
 	WZ_ASSERT(label);
 	return label->multiline;
 }
 
-void wz_label_set_text(struct wzLabel *label, const char *text)
+void wz_label_set_text(struct LabelImpl *label, const char *text)
 {
 	WZ_ASSERT(label);
 	label->text = std::string(text);
 	wz_widget_resize_to_measured(label);
 }
 
-const char *wz_label_get_text(const struct wzLabel *label)
+const char *wz_label_get_text(const struct LabelImpl *label)
 {
 	WZ_ASSERT(label);
 	return label->text.c_str();
 }
 
-void wz_label_set_text_color(struct wzLabel *label, NVGcolor color)
+void wz_label_set_text_color(struct LabelImpl *label, NVGcolor color)
 {
 	WZ_ASSERT(label);
 	label->textColor = color;
 	label->isTextColorUserSet = true;
 }
 
-NVGcolor wz_label_get_text_color(const struct wzLabel *label)
+NVGcolor wz_label_get_text_color(const struct LabelImpl *label)
 {
 	return label->textColor;
 }

@@ -27,20 +27,20 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzFrame : public wzWidget
+struct FrameImpl : public WidgetImpl
 {
-	wzFrame()
+	FrameImpl()
 	{
 		type = WZ_TYPE_FRAME;
 	}
 };
 
-struct wzFrame *wz_frame_create()
+struct FrameImpl *wz_frame_create()
 {
-	return new struct wzFrame;
+	return new struct FrameImpl;
 }
 
-void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
+void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(frame);
 	WZ_ASSERT(widget);
@@ -51,7 +51,7 @@ void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget)
 	wz_widget_add_child_widget(frame, widget);
 }
 
-void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget)
+void wz_frame_remove(struct FrameImpl *frame, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(frame);
 	WZ_ASSERT(widget);

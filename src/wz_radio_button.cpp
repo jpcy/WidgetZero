@@ -30,13 +30,13 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzRadioButton : public wzButton
+struct RadioButtonImpl : public ButtonImpl
 {
 };
 
-static void wz_radio_button_clicked(wzEvent *e)
+static void wz_radio_button_clicked(Event *e)
 {
-	struct wzWidget *parent = e->base.widget->parent;
+	struct WidgetImpl *parent = e->base.widget->parent;
 
 	WZ_ASSERT(parent);
 
@@ -45,12 +45,12 @@ static void wz_radio_button_clicked(wzEvent *e)
 	{
 		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != e->base.widget)
 		{
-			wz_button_set((struct wzButton *)parent->children[i], false);
+			wz_button_set((struct ButtonImpl *)parent->children[i], false);
 		}
 	}
 }
 
-static void wz_radio_button_added(struct wzWidget *parent, struct wzWidget *widget)
+static void wz_radio_button_added(struct WidgetImpl *parent, struct WidgetImpl *widget)
 {
 	// If this is the only radio button child, set it.
 	// This means that the first radio button will be selected.
@@ -60,23 +60,23 @@ static void wz_radio_button_added(struct wzWidget *parent, struct wzWidget *widg
 			return;
 	}
 
-	wz_button_set((struct wzButton *)widget, true);
+	wz_button_set((struct ButtonImpl *)widget, true);
 }
 
-static wzSize wz_radio_button_measure(struct wzWidget *widget)
+static Size wz_radio_button_measure(struct WidgetImpl *widget)
 {
-	wzSize size;
-	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
+	Size size;
+	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)widget;
 	wz_widget_measure_text(widget, radioButton->label.c_str(), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING;
 	size.h = WZ_MAX(size.h, WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS);
 	return size;
 }
 
-static void wz_radio_button_draw(struct wzWidget *widget, wzRect clip)
+static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 {
-	wzRect rect;
-	struct wzRadioButton *radioButton = (struct wzRadioButton *)widget;
+	Rect rect;
+	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 
 	nvgSave(vg);
@@ -114,10 +114,10 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-struct wzRadioButton *wz_radio_button_create(const char *label)
+struct RadioButtonImpl *wz_radio_button_create(const char *label)
 {
-	struct wzRadioButton *radioButton = (struct wzRadioButton *)wz_button_create(label, NULL);
-	struct wzWidget *widget = (struct wzWidget *)radioButton;
+	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)wz_button_create(label, NULL);
+	struct WidgetImpl *widget = (struct WidgetImpl *)radioButton;
 
 	widget->type = WZ_TYPE_RADIO_BUTTON;
 	widget->vtable.added = wz_radio_button_added;
@@ -129,31 +129,31 @@ struct wzRadioButton *wz_radio_button_create(const char *label)
 	return radioButton;
 }
 
-void wz_radio_button_set_label(struct wzRadioButton *radioButton, const char *label)
+void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label)
 {
 	WZ_ASSERT(radioButton);
 	wz_button_set_label(radioButton, label);
 }
 
-const char *wz_radio_button_get_label(const struct wzRadioButton *radioButton)
+const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton)
 {
 	WZ_ASSERT(radioButton);
 	return radioButton->label.c_str();
 }
 
-bool wz_radio_button_is_set(const struct wzRadioButton *radioButton)
+bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton)
 {
 	WZ_ASSERT(radioButton);
 	return radioButton->isSet;
 }
 
-void wz_radio_button_set(struct wzRadioButton *radioButton, bool value)
+void wz_radio_button_set(struct RadioButtonImpl *radioButton, bool value)
 {
 	WZ_ASSERT(radioButton);
 	wz_button_set(radioButton, value);
 }
 
-void wz_radio_button_add_callback_clicked(struct wzRadioButton *radioButton, wzEventCallback callback)
+void wz_radio_button_add_callback_clicked(struct RadioButtonImpl *radioButton, EventCallback callback)
 {
 	WZ_ASSERT(radioButton);
 	wz_button_add_callback_clicked(radioButton, callback);

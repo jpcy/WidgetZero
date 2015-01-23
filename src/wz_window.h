@@ -27,14 +27,14 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzWindow;
+struct WindowImpl;
 
-struct wzWidget *wz_window_get_content_widget(struct wzWindow *window);
+struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window);
 
 // Tell the window it's being docked.
-void wz_window_dock(struct wzWindow *window);
+void wz_window_dock(struct WindowImpl *window);
 
-int wz_window_get_draw_priority(const struct wzWindow *window);
-void wz_window_set_draw_priority(struct wzWindow *window, int drawPriority);
+int wz_window_get_draw_priority(const struct WindowImpl *window);
+void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority);
 
 } // namespace wz

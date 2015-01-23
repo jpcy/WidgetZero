@@ -32,13 +32,13 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzSpinner : public wzWidget
+struct SpinnerImpl : public WidgetImpl
 {
-	wzSpinner();
+	SpinnerImpl();
 
-	struct wzTextEdit *textEdit;
-	struct wzButton *decrementButton;
-	struct wzButton *incrementButton;
+	struct TextEditImpl *textEdit;
+	struct ButtonImpl *decrementButton;
+	struct ButtonImpl *incrementButton;
 };
 
 static bool wz_spinner_validate_text(const char *text)
@@ -54,11 +54,11 @@ static bool wz_spinner_validate_text(const char *text)
 	return true;
 }
 
-static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool decrement)
+static void wz_spinner_draw_button(struct WidgetImpl *widget, Rect clip, bool decrement)
 {
-	const struct wzButton *button = (struct wzButton *)widget;
+	const struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
 	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
 	const float buttonCenterY = rect.y + rect.h * 0.5f;
@@ -85,45 +85,45 @@ static void wz_spinner_draw_button(struct wzWidget *widget, wzRect clip, bool de
 	nvgRestore(vg);
 }
 
-static void wz_spinner_decrement_button_draw(struct wzWidget *widget, wzRect clip)
+static void wz_spinner_decrement_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_spinner_draw_button(widget, clip, true);
 }
 
-static void wz_spinner_decrement_button_clicked(wzEvent *e)
+static void wz_spinner_decrement_button_clicked(Event *e)
 {
-	struct wzSpinner *spinner;
+	struct SpinnerImpl *spinner;
 
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	spinner = (struct wzSpinner *)e->base.widget->parent;
+	spinner = (struct SpinnerImpl *)e->base.widget->parent;
 	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) - 1);
 }
 
-static void wz_spinner_increment_button_draw(struct wzWidget *widget, wzRect clip)
+static void wz_spinner_increment_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_spinner_draw_button(widget, clip, false);
 }
 
-static void wz_spinner_increment_button_clicked(wzEvent *e)
+static void wz_spinner_increment_button_clicked(Event *e)
 {
-	struct wzSpinner *spinner;
+	struct SpinnerImpl *spinner;
 
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	spinner = (struct wzSpinner *)e->base.widget->parent;
+	spinner = (struct SpinnerImpl *)e->base.widget->parent;
 	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) + 1);
 }
 
-static wzSize wz_spinner_measure(struct wzWidget *widget)
+static Size wz_spinner_measure(struct WidgetImpl *widget)
 {
-	wzBorder border;
-	wzSize size;
-	struct wzSpinner *spinner = (struct wzSpinner *)widget;
+	Border border;
+	Size size;
+	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
 
 	border = wz_text_edit_get_border(spinner->textEdit);
 	size.w = 100;
@@ -131,13 +131,13 @@ static wzSize wz_spinner_measure(struct wzWidget *widget)
 	return size;
 }
 
-static void wz_spinner_renderer_changed(struct wzWidget *widget)
+static void wz_spinner_renderer_changed(struct WidgetImpl *widget)
 {
-	struct wzSpinner *spinner;
-	wzBorder textEditBorder;
+	struct SpinnerImpl *spinner;
+	Border textEditBorder;
 
 	WZ_ASSERT(widget);
-	spinner = (struct wzSpinner *)widget;
+	spinner = (struct SpinnerImpl *)widget;
 
 	// Shrink the text edit border to exclude the increment and decrement buttons.
 	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
@@ -146,54 +146,54 @@ static void wz_spinner_renderer_changed(struct wzWidget *widget)
 }
 
 // Set the text edit font to match.
-static void wz_spinner_font_changed(struct wzWidget *widget, const char *fontFace, float fontSize)
+static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
 {
-	struct wzSpinner *spinner = (struct wzSpinner *)widget;
+	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
 	WZ_ASSERT(spinner);
-	wz_widget_set_font((struct wzWidget *)spinner->textEdit, fontFace, fontSize);
+	wz_widget_set_font((struct WidgetImpl *)spinner->textEdit, fontFace, fontSize);
 }
 
-wzSpinner::wzSpinner()
+SpinnerImpl::SpinnerImpl()
 {
 	type = WZ_TYPE_SPINNER;
 }
 
-struct wzSpinner *wz_spinner_create()
+struct SpinnerImpl *wz_spinner_create()
 {
-	struct wzSpinner *spinner = new struct wzSpinner;
+	struct SpinnerImpl *spinner = new struct SpinnerImpl;
 	spinner->vtable.measure = wz_spinner_measure;
 	spinner->vtable.renderer_changed = wz_spinner_renderer_changed;
 	spinner->vtable.font_changed = wz_spinner_font_changed;
 
 	spinner->textEdit = wz_text_edit_create(false, 256);
-	wz_widget_set_stretch((struct wzWidget *)spinner->textEdit, WZ_STRETCH);
+	wz_widget_set_stretch((struct WidgetImpl *)spinner->textEdit, WZ_STRETCH);
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
-	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->textEdit);
+	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->textEdit);
 
 	spinner->decrementButton = wz_button_create(NULL, NULL);
-	wz_widget_set_width((struct wzWidget *)spinner->decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch((struct wzWidget *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale((struct wzWidget *)spinner->decrementButton, 1, 0.5f);
-	wz_widget_set_align((struct wzWidget *)spinner->decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	wz_widget_set_draw_callback((struct wzWidget *)spinner->decrementButton, wz_spinner_decrement_button_draw);
+	wz_widget_set_width((struct WidgetImpl *)spinner->decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	wz_widget_set_stretch((struct WidgetImpl *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->decrementButton, 1, 0.5f);
+	wz_widget_set_align((struct WidgetImpl *)spinner->decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
+	wz_widget_set_draw_callback((struct WidgetImpl *)spinner->decrementButton, wz_spinner_decrement_button_draw);
 	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
-	wz_widget_set_overlap((struct wzWidget *)spinner->decrementButton, true);
-	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->decrementButton);
+	wz_widget_set_overlap((struct WidgetImpl *)spinner->decrementButton, true);
+	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->decrementButton);
 
 	spinner->incrementButton = wz_button_create(NULL, NULL);
-	wz_widget_set_width((struct wzWidget *)spinner->incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch((struct wzWidget *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale((struct wzWidget *)spinner->incrementButton, 1, 0.5f);
-	wz_widget_set_align((struct wzWidget *)spinner->incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	wz_widget_set_draw_callback((struct wzWidget *)spinner->incrementButton, wz_spinner_increment_button_draw);
+	wz_widget_set_width((struct WidgetImpl *)spinner->incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	wz_widget_set_stretch((struct WidgetImpl *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->incrementButton, 1, 0.5f);
+	wz_widget_set_align((struct WidgetImpl *)spinner->incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
+	wz_widget_set_draw_callback((struct WidgetImpl *)spinner->incrementButton, wz_spinner_increment_button_draw);
 	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
-	wz_widget_set_overlap((struct wzWidget *)spinner->incrementButton, true);
-	wz_widget_add_child_widget((struct wzWidget *)spinner, (struct wzWidget *)spinner->incrementButton);
+	wz_widget_set_overlap((struct WidgetImpl *)spinner->incrementButton, true);
+	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->incrementButton);
 
 	return spinner;
 }
 
-int wz_spinner_get_value(const struct wzSpinner *spinner)
+int wz_spinner_get_value(const struct SpinnerImpl *spinner)
 {
 	int value = 0;
 
@@ -202,7 +202,7 @@ int wz_spinner_get_value(const struct wzSpinner *spinner)
 	return value;
 }
 
-void wz_spinner_set_value(struct wzSpinner *spinner, int value)
+void wz_spinner_set_value(struct SpinnerImpl *spinner, int value)
 {
 	char buffer[32];
 

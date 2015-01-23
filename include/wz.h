@@ -40,23 +40,23 @@ typedef struct NVGcontext NVGcontext;
 namespace wz {
 
 struct wzRenderer;
-struct wzMainWindow;
-struct wzWindow;
-struct wzWidget;
-struct wzButton;
-struct wzCheckBox;
-struct wzCombo;
-struct wzFrame;
-struct wzGroupBox;
-struct wzLabel;
-struct wzList;
-struct wzMenuBar;
-struct wzMenuBarButton;
-struct wzRadioButton;
-struct wzScroller;
-struct wzSpinner;
-struct wzStackLayout;
-struct wzTextEdit;
+struct MainWindowImpl;
+struct WindowImpl;
+struct WidgetImpl;
+struct ButtonImpl;
+struct CheckBoxImpl;
+struct ComboImpl;
+struct FrameImpl;
+struct GroupBoxImpl;
+struct LabelImpl;
+struct ListImpl;
+struct MenuBarImpl;
+struct MenuBarButtonImpl;
+struct RadioButtonImpl;
+struct ScrollerImpl;
+struct SpinnerImpl;
+struct StackLayoutImpl;
+struct TextEditImpl;
 
 typedef enum
 {
@@ -81,33 +81,33 @@ typedef enum
 	WZ_TYPE_TEXT_EDIT,
 	WZ_MAX_WIDGET_TYPES = 64
 }
-wzWidgetType;
+WidgetType;
 
-struct wzPosition
+struct Position
 {
-	wzPosition() : x(0), y(0) {}
+	Position() : x(0), y(0) {}
 	int x, y;
 };
 
-struct wzSize
+struct Size
 {
-	wzSize() : w(0), h(0) {}
+	Size() : w(0), h(0) {}
 	int w, h;
 };
 
-struct wzRect
+struct Rect
 {
-	wzRect() : x(0), y(0), w(0), h(0) {}
+	Rect() : x(0), y(0), w(0), h(0) {}
 	int x, y, w, h;
 };
 
-struct wzBorder
+struct Border
 {
-	wzBorder() : top(0), right(0), bottom(0), left(0) {}
+	Border() : top(0), right(0), bottom(0), left(0) {}
 	int top, right, bottom, left;
 };
 
-extern const wzBorder wzBorder_zero;
+extern const Border Border_zero;
 
 enum
 {
@@ -143,78 +143,78 @@ typedef enum
 	WZ_EVENT_TAB_BAR_TAB_ADDED,
 	WZ_EVENT_TAB_BAR_TAB_REMOVED
 }
-wzWidgetEventType;
+WidgetEventType;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzWidget *widget;
+	WidgetEventType type;
+	struct WidgetImpl *widget;
 }
-wzEventBase;
+EventBase;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzWidget *parent;
-	struct wzWidget *widget; 
-	struct wzWidget *extra;
+	WidgetEventType type;
+	struct WidgetImpl *parent;
+	struct WidgetImpl *widget; 
+	struct WidgetImpl *extra;
 }
-wzCreateWidgetEvent;
+CreateWidgetEvent;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzWidget *parent;
-	struct wzWidget *widget;
+	WidgetEventType type;
+	struct WidgetImpl *parent;
+	struct WidgetImpl *widget;
 }
-wzDestroyWidgetEvent;
+DestroyWidgetEvent;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzButton *button;
+	WidgetEventType type;
+	struct ButtonImpl *button;
 	bool isSet;
 }
-wzButtonEvent;
+ButtonEvent;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzList *list;
+	WidgetEventType type;
+	struct ListImpl *list;
 	int selectedItem;
 }
-wzListEvent;
+ListEvent;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzScroller *scroller;
+	WidgetEventType type;
+	struct ScrollerImpl *scroller;
 	int oldValue;
 	int value;
 }
-wzScrollerEvent;
+ScrollerEvent;
 
 typedef struct
 {
-	wzWidgetEventType type;
-	struct wzTabBar *tabBar;
-	struct wzButton *tab;
+	WidgetEventType type;
+	struct TabBarImpl *tabBar;
+	struct ButtonImpl *tab;
 }
-wzTabBarEvent;
+TabBarEvent;
 
 typedef union
 {
-	wzEventBase base;
-	wzCreateWidgetEvent create;
-	wzDestroyWidgetEvent destroy;
-	wzButtonEvent button;
-	wzListEvent list;
-	wzScrollerEvent scroller;
-	wzTabBarEvent tabBar;
+	EventBase base;
+	CreateWidgetEvent create;
+	DestroyWidgetEvent destroy;
+	ButtonEvent button;
+	ListEvent list;
+	ScrollerEvent scroller;
+	TabBarEvent tabBar;
 }
-wzEvent;
+Event;
 
-typedef void (*wzEventCallback)(wzEvent *e);
+typedef void (*EventCallback)(Event *e);
 
 typedef enum
 {
@@ -226,7 +226,7 @@ typedef enum
 	WZ_CURSOR_RESIZE_NW_SE,
 	WZ_NUM_CURSORS
 }
-wzCursor;
+Cursor;
 
 typedef enum
 {
@@ -237,7 +237,7 @@ typedef enum
 	WZ_DOCK_POSITION_WEST,
 	WZ_NUM_DOCK_POSITIONS
 }
-wzDockPosition;
+DockPosition;
 
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define WZ_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -247,8 +247,8 @@ wzDockPosition;
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
 
-bool wz_is_rect_empty(wzRect rect);
-bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result);
+bool wz_is_rect_empty(Rect rect);
+bool wz_intersect_rects(Rect A, Rect B, Rect *result);
 
 typedef enum
 {
@@ -271,24 +271,24 @@ typedef enum
 	WZ_KEY_SHIFT_BIT = (1<<10),
 	WZ_KEY_CONTROL_BIT = (1<<11)
 }
-wzKey;
+Key;
 
 #define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
 
 struct IEventHandler
 {
 	virtual ~IEventHandler() {}
-	virtual void call(wzEvent *e) = 0;
+	virtual void call(Event *e) = 0;
 
-	wzWidgetEventType eventType;
+	WidgetEventType eventType;
 };
 
 template<class Object>
 struct EventHandler : public IEventHandler
 {
-	typedef void (Object::*Method)(wzEvent *);
+	typedef void (Object::*Method)(Event *);
 
-	virtual void call(wzEvent *e)
+	virtual void call(Event *e)
 	{
 		WZCPP_CALL_OBJECT_METHOD(object, method)(e);
 	}
@@ -297,266 +297,266 @@ struct EventHandler : public IEventHandler
 	Method method;
 };
 
-struct wzMainWindow *wz_main_window_create(struct wzRenderer *renderer);
+struct MainWindowImpl *wz_main_window_create(struct wzRenderer *renderer);
 
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
-void wz_main_window_set_event_callback(struct wzMainWindow *mainWindow, wzEventCallback callback);
+void wz_main_window_set_event_callback(struct MainWindowImpl *mainWindow, EventCallback callback);
 
-void wz_main_window_mouse_button_down(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
-void wz_main_window_mouse_button_up(struct wzMainWindow *mainWindow, int mouseButton, int mouseX, int mouseY);
-void wz_main_window_mouse_move(struct wzMainWindow *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-void wz_main_window_mouse_wheel_move(struct wzMainWindow *mainWindow, int x, int y);
-void wz_main_window_key_down(struct wzMainWindow *mainWindow, wzKey key);
-void wz_main_window_key_up(struct wzMainWindow *mainWindow, wzKey key);
-void wz_main_window_text_input(struct wzMainWindow *mainWindow, const char *text);
-void wz_main_window_draw(struct wzMainWindow *mainWindow);
-void wz_main_window_draw_frame(struct wzMainWindow *mainWindow);
-void wz_main_window_set_menu_bar(struct wzMainWindow *mainWindow, struct wzMenuBar *menuBar);
-void wz_main_window_add(struct wzMainWindow *mainWindow, struct wzWidget *widget);
-void wz_main_window_remove(struct wzMainWindow *mainWindow, struct wzWidget *widget);
-void wz_main_window_toggle_text_cursor(struct wzMainWindow *mainWindow);
-wzCursor wz_main_window_get_cursor(const struct wzMainWindow *mainWindow);
-const struct wzWidget *wz_main_window_get_keyboard_focus_widget(const struct wzMainWindow *mainWindow);
-void wz_main_window_dock_window(struct wzMainWindow *mainWindow, struct wzWindow *window, wzDockPosition dockPosition);
+void wz_main_window_mouse_button_down(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY);
+void wz_main_window_mouse_button_up(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY);
+void wz_main_window_mouse_move(struct MainWindowImpl *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+void wz_main_window_mouse_wheel_move(struct MainWindowImpl *mainWindow, int x, int y);
+void wz_main_window_key_down(struct MainWindowImpl *mainWindow, Key key);
+void wz_main_window_key_up(struct MainWindowImpl *mainWindow, Key key);
+void wz_main_window_text_input(struct MainWindowImpl *mainWindow, const char *text);
+void wz_main_window_draw(struct MainWindowImpl *mainWindow);
+void wz_main_window_draw_frame(struct MainWindowImpl *mainWindow);
+void wz_main_window_set_menu_bar(struct MainWindowImpl *mainWindow, struct MenuBarImpl *menuBar);
+void wz_main_window_add(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
+void wz_main_window_remove(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
+void wz_main_window_toggle_text_cursor(struct MainWindowImpl *mainWindow);
+Cursor wz_main_window_get_cursor(const struct MainWindowImpl *mainWindow);
+const struct WidgetImpl *wz_main_window_get_keyboard_focus_widget(const struct MainWindowImpl *mainWindow);
+void wz_main_window_dock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window, DockPosition dockPosition);
 
-typedef void (*wzWidgetDrawCallback)(struct wzWidget *widget, wzRect clip);
-typedef wzSize (*wzWidgetMeasureCallback)(struct wzWidget *widget);
+typedef void (*WidgetDrawCallback)(struct WidgetImpl *widget, Rect clip);
+typedef Size (*WidgetMeasureCallback)(struct WidgetImpl *widget);
 
-void wz_widget_destroy(struct wzWidget *widget);
-struct wzMainWindow *wz_widget_get_main_window(struct wzWidget *widget);
-wzWidgetType wz_widget_get_type(const struct wzWidget *widget);
-bool wz_widget_is_layout(const struct wzWidget *widget);
+void wz_widget_destroy(struct WidgetImpl *widget);
+struct MainWindowImpl *wz_widget_get_main_window(struct WidgetImpl *widget);
+WidgetType wz_widget_get_type(const struct WidgetImpl *widget);
+bool wz_widget_is_layout(const struct WidgetImpl *widget);
 
 // Resize the widget to the result of calling the widget "measure" callback.
-void wz_widget_resize_to_measured(struct wzWidget *widget);
+void wz_widget_resize_to_measured(struct WidgetImpl *widget);
 
-void wz_widget_set_position_args(struct wzWidget *widget, int x, int y);
-void wz_widget_set_position(struct wzWidget *widget, wzPosition position);
-wzPosition wz_widget_get_position(const struct wzWidget *widget);
-wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget);
-void wz_widget_set_width(struct wzWidget *widget, int w);
-void wz_widget_set_height(struct wzWidget *widget, int h);
-void wz_widget_set_size_args(struct wzWidget *widget, int w, int h);
-void wz_widget_set_size(struct wzWidget *widget, wzSize size);
-int wz_widget_get_width(const struct wzWidget *widget);
-int wz_widget_get_height(const struct wzWidget *widget);
-wzSize wz_widget_get_size(const struct wzWidget *widget);
-void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h);
-void wz_widget_set_rect(struct wzWidget *widget, wzRect rect);
-wzRect wz_widget_get_rect(const struct wzWidget *widget);
-wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget);
-void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin);
-void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left);
-void wz_widget_set_margin_uniform(struct wzWidget *widget, int value);
-wzBorder wz_widget_get_margin(const struct wzWidget *widget);
-void wz_widget_set_stretch(struct wzWidget *widget, int stretch);
-int wz_widget_get_stretch(const struct wzWidget *widget);
-void wz_widget_set_stretch_scale(struct wzWidget *widget, float width, float height);
-float wz_widget_get_stretch_width_scale(const struct wzWidget *widget);
-float wz_widget_get_stretch_height_scale(const struct wzWidget *widget);
-void wz_widget_set_align(struct wzWidget *widget, int align);
-int wz_widget_get_align(const struct wzWidget *widget);
-void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace);
-const char *wz_widget_get_font_face(const struct wzWidget *widget);
-void wz_widget_set_font_size(struct wzWidget *widget, float fontSize);
-float wz_widget_get_font_size(const struct wzWidget *widget);
-void wz_widget_set_font(struct wzWidget *widget, const char *fontFace, float fontSize);
-bool wz_widget_get_hover(const struct wzWidget *widget);
-void wz_widget_set_visible(struct wzWidget *widget, bool visible);
-bool wz_widget_get_visible(const struct wzWidget *widget);
-bool wz_widget_has_keyboard_focus(const struct wzWidget *widget);
-void wz_widget_set_metadata(struct wzWidget *widget, void *metadata);
-void *wz_widget_get_metadata(struct wzWidget *widget);
-void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw);
-void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure);
+void wz_widget_set_position_args(struct WidgetImpl *widget, int x, int y);
+void wz_widget_set_position(struct WidgetImpl *widget, Position position);
+Position wz_widget_get_position(const struct WidgetImpl *widget);
+Position wz_widget_get_absolute_position(const struct WidgetImpl *widget);
+void wz_widget_set_width(struct WidgetImpl *widget, int w);
+void wz_widget_set_height(struct WidgetImpl *widget, int h);
+void wz_widget_set_size_args(struct WidgetImpl *widget, int w, int h);
+void wz_widget_set_size(struct WidgetImpl *widget, Size size);
+int wz_widget_get_width(const struct WidgetImpl *widget);
+int wz_widget_get_height(const struct WidgetImpl *widget);
+Size wz_widget_get_size(const struct WidgetImpl *widget);
+void wz_widget_set_rect_args(struct WidgetImpl *widget, int x, int y, int w, int h);
+void wz_widget_set_rect(struct WidgetImpl *widget, Rect rect);
+Rect wz_widget_get_rect(const struct WidgetImpl *widget);
+Rect wz_widget_get_absolute_rect(const struct WidgetImpl *widget);
+void wz_widget_set_margin(struct WidgetImpl *widget, Border margin);
+void wz_widget_set_margin_args(struct WidgetImpl *widget, int top, int right, int bottom, int left);
+void wz_widget_set_margin_uniform(struct WidgetImpl *widget, int value);
+Border wz_widget_get_margin(const struct WidgetImpl *widget);
+void wz_widget_set_stretch(struct WidgetImpl *widget, int stretch);
+int wz_widget_get_stretch(const struct WidgetImpl *widget);
+void wz_widget_set_stretch_scale(struct WidgetImpl *widget, float width, float height);
+float wz_widget_get_stretch_width_scale(const struct WidgetImpl *widget);
+float wz_widget_get_stretch_height_scale(const struct WidgetImpl *widget);
+void wz_widget_set_align(struct WidgetImpl *widget, int align);
+int wz_widget_get_align(const struct WidgetImpl *widget);
+void wz_widget_set_font_face(struct WidgetImpl *widget, const char *fontFace);
+const char *wz_widget_get_font_face(const struct WidgetImpl *widget);
+void wz_widget_set_font_size(struct WidgetImpl *widget, float fontSize);
+float wz_widget_get_font_size(const struct WidgetImpl *widget);
+void wz_widget_set_font(struct WidgetImpl *widget, const char *fontFace, float fontSize);
+bool wz_widget_get_hover(const struct WidgetImpl *widget);
+void wz_widget_set_visible(struct WidgetImpl *widget, bool visible);
+bool wz_widget_get_visible(const struct WidgetImpl *widget);
+bool wz_widget_has_keyboard_focus(const struct WidgetImpl *widget);
+void wz_widget_set_metadata(struct WidgetImpl *widget, void *metadata);
+void *wz_widget_get_metadata(struct WidgetImpl *widget);
+void wz_widget_set_draw_callback(struct WidgetImpl *widget, WidgetDrawCallback draw);
+void wz_widget_set_measure_callback(struct WidgetImpl *widget, WidgetMeasureCallback measure);
 
 // Determine whether the widget is an descendant of a widget with the provided type.
-bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type);
+bool wz_widget_is_descendant_of(struct WidgetImpl *widget, WidgetType type);
 
-struct wzWidget *wz_widget_get_parent(struct wzWidget *widget);
+struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget);
 
-struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget);
+struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 
-struct wzWindow *wz_window_create(const char *title);
-int wz_window_get_header_height(const struct wzWindow *window);
-int wz_window_get_border_size(const struct wzWindow *window);
-wzRect wz_window_get_header_rect(const struct wzWindow *window);
-void wz_window_set_title(struct wzWindow *window, const char *title);
-const char *wz_window_get_title(const struct wzWindow *window);
-void wz_window_add(struct wzWindow *window, struct wzWidget *widget);
-void wz_window_remove(struct wzWindow *window, struct wzWidget *widget);
+struct WindowImpl *wz_window_create(const char *title);
+int wz_window_get_header_height(const struct WindowImpl *window);
+int wz_window_get_border_size(const struct WindowImpl *window);
+Rect wz_window_get_header_rect(const struct WindowImpl *window);
+void wz_window_set_title(struct WindowImpl *window, const char *title);
+const char *wz_window_get_title(const struct WindowImpl *window);
+void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget);
+void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget);
 
-struct wzButton *wz_button_create(const char *label, const char *icon);
-struct wzButton *wz_toggle_button_create(const char *label, const char *icon);
-void wz_button_set_label(struct wzButton *button, const char *label);
-const char *wz_button_get_label(const struct wzButton *button);
-void wz_button_set_icon(struct wzButton *button, const char *icon);
-const char *wz_button_get_icon(const struct wzButton *button);
-void wz_button_set_padding(struct wzButton *button, wzBorder padding);
-void wz_button_set_padding_args(struct wzButton *button, int top, int right, int bottom, int left);
-wzBorder wz_button_get_padding(const struct wzButton *button);
-bool wz_button_is_pressed(const struct wzButton *button);
-bool wz_button_is_set(const struct wzButton *button);
-void wz_button_set(struct wzButton *button, bool value);
-void wz_button_bind_value(struct wzButton *button, bool *value);
-void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback);
-void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback);
+struct ButtonImpl *wz_button_create(const char *label, const char *icon);
+struct ButtonImpl *wz_toggle_button_create(const char *label, const char *icon);
+void wz_button_set_label(struct ButtonImpl *button, const char *label);
+const char *wz_button_get_label(const struct ButtonImpl *button);
+void wz_button_set_icon(struct ButtonImpl *button, const char *icon);
+const char *wz_button_get_icon(const struct ButtonImpl *button);
+void wz_button_set_padding(struct ButtonImpl *button, Border padding);
+void wz_button_set_padding_args(struct ButtonImpl *button, int top, int right, int bottom, int left);
+Border wz_button_get_padding(const struct ButtonImpl *button);
+bool wz_button_is_pressed(const struct ButtonImpl *button);
+bool wz_button_is_set(const struct ButtonImpl *button);
+void wz_button_set(struct ButtonImpl *button, bool value);
+void wz_button_bind_value(struct ButtonImpl *button, bool *value);
+void wz_button_add_callback_pressed(struct ButtonImpl *button, EventCallback callback);
+void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback callback);
 
-struct wzCheckBox *wz_check_box_create(const char *label);
-void wz_check_box_set_label(struct wzCheckBox *checkBox, const char *label);
-const char *wz_check_box_get_label(const struct wzCheckBox *checkBox);
-bool wz_check_box_is_checked(const struct wzCheckBox *checkBox);
-void wz_check_box_check(struct wzCheckBox *checkBox, bool value);
-void wz_check_box_bind_value(struct wzCheckBox *checkBox, bool *value);
-void wz_check_box_add_callback_checked(struct wzCheckBox *checkBox, wzEventCallback callback);
+struct CheckBoxImpl *wz_check_box_create(const char *label);
+void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label);
+const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox);
+bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox);
+void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value);
+void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value);
+void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback);
 
-struct wzCombo *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
-struct wzList *wz_combo_get_list(const struct wzCombo *combo);
-bool wz_combo_is_open(struct wzCombo *combo);
+struct ComboImpl *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
+struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo);
+bool wz_combo_is_open(struct ComboImpl *combo);
 
-struct wzFrame *wz_frame_create();
-void wz_frame_add(struct wzFrame *frame, struct wzWidget *widget);
-void wz_frame_remove(struct wzFrame *frame, struct wzWidget *widget);
+struct FrameImpl *wz_frame_create();
+void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget);
+void wz_frame_remove(struct FrameImpl *frame, struct WidgetImpl *widget);
 
-struct wzGroupBox *wz_group_box_create(const char *label);
-void wz_group_box_set_label(struct wzGroupBox *groupBox, const char *label);
-const char *wz_group_box_get_label(const struct wzGroupBox *groupBox);
-void wz_group_box_add(struct wzGroupBox *groupBox, struct wzWidget *widget);
-void wz_group_box_remove(struct wzGroupBox *groupBox, struct wzWidget *widget);
+struct GroupBoxImpl *wz_group_box_create(const char *label);
+void wz_group_box_set_label(struct GroupBoxImpl *groupBox, const char *label);
+const char *wz_group_box_get_label(const struct GroupBoxImpl *groupBox);
+void wz_group_box_add(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
+void wz_group_box_remove(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
 
-struct wzLabel *wz_label_create(const char *text);
-void wz_label_set_multiline(struct wzLabel *label, bool multiline);
-bool wz_label_get_multiline(const struct wzLabel *label);
-void wz_label_set_text(struct wzLabel *label, const char *text);
-const char *wz_label_get_text(const struct wzLabel *label);
-void wz_label_set_text_color(struct wzLabel *label, NVGcolor color);
-NVGcolor wz_label_get_text_color(const struct wzLabel *label);
+struct LabelImpl *wz_label_create(const char *text);
+void wz_label_set_multiline(struct LabelImpl *label, bool multiline);
+bool wz_label_get_multiline(const struct LabelImpl *label);
+void wz_label_set_text(struct LabelImpl *label, const char *text);
+const char *wz_label_get_text(const struct LabelImpl *label);
+void wz_label_set_text_color(struct LabelImpl *label, NVGcolor color);
+NVGcolor wz_label_get_text_color(const struct LabelImpl *label);
 
-typedef void (*wzDrawListItemCallback)(struct wzRenderer *renderer, wzRect clip, const struct wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+typedef void (*DrawListItemCallback)(struct wzRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
-struct wzList *wz_list_create(uint8_t *itemData, int itemStride, int nItems);
-wzBorder wz_list_get_items_border(const struct wzList *list);
-wzRect wz_list_get_items_rect(const struct wzList *list);
+struct ListImpl *wz_list_create(uint8_t *itemData, int itemStride, int nItems);
+Border wz_list_get_items_border(const struct ListImpl *list);
+Rect wz_list_get_items_rect(const struct ListImpl *list);
 
 // rect will be absolute - ancestor window position is taken into account.
-wzRect wz_list_get_absolute_items_rect(const struct wzList *list);
+Rect wz_list_get_absolute_items_rect(const struct ListImpl *list);
 
-void wz_list_set_draw_item_callback(struct wzList *list, wzDrawListItemCallback callback);
-wzDrawListItemCallback wz_list_get_draw_item_callback(const struct wzList *list);
-void wz_list_set_item_data(struct wzList *list, uint8_t *itemData);
-uint8_t *wz_list_get_item_data(const struct wzList *list);
-void wz_list_set_item_stride(struct wzList *list, int itemStride);
-int wz_list_get_item_stride(const struct wzList *list);
-void wz_list_set_item_height(struct wzList *list, int itemHeight);
-int wz_list_get_item_height(const struct wzList *list);
-void wz_list_set_num_items(struct wzList *list, int nItems);
-int wz_list_get_num_items(const struct wzList *list);
-int wz_list_get_first_item(const struct wzList *list);
-void wz_list_set_selected_item(struct wzList *list, int selectedItem);
-int wz_list_get_selected_item(const struct wzList *list);
-int wz_list_get_pressed_item(const struct wzList *list);
-int wz_list_get_hovered_item(const struct wzList *list);
-int wz_list_get_scroll_value(const struct wzList *list);
-void wz_list_add_callback_item_selected(struct wzList *list, wzEventCallback callback);
+void wz_list_set_draw_item_callback(struct ListImpl *list, DrawListItemCallback callback);
+DrawListItemCallback wz_list_get_draw_item_callback(const struct ListImpl *list);
+void wz_list_set_item_data(struct ListImpl *list, uint8_t *itemData);
+uint8_t *wz_list_get_item_data(const struct ListImpl *list);
+void wz_list_set_item_stride(struct ListImpl *list, int itemStride);
+int wz_list_get_item_stride(const struct ListImpl *list);
+void wz_list_set_item_height(struct ListImpl *list, int itemHeight);
+int wz_list_get_item_height(const struct ListImpl *list);
+void wz_list_set_num_items(struct ListImpl *list, int nItems);
+int wz_list_get_num_items(const struct ListImpl *list);
+int wz_list_get_first_item(const struct ListImpl *list);
+void wz_list_set_selected_item(struct ListImpl *list, int selectedItem);
+int wz_list_get_selected_item(const struct ListImpl *list);
+int wz_list_get_pressed_item(const struct ListImpl *list);
+int wz_list_get_hovered_item(const struct ListImpl *list);
+int wz_list_get_scroll_value(const struct ListImpl *list);
+void wz_list_add_callback_item_selected(struct ListImpl *list, EventCallback callback);
 
-struct wzMenuBar *wz_menu_bar_create();
-struct wzMenuBarButton *wz_menu_bar_create_button(struct wzMenuBar *menuBar);
+struct MenuBarImpl *wz_menu_bar_create();
+struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar);
 
-void wz_menu_bar_button_set_label(struct wzMenuBarButton *button, const char *label);
-const char *wz_menu_bar_button_get_label(const struct wzMenuBarButton *button);
-bool wz_menu_bar_button_is_pressed(const struct wzMenuBarButton *button);
+void wz_menu_bar_button_set_label(struct MenuBarButtonImpl *button, const char *label);
+const char *wz_menu_bar_button_get_label(const struct MenuBarButtonImpl *button);
+bool wz_menu_bar_button_is_pressed(const struct MenuBarButtonImpl *button);
 
-struct wzRadioButton *wz_radio_button_create(const char *label);
-void wz_radio_button_set_label(struct wzRadioButton *radioButton, const char *label);
-const char *wz_radio_button_get_label(const struct wzRadioButton *radioButton);
-bool wz_radio_button_is_set(const struct wzRadioButton *radioButton);
-void wz_radio_button_set(struct wzRadioButton *radioButton, bool value);
-void wz_radio_button_add_callback_clicked(struct wzRadioButton *radioButton, wzEventCallback callback);
+struct RadioButtonImpl *wz_radio_button_create(const char *label);
+void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label);
+const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton);
+bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton);
+void wz_radio_button_set(struct RadioButtonImpl *radioButton, bool value);
+void wz_radio_button_add_callback_clicked(struct RadioButtonImpl *radioButton, EventCallback callback);
 
 typedef enum
 {
 	WZ_SCROLLER_VERTICAL,
 	WZ_SCROLLER_HORIZONTAL
 }
-wzScrollerType;
+ScrollerType;
 
-struct wzScroller *wz_scroller_create(wzScrollerType scrollerType, int value, int stepValue, int maxValue);
-wzScrollerType wz_scroller_get_type(const struct wzScroller *scroller);
-int wz_scroller_get_value(const struct wzScroller *scroller);
-void wz_scroller_set_value(struct wzScroller *scroller, int value);
-void wz_scroller_decrement_value(struct wzScroller *scroller);
-void wz_scroller_increment_value(struct wzScroller *scroller);
-void wz_scroller_set_step_value(struct wzScroller *scroller, int stepValue);
-int wz_scroller_get_step_value(struct wzScroller *scroller);
-void wz_scroller_set_max_value(struct wzScroller *scroller, int maxValue);
-void wz_scroller_set_nub_scale(struct wzScroller *scroller, float nubScale);
-void wz_scroller_get_nub_state(const struct wzScroller *scroller, wzRect *containerRect, wzRect *rect, bool *hover, bool *pressed);
-void wz_scroller_add_callback_value_changed(struct wzScroller *scroller, wzEventCallback callback);
+struct ScrollerImpl *wz_scroller_create(ScrollerType scrollerType, int value, int stepValue, int maxValue);
+ScrollerType wz_scroller_get_type(const struct ScrollerImpl *scroller);
+int wz_scroller_get_value(const struct ScrollerImpl *scroller);
+void wz_scroller_set_value(struct ScrollerImpl *scroller, int value);
+void wz_scroller_decrement_value(struct ScrollerImpl *scroller);
+void wz_scroller_increment_value(struct ScrollerImpl *scroller);
+void wz_scroller_set_step_value(struct ScrollerImpl *scroller, int stepValue);
+int wz_scroller_get_step_value(struct ScrollerImpl *scroller);
+void wz_scroller_set_max_value(struct ScrollerImpl *scroller, int maxValue);
+void wz_scroller_set_nub_scale(struct ScrollerImpl *scroller, float nubScale);
+void wz_scroller_get_nub_state(const struct ScrollerImpl *scroller, Rect *containerRect, Rect *rect, bool *hover, bool *pressed);
+void wz_scroller_add_callback_value_changed(struct ScrollerImpl *scroller, EventCallback callback);
 
-struct wzSpinner *wz_spinner_create();
-int wz_spinner_get_value(const struct wzSpinner *spinner);
-void wz_spinner_set_value(struct wzSpinner *spinner, int value);
+struct SpinnerImpl *wz_spinner_create();
+int wz_spinner_get_value(const struct SpinnerImpl *spinner);
+void wz_spinner_set_value(struct SpinnerImpl *spinner, int value);
 
 typedef enum
 {
 	WZ_STACK_LAYOUT_VERTICAL,
 	WZ_STACK_LAYOUT_HORIZONTAL,
 }
-wzStackLayoutDirection;
+StackLayoutDirection;
 
-struct wzStackLayout *wz_stack_layout_create(wzStackLayoutDirection direction, int spacing);
-void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction);
-void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing);
-int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout);
-void wz_stack_layout_add(struct wzStackLayout *stackLayout, struct wzWidget *widget);
-void wz_stack_layout_remove(struct wzStackLayout *stackLayout, struct wzWidget *widget);
+struct StackLayoutImpl *wz_stack_layout_create(StackLayoutDirection direction, int spacing);
+void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLayoutDirection direction);
+void wz_stack_layout_set_spacing(struct StackLayoutImpl *stackLayout, int spacing);
+int wz_stack_layout_get_spacing(const struct StackLayoutImpl *stackLayout);
+void wz_stack_layout_add(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
+void wz_stack_layout_remove(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
 
-struct wzTabBar *wz_tab_bar_create();
-struct wzButton *wz_tab_bar_create_tab(struct wzTabBar *tabBar);
-void wz_tab_bar_destroy_tab(struct wzTabBar *tabBar, struct wzButton *tab);
-void wz_tab_bar_clear_tabs(struct wzTabBar *tabBar);
-struct wzButton *wz_tab_bar_get_decrement_button(struct wzTabBar *tabBar);
-struct wzButton *wz_tab_bar_get_increment_button(struct wzTabBar *tabBar);
-struct wzButton *wz_tab_bar_get_selected_tab(struct wzTabBar *tabBar);
-void wz_tab_bar_select_tab(struct wzTabBar *tabBar, struct wzButton *tab);
-void wz_tab_bar_add_callback_tab_changed(struct wzTabBar *tabBar, wzEventCallback callback);
-int wz_tab_bar_get_scroll_value(const struct wzTabBar *tabBar);
+struct TabBarImpl *wz_tab_bar_create();
+struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar);
+void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
+void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar);
+struct ButtonImpl *wz_tab_bar_get_decrement_button(struct TabBarImpl *tabBar);
+struct ButtonImpl *wz_tab_bar_get_increment_button(struct TabBarImpl *tabBar);
+struct ButtonImpl *wz_tab_bar_get_selected_tab(struct TabBarImpl *tabBar);
+void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
+void wz_tab_bar_add_callback_tab_changed(struct TabBarImpl *tabBar, EventCallback callback);
+int wz_tab_bar_get_scroll_value(const struct TabBarImpl *tabBar);
 
-struct wzTabbed *wz_tabbed_create();
-void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page);
-void wz_tab_page_add(struct wzWidget *tabPage, struct wzWidget *widget);
-void wz_tab_page_remove(struct wzWidget *tabPage, struct wzWidget *widget);
+struct TabbedImpl *wz_tabbed_create();
+void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page);
+void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
+void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 
-typedef bool (*wzTextEditValidateTextCallback)(const char *text);
+typedef bool (*TextEditValidateTextCallback)(const char *text);
 
-struct wzTextEdit *wz_text_edit_create(bool multiline, int maximumTextLength);
-void wz_text_edit_set_validate_text_callback(struct wzTextEdit *textEdit, wzTextEditValidateTextCallback callback);
-bool wz_text_edit_is_multiline(const struct wzTextEdit *textEdit);
-wzBorder wz_text_edit_get_border(const struct wzTextEdit *textEdit);
-wzRect wz_text_edit_get_text_rect(const struct wzTextEdit *textEdit);
-const char *wz_text_edit_get_text(const struct wzTextEdit *textEdit);
-void wz_text_edit_set_text(struct wzTextEdit *textEdit, const char *text);
-int wz_text_edit_get_scroll_value(const struct wzTextEdit *textEdit);
-const char *wz_text_edit_get_visible_text(const struct wzTextEdit *textEdit);
+struct TextEditImpl *wz_text_edit_create(bool multiline, int maximumTextLength);
+void wz_text_edit_set_validate_text_callback(struct TextEditImpl *textEdit, TextEditValidateTextCallback callback);
+bool wz_text_edit_is_multiline(const struct TextEditImpl *textEdit);
+Border wz_text_edit_get_border(const struct TextEditImpl *textEdit);
+Rect wz_text_edit_get_text_rect(const struct TextEditImpl *textEdit);
+const char *wz_text_edit_get_text(const struct TextEditImpl *textEdit);
+void wz_text_edit_set_text(struct TextEditImpl *textEdit, const char *text);
+int wz_text_edit_get_scroll_value(const struct TextEditImpl *textEdit);
+const char *wz_text_edit_get_visible_text(const struct TextEditImpl *textEdit);
 
 // y is centered on the line.
-wzPosition wz_text_edit_get_cursor_position(const struct wzTextEdit *textEdit);
+Position wz_text_edit_get_cursor_position(const struct TextEditImpl *textEdit);
 
-bool wz_text_edit_has_selection(const struct wzTextEdit *textEdit);
+bool wz_text_edit_has_selection(const struct TextEditImpl *textEdit);
 
 // start is always < end if wz_text_edit_has_selection
-int wz_text_edit_get_selection_start_index(const struct wzTextEdit *textEdit);
+int wz_text_edit_get_selection_start_index(const struct TextEditImpl *textEdit);
 
 // y is centered on the line.
-wzPosition wz_text_edit_get_selection_start_position(const struct wzTextEdit *textEdit);
+Position wz_text_edit_get_selection_start_position(const struct TextEditImpl *textEdit);
 
 // end is always > start if wz_text_edit_has_selection
-int wz_text_edit_get_selection_end_index(const struct wzTextEdit *textEdit);
+int wz_text_edit_get_selection_end_index(const struct TextEditImpl *textEdit);
 
 // y is centered on the line.
-wzPosition wz_text_edit_get_selection_end_position(const struct wzTextEdit *textEdit);
+Position wz_text_edit_get_selection_end_position(const struct TextEditImpl *textEdit);
 
-wzPosition wz_text_edit_position_from_index(const struct wzTextEdit *textEdit, int index);
+Position wz_text_edit_position_from_index(const struct TextEditImpl *textEdit, int index);
 
 typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
 typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
@@ -568,14 +568,14 @@ struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
 
 int wz_renderer_create_image(struct wzRenderer *renderer, const char *filename, int *width, int *height);
 void wz_renderer_set_font_face(struct wzRenderer *renderer, const char *face);
-void wz_renderer_print_box(struct wzRenderer *renderer, wzRect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
+void wz_renderer_print_box(struct wzRenderer *renderer, Rect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
 void wz_renderer_print(struct wzRenderer *renderer, int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
-void wz_renderer_clip_to_rect(struct NVGcontext *vg, wzRect rect);
-bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, wzRect rect1, wzRect rect2);
-void wz_renderer_draw_filled_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
-void wz_renderer_draw_rect(struct NVGcontext *vg, wzRect rect, struct NVGcolor color);
+void wz_renderer_clip_to_rect(struct NVGcontext *vg, Rect rect);
+bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, Rect rect1, Rect rect2);
+void wz_renderer_draw_filled_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color);
+void wz_renderer_draw_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color);
 void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2, struct NVGcolor color);
-void wz_renderer_draw_image(struct NVGcontext *vg, wzRect rect, int image);
+void wz_renderer_draw_image(struct NVGcontext *vg, Rect rect, int image);
 
 enum
 {
@@ -592,7 +592,7 @@ enum
 	WZ_CORNER_ALL = WZ_CORNER_TL | WZ_CORNER_TR | WZ_CORNER_BR | WZ_CORNER_BL
 };
 
-void wz_renderer_create_rect_path(struct NVGcontext *vg, wzRect rect, float r, int sides, int roundedCorners);
+void wz_renderer_create_rect_path(struct NVGcontext *vg, Rect rect, float r, int sides, int roundedCorners);
 
 int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize);
 
@@ -605,9 +605,9 @@ typedef struct
 	size_t length;
 	const char *next;
 }
-wzLineBreakResult;
+LineBreakResult;
 
-wzLineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
+LineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 
 class Button;
 class Checkbox;
@@ -631,7 +631,7 @@ class Widget
 {
 public:
 	virtual ~Widget();
-	wzRect getRect() const;
+	Rect getRect() const;
 	Widget *setPosition(int x, int y);
 	Widget *setWidth(int w);
 	Widget *setHeight(int h);
@@ -641,7 +641,7 @@ public:
 	Widget *setAlign(int align);
 	Widget *setMargin(int margin);
 	Widget *setMargin(int top, int right, int bottom, int left);
-	Widget *setMargin(wzBorder margin);
+	Widget *setMargin(Border margin);
 	Widget *setFontFace(const std::string &fontFace);
 	Widget *setFontSize(float fontSize);
 	Widget *setFont(const std::string &fontFace, float fontSize);
@@ -650,7 +650,7 @@ public:
 	Widget *addEventHandler(IEventHandler *eventHandler);
 
 	template<class Object>
-	Widget *addEventHandler(wzWidgetEventType eventType, Object *object, void (Object::*method)(wzEvent *))
+	Widget *addEventHandler(WidgetEventType eventType, Object *object, void (Object::*method)(Event *))
 	{
 		EventHandler<Object> *eventHandler = new EventHandler<Object>();
 		eventHandler->eventType = eventType;
@@ -660,7 +660,7 @@ public:
 		return this;
 	}
 
-	wzWidget *p;
+	WidgetImpl *p;
 };
 
 class Button : public Widget
@@ -669,8 +669,8 @@ public:
 	Button();
 	Button(const std::string &label, const std::string &icon = std::string());
 	~Button();
-	wzBorder getPadding() const;
-	Button *setPadding(wzBorder padding);
+	Border getPadding() const;
+	Button *setPadding(Border padding);
 	Button *setPadding(int top, int right, int bottom, int left);
 	const char *getIcon() const;
 	Button *setIcon(const std::string &icon);
@@ -737,7 +737,7 @@ public:
 	List *setItems(uint8_t *itemData, size_t itemStride, int nItems);
 	List *setSelectedItem(int index);
 	List *setItemHeight(int height);
-	List *setDrawItemCallback(wzDrawListItemCallback callback);
+	List *setDrawItemCallback(DrawListItemCallback callback);
 };
 
 class MainWindow
@@ -752,19 +752,19 @@ public:
 	void mouseButtonDown(int button, int x, int y);
 	void mouseButtonUp(int button, int x, int y);
 	void mouseWheelMove(int x, int y);
-	void keyDown(wzKey key);
-	void keyUp(wzKey key);
+	void keyDown(Key key);
+	void keyUp(Key key);
 	void textInput(const char *text);
 	void beginFrame();
 	void draw();
 	void drawFrame();
 	void endFrame();
 	void toggleTextCursor();
-	wzCursor getCursor() const;
+	Cursor getCursor() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
 	void createMenuButton(const std::string &label);
-	void dockWindow(Window *window, wzDockPosition dockPosition);
+	void dockWindow(Window *window, DockPosition dockPosition);
 
 	MainWindowPrivate *p;
 };
@@ -782,7 +782,7 @@ public:
 class Scroller : public Widget
 {
 public:
-	Scroller(wzScrollerType type);
+	Scroller(ScrollerType type);
 	~Scroller();
 	Scroller *setValue(int value);
 	Scroller *setStepValue(int stepValue);
@@ -803,9 +803,9 @@ class StackLayout : public Widget
 {
 public:
 	StackLayout();
-	StackLayout(wzStackLayoutDirection direction);
+	StackLayout(StackLayoutDirection direction);
 	~StackLayout();
-	StackLayout *setDirection(wzStackLayoutDirection direction);
+	StackLayout *setDirection(StackLayoutDirection direction);
 	StackLayout *setSpacing(int spacing);
 	int getSpacing() const;
 	Widget *add(Widget *widget);
@@ -847,8 +847,8 @@ public:
 	ToggleButton();
 	ToggleButton(const std::string &label, const std::string &icon = std::string());
 	~ToggleButton();
-	wzBorder getPadding() const;
-	ToggleButton *setPadding(wzBorder padding);
+	Border getPadding() const;
+	ToggleButton *setPadding(Border padding);
 	ToggleButton *setPadding(int top, int right, int bottom, int left);
 	const char *getIcon() const;
 	ToggleButton *setIcon(const std::string &icon);

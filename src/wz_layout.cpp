@@ -27,11 +27,11 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzStackLayout : public wzWidget
+struct StackLayoutImpl : public WidgetImpl
 {
-	wzStackLayout();
+	StackLayoutImpl();
 
-	wzStackLayoutDirection direction;
+	StackLayoutDirection direction;
 
 	// Spacing between child widgets. Applied to the top/left of children.
 	int spacing;
@@ -45,15 +45,15 @@ VERTICAL STACK LAYOUT
 ================================================================================
 */
 
-static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
+static void wz_vertical_stack_layout_set_rect(struct WidgetImpl *widget, Rect rect)
 {
-	struct wzStackLayout *stackLayout;
+	struct StackLayoutImpl *stackLayout;
 	int availableHeight;
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int y;
 
 	WZ_ASSERT(widget);
-	stackLayout = (struct wzStackLayout *)widget;
+	stackLayout = (struct StackLayoutImpl *)widget;
 	widget->rect = rect;
 	availableHeight = rect.h;
 	nStretchingWidgets = 0;
@@ -86,8 +86,8 @@ static void wz_vertical_stack_layout_set_rect(struct wzWidget *widget, wzRect re
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
-		struct wzWidget *child;
-		wzRect childRect;
+		struct WidgetImpl *child;
+		Rect childRect;
 
 		child = widget->children[i];
 
@@ -145,15 +145,15 @@ HORIZONTAL STACK LAYOUT
 ================================================================================
 */
 
-static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
+static void wz_horizontal_stack_layout_set_rect(struct WidgetImpl *widget, Rect rect)
 {
-	struct wzStackLayout *stackLayout;
+	struct StackLayoutImpl *stackLayout;
 	int availableWidth;
 	int nStretchingWidgets; // The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int x;
 
 	WZ_ASSERT(widget);
-	stackLayout = (struct wzStackLayout *)widget;
+	stackLayout = (struct StackLayoutImpl *)widget;
 	widget->rect = rect;
 	availableWidth = rect.w;
 	nStretchingWidgets = 0;
@@ -186,8 +186,8 @@ static void wz_horizontal_stack_layout_set_rect(struct wzWidget *widget, wzRect 
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
-		struct wzWidget *child;
-		wzRect childRect;
+		struct WidgetImpl *child;
+		Rect childRect;
 
 		child = widget->children[i];
 
@@ -245,11 +245,11 @@ STACK LAYOUT
 ================================================================================
 */
 
-static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
+static void wz_stack_layout_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	WZ_ASSERT(widget);
 
-	if (((struct wzStackLayout *)widget)->direction == WZ_STACK_LAYOUT_VERTICAL)
+	if (((struct StackLayoutImpl *)widget)->direction == WZ_STACK_LAYOUT_VERTICAL)
 	{
 		wz_vertical_stack_layout_set_rect(widget, rect);
 	}
@@ -259,17 +259,17 @@ static void wz_stack_layout_set_rect(struct wzWidget *widget, wzRect rect)
 	}
 }
 
-wzStackLayout::wzStackLayout()
+StackLayoutImpl::StackLayoutImpl()
 {
 	direction = WZ_STACK_LAYOUT_VERTICAL;
 	spacing = 0;
 }
 
-struct wzStackLayout *wz_stack_layout_create(wzStackLayoutDirection direction, int spacing)
+struct StackLayoutImpl *wz_stack_layout_create(StackLayoutDirection direction, int spacing)
 {
-	struct wzStackLayout *stackLayout;
+	struct StackLayoutImpl *stackLayout;
 
-	stackLayout = new struct wzStackLayout;
+	stackLayout = new struct StackLayoutImpl;
 	stackLayout->type = WZ_TYPE_STACK_LAYOUT;
 	stackLayout->vtable.set_rect = wz_stack_layout_set_rect;
 	stackLayout->direction = direction;
@@ -277,27 +277,27 @@ struct wzStackLayout *wz_stack_layout_create(wzStackLayoutDirection direction, i
 	return stackLayout;
 }
 
-void wz_stack_layout_set_direction(struct wzStackLayout *stackLayout, wzStackLayoutDirection direction)
+void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLayoutDirection direction)
 {
 	WZ_ASSERT(stackLayout);
 	stackLayout->direction = direction;
-	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
+	wz_widget_refresh_rect((struct WidgetImpl *)stackLayout);
 }
 
-void wz_stack_layout_set_spacing(struct wzStackLayout *stackLayout, int spacing)
+void wz_stack_layout_set_spacing(struct StackLayoutImpl *stackLayout, int spacing)
 {
 	WZ_ASSERT(stackLayout);
 	stackLayout->spacing = spacing;
-	wz_widget_refresh_rect((struct wzWidget *)stackLayout);
+	wz_widget_refresh_rect((struct WidgetImpl *)stackLayout);
 }
 
-int wz_stack_layout_get_spacing(const struct wzStackLayout *stackLayout)
+int wz_stack_layout_get_spacing(const struct StackLayoutImpl *stackLayout)
 {
 	WZ_ASSERT(stackLayout);
 	return stackLayout->spacing;
 }
 
-void wz_stack_layout_add(struct wzStackLayout *stackLayout, struct wzWidget *widget)
+void wz_stack_layout_add(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(stackLayout);
 	WZ_ASSERT(widget);
@@ -305,14 +305,14 @@ void wz_stack_layout_add(struct wzStackLayout *stackLayout, struct wzWidget *wid
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget((struct wzWidget *)stackLayout, widget);
+	wz_widget_add_child_widget((struct WidgetImpl *)stackLayout, widget);
 }
 
-void wz_stack_layout_remove(struct wzStackLayout *stackLayout, struct wzWidget *widget)
+void wz_stack_layout_remove(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(stackLayout);
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget((struct wzWidget *)stackLayout, widget);
+	wz_widget_remove_child_widget((struct WidgetImpl *)stackLayout, widget);
 }
 
 /*
@@ -323,9 +323,9 @@ ALIGNMENT AND STRETCHING (OUTSIDE LAYOUT)
 ================================================================================
 */
 
-wzRect wz_widget_calculate_aligned_stretched_rect(const struct wzWidget *widget, wzRect rect)
+Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget, Rect rect)
 {
-	wzRect parentRect;
+	Rect parentRect;
 
 	WZ_ASSERT(widget);
 

@@ -51,9 +51,9 @@ wz_intersect_rects is SDL_IntersectRect
 
 namespace wz {
 
-const wzBorder wzBorder_zero;
+const Border Border_zero;
 
-wzWidget::wzWidget()
+WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
 	stretch = 0;
@@ -86,12 +86,12 @@ RECTANGLES
 ================================================================================
 */
 
-bool wz_is_rect_empty(wzRect rect)
+bool wz_is_rect_empty(Rect rect)
 {
 	return rect.x == 0 && rect.y == 0 && rect.w == 0 && rect.h == 0;
 }
 
-bool wz_intersect_rects(wzRect A, wzRect B, wzRect *result)
+bool wz_intersect_rects(Rect A, Rect B, Rect *result)
 {
     int Amin, Amax, Bmin, Bmax;
 
@@ -139,7 +139,7 @@ PUBLIC WIDGET FUNCTIONS
 ================================================================================
 */
 
-void wz_widget_destroy(struct wzWidget *widget)
+void wz_widget_destroy(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -159,35 +159,35 @@ void wz_widget_destroy(struct wzWidget *widget)
 	delete widget;
 }
 
-struct wzMainWindow *wz_widget_get_main_window(struct wzWidget *widget)
+struct MainWindowImpl *wz_widget_get_main_window(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->mainWindow;
 }
 
-wzWidgetType wz_widget_get_type(const struct wzWidget *widget)
+WidgetType wz_widget_get_type(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->type;
 }
 
-bool wz_widget_is_layout(const struct wzWidget *widget)
+bool wz_widget_is_layout(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->type == WZ_TYPE_STACK_LAYOUT;
 }
 
-void wz_widget_set_position_args(struct wzWidget *widget, int x, int y)
+void wz_widget_set_position_args(struct WidgetImpl *widget, int x, int y)
 {
-	wzPosition position;
+	Position position;
 	position.x = x;
 	position.y = y;
 	wz_widget_set_position(widget, position);
 }
 
-void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
+void wz_widget_set_position(struct WidgetImpl *widget, Position position)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->userRect;
@@ -196,10 +196,10 @@ void wz_widget_set_position(struct wzWidget *widget, wzPosition position)
 	wz_widget_set_rect(widget, rect);
 }
 
-wzPosition wz_widget_get_position(const struct wzWidget *widget)
+Position wz_widget_get_position(const struct WidgetImpl *widget)
 {
-	wzRect rect;
-	wzPosition pos;
+	Rect rect;
+	Position pos;
 
 	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
@@ -208,10 +208,10 @@ wzPosition wz_widget_get_position(const struct wzWidget *widget)
 	return pos;
 }
 
-wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget)
+Position wz_widget_get_absolute_position(const struct WidgetImpl *widget)
 {
-	wzRect rect;
-	wzPosition pos;
+	Rect rect;
+	Position pos;
 
 	WZ_ASSERT(widget);
 	rect = wz_widget_get_absolute_rect(widget);
@@ -220,9 +220,9 @@ wzPosition wz_widget_get_absolute_position(const struct wzWidget *widget)
 	return pos;
 }
 
-void wz_widget_set_width(struct wzWidget *widget, int w)
+void wz_widget_set_width(struct WidgetImpl *widget, int w)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->userRect;
@@ -230,9 +230,9 @@ void wz_widget_set_width(struct wzWidget *widget, int w)
 	wz_widget_set_rect(widget, rect);
 }
 
-void wz_widget_set_height(struct wzWidget *widget, int h)
+void wz_widget_set_height(struct WidgetImpl *widget, int h)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->userRect;
@@ -240,17 +240,17 @@ void wz_widget_set_height(struct wzWidget *widget, int h)
 	wz_widget_set_rect(widget, rect);
 }
 
-void wz_widget_set_size_args(struct wzWidget *widget, int w, int h)
+void wz_widget_set_size_args(struct WidgetImpl *widget, int w, int h)
 {
-	wzSize size;
+	Size size;
 	size.w = w;
 	size.h = h;
 	wz_widget_set_size(widget, size);
 }
 
-void wz_widget_set_size(struct wzWidget *widget, wzSize size)
+void wz_widget_set_size(struct WidgetImpl *widget, Size size)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->userRect;
@@ -259,20 +259,20 @@ void wz_widget_set_size(struct wzWidget *widget, wzSize size)
 	wz_widget_set_rect(widget, rect);
 }
 
-int wz_widget_get_width(const struct wzWidget *widget)
+int wz_widget_get_width(const struct WidgetImpl *widget)
 {
 	return wz_widget_get_rect(widget).w;
 }
 
-int wz_widget_get_height(const struct wzWidget *widget)
+int wz_widget_get_height(const struct WidgetImpl *widget)
 {
 	return wz_widget_get_rect(widget).h;
 }
 
-wzSize wz_widget_get_size(const struct wzWidget *widget)
+Size wz_widget_get_size(const struct WidgetImpl *widget)
 {
-	wzRect rect;
-	wzSize size;
+	Rect rect;
+	Size size;
 
 	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
@@ -281,9 +281,9 @@ wzSize wz_widget_get_size(const struct wzWidget *widget)
 	return size;
 }
 
-void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h)
+void wz_widget_set_rect_args(struct WidgetImpl *widget, int x, int y, int w, int h)
 {
-	wzRect rect;
+	Rect rect;
 	rect.x = x;
 	rect.y = y;
 	rect.w = w;
@@ -291,29 +291,29 @@ void wz_widget_set_rect_args(struct wzWidget *widget, int x, int y, int w, int h
 	wz_widget_set_rect(widget, rect);
 }
 
-void wz_widget_set_rect(struct wzWidget *widget, wzRect rect)
+void wz_widget_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	WZ_ASSERT(widget);
 	widget->userRect = rect;
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-wzRect wz_widget_get_rect(const struct wzWidget *widget)
+Rect wz_widget_get_rect(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->rect;
 }
 
-wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
+Rect wz_widget_get_absolute_rect(const struct WidgetImpl *widget)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = wz_widget_get_rect(widget);
 
 	if (widget->parent)
 	{
-		const wzPosition parentPosition = wz_widget_get_absolute_position(widget->parent);
+		const Position parentPosition = wz_widget_get_absolute_position(widget->parent);
 		rect.x += parentPosition.x;
 		rect.y += parentPosition.y;
 	}
@@ -321,16 +321,16 @@ wzRect wz_widget_get_absolute_rect(const struct wzWidget *widget)
 	return rect;
 }
 
-void wz_widget_set_margin(struct wzWidget *widget, wzBorder margin)
+void wz_widget_set_margin(struct WidgetImpl *widget, Border margin)
 {
 	WZ_ASSERT(widget);
 	widget->margin = margin;
 	wz_widget_refresh_rect(widget);
 }
 
-void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int bottom, int left)
+void wz_widget_set_margin_args(struct WidgetImpl *widget, int top, int right, int bottom, int left)
 {
-	wzBorder margin;
+	Border margin;
 	margin.top = top;
 	margin.right = right;
 	margin.bottom = bottom;
@@ -338,20 +338,20 @@ void wz_widget_set_margin_args(struct wzWidget *widget, int top, int right, int 
 	wz_widget_set_margin(widget, margin);
 }
 
-void wz_widget_set_margin_uniform(struct wzWidget *widget, int value)
+void wz_widget_set_margin_uniform(struct WidgetImpl *widget, int value)
 {
-	wzBorder margin;
+	Border margin;
 	margin.top = margin.right = margin.bottom = margin.left = value;
 	wz_widget_set_margin(widget, margin);
 }
 
-wzBorder wz_widget_get_margin(const struct wzWidget *widget)
+Border wz_widget_get_margin(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->margin;
 }
 
-void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
+void wz_widget_set_stretch(struct WidgetImpl *widget, int stretch)
 {
 	WZ_ASSERT(widget);
 	widget->stretch = stretch;
@@ -363,32 +363,32 @@ void wz_widget_set_stretch(struct wzWidget *widget, int stretch)
 	}
 }
 
-int wz_widget_get_stretch(const struct wzWidget *widget)
+int wz_widget_get_stretch(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->stretch;
 }
 
-void wz_widget_set_stretch_scale(struct wzWidget *widget, float width, float height)
+void wz_widget_set_stretch_scale(struct WidgetImpl *widget, float width, float height)
 {
 	WZ_ASSERT(widget);
 	widget->stretchWidthScale = width;
 	widget->stretchHeightScale = height;
 }
 
-float wz_widget_get_stretch_width_scale(const struct wzWidget *widget)
+float wz_widget_get_stretch_width_scale(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->stretchWidthScale;
 }
 
-float wz_widget_get_stretch_height_scale(const struct wzWidget *widget)
+float wz_widget_get_stretch_height_scale(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->stretchHeightScale;
 }
 
-void wz_widget_set_align(struct wzWidget *widget, int align)
+void wz_widget_set_align(struct WidgetImpl *widget, int align)
 {
 	WZ_ASSERT(widget);
 	widget->align = align;
@@ -400,13 +400,13 @@ void wz_widget_set_align(struct wzWidget *widget, int align)
 	}
 }
 
-int wz_widget_get_align(const struct wzWidget *widget)
+int wz_widget_get_align(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->align;
 }
 
-void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
+void wz_widget_set_font_face(struct WidgetImpl *widget, const char *fontFace)
 {
 	WZ_ASSERT(widget);
 	strcpy(widget->fontFace, fontFace);
@@ -418,13 +418,13 @@ void wz_widget_set_font_face(struct wzWidget *widget, const char *fontFace)
 	}
 }
 
-const char *wz_widget_get_font_face(const struct wzWidget *widget)
+const char *wz_widget_get_font_face(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->fontFace;
 }
 
-void wz_widget_set_font_size(struct wzWidget *widget, float fontSize)
+void wz_widget_set_font_size(struct WidgetImpl *widget, float fontSize)
 {
 	WZ_ASSERT(widget);
 	widget->fontSize = fontSize;
@@ -436,13 +436,13 @@ void wz_widget_set_font_size(struct wzWidget *widget, float fontSize)
 	}
 }
 
-float wz_widget_get_font_size(const struct wzWidget *widget)
+float wz_widget_get_font_size(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->fontSize;
 }
 
-void wz_widget_set_font(struct wzWidget *widget, const char *fontFace, float fontSize)
+void wz_widget_set_font(struct WidgetImpl *widget, const char *fontFace, float fontSize)
 {
 	WZ_ASSERT(widget);
 	strcpy(widget->fontFace, fontFace);
@@ -455,13 +455,13 @@ void wz_widget_set_font(struct wzWidget *widget, const char *fontFace, float fon
 	}
 }
 
-bool wz_widget_get_hover(const struct wzWidget *widget)
+bool wz_widget_get_hover(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->hover;
 }
 
-void wz_widget_set_visible(struct wzWidget *widget, bool visible)
+void wz_widget_set_visible(struct WidgetImpl *widget, bool visible)
 {
 	WZ_ASSERT(widget);
 
@@ -475,43 +475,43 @@ void wz_widget_set_visible(struct wzWidget *widget, bool visible)
 	}
 }
 
-bool wz_widget_get_visible(const struct wzWidget *widget)
+bool wz_widget_get_visible(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return !widget->hidden;
 }
 
-bool wz_widget_has_keyboard_focus(const struct wzWidget *widget)
+bool wz_widget_has_keyboard_focus(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return wz_main_window_get_keyboard_focus_widget(widget->mainWindow) == widget;
 }
 
-void wz_widget_set_metadata(struct wzWidget *widget, void *metadata)
+void wz_widget_set_metadata(struct WidgetImpl *widget, void *metadata)
 {
 	WZ_ASSERT(widget);
 	widget->metadata = metadata;
 }
 
-void *wz_widget_get_metadata(struct wzWidget *widget)
+void *wz_widget_get_metadata(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->metadata;
 }
 
-void wz_widget_set_draw_callback(struct wzWidget *widget, wzWidgetDrawCallback draw)
+void wz_widget_set_draw_callback(struct WidgetImpl *widget, WidgetDrawCallback draw)
 {
 	WZ_ASSERT(widget);
 	widget->vtable.draw = draw;
 }
 
-void wz_widget_set_measure_callback(struct wzWidget *widget, wzWidgetMeasureCallback measure)
+void wz_widget_set_measure_callback(struct WidgetImpl *widget, WidgetMeasureCallback measure)
 {
 	WZ_ASSERT(widget);
 	widget->vtable.measure = measure;
 }
 
-static struct wzMainWindow *wz_widget_find_main_window(struct wzWidget *widget)
+static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widget)
 {
 	for (;;)
 	{
@@ -519,7 +519,7 @@ static struct wzMainWindow *wz_widget_find_main_window(struct wzWidget *widget)
 			break;
 
 		if (widget->type == WZ_TYPE_MAIN_WINDOW)
-			return (struct wzMainWindow *)widget;
+			return (struct MainWindowImpl *)widget;
 
 		widget = widget->parent;
 	}
@@ -527,7 +527,7 @@ static struct wzMainWindow *wz_widget_find_main_window(struct wzWidget *widget)
 	return NULL;
 }
 
-static void wz_widget_set_renderer(struct wzWidget *widget, struct wzRenderer *renderer)
+static void wz_widget_set_renderer(struct WidgetImpl *widget, struct wzRenderer *renderer)
 {
 	struct wzRenderer *oldRenderer;
 
@@ -543,27 +543,27 @@ static void wz_widget_set_renderer(struct wzWidget *widget, struct wzRenderer *r
 
 // Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
 // Example: scroller does this with it's button children.
-static void wz_widget_set_main_window_and_window_recursive(struct wzWidget *widget, struct wzMainWindow *mainWindow, struct wzWindow *window)
+static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *widget, struct MainWindowImpl *mainWindow, struct WindowImpl *window)
 {
 	WZ_ASSERT(widget);
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
-		struct wzWidget *child = widget->children[i];
+		struct WidgetImpl *child = widget->children[i];
 		child->mainWindow = mainWindow;
 		child->window = window;
 
 		// Set the renderer too.
 		if (mainWindow)
 		{
-			wz_widget_set_renderer(child, ((struct wzWidget *)mainWindow)->renderer);
+			wz_widget_set_renderer(child, ((struct WidgetImpl *)mainWindow)->renderer);
 		}
 
 		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
 	}
 }
 
-bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
+bool wz_widget_is_descendant_of(struct WidgetImpl *widget, WidgetType type)
 {
 	WZ_ASSERT(widget);
 
@@ -581,13 +581,13 @@ bool wz_widget_is_descendant_of(struct wzWidget *widget, wzWidgetType type)
 	return false;
 }
 
-struct wzWidget *wz_widget_get_parent(struct wzWidget *widget)
+struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->parent;
 }
 
-struct wzWindow *wz_widget_get_parent_window(struct wzWidget *widget)
+struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->window;
@@ -601,13 +601,13 @@ WIDGET MEASURING
 ================================================================================
 */
 
-void wz_widget_resize_to_measured(struct wzWidget *widget)
+void wz_widget_resize_to_measured(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 
 	if (widget->renderer && widget->vtable.measure)
 	{
-		wzSize size = widget->vtable.measure(widget);
+		Size size = widget->vtable.measure(widget);
 
 		// The explicitly set size overrides the measured size.
 		if (widget->userRect.w != 0)
@@ -636,7 +636,7 @@ void wz_widget_resize_to_measured(struct wzWidget *widget)
 	}
 }
 
-static void wz_widget_measure_and_resize_recursive(struct wzWidget *widget)
+static void wz_widget_measure_and_resize_recursive(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	wz_widget_resize_to_measured(widget);
@@ -655,7 +655,7 @@ INTERNAL WIDGET FUNCTIONS
 ================================================================================
 */
 
-void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_add_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
 {
 	WZ_ASSERT(widget);
 	WZ_ASSERT(child);
@@ -664,16 +664,16 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	child->mainWindow = wz_widget_find_main_window(widget);
 
 	// Find the closest ancestor window.
-	child->window = (struct wzWindow *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
+	child->window = (struct WindowImpl *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
 
 	// Set the renderer.
 	if (child->mainWindow)
 	{
-		wz_widget_set_renderer(child, ((struct wzWidget *)child->mainWindow)->renderer);
+		wz_widget_set_renderer(child, ((struct WidgetImpl *)child->mainWindow)->renderer);
 	}
 
 	// Set children mainWindow, window and renderer.
-	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct wzWindow *)child : child->window);
+	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
 
 	child->parent = widget;
 	widget->children.push_back(child);
@@ -688,7 +688,7 @@ void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child)
 	}
 }
 
-void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_remove_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
 {
 	int deleteIndex;
 
@@ -718,7 +718,7 @@ void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *chi
 	child->window = NULL;
 }
 
-void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child)
+void wz_widget_destroy_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
 {
 	WZ_ASSERT(widget);
 	const size_t n = widget->children.size();
@@ -731,17 +731,17 @@ void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *ch
 	wz_widget_destroy(child);
 }
 
-void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y)
+void wz_widget_set_position_args_internal(struct WidgetImpl *widget, int x, int y)
 {
-	wzPosition position;
+	Position position;
 	position.x = x;
 	position.y = y;
 	wz_widget_set_position_internal(widget, position);
 }
 
-void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position)
+void wz_widget_set_position_internal(struct WidgetImpl *widget, Position position)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->rect;
@@ -750,9 +750,9 @@ void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition positio
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-void wz_widget_set_width_internal(struct wzWidget *widget, int w)
+void wz_widget_set_width_internal(struct WidgetImpl *widget, int w)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->rect;
@@ -760,9 +760,9 @@ void wz_widget_set_width_internal(struct wzWidget *widget, int w)
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-void wz_widget_set_height_internal(struct wzWidget *widget, int h)
+void wz_widget_set_height_internal(struct WidgetImpl *widget, int h)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->rect;
@@ -770,17 +770,17 @@ void wz_widget_set_height_internal(struct wzWidget *widget, int h)
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-void wz_widget_set_size_args_internal(struct wzWidget *widget, int w, int h)
+void wz_widget_set_size_args_internal(struct WidgetImpl *widget, int w, int h)
 {
-	wzSize size;
+	Size size;
 	size.w = w;
 	size.h = h;
 	wz_widget_set_size_internal(widget, size);
 }
 
-void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size)
+void wz_widget_set_size_internal(struct WidgetImpl *widget, Size size)
 {
-	wzRect rect;
+	Rect rect;
 
 	WZ_ASSERT(widget);
 	rect = widget->rect;
@@ -789,9 +789,9 @@ void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size)
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int w, int h)
+void wz_widget_set_rect_args_internal(struct WidgetImpl *widget, int x, int y, int w, int h)
 {
-	wzRect rect;
+	Rect rect;
 	rect.x = x;
 	rect.y = y;
 	rect.w = w;
@@ -799,9 +799,9 @@ void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int
 	wz_widget_set_rect_internal(widget, rect);
 }
 
-static void wz_widget_set_rect_internal_recursive(struct wzWidget *widget, wzRect rect)
+static void wz_widget_set_rect_internal_recursive(struct WidgetImpl *widget, Rect rect)
 {
-	wzRect oldRect;
+	Rect oldRect;
 
 	WZ_ASSERT(widget);
 	oldRect = widget->rect;
@@ -828,9 +828,9 @@ static void wz_widget_set_rect_internal_recursive(struct wzWidget *widget, wzRec
 	}
 }
 
-void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
+void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect)
 {
-	wzRect oldRect;
+	Rect oldRect;
 
 	WZ_ASSERT(widget);
 	oldRect = widget->rect;
@@ -847,15 +847,15 @@ void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect)
 	}
 }
 
-void wz_widget_refresh_rect(struct wzWidget *widget)
+void wz_widget_refresh_rect(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
 }
 
-struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, wzWidgetType type)
+struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type)
 {
-	struct wzWidget *temp = (struct wzWidget *)widget;
+	struct WidgetImpl *temp = (struct WidgetImpl *)widget;
 
 	for (;;)
 	{
@@ -873,12 +873,12 @@ struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, 
 	return NULL;
 }
 
-void wz_widget_set_draw_manually(struct wzWidget *widget, bool value)
+void wz_widget_set_draw_manually(struct WidgetImpl *widget, bool value)
 {
 	widget->drawManually = value;
 }
 
-void wz_widget_set_draw_last(struct wzWidget *widget, bool value)
+void wz_widget_set_draw_last(struct WidgetImpl *widget, bool value)
 {
 	if (value)
 	{
@@ -890,44 +890,44 @@ void wz_widget_set_draw_last(struct wzWidget *widget, bool value)
 	}
 }
 
-void wz_widget_set_overlap(struct wzWidget *widget, bool value)
+void wz_widget_set_overlap(struct WidgetImpl *widget, bool value)
 {
 	widget->overlap = value;
 }
 
-bool wz_widget_overlaps_parent_window(const struct wzWidget *widget)
+bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget)
 {
 	if (!widget->window)
 		return true;
 
-	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct wzWidget *)widget->window), wz_widget_get_absolute_rect(widget));
+	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct WidgetImpl *)widget->window), wz_widget_get_absolute_rect(widget));
 }
 
-void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value)
+void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value)
 {
 	WZ_ASSERT(widget);
 	widget->inputNotClippedToParent = !value;
 }
 
-void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata)
+void wz_widget_set_internal_metadata(struct WidgetImpl *widget, void *metadata)
 {
 	WZ_ASSERT(widget);
 	widget->internalMetadata = metadata;
 }
 
-void *wz_widget_get_internal_metadata(struct wzWidget *widget)
+void *wz_widget_get_internal_metadata(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return widget->internalMetadata;
 }
 
-int wz_widget_get_line_height(const struct wzWidget *widget)
+int wz_widget_get_line_height(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize);
 }
 
-void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height)
+void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height)
 {
 	WZ_ASSERT(widget);
 	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, text, n, width, height);
@@ -935,170 +935,170 @@ void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int
 
 //------------------------------------------------------------------------------
 
-struct ButtonPrivate : public wzWidget
+struct ButtonPrivate : public WidgetImpl
 {
 	ButtonPrivate()
 	{
 		button = wz_button_create(NULL, NULL);
-		wz_widget_set_metadata((wzWidget *)button, this);
+		wz_widget_set_metadata((WidgetImpl *)button, this);
 	}
 
 	~ButtonPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)button))
+		if (!wz_widget_get_main_window((WidgetImpl *)button))
 		{
-			wz_widget_destroy((wzWidget *)button);
+			wz_widget_destroy((WidgetImpl *)button);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)button; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)button; }
 
-	wzButton *button;
+	ButtonImpl *button;
 };
 
-struct CheckboxPrivate : public wzWidget
+struct CheckboxPrivate : public WidgetImpl
 {
 	CheckboxPrivate()
 	{
 		checkBox = wz_check_box_create(NULL);
-		wz_widget_set_metadata((wzWidget *)checkBox, this);
+		wz_widget_set_metadata((WidgetImpl *)checkBox, this);
 	}
 
 	~CheckboxPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)checkBox))
+		if (!wz_widget_get_main_window((WidgetImpl *)checkBox))
 		{
-			wz_widget_destroy((wzWidget *)checkBox);
+			wz_widget_destroy((WidgetImpl *)checkBox);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)checkBox; }
-	virtual wzWidget *getWidget() { return (wzWidget *)checkBox; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)checkBox; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)checkBox; }
 
-	wzCheckBox *checkBox;
+	CheckBoxImpl *checkBox;
 };
 
-struct ComboPrivate : public wzWidget
+struct ComboPrivate : public WidgetImpl
 {
 	ComboPrivate()
 	{
 		combo = wz_combo_create(NULL, 0, 0);
-		wz_widget_set_metadata((wzWidget *)combo, this);
+		wz_widget_set_metadata((WidgetImpl *)combo, this);
 	}
 
 	~ComboPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)combo))
+		if (!wz_widget_get_main_window((WidgetImpl *)combo))
 		{
-			wz_widget_destroy((wzWidget *)combo);
+			wz_widget_destroy((WidgetImpl *)combo);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)combo; }
-	virtual wzWidget *getWidget() { return (wzWidget *)combo; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)combo; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)combo; }
 
-	wzCombo *combo;
+	ComboImpl *combo;
 };
 
-struct FramePrivate : public wzWidget
+struct FramePrivate : public WidgetImpl
 {
 	FramePrivate()
 	{
 		frame = wz_frame_create();
-		wzWidget *widget = (wzWidget *)frame;
+		WidgetImpl *widget = (WidgetImpl *)frame;
 		wz_widget_set_metadata(widget, this);
 		wz_widget_set_size_args(widget, 200, 200);
 	}
 
 	~FramePrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)frame))
+		if (!wz_widget_get_main_window((WidgetImpl *)frame))
 		{
-			wz_widget_destroy((wzWidget *)frame);
+			wz_widget_destroy((WidgetImpl *)frame);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)frame; }
-	virtual wzWidget *getWidget() { return (wzWidget *)frame; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)frame; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)frame; }
 
-	wzFrame *frame;
+	FrameImpl *frame;
 };
 
-struct GroupBoxPrivate : public wzWidget
+struct GroupBoxPrivate : public WidgetImpl
 {
 	GroupBoxPrivate()
 	{
 		groupBox = wz_group_box_create(NULL);
-		wz_widget_set_metadata((wzWidget *)groupBox, this);
-		wz_widget_set_size_args((wzWidget *)groupBox, 200, 200);
+		wz_widget_set_metadata((WidgetImpl *)groupBox, this);
+		wz_widget_set_size_args((WidgetImpl *)groupBox, 200, 200);
 	}
 
 	~GroupBoxPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)groupBox))
+		if (!wz_widget_get_main_window((WidgetImpl *)groupBox))
 		{
-			wz_widget_destroy((wzWidget *)groupBox);
+			wz_widget_destroy((WidgetImpl *)groupBox);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)groupBox; }
-	virtual wzWidget *getWidget() { return (wzWidget *)groupBox; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)groupBox; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)groupBox; }
 
-	wzGroupBox *groupBox;
+	GroupBoxImpl *groupBox;
 };
 
-struct LabelPrivate : public wzWidget
+struct LabelPrivate : public WidgetImpl
 {
 	LabelPrivate()
 	{
 		label = wz_label_create(NULL);
-		wz_widget_set_metadata((wzWidget *)label, this);
+		wz_widget_set_metadata((WidgetImpl *)label, this);
 	}
 
 	~LabelPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)label))
+		if (!wz_widget_get_main_window((WidgetImpl *)label))
 		{
-			wz_widget_destroy((wzWidget *)label);
+			wz_widget_destroy((WidgetImpl *)label);
 		}
 	}
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)label; }
-	virtual wzWidget *getWidget() { return (wzWidget *)label; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)label; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)label; }
 
-	wzLabel *label;
+	LabelImpl *label;
 };
 
-struct ListPrivate : public wzWidget
+struct ListPrivate : public WidgetImpl
 {
 	ListPrivate()
 	{
 		list = wz_list_create(NULL, 0, 0);
-		wz_widget_set_metadata((wzWidget *)list, this);
+		wz_widget_set_metadata((WidgetImpl *)list, this);
 	}
 
 	~ListPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)list))
+		if (!wz_widget_get_main_window((WidgetImpl *)list))
 		{
-			wz_widget_destroy((wzWidget *)list);
+			wz_widget_destroy((WidgetImpl *)list);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)list; }
-	virtual wzWidget *getWidget() { return (wzWidget *)list; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)list; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)list; }
 
-	wzList *list;
+	ListImpl *list;
 };
 
-struct MainWindowPrivate : public wzWidget
+struct MainWindowPrivate : public WidgetImpl
 {
 	MainWindowPrivate(wzRenderer *renderer)
 	{
 		WZ_ASSERT(renderer);
 		this->renderer = renderer;
 		mainWindow = wz_main_window_create(renderer);
-		wz_widget_set_metadata((wzWidget *)mainWindow, this);
+		wz_widget_set_metadata((WidgetImpl *)mainWindow, this);
 
 		menuBar = wz_menu_bar_create();
 		wz_main_window_set_menu_bar(mainWindow, menuBar);
@@ -1106,84 +1106,84 @@ struct MainWindowPrivate : public wzWidget
 
 	~MainWindowPrivate()
 	{
-		wz_widget_destroy((wzWidget *)mainWindow);
+		wz_widget_destroy((WidgetImpl *)mainWindow);
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)mainWindow; }
-	virtual wzWidget *getWidget() { return (wzWidget *)mainWindow; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)mainWindow; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)mainWindow; }
 
-	wzMainWindow *mainWindow;
-	wzMenuBar *menuBar;
+	MainWindowImpl *mainWindow;
+	MenuBarImpl *menuBar;
 	wzRenderer *renderer;
 };
 
-struct RadioButtonPrivate : public wzWidget
+struct RadioButtonPrivate : public WidgetImpl
 {
 	RadioButtonPrivate()
 	{
 		button = wz_radio_button_create(NULL);
-		wz_widget_set_metadata((wzWidget *)button, this);
+		wz_widget_set_metadata((WidgetImpl *)button, this);
 	}
 
 	~RadioButtonPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)button))
+		if (!wz_widget_get_main_window((WidgetImpl *)button))
 		{
-			wz_widget_destroy((wzWidget *)button);
+			wz_widget_destroy((WidgetImpl *)button);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)button; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)button; }
 
-	wzRadioButton *button;
+	RadioButtonImpl *button;
 };
 
-struct ScrollerPrivate : public wzWidget
+struct ScrollerPrivate : public WidgetImpl
 {
-	ScrollerPrivate(wzScrollerType type)
+	ScrollerPrivate(ScrollerType type)
 	{
 		scroller = wz_scroller_create(type, 0, 1, 0);
-		wz_widget_set_metadata((wzWidget *)scroller, this);
+		wz_widget_set_metadata((WidgetImpl *)scroller, this);
 	}
 
 	~ScrollerPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)scroller))
+		if (!wz_widget_get_main_window((WidgetImpl *)scroller))
 		{
-			wz_widget_destroy((wzWidget *)scroller);
+			wz_widget_destroy((WidgetImpl *)scroller);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)scroller; }
-	virtual wzWidget *getWidget() { return (wzWidget *)scroller; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)scroller; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)scroller; }
 
-	wzScroller *scroller;
+	ScrollerImpl *scroller;
 };
 
-struct SpinnerPrivate : public wzWidget
+struct SpinnerPrivate : public WidgetImpl
 {
 	SpinnerPrivate()
 	{
 		spinner = wz_spinner_create();
-		wz_widget_set_metadata((wzWidget *)spinner, this);
+		wz_widget_set_metadata((WidgetImpl *)spinner, this);
 	}
 
 	~SpinnerPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)spinner))
+		if (!wz_widget_get_main_window((WidgetImpl *)spinner))
 		{
-			wz_widget_destroy((wzWidget *)spinner);
+			wz_widget_destroy((WidgetImpl *)spinner);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)spinner; }
-	virtual wzWidget *getWidget() { return (wzWidget *)spinner; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)spinner; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)spinner; }
 
-	wzSpinner *spinner;
+	SpinnerImpl *spinner;
 };
 
-struct StackLayoutPrivate : public wzWidget
+struct StackLayoutPrivate : public WidgetImpl
 {
 	StackLayoutPrivate()
 	{
@@ -1192,112 +1192,112 @@ struct StackLayoutPrivate : public wzWidget
 
 	~StackLayoutPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)layout))
+		if (!wz_widget_get_main_window((WidgetImpl *)layout))
 		{
-			wz_widget_destroy((wzWidget *)layout);
+			wz_widget_destroy((WidgetImpl *)layout);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (wzWidget *)layout; }
-	virtual wzWidget *getWidget() { return (wzWidget *)layout; }
+	virtual const WidgetImpl *getWidget() const { return (WidgetImpl *)layout; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)layout; }
 	
-	wzStackLayout *layout;
+	StackLayoutImpl *layout;
 };
 
 // Wraps tab button and page.
 struct TabPrivate
 {
 	TabPrivate() : button(NULL), page(NULL) {}
-	wzButton *button;
-	wzWidget *page;
+	ButtonImpl *button;
+	WidgetImpl *page;
 };
 
-struct TabbedPrivate : public wzWidget
+struct TabbedPrivate : public WidgetImpl
 {
 	TabbedPrivate()
 	{
 		tabbed = wz_tabbed_create();
-		wz_widget_set_metadata((wzWidget *)tabbed, this);
+		wz_widget_set_metadata((WidgetImpl *)tabbed, this);
 	}
 
 	~TabbedPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)tabbed))
+		if (!wz_widget_get_main_window((WidgetImpl *)tabbed))
 		{
-			wz_widget_destroy((wzWidget *)tabbed);
+			wz_widget_destroy((WidgetImpl *)tabbed);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)tabbed; }
-	virtual wzWidget *getWidget() { return (wzWidget *)tabbed; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)tabbed; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)tabbed; }
 
-	wzTabbed *tabbed;
+	TabbedImpl *tabbed;
 };
 
-struct TextEditPrivate : public wzWidget
+struct TextEditPrivate : public WidgetImpl
 {
 	TextEditPrivate(bool multiline)
 	{
 		textEdit = wz_text_edit_create(multiline, 256);
-		wz_widget_set_metadata((wzWidget *)textEdit, this);
+		wz_widget_set_metadata((WidgetImpl *)textEdit, this);
 	}
 
 	~TextEditPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)textEdit))
+		if (!wz_widget_get_main_window((WidgetImpl *)textEdit))
 		{
-			wz_widget_destroy((wzWidget *)textEdit);
+			wz_widget_destroy((WidgetImpl *)textEdit);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)textEdit; }
-	virtual wzWidget *getWidget() { return (wzWidget *)textEdit; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)textEdit; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)textEdit; }
 
-	wzTextEdit *textEdit;
+	TextEditImpl *textEdit;
 };
 
-struct ToggleButtonPrivate : public wzWidget
+struct ToggleButtonPrivate : public WidgetImpl
 {
 	ToggleButtonPrivate()
 	{
 		button = wz_toggle_button_create(NULL, NULL);
-		wz_widget_set_metadata((wzWidget *)button, this);
+		wz_widget_set_metadata((WidgetImpl *)button, this);
 	}
 
 	~ToggleButtonPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)button))
+		if (!wz_widget_get_main_window((WidgetImpl *)button))
 		{
-			wz_widget_destroy((wzWidget *)button);
+			wz_widget_destroy((WidgetImpl *)button);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)button; }
-	virtual wzWidget *getWidget() { return (wzWidget *)button; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)button; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)button; }
 
-	wzButton *button;
+	ButtonImpl *button;
 };
 
-struct WindowPrivate : public wzWidget
+struct WindowPrivate : public WidgetImpl
 {
 	WindowPrivate()
 	{
 		window = wz_window_create(NULL);
-		wz_widget_set_metadata((wzWidget *)window, this);
+		wz_widget_set_metadata((WidgetImpl *)window, this);
 	}
 
 	~WindowPrivate()
 	{
-		if (!wz_widget_get_main_window((wzWidget *)window))
+		if (!wz_widget_get_main_window((WidgetImpl *)window))
 		{
-			wz_widget_destroy((wzWidget *)window);
+			wz_widget_destroy((WidgetImpl *)window);
 		}
 	}
 
-	virtual const wzWidget *getWidget() const { return (const wzWidget *)window; }
-	virtual wzWidget *getWidget() { return (wzWidget *)window; }
+	virtual const WidgetImpl *getWidget() const { return (const WidgetImpl *)window; }
+	virtual WidgetImpl *getWidget() { return (WidgetImpl *)window; }
 
-	wzWindow *window;
+	WindowImpl *window;
 };
 
 //------------------------------------------------------------------------------
@@ -1306,7 +1306,7 @@ Widget::~Widget()
 {
 }
 
-wzRect Widget::getRect() const
+Rect Widget::getRect() const
 {
 	return wz_widget_get_absolute_rect(p->getWidget());
 }
@@ -1365,7 +1365,7 @@ Widget *Widget::setMargin(int top, int right, int bottom, int left)
 	return this;
 }
 
-Widget *Widget::setMargin(wzBorder margin)
+Widget *Widget::setMargin(Border margin)
 {
 	wz_widget_set_margin(p->getWidget(), margin);
 	return this;
@@ -1424,47 +1424,47 @@ Button::~Button()
 	delete p;
 }
 
-wzBorder Button::getPadding() const
+Border Button::getPadding() const
 {
-	return wz_button_get_padding((const wzButton *)p->getWidget());
+	return wz_button_get_padding((const ButtonImpl *)p->getWidget());
 }
 
-Button *Button::setPadding(wzBorder padding)
+Button *Button::setPadding(Border padding)
 {
-	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	wz_button_set_padding((ButtonImpl *)p->getWidget(), padding);
 	return this;
 }
 
 Button *Button::setPadding(int top, int right, int bottom, int left)
 {
-	wzBorder padding;
+	Border padding;
 	padding.top = top;
 	padding.right = right;
 	padding.bottom = bottom;
 	padding.left = left;
-	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	wz_button_set_padding((ButtonImpl *)p->getWidget(), padding);
 	return this;
 }
 
 const char *Button::getIcon() const
 {
-	return wz_button_get_icon((const wzButton *)p->getWidget());
+	return wz_button_get_icon((const ButtonImpl *)p->getWidget());
 }
 
 Button *Button::setIcon(const std::string &icon)
 {
-	wz_button_set_icon((wzButton *)p->getWidget(), icon.c_str());
+	wz_button_set_icon((ButtonImpl *)p->getWidget(), icon.c_str());
 	return this;
 }
 
 const char *Button::getLabel() const
 {
-	return wz_button_get_label((const wzButton *)p->getWidget());
+	return wz_button_get_label((const ButtonImpl *)p->getWidget());
 }
 
 Button *Button::setLabel(const std::string &label)
 {
-	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
+	wz_button_set_label((ButtonImpl *)p->getWidget(), label.c_str());
 	return this;
 }
 
@@ -1488,18 +1488,18 @@ Checkbox::~Checkbox()
 
 const char *Checkbox::getLabel() const
 {
-	return wz_check_box_get_label((const wzCheckBox *)p->getWidget());
+	return wz_check_box_get_label((const CheckBoxImpl *)p->getWidget());
 }
 
 Checkbox *Checkbox::setLabel(const std::string &label)
 {
-	wz_check_box_set_label((wzCheckBox *)p->getWidget(), label.c_str());
+	wz_check_box_set_label((CheckBoxImpl *)p->getWidget(), label.c_str());
 	return this;
 }
 
 Checkbox *Checkbox::bindValue(bool *value)
 {
-	wz_check_box_bind_value((wzCheckBox *)p->getWidget(), value);
+	wz_check_box_bind_value((CheckBoxImpl *)p->getWidget(), value);
 	return this;
 }
 
@@ -1517,7 +1517,7 @@ Combo::~Combo()
 
 Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	wzList *list = wz_combo_get_list((wzCombo *)p->getWidget());
+	ListImpl *list = wz_combo_get_list((ComboImpl *)p->getWidget());
 	wz_list_set_item_data(list, itemData);
 	wz_list_set_item_stride(list, itemStride);
 	wz_list_set_num_items(list, nItems);
@@ -1538,13 +1538,13 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	wz_frame_add((wzFrame *)p->getWidget(), widget->p->getWidget());
+	wz_frame_add((FrameImpl *)p->getWidget(), widget->p->getWidget());
 	return widget;
 }
 
 void Frame::remove(Widget *widget)
 {
-	wz_frame_remove((wzFrame *)p->getWidget(), widget->p->getWidget());
+	wz_frame_remove((FrameImpl *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -1567,24 +1567,24 @@ GroupBox::~GroupBox()
 
 const char *GroupBox::getLabel() const
 {
-	return wz_group_box_get_label((wzGroupBox *)p->getWidget());
+	return wz_group_box_get_label((GroupBoxImpl *)p->getWidget());
 }
 
 GroupBox *GroupBox::setLabel(const std::string &label)
 {
-	wz_group_box_set_label((wzGroupBox *)p->getWidget(), label.c_str());
+	wz_group_box_set_label((GroupBoxImpl *)p->getWidget(), label.c_str());
 	return this;
 }
 
 Widget *GroupBox::add(Widget *widget)
 {
-	wz_group_box_add((wzGroupBox *)p->getWidget(), widget->p->getWidget());
+	wz_group_box_add((GroupBoxImpl *)p->getWidget(), widget->p->getWidget());
 	return widget;
 }
 
 void GroupBox::remove(Widget *widget)
 {
-	wz_group_box_remove((wzGroupBox *)p->getWidget(), widget->p->getWidget());
+	wz_group_box_remove((GroupBoxImpl *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -1614,7 +1614,7 @@ Label *Label::setText(const char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 	
-	wz_label_set_text((wzLabel *)p->getWidget(), buffer);
+	wz_label_set_text((LabelImpl *)p->getWidget(), buffer);
 	return this;
 }
 
@@ -1625,13 +1625,13 @@ Label *Label::setTextColor(float r, float g, float b, float a)
 	color.g = g;
 	color.b = b;
 	color.a = a;
-	wz_label_set_text_color((wzLabel *)p->getWidget(), color);
+	wz_label_set_text_color((LabelImpl *)p->getWidget(), color);
 	return this;
 }
 
 Label *Label::setMultiline(bool multiline)
 {
-	wz_label_set_multiline((wzLabel *)p->getWidget(), multiline);
+	wz_label_set_multiline((LabelImpl *)p->getWidget(), multiline);
 	return this;
 }
 
@@ -1649,27 +1649,27 @@ List::~List()
 
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	wz_list_set_item_data((wzList *)p->getWidget(), itemData);
-	wz_list_set_item_stride((wzList *)p->getWidget(), itemStride);
-	wz_list_set_num_items((wzList *)p->getWidget(), nItems);
+	wz_list_set_item_data((ListImpl *)p->getWidget(), itemData);
+	wz_list_set_item_stride((ListImpl *)p->getWidget(), itemStride);
+	wz_list_set_num_items((ListImpl *)p->getWidget(), nItems);
 	return this;
 }
 
 List *List::setSelectedItem(int index)
 {
-	wz_list_set_selected_item((wzList *)p->getWidget(), index);
+	wz_list_set_selected_item((ListImpl *)p->getWidget(), index);
 	return this;
 }
 
 List *List::setItemHeight(int height)
 {
-	wz_list_set_item_height((wzList *)p->getWidget(), height);
+	wz_list_set_item_height((ListImpl *)p->getWidget(), height);
 	return this;
 }
 
-List *List::setDrawItemCallback(wzDrawListItemCallback callback)
+List *List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	wz_list_set_draw_item_callback((wzList *)p->getWidget(), callback);
+	wz_list_set_draw_item_callback((ListImpl *)p->getWidget(), callback);
 	return this;
 }
 
@@ -1687,17 +1687,17 @@ MainWindow::~MainWindow()
 
 int MainWindow::getWidth() const
 {
-	return wz_widget_get_width((const wzWidget *)p->mainWindow);
+	return wz_widget_get_width((const WidgetImpl *)p->mainWindow);
 }
 
 int MainWindow::getHeight() const
 {
-	return wz_widget_get_height((const wzWidget *)p->mainWindow);
+	return wz_widget_get_height((const WidgetImpl *)p->mainWindow);
 }
 
 void MainWindow::setSize(int w, int h)
 {
-	wz_widget_set_size_args((wzWidget *)p->mainWindow, w, h);
+	wz_widget_set_size_args((WidgetImpl *)p->mainWindow, w, h);
 }
 
 void MainWindow::mouseMove(int x, int y, int dx, int dy)
@@ -1720,12 +1720,12 @@ void MainWindow::mouseWheelMove(int x, int y)
 	wz_main_window_mouse_wheel_move(p->mainWindow, x, y);
 }
 
-void MainWindow::keyDown(wzKey key)
+void MainWindow::keyDown(Key key)
 {
 	wz_main_window_key_down(p->mainWindow, key);
 }
 
-void MainWindow::keyUp(wzKey key)
+void MainWindow::keyUp(Key key)
 {
 	wz_main_window_key_up(p->mainWindow, key);
 }
@@ -1750,7 +1750,7 @@ void MainWindow::toggleTextCursor()
 	wz_main_window_toggle_text_cursor(p->mainWindow);
 }
 
-wzCursor MainWindow::getCursor() const
+Cursor MainWindow::getCursor() const
 {
 	return wz_main_window_get_cursor(p->mainWindow);
 }
@@ -1768,13 +1768,13 @@ void MainWindow::remove(Widget *widget)
 
 void MainWindow::createMenuButton(const std::string &label)
 {
-	wzMenuBarButton *button = wz_menu_bar_create_button(p->menuBar);
+	MenuBarButtonImpl *button = wz_menu_bar_create_button(p->menuBar);
 	wz_menu_bar_button_set_label(button, label.c_str());
 }
 
-void MainWindow::dockWindow(Window *window, wzDockPosition dockPosition)
+void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 {
-	wz_main_window_dock_window(p->mainWindow, (wzWindow *)window->p->getWidget(), dockPosition);
+	wz_main_window_dock_window(p->mainWindow, (WindowImpl *)window->p->getWidget(), dockPosition);
 }
 
 //------------------------------------------------------------------------------
@@ -1797,18 +1797,18 @@ RadioButton::~RadioButton()
 
 const char *RadioButton::getLabel() const
 {
-	return wz_radio_button_get_label((const wzRadioButton *)p->getWidget());
+	return wz_radio_button_get_label((const RadioButtonImpl *)p->getWidget());
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	wz_radio_button_set_label((wzRadioButton *)p->getWidget(), label.c_str());
+	wz_radio_button_set_label((RadioButtonImpl *)p->getWidget(), label.c_str());
 	return this;
 }
 
 //------------------------------------------------------------------------------
 
-Scroller::Scroller(wzScrollerType type)
+Scroller::Scroller(ScrollerType type)
 {
 	p = new ScrollerPrivate(type);
 }
@@ -1871,7 +1871,7 @@ StackLayout::StackLayout()
 	p = new StackLayoutPrivate();
 }
 
-StackLayout::StackLayout(wzStackLayoutDirection direction)
+StackLayout::StackLayout(StackLayoutDirection direction)
 {
 	p = new StackLayoutPrivate();
 	setDirection(direction);
@@ -1882,7 +1882,7 @@ StackLayout::~StackLayout()
 	delete p;
 }
 
-StackLayout *StackLayout::setDirection(wzStackLayoutDirection direction)
+StackLayout *StackLayout::setDirection(StackLayoutDirection direction)
 {
 	wz_stack_layout_set_direction(((StackLayoutPrivate *)p)->layout, direction);
 	return this;
@@ -1901,13 +1901,13 @@ int StackLayout::getSpacing() const
 
 Widget *StackLayout::add(Widget *widget)
 {
-	wz_stack_layout_add((wzStackLayout *)p->getWidget(), widget->p->getWidget());
+	wz_stack_layout_add((StackLayoutImpl *)p->getWidget(), widget->p->getWidget());
 	return widget;
 }
 
 void StackLayout::remove(Widget *widget)
 {
-	wz_stack_layout_remove((wzStackLayout *)p->getWidget(), widget->p->getWidget());
+	wz_stack_layout_remove((StackLayoutImpl *)p->getWidget(), widget->p->getWidget());
 }
 
 //------------------------------------------------------------------------------
@@ -1953,7 +1953,7 @@ Tabbed::~Tabbed()
 
 Tab *Tabbed::addTab(Tab *tab)
 {
-	wz_tabbed_add_tab((wzTabbed *)p->getWidget(), &tab->p->button, &tab->p->page);
+	wz_tabbed_add_tab((TabbedImpl *)p->getWidget(), &tab->p->button, &tab->p->page);
 	return tab;
 }
 
@@ -1977,7 +1977,7 @@ TextEdit::~TextEdit()
 
 TextEdit *TextEdit::setText(const std::string &text)
 {
-	wz_text_edit_set_text((wzTextEdit *)p->getWidget(), text.c_str());
+	wz_text_edit_set_text((TextEditImpl *)p->getWidget(), text.c_str());
 	return this;
 }
 
@@ -2004,47 +2004,47 @@ ToggleButton::~ToggleButton()
 	delete p;
 }
 
-wzBorder ToggleButton::getPadding() const
+Border ToggleButton::getPadding() const
 {
-	return wz_button_get_padding((const wzButton *)p->getWidget());
+	return wz_button_get_padding((const ButtonImpl *)p->getWidget());
 }
 
-ToggleButton *ToggleButton::setPadding(wzBorder padding)
+ToggleButton *ToggleButton::setPadding(Border padding)
 {
-	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	wz_button_set_padding((ButtonImpl *)p->getWidget(), padding);
 	return this;
 }
 
 ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
 {
-	wzBorder padding;
+	Border padding;
 	padding.top = top;
 	padding.right = right;
 	padding.bottom = bottom;
 	padding.left = left;
-	wz_button_set_padding((wzButton *)p->getWidget(), padding);
+	wz_button_set_padding((ButtonImpl *)p->getWidget(), padding);
 	return this;
 }
 
 const char *ToggleButton::getIcon() const
 {
-	return wz_button_get_icon((const wzButton *)p->getWidget());
+	return wz_button_get_icon((const ButtonImpl *)p->getWidget());
 }
 
 ToggleButton *ToggleButton::setIcon(const std::string &icon)
 {
-	wz_button_set_icon((wzButton *)p->getWidget(), icon.c_str());
+	wz_button_set_icon((ButtonImpl *)p->getWidget(), icon.c_str());
 	return this;
 }
 
 const char *ToggleButton::getLabel() const
 {
-	return wz_button_get_label((const wzButton *)p->getWidget());
+	return wz_button_get_label((const ButtonImpl *)p->getWidget());
 }
 
 ToggleButton *ToggleButton::setLabel(const std::string &label)
 {
-	wz_button_set_label((wzButton *)p->getWidget(), label.c_str());
+	wz_button_set_label((ButtonImpl *)p->getWidget(), label.c_str());
 	return this;
 }
 
@@ -2068,24 +2068,24 @@ Window::~Window()
 
 const char *Window::getTitle() const
 {
-	return wz_window_get_title((wzWindow *)p->getWidget());
+	return wz_window_get_title((WindowImpl *)p->getWidget());
 }
 
 Window *Window::setTitle(const std::string &title)
 {
-	wz_window_set_title((wzWindow *)p->getWidget(), title.c_str());
+	wz_window_set_title((WindowImpl *)p->getWidget(), title.c_str());
 	return this;
 }
 
 Widget *Window::add(Widget *widget)
 {
-	wz_window_add((wzWindow *)p->getWidget(), widget->p->getWidget());
+	wz_window_add((WindowImpl *)p->getWidget(), widget->p->getWidget());
 	return widget;
 }
 
 void Window::remove(Widget *widget)
 {
-	wz_window_remove((wzWindow *)p->getWidget(), widget->p->getWidget());
+	wz_window_remove((WindowImpl *)p->getWidget(), widget->p->getWidget());
 }
 
 } // namespace wz

@@ -32,17 +32,17 @@ namespace wz {
 
 typedef struct
 {
-	struct wzButton *tab;
-	struct wzWidget *page;
+	struct ButtonImpl *tab;
+	struct WidgetImpl *page;
 }
-wzTabbedPage;
+TabbedPage;
 
-struct wzTabbed : public wzWidget
+struct TabbedImpl : public WidgetImpl
 {
-	wzTabbed();
+	TabbedImpl();
 
-	struct wzTabBar *tabBar;
-	std::vector<wzTabbedPage> pages;
+	struct TabBarImpl *tabBar;
+	std::vector<TabbedPage> pages;
 };
 
 /*
@@ -53,22 +53,22 @@ TAB PAGE WIDGET
 ================================================================================
 */
 
-static wzRect wz_tab_page_get_children_clip_rect(struct wzWidget *widget)
+static Rect wz_tab_page_get_children_clip_rect(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	return wz_widget_get_absolute_rect(widget);
 }
 
-static struct wzWidget *wz_tab_page_create(struct wzRenderer *renderer)
+static struct WidgetImpl *wz_tab_page_create(struct wzRenderer *renderer)
 {
-	struct wzWidget *page = new struct wzWidget;
+	struct WidgetImpl *page = new struct WidgetImpl;
 	page->type = WZ_TYPE_TAB_PAGE;
 	page->renderer = renderer;
 	page->vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
 	return page;
 }
 
-void wz_tab_page_add(struct wzWidget *tabPage, struct wzWidget *widget)
+void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(tabPage);
 	WZ_ASSERT(widget);
@@ -79,7 +79,7 @@ void wz_tab_page_add(struct wzWidget *tabPage, struct wzWidget *widget)
 	wz_widget_add_child_widget(tabPage, widget);
 }
 
-void wz_tab_page_remove(struct wzWidget *tabPage, struct wzWidget *widget)
+void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(tabPage);
 	WZ_ASSERT(widget);
@@ -98,17 +98,17 @@ TABBED WIDGET
 ================================================================================
 */
 
-static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
+static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
 {
 	int selectedTabIndex;
-	wzRect tr; // Tab rect.
-	struct wzTabbed *tabbed = (struct wzTabbed *)widget;
+	Rect tr; // Tab rect.
+	struct TabbedImpl *tabbed = (struct TabbedImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	wzRect rect = wz_widget_get_absolute_rect(widget);
-	const struct wzButton *selectedTab = wz_tab_bar_get_selected_tab(tabbed->tabBar);
+	Rect rect = wz_widget_get_absolute_rect(widget);
+	const struct ButtonImpl *selectedTab = wz_tab_bar_get_selected_tab(tabbed->tabBar);
 
 	// Use the page rect.
-	const int tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);
+	const int tabBarHeight = wz_widget_get_height((struct WidgetImpl *)tabbed->tabBar);
 	rect.y += tabBarHeight;
 	rect.h -= tabBarHeight;
 
@@ -118,10 +118,10 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 	// Draw an outline around the selected tab and the tab page.
 	nvgBeginPath(vg);
 
-	if (wz_widget_get_visible((struct wzWidget *)selectedTab))
+	if (wz_widget_get_visible((struct WidgetImpl *)selectedTab))
 	{
 		// Selected tab.
-		tr = wz_widget_get_absolute_rect((struct wzWidget *)selectedTab);
+		tr = wz_widget_get_absolute_rect((struct WidgetImpl *)selectedTab);
 		nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
 		nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
 		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
@@ -155,12 +155,12 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 	// Draw an outline around the non-selected tabs.
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
 	{
-		const struct wzButton *tab = tabbed->pages[i].tab;
+		const struct ButtonImpl *tab = tabbed->pages[i].tab;
 
-		if (tab == selectedTab || !wz_widget_get_visible((struct wzWidget *)tab))
+		if (tab == selectedTab || !wz_widget_get_visible((struct WidgetImpl *)tab))
 			continue;
 
-		tr = wz_widget_get_absolute_rect((struct wzWidget *)tab);
+		tr = wz_widget_get_absolute_rect((struct WidgetImpl *)tab);
 		nvgBeginPath(vg);
 
 		// Only draw the left side if this is the leftmost tab.
@@ -189,34 +189,34 @@ static void wz_tabbed_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-static void wz_tabbed_set_rect(struct wzWidget *widget, wzRect rect)
+static void wz_tabbed_set_rect(struct WidgetImpl *widget, Rect rect)
 {
-	struct wzTabbed *tabbed;
-	wzSize pageSize;
+	struct TabbedImpl *tabbed;
+	Size pageSize;
 
 	WZ_ASSERT(widget);
 	widget->rect = rect;
-	tabbed = (struct wzTabbed *)widget;
+	tabbed = (struct TabbedImpl *)widget;
 
 	// Set the tab bar width to match.
-	wz_widget_set_width_internal((struct wzWidget *)tabbed->tabBar, rect.w);
+	wz_widget_set_width_internal((struct WidgetImpl *)tabbed->tabBar, rect.w);
 
 	// Resize the pages to take up the remaining space.
 	pageSize.w = rect.w;
-	pageSize.h = rect.h - wz_widget_get_height((struct wzWidget *)tabbed->tabBar);
+	pageSize.h = rect.h - wz_widget_get_height((struct WidgetImpl *)tabbed->tabBar);
 
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
 	{
-		wz_widget_set_size_internal((struct wzWidget *)tabbed->pages[i].page, pageSize);
+		wz_widget_set_size_internal((struct WidgetImpl *)tabbed->pages[i].page, pageSize);
 	}
 }
 
-static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
+static void wz_tabbed_tab_bar_tab_changed(Event *e)
 {
-	struct wzTabbed *tabbed;
+	struct TabbedImpl *tabbed;
 
 	WZ_ASSERT(e);
-	tabbed = (struct wzTabbed *)e->base.widget->parent;
+	tabbed = (struct TabbedImpl *)e->base.widget->parent;
 
 	// Set the corresponding page to visible, hide all the others.
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
@@ -225,28 +225,28 @@ static void wz_tabbed_tab_bar_tab_changed(wzEvent *e)
 	}
 }
 
-wzTabbed::wzTabbed()
+TabbedImpl::TabbedImpl()
 {
 	type = WZ_TYPE_TABBED;
 }
 
-struct wzTabbed *wz_tabbed_create()
+struct TabbedImpl *wz_tabbed_create()
 {
-	struct wzTabbed *tabbed = new struct wzTabbed;
+	struct TabbedImpl *tabbed = new struct TabbedImpl;
 	tabbed->vtable.draw = wz_tabbed_draw;
 	tabbed->vtable.set_rect = wz_tabbed_set_rect;
 
 	tabbed->tabBar = wz_tab_bar_create();
 	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget((struct wzWidget *)tabbed, (struct wzWidget *)tabbed->tabBar);
+	wz_widget_add_child_widget((struct WidgetImpl *)tabbed, (struct WidgetImpl *)tabbed->tabBar);
 
 	return tabbed;
 }
 
-void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wzWidget **page)
+void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page)
 {
 	int tabBarHeight;
-	wzTabbedPage newPage;
+	TabbedPage newPage;
 
 	WZ_ASSERT(tabbed);
 	WZ_ASSERT(tab);
@@ -258,10 +258,10 @@ void wz_tabbed_add_tab(struct wzTabbed *tabbed, struct wzButton **tab, struct wz
 	// Add the page widget.
 	*page = wz_tab_page_create(tabbed->renderer);
 	wz_widget_set_visible(*page, wz_tab_bar_get_selected_tab(tabbed->tabBar) == *tab);
-	wz_widget_add_child_widget((struct wzWidget *)tabbed, *page);
+	wz_widget_add_child_widget((struct WidgetImpl *)tabbed, *page);
 
 	// Set the page widget rect.
-	tabBarHeight = wz_widget_get_height((struct wzWidget *)tabbed->tabBar);
+	tabBarHeight = wz_widget_get_height((struct WidgetImpl *)tabbed->tabBar);
 	wz_widget_set_rect_args_internal(*page, 0, tabBarHeight, tabbed->rect.w, tabbed->rect.h - tabBarHeight);
 
 	// Add the tabbed page.

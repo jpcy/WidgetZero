@@ -27,6 +27,6 @@ SOFTWARE.
 
 namespace wz {
 
-void wz_text_edit_set_border(struct wzTextEdit *textEdit, wzBorder border);
+void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
 
 } // namespace wz

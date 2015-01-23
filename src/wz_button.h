@@ -37,7 +37,7 @@ typedef enum
 	// Click the button on mouse down
 	WZ_BUTTON_CLICK_BEHAVIOR_DOWN
 }
-wzButtonClickBehavior;
+ButtonClickBehavior;
 
 typedef enum
 {
@@ -50,25 +50,25 @@ typedef enum
 	// Click to set the button. Clicking again does nothing.
 	WZ_BUTTON_SET_BEHAVIOR_STICKY
 }
-wzButtonSetBehavior;
+ButtonSetBehavior;
 
-struct wzButton : public wzWidget
+struct ButtonImpl : public WidgetImpl
 {
-	wzButton();
+	ButtonImpl();
 
-	wzButtonClickBehavior clickBehavior;
-	wzButtonSetBehavior setBehavior;
-	wzBorder padding;
+	ButtonClickBehavior clickBehavior;
+	ButtonSetBehavior setBehavior;
+	Border padding;
 	std::string label;
 	std::string icon;
 	bool isPressed;
 	bool isSet;
 	bool *boundValue;
-	std::vector<wzEventCallback> pressed_callbacks;
-	std::vector<wzEventCallback> clicked_callbacks;
+	std::vector<EventCallback> pressed_callbacks;
+	std::vector<EventCallback> clicked_callbacks;
 };
 
-void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior);
-void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior clickBehavior);
+void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior);
+void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior clickBehavior);
 
 } // namespace wz

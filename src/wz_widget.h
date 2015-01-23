@@ -30,50 +30,50 @@ namespace wz {
 
 typedef struct
 {
-	wzWidgetDrawCallback draw;
-	wzWidgetMeasureCallback measure;
+	WidgetDrawCallback draw;
+	WidgetMeasureCallback measure;
 
-	void (*destroy)(struct wzWidget *widget);
+	void (*destroy)(struct WidgetImpl *widget);
 
 	// The widget was added to a parent widget (see wz_widget_add_child_widget). 
-	void (*added)(struct wzWidget *parent, struct wzWidget *widget);
+	void (*added)(struct WidgetImpl *parent, struct WidgetImpl *widget);
 
-	// wzWidget.renderer has been changed
-	void (*renderer_changed)(struct wzWidget *widget);
+	// WidgetImpl.renderer has been changed
+	void (*renderer_changed)(struct WidgetImpl *widget);
 
-	// If NULL, wzWidget.rect will be set to rect, otherwise this function is called.
-	void (*set_rect)(struct wzWidget *widget, wzRect rect);
+	// If NULL, WidgetImpl.rect will be set to rect, otherwise this function is called.
+	void (*set_rect)(struct WidgetImpl *widget, Rect rect);
 
 	// Some additional widget state may been to be cleared when a widget is hidden.
-	void (*set_visible)(struct wzWidget *widget, bool visible);
+	void (*set_visible)(struct WidgetImpl *widget, bool visible);
 
-	void (*font_changed)(struct wzWidget *widget, const char *fontFace, float fontSize);
+	void (*font_changed)(struct WidgetImpl *widget, const char *fontFace, float fontSize);
 
-	void (*mouse_button_down)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
-	void (*mouse_button_up)(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY);
-	void (*mouse_move)(struct wzWidget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	void (*mouse_wheel_move)(struct wzWidget *widget, int x, int y);
-	void (*mouse_hover_on)(struct wzWidget *widget);
-	void (*mouse_hover_off)(struct wzWidget *widget);
-	void (*key_down)(struct wzWidget *widget, wzKey key);
-	void (*key_up)(struct wzWidget *widget, wzKey key);
-	void (*text_input)(struct wzWidget *widget, const char *text);
+	void (*mouse_button_down)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
+	void (*mouse_button_up)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
+	void (*mouse_move)(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	void (*mouse_wheel_move)(struct WidgetImpl *widget, int x, int y);
+	void (*mouse_hover_on)(struct WidgetImpl *widget);
+	void (*mouse_hover_off)(struct WidgetImpl *widget);
+	void (*key_down)(struct WidgetImpl *widget, Key key);
+	void (*key_up)(struct WidgetImpl *widget, Key key);
+	void (*text_input)(struct WidgetImpl *widget, const char *text);
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
-	wzRect (*get_children_clip_rect)(struct wzWidget *widget);
+	Rect (*get_children_clip_rect)(struct WidgetImpl *widget);
 }
-wzWidgetVtable;
+WidgetVtable;
 
 enum
 {
 	WZ_WIDGET_FLAG_DRAW_LAST = 1<<0,
 };
 
-struct wzWidget
+struct WidgetImpl
 {
-	wzWidget();
+	WidgetImpl();
 
-	virtual ~wzWidget()
+	virtual ~WidgetImpl()
 	{
 		for (size_t i = 0; i < eventHandlers.size(); i++)
 		{
@@ -83,15 +83,15 @@ struct wzWidget
 		eventHandlers.clear();
 	}
 
-	virtual const wzWidget *getWidget() const { return this; }
-	virtual wzWidget *getWidget() { return this; }
+	virtual const WidgetImpl *getWidget() const { return this; }
+	virtual WidgetImpl *getWidget() { return this; }
 
-	wzWidgetType type;
+	WidgetType type;
 
 	// Explicitly set by the user.
-	wzRect userRect;
+	Rect userRect;
 
-	wzRect rect;
+	Rect rect;
 
 	// Only used if the widget is the child of a layout.
 	int stretch;
@@ -103,7 +103,7 @@ struct wzWidget
 	int align;
 
 	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
-	wzBorder margin;
+	Border margin;
 
 	// Like metadata, but used internally.
 	void *internalMetadata;
@@ -133,17 +133,17 @@ struct wzWidget
 	char fontFace[256];
 	float fontSize;
 
-	wzWidgetVtable vtable;
+	WidgetVtable vtable;
 
 	struct wzRenderer *renderer;
 
-	struct wzMainWindow *mainWindow;
+	struct MainWindowImpl *mainWindow;
 
 	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in wz_widget_add_child_widget.
-	struct wzWindow *window;
+	struct WindowImpl *window;
 
-	struct wzWidget *parent;
-	std::vector<struct wzWidget *> children;
+	struct WidgetImpl *parent;
+	std::vector<struct WidgetImpl *> children;
 
 	std::vector<IEventHandler *> eventHandlers;
 };
@@ -161,40 +161,40 @@ enum
 	WZ_NUM_COMPASS_POINTS
 };
 
-void wz_widget_add_child_widget(struct wzWidget *widget, struct wzWidget *child);
-void wz_widget_remove_child_widget(struct wzWidget *widget, struct wzWidget *child);
-void wz_widget_destroy_child_widget(struct wzWidget *widget, struct wzWidget *child);
+void wz_widget_add_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
+void wz_widget_remove_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
+void wz_widget_destroy_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
 
-void wz_widget_set_position_args_internal(struct wzWidget *widget, int x, int y);
-void wz_widget_set_position_internal(struct wzWidget *widget, wzPosition position);
-void wz_widget_set_width_internal(struct wzWidget *widget, int w);
-void wz_widget_set_height_internal(struct wzWidget *widget, int h);
-void wz_widget_set_size_args_internal(struct wzWidget *widget, int w, int h);
-void wz_widget_set_size_internal(struct wzWidget *widget, wzSize size);
-void wz_widget_set_rect_args_internal(struct wzWidget *widget, int x, int y, int w, int h);
-void wz_widget_set_rect_internal(struct wzWidget *widget, wzRect rect);
+void wz_widget_set_position_args_internal(struct WidgetImpl *widget, int x, int y);
+void wz_widget_set_position_internal(struct WidgetImpl *widget, Position position);
+void wz_widget_set_width_internal(struct WidgetImpl *widget, int w);
+void wz_widget_set_height_internal(struct WidgetImpl *widget, int h);
+void wz_widget_set_size_args_internal(struct WidgetImpl *widget, int w, int h);
+void wz_widget_set_size_internal(struct WidgetImpl *widget, Size size);
+void wz_widget_set_rect_args_internal(struct WidgetImpl *widget, int x, int y, int w, int h);
+void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect);
 
-void wz_widget_refresh_rect(struct wzWidget *widget);
+void wz_widget_refresh_rect(struct WidgetImpl *widget);
 
-struct wzWidget *wz_widget_find_closest_ancestor(const struct wzWidget *widget, wzWidgetType type);
+struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type);
 
-void wz_widget_set_draw_manually(struct wzWidget *widget, bool value);
+void wz_widget_set_draw_manually(struct WidgetImpl *widget, bool value);
 
-void wz_widget_set_draw_last(struct wzWidget *widget, bool value);
+void wz_widget_set_draw_last(struct WidgetImpl *widget, bool value);
 
-void wz_widget_set_overlap(struct wzWidget *widget, bool value);
+void wz_widget_set_overlap(struct WidgetImpl *widget, bool value);
 
-bool wz_widget_overlaps_parent_window(const struct wzWidget *widget);
+bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget);
 
-void wz_widget_set_clip_input_to_parent(struct wzWidget *widget, bool value);
+void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value);
 
-void wz_widget_set_internal_metadata(struct wzWidget *widget, void *metadata);
-void *wz_widget_get_internal_metadata(struct wzWidget *widget);
+void wz_widget_set_internal_metadata(struct WidgetImpl *widget, void *metadata);
+void *wz_widget_get_internal_metadata(struct WidgetImpl *widget);
 
 // Shortcut for wz_renderer_get_line_height, using the widget's renderer, font face and font size.
-int wz_widget_get_line_height(const struct wzWidget *widget);
+int wz_widget_get_line_height(const struct WidgetImpl *widget);
 
 // Shortcut for wz_renderer_measure_text, using the widget's renderer, font face and font size.
-void wz_widget_measure_text(const struct wzWidget *widget, const char *text, int n, int *width, int *height);
+void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height);
 
 } // namespace wz

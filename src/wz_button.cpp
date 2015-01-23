@@ -39,10 +39,10 @@ MEASURING
 ================================================================================
 */
 
-static wzSize wz_button_measure(struct wzWidget *widget)
+static Size wz_button_measure(struct WidgetImpl *widget)
 {
-	wzSize size;
-	struct wzButton *button = (struct wzButton *)widget;
+	Size size;
+	struct ButtonImpl *button = (struct ButtonImpl *)widget;
 
 	wz_widget_measure_text(widget, button->label.c_str(), 0, &size.w, &size.h);
 
@@ -72,15 +72,15 @@ DRAWING
 ================================================================================
 */
 
-static void wz_button_draw(struct wzWidget *widget, wzRect clip)
+static void wz_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	NVGcolor bgColor1, bgColor2;
-	wzRect paddedRect;
-	wzSize iconSize;
+	Rect paddedRect;
+	Size iconSize;
 	int iconHandle, labelWidth, iconX, labelX;
-	struct wzButton *button = (struct wzButton *)widget;
+	struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
 
@@ -149,7 +149,7 @@ static void wz_button_draw(struct wzWidget *widget, wzRect clip)
 	// Draw the icon.
 	if (!button->icon.empty() && iconHandle)
 	{
-		wzRect iconRect;
+		Rect iconRect;
 		iconRect.x = iconX;
 		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
 		iconRect.w = iconSize.w;
@@ -174,9 +174,9 @@ VTABLE FUNCTIONS
 ================================================================================
 */
 
-static void wz_button_click(struct wzButton *button)
+static void wz_button_click(struct ButtonImpl *button)
 {
-	wzEvent e;
+	Event e;
 
 	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
 	{
@@ -203,16 +203,16 @@ static void wz_button_click(struct wzButton *button)
 	wz_invoke_event(&e, button->clicked_callbacks);
 }
 
-static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+static void wz_button_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzButton *button;
+	struct ButtonImpl *button;
 
 	WZ_ASSERT(widget);
-	button = (struct wzButton *)widget;
+	button = (struct ButtonImpl *)widget;
 
 	if (mouseButton == 1)
 	{
-		wzEvent e;
+		Event e;
 
 		button->isPressed = true;
 		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
@@ -229,12 +229,12 @@ static void wz_button_mouse_button_down(struct wzWidget *widget, int mouseButton
 	}
 }
 
-static void wz_button_mouse_button_up(struct wzWidget *widget, int mouseButton, int mouseX, int mouseY)
+static void wz_button_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
 {
-	struct wzButton *button;
+	struct ButtonImpl *button;
 
 	WZ_ASSERT(widget);
-	button = (struct wzButton *)widget;
+	button = (struct ButtonImpl *)widget;
 
 	if (mouseButton == 1 && button->isPressed)
 	{
@@ -256,13 +256,13 @@ PRIVATE INTERFACE
 ================================================================================
 */
 
-void wz_button_set_click_behavior(struct wzButton *button, wzButtonClickBehavior clickBehavior)
+void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior)
 {
 	WZ_ASSERT(button);
 	button->clickBehavior = clickBehavior;
 }
 
-void wz_button_set_set_behavior(struct wzButton *button, wzButtonSetBehavior setBehavior)
+void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior setBehavior)
 {
 	WZ_ASSERT(button);
 	button->setBehavior = setBehavior;
@@ -276,7 +276,7 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-wzButton::wzButton()
+ButtonImpl::ButtonImpl()
 {
 	type = WZ_TYPE_BUTTON;
 	vtable.measure = wz_button_measure;
@@ -291,55 +291,55 @@ wzButton::wzButton()
 	padding.top = padding.bottom = 4;
 }
 
-struct wzButton *wz_button_create(const char *label, const char *icon)
+struct ButtonImpl *wz_button_create(const char *label, const char *icon)
 {
-	struct wzButton *button = new wzButton;
+	struct ButtonImpl *button = new ButtonImpl;
 	button->label = label ? std::string(label) : std::string();
 	button->icon = icon ? std::string(icon) : std::string();
 	return button;
 }
 
-struct wzButton *wz_toggle_button_create(const char *label, const char *icon)
+struct ButtonImpl *wz_toggle_button_create(const char *label, const char *icon)
 {
-	struct wzButton *button = wz_button_create(label, icon);
+	struct ButtonImpl *button = wz_button_create(label, icon);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	return button;
 }
 
-void wz_button_set_label(struct wzButton *button, const char *label)
+void wz_button_set_label(struct ButtonImpl *button, const char *label)
 {
 	WZ_ASSERT(button);
 	button->label = label;
 	wz_widget_resize_to_measured(button);
 }
 
-const char *wz_button_get_label(const struct wzButton *button)
+const char *wz_button_get_label(const struct ButtonImpl *button)
 {
 	WZ_ASSERT(button);
 	return button->label.c_str();
 }
 
-void wz_button_set_icon(struct wzButton *button, const char *icon)
+void wz_button_set_icon(struct ButtonImpl *button, const char *icon)
 {
 	WZ_ASSERT(button);
 	button->icon = std::string(icon);
 	wz_widget_resize_to_measured(button);
 }
 
-const char *wz_button_get_icon(const struct wzButton *button)
+const char *wz_button_get_icon(const struct ButtonImpl *button)
 {
 	WZ_ASSERT(button);
 	return button->icon.c_str();
 }
 
-void wz_button_set_padding(struct wzButton *button, wzBorder padding)
+void wz_button_set_padding(struct ButtonImpl *button, Border padding)
 {
 	WZ_ASSERT(button);
 	button->padding = padding;
 	wz_widget_resize_to_measured(button);
 }
 
-void wz_button_set_padding_args(struct wzButton *button, int top, int right, int bottom, int left)
+void wz_button_set_padding_args(struct ButtonImpl *button, int top, int right, int bottom, int left)
 {
 	WZ_ASSERT(button);
 	button->padding.top = top;
@@ -349,25 +349,25 @@ void wz_button_set_padding_args(struct wzButton *button, int top, int right, int
 	wz_widget_resize_to_measured(button);
 }
 
-wzBorder wz_button_get_padding(const struct wzButton *button)
+Border wz_button_get_padding(const struct ButtonImpl *button)
 {
 	WZ_ASSERT(button);
 	return button->padding;
 }
 
-bool wz_button_is_pressed(const struct wzButton *button)
+bool wz_button_is_pressed(const struct ButtonImpl *button)
 {
 	WZ_ASSERT(button);
 	return button->isPressed;
 }
 
-bool wz_button_is_set(const struct wzButton *button)
+bool wz_button_is_set(const struct ButtonImpl *button)
 {
 	WZ_ASSERT(button);
 	return button->isSet;
 }
 
-void wz_button_set(struct wzButton *button, bool value)
+void wz_button_set(struct ButtonImpl *button, bool value)
 {
 	WZ_ASSERT(button);
 
@@ -391,7 +391,7 @@ void wz_button_set(struct wzButton *button, bool value)
 
 	if (button->isSet)
 	{
-		wzEvent e;
+		Event e;
 		e.button.type = WZ_EVENT_BUTTON_CLICKED;
 		e.button.button = button;
 		e.button.isSet = button->isSet;
@@ -399,7 +399,7 @@ void wz_button_set(struct wzButton *button, bool value)
 	}
 }
 
-void wz_button_bind_value(struct wzButton *button, bool *value)
+void wz_button_bind_value(struct ButtonImpl *button, bool *value)
 {
 	WZ_ASSERT(button);
 	button->boundValue = value;
@@ -410,13 +410,13 @@ void wz_button_bind_value(struct wzButton *button, bool *value)
 	}
 }
 
-void wz_button_add_callback_pressed(struct wzButton *button, wzEventCallback callback)
+void wz_button_add_callback_pressed(struct ButtonImpl *button, EventCallback callback)
 {
 	WZ_ASSERT(button);
 	button->pressed_callbacks.push_back(callback);
 }
 
-void wz_button_add_callback_clicked(struct wzButton *button, wzEventCallback callback)
+void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback callback)
 {
 	WZ_ASSERT(button);
 	button->clicked_callbacks.push_back(callback);

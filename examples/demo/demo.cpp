@@ -78,10 +78,10 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static void CustomDrawListItemCallback(struct wz::wzRenderer *renderer, wz::wzRect clip, const struct wz::wzList *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+static void CustomDrawListItemCallback(struct wz::wzRenderer *renderer, wz::Rect clip, const struct wz::ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
 {
 	int image, width, height;
-	wz::wzRect rect;
+	wz::Rect rect;
 	
 	image = wz::wz_renderer_create_image(renderer, (const char *)itemData, &width, &height);
 	rect.x = clip.x + (int)(clip.w / 2.0f - width / 2.0f);
@@ -491,17 +491,17 @@ private:
 		secondTab->add(new wz::Button("Button Button Button"))->setPosition(10, 10);
 	}
 
-	void showWindow1Toggled(wz::wzEvent *e)
+	void showWindow1Toggled(wz::Event *e)
 	{
 		window1->setVisible(e->button.isSet);
 	}
 
-	void showWindow2Toggled(wz::wzEvent *e)
+	void showWindow2Toggled(wz::Event *e)
 	{
 		window2->setVisible(e->button.isSet);
 	}
 
-	void widgetCategoryChanged(wz::wzEvent *e)
+	void widgetCategoryChanged(wz::Event *e)
 	{
 		setFrame(e->list.selectedItem);
 	}
@@ -547,7 +547,7 @@ static Uint32 TextCursorBlinkCallback(Uint32 interval, void *param)
     return interval;
 }
 
-static wz::wzKey ConvertKey(SDL_Keycode sym)
+static wz::Key ConvertKey(SDL_Keycode sym)
 {
 	static int keys[] =
 	{
@@ -584,7 +584,7 @@ static wz::wzKey ConvertKey(SDL_Keycode sym)
 				key |= wz::WZ_KEY_CONTROL_BIT;
 			}
 
-			return (wz::wzKey)key;
+			return (wz::Key)key;
 		}
 	}
 

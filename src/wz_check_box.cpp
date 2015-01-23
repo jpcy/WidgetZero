@@ -31,25 +31,25 @@ SOFTWARE.
 
 namespace wz {
 
-struct wzCheckBox : public wzButton
+struct CheckBoxImpl : public ButtonImpl
 {
 };
 
-static wzSize wz_check_box_measure(struct wzWidget *widget)
+static Size wz_check_box_measure(struct WidgetImpl *widget)
 {
-	wzSize size;
-	struct wzCheckBox *checkBox = (struct wzCheckBox *)widget;
+	Size size;
+	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
 	wz_widget_measure_text(widget, wz_check_box_get_label(checkBox), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
 	return size;
 }
 
-static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
+static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 {
-	wzRect boxRect;
-	struct wzCheckBox *checkBox = (struct wzCheckBox *)widget;
+	Rect boxRect;
+	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
-	const wzRect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -89,46 +89,46 @@ static void wz_check_box_draw(struct wzWidget *widget, wzRect clip)
 	nvgRestore(vg);
 }
 
-struct wzCheckBox *wz_check_box_create(const char *label)
+struct CheckBoxImpl *wz_check_box_create(const char *label)
 {
-	struct wzCheckBox *checkBox = (struct wzCheckBox *)wz_button_create(label, NULL);
+	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)wz_button_create(label, NULL);
 	wz_button_set_set_behavior(checkBox, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	checkBox->vtable.measure = wz_check_box_measure;
 	checkBox->vtable.draw = wz_check_box_draw;
 	return checkBox;
 }
 
-void wz_check_box_set_label(struct wzCheckBox *checkBox, const char *label)
+void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label)
 {
 	WZ_ASSERT(checkBox);
 	wz_button_set_label(checkBox, label);
 }
 
-const char *wz_check_box_get_label(const struct wzCheckBox *checkBox)
+const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox)
 {
 	WZ_ASSERT(checkBox);
 	return wz_button_get_label(checkBox);
 }
 
-bool wz_check_box_is_checked(const struct wzCheckBox *checkBox)
+bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox)
 {
 	WZ_ASSERT(checkBox);
 	return wz_button_is_set(checkBox);
 }
 
-void wz_check_box_check(struct wzCheckBox *checkBox, bool value)
+void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value)
 {
 	WZ_ASSERT(checkBox);
 	wz_button_set(checkBox, value);
 }
 
-void wz_check_box_bind_value(struct wzCheckBox *checkBox, bool *value)
+void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value)
 {
 	WZ_ASSERT(checkBox);
 	wz_button_bind_value(checkBox, value);
 }
 
-void wz_check_box_add_callback_checked(struct wzCheckBox *checkBox, wzEventCallback callback)
+void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback)
 {
 	WZ_ASSERT(checkBox);
 	wz_button_add_callback_clicked(checkBox, callback);
