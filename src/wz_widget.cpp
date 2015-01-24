@@ -53,6 +53,75 @@ namespace wz {
 
 const Border Border_zero;
 
+WidgetChildren::~WidgetChildren()
+{
+#if 0
+	for (size_t i = 0; i < widgets_.size(); i++)
+	{
+		delete widgets_[i];
+	}
+
+	widgets_.clear();
+
+	for (size_t i = 0; i < impls_.size(); i++)
+	{
+		delete impls_[i];
+	}
+
+	impls_.clear();
+#endif
+}
+	
+size_t WidgetChildren::size() const
+{
+	return widgets_.size() + impls_.size();
+}
+
+bool WidgetChildren::empty() const
+{
+	return widgets_.empty() && impls_.empty();
+}
+
+const struct WidgetImpl *WidgetChildren::operator[](size_t i) const
+{
+	if (i < widgets_.size())
+		return widgets_[i]->p;
+
+	return impls_[i - widgets_.size()];
+}
+
+struct WidgetImpl *WidgetChildren::operator[](size_t i)
+{
+	if (i < widgets_.size())
+		return widgets_[i]->p;
+
+	return impls_[i - widgets_.size()];
+}
+
+void WidgetChildren::clear()
+{
+	widgets_.clear();
+	impls_.clear();
+}
+
+void WidgetChildren::push_back(Widget *widget)
+{
+	widgets_.push_back(widget);
+}
+
+void WidgetChildren::push_back(struct WidgetImpl *widgetImpl)
+{
+	impls_.push_back(widgetImpl);
+}
+
+void WidgetChildren::erase(size_t i)
+{
+	if (i < widgets_.size())
+		widgets_.erase(widgets_.begin() + i);
+	else
+		impls_.erase(impls_.begin() + (i - impls_.size()));
+}
+
 WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
@@ -710,7 +779,7 @@ void wz_widget_remove_child_widget(struct WidgetImpl *widget, struct WidgetImpl 
 	if (deleteIndex == -1)
 		return;
 
-	widget->children.erase(widget->children.begin() + deleteIndex);
+	widget->children.erase(deleteIndex);
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
 	child->mainWindow = NULL;

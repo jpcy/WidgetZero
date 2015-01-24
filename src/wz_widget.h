@@ -69,6 +69,24 @@ enum
 	WZ_WIDGET_FLAG_DRAW_LAST = 1<<0,
 };
 
+class WidgetChildren
+{
+public:
+	~WidgetChildren();
+	size_t size() const;
+	bool empty() const;
+	const struct WidgetImpl *operator[](size_t i) const;
+	struct WidgetImpl *operator[](size_t i);
+	void clear();
+	void push_back(Widget *widget);
+	void push_back(struct WidgetImpl *widgetImpl);
+	void erase(size_t i);
+
+private:
+	std::vector<Widget *> widgets_;
+	std::vector<struct WidgetImpl *> impls_;
+};
+
 struct WidgetImpl
 {
 	WidgetImpl();
@@ -143,7 +161,7 @@ struct WidgetImpl
 	struct WindowImpl *window;
 
 	struct WidgetImpl *parent;
-	std::vector<struct WidgetImpl *> children;
+	WidgetChildren children;
 
 	std::vector<IEventHandler *> eventHandlers;
 };
