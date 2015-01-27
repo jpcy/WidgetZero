@@ -251,7 +251,7 @@ bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, Rect rect1, Re
 
 	WZ_ASSERT(vg);
 
-	if (!wz_intersect_rects(rect1, rect2, &intersection))
+	if (!Rect::intersect(rect1, rect2, &intersection))
 	{
 		return false;
 	}

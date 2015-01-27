@@ -98,6 +98,9 @@ struct Size
 struct Rect
 {
 	Rect() : x(0), y(0), w(0), h(0) {}
+	bool isEmpty() const { return x == 0 && y == 0 && w == 0 && h == 0; }
+	static bool intersect(const Rect A, const Rect B, Rect *result);
+
 	int x, y, w, h;
 };
 
@@ -246,9 +249,6 @@ DockPosition;
 #define WZ_SIGN(a) ((a) >= 0 ? 1 : -1)
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
-
-bool wz_is_rect_empty(Rect rect);
-bool wz_intersect_rects(Rect A, Rect B, Rect *result);
 
 typedef enum
 {

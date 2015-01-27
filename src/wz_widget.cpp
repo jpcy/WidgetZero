@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 /*
-wz_intersect_rects is SDL_IntersectRect
+Rect::intersect is SDL_IntersectRect
 
   Simple DirectMedia Layer
   Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
@@ -155,19 +155,14 @@ RECTANGLES
 ================================================================================
 */
 
-bool wz_is_rect_empty(Rect rect)
-{
-	return rect.x == 0 && rect.y == 0 && rect.w == 0 && rect.h == 0;
-}
-
-bool wz_intersect_rects(Rect A, Rect B, Rect *result)
+bool Rect::intersect(const Rect A, const Rect B, Rect *result)
 {
     int Amin, Amax, Bmin, Bmax;
 
 	WZ_ASSERT(result);
 
     /* Special cases for empty rects */
-    if (wz_is_rect_empty(A) || wz_is_rect_empty(B))
+    if (A.isEmpty() || B.isEmpty())
 	{
 		result->x = result->y = result->w = result->h = 0;
         return false;
@@ -197,7 +192,7 @@ bool wz_intersect_rects(Rect A, Rect B, Rect *result)
         Amax = Bmax;
     result->h = Amax - Amin;
 
-    return !wz_is_rect_empty(*result);
+    return !result->isEmpty();
 }
 
 /*

@@ -882,7 +882,7 @@ static void wz_widget_ignore_overlapping_children(struct WidgetImpl *widget, int
 			rect1 = wz_widget_get_absolute_rect(widget->children[i]);
 			rect2 = wz_widget_get_absolute_rect(widget->children[j]);
 
-			if (wz_intersect_rects(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
+			if (Rect::intersect(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
 				// Ignore the one that isn't set to overlap.
 				if (widget->children[i]->overlap)
@@ -1200,7 +1200,7 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 	// Update clip rect.
 	if (widget->vtable.get_children_clip_rect)
 	{
-		if (!wz_intersect_rects(clip, widget->vtable.get_children_clip_rect(widget), &clip))
+		if (!Rect::intersect(clip, widget->vtable.get_children_clip_rect(widget), &clip))
 		{
 			// Reset to mainWindow clip rect.
 			clip = wz_widget_get_rect((struct WidgetImpl *)widget->mainWindow);
