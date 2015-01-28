@@ -394,6 +394,45 @@ ListImpl::ListImpl()
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 }
 
+List::List()
+{
+	impl = wz_list_create(NULL, 0, 0);
+}
+
+List::~List()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
+{
+	wz_list_set_item_data((ListImpl *)impl, itemData);
+	wz_list_set_item_stride((ListImpl *)impl, itemStride);
+	wz_list_set_num_items((ListImpl *)impl, nItems);
+	return this;
+}
+
+List *List::setSelectedItem(int index)
+{
+	wz_list_set_selected_item((ListImpl *)impl, index);
+	return this;
+}
+
+List *List::setItemHeight(int height)
+{
+	wz_list_set_item_height((ListImpl *)impl, height);
+	return this;
+}
+
+List *List::setDrawItemCallback(DrawListItemCallback callback)
+{
+	wz_list_set_draw_item_callback((ListImpl *)impl, callback);
+	return this;
+}
+
 struct ListImpl *wz_list_create(uint8_t *itemData, int itemStride, int nItems)
 {
 	struct ListImpl *list = new struct ListImpl;

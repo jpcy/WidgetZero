@@ -939,6 +939,31 @@ TextEditImpl::TextEditImpl()
 	selectionStartIndex = selectionEndIndex = 0;
 }
 
+TextEdit::TextEdit(bool multiline)
+{
+	impl = wz_text_edit_create(multiline, 256);
+}
+
+TextEdit::TextEdit(const std::string &text, bool multiline)
+{
+	impl = wz_text_edit_create(multiline, 256);
+	setText(text);
+}
+
+TextEdit::~TextEdit()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+TextEdit *TextEdit::setText(const std::string &text)
+{
+	wz_text_edit_set_text((TextEditImpl *)impl, text.c_str());
+	return this;
+}
+
 struct TextEditImpl *wz_text_edit_create(bool multiline, int maximumTextLength)
 {
 	struct TextEditImpl *textEdit = new struct TextEditImpl;

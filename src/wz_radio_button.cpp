@@ -114,6 +114,35 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
+RadioButton::RadioButton()
+{
+	impl = wz_radio_button_create(NULL);
+}
+
+RadioButton::RadioButton(const std::string &label)
+{
+	impl = wz_radio_button_create(label.c_str());
+}
+
+RadioButton::~RadioButton()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+const char *RadioButton::getLabel() const
+{
+	return wz_radio_button_get_label((const RadioButtonImpl *)impl);
+}
+
+RadioButton *RadioButton::setLabel(const std::string &label)
+{
+	wz_radio_button_set_label((RadioButtonImpl *)impl, label.c_str());
+	return this;
+}
+
 struct RadioButtonImpl *wz_radio_button_create(const char *label)
 {
 	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)wz_button_create(label, NULL);

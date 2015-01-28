@@ -520,6 +520,42 @@ ScrollerImpl::ScrollerImpl()
 	nubScale = 0;
 }
 
+Scroller::Scroller(ScrollerType type)
+{
+	impl = wz_scroller_create(type, 0, 1, 0);
+}
+
+Scroller::~Scroller()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Scroller *Scroller::setValue(int value)
+{
+	wz_scroller_set_value((ScrollerImpl *)impl, value);
+	return this;
+}
+
+Scroller *Scroller::setStepValue(int stepValue)
+{
+	wz_scroller_set_step_value((ScrollerImpl *)impl, stepValue);
+	return this;
+}
+
+Scroller *Scroller::setMaxValue(int maxValue)
+{
+	wz_scroller_set_max_value((ScrollerImpl *)impl, maxValue);
+	return this;
+}
+
+int Scroller::getValue() const
+{
+	return wz_scroller_get_value((ScrollerImpl *)impl);
+}
+
 struct ScrollerImpl *wz_scroller_create(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	struct StackLayoutImpl *layout;

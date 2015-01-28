@@ -612,7 +612,6 @@ LineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const c
 class Button;
 class Checkbox;
 class Combo;
-struct MainWindowPrivate;
 class GroupBox;
 class Label;
 class List;
@@ -620,7 +619,7 @@ class RadioButton;
 class Scroller;
 class StackLayout;
 class Tab;
-struct TabPrivate;
+struct TabImpl;
 class Tabbed;
 class TextEdit;
 class ToggleButton;
@@ -660,7 +659,7 @@ public:
 		return this;
 	}
 
-	WidgetImpl *p;
+	WidgetImpl *impl;
 };
 
 class Button : public Widget
@@ -766,7 +765,7 @@ public:
 	void createMenuButton(const std::string &label);
 	void dockWindow(Window *window, DockPosition dockPosition);
 
-	MainWindowPrivate *p;
+	MainWindowImpl *impl;
 };
 
 class RadioButton : public Widget
@@ -821,7 +820,7 @@ public:
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
 
-	TabPrivate *p;
+	TabImpl *impl;
 };
 
 class Tabbed : public Widget

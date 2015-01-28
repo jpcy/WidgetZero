@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 #include <string>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include "wz_widget.h"
@@ -93,6 +94,54 @@ LabelImpl::LabelImpl()
 	multiline = false;
 	textColor = WZ_SKIN_LABEL_TEXT_COLOR;
 	isTextColorUserSet = false;
+}
+
+Label::Label()
+{
+	impl = wz_label_create(NULL);
+}
+
+Label::Label(const std::string &text)
+{
+	impl = wz_label_create(text.c_str());
+}
+
+Label::~Label()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Label *Label::setText(const char *format, ...)
+{
+	static char buffer[1024];
+
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+	
+	wz_label_set_text((LabelImpl *)impl, buffer);
+	return this;
+}
+
+Label *Label::setTextColor(float r, float g, float b, float a)
+{
+	NVGcolor color;
+	color.r = r;
+	color.g = g;
+	color.b = b;
+	color.a = a;
+	wz_label_set_text_color((LabelImpl *)impl, color);
+	return this;
+}
+
+Label *Label::setMultiline(bool multiline)
+{
+	wz_label_set_multiline((LabelImpl *)impl, multiline);
+	return this;
 }
 
 struct LabelImpl *wz_label_create(const char *text)

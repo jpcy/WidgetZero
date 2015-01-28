@@ -265,6 +265,52 @@ StackLayoutImpl::StackLayoutImpl()
 	spacing = 0;
 }
 
+StackLayout::StackLayout()
+{
+	impl = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 0);
+}
+
+StackLayout::StackLayout(StackLayoutDirection direction)
+{
+	impl = wz_stack_layout_create(direction, 0);
+}
+
+StackLayout::~StackLayout()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+StackLayout *StackLayout::setDirection(StackLayoutDirection direction)
+{
+	wz_stack_layout_set_direction((StackLayoutImpl *)impl, direction);
+	return this;
+}
+
+StackLayout *StackLayout::setSpacing(int spacing)
+{
+	wz_stack_layout_set_spacing((StackLayoutImpl *)impl, spacing);
+	return this;
+}
+
+int StackLayout::getSpacing() const
+{
+	return wz_stack_layout_get_spacing((StackLayoutImpl *)impl);
+}
+
+Widget *StackLayout::add(Widget *widget)
+{
+	wz_stack_layout_add((StackLayoutImpl *)impl, widget->impl);
+	return widget;
+}
+
+void StackLayout::remove(Widget *widget)
+{
+	wz_stack_layout_remove((StackLayoutImpl *)impl, widget->impl);
+}
+
 struct StackLayoutImpl *wz_stack_layout_create(StackLayoutDirection direction, int spacing)
 {
 	struct StackLayoutImpl *stackLayout;

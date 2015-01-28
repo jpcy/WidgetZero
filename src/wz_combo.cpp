@@ -251,6 +251,28 @@ ComboImpl::ComboImpl()
 	isOpen = false;
 }
 
+Combo::Combo()
+{
+	impl = wz_combo_create(NULL, 0, 0);
+}
+
+Combo::~Combo()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
+{
+	ListImpl *list = wz_combo_get_list((ComboImpl *)impl);
+	wz_list_set_item_data(list, itemData);
+	wz_list_set_item_stride(list, itemStride);
+	wz_list_set_num_items(list, nItems);
+	return this;
+}
+
 struct ComboImpl *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
 {
 	struct ComboImpl *combo = new ComboImpl;

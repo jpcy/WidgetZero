@@ -35,6 +35,31 @@ struct FrameImpl : public WidgetImpl
 	}
 };
 
+Frame::Frame()
+{
+	impl = wz_frame_create();
+	wz_widget_set_size_args(impl, 200, 200);
+}
+
+Frame::~Frame()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Widget *Frame::add(Widget *widget)
+{
+	wz_frame_add((FrameImpl *)impl, widget->impl);
+	return widget;
+}
+
+void Frame::remove(Widget *widget)
+{
+	wz_frame_remove((FrameImpl *)impl, widget->impl);
+}
+
 struct FrameImpl *wz_frame_create()
 {
 	return new struct FrameImpl;

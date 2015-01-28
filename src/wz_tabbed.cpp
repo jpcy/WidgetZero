@@ -93,6 +93,49 @@ void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
 /*
 ================================================================================
 
+TAB
+
+================================================================================
+*/
+
+// Wraps tab button and page.
+struct TabImpl
+{
+	TabImpl() : button(NULL), page(NULL) {}
+	ButtonImpl *button;
+	WidgetImpl *page;
+};
+
+Tab::Tab()
+{
+	impl = new TabImpl();
+}
+
+Tab::~Tab()
+{
+	delete impl;
+}
+
+Tab *Tab::setLabel(const std::string &label)
+{
+	wz_button_set_label(impl->button, label.c_str());
+	return this;
+}
+
+Widget *Tab::add(Widget *widget)
+{
+	wz_tab_page_add(impl->page, widget->impl);
+	return widget;
+}
+
+void Tab::remove(Widget *widget)
+{
+	wz_tab_page_remove(impl->page, widget->impl);
+}
+
+/*
+================================================================================
+
 TABBED WIDGET
 
 ================================================================================
@@ -228,6 +271,25 @@ static void wz_tabbed_tab_bar_tab_changed(Event *e)
 TabbedImpl::TabbedImpl()
 {
 	type = WZ_TYPE_TABBED;
+}
+
+Tabbed::Tabbed()
+{
+	impl = wz_tabbed_create();
+}
+
+Tabbed::~Tabbed()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Tab *Tabbed::addTab(Tab *tab)
+{
+	wz_tabbed_add_tab((TabbedImpl *)impl, &tab->impl->button, &tab->impl->page);
+	return tab;
 }
 
 struct TabbedImpl *wz_tabbed_create()

@@ -256,6 +256,21 @@ PRIVATE INTERFACE
 ================================================================================
 */
 
+ButtonImpl::ButtonImpl()
+{
+	type = WZ_TYPE_BUTTON;
+	vtable.measure = wz_button_measure;
+	vtable.draw = wz_button_draw;
+	vtable.mouse_button_down = wz_button_mouse_button_down;
+	vtable.mouse_button_up = wz_button_mouse_button_up;
+	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
+	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
+	isPressed = isSet = false;
+	boundValue = NULL;
+	padding.left = padding.right = 8;
+	padding.top = padding.bottom = 4;
+}
+
 void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior)
 {
 	WZ_ASSERT(button);
@@ -276,19 +291,66 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-ButtonImpl::ButtonImpl()
+Button::Button()
 {
-	type = WZ_TYPE_BUTTON;
-	vtable.measure = wz_button_measure;
-	vtable.draw = wz_button_draw;
-	vtable.mouse_button_down = wz_button_mouse_button_down;
-	vtable.mouse_button_up = wz_button_mouse_button_up;
-	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
-	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
-	isPressed = isSet = false;
-	boundValue = NULL;
-	padding.left = padding.right = 8;
-	padding.top = padding.bottom = 4;
+	impl = wz_button_create(NULL, NULL);
+}
+
+Button::Button(const std::string &label, const std::string &icon)
+{
+	impl = wz_button_create(label.c_str(), icon.c_str());
+}
+
+Button::~Button()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Border Button::getPadding() const
+{
+	return wz_button_get_padding((const ButtonImpl *)impl);
+}
+
+Button *Button::setPadding(Border padding)
+{
+	wz_button_set_padding((ButtonImpl *)impl, padding);
+	return this;
+}
+
+Button *Button::setPadding(int top, int right, int bottom, int left)
+{
+	Border padding;
+	padding.top = top;
+	padding.right = right;
+	padding.bottom = bottom;
+	padding.left = left;
+	wz_button_set_padding((ButtonImpl *)impl, padding);
+	return this;
+}
+
+const char *Button::getIcon() const
+{
+	return wz_button_get_icon((const ButtonImpl *)impl);
+}
+
+Button *Button::setIcon(const std::string &icon)
+{
+	wz_button_set_icon((ButtonImpl *)impl, icon.c_str());
+	return this;
+}
+
+const char *Button::getLabel() const
+{
+	return wz_button_get_label((const ButtonImpl *)impl);
+}
+
+Button *Button::setLabel(const std::string &label)
+{
+	wz_button_set_label((ButtonImpl *)impl, label.c_str());
+	return this;
 }
 
 struct ButtonImpl *wz_button_create(const char *label, const char *icon)
@@ -420,6 +482,76 @@ void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback cal
 {
 	WZ_ASSERT(button);
 	button->clicked_callbacks.push_back(callback);
+}
+
+/*
+================================================================================
+
+TOGGLE BUTTON PUBLIC INTERFACE
+
+================================================================================
+*/
+
+ToggleButton::ToggleButton()
+{
+	impl = wz_toggle_button_create(NULL, NULL);
+}
+
+ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
+{
+	impl = wz_toggle_button_create(label.c_str(), icon.c_str());
+}
+
+ToggleButton::~ToggleButton()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Border ToggleButton::getPadding() const
+{
+	return wz_button_get_padding((const ButtonImpl *)impl);
+}
+
+ToggleButton *ToggleButton::setPadding(Border padding)
+{
+	wz_button_set_padding((ButtonImpl *)impl, padding);
+	return this;
+}
+
+ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
+{
+	Border padding;
+	padding.top = top;
+	padding.right = right;
+	padding.bottom = bottom;
+	padding.left = left;
+	wz_button_set_padding((ButtonImpl *)impl, padding);
+	return this;
+}
+
+const char *ToggleButton::getIcon() const
+{
+	return wz_button_get_icon((const ButtonImpl *)impl);
+}
+
+ToggleButton *ToggleButton::setIcon(const std::string &icon)
+{
+	wz_button_set_icon((ButtonImpl *)impl, icon.c_str());
+	return this;
+}
+
+const char *ToggleButton::getLabel() const
+{
+	return wz_button_get_label((const ButtonImpl *)impl);
+}
+
+ToggleButton *ToggleButton::setLabel(const std::string &label)
+{
+	wz_button_set_label((ButtonImpl *)impl, label.c_str());
+	return this;
 }
 
 } // namespace wz

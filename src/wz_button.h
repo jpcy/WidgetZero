@@ -26,6 +26,7 @@ SOFTWARE.
 #include <string>
 #include <vector>
 #include <wz.h>
+#include "wz_widget.h"
 
 namespace wz {
 

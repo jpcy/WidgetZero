@@ -463,6 +463,43 @@ WindowImpl::WindowImpl()
 	drag = WZ_DRAG_NONE;
 }
 
+Window::Window()
+{
+	impl = wz_window_create(NULL);
+}
+
+Window::Window(const std::string &title)
+{
+	impl = wz_window_create(title.c_str());
+}
+
+Window::~Window()
+{
+	delete impl;
+}
+
+const char *Window::getTitle() const
+{
+	return wz_window_get_title((WindowImpl *)impl);
+}
+
+Window *Window::setTitle(const std::string &title)
+{
+	wz_window_set_title((WindowImpl *)impl, title.c_str());
+	return this;
+}
+
+Widget *Window::add(Widget *widget)
+{
+	wz_window_add((WindowImpl *)impl, widget->impl);
+	return widget;
+}
+
+void Window::remove(Widget *widget)
+{
+	wz_window_remove((WindowImpl *)impl, widget->impl);
+}
+
 struct WindowImpl *wz_window_create(const char *title)
 {
 	struct WindowImpl *window = new struct WindowImpl;

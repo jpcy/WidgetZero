@@ -105,6 +105,48 @@ static void wz_group_box_renderer_changed(struct WidgetImpl *widget)
 	wz_group_box_refresh_margin((struct GroupBoxImpl *)widget);
 }
 
+GroupBox::GroupBox()
+{
+	impl = wz_group_box_create(NULL);
+	wz_widget_set_size_args(impl, 200, 200);
+}
+
+GroupBox::GroupBox(const std::string &label)
+{
+	impl = wz_group_box_create(label.c_str());
+	wz_widget_set_size_args(impl, 200, 200);
+}
+
+GroupBox::~GroupBox()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+const char *GroupBox::getLabel() const
+{
+	return wz_group_box_get_label((GroupBoxImpl *)impl);
+}
+
+GroupBox *GroupBox::setLabel(const std::string &label)
+{
+	wz_group_box_set_label((GroupBoxImpl *)impl, label.c_str());
+	return this;
+}
+
+Widget *GroupBox::add(Widget *widget)
+{
+	wz_group_box_add((GroupBoxImpl *)impl, widget->impl);
+	return widget;
+}
+
+void GroupBox::remove(Widget *widget)
+{
+	wz_group_box_remove((GroupBoxImpl *)impl, widget->impl);
+}
+
 struct GroupBoxImpl *wz_group_box_create(const char *label)
 {
 	struct GroupBoxImpl *groupBox = new struct GroupBoxImpl;

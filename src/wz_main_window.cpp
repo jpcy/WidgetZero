@@ -1377,6 +1377,112 @@ MainWindowImpl::MainWindowImpl() : dockIcons(), dockTabBars()
 	menuBar = NULL;
 }
 
+MainWindow::MainWindow(wzRenderer *renderer)
+{
+	WZ_ASSERT(renderer);
+	impl = wz_main_window_create(renderer);
+
+	impl->menuBar = wz_menu_bar_create();
+	wz_main_window_set_menu_bar(impl, impl->menuBar);
+}
+
+MainWindow::~MainWindow()
+{
+	wz_widget_destroy(impl);
+}
+
+int MainWindow::getWidth() const
+{
+	return wz_widget_get_width(impl);
+}
+
+int MainWindow::getHeight() const
+{
+	return wz_widget_get_height(impl);
+}
+
+void MainWindow::setSize(int w, int h)
+{
+	wz_widget_set_size_args(impl, w, h);
+}
+
+void MainWindow::mouseMove(int x, int y, int dx, int dy)
+{
+	wz_main_window_mouse_move(impl, x, y, dx, dy);
+}
+
+void MainWindow::mouseButtonDown(int button, int x, int y)
+{
+	wz_main_window_mouse_button_down(impl, button, x, y);
+}
+
+void MainWindow::mouseButtonUp(int button, int x, int y)
+{
+	wz_main_window_mouse_button_up(impl, button, x, y);
+}
+
+void MainWindow::mouseWheelMove(int x, int y)
+{
+	wz_main_window_mouse_wheel_move(impl, x, y);
+}
+
+void MainWindow::keyDown(Key key)
+{
+	wz_main_window_key_down(impl, key);
+}
+
+void MainWindow::keyUp(Key key)
+{
+	wz_main_window_key_up(impl, key);
+}
+
+void MainWindow::textInput(const char *text)
+{
+	wz_main_window_text_input(impl, text);
+}
+
+void MainWindow::draw()
+{	
+	wz_main_window_draw(impl);
+}
+
+void MainWindow::drawFrame()
+{	
+	wz_main_window_draw_frame(impl);
+}
+
+void MainWindow::toggleTextCursor()
+{
+	wz_main_window_toggle_text_cursor(impl);
+}
+
+Cursor MainWindow::getCursor() const
+{
+	return wz_main_window_get_cursor(impl);
+}
+
+Widget *MainWindow::add(Widget *widget)
+{
+	wz_main_window_add(impl, widget->impl);
+	return widget;
+}
+
+void MainWindow::remove(Widget *widget)
+{
+	wz_main_window_remove(impl, widget->impl);
+}
+
+void MainWindow::createMenuButton(const std::string &label)
+{
+	MenuBarButtonImpl *button = wz_menu_bar_create_button(impl->menuBar);
+	wz_menu_bar_button_set_label(button, label.c_str());
+}
+
+void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
+{
+	wz_main_window_dock_window(impl, (WindowImpl *)window->impl, dockPosition);
+}
+
 struct MainWindowImpl *wz_main_window_create(struct wzRenderer *renderer)
 {
 	int i;
@@ -1562,19 +1668,6 @@ void wz_invoke_event(Event *e)
 		if (e->base.widget->eventHandlers[i]->eventType == e->base.type)
 		{
 			e->base.widget->eventHandlers[i]->call(e);
-		}
-	}
-
-	WidgetImpl *metadata = (WidgetImpl *)wz_widget_get_metadata(e->base.widget);
-
-	if (metadata && metadata != e->base.widget)
-	{
-		for (size_t i = 0; i < metadata->eventHandlers.size(); i++)
-		{
-			if (metadata->eventHandlers[i]->eventType == e->base.type)
-			{
-				metadata->eventHandlers[i]->call(e);
-			}
 		}
 	}
 

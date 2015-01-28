@@ -158,6 +158,30 @@ SpinnerImpl::SpinnerImpl()
 	type = WZ_TYPE_SPINNER;
 }
 
+Spinner::Spinner()
+{
+	impl = wz_spinner_create();
+}
+
+Spinner::~Spinner()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+Spinner *Spinner::setValue(int value)
+{
+	wz_spinner_set_value((SpinnerImpl *)impl, value);
+	return this;
+}
+
+int Spinner::getValue() const
+{
+	return wz_spinner_get_value((SpinnerImpl *)impl);
+}
+
 struct SpinnerImpl *wz_spinner_create()
 {
 	struct SpinnerImpl *spinner = new struct SpinnerImpl;

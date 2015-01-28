@@ -89,6 +89,41 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	nvgRestore(vg);
 }
 
+Checkbox::Checkbox()
+{
+	impl = wz_check_box_create(NULL);
+}
+
+Checkbox::Checkbox(const std::string &label)
+{
+	impl = wz_check_box_create(label.c_str());
+}
+
+Checkbox::~Checkbox()
+{
+	if (!wz_widget_get_main_window(impl))
+	{
+		wz_widget_destroy(impl);
+	}
+}
+
+const char *Checkbox::getLabel() const
+{
+	return wz_check_box_get_label((const CheckBoxImpl *)impl);
+}
+
+Checkbox *Checkbox::setLabel(const std::string &label)
+{
+	wz_check_box_set_label((CheckBoxImpl *)impl, label.c_str());
+	return this;
+}
+
+Checkbox *Checkbox::bindValue(bool *value)
+{
+	wz_check_box_bind_value((CheckBoxImpl *)impl, value);
+	return this;
+}
+
 struct CheckBoxImpl *wz_check_box_create(const char *label)
 {
 	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)wz_button_create(label, NULL);

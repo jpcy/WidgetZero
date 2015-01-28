@@ -101,9 +101,6 @@ struct WidgetImpl
 		eventHandlers.clear();
 	}
 
-	virtual const WidgetImpl *getWidget() const { return this; }
-	virtual WidgetImpl *getWidget() { return this; }
-
 	WidgetType type;
 
 	// Explicitly set by the user.
