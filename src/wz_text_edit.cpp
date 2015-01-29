@@ -26,23 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct TextEditImpl : public WidgetImpl
-{
-	TextEditImpl();
-
-	struct ScrollerImpl *scroller;
-	bool multiline;
-	int maximumTextLength;
-	TextEditValidateTextCallback validate_text;
-	Border border;
-	bool pressed;
-	int cursorIndex;
-	int scrollValue;
-	int selectionStartIndex;
-	int selectionEndIndex;
-	std::string text;
-};
-
 static void wz_text_edit_update_scroll_index(struct TextEditImpl *textEdit);
 static void wz_text_edit_delete_selection(struct TextEditImpl *textEdit);
 

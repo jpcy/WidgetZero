@@ -26,14 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct ComboImpl : public WidgetImpl
-{
-	ComboImpl();
-
-	bool isOpen;
-	struct ListImpl *list;
-};
-
 static Size wz_combo_measure(struct WidgetImpl *widget)
 {
 	Size size;

@@ -28,44 +28,6 @@ SOFTWARE.
 
 namespace wz {
 
-typedef enum
-{
-	WZ_DRAG_NONE,
-	WZ_DRAG_HEADER,
-	WZ_DRAG_RESIZE_N,
-	WZ_DRAG_RESIZE_NE,
-	WZ_DRAG_RESIZE_E,
-	WZ_DRAG_RESIZE_SE,
-	WZ_DRAG_RESIZE_S,
-	WZ_DRAG_RESIZE_SW,
-	WZ_DRAG_RESIZE_W,
-	WZ_DRAG_RESIZE_NW,
-}
-WindowDrag;
-
-struct WindowImpl : public WidgetImpl
-{
-	WindowImpl(const std::string &title);
-
-	int drawPriority;
-	int headerHeight;
-	int borderSize;
-	std::string title;
-	
-	struct WidgetImpl *content;
-
-	WindowDrag drag;
-
-	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
-	Position undockStartPosition;
-
-	Position resizeStartPosition;
-	Rect resizeStartRect;
-
-	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
-	Size sizeBeforeDocking;
-};
-
 static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 {
 	const struct WindowImpl *window = (struct WindowImpl *)widget;

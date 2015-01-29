@@ -26,48 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct MainWindowImpl : public WidgetImpl
-{
-	MainWindowImpl(wzRenderer *renderer);
-
-	struct WidgetImpl *content;
-
-	// Centralized event handler.
-	EventCallback handle_event;
-
-	bool isTextCursorVisible;
-
-	Cursor cursor;
-
-	bool isShiftKeyDown, isControlKeyDown;
-
-	std::vector<struct WidgetImpl *> lockInputWidgetStack;
-
-	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
-	struct WindowImpl *lockInputWindow;
-
-	struct WidgetImpl *keyboardFocusWidget;
-
-	// This window is currently being moved and may be docked.
-	struct WindowImpl *movingWindow;
-
-	// Hidden from the consumer.
-	struct WidgetImpl *dockIcons[WZ_NUM_DOCK_POSITIONS];
-	struct WidgetImpl *dockPreview;
-
-	std::vector<struct WindowImpl *> dockedWindows[WZ_NUM_DOCK_POSITIONS];
-
-	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
-	DockPosition windowDockPosition;
-
-	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
-	struct TabBarImpl *dockTabBars[WZ_NUM_DOCK_POSITIONS];
-
-	bool ignoreDockTabBarChangedEvent;
-
-	struct MenuBarImpl *menuBar;
-};
-
 /*
 ================================================================================
 

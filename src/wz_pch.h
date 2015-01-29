@@ -271,6 +271,268 @@ struct ButtonImpl : public WidgetImpl
 void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior);
 void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior clickBehavior);
 
+struct CheckBoxImpl : public ButtonImpl
+{
+};
+
+struct ComboImpl : public WidgetImpl
+{
+	ComboImpl();
+
+	bool isOpen;
+	struct ListImpl *list;
+};
+
+struct FrameImpl : public WidgetImpl
+{
+	FrameImpl()
+	{
+		type = WZ_TYPE_FRAME;
+	}
+};
+
+struct GroupBoxImpl : public WidgetImpl
+{
+	GroupBoxImpl()
+	{
+		type = WZ_TYPE_GROUP_BOX;
+		content = NULL;
+	}
+
+	struct WidgetImpl *content;
+	std::string label;
+};
+
+struct LabelImpl : public WidgetImpl
+{
+	LabelImpl();
+
+	std::string text;
+	bool multiline;
+	NVGcolor textColor;
+	bool isTextColorUserSet;
+};
+
+struct StackLayoutImpl : public WidgetImpl
+{
+	StackLayoutImpl();
+
+	StackLayoutDirection direction;
+
+	// Spacing between child widgets. Applied to the top/left of children.
+	int spacing;
+};
+
+struct ListImpl : public WidgetImpl
+{
+	ListImpl();
+
+	Border itemsBorder;
+	DrawListItemCallback draw_item;
+	uint8_t *itemData;
+	int itemStride;
+	int itemHeight;
+	bool isItemHeightUserSet;
+	int nItems;
+	int firstItem;
+	int selectedItem;
+	int pressedItem;
+	int hoveredItem;
+
+	// The same as hoveredItem, except when pressedItem != -1.
+	int mouseOverItem;
+
+	struct ScrollerImpl *scroller;
+
+	std::vector<EventCallback> item_selected_callbacks;
+
+	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
+	Position lastMousePosition;
+};
+
+struct MainWindowImpl : public WidgetImpl
+{
+	MainWindowImpl(wzRenderer *renderer);
+
+	struct WidgetImpl *content;
+
+	// Centralized event handler.
+	EventCallback handle_event;
+
+	bool isTextCursorVisible;
+
+	Cursor cursor;
+
+	bool isShiftKeyDown, isControlKeyDown;
+
+	std::vector<struct WidgetImpl *> lockInputWidgetStack;
+
+	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
+	struct WindowImpl *lockInputWindow;
+
+	struct WidgetImpl *keyboardFocusWidget;
+
+	// This window is currently being moved and may be docked.
+	struct WindowImpl *movingWindow;
+
+	// Hidden from the consumer.
+	struct WidgetImpl *dockIcons[WZ_NUM_DOCK_POSITIONS];
+	struct WidgetImpl *dockPreview;
+
+	std::vector<struct WindowImpl *> dockedWindows[WZ_NUM_DOCK_POSITIONS];
+
+	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
+	DockPosition windowDockPosition;
+
+	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
+	struct TabBarImpl *dockTabBars[WZ_NUM_DOCK_POSITIONS];
+
+	bool ignoreDockTabBarChangedEvent;
+
+	struct MenuBarImpl *menuBar;
+};
+
+struct MenuBarButtonImpl : public WidgetImpl
+{
+	MenuBarButtonImpl();
+
+	Border padding;
+	std::string label;
+	bool isPressed;
+	bool isSet;
+	std::vector<EventCallback> pressed_callbacks;
+	struct MenuBarImpl *menuBar;
+};
+
+struct MenuBarImpl : public WidgetImpl
+{
+	MenuBarImpl();
+
+	struct StackLayoutImpl *layout;
+};
+
+struct RadioButtonImpl : public ButtonImpl
+{
+};
+
+struct ScrollerNub : public WidgetImpl
+{
+	ScrollerNub();
+
+	struct ScrollerImpl *scroller;
+	bool isPressed;
+
+	// The position of the nub when the it was pressed.
+	Position pressPosition;
+
+	// The position of the mouse when the nub was pressed.
+	Position pressMousePosition;
+};
+
+struct ScrollerImpl : public WidgetImpl
+{
+	ScrollerImpl();
+
+	ScrollerType scrollerType;
+	int value, stepValue, maxValue;
+	float nubScale;
+	struct ScrollerNub *nub;
+	std::vector<EventCallback> value_changed_callbacks;
+};
+
+struct SpinnerImpl : public WidgetImpl
+{
+	SpinnerImpl();
+
+	struct TextEditImpl *textEdit;
+	struct ButtonImpl *decrementButton;
+	struct ButtonImpl *incrementButton;
+};
+
+struct TabBarImpl : public WidgetImpl
+{
+	TabBarImpl();
+
+	struct ButtonImpl *selectedTab;
+	std::vector<struct ButtonImpl *> tabs;
+
+	int scrollValue;
+	struct ButtonImpl *decrementButton;
+	struct ButtonImpl *incrementButton;
+
+	std::vector<EventCallback> tab_changed_callbacks;
+};
+
+typedef struct
+{
+	struct ButtonImpl *tab;
+	struct WidgetImpl *page;
+}
+TabbedPage;
+
+struct TabbedImpl : public WidgetImpl
+{
+	TabbedImpl();
+
+	struct TabBarImpl *tabBar;
+	std::vector<TabbedPage> pages;
+};
+
+struct TextEditImpl : public WidgetImpl
+{
+	TextEditImpl();
+
+	struct ScrollerImpl *scroller;
+	bool multiline;
+	int maximumTextLength;
+	TextEditValidateTextCallback validate_text;
+	Border border;
+	bool pressed;
+	int cursorIndex;
+	int scrollValue;
+	int selectionStartIndex;
+	int selectionEndIndex;
+	std::string text;
+};
+
+typedef enum
+{
+	WZ_DRAG_NONE,
+	WZ_DRAG_HEADER,
+	WZ_DRAG_RESIZE_N,
+	WZ_DRAG_RESIZE_NE,
+	WZ_DRAG_RESIZE_E,
+	WZ_DRAG_RESIZE_SE,
+	WZ_DRAG_RESIZE_S,
+	WZ_DRAG_RESIZE_SW,
+	WZ_DRAG_RESIZE_W,
+	WZ_DRAG_RESIZE_NW,
+}
+WindowDrag;
+
+struct WindowImpl : public WidgetImpl
+{
+	WindowImpl(const std::string &title);
+
+	int drawPriority;
+	int headerHeight;
+	int borderSize;
+	std::string title;
+	
+	struct WidgetImpl *content;
+
+	WindowDrag drag;
+
+	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
+	Position undockStartPosition;
+
+	Position resizeStartPosition;
+	Rect resizeStartRect;
+
+	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
+	Size sizeBeforeDocking;
+};
+
 // Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
 Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget, Rect rect);
 

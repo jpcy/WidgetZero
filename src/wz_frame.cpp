@@ -26,14 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct FrameImpl : public WidgetImpl
-{
-	FrameImpl()
-	{
-		type = WZ_TYPE_FRAME;
-	}
-};
-
 Frame::Frame()
 {
 	impl = wz_frame_create();

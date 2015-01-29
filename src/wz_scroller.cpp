@@ -29,31 +29,6 @@ SOFTWARE.
 
 namespace wz { 
 
-struct ScrollerNub : public WidgetImpl
-{
-	ScrollerNub();
-
-	struct ScrollerImpl *scroller;
-	bool isPressed;
-
-	// The position of the nub when the it was pressed.
-	Position pressPosition;
-
-	// The position of the mouse when the nub was pressed.
-	Position pressMousePosition;
-};
-
-struct ScrollerImpl : public WidgetImpl
-{
-	ScrollerImpl();
-
-	ScrollerType scrollerType;
-	int value, stepValue, maxValue;
-	float nubScale;
-	struct ScrollerNub *nub;
-	std::vector<EventCallback> value_changed_callbacks;
-};
-
 /*
 ================================================================================
 

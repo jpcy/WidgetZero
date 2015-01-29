@@ -26,18 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct GroupBoxImpl : public WidgetImpl
-{
-	GroupBoxImpl()
-	{
-		type = WZ_TYPE_GROUP_BOX;
-		content = NULL;
-	}
-
-	struct WidgetImpl *content;
-	std::string label;
-};
-
 static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
 {
 	Rect rect;

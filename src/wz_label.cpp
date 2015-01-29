@@ -26,16 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct LabelImpl : public WidgetImpl
-{
-	LabelImpl();
-
-	std::string text;
-	bool multiline;
-	NVGcolor textColor;
-	bool isTextColorUserSet;
-};
-
 static Size wz_label_measure(struct WidgetImpl *widget)
 {
 	Size size;

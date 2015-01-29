@@ -26,16 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct StackLayoutImpl : public WidgetImpl
-{
-	StackLayoutImpl();
-
-	StackLayoutDirection direction;
-
-	// Spacing between child widgets. Applied to the top/left of children.
-	int spacing;
-};
-
 /*
 ================================================================================
 

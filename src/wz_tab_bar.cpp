@@ -26,20 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct TabBarImpl : public WidgetImpl
-{
-	TabBarImpl();
-
-	struct ButtonImpl *selectedTab;
-	std::vector<struct ButtonImpl *> tabs;
-
-	int scrollValue;
-	struct ButtonImpl *decrementButton;
-	struct ButtonImpl *incrementButton;
-
-	std::vector<EventCallback> tab_changed_callbacks;
-};
-
 /*
 ================================================================================
 

@@ -26,15 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct SpinnerImpl : public WidgetImpl
-{
-	SpinnerImpl();
-
-	struct TextEditImpl *textEdit;
-	struct ButtonImpl *decrementButton;
-	struct ButtonImpl *incrementButton;
-};
-
 static bool wz_spinner_validate_text(const char *text)
 {
 	size_t i;

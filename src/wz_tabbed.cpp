@@ -26,21 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-typedef struct
-{
-	struct ButtonImpl *tab;
-	struct WidgetImpl *page;
-}
-TabbedPage;
-
-struct TabbedImpl : public WidgetImpl
-{
-	TabbedImpl();
-
-	struct TabBarImpl *tabBar;
-	std::vector<TabbedPage> pages;
-};
-
 /*
 ================================================================================
 

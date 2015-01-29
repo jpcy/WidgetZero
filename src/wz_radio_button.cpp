@@ -26,10 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct RadioButtonImpl : public ButtonImpl
-{
-};
-
 static void wz_radio_button_clicked(Event *e)
 {
 	struct WidgetImpl *parent = e->base.widget->parent;

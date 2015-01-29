@@ -26,10 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct CheckBoxImpl : public ButtonImpl
-{
-};
-
 static Size wz_check_box_measure(struct WidgetImpl *widget)
 {
 	Size size;

@@ -26,25 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct MenuBarButtonImpl : public WidgetImpl
-{
-	MenuBarButtonImpl();
-
-	Border padding;
-	std::string label;
-	bool isPressed;
-	bool isSet;
-	std::vector<EventCallback> pressed_callbacks;
-	struct MenuBarImpl *menuBar;
-};
-
-struct MenuBarImpl : public WidgetImpl
-{
-	MenuBarImpl();
-
-	struct StackLayoutImpl *layout;
-};
-
 /*
 ================================================================================
 

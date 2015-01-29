@@ -26,33 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-struct ListImpl : public WidgetImpl
-{
-	ListImpl();
-
-	Border itemsBorder;
-	DrawListItemCallback draw_item;
-	uint8_t *itemData;
-	int itemStride;
-	int itemHeight;
-	bool isItemHeightUserSet;
-	int nItems;
-	int firstItem;
-	int selectedItem;
-	int pressedItem;
-	int hoveredItem;
-
-	// The same as hoveredItem, except when pressedItem != -1.
-	int mouseOverItem;
-
-	struct ScrollerImpl *scroller;
-
-	std::vector<EventCallback> item_selected_callbacks;
-
-	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
-	Position lastMousePosition;
-};
-
 /*
 ================================================================================
 
