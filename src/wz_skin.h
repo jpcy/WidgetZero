@@ -23,8 +23,6 @@ SOFTWARE.
 */
 #pragma once
 
-#include <wz.h>
-
 #define WZ_SKIN_TEXT_COLOR nvgRGBf(0.8f, 0.8f, 0.8f)
 #define WZ_SKIN_DARK_BORDER_COLOR nvgRGB(25, 25, 25)
 #define WZ_SKIN_LIGHT_BORDER_COLOR nvgRGBf(0.8f, 0.8f, 0.8f)

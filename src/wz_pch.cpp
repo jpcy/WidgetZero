@@ -21,13 +21,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#pragma once
-
-#include <wz.h>
-
-namespace wz {
-
-// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
-Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget, Rect rect);
-
-} // namespace wz
+#include "wz_pch.h"

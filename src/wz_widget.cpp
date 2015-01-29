@@ -43,10 +43,8 @@ Rect::intersect is SDL_IntersectRect
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include <stdlib.h>
-#include <string.h>
-#include "wz_layout.h"
-#include "wz_widget.h"
+#include "wz_pch.h"
+#pragma hdrstop
 
 namespace wz {
 

@@ -23,10 +23,27 @@ SOFTWARE.
 */
 #pragma once
 
+#include <ctype.h>
+#include <math.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <string>
 #include <vector>
 #include <wz.h>
+#include "wz_skin.h"
+
+#define WZ_NANOVG_MAX_PATH 256
+#define WZ_NANOVG_MAX_IMAGES 1024
+#define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
+
+#define WZ_MAX_WINDOWS 256
 
 namespace wz {
+
+struct ListImpl;
+struct ScrollerImpl;
+struct WindowImpl;
 
 typedef struct
 {
@@ -211,5 +228,111 @@ int wz_widget_get_line_height(const struct WidgetImpl *widget);
 
 // Shortcut for wz_renderer_measure_text, using the widget's renderer, font face and font size.
 void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height);
+
+typedef enum
+{
+	// Click the button on mouse up (default).
+	WZ_BUTTON_CLICK_BEHAVIOR_UP,
+
+	// Click the button on mouse down
+	WZ_BUTTON_CLICK_BEHAVIOR_DOWN
+}
+ButtonClickBehavior;
+
+typedef enum
+{
+	// Button is never set.
+	WZ_BUTTON_SET_BEHAVIOR_DEFAULT,
+
+	// Click to toggle whether the button is set.
+	WZ_BUTTON_SET_BEHAVIOR_TOGGLE,
+
+	// Click to set the button. Clicking again does nothing.
+	WZ_BUTTON_SET_BEHAVIOR_STICKY
+}
+ButtonSetBehavior;
+
+struct ButtonImpl : public WidgetImpl
+{
+	ButtonImpl(const std::string &label = std::string(), const std::string &icon = std::string());
+
+	ButtonClickBehavior clickBehavior;
+	ButtonSetBehavior setBehavior;
+	Border padding;
+	std::string label;
+	std::string icon;
+	bool isPressed;
+	bool isSet;
+	bool *boundValue;
+	std::vector<EventCallback> pressed_callbacks;
+	std::vector<EventCallback> clicked_callbacks;
+};
+
+void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior);
+void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior clickBehavior);
+
+// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
+Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget, Rect rect);
+
+struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list);
+
+void wz_main_window_set_cursor(struct MainWindowImpl *mainWindow, Cursor cursor);
+
+// Set keyboard focus to this widget.
+void wz_main_window_set_keyboard_focus_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
+
+bool wz_main_window_is_shift_key_down(const struct MainWindowImpl *mainWindow);
+bool wz_main_window_is_control_key_down(const struct MainWindowImpl *mainWindow);
+
+// Lock input to this widget.
+void wz_main_window_push_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
+
+// Stop locking input to this widget.
+void wz_main_window_pop_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
+
+void wz_main_window_set_moving_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
+
+void wz_main_window_update_content_rect(struct MainWindowImpl *mainWindow);
+
+void wz_main_window_update_docked_window_rect(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
+
+DockPosition wz_main_window_get_window_dock_position(const struct MainWindowImpl *mainWindow, const struct WindowImpl *window);
+
+void wz_main_window_undock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
+
+void wz_invoke_event(Event *e);
+void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
+
+bool wz_main_window_text_cursor_is_visible(const struct MainWindowImpl *mainWindow);
+
+struct wzImage
+{
+	wzImage() : handle(0) {}
+
+	int handle;
+	char filename[WZ_NANOVG_MAX_PATH];
+};
+
+struct wzRenderer
+{
+	wzRenderer() : destroy(NULL), vg(NULL), nImages(0), defaultFontSize(0) {}
+
+	wzNanoVgGlDestroy destroy;
+	struct NVGcontext *vg;
+	wzImage images[WZ_NANOVG_MAX_IMAGES];
+	int nImages;
+	char fontDirectory[WZ_NANOVG_MAX_PATH];
+	float defaultFontSize;
+};
+
+void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
+
+struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window);
+
+// Tell the window it's being docked.
+void wz_window_dock(struct WindowImpl *window);
+
+int wz_window_get_draw_priority(const struct WindowImpl *window);
+void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority);
 
 } // namespace wz
