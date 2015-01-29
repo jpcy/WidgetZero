@@ -1318,7 +1318,7 @@ MainWindow::MainWindow(wzRenderer *renderer)
 	WZ_ASSERT(renderer);
 	impl = new MainWindowImpl(renderer);
 
-	impl->menuBar = wz_menu_bar_create();
+	impl->menuBar = new MenuBarImpl();
 	wz_main_window_set_menu_bar(impl, impl->menuBar);
 }
 
@@ -1468,11 +1468,10 @@ MainWindowImpl::MainWindowImpl(struct wzRenderer *renderer)
 	// Create dock tab bars.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		struct TabBarImpl *tabBar = wz_tab_bar_create();
-		dockTabBars[i] = tabBar;
-		wz_widget_set_visible((struct WidgetImpl *)tabBar, false);
-		wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)tabBar);
-		wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
+		dockTabBars[i] = new TabBarImpl;
+		wz_widget_set_visible(dockTabBars[i], false);
+		wz_widget_add_child_widget(this, dockTabBars[i]);
+		wz_tab_bar_add_callback_tab_changed(dockTabBars[i], wz_main_window_dock_tab_bar_tab_changed);
 	}
 }
 

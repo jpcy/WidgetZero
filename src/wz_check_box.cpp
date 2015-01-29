@@ -80,14 +80,21 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	nvgRestore(vg);
 }
 
+CheckBoxImpl::CheckBoxImpl(const std::string &label) : ButtonImpl(label)
+{
+	wz_button_set_set_behavior(this, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	vtable.measure = wz_check_box_measure;
+	vtable.draw = wz_check_box_draw;
+}
+
 Checkbox::Checkbox()
 {
-	impl = wz_check_box_create(NULL);
+	impl = new CheckBoxImpl();
 }
 
 Checkbox::Checkbox(const std::string &label)
 {
-	impl = wz_check_box_create(label.c_str());
+	impl = new CheckBoxImpl(label.c_str());
 }
 
 Checkbox::~Checkbox()
@@ -113,15 +120,6 @@ Checkbox *Checkbox::bindValue(bool *value)
 {
 	wz_check_box_bind_value((CheckBoxImpl *)impl, value);
 	return this;
-}
-
-struct CheckBoxImpl *wz_check_box_create(const char *label)
-{
-	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)new ButtonImpl(label);
-	wz_button_set_set_behavior(checkBox, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	checkBox->vtable.measure = wz_check_box_measure;
-	checkBox->vtable.draw = wz_check_box_draw;
-	return checkBox;
 }
 
 void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label)

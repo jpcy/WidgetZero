@@ -273,11 +273,12 @@ void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior cli
 
 struct CheckBoxImpl : public ButtonImpl
 {
+	CheckBoxImpl(const std::string &label = std::string());
 };
 
 struct ComboImpl : public WidgetImpl
 {
-	ComboImpl();
+	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
 
 	bool isOpen;
 	struct ListImpl *list;
@@ -285,19 +286,12 @@ struct ComboImpl : public WidgetImpl
 
 struct FrameImpl : public WidgetImpl
 {
-	FrameImpl()
-	{
-		type = WZ_TYPE_FRAME;
-	}
+	FrameImpl();
 };
 
 struct GroupBoxImpl : public WidgetImpl
 {
-	GroupBoxImpl()
-	{
-		type = WZ_TYPE_GROUP_BOX;
-		content = NULL;
-	}
+	GroupBoxImpl(const std::string &label = std::string());
 
 	struct WidgetImpl *content;
 	std::string label;
@@ -305,7 +299,7 @@ struct GroupBoxImpl : public WidgetImpl
 
 struct LabelImpl : public WidgetImpl
 {
-	LabelImpl();
+	LabelImpl(const std::string &text = std::string());
 
 	std::string text;
 	bool multiline;
@@ -313,19 +307,9 @@ struct LabelImpl : public WidgetImpl
 	bool isTextColorUserSet;
 };
 
-struct StackLayoutImpl : public WidgetImpl
-{
-	StackLayoutImpl();
-
-	StackLayoutDirection direction;
-
-	// Spacing between child widgets. Applied to the top/left of children.
-	int spacing;
-};
-
 struct ListImpl : public WidgetImpl
 {
-	ListImpl();
+	ListImpl(uint8_t *itemData, int itemStride, int nItems);
 
 	Border itemsBorder;
 	DrawListItemCallback draw_item;
@@ -413,6 +397,7 @@ struct MenuBarImpl : public WidgetImpl
 
 struct RadioButtonImpl : public ButtonImpl
 {
+	RadioButtonImpl(const std::string &label = std::string());
 };
 
 struct ScrollerNub : public WidgetImpl
@@ -431,7 +416,7 @@ struct ScrollerNub : public WidgetImpl
 
 struct ScrollerImpl : public WidgetImpl
 {
-	ScrollerImpl();
+	ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue);
 
 	ScrollerType scrollerType;
 	int value, stepValue, maxValue;
@@ -447,6 +432,16 @@ struct SpinnerImpl : public WidgetImpl
 	struct TextEditImpl *textEdit;
 	struct ButtonImpl *decrementButton;
 	struct ButtonImpl *incrementButton;
+};
+
+struct StackLayoutImpl : public WidgetImpl
+{
+	StackLayoutImpl(StackLayoutDirection direction, int spacing);
+
+	StackLayoutDirection direction;
+
+	// Spacing between child widgets. Applied to the top/left of children.
+	int spacing;
 };
 
 struct TabBarImpl : public WidgetImpl
@@ -480,7 +475,7 @@ struct TabbedImpl : public WidgetImpl
 
 struct TextEditImpl : public WidgetImpl
 {
-	TextEditImpl();
+	TextEditImpl(bool multiline, int maximumTextLength);
 
 	struct ScrollerImpl *scroller;
 	bool multiline;

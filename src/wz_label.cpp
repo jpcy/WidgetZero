@@ -73,22 +73,25 @@ static void wz_label_draw(struct WidgetImpl *widget, Rect clip)
 	nvgRestore(vg);
 }
 
-LabelImpl::LabelImpl()
+LabelImpl::LabelImpl(const std::string &text) : text(text)
 {
 	type = WZ_TYPE_LABEL;
 	multiline = false;
 	textColor = WZ_SKIN_LABEL_TEXT_COLOR;
 	isTextColorUserSet = false;
+
+	vtable.measure = wz_label_measure;
+	vtable.draw = wz_label_draw;
 }
 
 Label::Label()
 {
-	impl = wz_label_create(NULL);
+	impl = new LabelImpl;
 }
 
 Label::Label(const std::string &text)
 {
-	impl = wz_label_create(text.c_str());
+	impl = new LabelImpl(text);
 }
 
 Label::~Label()
@@ -127,15 +130,6 @@ Label *Label::setMultiline(bool multiline)
 {
 	wz_label_set_multiline((LabelImpl *)impl, multiline);
 	return this;
-}
-
-struct LabelImpl *wz_label_create(const char *text)
-{
-	struct LabelImpl *label = new struct LabelImpl;
-	label->vtable.measure = wz_label_measure;
-	label->vtable.draw = wz_label_draw;
-	label->text = text ? std::string(text) : std::string();
-	return label;
 }
 
 void wz_label_set_multiline(struct LabelImpl *label, bool multiline)

@@ -252,11 +252,17 @@ static void wz_tabbed_tab_bar_tab_changed(Event *e)
 TabbedImpl::TabbedImpl()
 {
 	type = WZ_TYPE_TABBED;
+	vtable.draw = wz_tabbed_draw;
+	vtable.set_rect = wz_tabbed_set_rect;
+
+	tabBar = new TabBarImpl;
+	wz_tab_bar_add_callback_tab_changed(tabBar, wz_tabbed_tab_bar_tab_changed);
+	wz_widget_add_child_widget(this, tabBar);
 }
 
 Tabbed::Tabbed()
 {
-	impl = wz_tabbed_create();
+	impl = new TabbedImpl;
 }
 
 Tabbed::~Tabbed()
@@ -271,19 +277,6 @@ Tab *Tabbed::addTab(Tab *tab)
 {
 	wz_tabbed_add_tab((TabbedImpl *)impl, &tab->impl->button, &tab->impl->page);
 	return tab;
-}
-
-struct TabbedImpl *wz_tabbed_create()
-{
-	struct TabbedImpl *tabbed = new struct TabbedImpl;
-	tabbed->vtable.draw = wz_tabbed_draw;
-	tabbed->vtable.set_rect = wz_tabbed_set_rect;
-
-	tabbed->tabBar = wz_tab_bar_create();
-	wz_tab_bar_add_callback_tab_changed(tabbed->tabBar, wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget((struct WidgetImpl *)tabbed, (struct WidgetImpl *)tabbed->tabBar);
-
-	return tabbed;
 }
 
 void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page)

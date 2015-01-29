@@ -248,20 +248,22 @@ static void wz_stack_layout_set_rect(struct WidgetImpl *widget, Rect rect)
 	}
 }
 
-StackLayoutImpl::StackLayoutImpl()
+StackLayoutImpl::StackLayoutImpl(StackLayoutDirection direction, int spacing)
 {
-	direction = WZ_STACK_LAYOUT_VERTICAL;
-	spacing = 0;
+	type = WZ_TYPE_STACK_LAYOUT;
+	vtable.set_rect = wz_stack_layout_set_rect;
+	this->direction = direction;
+	this->spacing = spacing;
 }
 
 StackLayout::StackLayout()
 {
-	impl = wz_stack_layout_create(WZ_STACK_LAYOUT_VERTICAL, 0);
+	impl = new StackLayoutImpl(WZ_STACK_LAYOUT_VERTICAL, 0);
 }
 
 StackLayout::StackLayout(StackLayoutDirection direction)
 {
-	impl = wz_stack_layout_create(direction, 0);
+	impl = new StackLayoutImpl(direction, 0);
 }
 
 StackLayout::~StackLayout()
@@ -298,18 +300,6 @@ Widget *StackLayout::add(Widget *widget)
 void StackLayout::remove(Widget *widget)
 {
 	wz_stack_layout_remove((StackLayoutImpl *)impl, widget->impl);
-}
-
-struct StackLayoutImpl *wz_stack_layout_create(StackLayoutDirection direction, int spacing)
-{
-	struct StackLayoutImpl *stackLayout;
-
-	stackLayout = new struct StackLayoutImpl;
-	stackLayout->type = WZ_TYPE_STACK_LAYOUT;
-	stackLayout->vtable.set_rect = wz_stack_layout_set_rect;
-	stackLayout->direction = direction;
-	stackLayout->spacing = spacing;
-	return stackLayout;
 }
 
 void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLayoutDirection direction)

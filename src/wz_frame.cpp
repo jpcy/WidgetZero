@@ -26,9 +26,14 @@ SOFTWARE.
 
 namespace wz {
 
+FrameImpl::FrameImpl()
+{
+	type = WZ_TYPE_FRAME;
+}
+
 Frame::Frame()
 {
-	impl = wz_frame_create();
+	impl = new FrameImpl;
 	wz_widget_set_size_args(impl, 200, 200);
 }
 
@@ -49,11 +54,6 @@ Widget *Frame::add(Widget *widget)
 void Frame::remove(Widget *widget)
 {
 	wz_frame_remove((FrameImpl *)impl, widget->impl);
-}
-
-struct FrameImpl *wz_frame_create()
-{
-	return new struct FrameImpl;
 }
 
 void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget)

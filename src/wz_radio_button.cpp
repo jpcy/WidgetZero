@@ -98,6 +98,16 @@ static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 	nvgRestore(vg);
 }
 
+RadioButtonImpl::RadioButtonImpl(const std::string &label) : ButtonImpl(label)
+{
+	type = WZ_TYPE_RADIO_BUTTON;
+	vtable.added = wz_radio_button_added;
+	vtable.measure = wz_radio_button_measure;
+	vtable.draw = wz_radio_button_draw;
+	wz_button_set_set_behavior(this, WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	wz_button_add_callback_clicked(this, wz_radio_button_clicked);
+}
+
 /*
 ================================================================================
 
@@ -108,12 +118,12 @@ PUBLIC INTERFACE
 
 RadioButton::RadioButton()
 {
-	impl = wz_radio_button_create(NULL);
+	impl = new RadioButtonImpl;
 }
 
 RadioButton::RadioButton(const std::string &label)
 {
-	impl = wz_radio_button_create(label.c_str());
+	impl = new RadioButtonImpl(label);
 }
 
 RadioButton::~RadioButton()
@@ -133,21 +143,6 @@ RadioButton *RadioButton::setLabel(const std::string &label)
 {
 	wz_radio_button_set_label((RadioButtonImpl *)impl, label.c_str());
 	return this;
-}
-
-struct RadioButtonImpl *wz_radio_button_create(const char *label)
-{
-	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)new ButtonImpl(label);
-	struct WidgetImpl *widget = (struct WidgetImpl *)radioButton;
-
-	widget->type = WZ_TYPE_RADIO_BUTTON;
-	widget->vtable.added = wz_radio_button_added;
-	widget->vtable.measure = wz_radio_button_measure;
-	widget->vtable.draw = wz_radio_button_draw;
-	wz_button_set_set_behavior(radioButton, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_button_add_callback_clicked(radioButton, wz_radio_button_clicked);
-
-	return radioButton;
 }
 
 void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label)

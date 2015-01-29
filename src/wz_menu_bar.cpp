@@ -180,20 +180,13 @@ static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
 MenuBarImpl::MenuBarImpl()
 {
 	type = WZ_TYPE_MENU_BAR;
-	layout = NULL;
-}
 
-struct MenuBarImpl *wz_menu_bar_create()
-{
-	struct MenuBarImpl *menuBar = new struct MenuBarImpl;
-	menuBar->vtable.draw = wz_menu_bar_draw;
-	menuBar->vtable.renderer_changed = wz_menu_bar_renderer_changed;
+	vtable.draw = wz_menu_bar_draw;
+	vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
-	menuBar->layout = wz_stack_layout_create(WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	wz_widget_set_stretch((struct WidgetImpl *)menuBar->layout, WZ_STRETCH);
-	wz_widget_add_child_widget((struct WidgetImpl *)menuBar, (struct WidgetImpl *)menuBar->layout);
-
-	return menuBar;
+	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
+	wz_widget_set_stretch((struct WidgetImpl *)layout, WZ_STRETCH);
+	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)layout);
 }
 
 struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar)

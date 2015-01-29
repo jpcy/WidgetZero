@@ -89,15 +89,27 @@ static void wz_group_box_renderer_changed(struct WidgetImpl *widget)
 	wz_group_box_refresh_margin((struct GroupBoxImpl *)widget);
 }
 
+GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
+{
+	type = WZ_TYPE_GROUP_BOX;
+	vtable.draw = wz_group_box_draw;
+	vtable.renderer_changed = wz_group_box_renderer_changed;
+
+	// Create content widget.
+	content = new WidgetImpl;
+	content->stretch = WZ_STRETCH;
+	wz_widget_add_child_widget((struct WidgetImpl *)this, content);
+}
+
 GroupBox::GroupBox()
 {
-	impl = wz_group_box_create(NULL);
+	impl = new GroupBoxImpl;
 	wz_widget_set_size_args(impl, 200, 200);
 }
 
 GroupBox::GroupBox(const std::string &label)
 {
-	impl = wz_group_box_create(label.c_str());
+	impl = new GroupBoxImpl(label);
 	wz_widget_set_size_args(impl, 200, 200);
 }
 
@@ -129,21 +141,6 @@ Widget *GroupBox::add(Widget *widget)
 void GroupBox::remove(Widget *widget)
 {
 	wz_group_box_remove((GroupBoxImpl *)impl, widget->impl);
-}
-
-struct GroupBoxImpl *wz_group_box_create(const char *label)
-{
-	struct GroupBoxImpl *groupBox = new struct GroupBoxImpl;
-	groupBox->vtable.draw = wz_group_box_draw;
-	groupBox->vtable.renderer_changed = wz_group_box_renderer_changed;
-	groupBox->label = label ? std::string(label) : std::string();
-
-	// Create content widget.
-	groupBox->content = new struct WidgetImpl;
-	groupBox->content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget((struct WidgetImpl *)groupBox, groupBox->content);
-
-	return groupBox;
 }
 
 void wz_group_box_set_label(struct GroupBoxImpl *groupBox, const char *label)

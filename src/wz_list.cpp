@@ -349,21 +349,40 @@ static void wz_list_mouse_hover_off(struct WidgetImpl *widget)
 	list->mouseOverItem = -1;
 }
 
-ListImpl::ListImpl()
+ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 {
+	type = WZ_TYPE_LIST;
 	draw_item = NULL;
-	itemData = NULL;
-	itemStride = itemHeight = nItems = 0;
+	itemHeight = 0;
 	isItemHeightUserSet = false;
 	firstItem = 0;
 	selectedItem = pressedItem = hoveredItem = mouseOverItem = -1;
 	scroller = NULL;
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
+
+	vtable.draw = wz_list_draw;
+	vtable.renderer_changed = wz_list_renderer_changed;
+	vtable.set_rect = wz_list_set_rect;
+	vtable.set_visible = wz_list_set_visible;
+	vtable.font_changed = wz_list_font_changed;
+	vtable.mouse_button_down = wz_list_mouse_button_down;
+	vtable.mouse_button_up = wz_list_mouse_button_up;
+	vtable.mouse_move = wz_list_mouse_move;
+	vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
+	vtable.mouse_hover_off = wz_list_mouse_hover_off;
+	this->itemData = itemData;
+	this->itemStride = itemStride;
+	this->nItems = nItems;
+
+	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)scroller);
+	wz_list_update_scroller(this);
+	wz_scroller_add_callback_value_changed(scroller, wz_list_scroller_value_changed);
 }
 
 List::List()
 {
-	impl = wz_list_create(NULL, 0, 0);
+	impl = new ListImpl(NULL, 0, 0);
 }
 
 List::~List()
@@ -398,32 +417,6 @@ List *List::setDrawItemCallback(DrawListItemCallback callback)
 {
 	wz_list_set_draw_item_callback((ListImpl *)impl, callback);
 	return this;
-}
-
-struct ListImpl *wz_list_create(uint8_t *itemData, int itemStride, int nItems)
-{
-	struct ListImpl *list = new struct ListImpl;
-	list->type = WZ_TYPE_LIST;
-	list->vtable.draw = wz_list_draw;
-	list->vtable.renderer_changed = wz_list_renderer_changed;
-	list->vtable.set_rect = wz_list_set_rect;
-	list->vtable.set_visible = wz_list_set_visible;
-	list->vtable.font_changed = wz_list_font_changed;
-	list->vtable.mouse_button_down = wz_list_mouse_button_down;
-	list->vtable.mouse_button_up = wz_list_mouse_button_up;
-	list->vtable.mouse_move = wz_list_mouse_move;
-	list->vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
-	list->vtable.mouse_hover_off = wz_list_mouse_hover_off;
-	list->itemData = itemData;
-	list->itemStride = itemStride;
-	list->nItems = nItems;
-
-	list->scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-	wz_widget_add_child_widget((struct WidgetImpl *)list, (struct WidgetImpl *)list->scroller);
-	wz_list_update_scroller(list);
-	wz_scroller_add_callback_value_changed(list->scroller, wz_list_scroller_value_changed);
-
-	return list;
 }
 
 Border wz_list_get_items_border(const struct ListImpl *list)

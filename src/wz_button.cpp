@@ -350,13 +350,6 @@ Button *Button::setLabel(const std::string &label)
 	return this;
 }
 
-struct ButtonImpl *wz_toggle_button_create(const char *label, const char *icon)
-{
-	struct ButtonImpl *button = new ButtonImpl(label, icon);
-	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	return button;
-}
-
 void wz_button_set_label(struct ButtonImpl *button, const char *label)
 {
 	WZ_ASSERT(button);
@@ -483,12 +476,14 @@ TOGGLE BUTTON PUBLIC INTERFACE
 
 ToggleButton::ToggleButton()
 {
-	impl = wz_toggle_button_create(NULL, NULL);
+	impl = new ButtonImpl;
+	wz_button_set_set_behavior((ButtonImpl *)impl, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
 {
-	impl = wz_toggle_button_create(label.c_str(), icon.c_str());
+	impl = new ButtonImpl(label.c_str(), icon.c_str());
+	wz_button_set_set_behavior((ButtonImpl *)impl, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::~ToggleButton()

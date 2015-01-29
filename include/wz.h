@@ -383,8 +383,6 @@ const char *wz_window_get_title(const struct WindowImpl *window);
 void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget);
 void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget);
 
-struct ButtonImpl *wz_button_create(const char *label, const char *icon);
-struct ButtonImpl *wz_toggle_button_create(const char *label, const char *icon);
 void wz_button_set_label(struct ButtonImpl *button, const char *label);
 const char *wz_button_get_label(const struct ButtonImpl *button);
 void wz_button_set_icon(struct ButtonImpl *button, const char *icon);
@@ -399,7 +397,6 @@ void wz_button_bind_value(struct ButtonImpl *button, bool *value);
 void wz_button_add_callback_pressed(struct ButtonImpl *button, EventCallback callback);
 void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback callback);
 
-struct CheckBoxImpl *wz_check_box_create(const char *label);
 void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label);
 const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox);
 bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox);
@@ -407,21 +404,17 @@ void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value);
 void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value);
 void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback);
 
-struct ComboImpl *wz_combo_create(uint8_t *itemData, int itemStride, int nItems);
 struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo);
 bool wz_combo_is_open(struct ComboImpl *combo);
 
-struct FrameImpl *wz_frame_create();
 void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget);
 void wz_frame_remove(struct FrameImpl *frame, struct WidgetImpl *widget);
 
-struct GroupBoxImpl *wz_group_box_create(const char *label);
 void wz_group_box_set_label(struct GroupBoxImpl *groupBox, const char *label);
 const char *wz_group_box_get_label(const struct GroupBoxImpl *groupBox);
 void wz_group_box_add(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
 void wz_group_box_remove(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
 
-struct LabelImpl *wz_label_create(const char *text);
 void wz_label_set_multiline(struct LabelImpl *label, bool multiline);
 bool wz_label_get_multiline(const struct LabelImpl *label);
 void wz_label_set_text(struct LabelImpl *label, const char *text);
@@ -431,7 +424,6 @@ NVGcolor wz_label_get_text_color(const struct LabelImpl *label);
 
 typedef void (*DrawListItemCallback)(struct wzRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
-struct ListImpl *wz_list_create(uint8_t *itemData, int itemStride, int nItems);
 Border wz_list_get_items_border(const struct ListImpl *list);
 Rect wz_list_get_items_rect(const struct ListImpl *list);
 
@@ -456,14 +448,12 @@ int wz_list_get_hovered_item(const struct ListImpl *list);
 int wz_list_get_scroll_value(const struct ListImpl *list);
 void wz_list_add_callback_item_selected(struct ListImpl *list, EventCallback callback);
 
-struct MenuBarImpl *wz_menu_bar_create();
 struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar);
 
 void wz_menu_bar_button_set_label(struct MenuBarButtonImpl *button, const char *label);
 const char *wz_menu_bar_button_get_label(const struct MenuBarButtonImpl *button);
 bool wz_menu_bar_button_is_pressed(const struct MenuBarButtonImpl *button);
 
-struct RadioButtonImpl *wz_radio_button_create(const char *label);
 void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label);
 const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton);
 bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton);
@@ -477,7 +467,6 @@ typedef enum
 }
 ScrollerType;
 
-struct ScrollerImpl *wz_scroller_create(ScrollerType scrollerType, int value, int stepValue, int maxValue);
 ScrollerType wz_scroller_get_type(const struct ScrollerImpl *scroller);
 int wz_scroller_get_value(const struct ScrollerImpl *scroller);
 void wz_scroller_set_value(struct ScrollerImpl *scroller, int value);
@@ -490,7 +479,6 @@ void wz_scroller_set_nub_scale(struct ScrollerImpl *scroller, float nubScale);
 void wz_scroller_get_nub_state(const struct ScrollerImpl *scroller, Rect *containerRect, Rect *rect, bool *hover, bool *pressed);
 void wz_scroller_add_callback_value_changed(struct ScrollerImpl *scroller, EventCallback callback);
 
-struct SpinnerImpl *wz_spinner_create();
 int wz_spinner_get_value(const struct SpinnerImpl *spinner);
 void wz_spinner_set_value(struct SpinnerImpl *spinner, int value);
 
@@ -501,14 +489,12 @@ typedef enum
 }
 StackLayoutDirection;
 
-struct StackLayoutImpl *wz_stack_layout_create(StackLayoutDirection direction, int spacing);
 void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLayoutDirection direction);
 void wz_stack_layout_set_spacing(struct StackLayoutImpl *stackLayout, int spacing);
 int wz_stack_layout_get_spacing(const struct StackLayoutImpl *stackLayout);
 void wz_stack_layout_add(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
 void wz_stack_layout_remove(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
 
-struct TabBarImpl *wz_tab_bar_create();
 struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar);
 void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
 void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar);
@@ -519,14 +505,12 @@ void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
 void wz_tab_bar_add_callback_tab_changed(struct TabBarImpl *tabBar, EventCallback callback);
 int wz_tab_bar_get_scroll_value(const struct TabBarImpl *tabBar);
 
-struct TabbedImpl *wz_tabbed_create();
 void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page);
 void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 
 typedef bool (*TextEditValidateTextCallback)(const char *text);
 
-struct TextEditImpl *wz_text_edit_create(bool multiline, int maximumTextLength);
 void wz_text_edit_set_validate_text_callback(struct TextEditImpl *textEdit, TextEditValidateTextCallback callback);
 bool wz_text_edit_is_multiline(const struct TextEditImpl *textEdit);
 Border wz_text_edit_get_border(const struct TextEditImpl *textEdit);

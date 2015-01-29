@@ -232,15 +232,28 @@ static void wz_combo_list_item_selected(Event *e)
 	combo->isOpen = false;
 }
 
-ComboImpl::ComboImpl()
+ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_COMBO;
 	isOpen = false;
+
+	vtable.measure = wz_combo_measure;
+	vtable.draw = wz_combo_draw;
+	vtable.set_rect = wz_combo_set_rect;
+	vtable.font_changed = wz_combo_font_changed;
+	vtable.mouse_button_down = wz_combo_mouse_button_down;
+	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
+
+	list = new ListImpl(itemData, itemStride, nItems);
+	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)list);
+	wz_widget_set_visible((struct WidgetImpl *)list, false);
+	wz_widget_set_clip_input_to_parent((struct WidgetImpl *)list, false);
+	wz_list_add_callback_item_selected(list, wz_combo_list_item_selected);
 }
 
 Combo::Combo()
 {
-	impl = wz_combo_create(NULL, 0, 0);
+	impl = new ComboImpl(NULL, 0, 0);
 }
 
 Combo::~Combo()
@@ -258,25 +271,6 @@ Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 	wz_list_set_item_stride(list, itemStride);
 	wz_list_set_num_items(list, nItems);
 	return this;
-}
-
-struct ComboImpl *wz_combo_create(uint8_t *itemData, int itemStride, int nItems)
-{
-	struct ComboImpl *combo = new ComboImpl;
-	combo->vtable.measure = wz_combo_measure;
-	combo->vtable.draw = wz_combo_draw;
-	combo->vtable.set_rect = wz_combo_set_rect;
-	combo->vtable.font_changed = wz_combo_font_changed;
-	combo->vtable.mouse_button_down = wz_combo_mouse_button_down;
-	combo->vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
-
-	combo->list = wz_list_create(itemData, itemStride, nItems);
-	wz_widget_add_child_widget((struct WidgetImpl *)combo, (struct WidgetImpl *)combo->list);
-	wz_widget_set_visible((struct WidgetImpl *)combo->list, false);
-	wz_widget_set_clip_input_to_parent((struct WidgetImpl *)combo->list, false);
-	wz_list_add_callback_item_selected(combo->list, wz_combo_list_item_selected);
-
-	return combo;
 }
 
 struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo)

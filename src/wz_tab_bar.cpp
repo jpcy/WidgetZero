@@ -241,33 +241,26 @@ TabBarImpl::TabBarImpl()
 	type = WZ_TYPE_TAB_BAR;
 	selectedTab = NULL;
 	scrollValue = 0;
-}
-
-struct TabBarImpl *wz_tab_bar_create()
-{
-	struct TabBarImpl *tabBar = new struct TabBarImpl;
-	tabBar->vtable.measure = wz_tab_bar_measure;
-	tabBar->vtable.set_rect = wz_tab_bar_set_rect;
-	tabBar->vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
+	vtable.measure = wz_tab_bar_measure;
+	vtable.set_rect = wz_tab_bar_set_rect;
+	vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
-	tabBar->decrementButton = new ButtonImpl("<");
-	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
-	wz_widget_add_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tabBar->decrementButton);
-	wz_widget_set_width_internal((struct WidgetImpl *)tabBar->decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->decrementButton, false);
-	wz_widget_set_draw_last((struct WidgetImpl *)tabBar->decrementButton, true);
-	wz_widget_set_overlap((struct WidgetImpl *)tabBar->decrementButton, true);
+	decrementButton = new ButtonImpl("<");
+	wz_button_add_callback_clicked(decrementButton, wz_tab_bar_decrement_button_clicked);
+	wz_widget_add_child_widget(this, decrementButton);
+	wz_widget_set_width_internal(decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
+	wz_widget_set_visible(decrementButton, false);
+	wz_widget_set_draw_last(decrementButton, true);
+	wz_widget_set_overlap(decrementButton, true);
 
-	tabBar->incrementButton = new ButtonImpl(">");
-	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
-	wz_widget_add_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tabBar->incrementButton);
-	wz_widget_set_width_internal((struct WidgetImpl *)tabBar->incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->incrementButton, false);
-	wz_widget_set_draw_last((struct WidgetImpl *)tabBar->incrementButton, true);
-	wz_widget_set_overlap((struct WidgetImpl *)tabBar->incrementButton, true);
-
-	return tabBar;
+	incrementButton = new ButtonImpl(">");
+	wz_button_add_callback_clicked(incrementButton, wz_tab_bar_increment_button_clicked);
+	wz_widget_add_child_widget(this, incrementButton);
+	wz_widget_set_width_internal(incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
+	wz_widget_set_visible(incrementButton, false);
+	wz_widget_set_draw_last(incrementButton, true);
+	wz_widget_set_overlap(incrementButton, true);
 }
 
 struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)

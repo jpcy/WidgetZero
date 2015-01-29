@@ -908,23 +908,45 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-TextEditImpl::TextEditImpl()
+TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 {
 	type = WZ_TYPE_TEXT_EDIT;
 	validate_text = NULL;
 	pressed = false;
 	cursorIndex = scrollValue = 0;
 	selectionStartIndex = selectionEndIndex = 0;
+
+	vtable.measure = wz_text_edit_measure;
+	vtable.draw = wz_text_edit_draw;
+	vtable.renderer_changed = wz_text_edit_renderer_changed;
+	vtable.set_rect = wz_text_edit_set_rect;
+	vtable.mouse_button_down = wz_text_edit_mouse_button_down;
+	vtable.mouse_button_up = wz_text_edit_mouse_button_up;
+	vtable.mouse_move = wz_text_edit_mouse_move;
+	vtable.mouse_wheel_move = wz_text_edit_mouse_wheel_move;
+	vtable.key_down = wz_text_edit_key_down;
+	vtable.text_input = wz_text_edit_text_input;
+
+	if (multiline)
+	{
+		scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+		wz_widget_add_child_widget(this, scroller);
+		wz_text_edit_update_scroller(this);
+		wz_scroller_add_callback_value_changed(scroller, wz_text_edit_scroller_value_changed);
+	}
+
+	this->multiline = multiline;
+	this->maximumTextLength = maximumTextLength;
 }
 
 TextEdit::TextEdit(bool multiline)
 {
-	impl = wz_text_edit_create(multiline, 256);
+	impl = new TextEditImpl(multiline, 256);
 }
 
 TextEdit::TextEdit(const std::string &text, bool multiline)
 {
-	impl = wz_text_edit_create(multiline, 256);
+	impl = new TextEditImpl(multiline, 256);
 	setText(text);
 }
 
@@ -940,35 +962,6 @@ TextEdit *TextEdit::setText(const std::string &text)
 {
 	wz_text_edit_set_text((TextEditImpl *)impl, text.c_str());
 	return this;
-}
-
-struct TextEditImpl *wz_text_edit_create(bool multiline, int maximumTextLength)
-{
-	struct TextEditImpl *textEdit = new struct TextEditImpl;
-	textEdit->vtable.measure = wz_text_edit_measure;
-	textEdit->vtable.draw = wz_text_edit_draw;
-	textEdit->vtable.renderer_changed = wz_text_edit_renderer_changed;
-	textEdit->vtable.set_rect = wz_text_edit_set_rect;
-	textEdit->vtable.mouse_button_down = wz_text_edit_mouse_button_down;
-	textEdit->vtable.mouse_button_up = wz_text_edit_mouse_button_up;
-	textEdit->vtable.mouse_move = wz_text_edit_mouse_move;
-	textEdit->vtable.mouse_wheel_move = wz_text_edit_mouse_wheel_move;
-	textEdit->vtable.key_down = wz_text_edit_key_down;
-	textEdit->vtable.text_input = wz_text_edit_text_input;
-
-	if (multiline)
-	{
-		textEdit->scroller = wz_scroller_create(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-		wz_widget_add_child_widget((struct WidgetImpl *)textEdit, (struct WidgetImpl *)textEdit->scroller);
-		wz_text_edit_update_scroller(textEdit);
-		wz_scroller_add_callback_value_changed(textEdit->scroller, wz_text_edit_scroller_value_changed);
-	}
-
-	textEdit->multiline = multiline;
-	textEdit->maximumTextLength = maximumTextLength;
-	textEdit->text = std::string();
-
-	return textEdit;
 }
 
 void wz_text_edit_set_validate_text_callback(struct TextEditImpl *textEdit, TextEditValidateTextCallback callback)

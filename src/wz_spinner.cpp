@@ -141,11 +141,40 @@ static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontF
 SpinnerImpl::SpinnerImpl()
 {
 	type = WZ_TYPE_SPINNER;
+
+	vtable.measure = wz_spinner_measure;
+	vtable.renderer_changed = wz_spinner_renderer_changed;
+	vtable.font_changed = wz_spinner_font_changed;
+
+	textEdit = new TextEditImpl(false, 256);
+	wz_widget_set_stretch(textEdit, WZ_STRETCH);
+	wz_text_edit_set_validate_text_callback(textEdit, wz_spinner_validate_text);
+	wz_widget_add_child_widget(this, textEdit);
+
+	decrementButton = new ButtonImpl();
+	wz_widget_set_width(decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	wz_widget_set_stretch(decrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale(decrementButton, 1, 0.5f);
+	wz_widget_set_align(decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
+	wz_widget_set_draw_callback(decrementButton, wz_spinner_decrement_button_draw);
+	wz_button_add_callback_clicked(decrementButton, wz_spinner_decrement_button_clicked);
+	wz_widget_set_overlap(decrementButton, true);
+	wz_widget_add_child_widget(this, decrementButton);
+
+	incrementButton = new ButtonImpl();
+	wz_widget_set_width(incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	wz_widget_set_stretch(incrementButton, WZ_STRETCH_HEIGHT);
+	wz_widget_set_stretch_scale(incrementButton, 1, 0.5f);
+	wz_widget_set_align(incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
+	wz_widget_set_draw_callback(incrementButton, wz_spinner_increment_button_draw);
+	wz_button_add_callback_clicked(incrementButton, wz_spinner_increment_button_clicked);
+	wz_widget_set_overlap(incrementButton, true);
+	wz_widget_add_child_widget(this, incrementButton);
 }
 
 Spinner::Spinner()
 {
-	impl = wz_spinner_create();
+	impl = new SpinnerImpl;
 }
 
 Spinner::~Spinner()
@@ -165,41 +194,6 @@ Spinner *Spinner::setValue(int value)
 int Spinner::getValue() const
 {
 	return wz_spinner_get_value((SpinnerImpl *)impl);
-}
-
-struct SpinnerImpl *wz_spinner_create()
-{
-	struct SpinnerImpl *spinner = new struct SpinnerImpl;
-	spinner->vtable.measure = wz_spinner_measure;
-	spinner->vtable.renderer_changed = wz_spinner_renderer_changed;
-	spinner->vtable.font_changed = wz_spinner_font_changed;
-
-	spinner->textEdit = wz_text_edit_create(false, 256);
-	wz_widget_set_stretch((struct WidgetImpl *)spinner->textEdit, WZ_STRETCH);
-	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
-	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->textEdit);
-
-	spinner->decrementButton = new ButtonImpl();
-	wz_widget_set_width((struct WidgetImpl *)spinner->decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch((struct WidgetImpl *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->decrementButton, 1, 0.5f);
-	wz_widget_set_align((struct WidgetImpl *)spinner->decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	wz_widget_set_draw_callback((struct WidgetImpl *)spinner->decrementButton, wz_spinner_decrement_button_draw);
-	wz_button_add_callback_clicked(spinner->decrementButton, wz_spinner_decrement_button_clicked);
-	wz_widget_set_overlap((struct WidgetImpl *)spinner->decrementButton, true);
-	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->decrementButton);
-
-	spinner->incrementButton = new ButtonImpl();
-	wz_widget_set_width((struct WidgetImpl *)spinner->incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch((struct WidgetImpl *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->incrementButton, 1, 0.5f);
-	wz_widget_set_align((struct WidgetImpl *)spinner->incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	wz_widget_set_draw_callback((struct WidgetImpl *)spinner->incrementButton, wz_spinner_increment_button_draw);
-	wz_button_add_callback_clicked(spinner->incrementButton, wz_spinner_increment_button_clicked);
-	wz_widget_set_overlap((struct WidgetImpl *)spinner->incrementButton, true);
-	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->incrementButton);
-
-	return spinner;
 }
 
 int wz_spinner_get_value(const struct SpinnerImpl *spinner)
