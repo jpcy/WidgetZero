@@ -242,7 +242,7 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	wz_renderer_clip_to_rect(vg, clip);
 	
 	// Background color.
-	if (wz_button_is_pressed(button) && widget->hover)
+	if (button->isPressed() && widget->hover)
 	{
 		bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
 		bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
@@ -505,7 +505,7 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	struct ButtonImpl *decrementButton = new ButtonImpl();
 	wz_widget_set_size_args(decrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	wz_widget_set_draw_callback(decrementButton, wz_scroller_decrement_button_draw);
-	wz_button_add_callback_clicked(decrementButton, wz_scroller_decrement_button_clicked);
+	decrementButton->addCallbackClicked(wz_scroller_decrement_button_clicked);
 	wz_stack_layout_add(layout, decrementButton);
 
 	struct WidgetImpl *nubContainer = new WidgetImpl();
@@ -519,7 +519,7 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	struct ButtonImpl *incrementButton = new ButtonImpl();
 	wz_widget_set_size_args(incrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	wz_widget_set_draw_callback(incrementButton, wz_scroller_increment_button_draw);
-	wz_button_add_callback_clicked(incrementButton, wz_scroller_increment_button_clicked);
+	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
 	wz_stack_layout_add(layout, incrementButton);
 
 	wz_scroller_nub_update_rect(nub);

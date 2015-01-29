@@ -40,7 +40,7 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 	struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 	const Rect rect = wz_widget_get_absolute_rect(widget);
-	const Border padding = wz_button_get_padding(button);
+	const Border padding = button->getPadding();
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -50,7 +50,7 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, wz_button_get_label(button), 0);
+	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
 
 	nvgRestore(vg);
 }
@@ -247,7 +247,7 @@ TabBarImpl::TabBarImpl()
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton = new ButtonImpl("<");
-	wz_button_add_callback_clicked(decrementButton, wz_tab_bar_decrement_button_clicked);
+	decrementButton->addCallbackClicked(wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget(this, decrementButton);
 	wz_widget_set_width_internal(decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	wz_widget_set_visible(decrementButton, false);
@@ -255,7 +255,7 @@ TabBarImpl::TabBarImpl()
 	wz_widget_set_overlap(decrementButton, true);
 
 	incrementButton = new ButtonImpl(">");
-	wz_button_add_callback_clicked(incrementButton, wz_tab_bar_increment_button_clicked);
+	incrementButton->addCallbackClicked(wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget(this, incrementButton);
 	wz_widget_set_width_internal(incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	wz_widget_set_visible(incrementButton, false);
@@ -284,9 +284,9 @@ struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)
 	}
 
 	(tab)->vtable.set_rect = wz_tab_set_rect;
-	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
-	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
-	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	tab->addCallbackPressed(wz_tab_bar_button_pressed);
+	tab->setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
+	tab->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
 	wz_widget_add_child_widget(tabBar, tab);
 	tabBar->tabs.push_back(tab);
 	wz_widget_set_rect_internal(tab, rect);
@@ -294,7 +294,7 @@ struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)
 	// Select the first tab added.
 	if (!tabBar->selectedTab)
 	{
-		wz_button_set(tab, true);
+		tab->set(true);
 		tabBar->selectedTab = tab;
 		wz_tab_bar_invoke_tab_changed(tabBar);
 	}
@@ -393,7 +393,7 @@ void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
 	if (tabBar->selectedTab == tab)
 		return; // Already selected.
 
-	wz_button_set(tab, true);
+	tab->set(true);
 	tabBar->selectedTab = tab;
 
 	// Unset all the other tab bar buttons.
@@ -401,7 +401,7 @@ void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
 	{
 		if (tabBar->tabs[i] != tabBar->selectedTab)
 		{
-			wz_button_set(tabBar->tabs[i], false);
+			tabBar->tabs[i]->set(false);
 		}
 	}
 	

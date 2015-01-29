@@ -256,21 +256,33 @@ ButtonSetBehavior;
 struct ButtonImpl : public WidgetImpl
 {
 	ButtonImpl(const std::string &label = std::string(), const std::string &icon = std::string());
+	void setLabel(const char *label);
+	const char *getLabel() const;
+	void setIcon(const char *icon);
+	const char *getIcon() const;
+	void setPadding(Border padding);
+	void setPadding(int top, int right, int bottom, int left);
+	Border getPadding() const;
+	bool isPressed() const;
+	bool isSet() const;
+	void set(bool value);
+	void bindValue(bool *value);
+	void addCallbackPressed(EventCallback callback);
+	void addCallbackClicked(EventCallback callback);
+	void setClickBehavior(ButtonClickBehavior clickBehavior);
+	void setSetBehavior(ButtonSetBehavior setBehavior);
 
 	ButtonClickBehavior clickBehavior;
 	ButtonSetBehavior setBehavior;
 	Border padding;
 	std::string label;
 	std::string icon;
-	bool isPressed;
-	bool isSet;
+	bool isPressed_;
+	bool isSet_;
 	bool *boundValue;
 	std::vector<EventCallback> pressed_callbacks;
 	std::vector<EventCallback> clicked_callbacks;
 };
-
-void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior);
-void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior clickBehavior);
 
 struct CheckBoxImpl : public ButtonImpl
 {

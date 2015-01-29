@@ -37,7 +37,7 @@ static void wz_radio_button_clicked(Event *e)
 	{
 		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != e->base.widget)
 		{
-			wz_button_set((struct ButtonImpl *)parent->children[i], false);
+			((struct ButtonImpl *)parent->children[i])->set(false);
 		}
 	}
 }
@@ -52,7 +52,7 @@ static void wz_radio_button_added(struct WidgetImpl *parent, struct WidgetImpl *
 			return;
 	}
 
-	wz_button_set((struct ButtonImpl *)widget, true);
+	((struct ButtonImpl *)widget)->set(true);
 }
 
 static Size wz_radio_button_measure(struct WidgetImpl *widget)
@@ -78,7 +78,7 @@ static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 		return;
 
 	// Inner circle.
-	if (radioButton->isSet)
+	if (radioButton->isSet())
 	{
 		nvgBeginPath(vg);
 		nvgCircle(vg, (float)(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS), rect.y + rect.h / 2.0f, (float)WZ_SKIN_RADIO_BUTTON_INNER_RADIUS);
@@ -104,8 +104,8 @@ RadioButtonImpl::RadioButtonImpl(const std::string &label) : ButtonImpl(label)
 	vtable.added = wz_radio_button_added;
 	vtable.measure = wz_radio_button_measure;
 	vtable.draw = wz_radio_button_draw;
-	wz_button_set_set_behavior(this, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_button_add_callback_clicked(this, wz_radio_button_clicked);
+	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	addCallbackClicked(wz_radio_button_clicked);
 }
 
 /*
@@ -148,7 +148,7 @@ RadioButton *RadioButton::setLabel(const std::string &label)
 void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label)
 {
 	WZ_ASSERT(radioButton);
-	wz_button_set_label(radioButton, label);
+	radioButton->setLabel(label);
 }
 
 const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton)
@@ -160,19 +160,19 @@ const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton)
 bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton)
 {
 	WZ_ASSERT(radioButton);
-	return radioButton->isSet;
+	return radioButton->isSet();
 }
 
 void wz_radio_button_set(struct RadioButtonImpl *radioButton, bool value)
 {
 	WZ_ASSERT(radioButton);
-	wz_button_set(radioButton, value);
+	radioButton->set(value);
 }
 
 void wz_radio_button_add_callback_clicked(struct RadioButtonImpl *radioButton, EventCallback callback)
 {
 	WZ_ASSERT(radioButton);
-	wz_button_add_callback_clicked(radioButton, callback);
+	radioButton->addCallbackClicked(callback);
 }
 
 } // namespace wz

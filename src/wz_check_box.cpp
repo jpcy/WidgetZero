@@ -82,7 +82,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 
 CheckBoxImpl::CheckBoxImpl(const std::string &label) : ButtonImpl(label)
 {
-	wz_button_set_set_behavior(this, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	vtable.measure = wz_check_box_measure;
 	vtable.draw = wz_check_box_draw;
 }
@@ -125,37 +125,37 @@ Checkbox *Checkbox::bindValue(bool *value)
 void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_set_label(checkBox, label);
+	checkBox->setLabel(label);
 }
 
 const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox)
 {
 	WZ_ASSERT(checkBox);
-	return wz_button_get_label(checkBox);
+	return checkBox->getLabel();
 }
 
 bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox)
 {
 	WZ_ASSERT(checkBox);
-	return wz_button_is_set(checkBox);
+	return checkBox->isSet();
 }
 
 void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_set(checkBox, value);
+	checkBox->set(value);
 }
 
 void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_bind_value(checkBox, value);
+	checkBox->bindValue(value);
 }
 
 void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback)
 {
 	WZ_ASSERT(checkBox);
-	wz_button_add_callback_clicked(checkBox, callback);
+	checkBox->addCallbackClicked(callback);
 }
 
 } // namespace wz

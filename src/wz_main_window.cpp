@@ -163,7 +163,7 @@ static void wz_main_window_refresh_dock_tab_bar(struct MainWindowImpl *mainWindo
 
 			// Create a new tab.
 			struct ButtonImpl *tab = wz_tab_bar_create_tab(tabBar);
-			wz_button_set_label(tab, wz_window_get_title(window));
+			tab->setLabel(wz_window_get_title(window));
 
 			// Set the tab internal metadata to the window.
 			wz_widget_set_internal_metadata(tab, window);

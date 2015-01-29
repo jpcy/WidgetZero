@@ -83,12 +83,12 @@ static void wz_button_draw(struct WidgetImpl *widget, Rect clip)
 		return;
 
 	// Background color.
-	if (button->isPressed && widget->hover)
+	if (button->isPressed() && widget->hover)
 	{
 		bgColor1 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR1;
 		bgColor2 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR2;
 	}
-	else if (button->isSet)
+	else if (button->isSet())
 	{
 		bgColor1 = WZ_SKIN_BUTTON_BG_SET_COLOR1;
 		bgColor2 = WZ_SKIN_BUTTON_BG_SET_COLOR2;
@@ -175,26 +175,26 @@ static void wz_button_click(struct ButtonImpl *button)
 
 	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
 	{
-		button->isSet = !button->isSet;
+		button->isSet_ = !button->isSet_;
 	}
 	else if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_STICKY)
 	{
 		// Don't invoke the clicked event if already set.
-		if (button->isSet)
+		if (button->isSet_)
 			return;
 
-		button->isSet = true;
+		button->isSet_ = true;
 	}
 
 	// isSet assigned to, update the bound value.
 	if (button->boundValue)
 	{
-		*button->boundValue = button->isSet;
+		*button->boundValue = button->isSet_;
 	}
 
 	e.button.type = WZ_EVENT_BUTTON_CLICKED;
 	e.button.button = button;
-	e.button.isSet = button->isSet;
+	e.button.isSet = button->isSet_;
 	wz_invoke_event(&e, button->clicked_callbacks);
 }
 
@@ -209,12 +209,12 @@ static void wz_button_mouse_button_down(struct WidgetImpl *widget, int mouseButt
 	{
 		Event e;
 
-		button->isPressed = true;
+		button->isPressed_ = true;
 		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = button;
-		e.button.isSet = button->isSet;
+		e.button.isSet = button->isSet_;
 		wz_invoke_event(&e, button->pressed_callbacks);
 
 		if (button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
@@ -231,9 +231,9 @@ static void wz_button_mouse_button_up(struct WidgetImpl *widget, int mouseButton
 	WZ_ASSERT(widget);
 	button = (struct ButtonImpl *)widget;
 
-	if (mouseButton == 1 && button->isPressed)
+	if (mouseButton == 1 && button->isPressed_)
 	{
-		button->isPressed = false;
+		button->isPressed_ = false;
 		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 
 		if (widget->hover && button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
@@ -260,7 +260,7 @@ ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 	vtable.mouse_button_up = wz_button_mouse_button_up;
 	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
 	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
-	isPressed = isSet = false;
+	isPressed_ = isSet_ = false;
 	boundValue = NULL;
 	padding.left = padding.right = 8;
 	padding.top = padding.bottom = 4;
@@ -268,16 +268,116 @@ ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 	this->icon = icon;
 }
 
-void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior)
+void ButtonImpl::setLabel(const char *label)
 {
-	WZ_ASSERT(button);
-	button->clickBehavior = clickBehavior;
+	this->label = label;
+	wz_widget_resize_to_measured(this);
 }
 
-void wz_button_set_set_behavior(struct ButtonImpl *button, ButtonSetBehavior setBehavior)
+const char *ButtonImpl::getLabel() const
 {
-	WZ_ASSERT(button);
-	button->setBehavior = setBehavior;
+	return label.c_str();
+}
+
+void ButtonImpl::setIcon(const char *icon)
+{
+	this->icon = icon;
+	wz_widget_resize_to_measured(this);
+}
+
+const char *ButtonImpl::getIcon() const
+{
+	return icon.c_str();
+}
+
+void ButtonImpl::setPadding(Border padding)
+{
+	this->padding = padding;
+	wz_widget_resize_to_measured(this);
+}
+
+void ButtonImpl::setPadding(int top, int right, int bottom, int left)
+{
+	padding.top = top;
+	padding.right = right;
+	padding.bottom = bottom;
+	padding.left = left;
+	wz_widget_resize_to_measured(this);
+}
+
+Border ButtonImpl::getPadding() const
+{
+	return padding;
+}
+
+bool ButtonImpl::isPressed() const
+{
+	return isPressed_;
+}
+
+bool ButtonImpl::isSet() const
+{
+	return isSet_;
+}
+
+void ButtonImpl::set(bool value)
+{
+	// No such thing as setting a button if using the default behavior.
+	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
+		return;
+
+	if (value && isSet_)
+	{
+		// Already set, don't invoke click event.
+		return;
+	}
+
+	isSet_ = value;
+
+	// isSet assigned to, update the bound value.
+	if (boundValue)
+	{
+		*boundValue = isSet_;
+	}
+
+	if (isSet_)
+	{
+		Event e;
+		e.button.type = WZ_EVENT_BUTTON_CLICKED;
+		e.button.button = this;
+		e.button.isSet = isSet_;
+		wz_invoke_event(&e, clicked_callbacks);
+	}
+}
+
+void ButtonImpl::bindValue(bool *value)
+{
+	boundValue = value;
+
+	if (value)
+	{
+		set(*value);
+	}
+}
+
+void ButtonImpl::addCallbackPressed(EventCallback callback)
+{
+	pressed_callbacks.push_back(callback);
+}
+
+void ButtonImpl::addCallbackClicked(EventCallback callback)
+{
+	clicked_callbacks.push_back(callback);
+}
+
+void ButtonImpl::setClickBehavior(ButtonClickBehavior clickBehavior)
+{
+	this->clickBehavior = clickBehavior;
+}
+
+void ButtonImpl::setSetBehavior(ButtonSetBehavior setBehavior)
+{
+	this->setBehavior = setBehavior;
 }
 
 /*
@@ -308,162 +408,41 @@ Button::~Button()
 
 Border Button::getPadding() const
 {
-	return wz_button_get_padding((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getPadding();
 }
 
 Button *Button::setPadding(Border padding)
 {
-	wz_button_set_padding((ButtonImpl *)impl, padding);
+	((ButtonImpl *)impl)->setPadding(padding);
 	return this;
 }
 
 Button *Button::setPadding(int top, int right, int bottom, int left)
 {
-	Border padding;
-	padding.top = top;
-	padding.right = right;
-	padding.bottom = bottom;
-	padding.left = left;
-	wz_button_set_padding((ButtonImpl *)impl, padding);
+	((ButtonImpl *)impl)->setPadding(top, right, bottom, left);
 	return this;
 }
 
 const char *Button::getIcon() const
 {
-	return wz_button_get_icon((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getIcon();
 }
 
 Button *Button::setIcon(const std::string &icon)
 {
-	wz_button_set_icon((ButtonImpl *)impl, icon.c_str());
+	((ButtonImpl *)impl)->setIcon(icon.c_str());
 	return this;
 }
 
 const char *Button::getLabel() const
 {
-	return wz_button_get_label((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getLabel();
 }
 
 Button *Button::setLabel(const std::string &label)
 {
-	wz_button_set_label((ButtonImpl *)impl, label.c_str());
+	((ButtonImpl *)impl)->setLabel(label.c_str());
 	return this;
-}
-
-void wz_button_set_label(struct ButtonImpl *button, const char *label)
-{
-	WZ_ASSERT(button);
-	button->label = label;
-	wz_widget_resize_to_measured(button);
-}
-
-const char *wz_button_get_label(const struct ButtonImpl *button)
-{
-	WZ_ASSERT(button);
-	return button->label.c_str();
-}
-
-void wz_button_set_icon(struct ButtonImpl *button, const char *icon)
-{
-	WZ_ASSERT(button);
-	button->icon = std::string(icon);
-	wz_widget_resize_to_measured(button);
-}
-
-const char *wz_button_get_icon(const struct ButtonImpl *button)
-{
-	WZ_ASSERT(button);
-	return button->icon.c_str();
-}
-
-void wz_button_set_padding(struct ButtonImpl *button, Border padding)
-{
-	WZ_ASSERT(button);
-	button->padding = padding;
-	wz_widget_resize_to_measured(button);
-}
-
-void wz_button_set_padding_args(struct ButtonImpl *button, int top, int right, int bottom, int left)
-{
-	WZ_ASSERT(button);
-	button->padding.top = top;
-	button->padding.right = right;
-	button->padding.bottom = bottom;
-	button->padding.left = left;
-	wz_widget_resize_to_measured(button);
-}
-
-Border wz_button_get_padding(const struct ButtonImpl *button)
-{
-	WZ_ASSERT(button);
-	return button->padding;
-}
-
-bool wz_button_is_pressed(const struct ButtonImpl *button)
-{
-	WZ_ASSERT(button);
-	return button->isPressed;
-}
-
-bool wz_button_is_set(const struct ButtonImpl *button)
-{
-	WZ_ASSERT(button);
-	return button->isSet;
-}
-
-void wz_button_set(struct ButtonImpl *button, bool value)
-{
-	WZ_ASSERT(button);
-
-	// No such thing as setting a button if using the default behavior.
-	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
-		return;
-
-	if (value && button->isSet)
-	{
-		// Already set, don't invoke click event.
-		return;
-	}
-
-	button->isSet = value;
-
-	// isSet assigned to, update the bound value.
-	if (button->boundValue)
-	{
-		*button->boundValue = button->isSet;
-	}
-
-	if (button->isSet)
-	{
-		Event e;
-		e.button.type = WZ_EVENT_BUTTON_CLICKED;
-		e.button.button = button;
-		e.button.isSet = button->isSet;
-		wz_invoke_event(&e, button->clicked_callbacks);
-	}
-}
-
-void wz_button_bind_value(struct ButtonImpl *button, bool *value)
-{
-	WZ_ASSERT(button);
-	button->boundValue = value;
-
-	if (value)
-	{
-		wz_button_set(button, *value);
-	}
-}
-
-void wz_button_add_callback_pressed(struct ButtonImpl *button, EventCallback callback)
-{
-	WZ_ASSERT(button);
-	button->pressed_callbacks.push_back(callback);
-}
-
-void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback callback)
-{
-	WZ_ASSERT(button);
-	button->clicked_callbacks.push_back(callback);
 }
 
 /*
@@ -477,13 +456,13 @@ TOGGLE BUTTON PUBLIC INTERFACE
 ToggleButton::ToggleButton()
 {
 	impl = new ButtonImpl;
-	wz_button_set_set_behavior((ButtonImpl *)impl, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	((ButtonImpl *)impl)->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
 {
 	impl = new ButtonImpl(label.c_str(), icon.c_str());
-	wz_button_set_set_behavior((ButtonImpl *)impl, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	((ButtonImpl *)impl)->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::~ToggleButton()
@@ -496,45 +475,40 @@ ToggleButton::~ToggleButton()
 
 Border ToggleButton::getPadding() const
 {
-	return wz_button_get_padding((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getPadding();
 }
 
 ToggleButton *ToggleButton::setPadding(Border padding)
 {
-	wz_button_set_padding((ButtonImpl *)impl, padding);
+	((ButtonImpl *)impl)->setPadding(padding);
 	return this;
 }
 
 ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
 {
-	Border padding;
-	padding.top = top;
-	padding.right = right;
-	padding.bottom = bottom;
-	padding.left = left;
-	wz_button_set_padding((ButtonImpl *)impl, padding);
+	((ButtonImpl *)impl)->setPadding(top, right, bottom, left);
 	return this;
 }
 
 const char *ToggleButton::getIcon() const
 {
-	return wz_button_get_icon((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getIcon();
 }
 
 ToggleButton *ToggleButton::setIcon(const std::string &icon)
 {
-	wz_button_set_icon((ButtonImpl *)impl, icon.c_str());
+	((ButtonImpl *)impl)->setIcon(icon.c_str());
 	return this;
 }
 
 const char *ToggleButton::getLabel() const
 {
-	return wz_button_get_label((const ButtonImpl *)impl);
+	return ((ButtonImpl *)impl)->getLabel();
 }
 
 ToggleButton *ToggleButton::setLabel(const std::string &label)
 {
-	wz_button_set_label((ButtonImpl *)impl, label.c_str());
+	((ButtonImpl *)impl)->setLabel(label.c_str());
 	return this;
 }
 

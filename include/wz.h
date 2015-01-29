@@ -383,20 +383,6 @@ const char *wz_window_get_title(const struct WindowImpl *window);
 void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget);
 void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget);
 
-void wz_button_set_label(struct ButtonImpl *button, const char *label);
-const char *wz_button_get_label(const struct ButtonImpl *button);
-void wz_button_set_icon(struct ButtonImpl *button, const char *icon);
-const char *wz_button_get_icon(const struct ButtonImpl *button);
-void wz_button_set_padding(struct ButtonImpl *button, Border padding);
-void wz_button_set_padding_args(struct ButtonImpl *button, int top, int right, int bottom, int left);
-Border wz_button_get_padding(const struct ButtonImpl *button);
-bool wz_button_is_pressed(const struct ButtonImpl *button);
-bool wz_button_is_set(const struct ButtonImpl *button);
-void wz_button_set(struct ButtonImpl *button, bool value);
-void wz_button_bind_value(struct ButtonImpl *button, bool *value);
-void wz_button_add_callback_pressed(struct ButtonImpl *button, EventCallback callback);
-void wz_button_add_callback_clicked(struct ButtonImpl *button, EventCallback callback);
-
 void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label);
 const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox);
 bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox);

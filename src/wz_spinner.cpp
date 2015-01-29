@@ -157,7 +157,7 @@ SpinnerImpl::SpinnerImpl()
 	wz_widget_set_stretch_scale(decrementButton, 1, 0.5f);
 	wz_widget_set_align(decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
 	wz_widget_set_draw_callback(decrementButton, wz_spinner_decrement_button_draw);
-	wz_button_add_callback_clicked(decrementButton, wz_spinner_decrement_button_clicked);
+	decrementButton->addCallbackClicked(wz_spinner_decrement_button_clicked);
 	wz_widget_set_overlap(decrementButton, true);
 	wz_widget_add_child_widget(this, decrementButton);
 
@@ -167,7 +167,7 @@ SpinnerImpl::SpinnerImpl()
 	wz_widget_set_stretch_scale(incrementButton, 1, 0.5f);
 	wz_widget_set_align(incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
 	wz_widget_set_draw_callback(incrementButton, wz_spinner_increment_button_draw);
-	wz_button_add_callback_clicked(incrementButton, wz_spinner_increment_button_clicked);
+	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
 	wz_widget_set_overlap(incrementButton, true);
 	wz_widget_add_child_widget(this, incrementButton);
 }

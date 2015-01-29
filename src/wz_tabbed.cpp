@@ -99,7 +99,7 @@ Tab::~Tab()
 
 Tab *Tab::setLabel(const std::string &label)
 {
-	wz_button_set_label(impl->button, label.c_str());
+	impl->button->setLabel(label.c_str());
 	return this;
 }
 
