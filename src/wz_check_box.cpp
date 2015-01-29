@@ -26,11 +26,19 @@ SOFTWARE.
 
 namespace wz {
 
+/*
+================================================================================
+
+PRIVATE INTERFACE
+
+================================================================================
+*/
+
 static Size wz_check_box_measure(struct WidgetImpl *widget)
 {
 	Size size;
 	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
-	wz_widget_measure_text(widget, wz_check_box_get_label(checkBox), 0, &size.w, &size.h);
+	wz_widget_measure_text(widget, checkBox->getLabel(), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
 	return size;
 }
@@ -54,7 +62,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	wz_renderer_draw_rect(vg, boxRect, widget->hover ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
 
 	// Box checkmark.
-	if (wz_check_box_is_checked(checkBox))
+	if (checkBox->isChecked())
 	{
 		const float left = (float)boxRect.x + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
 		const float right = (float)boxRect.x + boxRect.w - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
@@ -75,7 +83,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	}
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, wz_check_box_get_label(checkBox), 0);
+	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
 
 	nvgRestore(vg);
 }
@@ -86,6 +94,29 @@ CheckBoxImpl::CheckBoxImpl(const std::string &label) : ButtonImpl(label)
 	vtable.measure = wz_check_box_measure;
 	vtable.draw = wz_check_box_draw;
 }
+
+bool CheckBoxImpl::isChecked() const
+{
+	return isSet();
+}
+
+void CheckBoxImpl::check(bool value)
+{
+	set(value);
+}
+
+void CheckBoxImpl::addCallbackChecked(EventCallback callback)
+{
+	addCallbackClicked(callback);
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
 
 Checkbox::Checkbox()
 {
@@ -107,55 +138,19 @@ Checkbox::~Checkbox()
 
 const char *Checkbox::getLabel() const
 {
-	return wz_check_box_get_label((const CheckBoxImpl *)impl);
+	return ((const CheckBoxImpl *)impl)->getLabel();
 }
 
 Checkbox *Checkbox::setLabel(const std::string &label)
 {
-	wz_check_box_set_label((CheckBoxImpl *)impl, label.c_str());
+	((CheckBoxImpl *)impl)->setLabel(label.c_str());
 	return this;
 }
 
 Checkbox *Checkbox::bindValue(bool *value)
 {
-	wz_check_box_bind_value((CheckBoxImpl *)impl, value);
+	((CheckBoxImpl *)impl)->bindValue(value);
 	return this;
-}
-
-void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label)
-{
-	WZ_ASSERT(checkBox);
-	checkBox->setLabel(label);
-}
-
-const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox)
-{
-	WZ_ASSERT(checkBox);
-	return checkBox->getLabel();
-}
-
-bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox)
-{
-	WZ_ASSERT(checkBox);
-	return checkBox->isSet();
-}
-
-void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value)
-{
-	WZ_ASSERT(checkBox);
-	checkBox->set(value);
-}
-
-void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value)
-{
-	WZ_ASSERT(checkBox);
-	checkBox->bindValue(value);
-}
-
-void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback)
-{
-	WZ_ASSERT(checkBox);
-	checkBox->addCallbackClicked(callback);
 }
 
 } // namespace wz

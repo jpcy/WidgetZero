@@ -287,6 +287,9 @@ struct ButtonImpl : public WidgetImpl
 struct CheckBoxImpl : public ButtonImpl
 {
 	CheckBoxImpl(const std::string &label = std::string());
+	bool isChecked() const;
+	void check(bool value);
+	void addCallbackChecked(EventCallback callback);
 };
 
 struct ComboImpl : public WidgetImpl

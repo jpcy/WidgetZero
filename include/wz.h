@@ -383,13 +383,6 @@ const char *wz_window_get_title(const struct WindowImpl *window);
 void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget);
 void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget);
 
-void wz_check_box_set_label(struct CheckBoxImpl *checkBox, const char *label);
-const char *wz_check_box_get_label(const struct CheckBoxImpl *checkBox);
-bool wz_check_box_is_checked(const struct CheckBoxImpl *checkBox);
-void wz_check_box_check(struct CheckBoxImpl *checkBox, bool value);
-void wz_check_box_bind_value(struct CheckBoxImpl *checkBox, bool *value);
-void wz_check_box_add_callback_checked(struct CheckBoxImpl *checkBox, EventCallback callback);
-
 struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo);
 bool wz_combo_is_open(struct ComboImpl *combo);
 
