@@ -50,7 +50,7 @@ static Size wz_combo_measure(struct WidgetImpl *widget)
 	size.h = wz_widget_get_line_height(widget);
 
 	// Add scroller width or button width, whichever is largest.
-	scroller = (struct WidgetImpl *)wz_list_get_scroller(combo->list);
+	scroller = wz_list_get_scroller(combo->list);
 	size.w += WZ_MAX(scroller->vtable.measure(scroller).w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
 	// Padding.
@@ -129,8 +129,8 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 	if (!combo->mainWindow)
 		return;
 
-	rect = wz_widget_get_rect((struct WidgetImpl *)combo);
-	absRect = wz_widget_get_absolute_rect((struct WidgetImpl *)combo);
+	rect = wz_widget_get_rect(combo);
+	absRect = wz_widget_get_absolute_rect(combo);
 
 	// Set list rect.
 	listRect.x = 0;
@@ -145,14 +145,14 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 
 	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - wz_widget_get_size((struct WidgetImpl *)combo->mainWindow).h;
+	over = absRect.y + rect.h + listRect.h - wz_widget_get_size(combo->mainWindow).h;
 	
 	if (over > 0)
 	{
 		listRect.h -= over;
 	}
 
-	wz_widget_set_rect_internal((struct WidgetImpl *)combo->list, listRect);
+	wz_widget_set_rect_internal(combo->list, listRect);
 }
 
 static void wz_combo_set_rect(struct WidgetImpl *widget, Rect rect)
@@ -165,7 +165,7 @@ static void wz_combo_font_changed(struct WidgetImpl *widget, const char *fontFac
 {
 	struct ComboImpl *combo = (struct ComboImpl *)widget;
 	WZ_ASSERT(widget);
-	wz_widget_set_font((struct WidgetImpl *)combo->list, fontFace, fontSize);
+	wz_widget_set_font(combo->list, fontFace, fontSize);
 }
 
 static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
@@ -178,7 +178,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 
 	if (mouseButton == 1)
 	{
-		listRect = wz_widget_get_absolute_rect((struct WidgetImpl *)combo->list);
+		listRect = wz_widget_get_absolute_rect(combo->list);
 
 		// Open dropdown.
 		if (!combo->isOpen)
@@ -187,7 +187,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
 
 			// Show dropdown list and set it to draw last.
-			wz_widget_set_visible((struct WidgetImpl *)combo->list, true);
+			wz_widget_set_visible(combo->list, true);
 			wz_combo_update_list_rect(combo);
 
 			combo->isOpen = true;
@@ -200,7 +200,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
 
 			// Hide dropdown list.
-			wz_widget_set_visible((struct WidgetImpl *)combo->list, false);
+			wz_widget_set_visible(combo->list, false);
 
 			combo->isOpen = false;
 		}
@@ -224,10 +224,10 @@ static void wz_combo_list_item_selected(Event *e)
 	combo = (struct ComboImpl *)e->base.widget->parent;
 
 	// Unlock input.
-	wz_main_window_pop_lock_input_widget(combo->mainWindow, (struct WidgetImpl *)combo);
+	wz_main_window_pop_lock_input_widget(combo->mainWindow, combo);
 
 	// Hide dropdown list.
-	wz_widget_set_visible((struct WidgetImpl *)combo->list, false);
+	wz_widget_set_visible(combo->list, false);
 
 	combo->isOpen = false;
 }
@@ -245,9 +245,9 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	list = new ListImpl(itemData, itemStride, nItems);
-	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)list);
-	wz_widget_set_visible((struct WidgetImpl *)list, false);
-	wz_widget_set_clip_input_to_parent((struct WidgetImpl *)list, false);
+	wz_widget_add_child_widget(this, list);
+	wz_widget_set_visible(list, false);
+	wz_widget_set_clip_input_to_parent(list, false);
 	wz_list_add_callback_item_selected(list, wz_combo_list_item_selected);
 }
 

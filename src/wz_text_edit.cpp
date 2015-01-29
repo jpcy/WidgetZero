@@ -81,11 +81,11 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 
 	if (lineHeight * nLines > textEdit->rect.h - (textEdit->border.top + textEdit->border.bottom))
 	{
-		wz_widget_set_visible((struct WidgetImpl *)textEdit->scroller, true);
+		wz_widget_set_visible(textEdit->scroller, true);
 	}
 	else
 	{
-		wz_widget_set_visible((struct WidgetImpl *)textEdit->scroller, false);
+		wz_widget_set_visible(textEdit->scroller, false);
 		return;
 	}
 
@@ -95,12 +95,12 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 	wz_scroller_set_max_value(textEdit->scroller, max);
 
 	// Fit to the right of the rect. Width doesn't change.
-	textEditRect = wz_widget_get_rect((struct WidgetImpl *)textEdit);
-	rect.w = ((struct WidgetImpl *)textEdit->scroller)->rect.w;
+	textEditRect = wz_widget_get_rect(textEdit);
+	rect.w = (textEdit->scroller)->rect.w;
 	rect.x = textEditRect.w - textEdit->border.right - rect.w;
 	rect.y = textEdit->border.top;
 	rect.h = textEditRect.h - (textEdit->border.top + textEdit->border.bottom);
-	wz_widget_set_rect_internal((struct WidgetImpl *)textEdit->scroller, rect);
+	wz_widget_set_rect_internal(textEdit->scroller, rect);
 
 	// Now that the height has been calculated, update the nub scale.
 	maxHeight = nLines * lineHeight;
@@ -677,7 +677,7 @@ static void wz_text_edit_mouse_wheel_move(struct WidgetImpl *widget, int x, int 
 	WZ_ASSERT(widget);
 	textEdit = (struct TextEditImpl *)widget;
 
-	if (textEdit->multiline && wz_widget_get_visible((struct WidgetImpl *)textEdit->scroller))
+	if (textEdit->multiline && wz_widget_get_visible(textEdit->scroller))
 	{
 		wz_scroller_set_value(textEdit->scroller, wz_scroller_get_value(textEdit->scroller) - y);
 	}
@@ -987,7 +987,7 @@ Rect wz_text_edit_get_text_rect(const struct TextEditImpl *textEdit)
 	Rect textRect;
 
 	WZ_ASSERT(textEdit);
-	textRect = wz_widget_get_absolute_rect((struct WidgetImpl *)textEdit);
+	textRect = wz_widget_get_absolute_rect(textEdit);
 	textRect.x += textEdit->border.left;
 	textRect.y += textEdit->border.top;
 	textRect.w -= textEdit->border.left + textEdit->border.right;

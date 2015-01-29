@@ -78,7 +78,7 @@ static void wz_menu_bar_button_mouse_button_down(struct WidgetImpl *widget, int 
 		button->isPressed = true;
 
 		// Lock input to the menu bar, not this button.
-		wz_main_window_push_lock_input_widget(widget->mainWindow, (struct WidgetImpl *)button->menuBar);
+		wz_main_window_push_lock_input_widget(widget->mainWindow, button->menuBar);
 	}
 }
 
@@ -185,8 +185,8 @@ MenuBarImpl::MenuBarImpl()
 	vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
 	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	wz_widget_set_stretch((struct WidgetImpl *)layout, WZ_STRETCH);
-	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)layout);
+	wz_widget_set_stretch(layout, WZ_STRETCH);
+	wz_widget_add_child_widget(this, layout);
 }
 
 struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar)
@@ -195,8 +195,8 @@ struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar)
 
 	WZ_ASSERT(menuBar);
 	button = wz_menu_bar_button_create(menuBar);
-	wz_widget_set_stretch((struct WidgetImpl *)button, WZ_STRETCH_HEIGHT);
-	wz_stack_layout_add(menuBar->layout, (struct WidgetImpl *)button);
+	wz_widget_set_stretch(button, WZ_STRETCH_HEIGHT);
+	wz_stack_layout_add(menuBar->layout, button);
 	return button;
 }
 

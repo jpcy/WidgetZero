@@ -208,7 +208,8 @@ void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect);
 
 void wz_widget_refresh_rect(struct WidgetImpl *widget);
 
-struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type);
+const struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type);
+struct WidgetImpl *wz_widget_find_closest_ancestor(struct WidgetImpl *widget, WidgetType type);
 
 void wz_widget_set_draw_manually(struct WidgetImpl *widget, bool value);
 

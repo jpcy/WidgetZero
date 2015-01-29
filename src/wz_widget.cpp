@@ -617,7 +617,7 @@ static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *wi
 		// Set the renderer too.
 		if (mainWindow)
 		{
-			wz_widget_set_renderer(child, ((struct WidgetImpl *)mainWindow)->renderer);
+			wz_widget_set_renderer(child, (mainWindow)->renderer);
 		}
 
 		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
@@ -730,7 +730,7 @@ void wz_widget_add_child_widget(struct WidgetImpl *widget, struct WidgetImpl *ch
 	// Set the renderer.
 	if (child->mainWindow)
 	{
-		wz_widget_set_renderer(child, ((struct WidgetImpl *)child->mainWindow)->renderer);
+		wz_widget_set_renderer(child, (child->mainWindow)->renderer);
 	}
 
 	// Set children mainWindow, window and renderer.
@@ -914,9 +914,29 @@ void wz_widget_refresh_rect(struct WidgetImpl *widget)
 	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
 }
 
-struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type)
+const struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type)
 {
-	struct WidgetImpl *temp = (struct WidgetImpl *)widget;
+	const struct WidgetImpl *temp = widget;
+
+	for (;;)
+	{
+		if (temp == NULL)
+			break;
+
+		if (temp->type == type)
+		{
+			return temp;
+		}
+
+		temp = temp->parent;
+	}
+
+	return NULL;
+}
+
+struct WidgetImpl *wz_widget_find_closest_ancestor(struct WidgetImpl *widget, WidgetType type)
+{
+	struct WidgetImpl *temp = widget;
 
 	for (;;)
 	{
@@ -961,7 +981,7 @@ bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget)
 	if (!widget->window)
 		return true;
 
-	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect((struct WidgetImpl *)widget->window), wz_widget_get_absolute_rect(widget));
+	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect(widget->window), wz_widget_get_absolute_rect(widget));
 }
 
 void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value)

@@ -429,7 +429,7 @@ WindowImpl::WindowImpl(const std::string &title)
 	this->title = title;
 
 	content = new struct WidgetImpl;
-	wz_widget_add_child_widget((struct WidgetImpl *)this, content);
+	wz_widget_add_child_widget(this, content);
 }
 
 Window::Window()

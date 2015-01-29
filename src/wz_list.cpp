@@ -47,13 +47,13 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	wz_scroller_set_max_value(list->scroller, max);
 
 	// Fit to the right of items rect. Width doesn't change.
-	listRect = wz_widget_get_rect((struct WidgetImpl *)list);
+	listRect = wz_widget_get_rect(list);
 
-	rect.w = ((struct WidgetImpl *)list->scroller)->rect.w;
+	rect.w = (list->scroller)->rect.w;
 	rect.x = listRect.w - list->itemsBorder.right - rect.w;
 	rect.y = list->itemsBorder.top;
 	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
-	wz_widget_set_rect_internal((struct WidgetImpl *)list->scroller, rect);
+	wz_widget_set_rect_internal(list->scroller, rect);
 
 	// Now that the height has been calculated, update the nub scale.
 	wz_scroller_set_nub_scale(list->scroller, 1.0f - ((maxHeight - rect.h) / (float)maxHeight));
@@ -61,11 +61,11 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	// Hide/show scroller depending on if it's needed.
 	if (max <= 0)
 	{
-		wz_widget_set_visible((struct WidgetImpl *)list->scroller, false);
+		wz_widget_set_visible(list->scroller, false);
 	}
 	else
 	{
-		wz_widget_set_visible((struct WidgetImpl *)list->scroller, true);
+		wz_widget_set_visible(list->scroller, true);
 	}
 }
 
@@ -174,7 +174,7 @@ static void wz_list_refresh_item_height(struct ListImpl *list)
 		return;
 
 	// Add a little padding.
-	wz_list_set_item_height_internal(list, wz_widget_get_line_height((struct WidgetImpl *)list) + 2);
+	wz_list_set_item_height_internal(list, wz_widget_get_line_height(list) + 2);
 }
 
 static void wz_list_renderer_changed(struct WidgetImpl *widget)
@@ -325,7 +325,7 @@ static void wz_list_mouse_wheel_move(struct WidgetImpl *widget, int x, int y)
 	WZ_ASSERT(widget);
 	list = (struct ListImpl *)widget;
 
-	if (wz_widget_get_visible((struct WidgetImpl *)list->scroller))
+	if (wz_widget_get_visible(list->scroller))
 	{
 		int value, stepValue;
 
@@ -375,7 +375,7 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	this->nItems = nItems;
 
 	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-	wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)scroller);
+	wz_widget_add_child_widget(this, scroller);
 	wz_list_update_scroller(this);
 	wz_scroller_add_callback_value_changed(scroller, wz_list_scroller_value_changed);
 }
@@ -430,16 +430,16 @@ Rect wz_list_get_items_rect(const struct ListImpl *list)
 	Rect listRect, rect;
 
 	WZ_ASSERT(list);
-	listRect = wz_widget_get_rect((struct WidgetImpl *)list);
+	listRect = wz_widget_get_rect(list);
 	rect.x = list->itemsBorder.left;
 	rect.y = list->itemsBorder.top;
 	rect.w = listRect.w - (list->itemsBorder.left + list->itemsBorder.right);
 	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
 
 	// Subtract the scroller width.
-	if (wz_widget_get_visible((struct WidgetImpl *)list->scroller))
+	if (wz_widget_get_visible(list->scroller))
 	{
-		rect.w -= wz_widget_get_size((struct WidgetImpl *)list->scroller).w;
+		rect.w -= wz_widget_get_size(list->scroller).w;
 	}
 
 	return rect;

@@ -306,14 +306,14 @@ void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLay
 {
 	WZ_ASSERT(stackLayout);
 	stackLayout->direction = direction;
-	wz_widget_refresh_rect((struct WidgetImpl *)stackLayout);
+	wz_widget_refresh_rect(stackLayout);
 }
 
 void wz_stack_layout_set_spacing(struct StackLayoutImpl *stackLayout, int spacing)
 {
 	WZ_ASSERT(stackLayout);
 	stackLayout->spacing = spacing;
-	wz_widget_refresh_rect((struct WidgetImpl *)stackLayout);
+	wz_widget_refresh_rect(stackLayout);
 }
 
 int wz_stack_layout_get_spacing(const struct StackLayoutImpl *stackLayout)
@@ -330,14 +330,14 @@ void wz_stack_layout_add(struct StackLayoutImpl *stackLayout, struct WidgetImpl 
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget((struct WidgetImpl *)stackLayout, widget);
+	wz_widget_add_child_widget(stackLayout, widget);
 }
 
 void wz_stack_layout_remove(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget)
 {
 	WZ_ASSERT(stackLayout);
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget((struct WidgetImpl *)stackLayout, widget);
+	wz_widget_remove_child_widget(stackLayout, widget);
 }
 
 /*

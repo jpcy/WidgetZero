@@ -135,7 +135,7 @@ static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontF
 {
 	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
 	WZ_ASSERT(spinner);
-	wz_widget_set_font((struct WidgetImpl *)spinner->textEdit, fontFace, fontSize);
+	wz_widget_set_font(spinner->textEdit, fontFace, fontSize);
 }
 
 SpinnerImpl::SpinnerImpl()

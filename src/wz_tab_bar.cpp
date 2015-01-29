@@ -58,7 +58,7 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 static struct ButtonImpl *wz_tab_button_create()
 {
 	struct ButtonImpl *button = new ButtonImpl;
-	struct WidgetImpl *widget = (struct WidgetImpl *)button;
+	struct WidgetImpl *widget = button;
 	widget->vtable.draw = wz_tab_button_draw;
 	return button;
 }
@@ -93,27 +93,27 @@ static void wz_tab_bar_update_scroll_buttons(struct TabBarImpl *tabBar)
 
 	for (size_t i = 0; i < tabBar->tabs.size(); i++)
 	{
-		Size size = wz_widget_get_size((struct WidgetImpl *)tabBar->tabs[i]);
+		Size size = wz_widget_get_size(tabBar->tabs[i]);
 		totalTabWidth += size.w;
 	}
 
 	// Show/hide the scroll buttons and set their rects.
-	wereScrollButtonsVisible = wz_widget_get_visible((struct WidgetImpl *)tabBar->decrementButton);
+	wereScrollButtonsVisible = wz_widget_get_visible(tabBar->decrementButton);
 	showScrollButtons = totalTabWidth > tabBar->rect.w;
 
-	rect.w = wz_widget_get_size((struct WidgetImpl *)tabBar->decrementButton).w;
+	rect.w = wz_widget_get_size(tabBar->decrementButton).w;
 	rect.x = tabBar->rect.w - rect.w * 2;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
-	wz_widget_set_rect_internal((struct WidgetImpl *)tabBar->decrementButton, rect);
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->decrementButton, showScrollButtons);
+	wz_widget_set_rect_internal(tabBar->decrementButton, rect);
+	wz_widget_set_visible(tabBar->decrementButton, showScrollButtons);
 
-	rect.w = wz_widget_get_size((struct WidgetImpl *)tabBar->incrementButton).w;
+	rect.w = wz_widget_get_size(tabBar->incrementButton).w;
 	rect.x = tabBar->rect.w - rect.w;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
-	wz_widget_set_rect_internal((struct WidgetImpl *)tabBar->incrementButton, rect);
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->incrementButton, showScrollButtons);
+	wz_widget_set_rect_internal(tabBar->incrementButton, rect);
+	wz_widget_set_visible(tabBar->incrementButton, showScrollButtons);
 
 	if (wereScrollButtonsVisible && showScrollButtons)
 	{
@@ -132,7 +132,7 @@ static void wz_tab_bar_update_tabs(struct TabBarImpl *tabBar)
 
 	for (size_t i = 0; i < tabBar->tabs.size(); i++)
 	{
-		struct WidgetImpl *widget = (struct WidgetImpl *)tabBar->tabs[i];
+		struct WidgetImpl *widget = tabBar->tabs[i];
 
 		if ((int)i < tabBar->scrollValue)
 		{
@@ -279,17 +279,17 @@ struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)
 
 	for (size_t i = 0; i < tabBar->tabs.size(); i++)
 	{
-		Size size = wz_widget_get_size((struct WidgetImpl *)tabBar->tabs[i]);
+		Size size = wz_widget_get_size(tabBar->tabs[i]);
 		rect.x += size.w;
 	}
 
-	((struct WidgetImpl *)tab)->vtable.set_rect = wz_tab_set_rect;
+	(tab)->vtable.set_rect = wz_tab_set_rect;
 	wz_button_add_callback_pressed(tab, wz_tab_bar_button_pressed);
 	wz_button_set_click_behavior(tab, WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	wz_button_set_set_behavior(tab, WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_widget_add_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tab);
+	wz_widget_add_child_widget(tabBar, tab);
 	tabBar->tabs.push_back(tab);
-	wz_widget_set_rect_internal((struct WidgetImpl *)tab, rect);
+	wz_widget_set_rect_internal(tab, rect);
 
 	// Select the first tab added.
 	if (!tabBar->selectedTab)
@@ -339,7 +339,7 @@ void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
 
 	// Delete the tab.
 	tabBar->tabs.erase(tabBar->tabs.begin() + deleteIndex);
-	wz_widget_destroy_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tab);
+	wz_widget_destroy_child_widget(tabBar, tab);
 }
 
 void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar)
@@ -357,14 +357,14 @@ void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar)
 		wz_invoke_event(&e);
 
 		// Destroy the tab.
-		wz_widget_destroy_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tabBar->tabs[i]);
+		wz_widget_destroy_child_widget(tabBar, tabBar->tabs[i]);
 	}
 
 	tabBar->tabs.clear();
 	tabBar->selectedTab = NULL;
 	tabBar->scrollValue = 0;
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->decrementButton, false);
-	wz_widget_set_visible((struct WidgetImpl *)tabBar->incrementButton, false);
+	wz_widget_set_visible(tabBar->decrementButton, false);
+	wz_widget_set_visible(tabBar->incrementButton, false);
 }
 
 struct ButtonImpl *wz_tab_bar_get_decrement_button(struct TabBarImpl *tabBar)

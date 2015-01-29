@@ -78,7 +78,7 @@ static void wz_group_box_refresh_margin(struct GroupBoxImpl *groupBox)
 
 	if (!groupBox->label.empty())
 	{
-		margin.top = wz_widget_get_line_height((struct WidgetImpl *)groupBox) + WZ_SKIN_GROUP_BOX_MARGIN;
+		margin.top = wz_widget_get_line_height(groupBox) + WZ_SKIN_GROUP_BOX_MARGIN;
 	}
 
 	wz_widget_set_margin(groupBox->content, margin);
@@ -98,7 +98,7 @@ GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
 	// Create content widget.
 	content = new WidgetImpl;
 	content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget((struct WidgetImpl *)this, content);
+	wz_widget_add_child_widget(this, content);
 }
 
 GroupBox::GroupBox()
