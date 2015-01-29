@@ -256,7 +256,7 @@ PRIVATE INTERFACE
 ================================================================================
 */
 
-ButtonImpl::ButtonImpl()
+ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 {
 	type = WZ_TYPE_BUTTON;
 	vtable.measure = wz_button_measure;
@@ -269,6 +269,8 @@ ButtonImpl::ButtonImpl()
 	boundValue = NULL;
 	padding.left = padding.right = 8;
 	padding.top = padding.bottom = 4;
+	this->label = label;
+	this->icon = icon;
 }
 
 void wz_button_set_click_behavior(struct ButtonImpl *button, ButtonClickBehavior clickBehavior)
@@ -293,12 +295,12 @@ PUBLIC INTERFACE
 
 Button::Button()
 {
-	impl = wz_button_create(NULL, NULL);
+	impl = new ButtonImpl;
 }
 
 Button::Button(const std::string &label, const std::string &icon)
 {
-	impl = wz_button_create(label.c_str(), icon.c_str());
+	impl = new ButtonImpl(label, icon);
 }
 
 Button::~Button()
@@ -353,17 +355,9 @@ Button *Button::setLabel(const std::string &label)
 	return this;
 }
 
-struct ButtonImpl *wz_button_create(const char *label, const char *icon)
-{
-	struct ButtonImpl *button = new ButtonImpl;
-	button->label = label ? std::string(label) : std::string();
-	button->icon = icon ? std::string(icon) : std::string();
-	return button;
-}
-
 struct ButtonImpl *wz_toggle_button_create(const char *label, const char *icon)
 {
-	struct ButtonImpl *button = wz_button_create(label, icon);
+	struct ButtonImpl *button = new ButtonImpl(label, icon);
 	wz_button_set_set_behavior(button, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	return button;
 }

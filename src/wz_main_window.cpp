@@ -34,7 +34,7 @@ namespace wz {
 
 struct MainWindowImpl : public WidgetImpl
 {
-	MainWindowImpl();
+	MainWindowImpl(wzRenderer *renderer);
 
 	struct WidgetImpl *content;
 
@@ -1361,26 +1361,10 @@ static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_main_window_update_content_rect(mainWindow);
 }
 
-MainWindowImpl::MainWindowImpl() : dockIcons(), dockTabBars()
-{
-	content = NULL;
-	handle_event = NULL;
-	isTextCursorVisible = false;
-	cursor = WZ_CURSOR_DEFAULT;
-	isShiftKeyDown = isControlKeyDown = false;
-	lockInputWindow = NULL;
-	keyboardFocusWidget = NULL;
-	movingWindow = NULL;
-	dockPreview = NULL;
-	windowDockPosition = WZ_DOCK_POSITION_NONE;
-	ignoreDockTabBarChangedEvent = false;
-	menuBar = NULL;
-}
-
 MainWindow::MainWindow(wzRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	impl = wz_main_window_create(renderer);
+	impl = new MainWindowImpl(renderer);
 
 	impl->menuBar = wz_menu_bar_create();
 	wz_main_window_set_menu_bar(impl, impl->menuBar);
@@ -1483,57 +1467,61 @@ void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 	wz_main_window_dock_window(impl, (WindowImpl *)window->impl, dockPosition);
 }
 
-struct MainWindowImpl *wz_main_window_create(struct wzRenderer *renderer)
+MainWindowImpl::MainWindowImpl(struct wzRenderer *renderer)
 {
-	int i;
-	struct WidgetImpl *widget;
-	
-	struct MainWindowImpl *mainWindow = new struct MainWindowImpl;
-	mainWindow->type = WZ_TYPE_MAIN_WINDOW;
-	mainWindow->renderer = renderer;
-	mainWindow->mainWindow = mainWindow;
-	mainWindow->vtable.set_rect = wz_main_window_set_rect;
-	mainWindow->isTextCursorVisible = true;
+	type = WZ_TYPE_MAIN_WINDOW;
+	handle_event = NULL;
+	cursor = WZ_CURSOR_DEFAULT;
+	isShiftKeyDown = isControlKeyDown = false;
+	lockInputWindow = NULL;
+	keyboardFocusWidget = NULL;
+	movingWindow = NULL;
+	windowDockPosition = WZ_DOCK_POSITION_NONE;
+	ignoreDockTabBarChangedEvent = false;
+	menuBar = NULL;
+
+	this->renderer = renderer;
+	mainWindow = this;
+	vtable.set_rect = wz_main_window_set_rect;
+	isTextCursorVisible = true;
 
 	// Create content widget.
-	mainWindow->content = new struct WidgetImpl;
-	mainWindow->content->mainWindow = mainWindow;
-	wz_widget_add_child_widget((struct WidgetImpl *)mainWindow, mainWindow->content);
+	content = new struct WidgetImpl;
+	content->mainWindow = this;
+	wz_widget_add_child_widget((struct WidgetImpl *)this, content);
 
 	// Create dock icon widgets.
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		mainWindow->dockIcons[i] = new WidgetImpl;
-		widget = (struct WidgetImpl *)mainWindow->dockIcons[i];
+		dockIcons[i] = new WidgetImpl;
+		struct WidgetImpl *widget = (struct WidgetImpl *)dockIcons[i];
 		wz_widget_set_measure_callback(widget, NULL);
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
-		wz_widget_set_size_args_internal((struct WidgetImpl *)mainWindow->dockIcons[i], 48, 48);
+		wz_widget_set_size_args_internal((struct WidgetImpl *)dockIcons[i], 48, 48);
 		wz_widget_set_visible(widget, false);
 		wz_widget_set_draw_manually(widget, true);
-		wz_widget_add_child_widget((struct WidgetImpl *)mainWindow, widget);
+		wz_widget_add_child_widget((struct WidgetImpl *)this, widget);
 	}
 
-	wz_main_window_update_dock_icon_positions(mainWindow);
+	wz_main_window_update_dock_icon_positions(this);
 
 	// Create dock preview widget.
-	mainWindow->dockPreview = new WidgetImpl;
-	widget = (struct WidgetImpl *)mainWindow->dockPreview;
+	dockPreview = new WidgetImpl;
+	struct WidgetImpl *widget = (struct WidgetImpl *)dockPreview;
 	wz_widget_set_draw_manually(widget, true);
 	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);
 	wz_widget_set_visible(widget, false);
-	wz_widget_add_child_widget((struct WidgetImpl *)mainWindow, widget);
+	wz_widget_add_child_widget((struct WidgetImpl *)this, widget);
 
 	// Create dock tab bars.
-	for (i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
 		struct TabBarImpl *tabBar = wz_tab_bar_create();
-		mainWindow->dockTabBars[i] = tabBar;
+		dockTabBars[i] = tabBar;
 		wz_widget_set_visible((struct WidgetImpl *)tabBar, false);
-		wz_widget_add_child_widget((struct WidgetImpl *)mainWindow, (struct WidgetImpl *)tabBar);
+		wz_widget_add_child_widget((struct WidgetImpl *)this, (struct WidgetImpl *)tabBar);
 		wz_tab_bar_add_callback_tab_changed(tabBar, wz_main_window_dock_tab_bar_tab_changed);
 	}
-
-	return mainWindow;
 }
 
 void wz_main_window_set_event_callback(struct MainWindowImpl *mainWindow, EventCallback callback)

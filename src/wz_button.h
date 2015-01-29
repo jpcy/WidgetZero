@@ -55,7 +55,7 @@ ButtonSetBehavior;
 
 struct ButtonImpl : public WidgetImpl
 {
-	ButtonImpl();
+	ButtonImpl(const std::string &label = std::string(), const std::string &icon = std::string());
 
 	ButtonClickBehavior clickBehavior;
 	ButtonSetBehavior setBehavior;

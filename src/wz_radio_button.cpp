@@ -145,7 +145,7 @@ RadioButton *RadioButton::setLabel(const std::string &label)
 
 struct RadioButtonImpl *wz_radio_button_create(const char *label)
 {
-	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)wz_button_create(label, NULL);
+	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)new ButtonImpl(label);
 	struct WidgetImpl *widget = (struct WidgetImpl *)radioButton;
 
 	widget->type = WZ_TYPE_RADIO_BUTTON;

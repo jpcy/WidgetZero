@@ -77,7 +77,7 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 
 static struct ButtonImpl *wz_tab_button_create()
 {
-	struct ButtonImpl *button = wz_button_create(NULL, NULL);
+	struct ButtonImpl *button = new ButtonImpl;
 	struct WidgetImpl *widget = (struct WidgetImpl *)button;
 	widget->vtable.draw = wz_tab_button_draw;
 	return button;
@@ -271,7 +271,7 @@ struct TabBarImpl *wz_tab_bar_create()
 	tabBar->vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
-	tabBar->decrementButton = wz_button_create("<", NULL);
+	tabBar->decrementButton = new ButtonImpl("<");
 	wz_button_add_callback_clicked(tabBar->decrementButton, wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tabBar->decrementButton);
 	wz_widget_set_width_internal((struct WidgetImpl *)tabBar->decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
@@ -279,7 +279,7 @@ struct TabBarImpl *wz_tab_bar_create()
 	wz_widget_set_draw_last((struct WidgetImpl *)tabBar->decrementButton, true);
 	wz_widget_set_overlap((struct WidgetImpl *)tabBar->decrementButton, true);
 
-	tabBar->incrementButton = wz_button_create(">", NULL);
+	tabBar->incrementButton = new ButtonImpl(">");
 	wz_button_add_callback_clicked(tabBar->incrementButton, wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget((struct WidgetImpl *)tabBar, (struct WidgetImpl *)tabBar->incrementButton);
 	wz_widget_set_width_internal((struct WidgetImpl *)tabBar->incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);

@@ -297,8 +297,6 @@ struct EventHandler : public IEventHandler
 	Method method;
 };
 
-struct MainWindowImpl *wz_main_window_create(struct wzRenderer *renderer);
-
 // Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
 void wz_main_window_set_event_callback(struct MainWindowImpl *mainWindow, EventCallback callback);
 
@@ -377,7 +375,6 @@ struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget);
 
 struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 
-struct WindowImpl *wz_window_create(const char *title);
 int wz_window_get_header_height(const struct WindowImpl *window);
 int wz_window_get_border_size(const struct WindowImpl *window);
 Rect wz_window_get_header_rect(const struct WindowImpl *window);

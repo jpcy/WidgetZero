@@ -24,6 +24,7 @@ SOFTWARE.
 #include <vector>
 #include <stdlib.h>
 #include <string.h>
+#include "wz_button.h"
 #include "wz_main_window.h"
 #include "wz_renderer.h"
 #include "wz_widget.h"
@@ -578,13 +579,13 @@ struct ScrollerImpl *wz_scroller_create(ScrollerType scrollerType, int value, in
 	wz_widget_set_stretch((struct WidgetImpl *)layout, WZ_STRETCH);
 	wz_widget_add_child_widget((struct WidgetImpl *)scroller, (struct WidgetImpl *)layout);
 
-	decrementButton = wz_button_create(NULL, NULL);
+	decrementButton = new ButtonImpl();
 	wz_widget_set_size_args((struct WidgetImpl *)decrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	wz_widget_set_draw_callback((struct WidgetImpl *)decrementButton, wz_scroller_decrement_button_draw);
 	wz_button_add_callback_clicked(decrementButton, wz_scroller_decrement_button_clicked);
 	wz_stack_layout_add(layout, (struct WidgetImpl *)decrementButton);
 
-	nubContainer = new WidgetImpl;
+	nubContainer = new WidgetImpl();
 	((struct WidgetImpl *)nubContainer)->vtable.mouse_button_down = wz_scroller_nub_container_mouse_button_down;
 	wz_widget_set_stretch((struct WidgetImpl *)nubContainer, WZ_STRETCH);
 	wz_stack_layout_add(layout, (struct WidgetImpl *)nubContainer);
@@ -592,7 +593,7 @@ struct ScrollerImpl *wz_scroller_create(ScrollerType scrollerType, int value, in
 	scroller->nub = wz_scroller_nub_create(scroller);
 	wz_widget_add_child_widget((struct WidgetImpl *)nubContainer, (struct WidgetImpl *)scroller->nub);
 
-	incrementButton = wz_button_create(NULL, NULL);
+	incrementButton = new ButtonImpl();
 	wz_widget_set_size_args((struct WidgetImpl *)incrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	wz_widget_set_draw_callback((struct WidgetImpl *)incrementButton, wz_scroller_increment_button_draw);
 	wz_button_add_callback_clicked(incrementButton, wz_scroller_increment_button_clicked);

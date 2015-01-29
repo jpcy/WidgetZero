@@ -51,7 +51,7 @@ WindowDrag;
 
 struct WindowImpl : public WidgetImpl
 {
-	WindowImpl();
+	WindowImpl(const std::string &title);
 
 	int drawPriority;
 	int headerHeight;
@@ -454,23 +454,36 @@ static void wz_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_widget_set_rect_internal(window->content, contentRect);
 }
 
-WindowImpl::WindowImpl()
+WindowImpl::WindowImpl(const std::string &title)
 {
 	type = WZ_TYPE_WINDOW;
 	drawPriority = 0;
 	headerHeight = 0;
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
+
+	vtable.draw = wz_window_draw;
+	vtable.renderer_changed = wz_window_renderer_changed;
+	vtable.font_changed = wz_window_font_changed;
+	vtable.mouse_button_down = wz_window_mouse_button_down;
+	vtable.mouse_button_up = wz_window_mouse_button_up;
+	vtable.mouse_move = wz_window_mouse_move;
+	vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
+	vtable.set_rect = wz_window_set_rect;
+	this->title = title;
+
+	content = new struct WidgetImpl;
+	wz_widget_add_child_widget((struct WidgetImpl *)this, content);
 }
 
 Window::Window()
 {
-	impl = wz_window_create(NULL);
+	impl = new WindowImpl(NULL);
 }
 
 Window::Window(const std::string &title)
 {
-	impl = wz_window_create(title.c_str());
+	impl = new WindowImpl(title);
 }
 
 Window::~Window()
@@ -498,25 +511,6 @@ Widget *Window::add(Widget *widget)
 void Window::remove(Widget *widget)
 {
 	wz_window_remove((WindowImpl *)impl, widget->impl);
-}
-
-struct WindowImpl *wz_window_create(const char *title)
-{
-	struct WindowImpl *window = new struct WindowImpl;
-	window->vtable.draw = wz_window_draw;
-	window->vtable.renderer_changed = wz_window_renderer_changed;
-	window->vtable.font_changed = wz_window_font_changed;
-	window->vtable.mouse_button_down = wz_window_mouse_button_down;
-	window->vtable.mouse_button_up = wz_window_mouse_button_up;
-	window->vtable.mouse_move = wz_window_mouse_move;
-	window->vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
-	window->vtable.set_rect = wz_window_set_rect;
-	window->title = title ? std::string(title) : std::string();
-
-	window->content = new struct WidgetImpl;
-	wz_widget_add_child_widget((struct WidgetImpl *)window, window->content);
-
-	return window;
 }
 
 int wz_window_get_header_height(const struct WindowImpl *window)

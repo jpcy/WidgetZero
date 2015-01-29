@@ -25,6 +25,7 @@ SOFTWARE.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "wz_button.h"
 #include "wz_widget.h"
 #include "wz_renderer.h"
 #include "wz_text_edit.h"
@@ -194,7 +195,7 @@ struct SpinnerImpl *wz_spinner_create()
 	wz_text_edit_set_validate_text_callback(spinner->textEdit, wz_spinner_validate_text);
 	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->textEdit);
 
-	spinner->decrementButton = wz_button_create(NULL, NULL);
+	spinner->decrementButton = new ButtonImpl();
 	wz_widget_set_width((struct WidgetImpl *)spinner->decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	wz_widget_set_stretch((struct WidgetImpl *)spinner->decrementButton, WZ_STRETCH_HEIGHT);
 	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->decrementButton, 1, 0.5f);
@@ -204,7 +205,7 @@ struct SpinnerImpl *wz_spinner_create()
 	wz_widget_set_overlap((struct WidgetImpl *)spinner->decrementButton, true);
 	wz_widget_add_child_widget((struct WidgetImpl *)spinner, (struct WidgetImpl *)spinner->decrementButton);
 
-	spinner->incrementButton = wz_button_create(NULL, NULL);
+	spinner->incrementButton = new ButtonImpl();
 	wz_widget_set_width((struct WidgetImpl *)spinner->incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	wz_widget_set_stretch((struct WidgetImpl *)spinner->incrementButton, WZ_STRETCH_HEIGHT);
 	wz_widget_set_stretch_scale((struct WidgetImpl *)spinner->incrementButton, 1, 0.5f);

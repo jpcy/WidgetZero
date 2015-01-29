@@ -126,7 +126,7 @@ Checkbox *Checkbox::bindValue(bool *value)
 
 struct CheckBoxImpl *wz_check_box_create(const char *label)
 {
-	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)wz_button_create(label, NULL);
+	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)new ButtonImpl(label);
 	wz_button_set_set_behavior(checkBox, WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 	checkBox->vtable.measure = wz_check_box_measure;
 	checkBox->vtable.draw = wz_check_box_draw;
