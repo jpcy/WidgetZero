@@ -51,7 +51,18 @@ static Size wz_combo_measure(struct WidgetImpl *widget)
 
 	// Add scroller width or button width, whichever is largest.
 	scroller = wz_list_get_scroller(combo->list);
-	size.w += WZ_MAX(scroller->vtable.measure(scroller).w, WZ_SKIN_COMBO_BUTTON_WIDTH);
+	Size scrollerSize;
+
+	if (scroller->vtable.measure)
+	{
+		scrollerSize = scroller->vtable.measure(scroller);
+	}
+	else
+	{
+		scrollerSize = scroller->measure();
+	}
+
+	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
 	// Padding.
 	size.w += WZ_SKIN_COMBO_PADDING_X;

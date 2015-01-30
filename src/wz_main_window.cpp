@@ -1144,9 +1144,16 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 	if (!wz_widget_overlaps_parent_window(widget) && !wz_widget_is_combo_ancestor(widget))
 		return;
 
-	if (draw_predicate(widget) && !widget->drawManually && widget->vtable.draw)
+	if (draw_predicate(widget) && !widget->drawManually)
 	{
-		widget->vtable.draw(widget, clip);
+		if (widget->vtable.draw)
+		{
+			widget->vtable.draw(widget, clip);
+		}
+		else
+		{
+			widget->draw(clip);
+		}
 	}
 
 	// Update clip rect.
@@ -1222,7 +1229,15 @@ static void wz_widget_draw_if_visible(struct WidgetImpl *widget)
 	{
 		Rect clip;
 		clip.x = clip.y = clip.w = clip.h = 0;
-		widget->vtable.draw(widget, clip);
+
+		if (widget->vtable.draw)
+		{
+			widget->vtable.draw(widget, clip);
+		}
+		else
+		{
+			widget->draw(clip);
+		}
 	}
 }
 
@@ -1263,7 +1278,11 @@ void wz_main_window_draw(struct MainWindowImpl *mainWindow)
 
 		if (widget->vtable.draw)
 		{
-			widget->vtable.draw(widget, (mainWindow)->rect);
+			widget->vtable.draw(widget, mainWindow->rect);
+		}
+		else
+		{
+			widget->draw(mainWindow->rect);
 		}
 
 		wz_widget_draw(widget, wz_widget_true, wz_widget_is_not_combo);
@@ -1447,7 +1466,6 @@ MainWindowImpl::MainWindowImpl(struct wzRenderer *renderer)
 	{
 		dockIcons[i] = new WidgetImpl;
 		struct WidgetImpl *widget = dockIcons[i];
-		wz_widget_set_measure_callback(widget, NULL);
 		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
 		wz_widget_set_size_args_internal(dockIcons[i], 48, 48);
 		wz_widget_set_visible(widget, false);

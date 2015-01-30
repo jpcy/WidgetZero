@@ -666,9 +666,18 @@ void wz_widget_resize_to_measured(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->renderer && widget->vtable.measure)
+	if (widget->renderer)
 	{
-		Size size = widget->vtable.measure(widget);
+		Size size;
+
+		if (widget->vtable.measure)
+		{
+			size = widget->vtable.measure(widget);
+		}
+		else
+		{
+			size = widget->measure();
+		}
 
 		// The explicitly set size overrides the measured size.
 		if (widget->userRect.w != 0)

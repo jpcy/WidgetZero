@@ -118,6 +118,9 @@ struct WidgetImpl
 		eventHandlers.clear();
 	}
 
+	virtual void draw(Rect clip) {}
+	virtual Size measure() { return Size(); }
+
 	WidgetType type;
 
 	// Explicitly set by the user.
@@ -324,6 +327,8 @@ struct GroupBoxImpl : public WidgetImpl
 struct LabelImpl : public WidgetImpl
 {
 	LabelImpl(const std::string &text = std::string());
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void setMultiline(bool multiline);
 	bool getMultiline() const;
 	void setText(const char *text);
@@ -331,10 +336,11 @@ struct LabelImpl : public WidgetImpl
 	void setTextColor(NVGcolor color);
 	NVGcolor getTextColor() const;
 
-	std::string text;
-	bool multiline;
-	NVGcolor textColor;
-	bool isTextColorUserSet;
+private:
+	std::string text_;
+	bool multiline_;
+	NVGcolor textColor_;
+	bool isTextColorUserSet_;
 };
 
 struct ListImpl : public WidgetImpl

@@ -26,94 +26,88 @@ SOFTWARE.
 
 namespace wz {
 
-static Size wz_label_measure(struct WidgetImpl *widget)
+LabelImpl::LabelImpl(const std::string &text) : text_(text)
 {
-	Size size;
-	struct LabelImpl *label = (struct LabelImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
-
-	if (label->multiline)
-	{
-		float bounds[4];
-
-		nvgFontSize(vg, widget->fontSize == 0 ? widget->renderer->defaultFontSize : widget->fontSize);
-		wz_renderer_set_font_face(widget->renderer, widget->fontFace);
-		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-		nvgTextLineHeight(vg, 1.2f);
-		nvgTextBoxBounds(vg, 0, 0, (float)widget->rect.w, label->text.c_str(), NULL, bounds);
-		size.w = (int)bounds[2];
-		size.h = (int)bounds[3];
-	}
-	else
-	{
-		wz_widget_measure_text(widget, label->text.c_str(), 0, &size.w, &size.h);
-	}
-
-	return size;
+	type = WZ_TYPE_LABEL;
+	multiline_ = false;
+	textColor_ = WZ_SKIN_LABEL_TEXT_COLOR;
+	isTextColorUserSet_ = false;
 }
 
-static void wz_label_draw(struct WidgetImpl *widget, Rect clip)
+void LabelImpl::draw(Rect clip)
 {
-	struct LabelImpl *label = (struct LabelImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	struct NVGcontext *vg = renderer->vg;
+	const Rect rect = wz_widget_get_absolute_rect(this);
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
 
-	if (label->multiline)
+	if (multiline_)
 	{
-		wz_renderer_print_box(widget->renderer, rect, widget->fontFace, widget->fontSize, label->textColor, label->text.c_str(), 0);
+		wz_renderer_print_box(renderer, rect, fontFace, fontSize, textColor_, text_.c_str(), 0);
 	}
 	else
 	{
-		wz_renderer_print(widget->renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, label->textColor, label->text.c_str(), 0);
+		wz_renderer_print(renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, textColor_, text_.c_str(), 0);
 	}
 
 	nvgRestore(vg);
 }
 
-LabelImpl::LabelImpl(const std::string &text) : text(text)
+Size LabelImpl::measure()
 {
-	type = WZ_TYPE_LABEL;
-	multiline = false;
-	textColor = WZ_SKIN_LABEL_TEXT_COLOR;
-	isTextColorUserSet = false;
+	Size size;
+	struct NVGcontext *vg = renderer->vg;
 
-	vtable.measure = wz_label_measure;
-	vtable.draw = wz_label_draw;
+	if (multiline_)
+	{
+		nvgFontSize(vg, fontSize == 0 ? renderer->defaultFontSize : fontSize);
+		wz_renderer_set_font_face(renderer, fontFace);
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.2f);
+		float bounds[4];
+		nvgTextBoxBounds(vg, 0, 0, (float)rect.w, text_.c_str(), NULL, bounds);
+		size.w = (int)bounds[2];
+		size.h = (int)bounds[3];
+	}
+	else
+	{
+		wz_widget_measure_text(this, text_.c_str(), 0, &size.w, &size.h);
+	}
+
+	return size;
 }
 
 void LabelImpl::setMultiline(bool multiline)
 {
-	this->multiline = multiline;
+	multiline_ = multiline;
 }
 
 bool LabelImpl::getMultiline() const
 {
-	return multiline;
+	return multiline_;
 }
 
 void LabelImpl::setText(const char *text)
 {
-	this->text = text;
+	text_ = text;
 	wz_widget_resize_to_measured(this);
 }
 
 const char *LabelImpl::getText() const
 {
-	return text.c_str();
+	return text_.c_str();
 }
 
 void LabelImpl::setTextColor(NVGcolor color)
 {
-	textColor = color;
-	isTextColorUserSet = true;
+	textColor_ = color;
+	isTextColorUserSet_ = true;
 }
 
 NVGcolor LabelImpl::getTextColor() const
 {
-	return textColor;
+	return textColor_;
 }
 
 /*
