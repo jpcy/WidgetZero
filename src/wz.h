@@ -86,18 +86,21 @@ WidgetType;
 struct Position
 {
 	Position() : x(0), y(0) {}
+	Position(int x, int y) : x(x), y(y) {}
 	int x, y;
 };
 
 struct Size
 {
 	Size() : w(0), h(0) {}
+	Size(int w, int h) : w(w), h(h) {}
 	int w, h;
 };
 
 struct Rect
 {
 	Rect() : x(0), y(0), w(0), h(0) {}
+	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
 	bool isEmpty() const { return x == 0 && y == 0 && w == 0 && h == 0; }
 	static bool intersect(const Rect A, const Rect B, Rect *result);
 
@@ -107,6 +110,7 @@ struct Rect
 struct Border
 {
 	Border() : top(0), right(0), bottom(0), left(0) {}
+	Border(int top, int right, int bottom, int left) : top(top), right(right), bottom(bottom), left(left) {}
 	int top, right, bottom, left;
 };
 
