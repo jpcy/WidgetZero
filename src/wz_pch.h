@@ -30,7 +30,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include <wz.h>
+#include "wz.h"
 #include "wz_skin.h"
 
 #define WZ_NANOVG_MAX_PATH 256

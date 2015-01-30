@@ -42,9 +42,8 @@ project "WidgetZero"
 	kind "StaticLib"
 	pchheader "wz_pch.h"
 	pchsource "src/wz_pch.cpp"
-	files { "src/*.*", "include/*.*" }
-	includedirs { "include", "nanovg" }
-	vpaths { ["*"] = { "src", "include" } }
+	files { "src/*.*" }
+	includedirs { "nanovg" }
 	configuration "vs*"
 		-- disable warning "new behavior: elements of array 'array' will be default initialized"
 		buildoptions { "/wd\"4351\"" }
@@ -64,7 +63,7 @@ function createExampleProject(_name)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
 		files { "examples/" .. _name .. "/*.*", "examples/gl/*.*" }
-		includedirs { "include", "nanovg", "examples/gl" }
+		includedirs { "src", "nanovg", "examples/gl" }
 		
 		configuration "linux"
 			buildoptions { "`pkg-config --cflags sdl2`" }
