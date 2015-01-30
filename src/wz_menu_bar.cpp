@@ -190,7 +190,7 @@ struct MenuBarButtonImpl *MenuBarImpl::createButton()
 {
 	struct MenuBarButtonImpl *button = wz_menu_bar_button_create(this);
 	wz_widget_set_stretch(button, WZ_STRETCH_HEIGHT);
-	wz_stack_layout_add(layout, button);
+	layout->add(button);
 	return button;
 }
 

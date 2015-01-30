@@ -129,7 +129,7 @@ static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
 	struct TabbedImpl *tabbed = (struct TabbedImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 	Rect rect = wz_widget_get_absolute_rect(widget);
-	const struct ButtonImpl *selectedTab = wz_tab_bar_get_selected_tab(tabbed->tabBar);
+	const struct ButtonImpl *selectedTab = tabbed->tabBar->getSelectedTab();
 
 	// Use the page rect.
 	const int tabBarHeight = wz_widget_get_height(tabbed->tabBar);
@@ -188,7 +188,7 @@ static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
 		nvgBeginPath(vg);
 
 		// Only draw the left side if this is the leftmost tab.
-		if (i == wz_tab_bar_get_scroll_value(tabbed->tabBar))
+		if (i == tabbed->tabBar->getScrollValue())
 		{
 			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
 			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
@@ -256,9 +256,41 @@ TabbedImpl::TabbedImpl()
 	vtable.set_rect = wz_tabbed_set_rect;
 
 	tabBar = new TabBarImpl;
-	wz_tab_bar_add_callback_tab_changed(tabBar, wz_tabbed_tab_bar_tab_changed);
+	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
 	wz_widget_add_child_widget(this, tabBar);
 }
+
+void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
+{
+	WZ_ASSERT(tab);
+	WZ_ASSERT(page);
+
+	// Add the tab.
+	*tab = tabBar->createTab();
+
+	// Add the page widget.
+	*page = wz_tab_page_create(renderer);
+	wz_widget_set_visible(*page, tabBar->getSelectedTab() == *tab);
+	wz_widget_add_child_widget(this, *page);
+
+	// Set the page widget rect.
+	int tabBarHeight = wz_widget_get_height(tabBar);
+	wz_widget_set_rect_args_internal(*page, 0, tabBarHeight, rect.w, rect.h - tabBarHeight);
+
+	// Add the tabbed page.
+	TabbedPage newPage;
+	newPage.tab = *tab;
+	newPage.page = *page;
+	pages.push_back(newPage);
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
 
 Tabbed::Tabbed()
 {
@@ -275,35 +307,8 @@ Tabbed::~Tabbed()
 
 Tab *Tabbed::addTab(Tab *tab)
 {
-	wz_tabbed_add_tab((TabbedImpl *)impl, &tab->impl->button, &tab->impl->page);
+	((TabbedImpl *)impl)->addTab(&tab->impl->button, &tab->impl->page);
 	return tab;
-}
-
-void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page)
-{
-	int tabBarHeight;
-	TabbedPage newPage;
-
-	WZ_ASSERT(tabbed);
-	WZ_ASSERT(tab);
-	WZ_ASSERT(page);
-
-	// Add the tab.
-	*tab = wz_tab_bar_create_tab(tabbed->tabBar);
-
-	// Add the page widget.
-	*page = wz_tab_page_create(tabbed->renderer);
-	wz_widget_set_visible(*page, wz_tab_bar_get_selected_tab(tabbed->tabBar) == *tab);
-	wz_widget_add_child_widget(tabbed, *page);
-
-	// Set the page widget rect.
-	tabBarHeight = wz_widget_get_height(tabbed->tabBar);
-	wz_widget_set_rect_args_internal(*page, 0, tabBarHeight, tabbed->rect.w, tabbed->rect.h - tabBarHeight);
-
-	// Add the tabbed page.
-	newPage.tab = *tab;
-	newPage.page = *page;
-	tabbed->pages.push_back(newPage);
 }
 
 } // namespace wz

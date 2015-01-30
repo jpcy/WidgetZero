@@ -496,6 +496,8 @@ struct ScrollerImpl : public WidgetImpl
 struct SpinnerImpl : public WidgetImpl
 {
 	SpinnerImpl();
+	int getValue() const;
+	void setValue(int value);
 
 	struct TextEditImpl *textEdit;
 	struct ButtonImpl *decrementButton;
@@ -505,6 +507,11 @@ struct SpinnerImpl : public WidgetImpl
 struct StackLayoutImpl : public WidgetImpl
 {
 	StackLayoutImpl(StackLayoutDirection direction, int spacing);
+	void setDirection(StackLayoutDirection direction);
+	void setSpacing(int spacing);
+	int getSpacing() const;
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
 
 	StackLayoutDirection direction;
 
@@ -515,6 +522,15 @@ struct StackLayoutImpl : public WidgetImpl
 struct TabBarImpl : public WidgetImpl
 {
 	TabBarImpl();
+	struct ButtonImpl *createTab();
+	void destroyTab(struct ButtonImpl *tab);
+	void clearTabs();
+	struct ButtonImpl *getDecrementButton();
+	struct ButtonImpl *getIncrementButton();
+	struct ButtonImpl *getSelectedTab();
+	void selectTab(struct ButtonImpl *tab);
+	void addCallbackTabChanged(EventCallback callback);
+	int getScrollValue() const;
 
 	struct ButtonImpl *selectedTab;
 	std::vector<struct ButtonImpl *> tabs;
@@ -536,6 +552,7 @@ TabbedPage;
 struct TabbedImpl : public WidgetImpl
 {
 	TabbedImpl();
+	void addTab(struct ButtonImpl **tab, struct WidgetImpl **page);
 
 	struct TabBarImpl *tabBar;
 	std::vector<TabbedPage> pages;
@@ -544,6 +561,34 @@ struct TabbedImpl : public WidgetImpl
 struct TextEditImpl : public WidgetImpl
 {
 	TextEditImpl(bool multiline, int maximumTextLength);
+	void setValidateTextCallback(TextEditValidateTextCallback callback);
+	bool isMultiline() const;
+	Border getBorder() const;
+	Rect getTextRect() const;
+	const char *getText() const;
+	void setText(const char *text);
+	int getScrollValue() const;
+	const char *getVisibleText() const;
+
+	// y is centered on the line.
+	Position getCursorPosition() const;
+
+	bool hasSelection() const;
+
+	// start is always < end if has_selection
+	int getSelectionStartIndex() const;
+
+	// y is centered on the line.
+	Position getSelectionStartPosition() const;
+
+	// end is always > start if has_selection
+	int getSelectionEndIndex() const;
+
+	// y is centered on the line.
+	Position getSelectionEndPosition() const;
+
+	// Calculate the position of the index - relative to text rect - based on the cursor index and scroll index. 
+	Position positionFromIndex(int index) const;
 
 	struct ScrollerImpl *scroller;
 	bool multiline;

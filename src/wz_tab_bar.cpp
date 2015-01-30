@@ -183,7 +183,7 @@ static void wz_tab_bar_invoke_tab_changed(struct TabBarImpl *tabBar)
 static void wz_tab_bar_button_pressed(Event *e)
 {
 	WZ_ASSERT(e);
-	wz_tab_bar_select_tab((struct TabBarImpl *)e->base.widget->parent, (struct ButtonImpl *)e->base.widget);
+	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct ButtonImpl *)e->base.widget);
 }
 
 static Size wz_tab_bar_measure(struct WidgetImpl *widget)
@@ -263,23 +263,19 @@ TabBarImpl::TabBarImpl()
 	wz_widget_set_overlap(incrementButton, true);
 }
 
-struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)
+struct ButtonImpl *TabBarImpl::createTab()
 {
-	struct ButtonImpl *tab;
-	Rect rect;
-	Event e;
-
-	WZ_ASSERT(tabBar);
-	tab = wz_tab_button_create();
+	struct ButtonImpl *tab = wz_tab_button_create();
 
 	// Position to the right of the last tab.
+	Rect rect;
 	rect.x = rect.y = 0;
 	rect.w = 50; // Default width.
-	rect.h = tabBar->rect.h;
+	rect.h = this->rect.h;
 
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
+	for (size_t i = 0; i < tabs.size(); i++)
 	{
-		Size size = wz_widget_get_size(tabBar->tabs[i]);
+		Size size = wz_widget_get_size(tabs[i]);
 		rect.x += size.w;
 	}
 
@@ -287,41 +283,38 @@ struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar)
 	tab->addCallbackPressed(wz_tab_bar_button_pressed);
 	tab->setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	tab->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_widget_add_child_widget(tabBar, tab);
-	tabBar->tabs.push_back(tab);
+	wz_widget_add_child_widget(this, tab);
+	tabs.push_back(tab);
 	wz_widget_set_rect_internal(tab, rect);
 
 	// Select the first tab added.
-	if (!tabBar->selectedTab)
+	if (!selectedTab)
 	{
 		tab->set(true);
-		tabBar->selectedTab = tab;
-		wz_tab_bar_invoke_tab_changed(tabBar);
+		selectedTab = tab;
+		wz_tab_bar_invoke_tab_changed(this);
 	}
 
-	wz_tab_bar_update_scroll_buttons(tabBar);
+	wz_tab_bar_update_scroll_buttons(this);
 
 	// Invoke the tab added event.
+	Event e;
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
-	e.tabBar.tabBar = tabBar;
+	e.tabBar.tabBar = this;
 	e.tabBar.tab = tab;
 	wz_invoke_event(&e);
 
 	return tab;
 }
 
-void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
+void TabBarImpl::destroyTab(struct ButtonImpl *tab)
 {
-	int deleteIndex;
-	Event e;
-
-	WZ_ASSERT(tabBar);
 	WZ_ASSERT(tab);
-	deleteIndex = -1;
+	int deleteIndex = -1;
 
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
+	for (size_t i = 0; i < tabs.size(); i++)
 	{
-		if (tabBar->tabs[i] == tab)
+		if (tabs[i] == tab)
 		{
 			deleteIndex = (int)i;
 			break;
@@ -332,92 +325,84 @@ void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
 		return;
 
 	// Invoke the tab removed event.
+	Event e;
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
-	e.tabBar.tabBar = tabBar;
-	e.tabBar.tab = tabBar->tabs[deleteIndex];
+	e.tabBar.tabBar = this;
+	e.tabBar.tab = tabs[deleteIndex];
 	wz_invoke_event(&e);
 
 	// Delete the tab.
-	tabBar->tabs.erase(tabBar->tabs.begin() + deleteIndex);
-	wz_widget_destroy_child_widget(tabBar, tab);
+	tabs.erase(tabs.begin() + deleteIndex);
+	wz_widget_destroy_child_widget(this, tab);
 }
 
-void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar)
+void TabBarImpl::clearTabs()
 {
-	WZ_ASSERT(tabBar);
-
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
+	for (size_t i = 0; i < tabs.size(); i++)
 	{
-		Event e;
-
 		// Invoke the tab removed event.
+		Event e;
 		e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
-		e.tabBar.tabBar = tabBar;
-		e.tabBar.tab = tabBar->tabs[i];
+		e.tabBar.tabBar = this;
+		e.tabBar.tab = tabs[i];
 		wz_invoke_event(&e);
 
 		// Destroy the tab.
-		wz_widget_destroy_child_widget(tabBar, tabBar->tabs[i]);
+		wz_widget_destroy_child_widget(this, tabs[i]);
 	}
 
-	tabBar->tabs.clear();
-	tabBar->selectedTab = NULL;
-	tabBar->scrollValue = 0;
-	wz_widget_set_visible(tabBar->decrementButton, false);
-	wz_widget_set_visible(tabBar->incrementButton, false);
+	tabs.clear();
+	selectedTab = NULL;
+	scrollValue = 0;
+	wz_widget_set_visible(decrementButton, false);
+	wz_widget_set_visible(incrementButton, false);
 }
 
-struct ButtonImpl *wz_tab_bar_get_decrement_button(struct TabBarImpl *tabBar)
+struct ButtonImpl *TabBarImpl::getDecrementButton()
 {
-	WZ_ASSERT(tabBar);
-	return tabBar->decrementButton;
+	return decrementButton;
 }
 
-struct ButtonImpl *wz_tab_bar_get_increment_button(struct TabBarImpl *tabBar)
+struct ButtonImpl *TabBarImpl::getIncrementButton()
 {
-	WZ_ASSERT(tabBar);
-	return tabBar->incrementButton;
+	return incrementButton;
 }
 
-struct ButtonImpl *wz_tab_bar_get_selected_tab(struct TabBarImpl *tabBar)
+struct ButtonImpl *TabBarImpl::getSelectedTab()
 {
-	WZ_ASSERT(tabBar);
-	return tabBar->selectedTab;
+	return selectedTab;
 }
 
-void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab)
+void TabBarImpl::selectTab(struct ButtonImpl *tab)
 {
-	WZ_ASSERT(tabBar);
 	WZ_ASSERT(tab);
 
-	if (tabBar->selectedTab == tab)
+	if (selectedTab == tab)
 		return; // Already selected.
 
 	tab->set(true);
-	tabBar->selectedTab = tab;
+	selectedTab = tab;
 
 	// Unset all the other tab bar buttons.
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
+	for (size_t i = 0; i < tabs.size(); i++)
 	{
-		if (tabBar->tabs[i] != tabBar->selectedTab)
+		if (tabs[i] != selectedTab)
 		{
-			tabBar->tabs[i]->set(false);
+			tabs[i]->set(false);
 		}
 	}
 	
-	wz_tab_bar_invoke_tab_changed(tabBar);
+	wz_tab_bar_invoke_tab_changed(this);
 }
 
-void wz_tab_bar_add_callback_tab_changed(struct TabBarImpl *tabBar, EventCallback callback)
+void TabBarImpl::addCallbackTabChanged(EventCallback callback)
 {
-	WZ_ASSERT(tabBar);
-	tabBar->tab_changed_callbacks.push_back(callback);
+	tab_changed_callbacks.push_back(callback);
 }
 
-int wz_tab_bar_get_scroll_value(const struct TabBarImpl *tabBar)
+int TabBarImpl::getScrollValue() const
 {
-	WZ_ASSERT(tabBar);
-	return tabBar->scrollValue;
+	return scrollValue;
 }
 
 } // namespace wz

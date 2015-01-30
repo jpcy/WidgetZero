@@ -84,7 +84,7 @@ static void wz_spinner_decrement_button_clicked(Event *e)
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
 	spinner = (struct SpinnerImpl *)e->base.widget->parent;
-	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) - 1);
+	spinner->setValue(spinner->getValue() - 1);
 }
 
 static void wz_spinner_increment_button_draw(struct WidgetImpl *widget, Rect clip)
@@ -101,7 +101,7 @@ static void wz_spinner_increment_button_clicked(Event *e)
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
 	spinner = (struct SpinnerImpl *)e->base.widget->parent;
-	wz_spinner_set_value(spinner, wz_spinner_get_value(spinner) + 1);
+	spinner->setValue(spinner->getValue() + 1);
 }
 
 static Size wz_spinner_measure(struct WidgetImpl *widget)
@@ -110,7 +110,7 @@ static Size wz_spinner_measure(struct WidgetImpl *widget)
 	Size size;
 	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
 
-	border = wz_text_edit_get_border(spinner->textEdit);
+	border = spinner->textEdit->getBorder();
 	size.w = 100;
 	size.h = wz_widget_get_line_height(widget) + border.top + border.bottom;
 	return size;
@@ -125,7 +125,7 @@ static void wz_spinner_renderer_changed(struct WidgetImpl *widget)
 	spinner = (struct SpinnerImpl *)widget;
 
 	// Shrink the text edit border to exclude the increment and decrement buttons.
-	textEditBorder = wz_text_edit_get_border(spinner->textEdit);
+	textEditBorder = spinner->textEdit->getBorder();
 	textEditBorder.right += 16;
 	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
 }
@@ -148,7 +148,7 @@ SpinnerImpl::SpinnerImpl()
 
 	textEdit = new TextEditImpl(false, 256);
 	wz_widget_set_stretch(textEdit, WZ_STRETCH);
-	wz_text_edit_set_validate_text_callback(textEdit, wz_spinner_validate_text);
+	textEdit->setValidateTextCallback(wz_spinner_validate_text);
 	wz_widget_add_child_widget(this, textEdit);
 
 	decrementButton = new ButtonImpl();
@@ -172,6 +172,28 @@ SpinnerImpl::SpinnerImpl()
 	wz_widget_add_child_widget(this, incrementButton);
 }
 
+int SpinnerImpl::getValue() const
+{
+	int value = 0;
+	sscanf(textEdit->getText(), "%d", &value);
+	return value;
+}
+
+void SpinnerImpl::setValue(int value)
+{
+	char buffer[32];
+	sprintf(buffer, "%d", value);
+	textEdit->setText(buffer);
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
 Spinner::Spinner()
 {
 	impl = new SpinnerImpl;
@@ -187,31 +209,13 @@ Spinner::~Spinner()
 
 Spinner *Spinner::setValue(int value)
 {
-	wz_spinner_set_value((SpinnerImpl *)impl, value);
+	((SpinnerImpl *)impl)->setValue(value);
 	return this;
 }
 
 int Spinner::getValue() const
 {
-	return wz_spinner_get_value((SpinnerImpl *)impl);
-}
-
-int wz_spinner_get_value(const struct SpinnerImpl *spinner)
-{
-	int value = 0;
-
-	WZ_ASSERT(spinner);
-	sscanf(wz_text_edit_get_text(spinner->textEdit), "%d", &value);
-	return value;
-}
-
-void wz_spinner_set_value(struct SpinnerImpl *spinner, int value)
-{
-	char buffer[32];
-
-	WZ_ASSERT(spinner);
-	sprintf(buffer, "%d", value);
-	wz_text_edit_set_text(spinner->textEdit, buffer);
+	return ((SpinnerImpl *)impl)->getValue();
 }
 
 } // namespace wz

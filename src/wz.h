@@ -375,65 +375,8 @@ struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget);
 
 struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 
-int wz_spinner_get_value(const struct SpinnerImpl *spinner);
-void wz_spinner_set_value(struct SpinnerImpl *spinner, int value);
-
-typedef enum
-{
-	WZ_STACK_LAYOUT_VERTICAL,
-	WZ_STACK_LAYOUT_HORIZONTAL,
-}
-StackLayoutDirection;
-
-void wz_stack_layout_set_direction(struct StackLayoutImpl *stackLayout, StackLayoutDirection direction);
-void wz_stack_layout_set_spacing(struct StackLayoutImpl *stackLayout, int spacing);
-int wz_stack_layout_get_spacing(const struct StackLayoutImpl *stackLayout);
-void wz_stack_layout_add(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
-void wz_stack_layout_remove(struct StackLayoutImpl *stackLayout, struct WidgetImpl *widget);
-
-struct ButtonImpl *wz_tab_bar_create_tab(struct TabBarImpl *tabBar);
-void wz_tab_bar_destroy_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
-void wz_tab_bar_clear_tabs(struct TabBarImpl *tabBar);
-struct ButtonImpl *wz_tab_bar_get_decrement_button(struct TabBarImpl *tabBar);
-struct ButtonImpl *wz_tab_bar_get_increment_button(struct TabBarImpl *tabBar);
-struct ButtonImpl *wz_tab_bar_get_selected_tab(struct TabBarImpl *tabBar);
-void wz_tab_bar_select_tab(struct TabBarImpl *tabBar, struct ButtonImpl *tab);
-void wz_tab_bar_add_callback_tab_changed(struct TabBarImpl *tabBar, EventCallback callback);
-int wz_tab_bar_get_scroll_value(const struct TabBarImpl *tabBar);
-
-void wz_tabbed_add_tab(struct TabbedImpl *tabbed, struct ButtonImpl **tab, struct WidgetImpl **page);
 void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
-
-typedef bool (*TextEditValidateTextCallback)(const char *text);
-
-void wz_text_edit_set_validate_text_callback(struct TextEditImpl *textEdit, TextEditValidateTextCallback callback);
-bool wz_text_edit_is_multiline(const struct TextEditImpl *textEdit);
-Border wz_text_edit_get_border(const struct TextEditImpl *textEdit);
-Rect wz_text_edit_get_text_rect(const struct TextEditImpl *textEdit);
-const char *wz_text_edit_get_text(const struct TextEditImpl *textEdit);
-void wz_text_edit_set_text(struct TextEditImpl *textEdit, const char *text);
-int wz_text_edit_get_scroll_value(const struct TextEditImpl *textEdit);
-const char *wz_text_edit_get_visible_text(const struct TextEditImpl *textEdit);
-
-// y is centered on the line.
-Position wz_text_edit_get_cursor_position(const struct TextEditImpl *textEdit);
-
-bool wz_text_edit_has_selection(const struct TextEditImpl *textEdit);
-
-// start is always < end if wz_text_edit_has_selection
-int wz_text_edit_get_selection_start_index(const struct TextEditImpl *textEdit);
-
-// y is centered on the line.
-Position wz_text_edit_get_selection_start_position(const struct TextEditImpl *textEdit);
-
-// end is always > start if wz_text_edit_has_selection
-int wz_text_edit_get_selection_end_index(const struct TextEditImpl *textEdit);
-
-// y is centered on the line.
-Position wz_text_edit_get_selection_end_position(const struct TextEditImpl *textEdit);
-
-Position wz_text_edit_position_from_index(const struct TextEditImpl *textEdit, int index);
 
 typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
 typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
@@ -644,6 +587,7 @@ public:
 	void createMenuButton(const std::string &label);
 	void dockWindow(Window *window, DockPosition dockPosition);
 
+private:
 	MainWindowImpl *impl;
 };
 
@@ -684,6 +628,13 @@ public:
 	int getValue() const;
 };
 
+typedef enum
+{
+	WZ_STACK_LAYOUT_VERTICAL,
+	WZ_STACK_LAYOUT_HORIZONTAL,
+}
+StackLayoutDirection;
+
 class StackLayout : public Widget
 {
 public:
@@ -716,6 +667,8 @@ public:
 	~Tabbed();
 	Tab *addTab(Tab *tab);
 };
+
+typedef bool (*TextEditValidateTextCallback)(const char *text);
 
 class TextEdit : public Widget
 {

@@ -147,7 +147,7 @@ static void wz_main_window_refresh_dock_tab_bar(struct MainWindowImpl *mainWindo
 		int tabBarHeight;
 
 		// Clear the tabs.
-		wz_tab_bar_clear_tabs(tabBar);
+		tabBar->clearTabs();
 
 		// Resize the tab bar to match the window(s) at this dock position. Just use the first window, doesn't matter which.
 		windowRect = wz_widget_get_rect(mainWindow->dockedWindows[dockPosition][0]);
@@ -162,7 +162,7 @@ static void wz_main_window_refresh_dock_tab_bar(struct MainWindowImpl *mainWindo
 			struct WindowImpl *window = mainWindow->dockedWindows[dockPosition][i];
 
 			// Create a new tab.
-			struct ButtonImpl *tab = wz_tab_bar_create_tab(tabBar);
+			struct ButtonImpl *tab = tabBar->createTab();
 			tab->setLabel(window->getTitle());
 
 			// Set the tab internal metadata to the window.
@@ -171,7 +171,7 @@ static void wz_main_window_refresh_dock_tab_bar(struct MainWindowImpl *mainWindo
 			// If this window is selected (visible), select the corresponding tab.
 			if (wz_widget_get_visible(window))
 			{
-				wz_tab_bar_select_tab(tabBar, tab);
+				tabBar->selectTab(tab);
 			}
 		}
 
@@ -1471,7 +1471,7 @@ MainWindowImpl::MainWindowImpl(struct wzRenderer *renderer)
 		dockTabBars[i] = new TabBarImpl;
 		wz_widget_set_visible(dockTabBars[i], false);
 		wz_widget_add_child_widget(this, dockTabBars[i]);
-		wz_tab_bar_add_callback_tab_changed(dockTabBars[i], wz_main_window_dock_tab_bar_tab_changed);
+		dockTabBars[i]->addCallbackTabChanged(wz_main_window_dock_tab_bar_tab_changed);
 	}
 }
 
