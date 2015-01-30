@@ -208,7 +208,7 @@ static int wz_text_edit_index_from_relative_position(const struct TextEditImpl *
 	WZ_ASSERT(textEdit);
 
 	// Calculate relative position.
-	rect = wz_widget_get_absolute_rect((const struct WidgetImpl *)textEdit);
+	rect = wz_widget_get_absolute_rect(textEdit);
 
 	if (textEdit->multiline)
 	{
@@ -341,7 +341,7 @@ static int wz_text_edit_index_from_position(const struct TextEditImpl *textEdit,
 	Position pos;
 
 	// Make position relative.
-	rect = wz_widget_get_absolute_rect((const struct WidgetImpl *)textEdit);
+	rect = wz_widget_get_absolute_rect(textEdit);
 	pos.x = x - rect.x;
 	pos.y = y - rect.y;
 
@@ -538,7 +538,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	}
 
 	// Cursor.
-	if (wz_main_window_text_cursor_is_visible(widget->mainWindow) && wz_widget_has_keyboard_focus((const struct WidgetImpl *)textEdit))
+	if (wz_main_window_text_cursor_is_visible(widget->mainWindow) && wz_widget_has_keyboard_focus(textEdit))
 	{
 		Position position;
 		
@@ -993,9 +993,9 @@ Rect wz_text_edit_get_text_rect(const struct TextEditImpl *textEdit)
 	textRect.w -= textEdit->border.left + textEdit->border.right;
 	textRect.h -= textEdit->border.top + textEdit->border.bottom;
 
-	if (textEdit->multiline && wz_widget_get_visible((const struct WidgetImpl *)textEdit->scroller))
+	if (textEdit->multiline && wz_widget_get_visible(textEdit->scroller))
 	{
-		textRect.w -= wz_widget_get_width((const struct WidgetImpl *)textEdit->scroller);
+		textRect.w -= wz_widget_get_width(textEdit->scroller);
 	}
 
 	return textRect;

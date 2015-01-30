@@ -195,7 +195,7 @@ void wz_main_window_update_docked_window_rect(struct MainWindowImpl *mainWindow,
 
 	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(window);
-	rect = wz_widget_get_rect((const struct WidgetImpl *)window);
+	rect = wz_widget_get_rect(window);
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -239,7 +239,7 @@ static void wz_main_window_update_docking_rects(struct MainWindowImpl *mainWindo
 
 		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
 		windowRect = wz_widget_get_rect(mainWindow->dockedWindows[i][0]);
-		menuBarHeight = mainWindow->menuBar ? wz_widget_get_height((const struct WidgetImpl *)mainWindow->menuBar) : 0;
+		menuBarHeight = mainWindow->menuBar ? wz_widget_get_height(mainWindow->menuBar) : 0;
 
 		switch (i)
 		{
@@ -306,7 +306,7 @@ static Rect wz_main_window_calculate_dock_window_rect(struct MainWindowImpl *mai
 	const float maxPreviewSizeMultiplier = 0.3f;
 
 	WZ_ASSERT(mainWindow);
-	menuBarHeight = mainWindow->menuBar ? wz_widget_get_height((const struct WidgetImpl *)mainWindow->menuBar) : 0;
+	menuBarHeight = mainWindow->menuBar ? wz_widget_get_height(mainWindow->menuBar) : 0;
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
 	nDockedWindows = mainWindow->dockedWindows[dockPosition].size();
@@ -457,7 +457,7 @@ void wz_main_window_undock_window(struct MainWindowImpl *mainWindow, struct Wind
 	nDockedWindows = mainWindow->dockedWindows[dockPosition].size();
 
 	// If there are other windows docked at this position, make sure one is visible after removing this window.
-	if (wz_widget_get_visible((const struct WidgetImpl *)window) && nDockedWindows > 0)
+	if (wz_widget_get_visible(window) && nDockedWindows > 0)
 	{
 		wz_widget_set_visible(mainWindow->dockedWindows[dockPosition][0], true);
 	}
@@ -466,7 +466,7 @@ void wz_main_window_undock_window(struct MainWindowImpl *mainWindow, struct Wind
 	wz_main_window_refresh_dock_tab_bar(mainWindow, dockPosition);
 
 	// If the dock tab bar is hidden, resize the windows at this dock position to reclaim the space it used.
-	if (!wz_widget_get_visible((const struct WidgetImpl *)mainWindow->dockTabBars[dockPosition]))
+	if (!wz_widget_get_visible(mainWindow->dockTabBars[dockPosition]))
 	{
 		for (size_t j = 0; j < mainWindow->dockedWindows[dockPosition].size(); j++)
 		{
@@ -1201,8 +1201,8 @@ static int wz_compare_window_draw_priorities_docked(const void *a, const void *b
 
 	window1 = *((const struct WindowImpl **)a);
 	window2 = *((const struct WindowImpl **)b);
-	window1Docked = wz_main_window_get_window_dock_position(((const struct WidgetImpl *)window1)->mainWindow, window1) != WZ_DOCK_POSITION_NONE;
-	window2Docked = wz_main_window_get_window_dock_position(((const struct WidgetImpl *)window2)->mainWindow, window2) != WZ_DOCK_POSITION_NONE;
+	window1Docked = wz_main_window_get_window_dock_position((window1)->mainWindow, window1) != WZ_DOCK_POSITION_NONE;
+	window2Docked = wz_main_window_get_window_dock_position((window2)->mainWindow, window2) != WZ_DOCK_POSITION_NONE;
 
 	if (window1Docked && !window2Docked)
 	{

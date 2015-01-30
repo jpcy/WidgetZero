@@ -48,7 +48,7 @@ static void wz_scroller_nub_container_mouse_button_down(struct WidgetImpl *widge
 		return;
 
 	scroller = (struct ScrollerImpl *)widget->parent->parent;
-	nubRect = wz_widget_get_absolute_rect((const struct WidgetImpl *)scroller->nub);
+	nubRect = wz_widget_get_absolute_rect(scroller->nub);
 
 	if ((scroller->scrollerType == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->scrollerType == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
 	{
