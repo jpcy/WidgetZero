@@ -34,7 +34,7 @@ static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 	struct NVGcontext *vg = widget->renderer->vg;
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const Rect contentRect = wz_widget_get_absolute_rect(window->content);
-	const Rect headerRect = wz_window_get_header_rect(window);
+	const Rect headerRect = window->getHeaderRect();
 
 	nvgSave(vg);
 	nvgBeginPath(vg);
@@ -172,7 +172,7 @@ static void wz_window_mouse_button_down(struct WidgetImpl *widget, int mouseButt
 		int i;
 
 		// Drag the header.
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, wz_window_get_header_rect(window)))
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, window->getHeaderRect()))
 		{
 			window->drag = WZ_DRAG_HEADER;
 			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
@@ -432,95 +432,50 @@ WindowImpl::WindowImpl(const std::string &title)
 	wz_widget_add_child_widget(this, content);
 }
 
-Window::Window()
+int WindowImpl::getHeaderHeight() const
 {
-	impl = new WindowImpl(NULL);
+	return headerHeight;
 }
 
-Window::Window(const std::string &title)
+int WindowImpl::getBorderSize() const
 {
-	impl = new WindowImpl(title);
+	return borderSize;
 }
 
-Window::~Window()
-{
-	delete impl;
-}
-
-const char *Window::getTitle() const
-{
-	return wz_window_get_title((WindowImpl *)impl);
-}
-
-Window *Window::setTitle(const std::string &title)
-{
-	wz_window_set_title((WindowImpl *)impl, title.c_str());
-	return this;
-}
-
-Widget *Window::add(Widget *widget)
-{
-	wz_window_add((WindowImpl *)impl, widget->impl);
-	return widget;
-}
-
-void Window::remove(Widget *widget)
-{
-	wz_window_remove((WindowImpl *)impl, widget->impl);
-}
-
-int wz_window_get_header_height(const struct WindowImpl *window)
-{
-	WZ_ASSERT(window);
-	return window->headerHeight;
-}
-
-int wz_window_get_border_size(const struct WindowImpl *window)
-{
-	WZ_ASSERT(window);
-	return window->borderSize;
-}
-
-Rect wz_window_get_header_rect(const struct WindowImpl *window)
+Rect WindowImpl::getHeaderRect() const
 {
 	Rect rect;
-
-	WZ_ASSERT(window);
-	rect.x = window->rect.x + window->borderSize;
-	rect.y = window->rect.y + window->borderSize;
-	rect.w = window->rect.w - window->borderSize * 2;
-	rect.h = window->headerHeight;
+	rect.x = this->rect.x + borderSize;
+	rect.y = this->rect.y + borderSize;
+	rect.w = this->rect.w - borderSize * 2;
+	rect.h = headerHeight;
 	return rect;
 }
 
-void wz_window_set_title(struct WindowImpl *window, const char *title)
+void WindowImpl::setTitle(const char *title)
 {
-	WZ_ASSERT(window);
-	window->title = std::string(title);
+	this->title = title;
 }
 
-const char *wz_window_get_title(const struct WindowImpl *window)
+const char *WindowImpl::getTitle() const
 {
-	WZ_ASSERT(window);
-	return window->title.c_str();
+	return title.c_str();
 }
 
-void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget)
+void WindowImpl::add(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(window);
 	WZ_ASSERT(widget);
 
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(window->content, widget);
+	wz_widget_add_child_widget(content, widget);
 }
 
-void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget)
+void WindowImpl::remove(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(window);
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(window->content, widget);
+	wz_widget_remove_child_widget(content, widget);
 }
 
 struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window)
@@ -547,6 +502,43 @@ void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority)
 {
 	WZ_ASSERT(window);
 	window->drawPriority = drawPriority;
+}
+
+Window::Window()
+{
+	impl = new WindowImpl(NULL);
+}
+
+Window::Window(const std::string &title)
+{
+	impl = new WindowImpl(title);
+}
+
+Window::~Window()
+{
+	delete impl;
+}
+
+const char *Window::getTitle() const
+{
+	return ((WindowImpl *)impl)->getTitle();
+}
+
+Window *Window::setTitle(const std::string &title)
+{
+	((WindowImpl *)impl)->setTitle(title.c_str());
+	return this;
+}
+
+Widget *Window::add(Widget *widget)
+{
+	((WindowImpl *)impl)->add(widget->impl);
+	return widget;
+}
+
+void Window::remove(Widget *widget)
+{
+	((WindowImpl *)impl)->remove(widget->impl);
 }
 
 } // namespace wz

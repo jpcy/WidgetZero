@@ -163,7 +163,7 @@ static void wz_main_window_refresh_dock_tab_bar(struct MainWindowImpl *mainWindo
 
 			// Create a new tab.
 			struct ButtonImpl *tab = wz_tab_bar_create_tab(tabBar);
-			tab->setLabel(wz_window_get_title(window));
+			tab->setLabel(window->getTitle());
 
 			// Set the tab internal metadata to the window.
 			wz_widget_set_internal_metadata(tab, window);
@@ -1410,8 +1410,8 @@ void MainWindow::remove(Widget *widget)
 
 void MainWindow::createMenuButton(const std::string &label)
 {
-	MenuBarButtonImpl *button = wz_menu_bar_create_button(impl->menuBar);
-	wz_menu_bar_button_set_label(button, label.c_str());
+	MenuBarButtonImpl *button = impl->menuBar->createButton();
+	button->setLabel(label.c_str());
 }
 
 void MainWindow::dockWindow(Window *window, DockPosition dockPosition)

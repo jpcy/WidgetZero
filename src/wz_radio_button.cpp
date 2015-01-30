@@ -136,43 +136,13 @@ RadioButton::~RadioButton()
 
 const char *RadioButton::getLabel() const
 {
-	return wz_radio_button_get_label((const RadioButtonImpl *)impl);
+	return ((const ButtonImpl *)impl)->getLabel();
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	wz_radio_button_set_label((RadioButtonImpl *)impl, label.c_str());
+	((ButtonImpl *)impl)->setLabel(label.c_str());
 	return this;
-}
-
-void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label)
-{
-	WZ_ASSERT(radioButton);
-	radioButton->setLabel(label);
-}
-
-const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton)
-{
-	WZ_ASSERT(radioButton);
-	return radioButton->label.c_str();
-}
-
-bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton)
-{
-	WZ_ASSERT(radioButton);
-	return radioButton->isSet();
-}
-
-void wz_radio_button_set(struct RadioButtonImpl *radioButton, bool value)
-{
-	WZ_ASSERT(radioButton);
-	radioButton->set(value);
-}
-
-void wz_radio_button_add_callback_clicked(struct RadioButtonImpl *radioButton, EventCallback callback)
-{
-	WZ_ASSERT(radioButton);
-	radioButton->addCallbackClicked(callback);
 }
 
 } // namespace wz

@@ -375,89 +375,6 @@ struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget);
 
 struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 
-int wz_window_get_header_height(const struct WindowImpl *window);
-int wz_window_get_border_size(const struct WindowImpl *window);
-Rect wz_window_get_header_rect(const struct WindowImpl *window);
-void wz_window_set_title(struct WindowImpl *window, const char *title);
-const char *wz_window_get_title(const struct WindowImpl *window);
-void wz_window_add(struct WindowImpl *window, struct WidgetImpl *widget);
-void wz_window_remove(struct WindowImpl *window, struct WidgetImpl *widget);
-
-struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo);
-bool wz_combo_is_open(struct ComboImpl *combo);
-
-void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget);
-void wz_frame_remove(struct FrameImpl *frame, struct WidgetImpl *widget);
-
-void wz_group_box_set_label(struct GroupBoxImpl *groupBox, const char *label);
-const char *wz_group_box_get_label(const struct GroupBoxImpl *groupBox);
-void wz_group_box_add(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
-void wz_group_box_remove(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget);
-
-void wz_label_set_multiline(struct LabelImpl *label, bool multiline);
-bool wz_label_get_multiline(const struct LabelImpl *label);
-void wz_label_set_text(struct LabelImpl *label, const char *text);
-const char *wz_label_get_text(const struct LabelImpl *label);
-void wz_label_set_text_color(struct LabelImpl *label, NVGcolor color);
-NVGcolor wz_label_get_text_color(const struct LabelImpl *label);
-
-typedef void (*DrawListItemCallback)(struct wzRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
-
-Border wz_list_get_items_border(const struct ListImpl *list);
-Rect wz_list_get_items_rect(const struct ListImpl *list);
-
-// rect will be absolute - ancestor window position is taken into account.
-Rect wz_list_get_absolute_items_rect(const struct ListImpl *list);
-
-void wz_list_set_draw_item_callback(struct ListImpl *list, DrawListItemCallback callback);
-DrawListItemCallback wz_list_get_draw_item_callback(const struct ListImpl *list);
-void wz_list_set_item_data(struct ListImpl *list, uint8_t *itemData);
-uint8_t *wz_list_get_item_data(const struct ListImpl *list);
-void wz_list_set_item_stride(struct ListImpl *list, int itemStride);
-int wz_list_get_item_stride(const struct ListImpl *list);
-void wz_list_set_item_height(struct ListImpl *list, int itemHeight);
-int wz_list_get_item_height(const struct ListImpl *list);
-void wz_list_set_num_items(struct ListImpl *list, int nItems);
-int wz_list_get_num_items(const struct ListImpl *list);
-int wz_list_get_first_item(const struct ListImpl *list);
-void wz_list_set_selected_item(struct ListImpl *list, int selectedItem);
-int wz_list_get_selected_item(const struct ListImpl *list);
-int wz_list_get_pressed_item(const struct ListImpl *list);
-int wz_list_get_hovered_item(const struct ListImpl *list);
-int wz_list_get_scroll_value(const struct ListImpl *list);
-void wz_list_add_callback_item_selected(struct ListImpl *list, EventCallback callback);
-
-struct MenuBarButtonImpl *wz_menu_bar_create_button(struct MenuBarImpl *menuBar);
-
-void wz_menu_bar_button_set_label(struct MenuBarButtonImpl *button, const char *label);
-const char *wz_menu_bar_button_get_label(const struct MenuBarButtonImpl *button);
-bool wz_menu_bar_button_is_pressed(const struct MenuBarButtonImpl *button);
-
-void wz_radio_button_set_label(struct RadioButtonImpl *radioButton, const char *label);
-const char *wz_radio_button_get_label(const struct RadioButtonImpl *radioButton);
-bool wz_radio_button_is_set(const struct RadioButtonImpl *radioButton);
-void wz_radio_button_set(struct RadioButtonImpl *radioButton, bool value);
-void wz_radio_button_add_callback_clicked(struct RadioButtonImpl *radioButton, EventCallback callback);
-
-typedef enum
-{
-	WZ_SCROLLER_VERTICAL,
-	WZ_SCROLLER_HORIZONTAL
-}
-ScrollerType;
-
-ScrollerType wz_scroller_get_type(const struct ScrollerImpl *scroller);
-int wz_scroller_get_value(const struct ScrollerImpl *scroller);
-void wz_scroller_set_value(struct ScrollerImpl *scroller, int value);
-void wz_scroller_decrement_value(struct ScrollerImpl *scroller);
-void wz_scroller_increment_value(struct ScrollerImpl *scroller);
-void wz_scroller_set_step_value(struct ScrollerImpl *scroller, int stepValue);
-int wz_scroller_get_step_value(struct ScrollerImpl *scroller);
-void wz_scroller_set_max_value(struct ScrollerImpl *scroller, int maxValue);
-void wz_scroller_set_nub_scale(struct ScrollerImpl *scroller, float nubScale);
-void wz_scroller_get_nub_state(const struct ScrollerImpl *scroller, Rect *containerRect, Rect *rect, bool *hover, bool *pressed);
-void wz_scroller_add_callback_value_changed(struct ScrollerImpl *scroller, EventCallback callback);
-
 int wz_spinner_get_value(const struct SpinnerImpl *spinner);
 void wz_spinner_set_value(struct SpinnerImpl *spinner, int value);
 
@@ -688,6 +605,8 @@ public:
 	Label *setMultiline(bool multiline);
 };
 
+typedef void (*DrawListItemCallback)(struct wzRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+
 class List : public Widget
 {
 public:
@@ -737,6 +656,13 @@ public:
 	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);
 };
+
+typedef enum
+{
+	WZ_SCROLLER_VERTICAL,
+	WZ_SCROLLER_HORIZONTAL
+}
+ScrollerType;
 
 class Scroller : public Widget
 {

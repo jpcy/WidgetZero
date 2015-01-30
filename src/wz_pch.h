@@ -295,19 +295,27 @@ struct CheckBoxImpl : public ButtonImpl
 struct ComboImpl : public WidgetImpl
 {
 	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
+	struct ListImpl *getList();
+	bool isOpen() const;
 
-	bool isOpen;
+	bool isOpen_;
 	struct ListImpl *list;
 };
 
 struct FrameImpl : public WidgetImpl
 {
 	FrameImpl();
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
 };
 
 struct GroupBoxImpl : public WidgetImpl
 {
 	GroupBoxImpl(const std::string &label = std::string());
+	void setLabel(const char *label);
+	const char *getLabel() const;
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
 
 	struct WidgetImpl *content;
 	std::string label;
@@ -316,6 +324,12 @@ struct GroupBoxImpl : public WidgetImpl
 struct LabelImpl : public WidgetImpl
 {
 	LabelImpl(const std::string &text = std::string());
+	void setMultiline(bool multiline);
+	bool getMultiline() const;
+	void setText(const char *text);
+	const char *getText() const;
+	void setTextColor(NVGcolor color);
+	NVGcolor getTextColor() const;
 
 	std::string text;
 	bool multiline;
@@ -326,6 +340,29 @@ struct LabelImpl : public WidgetImpl
 struct ListImpl : public WidgetImpl
 {
 	ListImpl(uint8_t *itemData, int itemStride, int nItems);
+	Border getItemsBorder() const;
+	Rect getItemsRect() const;
+
+	// rect will be absolute - ancestor window position is taken into account.
+	Rect getAbsoluteItemsRect() const;
+
+	void setDrawItemCallback(DrawListItemCallback callback);
+	DrawListItemCallback getDrawItemCallback() const;
+	void setItemData(uint8_t *itemData);
+	uint8_t *getItemData() const;
+	void setItemStride(int itemStride);
+	int getItemStride() const;
+	void setItemHeight(int itemHeight);
+	int getItemHeight() const;
+	void setNumItems(int nItems);
+	int getNumItems() const;
+	int getFirstItem() const;
+	void setSelectedItem(int selectedItem);
+	int getSelectedItem() const;
+	int getPressedItem() const;
+	int getHoveredItem() const;
+	int getScrollValue() const;
+	void addCallbackItemSelected(EventCallback callback);
 
 	Border itemsBorder;
 	DrawListItemCallback draw_item;
@@ -395,10 +432,13 @@ struct MainWindowImpl : public WidgetImpl
 struct MenuBarButtonImpl : public WidgetImpl
 {
 	MenuBarButtonImpl();
+	void setLabel(const char *label);
+	const char *getLabel() const;
+	bool isPressed() const;
 
 	Border padding;
 	std::string label;
-	bool isPressed;
+	bool isPressed_;
 	bool isSet;
 	std::vector<EventCallback> pressed_callbacks;
 	struct MenuBarImpl *menuBar;
@@ -407,6 +447,7 @@ struct MenuBarButtonImpl : public WidgetImpl
 struct MenuBarImpl : public WidgetImpl
 {
 	MenuBarImpl();
+	struct MenuBarButtonImpl *createButton();
 
 	struct StackLayoutImpl *layout;
 };
@@ -433,6 +474,17 @@ struct ScrollerNub : public WidgetImpl
 struct ScrollerImpl : public WidgetImpl
 {
 	ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue);
+	ScrollerType getType() const;
+	int getValue() const;
+	void setValue(int value);
+	void decrementValue();
+	void incrementValue();
+	void setStepValue(int stepValue);
+	int getStepValue();
+	void setMaxValue(int maxValue);
+	void setNubScale(float nubScale);
+	void getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const;
+	void addCallbackValueChanged(EventCallback callback);
 
 	ScrollerType scrollerType;
 	int value, stepValue, maxValue;
@@ -524,6 +576,13 @@ WindowDrag;
 struct WindowImpl : public WidgetImpl
 {
 	WindowImpl(const std::string &title);
+	int getHeaderHeight() const;
+	int getBorderSize() const;
+	Rect getHeaderRect() const;
+	void setTitle(const char *title);
+	const char *getTitle() const;
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
 
 	int drawPriority;
 	int headerHeight;

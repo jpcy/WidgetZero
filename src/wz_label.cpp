@@ -84,6 +84,46 @@ LabelImpl::LabelImpl(const std::string &text) : text(text)
 	vtable.draw = wz_label_draw;
 }
 
+void LabelImpl::setMultiline(bool multiline)
+{
+	this->multiline = multiline;
+}
+
+bool LabelImpl::getMultiline() const
+{
+	return multiline;
+}
+
+void LabelImpl::setText(const char *text)
+{
+	this->text = text;
+	wz_widget_resize_to_measured(this);
+}
+
+const char *LabelImpl::getText() const
+{
+	return text.c_str();
+}
+
+void LabelImpl::setTextColor(NVGcolor color)
+{
+	textColor = color;
+	isTextColorUserSet = true;
+}
+
+NVGcolor LabelImpl::getTextColor() const
+{
+	return textColor;
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
 Label::Label()
 {
 	impl = new LabelImpl;
@@ -111,7 +151,7 @@ Label *Label::setText(const char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 	
-	wz_label_set_text((LabelImpl *)impl, buffer);
+	((LabelImpl *)impl)->setText(buffer);
 	return this;
 }
 
@@ -122,51 +162,14 @@ Label *Label::setTextColor(float r, float g, float b, float a)
 	color.g = g;
 	color.b = b;
 	color.a = a;
-	wz_label_set_text_color((LabelImpl *)impl, color);
+	((LabelImpl *)impl)->setTextColor(color);
 	return this;
 }
 
 Label *Label::setMultiline(bool multiline)
 {
-	wz_label_set_multiline((LabelImpl *)impl, multiline);
+	((LabelImpl *)impl)->setMultiline(multiline);
 	return this;
-}
-
-void wz_label_set_multiline(struct LabelImpl *label, bool multiline)
-{
-	WZ_ASSERT(label);
-	label->multiline = multiline;
-}
-
-bool wz_label_get_multiline(const struct LabelImpl *label)
-{
-	WZ_ASSERT(label);
-	return label->multiline;
-}
-
-void wz_label_set_text(struct LabelImpl *label, const char *text)
-{
-	WZ_ASSERT(label);
-	label->text = std::string(text);
-	wz_widget_resize_to_measured(label);
-}
-
-const char *wz_label_get_text(const struct LabelImpl *label)
-{
-	WZ_ASSERT(label);
-	return label->text.c_str();
-}
-
-void wz_label_set_text_color(struct LabelImpl *label, NVGcolor color)
-{
-	WZ_ASSERT(label);
-	label->textColor = color;
-	label->isTextColorUserSet = true;
-}
-
-NVGcolor wz_label_get_text_color(const struct LabelImpl *label)
-{
-	return label->textColor;
 }
 
 } // namespace wz

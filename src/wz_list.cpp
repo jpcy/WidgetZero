@@ -43,8 +43,8 @@ static void wz_list_update_scroller(struct ListImpl *list)
 
 	// Update max value.
 	maxHeight = list->nItems * list->itemHeight;
-	max = maxHeight - wz_list_get_items_rect(list).h;
-	wz_scroller_set_max_value(list->scroller, max);
+	max = maxHeight - list->getItemsRect().h;
+	list->scroller->setMaxValue(max);
 
 	// Fit to the right of items rect. Width doesn't change.
 	listRect = wz_widget_get_rect(list);
@@ -56,7 +56,7 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	wz_widget_set_rect_internal(list->scroller, rect);
 
 	// Now that the height has been calculated, update the nub scale.
-	wz_scroller_set_nub_scale(list->scroller, 1.0f - ((maxHeight - rect.h) / (float)maxHeight));
+	list->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 
 	// Hide/show scroller depending on if it's needed.
 	if (max <= 0)
@@ -90,7 +90,7 @@ static void wz_list_set_item_height_internal(struct ListImpl *list, int itemHeig
 {
 	WZ_ASSERT(list);
 	list->itemHeight = itemHeight;
-	wz_scroller_set_step_value(list->scroller, itemHeight);
+	list->scroller->setStepValue(itemHeight);
 	wz_list_update_scroller(list);
 }
 
@@ -108,7 +108,7 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 	struct ListImpl *list = (struct ListImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 	const Rect rect = wz_widget_get_absolute_rect(widget);
-	const Rect itemsRect = wz_list_get_absolute_items_rect(list);
+	const Rect itemsRect = list->getAbsoluteItemsRect();
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -126,9 +126,9 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 	if (!wz_renderer_clip_to_rect_intersection(vg, clip, itemsRect))
 		return;
 
-	y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
+	y = itemsRect.y - (list->scroller->getValue() % list->itemHeight);
 
-	for (i = wz_list_get_first_item(list); i < list->nItems; i++)
+	for (i = list->getFirstItem(); i < list->nItems; i++)
 	{
 		Rect itemRect;
 		const uint8_t *itemData;
@@ -226,9 +226,9 @@ static void wz_list_update_mouse_over_item(struct ListImpl *list, int mouseX, in
 	if (!list->hover)
 		return;
 
-	itemsRect = wz_list_get_absolute_items_rect(list);
+	itemsRect = list->getAbsoluteItemsRect();
 	rect.x = itemsRect.x;
-	rect.y = itemsRect.y - (wz_scroller_get_value(list->scroller) % list->itemHeight);
+	rect.y = itemsRect.y - (list->scroller->getValue() % list->itemHeight);
 	rect.w = itemsRect.w;
 	rect.h = list->itemHeight;
 
@@ -329,9 +329,9 @@ static void wz_list_mouse_wheel_move(struct WidgetImpl *widget, int x, int y)
 	{
 		int value, stepValue;
 
-		value = wz_scroller_get_value(list->scroller);
-		stepValue = wz_scroller_get_step_value(list->scroller);
-		wz_scroller_set_value(list->scroller, value - y * stepValue);
+		value = list->scroller->getValue();
+		stepValue = list->scroller->getStepValue();
+		list->scroller->setValue(value - y * stepValue);
 
 		// Refresh hovered item.
 		wz_list_update_mouse_over_item(list, list->lastMousePosition.x, list->lastMousePosition.y);
@@ -377,8 +377,145 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	wz_widget_add_child_widget(this, scroller);
 	wz_list_update_scroller(this);
-	wz_scroller_add_callback_value_changed(scroller, wz_list_scroller_value_changed);
+	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
 }
+
+Border ListImpl::getItemsBorder() const
+{
+	return itemsBorder;
+}
+
+Rect ListImpl::getItemsRect() const
+{
+	Rect rect;
+	rect.x = itemsBorder.left;
+	rect.y = itemsBorder.top;
+	const Rect listRect = wz_widget_get_rect(this);
+	rect.w = listRect.w - (itemsBorder.left + itemsBorder.right);
+	rect.h = listRect.h - (itemsBorder.top + itemsBorder.bottom);
+
+	// Subtract the scroller width.
+	if (wz_widget_get_visible(scroller))
+	{
+		rect.w -= wz_widget_get_size(scroller).w;
+	}
+
+	return rect;
+}
+
+Rect ListImpl::getAbsoluteItemsRect() const
+{
+	Rect rect = getItemsRect();
+	const Position offset = wz_widget_get_absolute_position(this);
+	rect.x += offset.x;
+	rect.y += offset.y;
+	return rect;
+}
+void ListImpl::setDrawItemCallback(DrawListItemCallback callback)
+{
+	this->draw_item = callback;
+}
+
+DrawListItemCallback ListImpl::getDrawItemCallback() const
+{
+	return draw_item;
+}
+
+void ListImpl::setItemData(uint8_t *itemData)
+{
+	this->itemData = itemData;
+}
+
+uint8_t *ListImpl::getItemData() const
+{
+	return itemData;
+}
+
+void ListImpl::setItemStride(int itemStride)
+{
+	this->itemStride = itemStride;
+}
+
+int ListImpl::getItemStride() const
+{
+	return itemStride;
+}
+
+void ListImpl::setItemHeight(int itemHeight)
+{
+	isItemHeightUserSet = true;
+	wz_list_set_item_height_internal(this, itemHeight);
+}
+
+int ListImpl::getItemHeight() const
+{
+	return itemHeight;
+}
+
+void ListImpl::setNumItems(int nItems)
+{
+	this->nItems = WZ_MAX(0, nItems);
+	wz_list_update_scroller(this);
+}
+
+int ListImpl::getNumItems() const
+{
+	return nItems;
+}
+
+int ListImpl::getFirstItem() const
+{
+	return firstItem;
+}
+
+void ListImpl::setSelectedItem(int selectedItem)
+{
+	this->selectedItem = selectedItem;
+	
+	Event e;
+	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+	e.list.list = this;
+	e.list.selectedItem = selectedItem;
+	wz_invoke_event(&e, item_selected_callbacks);
+}
+
+int ListImpl::getSelectedItem() const
+{
+	return selectedItem;
+}
+
+int ListImpl::getPressedItem() const
+{
+	return pressedItem;
+}
+
+int ListImpl::getHoveredItem() const
+{
+	return hoveredItem;
+}
+
+int ListImpl::getScrollValue() const
+{
+	return scroller->getValue();
+}
+
+void ListImpl::addCallbackItemSelected(EventCallback callback)
+{
+	item_selected_callbacks.push_back(callback);
+}
+
+struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list)
+{
+	return list->scroller;
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
 
 List::List()
 {
@@ -395,183 +532,28 @@ List::~List()
 
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	wz_list_set_item_data((ListImpl *)impl, itemData);
-	wz_list_set_item_stride((ListImpl *)impl, itemStride);
-	wz_list_set_num_items((ListImpl *)impl, nItems);
+	((ListImpl *)impl)->setItemData(itemData);
+	((ListImpl *)impl)->setItemStride(itemStride);
+	((ListImpl *)impl)->setNumItems(nItems);
 	return this;
 }
 
 List *List::setSelectedItem(int index)
 {
-	wz_list_set_selected_item((ListImpl *)impl, index);
+	((ListImpl *)impl)->setSelectedItem(index);
 	return this;
 }
 
 List *List::setItemHeight(int height)
 {
-	wz_list_set_item_height((ListImpl *)impl, height);
+	((ListImpl *)impl)->setItemHeight(height);
 	return this;
 }
 
 List *List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	wz_list_set_draw_item_callback((ListImpl *)impl, callback);
+	((ListImpl *)impl)->setDrawItemCallback(callback);
 	return this;
-}
-
-Border wz_list_get_items_border(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->itemsBorder;
-}
-
-Rect wz_list_get_items_rect(const struct ListImpl *list)
-{
-	Rect listRect, rect;
-
-	WZ_ASSERT(list);
-	listRect = wz_widget_get_rect(list);
-	rect.x = list->itemsBorder.left;
-	rect.y = list->itemsBorder.top;
-	rect.w = listRect.w - (list->itemsBorder.left + list->itemsBorder.right);
-	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
-
-	// Subtract the scroller width.
-	if (wz_widget_get_visible(list->scroller))
-	{
-		rect.w -= wz_widget_get_size(list->scroller).w;
-	}
-
-	return rect;
-}
-
-Rect wz_list_get_absolute_items_rect(const struct ListImpl *list)
-{
-	Rect rect;
-	Position offset;
-	
-	WZ_ASSERT(list);
-	rect = wz_list_get_items_rect(list);
-	offset = wz_widget_get_absolute_position((const struct WidgetImpl *)list);
-	rect.x += offset.x;
-	rect.y += offset.y;
-	
-	return rect;
-}
-
-void wz_list_set_draw_item_callback(struct ListImpl *list, DrawListItemCallback callback)
-{
-	WZ_ASSERT(list);
-	list->draw_item = callback;
-}
-
-DrawListItemCallback wz_list_get_draw_item_callback(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->draw_item;
-}
-
-void wz_list_set_item_data(struct ListImpl *list, uint8_t *itemData)
-{
-	WZ_ASSERT(list);
-	list->itemData = itemData;
-}
-
-uint8_t *wz_list_get_item_data(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->itemData;
-}
-
-void wz_list_set_item_stride(struct ListImpl *list, int itemStride)
-{
-	WZ_ASSERT(list);
-	list->itemStride = itemStride;
-}
-
-int wz_list_get_item_stride(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->itemStride;
-}
-
-void wz_list_set_item_height(struct ListImpl *list, int itemHeight)
-{
-	list->isItemHeightUserSet = true;
-	wz_list_set_item_height_internal(list, itemHeight);
-}
-
-int wz_list_get_item_height(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->itemHeight;
-}
-
-void wz_list_set_num_items(struct ListImpl *list, int nItems)
-{
-	WZ_ASSERT(list);
-	list->nItems = WZ_MAX(0, nItems);
-	wz_list_update_scroller(list);
-}
-
-int wz_list_get_num_items(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->nItems;
-}
-
-int wz_list_get_first_item(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->firstItem;
-}
-
-void wz_list_set_selected_item(struct ListImpl *list, int selectedItem)
-{
-	Event e;
-
-	WZ_ASSERT(list);
-	list->selectedItem = selectedItem;
-	
-	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
-	e.list.list = list;
-	e.list.selectedItem = list->selectedItem;
-	wz_invoke_event(&e, list->item_selected_callbacks);
-}
-
-int wz_list_get_selected_item(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->selectedItem;
-}
-
-int wz_list_get_pressed_item(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->pressedItem;
-}
-
-int wz_list_get_hovered_item(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return list->hoveredItem;
-}
-
-int wz_list_get_scroll_value(const struct ListImpl *list)
-{
-	WZ_ASSERT(list);
-	return wz_scroller_get_value(list->scroller);
-}
-
-void wz_list_add_callback_item_selected(struct ListImpl *list, EventCallback callback)
-{
-	WZ_ASSERT(list);
-	list->item_selected_callbacks.push_back(callback);
-}
-
-struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list)
-{
-	return list->scroller;
 }
 
 } // namespace wz

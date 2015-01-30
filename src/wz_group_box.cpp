@@ -101,6 +101,46 @@ GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
 	wz_widget_add_child_widget(this, content);
 }
 
+void GroupBoxImpl::setLabel(const char *label)
+{
+	this->label = label;
+
+	// Update the margin.
+	if (renderer)
+	{
+		wz_group_box_refresh_margin(this);
+	}
+}
+
+const char *GroupBoxImpl::getLabel() const
+{
+	return label.c_str();
+}
+
+void GroupBoxImpl::add(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget(content, widget);
+}
+
+void GroupBoxImpl::remove(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+	wz_widget_remove_child_widget(content, widget);
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
 GroupBox::GroupBox()
 {
 	impl = new GroupBoxImpl;
@@ -123,60 +163,24 @@ GroupBox::~GroupBox()
 
 const char *GroupBox::getLabel() const
 {
-	return wz_group_box_get_label((GroupBoxImpl *)impl);
+	return ((GroupBoxImpl *)impl)->getLabel();
 }
 
 GroupBox *GroupBox::setLabel(const std::string &label)
 {
-	wz_group_box_set_label((GroupBoxImpl *)impl, label.c_str());
+	((GroupBoxImpl *)impl)->setLabel(label.c_str());
 	return this;
 }
 
 Widget *GroupBox::add(Widget *widget)
 {
-	wz_group_box_add((GroupBoxImpl *)impl, widget->impl);
+	((GroupBoxImpl *)impl)->add(widget->impl);
 	return widget;
 }
 
 void GroupBox::remove(Widget *widget)
 {
-	wz_group_box_remove((GroupBoxImpl *)impl, widget->impl);
-}
-
-void wz_group_box_set_label(struct GroupBoxImpl *groupBox, const char *label)
-{
-	WZ_ASSERT(groupBox);
-	groupBox->label = std::string(label);
-
-	// Update the margin.
-	if (groupBox->renderer)
-	{
-		wz_group_box_refresh_margin(groupBox);
-	}
-}
-
-const char *wz_group_box_get_label(const struct GroupBoxImpl *groupBox)
-{
-	WZ_ASSERT(groupBox);
-	return groupBox->label.c_str();
-}
-
-void wz_group_box_add(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget)
-{
-	WZ_ASSERT(groupBox);
-	WZ_ASSERT(widget);
-
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
-		return;
-
-	wz_widget_add_child_widget(groupBox->content, widget);
-}
-
-void wz_group_box_remove(struct GroupBoxImpl *groupBox, struct WidgetImpl *widget)
-{
-	WZ_ASSERT(groupBox);
-	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(groupBox->content, widget);
+	((GroupBoxImpl *)impl)->remove(widget->impl);
 }
 
 } // namespace wz

@@ -31,6 +31,30 @@ FrameImpl::FrameImpl()
 	type = WZ_TYPE_FRAME;
 }
 
+void FrameImpl::add(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	wz_widget_add_child_widget(this, widget);
+}
+
+void FrameImpl::remove(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+	wz_widget_remove_child_widget(this, widget);
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
 Frame::Frame()
 {
 	impl = new FrameImpl;
@@ -47,31 +71,13 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	wz_frame_add((FrameImpl *)impl, widget->impl);
+	((FrameImpl *)impl)->add(widget->impl);
 	return widget;
 }
 
 void Frame::remove(Widget *widget)
 {
-	wz_frame_remove((FrameImpl *)impl, widget->impl);
-}
-
-void wz_frame_add(struct FrameImpl *frame, struct WidgetImpl *widget)
-{
-	WZ_ASSERT(frame);
-	WZ_ASSERT(widget);
-
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
-		return;
-
-	wz_widget_add_child_widget(frame, widget);
-}
-
-void wz_frame_remove(struct FrameImpl *frame, struct WidgetImpl *widget)
-{
-	WZ_ASSERT(frame);
-	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(frame, widget);
+	((FrameImpl *)impl)->remove(widget->impl);
 }
 
 } // namespace wz

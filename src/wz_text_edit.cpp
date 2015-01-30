@@ -92,7 +92,7 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 	// Update max value.
 	nLines = wz_calculate_num_lines(textEdit, wz_text_edit_get_text_rect(textEdit).w);
 	max = nLines - (wz_text_edit_get_text_rect(textEdit).h / lineHeight);
-	wz_scroller_set_max_value(textEdit->scroller, max);
+	textEdit->scroller->setMaxValue(max);
 
 	// Fit to the right of the rect. Width doesn't change.
 	textEditRect = wz_widget_get_rect(textEdit);
@@ -104,7 +104,7 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 
 	// Now that the height has been calculated, update the nub scale.
 	maxHeight = nLines * lineHeight;
-	wz_scroller_set_nub_scale(textEdit->scroller, 1.0f - ((maxHeight - rect.h) / (float)maxHeight));
+	textEdit->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 }
 
 static void wz_text_edit_scroller_value_changed(Event *e)
@@ -362,12 +362,12 @@ static void wz_text_edit_update_scroll_index(struct TextEditImpl *textEdit)
 			if (cursorY > textEdit->rect.h - (textEdit->border.top + textEdit->border.bottom))
 			{
 				textEdit->scrollValue++;
-				wz_scroller_set_value(textEdit->scroller, textEdit->scrollValue);
+				textEdit->scroller->setValue(textEdit->scrollValue);
 			}
 			else if (cursorY < 0)
 			{
 				textEdit->scrollValue--;
-				wz_scroller_set_value(textEdit->scroller, textEdit->scrollValue);
+				textEdit->scroller->setValue(textEdit->scrollValue);
 			}
 			else
 			{
@@ -679,7 +679,7 @@ static void wz_text_edit_mouse_wheel_move(struct WidgetImpl *widget, int x, int 
 
 	if (textEdit->multiline && wz_widget_get_visible(textEdit->scroller))
 	{
-		wz_scroller_set_value(textEdit->scroller, wz_scroller_get_value(textEdit->scroller) - y);
+		textEdit->scroller->setValue(textEdit->scroller->getValue() - y);
 	}
 }
 
@@ -932,7 +932,7 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 		scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		wz_widget_add_child_widget(this, scroller);
 		wz_text_edit_update_scroller(this);
-		wz_scroller_add_callback_value_changed(scroller, wz_text_edit_scroller_value_changed);
+		scroller->addCallbackValueChanged(wz_text_edit_scroller_value_changed);
 	}
 
 	this->multiline = multiline;

@@ -32,9 +32,9 @@ static Size wz_combo_measure(struct WidgetImpl *widget)
 	int i;
 	struct WidgetImpl *scroller;
 	struct ComboImpl *combo = (struct ComboImpl *)widget;
-	uint8_t *itemData = wz_list_get_item_data(combo->list);
-	int itemStride = wz_list_get_item_stride(combo->list);
-	int nItems = wz_list_get_num_items(combo->list);
+	uint8_t *itemData = combo->list->getItemData();
+	int itemStride = combo->list->getItemStride();
+	int nItems = combo->list->getNumItems();
 
 	// Use the widest item text.
 	size.w = 0;
@@ -65,10 +65,10 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 	const struct ComboImpl *combo = (struct ComboImpl *)widget;
 	struct NVGcontext *vg = widget->renderer->vg;
 	const Rect rect = wz_widget_get_absolute_rect(widget);
-	const uint8_t *itemData = wz_list_get_item_data(combo->list);
-	const int itemStride = wz_list_get_item_stride(combo->list);
-	const int nItems = wz_list_get_num_items(combo->list);
-	const int selectedItemIndex = wz_list_get_selected_item(combo->list);
+	const uint8_t *itemData = combo->list->getItemData();
+	const int itemStride = combo->list->getItemStride();
+	const int nItems = combo->list->getNumItems();
+	const int selectedItemIndex = combo->list->getSelectedItem();
 
 	nvgSave(vg);
 	wz_renderer_clip_to_rect(vg, clip);
@@ -76,7 +76,7 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 	nvgBeginPath(vg);
 
 	// Don't round the bottom corners if the combo is open.
-	if (combo->isOpen)
+	if (combo->isOpen())
 	{
 		wz_renderer_create_rect_path(vg, rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
 	}
@@ -138,9 +138,9 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 	listRect.w = rect.w;
 
 	// Make the height large enough to avoid scrolling.
-	listItemsBorder = wz_list_get_items_border(combo->list);
-	listItemHeight = wz_list_get_item_height(combo->list);
-	listNumItems = wz_list_get_num_items(combo->list);
+	listItemsBorder = combo->list->getItemsBorder();
+	listItemHeight = combo->list->getItemHeight();
+	listNumItems = combo->list->getNumItems();
 	listRect.h = listItemsBorder.top + listItemHeight * listNumItems + listItemsBorder.bottom;
 
 	// Clip the height to the mainWindow.
@@ -181,7 +181,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 		listRect = wz_widget_get_absolute_rect(combo->list);
 
 		// Open dropdown.
-		if (!combo->isOpen)
+		if (!combo->isOpen_)
 		{
 			// Lock input.
 			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
@@ -190,7 +190,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			wz_widget_set_visible(combo->list, true);
 			wz_combo_update_list_rect(combo);
 
-			combo->isOpen = true;
+			combo->isOpen_ = true;
 		}
 		// Close dropdown.
 		// Don't do it if the mouse cursor is over the dropdown list.
@@ -202,7 +202,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			// Hide dropdown list.
 			wz_widget_set_visible(combo->list, false);
 
-			combo->isOpen = false;
+			combo->isOpen_ = false;
 		}
 	}
 }
@@ -229,13 +229,13 @@ static void wz_combo_list_item_selected(Event *e)
 	// Hide dropdown list.
 	wz_widget_set_visible(combo->list, false);
 
-	combo->isOpen = false;
+	combo->isOpen_ = false;
 }
 
 ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_COMBO;
-	isOpen = false;
+	isOpen_ = false;
 
 	vtable.measure = wz_combo_measure;
 	vtable.draw = wz_combo_draw;
@@ -248,8 +248,26 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	wz_widget_add_child_widget(this, list);
 	wz_widget_set_visible(list, false);
 	wz_widget_set_clip_input_to_parent(list, false);
-	wz_list_add_callback_item_selected(list, wz_combo_list_item_selected);
+	list->addCallbackItemSelected(wz_combo_list_item_selected);
 }
+
+struct ListImpl *ComboImpl::getList()
+{
+	return list;
+}
+
+bool ComboImpl::isOpen() const
+{
+	return isOpen_;
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
 
 Combo::Combo()
 {
@@ -266,23 +284,11 @@ Combo::~Combo()
 
 Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	ListImpl *list = wz_combo_get_list((ComboImpl *)impl);
-	wz_list_set_item_data(list, itemData);
-	wz_list_set_item_stride(list, itemStride);
-	wz_list_set_num_items(list, nItems);
+	ListImpl *list = ((ComboImpl *)impl)->getList();
+	list->setItemData(itemData);
+	list->setItemStride(itemStride);
+	list->setNumItems(nItems);
 	return this;
-}
-
-struct ListImpl *wz_combo_get_list(const struct ComboImpl *combo)
-{
-	WZ_ASSERT(combo);
-	return combo->list;
-}
-
-bool wz_combo_is_open(struct ComboImpl *combo)
-{
-	WZ_ASSERT(combo);
-	return combo->isOpen;
 }
 
 } // namespace wz
