@@ -34,6 +34,7 @@ SOFTWARE.
 #include <wz.h>
 
 #include <wz.h>
+#include <wz_renderer_nanovg.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -112,11 +113,11 @@ int main(int argc, char **argv)
 		return errorCode;
 
 	// Create the renderer.
-	wz::wzRenderer *renderer = wz::wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
+	wz::NVGRenderer *renderer = new wz::NVGRenderer(nvgCreateGL2, nvgDeleteGL2, 0, "../examples/data", "DejaVuSans", 16.0f);
 
-	if (!renderer)
+	if (renderer->getError())
 	{
-		ShowError(wz::wz_renderer_get_error());
+		ShowError(renderer->getError());
 		return 1;
 	}
 
@@ -157,6 +158,6 @@ int main(int argc, char **argv)
 		SDL_GL_SwapWindow(sdlWindow);
 	}
 
-	wz::wz_renderer_destroy(renderer);
+	delete renderer;
 	return 0;
 }

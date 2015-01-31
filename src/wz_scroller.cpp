@@ -235,11 +235,12 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	int sides, roundedCorners;
 	struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget->parent;
-	struct NVGcontext *vg = widget->renderer->vg;
-	const Rect r = wz_widget_get_absolute_rect(widget);
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
+	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	
 	// Background color.
 	if (button->isPressed() && widget->hover)
@@ -283,12 +284,12 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	}
 
 	// Background.
-	wz_renderer_create_rect_path(vg, r, WZ_SKIN_SCROLLER_CORNER_RADIUS, WZ_SIDE_ALL, roundedCorners);
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
+	r->createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, WZ_SIDE_ALL, roundedCorners);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
 	nvgFill(vg);
 
 	// Border.
-	wz_renderer_create_rect_path(vg, r, WZ_SKIN_SCROLLER_CORNER_RADIUS, sides, roundedCorners);
+	r->createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, sides, roundedCorners);
 	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
 	nvgStroke(vg);
 
@@ -299,30 +300,30 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	{
 		if (decrement)
 		{
-			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.25f); // top
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // left
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // right
+			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.25f); // top
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // left
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // right
 		}
 		else
 		{
-			nvgMoveTo(vg, r.x + r.w * 0.5f, r.y + r.h * 0.75f); // bottom
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // right
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // left
+			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.75f); // bottom
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // right
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // left
 		}
 	}
 	else
 	{
 		if (decrement)
 		{
-			nvgMoveTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.5f); // left
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.75f); // bottom
-			nvgLineTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.25f); // top
+			nvgMoveTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.5f); // left
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // bottom
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // top
 		}
 		else
 		{
-			nvgMoveTo(vg, r.x + r.w * 0.75f, r.y + r.h * 0.5f); // right
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.25f); // top
-			nvgLineTo(vg, r.x + r.w * 0.25f, r.y + r.h * 0.75f); // bottom
+			nvgMoveTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.5f); // right
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // top
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // bottom
 		}
 	}
 
@@ -406,16 +407,17 @@ static Size wz_scroller_measure(struct WidgetImpl *widget)
 static void wz_scroller_draw(struct WidgetImpl *widget, Rect clip)
 {
 	const struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+struct NVGcontext *vg = r->getContext();
 	Rect nubContainerRect, nubRect;
 	bool hover, pressed;
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	scroller->getNubState(&nubContainerRect, &nubRect, &hover, &pressed);
 
 	// Nub container.
-	wz_renderer_draw_filled_rect(vg, nubContainerRect, WZ_SKIN_SCROLLER_BG_COLOR1);
+	r->drawFilledRect(nubContainerRect, WZ_SKIN_SCROLLER_BG_COLOR1);
 
 	// Nub.
 	{

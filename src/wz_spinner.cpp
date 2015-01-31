@@ -42,14 +42,15 @@ static bool wz_spinner_validate_text(const char *text)
 static void wz_spinner_draw_button(struct WidgetImpl *widget, Rect clip, bool decrement)
 {
 	const struct ButtonImpl *button = (struct ButtonImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
 	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
 	const float buttonCenterY = rect.y + rect.h * 0.5f;
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	nvgBeginPath(vg);
 
 	if (decrement)

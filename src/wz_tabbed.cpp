@@ -40,7 +40,7 @@ static Rect wz_tab_page_get_children_clip_rect(struct WidgetImpl *widget)
 	return wz_widget_get_absolute_rect(widget);
 }
 
-static struct WidgetImpl *wz_tab_page_create(struct wzRenderer *renderer)
+static struct WidgetImpl *wz_tab_page_create(IRenderer *renderer)
 {
 	struct WidgetImpl *page = new struct WidgetImpl;
 	page->type = WZ_TYPE_TAB_PAGE;
@@ -127,7 +127,8 @@ static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
 	int selectedTabIndex;
 	Rect tr; // Tab rect.
 	struct TabbedImpl *tabbed = (struct TabbedImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	Rect rect = wz_widget_get_absolute_rect(widget);
 	const struct ButtonImpl *selectedTab = tabbed->tabBar->getSelectedTab();
 
@@ -137,7 +138,7 @@ static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
 	rect.h -= tabBarHeight;
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect_intersection(vg, clip, wz_widget_get_absolute_rect(widget));
+	r->clipToRectIntersection(clip, wz_widget_get_absolute_rect(widget));
 
 	// Draw an outline around the selected tab and the tab page.
 	nvgBeginPath(vg);

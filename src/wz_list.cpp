@@ -106,12 +106,13 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 {
 	int y, i;
 	struct ListImpl *list = (struct ListImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const Rect itemsRect = list->getAbsoluteItemsRect();
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	
 	// Background.
 	nvgBeginPath(vg);
@@ -120,10 +121,10 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 	nvgFill(vg);
 
 	// Border.
-	wz_renderer_draw_rect(vg, rect, WZ_SKIN_LIST_BORDER_COLOR);
+	r->drawRect(rect, WZ_SKIN_LIST_BORDER_COLOR);
 
 	// Items.
-	if (!wz_renderer_clip_to_rect_intersection(vg, clip, itemsRect))
+	if (!r->clipToRectIntersection(clip, itemsRect))
 		return;
 
 	y = itemsRect.y - (list->scroller->getValue() % list->itemHeight);
@@ -145,11 +146,11 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 
 		if (i == list->selectedItem)
 		{
-			wz_renderer_draw_filled_rect(vg, itemRect, WZ_SKIN_LIST_SET_COLOR);
+			r->drawFilledRect(itemRect, WZ_SKIN_LIST_SET_COLOR);
 		}
 		else if (i == list->pressedItem || i == list->hoveredItem)
 		{
-			wz_renderer_draw_filled_rect(vg, itemRect, WZ_SKIN_LIST_HOVER_COLOR);
+			r->drawFilledRect(itemRect, WZ_SKIN_LIST_HOVER_COLOR);
 		}
 
 		if (list->draw_item)
@@ -158,7 +159,7 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 		}
 		else
 		{
-			wz_renderer_print(widget->renderer, itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
+			r->print(itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
 		}
 
 		y += list->itemHeight;

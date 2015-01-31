@@ -494,7 +494,8 @@ DOCK ICON
 
 static void wz_main_window_draw_dock_icon(struct WidgetImpl *widget, Rect clip)
 {
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_rect(widget);
 	clip = clip; // Never clipped, so just ignore that parameter.
 
@@ -535,11 +536,12 @@ DOCK PREVIEW
 
 static void wz_main_window_draw_dock_preview(struct WidgetImpl *widget, Rect clip)
 {
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	nvgSave(vg);
-	wz_renderer_draw_filled_rect(vg, wz_widget_get_rect(widget), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
+	r->drawFilledRect(wz_widget_get_rect(widget), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
 	nvgRestore(vg);
 }
 
@@ -1304,9 +1306,11 @@ void wz_main_window_draw(struct MainWindowImpl *mainWindow)
 void wz_main_window_draw_frame(struct MainWindowImpl *mainWindow)
 {
 	WZ_ASSERT(mainWindow);
-	nvgBeginFrame(mainWindow->renderer->vg, mainWindow->rect.w, mainWindow->rect.h, 1);
+	NVGRenderer *r = (NVGRenderer *)mainWindow->renderer;
+	struct NVGcontext *vg = r->getContext();
+	nvgBeginFrame(vg, mainWindow->rect.w, mainWindow->rect.h, 1);
 	wz_main_window_draw(mainWindow);
-	nvgEndFrame(mainWindow->renderer->vg);
+	nvgEndFrame(vg);
 }
 
 /*
@@ -1332,7 +1336,7 @@ static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_main_window_update_content_rect(mainWindow);
 }
 
-MainWindow::MainWindow(wzRenderer *renderer)
+MainWindow::MainWindow(IRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
 	impl = new MainWindowImpl(renderer);
@@ -1438,7 +1442,7 @@ void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 	wz_main_window_dock_window(impl, (WindowImpl *)window->impl, dockPosition);
 }
 
-MainWindowImpl::MainWindowImpl(struct wzRenderer *renderer)
+MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 {
 	type = WZ_TYPE_MAIN_WINDOW;
 	handle_event = NULL;

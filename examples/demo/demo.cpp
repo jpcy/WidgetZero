@@ -35,6 +35,7 @@ SOFTWARE.
 #include <SDL.h>
 
 #include <wz.h>
+#include <wz_renderer_nanovg.h>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -78,23 +79,24 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static void CustomDrawListItemCallback(struct wz::wzRenderer *renderer, wz::Rect clip, const struct wz::ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+static void CustomDrawListItemCallback(wz::IRenderer *renderer, wz::Rect clip, const struct wz::ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
 {
 	int image, width, height;
 	wz::Rect rect;
-	
-	image = wz::wz_renderer_create_image(renderer, (const char *)itemData, &width, &height);
+
+	wz::NVGRenderer *nvg = (wz::NVGRenderer *)renderer;
+	image = nvg->createImage((const char *)itemData, &width, &height);
 	rect.x = clip.x + (int)(clip.w / 2.0f - width / 2.0f);
 	rect.y = clip.y + (int)(clip.h / 2.0f - height / 2.0f);
 	rect.w = width;
 	rect.h = height;
-	wz::wz_renderer_draw_image(wz::wz_renderer_get_context(renderer), rect, image);
+	nvg->drawImage(rect, image);
 }
 
 class GUI
 {
 public:
-	GUI(int windowWidth, int windowHeight, wz::wzRenderer *renderer) : mainWindow(renderer), renderer(renderer)
+	GUI(int windowWidth, int windowHeight, wz::IRenderer *renderer) : mainWindow(renderer)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		mainWindow.createMenuButton("File");
@@ -520,7 +522,6 @@ private:
 		wz::Frame *frame;
 	};
 
-	wz::wzRenderer *renderer;
 	wz::Window *window1, *window2;
 	std::vector<WidgetCategoryListItem> widgetCategories;
 	bool showProfiling_;
@@ -644,11 +645,11 @@ int main(int argc, char **argv)
 	cursors[wz::WZ_CURSOR_RESIZE_NW_SE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 
 	// Create the renderer.
-	wz::wzRenderer *renderer = wz::wz_renderer_create(nvgCreateGL2, nvgDeleteGL2, NVG_ANTIALIAS, "../examples/data", "DejaVuSans", 16.0f);
+	wz::IRenderer *renderer = new wz::NVGRenderer(nvgCreateGL2, nvgDeleteGL2, NVG_ANTIALIAS, "../examples/data", "DejaVuSans", 16.0f);
 
-	if (!renderer)
+	if (renderer->getError())
 	{
-		ShowError(wz::wz_renderer_get_error());
+		ShowError(renderer->getError());
 		return 1;
 	}
 
@@ -706,6 +707,6 @@ int main(int argc, char **argv)
 		SDL_SetCursor(cursors[gui.mainWindow.getCursor()]);
 	}
 
-	wz_renderer_destroy(renderer);
+	delete renderer;
 	return 0;
 }

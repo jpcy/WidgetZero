@@ -47,23 +47,24 @@ static Size wz_menu_bar_button_measure(struct WidgetImpl *widget)
 static void wz_menu_bar_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 
 	if (button->isPressed())
 	{
-		wz_renderer_draw_filled_rect(vg, rect, WZ_SKIN_MENU_BAR_SET_COLOR);
+		r->drawFilledRect(rect, WZ_SKIN_MENU_BAR_SET_COLOR);
 	}
 
 	if (widget->hover)
 	{
-		wz_renderer_draw_rect(vg, rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
+		r->drawRect(rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
 	}
 
-	wz_renderer_print(widget->renderer, rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label.c_str(), 0);
+	r->print(rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label.c_str(), 0);
 
 	nvgRestore(vg);
 }
@@ -159,12 +160,12 @@ MENU BAR
 
 static void wz_menu_bar_draw(struct WidgetImpl *widget, Rect clip)
 {
-	struct NVGcontext *vg = widget->renderer->vg;
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
-	wz_renderer_draw_filled_rect(vg, rect, WZ_SKIN_MENU_BAR_BG_COLOR);
+	r->clipToRect(clip);
+	r->drawFilledRect(wz_widget_get_absolute_rect(widget), WZ_SKIN_MENU_BAR_BG_COLOR);
 	nvgRestore(vg);
 }
 

@@ -30,10 +30,11 @@ static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
 {
 	Rect rect;
 	struct GroupBoxImpl *groupBox = (struct GroupBoxImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	rect = wz_widget_get_absolute_rect(widget);
 	
 	if (groupBox->label.empty())
@@ -54,18 +55,18 @@ static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
 		borderRect.h -= textHeight / 2;
 
 		// Border top, left of text.
-		wz_renderer_draw_line(vg, (int)(borderRect.x + WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN - WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING, borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+		r->drawLine((int)(borderRect.x + WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN - WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING, borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 
 		// Border top, right of text.
-		wz_renderer_draw_line(vg, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN + textWidth + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING * 2, borderRect.y, (int)(borderRect.x + borderRect.w - WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+		r->drawLine(borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN + textWidth + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING * 2, borderRect.y, (int)(borderRect.x + borderRect.w - WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 
 		// The rest of the border.
-		wz_renderer_create_rect_path(vg, borderRect, WZ_SKIN_GROUP_BOX_CORNER_RADIUS, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
+		r->createRectPath(borderRect, WZ_SKIN_GROUP_BOX_CORNER_RADIUS, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
 		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
 		nvgStroke(vg);
 
 		// Label.
-		wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label.c_str(), 0);
+		r->print(rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label.c_str(), 0);
 	}
 
 	nvgRestore(vg);

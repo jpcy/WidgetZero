@@ -33,13 +33,10 @@ SOFTWARE.
 
 #include <nanovg.h>
 
-typedef struct NVGcontext NVGcontext;
-
 #define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
 namespace wz {
 
-struct wzRenderer;
 struct MainWindowImpl;
 struct WindowImpl;
 struct WidgetImpl;
@@ -382,47 +379,6 @@ struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 
-typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
-typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
-
-struct wzRenderer *wz_renderer_create(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize);
-void wz_renderer_destroy(struct wzRenderer *renderer);
-const char *wz_renderer_get_error();
-struct NVGcontext *wz_renderer_get_context(struct wzRenderer *renderer);
-
-int wz_renderer_create_image(struct wzRenderer *renderer, const char *filename, int *width, int *height);
-void wz_renderer_set_font_face(struct wzRenderer *renderer, const char *face);
-void wz_renderer_print_box(struct wzRenderer *renderer, Rect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
-void wz_renderer_print(struct wzRenderer *renderer, int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
-void wz_renderer_clip_to_rect(struct NVGcontext *vg, Rect rect);
-bool wz_renderer_clip_to_rect_intersection(struct NVGcontext *vg, Rect rect1, Rect rect2);
-void wz_renderer_draw_filled_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color);
-void wz_renderer_draw_rect(struct NVGcontext *vg, Rect rect, struct NVGcolor color);
-void wz_renderer_draw_line(struct NVGcontext *vg, int x1, int y1, int x2, int y2, struct NVGcolor color);
-void wz_renderer_draw_image(struct NVGcontext *vg, Rect rect, int image);
-
-enum
-{
-	WZ_SIDE_TOP = 1<<0,
-	WZ_SIDE_RIGHT = 1<<1,
-	WZ_SIDE_BOTTOM = 1<<2,
-	WZ_SIDE_LEFT = 1<<3,
-	WZ_SIDE_ALL = WZ_SIDE_TOP | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM | WZ_SIDE_LEFT,
-
-	WZ_CORNER_TL = 1<<0,
-	WZ_CORNER_TR = 1<<1,
-	WZ_CORNER_BR = 1<<2,
-	WZ_CORNER_BL = 1<<3,
-	WZ_CORNER_ALL = WZ_CORNER_TL | WZ_CORNER_TR | WZ_CORNER_BR | WZ_CORNER_BL
-};
-
-void wz_renderer_create_rect_path(struct NVGcontext *vg, Rect rect, float r, int sides, int roundedCorners);
-
-int wz_renderer_get_line_height(struct wzRenderer *renderer, const char *fontFace, float fontSize);
-
-// width or height can be NULL.
-void wz_renderer_measure_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
-
 typedef struct
 {
 	const char *start;
@@ -431,7 +387,20 @@ typedef struct
 }
 LineBreakResult;
 
-LineBreakResult wz_renderer_line_break_text(struct wzRenderer *renderer, const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
+class IRenderer
+{
+public:
+	~IRenderer() {};
+	virtual const char *getError() = 0;
+	virtual int getLineHeight(const char *fontFace, float fontSize) = 0;
+
+	// width or height can be NULL.
+	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) = 0;
+
+	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
+	virtual void drawButton(const ButtonImpl *button, Rect clip) = 0;
+	virtual Size measureButton(const ButtonImpl *button) = 0;
+};
 
 class Button;
 class Checkbox;
@@ -552,7 +521,7 @@ public:
 	Label *setMultiline(bool multiline);
 };
 
-typedef void (*DrawListItemCallback)(struct wzRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
+typedef void (*DrawListItemCallback)(IRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
 
 class List : public Widget
 {
@@ -568,7 +537,7 @@ public:
 class MainWindow
 {
 public:
-	MainWindow(wzRenderer *renderer);
+	MainWindow(IRenderer *renderer);
 	~MainWindow();
 	int getWidth() const;
 	int getHeight() const;

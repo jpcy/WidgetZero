@@ -43,7 +43,7 @@ static int wz_calculate_num_lines(struct TextEditImpl *textEdit, int lineWidth)
 
 	for (;;)
 	{
-		line = wz_renderer_line_break_text(textEdit->renderer, wz_widget_get_font_face(textEdit), wz_widget_get_font_size(textEdit), line.next, 0, lineWidth);
+		line = wz_widget_line_break_text(textEdit, line.next, 0, lineWidth);
 
 		if (!line.next || !line.next[0])
 			break;
@@ -227,7 +227,7 @@ static int wz_text_edit_index_from_relative_position(const struct TextEditImpl *
 
 		for (;;)
 		{
-			line = wz_renderer_line_break_text(textEdit->renderer, wz_widget_get_font_face(textEdit), wz_widget_get_font_size(textEdit), line.next, 0, textEdit->getTextRect().w);
+			line = wz_widget_line_break_text(textEdit, line.next, 0, textEdit->getTextRect().w);
 
 			result = line.start - textEdit->text.c_str();
 
@@ -426,14 +426,15 @@ static Size wz_text_edit_measure(struct WidgetImpl *widget)
 
 static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 {
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const Rect textRect = textEdit->getTextRect();
 	const int lineHeight = wz_widget_get_line_height(widget);
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 	
 	nvgBeginPath(vg);
 	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_TEXT_EDIT_CORNER_RADIUS);
@@ -447,7 +448,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	nvgStroke(vg);
 
 	// Clip to the text rect.
-	if (!wz_renderer_clip_to_rect_intersection(vg, clip, textRect))
+	if (!r->clipToRectIntersection(clip, textRect))
 		return;
 
 	// Text.
@@ -462,12 +463,12 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 
 		for (;;)
 		{
-			line = wz_renderer_line_break_text(widget->renderer, widget->fontFace, widget->fontSize, line.next, 0, textRect.w);
+			line = wz_widget_line_break_text(widget, line.next, 0, textRect.w);
 
 			if (line.length > 0)
 			{
 				// Draw this line.
-				wz_renderer_print(widget->renderer, textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, line.start, line.length);
+				r->print(textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, line.start, line.length);
 
 				// Selection.
 				if (textEdit->hasSelection())
@@ -506,7 +507,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 						selectionRect.y = textRect.y + start.y - lineHeight / 2;
 						selectionRect.w = end.x - start.x;
 						selectionRect.h = lineHeight;
-						wz_renderer_draw_filled_rect(vg, selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
+						r->drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
 					}
 				}
 			}
@@ -519,7 +520,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	}
 	else
 	{
-		wz_renderer_print(widget->renderer, textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, textEdit->getVisibleText(), 0);
+		r->print(textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, textEdit->getVisibleText(), 0);
 
 		// Selection.
 		if (textEdit->hasSelection())
@@ -533,7 +534,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
 			selectionRect.w = position2.x - position1.x;
 			selectionRect.h = lineHeight;
-			wz_renderer_draw_filled_rect(vg, selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
+			r->drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
 		}
 	}
 
@@ -546,7 +547,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 		position.x += textRect.x;
 		position.y += textRect.y;
 
-		wz_renderer_clip_to_rect(vg, rect);
+		r->clipToRect(rect);
 		nvgBeginPath(vg);
 		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
 		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);
@@ -814,7 +815,7 @@ static void wz_text_edit_key_down(struct WidgetImpl *widget, Key key)
 
 			for (;;)
 			{
-				line = wz_renderer_line_break_text(textEdit->renderer, wz_widget_get_font_face(textEdit), wz_widget_get_font_size(textEdit), line.next, 0, textEdit->getTextRect().w);
+				line = wz_widget_line_break_text(textEdit, line.next, 0, textEdit->getTextRect().w);
 				WZ_ASSERT(line.start);
 				WZ_ASSERT(line.next);
 
@@ -996,7 +997,7 @@ const char *TextEditImpl::getVisibleText() const
 
 		for (;;)
 		{
-			line = wz_renderer_line_break_text(renderer, wz_widget_get_font_face(this), wz_widget_get_font_size(this), line.next, 0, getTextRect().w);
+			line = wz_widget_line_break_text(this, line.next, 0, getTextRect().w);
 
 			if (lineIndex == scrollValue)
 				return line.start;
@@ -1069,7 +1070,7 @@ Position TextEditImpl::positionFromIndex(int index) const
 		{
 			int lineStartIndex;
 
-			line = wz_renderer_line_break_text(renderer, wz_widget_get_font_face(this), wz_widget_get_font_size(this), line.next, 0, getTextRect().w);
+			line = wz_widget_line_break_text(this, line.next, 0, getTextRect().w);
 			WZ_ASSERT(line.start);
 			WZ_ASSERT(line.next);
 			lineStartIndex = line.start - text.c_str();

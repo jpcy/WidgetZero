@@ -74,7 +74,8 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 {
 	int buttonX;
 	const struct ComboImpl *combo = (struct ComboImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const uint8_t *itemData = combo->list->getItemData();
 	const int itemStride = combo->list->getItemStride();
@@ -82,14 +83,13 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 	const int selectedItemIndex = combo->list->getSelectedItem();
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
-
+	r->clipToRect(clip);
 	nvgBeginPath(vg);
 
 	// Don't round the bottom corners if the combo is open.
 	if (combo->isOpen())
 	{
-		wz_renderer_create_rect_path(vg, rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
+		r->createRectPath(rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
 	}
 	else
 	{
@@ -106,7 +106,7 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 
 	// Internal border.
 	buttonX = rect.x + rect.w - WZ_SKIN_COMBO_BUTTON_WIDTH;
-	wz_renderer_draw_line(vg, buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
+	r->drawLine(buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
 
 	// Icon.
 	{
@@ -124,7 +124,7 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 	// Selected item.
 	if (selectedItemIndex >= 0)
 	{
-		wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
+		r->print(rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
 	}
 
 	nvgRestore(vg);

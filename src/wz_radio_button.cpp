@@ -69,12 +69,13 @@ static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	Rect rect;
 	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 
 	nvgSave(vg);
 	rect = wz_widget_get_absolute_rect(widget);
 
-	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
+	if (!r->clipToRectIntersection(clip, rect))
 		return;
 
 	// Inner circle.
@@ -93,7 +94,7 @@ static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 	nvgStroke(vg);
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_RADIO_BUTTON_TEXT_COLOR, radioButton->label.c_str(), 0);
+	r->print(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_RADIO_BUTTON_TEXT_COLOR, radioButton->label.c_str(), 0);
 
 	nvgRestore(vg);
 }

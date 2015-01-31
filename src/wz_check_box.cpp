@@ -47,11 +47,12 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 {
 	Rect boxRect;
 	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 
 	// Calculate box rect.
 	boxRect.x = rect.x;
@@ -59,7 +60,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	boxRect.w = boxRect.h = WZ_SKIN_CHECK_BOX_BOX_SIZE;
 
 	// Box border.
-	wz_renderer_draw_rect(vg, boxRect, widget->hover ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
+	r->drawRect(boxRect, widget->hover ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
 
 	// Box checkmark.
 	if (checkBox->isChecked())
@@ -83,7 +84,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	}
 
 	// Label.
-	wz_renderer_print(widget->renderer, rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
+	r->print(rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
 
 	nvgRestore(vg);
 }

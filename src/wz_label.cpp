@@ -36,19 +36,20 @@ LabelImpl::LabelImpl(const std::string &text) : text_(text)
 
 void LabelImpl::draw(Rect clip)
 {
-	struct NVGcontext *vg = renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(this);
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 
 	if (multiline_)
 	{
-		wz_renderer_print_box(renderer, rect, fontFace, fontSize, textColor_, text_.c_str(), 0);
+		r->printBox(rect, fontFace, fontSize, textColor_, text_.c_str(), 0);
 	}
 	else
 	{
-		wz_renderer_print(renderer, rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, textColor_, text_.c_str(), 0);
+		r->print(rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, textColor_, text_.c_str(), 0);
 	}
 
 	nvgRestore(vg);
@@ -57,12 +58,13 @@ void LabelImpl::draw(Rect clip)
 Size LabelImpl::measure()
 {
 	Size size;
-	struct NVGcontext *vg = renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	struct NVGcontext *vg = r->getContext();
 
 	if (multiline_)
 	{
-		nvgFontSize(vg, fontSize == 0 ? renderer->defaultFontSize : fontSize);
-		wz_renderer_set_font_face(renderer, fontFace);
+		nvgFontSize(vg, fontSize == 0 ? r->getDefaultFontSize() : fontSize);
+		r->setFontFace(fontFace);
 		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 		nvgTextLineHeight(vg, 1.2f);
 		float bounds[4];

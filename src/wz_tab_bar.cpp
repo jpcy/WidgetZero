@@ -38,19 +38,20 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 {
 	Rect labelRect;
 	struct ButtonImpl *button = (struct ButtonImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const Border padding = button->getPadding();
 
 	nvgSave(vg);
-	wz_renderer_clip_to_rect(vg, clip);
+	r->clipToRect(clip);
 
 	// Label.
 	labelRect.x = rect.x + padding.left;
 	labelRect.y = rect.y + padding.top;
 	labelRect.w = rect.w - (padding.left + padding.right);
 	labelRect.h = rect.h - (padding.top + padding.bottom);
-	wz_renderer_print(widget->renderer, labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
+	r->print(labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
 
 	nvgRestore(vg);
 }

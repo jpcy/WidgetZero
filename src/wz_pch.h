@@ -31,11 +31,8 @@ SOFTWARE.
 #include <string>
 #include <vector>
 #include "wz.h"
+#include "wz_renderer_nanovg.h"
 #include "wz_skin.h"
-
-#define WZ_NANOVG_MAX_PATH 256
-#define WZ_NANOVG_MAX_IMAGES 1024
-#define WZ_NANOVG_MAX_ERROR_MESSAGE 1024
 
 #define WZ_MAX_WINDOWS 256
 
@@ -170,7 +167,7 @@ struct WidgetImpl
 
 	WidgetVtable vtable;
 
-	struct wzRenderer *renderer;
+	IRenderer *renderer;
 
 	struct MainWindowImpl *mainWindow;
 
@@ -227,11 +224,14 @@ void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value);
 void wz_widget_set_internal_metadata(struct WidgetImpl *widget, void *metadata);
 void *wz_widget_get_internal_metadata(struct WidgetImpl *widget);
 
-// Shortcut for wz_renderer_get_line_height, using the widget's renderer, font face and font size.
+// Shortcut for IRenderer::getLineHeight, using the widget's renderer, font face and font size.
 int wz_widget_get_line_height(const struct WidgetImpl *widget);
 
-// Shortcut for wz_renderer_measure_text, using the widget's renderer, font face and font size.
+// Shortcut for IRenderer::measureText, using the widget's renderer, font face and font size.
 void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height);
+
+// Shortcut for IRenderer::lineBreakText, using the widget's renderer, font face and font size.
+LineBreakResult wz_widget_line_break_text(const struct WidgetImpl *widget, const char *text, int n, int lineWidth);
 
 typedef enum
 {
@@ -397,7 +397,7 @@ struct ListImpl : public WidgetImpl
 
 struct MainWindowImpl : public WidgetImpl
 {
-	MainWindowImpl(wzRenderer *renderer);
+	MainWindowImpl(IRenderer *renderer);
 
 	struct WidgetImpl *content;
 
@@ -689,26 +689,6 @@ void wz_invoke_event(Event *e);
 void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
 
 bool wz_main_window_text_cursor_is_visible(const struct MainWindowImpl *mainWindow);
-
-struct wzImage
-{
-	wzImage() : handle(0) {}
-
-	int handle;
-	char filename[WZ_NANOVG_MAX_PATH];
-};
-
-struct wzRenderer
-{
-	wzRenderer() : destroy(NULL), vg(NULL), nImages(0), defaultFontSize(0) {}
-
-	wzNanoVgGlDestroy destroy;
-	struct NVGcontext *vg;
-	wzImage images[WZ_NANOVG_MAX_IMAGES];
-	int nImages;
-	char fontDirectory[WZ_NANOVG_MAX_PATH];
-	float defaultFontSize;
-};
 
 void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
 

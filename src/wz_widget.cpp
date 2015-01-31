@@ -588,9 +588,9 @@ static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widg
 	return NULL;
 }
 
-static void wz_widget_set_renderer(struct WidgetImpl *widget, struct wzRenderer *renderer)
+static void wz_widget_set_renderer(struct WidgetImpl *widget, IRenderer *renderer)
 {
-	struct wzRenderer *oldRenderer;
+	IRenderer *oldRenderer;
 
 	WZ_ASSERT(widget);
 	oldRenderer = widget->renderer;
@@ -1014,13 +1014,22 @@ void *wz_widget_get_internal_metadata(struct WidgetImpl *widget)
 int wz_widget_get_line_height(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	return wz_renderer_get_line_height(widget->renderer, widget->fontFace, widget->fontSize);
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	return r->getLineHeight(widget->fontFace, widget->fontSize);
 }
 
 void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height)
 {
 	WZ_ASSERT(widget);
-	wz_renderer_measure_text(widget->renderer, widget->fontFace, widget->fontSize, text, n, width, height);
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	return r->measureText(widget->fontFace, widget->fontSize, text, n, width, height);
+}
+
+LineBreakResult wz_widget_line_break_text(const struct WidgetImpl *widget, const char *text, int n, int lineWidth)
+{
+	WZ_ASSERT(widget);
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	return r->lineBreakText(widget->fontFace, widget->fontSize, text, n, lineWidth);
 }
 
 //------------------------------------------------------------------------------

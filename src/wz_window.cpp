@@ -31,7 +31,8 @@ namespace wz {
 static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 {
 	const struct WindowImpl *window = (struct WindowImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
+	NVGRenderer *r = (NVGRenderer *)widget->renderer;
+	struct NVGcontext *vg = r->getContext();
 	const Rect rect = wz_widget_get_absolute_rect(widget);
 	const Rect contentRect = wz_widget_get_absolute_rect(window->content);
 	const Rect headerRect = window->getHeaderRect();
@@ -63,8 +64,8 @@ static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 	// Header.
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
-		wz_renderer_clip_to_rect(vg, headerRect);
-		wz_renderer_print(widget->renderer, headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title.c_str(), 0);
+		r->clipToRect(headerRect);
+		r->print(headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title.c_str(), 0);
 	}
 
 	nvgRestore(vg);
