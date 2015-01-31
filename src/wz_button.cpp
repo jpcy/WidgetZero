@@ -29,141 +29,6 @@ namespace wz {
 /*
 ================================================================================
 
-MEASURING
-
-================================================================================
-*/
-
-static Size wz_button_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	struct ButtonImpl *button = (struct ButtonImpl *)widget;
-
-	wz_widget_measure_text(widget, button->label.c_str(), 0, &size.w, &size.h);
-
-	if (!button->icon.empty())
-	{
-		int handle, w, h;
-
-		handle = wz_renderer_create_image(widget->renderer, button->icon.c_str(), &w, &h);
-
-		if (handle)
-		{
-			size.w += w + WZ_SKIN_BUTTON_ICON_SPACING;
-			size.h = WZ_MAX(size.h, h);
-		}
-	}
-
-	size.w += button->padding.left + button->padding.right;
-	size.h += button->padding.top + button->padding.bottom;
-	return size;
-}
-
-/*
-================================================================================
-
-DRAWING
-
-================================================================================
-*/
-
-static void wz_button_draw(struct WidgetImpl *widget, Rect clip)
-{
-	NVGcolor bgColor1, bgColor2;
-	Rect paddedRect;
-	Size iconSize;
-	int iconHandle, labelWidth, iconX, labelX;
-	struct ButtonImpl *button = (struct ButtonImpl *)widget;
-	struct NVGcontext *vg = widget->renderer->vg;
-	const Rect rect = wz_widget_get_absolute_rect(widget);
-
-	nvgSave(vg);
-
-	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
-		return;
-
-	// Background color.
-	if (button->isPressed() && widget->hover)
-	{
-		bgColor1 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR1;
-		bgColor2 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR2;
-	}
-	else if (button->isSet())
-	{
-		bgColor1 = WZ_SKIN_BUTTON_BG_SET_COLOR1;
-		bgColor2 = WZ_SKIN_BUTTON_BG_SET_COLOR2;
-	}
-	else
-	{
-		bgColor1 = WZ_SKIN_BUTTON_BG_COLOR1;
-		bgColor2 = WZ_SKIN_BUTTON_BG_COLOR2;
-	}
-
-	nvgBeginPath(vg);
-	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_BUTTON_CORNER_RADIUS);
-
-	// Background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
-	nvgFill(vg);
-
-	// Border.
-	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Calculate padded rect.
-	paddedRect.x = rect.x + button->padding.left;
-	paddedRect.y = rect.y + button->padding.top;
-	paddedRect.w = rect.w - (button->padding.left + button->padding.right);
-	paddedRect.h = rect.h - (button->padding.top + button->padding.bottom);
-
-	// Calculate icon and label sizes.
-	iconSize.w = iconSize.h = 0;
-
-	if (!button->icon.empty())
-	{
-		iconHandle = wz_renderer_create_image(widget->renderer, button->icon.c_str(), &iconSize.w, &iconSize.h);
-	}
-
-	wz_widget_measure_text(widget, button->label.c_str(), 0, &labelWidth, NULL);
-
-	// Position the icon and label centered.
-	if (!button->icon.empty() && iconHandle && !button->label.empty())
-	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING + labelWidth) / 2.0f);
-		labelX = iconX + iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING;
-	}
-	else if (!button->icon.empty() && iconHandle)
-	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
-	}
-	else if (!button->label.empty())
-	{
-		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
-	}
-
-	// Draw the icon.
-	if (!button->icon.empty() && iconHandle)
-	{
-		Rect iconRect;
-		iconRect.x = iconX;
-		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
-		iconRect.w = iconSize.w;
-		iconRect.h = iconSize.h;
-		wz_renderer_draw_image(vg, iconRect, iconHandle);
-	}
-
-	// Draw the label.
-	if (!button->label.empty())
-	{
-		wz_renderer_print(widget->renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_BUTTON_TEXT_COLOR, button->label.c_str(), 0);
-	}
-
-	nvgRestore(vg);
-}
-
-/*
-================================================================================
-
 VTABLE FUNCTIONS
 
 ================================================================================
@@ -254,8 +119,6 @@ PRIVATE INTERFACE
 ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 {
 	type = WZ_TYPE_BUTTON;
-	vtable.measure = wz_button_measure;
-	vtable.draw = wz_button_draw;
 	vtable.mouse_button_down = wz_button_mouse_button_down;
 	vtable.mouse_button_up = wz_button_mouse_button_up;
 	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
@@ -266,6 +129,124 @@ ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 	padding.top = padding.bottom = 4;
 	this->label = label;
 	this->icon = icon;
+}
+
+void ButtonImpl::draw(Rect clip)
+{
+	struct NVGcontext *vg = renderer->vg;
+	nvgSave(vg);
+	const Rect rect = wz_widget_get_absolute_rect(this);
+
+	if (!wz_renderer_clip_to_rect_intersection(vg, clip, rect))
+		return;
+
+	// Background color.
+	NVGcolor bgColor1, bgColor2;
+
+	if (isPressed() && hover)
+	{
+		bgColor1 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR2;
+	}
+	else if (isSet())
+	{
+		bgColor1 = WZ_SKIN_BUTTON_BG_SET_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_SET_COLOR2;
+	}
+	else
+	{
+		bgColor1 = WZ_SKIN_BUTTON_BG_COLOR1;
+		bgColor2 = WZ_SKIN_BUTTON_BG_COLOR2;
+	}
+
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_BUTTON_CORNER_RADIUS);
+
+	// Background.
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
+	nvgFill(vg);
+
+	// Border.
+	nvgStrokeColor(vg, hover ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Calculate padded rect.
+	Rect paddedRect;
+	paddedRect.x = rect.x + padding.left;
+	paddedRect.y = rect.y + padding.top;
+	paddedRect.w = rect.w - (padding.left + padding.right);
+	paddedRect.h = rect.h - (padding.top + padding.bottom);
+
+	// Calculate icon and label sizes.
+	Size iconSize;
+	int iconHandle;
+
+	if (!icon.empty())
+	{
+		iconHandle = wz_renderer_create_image(renderer, icon.c_str(), &iconSize.w, &iconSize.h);
+	}
+
+	int labelWidth;
+	wz_widget_measure_text(this, label.c_str(), 0, &labelWidth, NULL);
+
+	// Position the icon and label centered.
+	int iconX, labelX;
+
+	if (!icon.empty() && iconHandle && !label.empty())
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING;
+	}
+	else if (!icon.empty() && iconHandle)
+	{
+		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
+	}
+	else if (!label.empty())
+	{
+		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
+	}
+
+	// Draw the icon.
+	if (!icon.empty() && iconHandle)
+	{
+		Rect iconRect;
+		iconRect.x = iconX;
+		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
+		iconRect.w = iconSize.w;
+		iconRect.h = iconSize.h;
+		wz_renderer_draw_image(vg, iconRect, iconHandle);
+	}
+
+	// Draw the label.
+	if (!label.empty())
+	{
+		wz_renderer_print(renderer, labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, WZ_SKIN_BUTTON_TEXT_COLOR, label.c_str(), 0);
+	}
+
+	nvgRestore(vg);
+}
+
+Size ButtonImpl::measure()
+{
+	Size size;
+	wz_widget_measure_text(this, label.c_str(), 0, &size.w, &size.h);
+
+	if (!icon.empty())
+	{
+		int handle, w, h;
+
+		handle = wz_renderer_create_image(renderer, icon.c_str(), &w, &h);
+
+		if (handle)
+		{
+			size.w += w + WZ_SKIN_BUTTON_ICON_SPACING;
+			size.h = WZ_MAX(size.h, h);
+		}
+	}
+
+	size.w += padding.left + padding.right;
+	size.h += padding.top + padding.bottom;
+	return size;
 }
 
 void ButtonImpl::setLabel(const char *label)

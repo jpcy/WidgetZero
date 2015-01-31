@@ -259,6 +259,8 @@ ButtonSetBehavior;
 struct ButtonImpl : public WidgetImpl
 {
 	ButtonImpl(const std::string &label = std::string(), const std::string &icon = std::string());
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
 	void setIcon(const char *icon);
