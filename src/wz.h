@@ -37,23 +37,9 @@ SOFTWARE.
 
 namespace wz {
 
-struct MainWindowImpl;
 struct WindowImpl;
-struct WidgetImpl;
-struct ButtonImpl;
-struct CheckBoxImpl;
-struct ComboImpl;
-struct FrameImpl;
-struct GroupBoxImpl;
-struct LabelImpl;
-struct ListImpl;
+class Window;
 struct MenuBarImpl;
-struct MenuBarButtonImpl;
-struct RadioButtonImpl;
-struct ScrollerImpl;
-struct SpinnerImpl;
-struct StackLayoutImpl;
-struct TextEditImpl;
 
 typedef enum
 {
@@ -402,23 +388,6 @@ public:
 	virtual Size measureButton(const ButtonImpl *button) = 0;
 };
 
-class Button;
-class Checkbox;
-class Combo;
-class GroupBox;
-class Label;
-class List;
-class RadioButton;
-class Scroller;
-class StackLayout;
-class Tab;
-struct TabImpl;
-class Tabbed;
-class TextEdit;
-class ToggleButton;
-class Widget;
-class Window;
-
 class Widget
 {
 public:
@@ -620,6 +589,8 @@ public:
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
 };
+
+struct TabImpl;
 
 class Tab
 {
