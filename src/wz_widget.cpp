@@ -116,7 +116,7 @@ void WidgetChildren::erase(size_t i)
 	if (i < widgets_.size())
 		widgets_.erase(widgets_.begin() + i);
 	else
-		impls_.erase(impls_.begin() + (i - impls_.size()));
+		impls_.erase(impls_.begin() + (i - widgets_.size()));
 }
 
 WidgetImpl::WidgetImpl()
