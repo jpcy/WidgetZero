@@ -40,11 +40,10 @@ static Rect wz_tab_page_get_children_clip_rect(struct WidgetImpl *widget)
 	return wz_widget_get_absolute_rect(widget);
 }
 
-static struct WidgetImpl *wz_tab_page_create(IRenderer *renderer)
+static struct WidgetImpl *wz_tab_page_create()
 {
 	struct WidgetImpl *page = new struct WidgetImpl;
 	page->type = WZ_TYPE_TAB_PAGE;
-	page->renderer = renderer;
 	page->vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
 	return page;
 }
@@ -270,7 +269,7 @@ void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
 	*tab = tabBar->createTab();
 
 	// Add the page widget.
-	*page = wz_tab_page_create(renderer);
+	*page = wz_tab_page_create();
 	wz_widget_set_visible(*page, tabBar->getSelectedTab() == *tab);
 	wz_widget_add_child_widget(this, *page);
 
