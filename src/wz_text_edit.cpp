@@ -539,7 +539,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	}
 
 	// Cursor.
-	if (wz_main_window_text_cursor_is_visible(widget->mainWindow) && wz_widget_has_keyboard_focus(textEdit))
+	if (widget->mainWindow->isTextCursorVisible() && wz_widget_has_keyboard_focus(textEdit))
 	{
 		Position position;
 		
@@ -585,7 +585,7 @@ static void wz_text_edit_mouse_button_down(struct WidgetImpl *widget, int mouseB
 	if (mouseButton == 1)
 	{
 		// Set keyboard focus to this widget.
-		wz_main_window_set_keyboard_focus_widget(widget->mainWindow, widget);
+		widget->mainWindow->setKeyboardFocusWidget(widget);
 	}
 
 	if (mouseButton == 1 && WZ_POINT_IN_RECT(mouseX, mouseY, textEdit->getTextRect()))
@@ -593,7 +593,7 @@ static void wz_text_edit_mouse_button_down(struct WidgetImpl *widget, int mouseB
 		int oldCursorIndex;
 
 		// Lock input to this widget.
-		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->pushLockInputWidget(widget);
 
 		// Move the cursor to the mouse position.
 		oldCursorIndex = textEdit->cursorIndex;
@@ -610,7 +610,7 @@ static void wz_text_edit_mouse_button_down(struct WidgetImpl *widget, int mouseB
 		textEdit->pressed = true;
 
 		// Handle selecting.
-		if (wz_main_window_is_shift_key_down(widget->mainWindow))
+		if (widget->mainWindow->isShiftKeyDown())
 		{
 			// Start a new selection if there isn't one.
 			if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
@@ -638,7 +638,7 @@ static void wz_text_edit_mouse_button_up(struct WidgetImpl *widget, int mouseBut
 
 	if (mouseButton == 1)
 	{
-		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->popLockInputWidget(widget);
 		textEdit->pressed = false;
 	}
 }
@@ -653,7 +653,7 @@ static void wz_text_edit_mouse_move(struct WidgetImpl *widget, int mouseX, int m
 	if (!(widget->hover && WZ_POINT_IN_RECT(mouseX, mouseY, textEdit->getTextRect())))
 		return;
 	
-	wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_IBEAM);
+	widget->mainWindow->setCursor(WZ_CURSOR_IBEAM);
 
 	if (textEdit->pressed)
 	{

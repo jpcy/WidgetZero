@@ -195,7 +195,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 		if (!combo->isOpen_)
 		{
 			// Lock input.
-			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+			widget->mainWindow->pushLockInputWidget(widget);
 
 			// Show dropdown list and set it to draw last.
 			wz_widget_set_visible(combo->list, true);
@@ -208,7 +208,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
 		{
 			// Unlock input.
-			wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
+			widget->mainWindow->popLockInputWidget(widget);
 
 			// Hide dropdown list.
 			wz_widget_set_visible(combo->list, false);
@@ -235,7 +235,7 @@ static void wz_combo_list_item_selected(Event *e)
 	combo = (struct ComboImpl *)e->base.widget->parent;
 
 	// Unlock input.
-	wz_main_window_pop_lock_input_widget(combo->mainWindow, combo);
+	combo->mainWindow->popLockInputWidget(combo);
 
 	// Hide dropdown list.
 	wz_widget_set_visible(combo->list, false);

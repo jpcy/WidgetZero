@@ -146,7 +146,7 @@ static void wz_window_calculate_mouse_over_border_rects(struct WindowImpl *windo
 	DockPosition dockPosition;
 
 	WZ_ASSERT(window);
-	dockPosition = wz_main_window_get_window_dock_position(window->mainWindow, window);
+	dockPosition = window->mainWindow->getWindowDockPosition(window);
 
 	// Take into account dockPositioning, e.g. north dockPositioned window can only be resized south.
 	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_SOUTH));
@@ -176,12 +176,12 @@ static void wz_window_mouse_button_down(struct WidgetImpl *widget, int mouseButt
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, window->getHeaderRect()))
 		{
 			window->drag = WZ_DRAG_HEADER;
-			wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+			widget->mainWindow->pushLockInputWidget(widget);
 
 			// Don't actually move the window yet if it's docked.
-			if (wz_main_window_get_window_dock_position(window->mainWindow, window) == WZ_DOCK_POSITION_NONE)
+			if (window->mainWindow->getWindowDockPosition(window) == WZ_DOCK_POSITION_NONE)
 			{
-				wz_main_window_set_moving_window(widget->mainWindow, window);
+				widget->mainWindow->setMovingWindow(window);
 			}
 			else
 			{
@@ -204,7 +204,7 @@ static void wz_window_mouse_button_down(struct WidgetImpl *widget, int mouseButt
 				window->resizeStartPosition.x = mouseX;
 				window->resizeStartPosition.y = mouseY;
 				window->resizeStartRect = window->rect;
-				wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+				widget->mainWindow->pushLockInputWidget(widget);
 				return;
 			}
 		}
@@ -222,11 +222,11 @@ static void wz_window_mouse_button_up(struct WidgetImpl *widget, int mouseButton
 	{
 		if (window->drag == WZ_DRAG_HEADER)
 		{
-			wz_main_window_set_moving_window(widget->mainWindow, NULL);
+			widget->mainWindow->setMovingWindow(NULL);
 		}
 
 		window->drag = WZ_DRAG_NONE;
-		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->popLockInputWidget(widget);
 	}
 }
 
@@ -249,23 +249,23 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 
 	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || window->drag == WZ_DRAG_RESIZE_N || window->drag == WZ_DRAG_RESIZE_S)
 	{
-		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_RESIZE_N_S);
+		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_N_S);
 	}
 	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || window->drag == WZ_DRAG_RESIZE_E || window->drag == WZ_DRAG_RESIZE_W)
 	{
-		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_RESIZE_E_W);
+		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_E_W);
 	}
 	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || window->drag == WZ_DRAG_RESIZE_NE || window->drag == WZ_DRAG_RESIZE_SW)
 	{
-		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_RESIZE_NE_SW);
+		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_NE_SW);
 	}
 	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || window->drag == WZ_DRAG_RESIZE_NW || window->drag == WZ_DRAG_RESIZE_SE)
 	{
-		wz_main_window_set_cursor(widget->mainWindow, WZ_CURSOR_RESIZE_NW_SE);
+		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_NW_SE);
 	}
 
 	// Don't actually move the window yet if it's docked.
-	dockPosition = wz_main_window_get_window_dock_position(widget->mainWindow, window);
+	dockPosition = widget->mainWindow->getWindowDockPosition(window);
 
 	if (window->drag == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
 	{
@@ -278,8 +278,8 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		if ((int)sqrtf((float)(delta.x * delta.x + delta.y * delta.y)) < WZ_WINDOW_UNDOCK_DISTANCE)
 			return;
 
-		wz_main_window_undock_window(widget->mainWindow, window);
-		wz_main_window_set_moving_window(widget->mainWindow, window);
+		widget->mainWindow->undockWindow(window);
+		widget->mainWindow->setMovingWindow(window);
 
 		// Re-position and resize the window.
 		rect = wz_widget_get_rect(widget);
@@ -295,7 +295,7 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		}
 
 		wz_widget_set_rect_internal(widget, rect);
-		wz_main_window_update_content_rect(widget->mainWindow);
+		widget->mainWindow->updateContentRect();
 	}
 
 	// Calculate the minimum allowed window size.
@@ -369,19 +369,19 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		}
 		break;
 	default:
-		return; // Not dragging, don't call wz_main_window_update_content_rect.
+		return; // Not dragging, don't call MainWindowImpl::updateContentRect.
 	}
 
 	wz_widget_set_rect_internal(widget, rect);
 
 	// Resizing a docked window: 
-	if (wz_main_window_get_window_dock_position(widget->mainWindow, window) != WZ_DOCK_POSITION_NONE)
+	if (widget->mainWindow->getWindowDockPosition(window) != WZ_DOCK_POSITION_NONE)
 	{
 		// Tell the mainWindow so it can resize other windows docked at the same position too.
-		wz_main_window_update_docked_window_rect(widget->mainWindow, window);
+		widget->mainWindow->updateDockedWindowRect(window);
 
 		// Update the mainWindow content rect.
-		wz_main_window_update_content_rect(widget->mainWindow);
+		widget->mainWindow->updateContentRect();
 	}
 }
 

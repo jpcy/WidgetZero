@@ -399,6 +399,9 @@ struct MainWindowImpl : public WidgetImpl
 {
 	MainWindowImpl(IRenderer *renderer);
 
+	bool isShiftKeyDown() const;
+	bool isControlKeyDown() const;
+
 	// Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
 	void setEventCallback(EventCallback callback);
 
@@ -414,21 +417,41 @@ struct MainWindowImpl : public WidgetImpl
 	void setMenuBar(struct MenuBarImpl *menuBar);
 	void add(struct WidgetImpl *widget);
 	void remove(struct WidgetImpl *widget);
+	bool isTextCursorVisible() const;
 	void toggleTextCursor();
+	void setCursor(Cursor cursor);
 	Cursor getCursor() const;
 	const struct WidgetImpl *getKeyboardFocusWidget() const;
+
+	// Set keyboard focus to this widget.
+	void setKeyboardFocusWidget(struct WidgetImpl *widget);
+
+	DockPosition getWindowDockPosition(const struct WindowImpl *window) const;
 	void dockWindow(struct WindowImpl *window, DockPosition dockPosition);
+	void undockWindow(struct WindowImpl *window);
+
+	// The docked window has been resized, update the rects of other windows docked at the same position.
+	void updateDockedWindowRect(struct WindowImpl *window);
+
+	// Lock input to this widget.
+	void pushLockInputWidget(struct WidgetImpl *widget);
+
+	// Stop locking input to this widget.
+	void popLockInputWidget(struct WidgetImpl *widget);
+
+	void setMovingWindow(struct WindowImpl *window);
+	void updateContentRect();
 
 	struct WidgetImpl *content;
 
 	// Centralized event handler.
 	EventCallback handle_event;
 
-	bool isTextCursorVisible;
+	bool isTextCursorVisible_;
 
 	Cursor cursor;
 
-	bool isShiftKeyDown, isControlKeyDown;
+	bool isShiftKeyDown_, isControlKeyDown_;
 
 	std::vector<struct WidgetImpl *> lockInputWidgetStack;
 
@@ -681,34 +704,8 @@ Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget,
 
 struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list);
 
-void wz_main_window_set_cursor(struct MainWindowImpl *mainWindow, Cursor cursor);
-
-// Set keyboard focus to this widget.
-void wz_main_window_set_keyboard_focus_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
-
-bool wz_main_window_is_shift_key_down(const struct MainWindowImpl *mainWindow);
-bool wz_main_window_is_control_key_down(const struct MainWindowImpl *mainWindow);
-
-// Lock input to this widget.
-void wz_main_window_push_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
-
-// Stop locking input to this widget.
-void wz_main_window_pop_lock_input_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
-
-void wz_main_window_set_moving_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
-
-void wz_main_window_update_content_rect(struct MainWindowImpl *mainWindow);
-
-void wz_main_window_update_docked_window_rect(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
-
-DockPosition wz_main_window_get_window_dock_position(const struct MainWindowImpl *mainWindow, const struct WindowImpl *window);
-
-void wz_main_window_undock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
-
 void wz_invoke_event(Event *e);
 void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
-
-bool wz_main_window_text_cursor_is_visible(const struct MainWindowImpl *mainWindow);
 
 void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
 

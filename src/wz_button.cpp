@@ -75,7 +75,7 @@ static void wz_button_mouse_button_down(struct WidgetImpl *widget, int mouseButt
 		Event e;
 
 		button->isPressed_ = true;
-		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->pushLockInputWidget(widget);
 
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = button;
@@ -99,7 +99,7 @@ static void wz_button_mouse_button_up(struct WidgetImpl *widget, int mouseButton
 	if (mouseButton == 1 && button->isPressed_)
 	{
 		button->isPressed_ = false;
-		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->popLockInputWidget(widget);
 
 		if (widget->hover && button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
 		{

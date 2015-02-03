@@ -79,7 +79,7 @@ static void wz_menu_bar_button_mouse_button_down(struct WidgetImpl *widget, int 
 		button->isPressed_ = true;
 
 		// Lock input to the menu bar, not this button.
-		wz_main_window_push_lock_input_widget(widget->mainWindow, button->menuBar);
+		widget->mainWindow->pushLockInputWidget(button->menuBar);
 	}
 }
 
@@ -91,7 +91,7 @@ static void wz_menu_bar_button_mouse_button_up(struct WidgetImpl *widget, int mo
 	if (mouseButton == 1 && button->isPressed_)
 	{
 		button->isPressed_ = false;
-		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget->parent->parent);
+		widget->mainWindow->popLockInputWidget(widget->parent->parent);
 	}
 }
 

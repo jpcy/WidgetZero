@@ -84,7 +84,7 @@ static void wz_nub_mouse_button_down(struct WidgetImpl *widget, int mouseButton,
 		nub->pressPosition.y = rect.y;
 		nub->pressMousePosition.x = mouseX;
 		nub->pressMousePosition.y = mouseY;
-		wz_main_window_push_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->pushLockInputWidget(widget);
 	}
 }
 
@@ -98,7 +98,7 @@ static void wz_nub_mouse_button_up(struct WidgetImpl *widget, int mouseButton, i
 	if (mouseButton == 1)
 	{
 		nub->isPressed = false;
-		wz_main_window_pop_lock_input_widget(widget->mainWindow, widget);
+		widget->mainWindow->popLockInputWidget(widget);
 	}
 }
 
