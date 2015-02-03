@@ -409,6 +409,11 @@ struct MainWindowImpl : public WidgetImpl
 	void mouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	void mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	void mouseWheelMove(int x, int y);
+
+private:
+	void keyDelta(Key key, bool down);
+
+public:
 	void keyDown(Key key);
 	void keyUp(Key key);
 	void textInput(const char *text);
@@ -478,6 +483,28 @@ struct MainWindowImpl : public WidgetImpl
 	bool ignoreDockTabBarChangedEvent;
 
 	struct MenuBarImpl *menuBar;
+
+private:
+	// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
+	struct WindowImpl *getHoverWindow(int mouseX, int mouseY);
+
+	void refreshDockTabBar(DockPosition dockPosition);
+
+public: // FIXME
+	void updateDockingRects();
+
+private:
+	Rect calculateDockWindowRect(DockPosition dockPosition, Size windowSize);
+
+public: // FIXME
+	void updateDockIconPositions();
+
+private:
+	void updateDockPreviewRect(DockPosition dockPosition);
+	void updateDockPreviewVisible(int mouseX, int mouseY);
+
+	// top can be NULL
+	void updateWindowDrawPriorities(struct WindowImpl *top);
 };
 
 struct MenuBarButtonImpl : public WidgetImpl
