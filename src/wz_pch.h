@@ -156,7 +156,7 @@ struct WidgetImpl
 	// This widget should overlap other widgets when doing mouse cursor logic. e.g. tab bar scroll buttons.
 	bool overlap;
 
-	// Don't draw automatically when wz_main_window_draw walks through the widget hierarchy.
+	// Don't draw automatically when MainWindowImpl::draw walks through the widget hierarchy.
 	bool drawManually;
 
 	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
@@ -398,6 +398,26 @@ struct ListImpl : public WidgetImpl
 struct MainWindowImpl : public WidgetImpl
 {
 	MainWindowImpl(IRenderer *renderer);
+
+	// Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
+	void setEventCallback(EventCallback callback);
+
+	void mouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	void mouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	void mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	void mouseWheelMove(int x, int y);
+	void keyDown(Key key);
+	void keyUp(Key key);
+	void textInput(const char *text);
+	void draw();
+	void drawFrame();
+	void setMenuBar(struct MenuBarImpl *menuBar);
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
+	void toggleTextCursor();
+	Cursor getCursor() const;
+	const struct WidgetImpl *getKeyboardFocusWidget() const;
+	void dockWindow(struct WindowImpl *window, DockPosition dockPosition);
 
 	struct WidgetImpl *content;
 

@@ -359,49 +359,6 @@ static Rect wz_main_window_calculate_dock_window_rect(struct MainWindowImpl *mai
 	return rect;
 }
 
-void wz_main_window_dock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window, DockPosition dockPosition)
-{
-	WZ_ASSERT(mainWindow);
-	WZ_ASSERT(window);
-
-	// Not valid, use wz_main_window_undock_window to undock.
-	if (dockPosition == WZ_DOCK_POSITION_NONE)
-		return;
-
-	// Don't do anything if this window is already docked at this position.
-	for (size_t i = 0; i < mainWindow->dockedWindows[dockPosition].size(); i++)
-	{
-		if (mainWindow->dockedWindows[dockPosition][i] == window)
-			return;
-	}
-
-	// Hide any other windows docked at the same position.
-	for (size_t i = 0; i < mainWindow->dockedWindows[dockPosition].size(); i++)
-	{
-		wz_widget_set_visible(mainWindow->dockedWindows[dockPosition][i], false);
-	}
-
-	// Inform the window it is being docked.
-	wz_window_dock(window);
-
-	// Resize the window.
-	wz_widget_set_rect_internal(window, wz_main_window_calculate_dock_window_rect(mainWindow, dockPosition, wz_widget_get_size(window)));
-
-	// Dock the window.
-	mainWindow->dockedWindows[dockPosition].push_back(window);
-
-	// Resize the other windows docked at this position to match.
-	wz_main_window_update_docked_window_rect(mainWindow, window);
-
-	// Refresh the tab bar for this dock position.
-	mainWindow->ignoreDockTabBarChangedEvent = true;
-	wz_main_window_refresh_dock_tab_bar(mainWindow, dockPosition);
-	mainWindow->ignoreDockTabBarChangedEvent = false;
-
-	// Docked windows affect the mainWindow content rect, so update it.
-	wz_main_window_update_content_rect(mainWindow);
-}
-
 DockPosition wz_main_window_get_window_dock_position(const struct MainWindowImpl *mainWindow, const struct WindowImpl *window)
 {
 	WZ_ASSERT(mainWindow);
@@ -683,38 +640,6 @@ static void wz_widget_mouse_button_down_recursive(struct WidgetImpl *widget, int
 	}
 }
 
-void wz_main_window_mouse_button_down(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY)
-{
-	struct WidgetImpl *widget;
-
-	WZ_ASSERT(mainWindow);
-
-	// Clear keyboard focus widget.
-	mainWindow->keyboardFocusWidget = NULL;
-
-	mainWindow->lockInputWindow = wz_main_window_get_hover_window(mainWindow, mouseX, mouseY);
-
-	if (!mainWindow->lockInputWidgetStack.empty())
-	{
-		// Lock input to the top/last item on the stack.
-		widget = mainWindow->lockInputWidgetStack.back();
-	}
-	else if (mainWindow->lockInputWindow)
-	{
-		wz_main_window_update_window_draw_priorities(mainWindow, mainWindow->lockInputWindow);
-		widget = mainWindow->lockInputWindow;
-	}
-	else
-	{
-		widget = mainWindow;
-	}
-
-	wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
-
-	// Need a special case for dock icons.
-	wz_main_window_update_dock_preview_visible(mainWindow, mouseX, mouseY);
-}
-
 /*
 ================================================================================
 
@@ -739,42 +664,6 @@ static void wz_widget_mouse_button_up_recursive(struct WidgetImpl *widget, int m
 	{
 		wz_widget_mouse_button_up_recursive(widget->children[i], mouseButton, mouseX, mouseY);
 	}
-}
-
-void wz_main_window_mouse_button_up(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY)
-{
-	struct WidgetImpl *widget;
-
-	WZ_ASSERT(mainWindow);
-
-	// Need a special case for dock icons.
-	if (mainWindow->movingWindow)
-	{
-		// If the dock preview is visible, movingWindow can be docked.
-		if (wz_widget_get_visible(mainWindow->dockPreview))
-		{
-			wz_main_window_dock_window(mainWindow, mainWindow->movingWindow, mainWindow->windowDockPosition);
-		}
-
-		wz_widget_set_visible(mainWindow->dockPreview, false);
-		mainWindow->movingWindow = NULL;
-	}
-
-	if (!mainWindow->lockInputWidgetStack.empty())
-	{
-		// Lock input to the top/last item on the stack.
-		widget = mainWindow->lockInputWidgetStack.back();
-	}
-	else if (mainWindow->lockInputWindow)
-	{
-		widget = mainWindow->lockInputWindow;
-	}
-	else
-	{
-		widget = mainWindow;
-	}
-
-	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
 }
 
 /*
@@ -940,31 +829,6 @@ static void wz_widget_mouse_move_recursive(struct WindowImpl *window, struct Wid
 	}
 }
 
-void wz_main_window_mouse_move(struct MainWindowImpl *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	WZ_ASSERT(mainWindow);
-
-	// Reset the mouse cursor to default.
-	mainWindow->cursor = WZ_CURSOR_DEFAULT;
-
-	// Need a special case for dock icons.
-	wz_main_window_update_dock_preview_visible(mainWindow, mouseX, mouseY);
-
-	if (!mainWindow->lockInputWidgetStack.empty())
-	{
-		// Lock input to the top/last item on the stack.
-		wz_widget_mouse_move_recursive(NULL, mainWindow->lockInputWidgetStack.back(), mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-		return;
-	}
-
-	mainWindow->lockInputWindow = wz_main_window_get_hover_window(mainWindow, mouseX, mouseY);
-
-	// Clear hover on everything but the lockInputWindow and it's children.
-	wz_widget_clear_hover_recursive(mainWindow->lockInputWindow, mainWindow);
-
-	wz_widget_mouse_move_recursive(mainWindow->lockInputWindow, mainWindow, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-}
-
 /*
 ================================================================================
 
@@ -994,29 +858,6 @@ static void wz_widget_mouse_wheel_move_recursive(struct WidgetImpl *widget, int 
 	}
 }
 
-void wz_main_window_mouse_wheel_move(struct MainWindowImpl *mainWindow, int x, int y)
-{
-	struct WidgetImpl *widget;
-
-	WZ_ASSERT(mainWindow);
-
-	if (!mainWindow->lockInputWidgetStack.empty())
-	{
-		// Lock input to the top/last item on the stack.
-		widget = mainWindow->lockInputWidgetStack.back();
-	}
-	else if (mainWindow->lockInputWindow)
-	{
-		widget = mainWindow->lockInputWindow;
-	}
-	else
-	{
-		widget = mainWindow;
-	}
-
-	wz_widget_mouse_wheel_move_recursive(widget, x, y);
-}
-
 /*
 ================================================================================
 
@@ -1042,64 +883,6 @@ static void wz_main_window_key(struct MainWindowImpl *mainWindow, Key key, bool 
 	else if (!down && widget->vtable.key_up)
 	{
 		widget->vtable.key_up(widget, key);
-	}
-}
-
-void wz_main_window_key_down(struct MainWindowImpl *mainWindow, Key key)
-{
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
-		return;
-
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
-	{
-		mainWindow->isShiftKeyDown = true;
-	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
-	{
-		mainWindow->isControlKeyDown = true;
-	}
-
-	wz_main_window_key(mainWindow, key, true);
-}
-
-void wz_main_window_key_up(struct MainWindowImpl *mainWindow, Key key)
-{
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
-		return;
-
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
-	{
-		mainWindow->isShiftKeyDown = false;
-	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
-	{
-		mainWindow->isControlKeyDown = false;
-	}
-
-	wz_main_window_key(mainWindow, key, false);
-}
-
-/*
-================================================================================
-
-TEXT INPUT
-
-================================================================================
-*/
-
-void wz_main_window_text_input(struct MainWindowImpl *mainWindow, const char *text)
-{
-	struct WidgetImpl *widget;
-
-	WZ_ASSERT(mainWindow);
-	widget = mainWindow->keyboardFocusWidget;
-
-	if (!widget || !wz_widget_get_visible(widget))
-		return;
-
-	if (widget->vtable.text_input)
-	{
-		widget->vtable.text_input(widget, text);
 	}
 }
 
@@ -1243,84 +1026,6 @@ static void wz_widget_draw_if_visible(struct WidgetImpl *widget)
 	}
 }
 
-void wz_main_window_draw(struct MainWindowImpl *mainWindow)
-{
-	struct WindowImpl *windows[WZ_MAX_WINDOWS];
-	int nWindows;
-
-	WZ_ASSERT(mainWindow);
-
-	// Draw the main window (not really, vtable.draw is NULL) and ancestors. Don't recurse into windows or combos.
-	wz_widget_draw(mainWindow, wz_widget_true, wz_widget_is_not_window_or_combo);
-
-	// Get a list of windows (excluding top).
-	nWindows = 0;
-
-	for (size_t i = 0; i < (mainWindow)->children.size(); i++)
-	{
-		struct WidgetImpl *widget = (mainWindow)->children[i];
-	
-		if (widget->type == WZ_TYPE_WINDOW)
-		{
-			windows[nWindows] = (struct WindowImpl *)widget;
-			nWindows++;
-		}
-	}
-
-	// Sort them in ascending order by draw priority.
-	qsort(windows, nWindows, sizeof(struct WindowImpl *), wz_compare_window_draw_priorities_docked);
-
-	// For each window, draw the window and all ancestors. Don't recurse into combos.
-	for (int i = 0; i < nWindows; i++)
-	{
-		struct WidgetImpl *widget = windows[i];
-
-		if (!wz_widget_get_visible(widget))
-			continue;
-
-		if (widget->vtable.draw)
-		{
-			widget->vtable.draw(widget, mainWindow->rect);
-		}
-		else
-		{
-			widget->draw(mainWindow->rect);
-		}
-
-		wz_widget_draw(widget, wz_widget_true, wz_widget_is_not_combo);
-	}
-
-	// Draw combo box dropdown lists.
-	wz_widget_draw(mainWindow, wz_widget_is_combo_ancestor, wz_widget_true);
-
-	// Draw dock preview.
-	wz_widget_draw_if_visible(mainWindow->dockPreview);
-
-	// Draw dock icons.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		wz_widget_draw_if_visible(mainWindow->dockIcons[i]);
-	}
-}
-
-void wz_main_window_draw_frame(struct MainWindowImpl *mainWindow)
-{
-	WZ_ASSERT(mainWindow);
-	NVGRenderer *r = (NVGRenderer *)mainWindow->renderer;
-	struct NVGcontext *vg = r->getContext();
-	nvgBeginFrame(vg, mainWindow->rect.w, mainWindow->rect.h, 1);
-	wz_main_window_draw(mainWindow);
-	nvgEndFrame(vg);
-}
-
-/*
-================================================================================
-
-MISC.
-
-================================================================================
-*/
-
 static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	struct MainWindowImpl *mainWindow;
@@ -1334,112 +1039,6 @@ static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_main_window_update_dock_icon_positions(mainWindow);
 	wz_main_window_update_docking_rects(mainWindow);
 	wz_main_window_update_content_rect(mainWindow);
-}
-
-MainWindow::MainWindow(IRenderer *renderer)
-{
-	WZ_ASSERT(renderer);
-	impl = new MainWindowImpl(renderer);
-
-	impl->menuBar = new MenuBarImpl();
-	wz_main_window_set_menu_bar(impl, impl->menuBar);
-}
-
-MainWindow::~MainWindow()
-{
-	wz_widget_destroy(impl);
-}
-
-int MainWindow::getWidth() const
-{
-	return wz_widget_get_width(impl);
-}
-
-int MainWindow::getHeight() const
-{
-	return wz_widget_get_height(impl);
-}
-
-void MainWindow::setSize(int w, int h)
-{
-	wz_widget_set_size_args(impl, w, h);
-}
-
-void MainWindow::mouseMove(int x, int y, int dx, int dy)
-{
-	wz_main_window_mouse_move(impl, x, y, dx, dy);
-}
-
-void MainWindow::mouseButtonDown(int button, int x, int y)
-{
-	wz_main_window_mouse_button_down(impl, button, x, y);
-}
-
-void MainWindow::mouseButtonUp(int button, int x, int y)
-{
-	wz_main_window_mouse_button_up(impl, button, x, y);
-}
-
-void MainWindow::mouseWheelMove(int x, int y)
-{
-	wz_main_window_mouse_wheel_move(impl, x, y);
-}
-
-void MainWindow::keyDown(Key key)
-{
-	wz_main_window_key_down(impl, key);
-}
-
-void MainWindow::keyUp(Key key)
-{
-	wz_main_window_key_up(impl, key);
-}
-
-void MainWindow::textInput(const char *text)
-{
-	wz_main_window_text_input(impl, text);
-}
-
-void MainWindow::draw()
-{	
-	wz_main_window_draw(impl);
-}
-
-void MainWindow::drawFrame()
-{	
-	wz_main_window_draw_frame(impl);
-}
-
-void MainWindow::toggleTextCursor()
-{
-	wz_main_window_toggle_text_cursor(impl);
-}
-
-Cursor MainWindow::getCursor() const
-{
-	return wz_main_window_get_cursor(impl);
-}
-
-Widget *MainWindow::add(Widget *widget)
-{
-	wz_main_window_add(impl, widget->impl);
-	return widget;
-}
-
-void MainWindow::remove(Widget *widget)
-{
-	wz_main_window_remove(impl, widget->impl);
-}
-
-void MainWindow::createMenuButton(const std::string &label)
-{
-	MenuBarButtonImpl *button = impl->menuBar->createButton();
-	button->setLabel(label.c_str());
-}
-
-void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
-{
-	wz_main_window_dock_window(impl, (WindowImpl *)window->impl, dockPosition);
 }
 
 MainWindowImpl::MainWindowImpl(IRenderer *renderer)
@@ -1495,25 +1094,231 @@ MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 		wz_widget_add_child_widget(this, dockTabBars[i]);
 		dockTabBars[i]->addCallbackTabChanged(wz_main_window_dock_tab_bar_tab_changed);
 	}
+
+	// Create menu bar.
+	menuBar = new MenuBarImpl;
+	setMenuBar(menuBar);
 }
 
-void wz_main_window_set_event_callback(struct MainWindowImpl *mainWindow, EventCallback callback)
+void MainWindowImpl::setEventCallback(EventCallback callback)
 {
-	WZ_ASSERT(mainWindow);
-	mainWindow->handle_event = callback;
+	handle_event = callback;
 }
 
-void wz_main_window_set_menu_bar(struct MainWindowImpl *mainWindow, struct MenuBarImpl *menuBar)
+void MainWindowImpl::mouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
-	WZ_ASSERT(mainWindow);
-	mainWindow->menuBar = menuBar;
+	// Clear keyboard focus widget.
+	keyboardFocusWidget = NULL;
+
+	lockInputWindow = wz_main_window_get_hover_window(this, mouseX, mouseY);
+	struct WidgetImpl *widget = this;;
+
+	if (!mainWindow->lockInputWidgetStack.empty())
+	{
+		// Lock input to the top/last item on the stack.
+		widget = lockInputWidgetStack.back();
+	}
+	else if (mainWindow->lockInputWindow)
+	{
+		wz_main_window_update_window_draw_priorities(this, lockInputWindow);
+		widget = lockInputWindow;
+	}
+
+	wz_widget_mouse_button_down_recursive(widget, mouseButton, mouseX, mouseY);
+
+	// Need a special case for dock icons.
+	wz_main_window_update_dock_preview_visible(this, mouseX, mouseY);
+}
+
+void MainWindowImpl::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	// Need a special case for dock icons.
+	if (movingWindow)
+	{
+		// If the dock preview is visible, movingWindow can be docked.
+		if (wz_widget_get_visible(dockPreview))
+		{
+			dockWindow(movingWindow, windowDockPosition);
+		}
+
+		wz_widget_set_visible(dockPreview, false);
+		movingWindow = NULL;
+	}
+
+	struct WidgetImpl *widget = this;
+
+	if (!lockInputWidgetStack.empty())
+	{
+		// Lock input to the top/last item on the stack.
+		widget = lockInputWidgetStack.back();
+	}
+	else if (lockInputWindow)
+	{
+		widget = lockInputWindow;
+	}
+
+	wz_widget_mouse_button_up_recursive(widget, mouseButton, mouseX, mouseY);
+}
+
+void MainWindowImpl::mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	// Reset the mouse cursor to default.
+	cursor = WZ_CURSOR_DEFAULT;
+
+	// Need a special case for dock icons.
+	wz_main_window_update_dock_preview_visible(this, mouseX, mouseY);
+
+	if (!lockInputWidgetStack.empty())
+	{
+		// Lock input to the top/last item on the stack.
+		wz_widget_mouse_move_recursive(NULL, lockInputWidgetStack.back(), mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		return;
+	}
+
+	lockInputWindow = wz_main_window_get_hover_window(this, mouseX, mouseY);
+
+	// Clear hover on everything but the lockInputWindow and it's children.
+	wz_widget_clear_hover_recursive(lockInputWindow, this);
+
+	wz_widget_mouse_move_recursive(lockInputWindow, this, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+}
+
+void MainWindowImpl::mouseWheelMove(int x, int y)
+{
+	struct WidgetImpl *widget = this;
+
+	if (!lockInputWidgetStack.empty())
+	{
+		// Lock input to the top/last item on the stack.
+		widget = lockInputWidgetStack.back();
+	}
+	else if (lockInputWindow)
+	{
+		widget = lockInputWindow;
+	}
+
+	wz_widget_mouse_wheel_move_recursive(widget, x, y);
+}
+
+void MainWindowImpl::keyDown(Key key)
+{
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
+		return;
+
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	{
+		isShiftKeyDown = true;
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	{
+		isControlKeyDown = true;
+	}
+
+	wz_main_window_key(this, key, true);
+}
+
+void MainWindowImpl::keyUp(Key key)
+{
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
+		return;
+
+	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	{
+		isShiftKeyDown = false;
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	{
+		isControlKeyDown = false;
+	}
+
+	wz_main_window_key(this, key, false);
+}
+
+void MainWindowImpl::textInput(const char *text)
+{
+	struct WidgetImpl *widget = keyboardFocusWidget;
+
+	if (!widget || !wz_widget_get_visible(widget))
+		return;
+
+	if (widget->vtable.text_input)
+	{
+		widget->vtable.text_input(widget, text);
+	}
+}
+
+void MainWindowImpl::draw()
+{
+	// Draw the main window (not really, vtable.draw is NULL) and ancestors. Don't recurse into windows or combos.
+	wz_widget_draw(this, wz_widget_true, wz_widget_is_not_window_or_combo);
+
+	// Get a list of windows (excluding top).
+	struct WindowImpl *windows[WZ_MAX_WINDOWS];
+	int nWindows = 0;
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		if (children[i]->type == WZ_TYPE_WINDOW)
+		{
+			windows[nWindows] = (struct WindowImpl *)children[i];
+			nWindows++;
+		}
+	}
+
+	// Sort them in ascending order by draw priority.
+	qsort(windows, nWindows, sizeof(struct WindowImpl *), wz_compare_window_draw_priorities_docked);
+
+	// For each window, draw the window and all ancestors. Don't recurse into combos.
+	for (int i = 0; i < nWindows; i++)
+	{
+		struct WidgetImpl *widget = windows[i];
+
+		if (!wz_widget_get_visible(widget))
+			continue;
+
+		if (widget->vtable.draw)
+		{
+			widget->vtable.draw(widget, rect);
+		}
+		else
+		{
+			widget->draw(rect);
+		}
+
+		wz_widget_draw(widget, wz_widget_true, wz_widget_is_not_combo);
+	}
+
+	// Draw combo box dropdown lists.
+	wz_widget_draw(this, wz_widget_is_combo_ancestor, wz_widget_true);
+
+	// Draw dock preview.
+	wz_widget_draw_if_visible(dockPreview);
+
+	// Draw dock icons.
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		wz_widget_draw_if_visible(dockIcons[i]);
+	}
+}
+
+void MainWindowImpl::drawFrame()
+{
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	struct NVGcontext *vg = r->getContext();
+	nvgBeginFrame(vg, rect.w, rect.h, 1);
+	draw();
+	nvgEndFrame(vg);
+}
+
+void MainWindowImpl::setMenuBar(struct MenuBarImpl *menuBar)
+{
+	this->menuBar = menuBar;
 	wz_widget_set_width(menuBar, mainWindow->rect.w);
-	wz_widget_add_child_widget(mainWindow, menuBar);
+	wz_widget_add_child_widget(this, menuBar);
 }
 
-void wz_main_window_add(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget)
+void MainWindowImpl::add(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(widget);
 
 	if (widget->type == WZ_TYPE_MAIN_WINDOW)
@@ -1522,52 +1327,90 @@ void wz_main_window_add(struct MainWindowImpl *mainWindow, struct WidgetImpl *wi
 	// Special case for windows: add directly, not to the content widget.
 	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
 	{
-		wz_widget_add_child_widget(mainWindow, widget);
+		wz_widget_add_child_widget(this, widget);
 	}
 	else
 	{
-		wz_widget_add_child_widget(mainWindow->content, widget);
+		wz_widget_add_child_widget(content, widget);
 	}
 }
 
-void wz_main_window_remove(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget)
+void MainWindowImpl::remove(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(mainWindow);
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
 	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
 	{
-		wz_widget_remove_child_widget(mainWindow, widget);
+		wz_widget_remove_child_widget(this, widget);
 	}
 	else
 	{
-		wz_widget_remove_child_widget(mainWindow->content, widget);
+		wz_widget_remove_child_widget(content, widget);
 	}
 }
 
-void wz_main_window_toggle_text_cursor(struct MainWindowImpl *mainWindow)
+void MainWindowImpl::toggleTextCursor()
 {
-	WZ_ASSERT(mainWindow);
-	mainWindow->isTextCursorVisible = !mainWindow->isTextCursorVisible;
+	isTextCursorVisible = !isTextCursorVisible;
 }
 
-Cursor wz_main_window_get_cursor(const struct MainWindowImpl *mainWindow)
+Cursor MainWindowImpl::getCursor() const
 {
-	WZ_ASSERT(mainWindow);
-	return mainWindow->cursor;
+	return cursor;
+}
+
+const struct WidgetImpl *MainWindowImpl::getKeyboardFocusWidget() const
+{
+	return keyboardFocusWidget;
+}
+
+void MainWindowImpl::dockWindow(struct WindowImpl *window, DockPosition dockPosition)
+{
+	WZ_ASSERT(window);
+
+	// Not valid, use wz_main_window_undock_window to undock.
+	if (dockPosition == WZ_DOCK_POSITION_NONE)
+		return;
+
+	// Don't do anything if this window is already docked at this position.
+	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	{
+		if (dockedWindows[dockPosition][i] == window)
+			return;
+	}
+
+	// Hide any other windows docked at the same position.
+	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	{
+		wz_widget_set_visible(dockedWindows[dockPosition][i], false);
+	}
+
+	// Inform the window it is being docked.
+	wz_window_dock(window);
+
+	// Resize the window.
+	wz_widget_set_rect_internal(window, wz_main_window_calculate_dock_window_rect(this, dockPosition, wz_widget_get_size(window)));
+
+	// Dock the window.
+	dockedWindows[dockPosition].push_back(window);
+
+	// Resize the other windows docked at this position to match.
+	wz_main_window_update_docked_window_rect(this, window);
+
+	// Refresh the tab bar for this dock position.
+	ignoreDockTabBarChangedEvent = true;
+	wz_main_window_refresh_dock_tab_bar(this, dockPosition);
+	ignoreDockTabBarChangedEvent = false;
+
+	// Docked windows affect the mainWindow content rect, so update it.
+	wz_main_window_update_content_rect(this);
 }
 
 void wz_main_window_set_cursor(struct MainWindowImpl *mainWindow, Cursor cursor)
 {
 	WZ_ASSERT(mainWindow);
 	mainWindow->cursor = cursor;
-}
-
-const struct WidgetImpl *wz_main_window_get_keyboard_focus_widget(const struct MainWindowImpl *mainWindow)
-{
-	WZ_ASSERT(mainWindow);
-	return mainWindow->keyboardFocusWidget;
 }
 
 void wz_main_window_set_keyboard_focus_widget(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget)
@@ -1700,6 +1543,117 @@ void wz_main_window_update_content_rect(struct MainWindowImpl *mainWindow)
 bool wz_main_window_text_cursor_is_visible(const struct MainWindowImpl *mainWindow)
 {
 	return mainWindow->isTextCursorVisible;
+}
+
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
+MainWindow::MainWindow(IRenderer *renderer)
+{
+	WZ_ASSERT(renderer);
+	impl = new MainWindowImpl(renderer);
+}
+
+MainWindow::~MainWindow()
+{
+	wz_widget_destroy(impl);
+}
+
+int MainWindow::getWidth() const
+{
+	return wz_widget_get_width(impl);
+}
+
+int MainWindow::getHeight() const
+{
+	return wz_widget_get_height(impl);
+}
+
+void MainWindow::setSize(int w, int h)
+{
+	wz_widget_set_size_args(impl, w, h);
+}
+
+void MainWindow::mouseMove(int x, int y, int dx, int dy)
+{
+	impl->mouseMove(x, y, dx, dy);
+}
+
+void MainWindow::mouseButtonDown(int button, int x, int y)
+{
+	impl->mouseButtonDown(button, x, y);
+}
+
+void MainWindow::mouseButtonUp(int button, int x, int y)
+{
+	impl->mouseButtonUp(button, x, y);
+}
+
+void MainWindow::mouseWheelMove(int x, int y)
+{
+	impl->mouseWheelMove(x, y);
+}
+
+void MainWindow::keyDown(Key key)
+{
+	impl->keyDown(key);
+}
+
+void MainWindow::keyUp(Key key)
+{
+	impl->keyUp(key);
+}
+
+void MainWindow::textInput(const char *text)
+{
+	impl->textInput(text);
+}
+
+void MainWindow::draw()
+{	
+	impl->draw();
+}
+
+void MainWindow::drawFrame()
+{	
+	impl->drawFrame();
+}
+
+void MainWindow::toggleTextCursor()
+{
+	impl->toggleTextCursor();
+}
+
+Cursor MainWindow::getCursor() const
+{
+	return impl->getCursor();
+}
+
+Widget *MainWindow::add(Widget *widget)
+{
+	impl->add(widget->impl);
+	return widget;
+}
+
+void MainWindow::remove(Widget *widget)
+{
+	impl->remove(widget->impl);
+}
+
+void MainWindow::createMenuButton(const std::string &label)
+{
+	MenuBarButtonImpl *button = impl->menuBar->createButton();
+	button->setLabel(label.c_str());
+}
+
+void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
+{
+	impl->dockWindow((WindowImpl *)window->impl, dockPosition);
 }
 
 } // namespace wz

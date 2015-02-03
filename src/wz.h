@@ -284,26 +284,6 @@ struct EventHandler : public IEventHandler
 	Method method;
 };
 
-// Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
-void wz_main_window_set_event_callback(struct MainWindowImpl *mainWindow, EventCallback callback);
-
-void wz_main_window_mouse_button_down(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY);
-void wz_main_window_mouse_button_up(struct MainWindowImpl *mainWindow, int mouseButton, int mouseX, int mouseY);
-void wz_main_window_mouse_move(struct MainWindowImpl *mainWindow, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-void wz_main_window_mouse_wheel_move(struct MainWindowImpl *mainWindow, int x, int y);
-void wz_main_window_key_down(struct MainWindowImpl *mainWindow, Key key);
-void wz_main_window_key_up(struct MainWindowImpl *mainWindow, Key key);
-void wz_main_window_text_input(struct MainWindowImpl *mainWindow, const char *text);
-void wz_main_window_draw(struct MainWindowImpl *mainWindow);
-void wz_main_window_draw_frame(struct MainWindowImpl *mainWindow);
-void wz_main_window_set_menu_bar(struct MainWindowImpl *mainWindow, struct MenuBarImpl *menuBar);
-void wz_main_window_add(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
-void wz_main_window_remove(struct MainWindowImpl *mainWindow, struct WidgetImpl *widget);
-void wz_main_window_toggle_text_cursor(struct MainWindowImpl *mainWindow);
-Cursor wz_main_window_get_cursor(const struct MainWindowImpl *mainWindow);
-const struct WidgetImpl *wz_main_window_get_keyboard_focus_widget(const struct MainWindowImpl *mainWindow);
-void wz_main_window_dock_window(struct MainWindowImpl *mainWindow, struct WindowImpl *window, DockPosition dockPosition);
-
 typedef void (*WidgetDrawCallback)(struct WidgetImpl *widget, Rect clip);
 typedef Size (*WidgetMeasureCallback)(struct WidgetImpl *widget);
 

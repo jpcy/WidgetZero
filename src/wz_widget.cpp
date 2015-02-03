@@ -545,7 +545,7 @@ bool wz_widget_get_visible(const struct WidgetImpl *widget)
 bool wz_widget_has_keyboard_focus(const struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	return wz_main_window_get_keyboard_focus_widget(widget->mainWindow) == widget;
+	return widget->mainWindow->getKeyboardFocusWidget() == widget;
 }
 
 void wz_widget_set_metadata(struct WidgetImpl *widget, void *metadata)
