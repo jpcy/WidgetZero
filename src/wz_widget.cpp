@@ -139,69 +139,6 @@ void wz_widget_destroy(struct WidgetImpl *widget)
 	delete widget;
 }
 
-static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widget)
-{
-	for (;;)
-	{
-		if (!widget)
-			break;
-
-		if (widget->type == WZ_TYPE_MAIN_WINDOW)
-			return (struct MainWindowImpl *)widget;
-
-		widget = widget->parent;
-	}
-
-	return NULL;
-}
-
-static void wz_widget_set_renderer(struct WidgetImpl *widget, IRenderer *renderer)
-{
-	IRenderer *oldRenderer;
-
-	WZ_ASSERT(widget);
-	oldRenderer = widget->renderer;
-	widget->renderer = renderer;
-
-	if (oldRenderer != widget->renderer && widget->vtable.renderer_changed)
-	{
-		widget->vtable.renderer_changed(widget);
-	}
-}
-
-// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via WidgetImpl::addChildWidget.
-// Example: scroller does this with it's button children.
-static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *widget, struct MainWindowImpl *mainWindow, struct WindowImpl *window)
-{
-	WZ_ASSERT(widget);
-
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		struct WidgetImpl *child = widget->children[i];
-		child->mainWindow = mainWindow;
-		child->window = window;
-
-		// Set the renderer too.
-		if (mainWindow)
-		{
-			wz_widget_set_renderer(child, mainWindow->renderer);
-		}
-
-		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
-	}
-}
-
-static void wz_widget_measure_and_resize_recursive(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	widget->resizeToMeasured();
-
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		wz_widget_measure_and_resize_recursive(widget->children[i]);
-	}
-}
-
 WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
@@ -546,7 +483,7 @@ void WidgetImpl::addChildWidget(struct WidgetImpl *child)
 	WZ_ASSERT(child);
 
 	// Set mainWindow.
-	child->mainWindow = wz_widget_find_main_window(this);
+	child->mainWindow = findMainWindow();
 
 	// Find the closest ancestor window.
 	child->window = (struct WindowImpl *)findClosestAncestor(WZ_TYPE_WINDOW);
@@ -554,17 +491,17 @@ void WidgetImpl::addChildWidget(struct WidgetImpl *child)
 	// Set the renderer.
 	if (child->mainWindow)
 	{
-		wz_widget_set_renderer(child, child->mainWindow->renderer);
+		child->setRenderer(child->mainWindow->renderer);
 	}
 
 	// Set children mainWindow, window and renderer.
-	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
+	child->setMainWindowAndWindowRecursive(child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
 
 	child->parent = this;
 	children.push_back(child);
 
 	// Resize the widget and children to their measured sizes.
-	wz_widget_measure_and_resize_recursive(child);
+	child->resizeToMeasuredRecursive();
 	child->refreshRect();
 
 	if (child->vtable.added)
@@ -667,7 +604,7 @@ void WidgetImpl::setRectInternalRecursive(Rect rect)
 	Rect oldRect = this->rect;
 
 	// Apply alignment and stretching.
-	rect = wz_widget_calculate_aligned_stretched_rect(this, rect);
+	rect = calculateAlignedStretchedRect(rect);
 
 	if (vtable.set_rect)
 	{
@@ -812,6 +749,125 @@ LineBreakResult WidgetImpl::lineBreakText(const char *text, int n, int lineWidth
 	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
 }
 
+Rect WidgetImpl::calculateAlignedStretchedRect(Rect rect) const
+{
+	// Can't align or stretch to parent rect if there is no parent.
+	if (!parent)
+		return rect;
+
+	// Don't align or stretch if this widget is a child of a layout. The layout will handle the logic in that case.
+	if (parent && parent->isLayout())
+		return rect;
+
+	Rect parentRect = parent->getRect();
+
+	// Handle stretching.
+	if ((stretch & WZ_STRETCH_WIDTH) != 0)
+	{
+		const float scale = (stretchWidthScale < 0.01f) ? 1 : stretchWidthScale;
+
+		rect.x = margin.left;
+		rect.w = (int)(parentRect.w * scale) - (margin.left + margin.right);
+	}
+
+	if ((stretch & WZ_STRETCH_HEIGHT) != 0)
+	{
+		const float scale = (stretchHeightScale < 0.01f) ? 1 : stretchHeightScale;
+
+		rect.y = margin.top;
+		rect.h = (int)(parentRect.h * scale) - (margin.top + margin.bottom);
+	}
+
+	// Handle horizontal alignment.
+	if ((align & WZ_ALIGN_LEFT) != 0)
+	{
+		rect.x = margin.left;
+	}
+	else if ((align & WZ_ALIGN_CENTER) != 0)
+	{
+		rect.x = margin.left + (int)((parentRect.w - margin.right) / 2.0f - rect.w / 2.0f);
+	}
+	else if ((align & WZ_ALIGN_RIGHT) != 0)
+	{
+		rect.x = parentRect.w - margin.right - rect.w;
+	}
+
+	// Handle vertical alignment.
+	if ((align & WZ_ALIGN_TOP) != 0)
+	{
+		rect.y = margin.top;
+	}
+	else if ((align & WZ_ALIGN_MIDDLE) != 0)
+	{
+		rect.y = margin.top + (int)((parentRect.h - margin.bottom) / 2.0f - rect.h / 2.0f);
+	}
+	else if ((align & WZ_ALIGN_BOTTOM) != 0)
+	{
+		rect.y = parentRect.h - margin.bottom - rect.h;
+	}
+
+	return rect;
+}
+
+struct MainWindowImpl *WidgetImpl::findMainWindow()
+{
+	struct WidgetImpl *widget = this;
+
+	for (;;)
+	{
+		if (!widget)
+			break;
+
+		if (widget->type == WZ_TYPE_MAIN_WINDOW)
+			return (struct MainWindowImpl *)widget;
+
+		widget = widget->parent;
+	}
+
+	return NULL;
+}
+
+void WidgetImpl::setRenderer(IRenderer *renderer)
+{
+	IRenderer *oldRenderer = this->renderer;
+	this->renderer = renderer;
+
+	if (oldRenderer != this->renderer && vtable.renderer_changed)
+	{
+		vtable.renderer_changed(this);
+	}
+}
+
+// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via WidgetImpl::addChildWidget.
+// Example: scroller does this with it's button children.
+void WidgetImpl::setMainWindowAndWindowRecursive(struct MainWindowImpl *mainWindow, struct WindowImpl *window)
+{
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		struct WidgetImpl *child = children[i];
+		child->mainWindow = mainWindow;
+		child->window = window;
+
+		// Set the renderer too.
+		if (mainWindow)
+		{
+			child->setRenderer(mainWindow->renderer);
+		}
+
+		child->setMainWindowAndWindowRecursive(mainWindow, window);
+	}
+}
+
+void WidgetImpl::resizeToMeasuredRecursive()
+{
+	resizeToMeasured();
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->resizeToMeasuredRecursive();
+	}
+}
+
 /*
 ================================================================================
 
@@ -860,7 +916,13 @@ bool Rect::intersect(const Rect A, const Rect B, Rect *result)
     return !result->isEmpty();
 }
 
-//------------------------------------------------------------------------------
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
 
 Widget::~Widget()
 {

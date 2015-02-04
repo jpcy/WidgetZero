@@ -260,6 +260,15 @@ public:
 	WidgetChildren children;
 
 	std::vector<IEventHandler *> eventHandlers;
+
+private:
+	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
+	Rect calculateAlignedStretchedRect(Rect rect) const;
+
+	struct MainWindowImpl *findMainWindow();
+	void setRenderer(IRenderer *renderer);
+	void setMainWindowAndWindowRecursive(struct MainWindowImpl *mainWindow, struct WindowImpl *window);
+	void resizeToMeasuredRecursive();
 };
 
 enum
@@ -767,9 +776,6 @@ struct WindowImpl : public WidgetImpl
 	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
 	Size sizeBeforeDocking;
 };
-
-// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
-Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget, Rect rect);
 
 struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list);
 
