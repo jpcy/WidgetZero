@@ -113,7 +113,7 @@ static Size wz_spinner_measure(struct WidgetImpl *widget)
 
 	border = spinner->textEdit->getBorder();
 	size.w = 100;
-	size.h = wz_widget_get_line_height(widget) + border.top + border.bottom;
+	size.h = widget->getLineHeight() + border.top + border.bottom;
 	return size;
 }
 
@@ -150,7 +150,7 @@ SpinnerImpl::SpinnerImpl()
 	textEdit = new TextEditImpl(false, 256);
 	textEdit->setStretch(WZ_STRETCH);
 	textEdit->setValidateTextCallback(wz_spinner_validate_text);
-	wz_widget_add_child_widget(this, textEdit);
+	addChildWidget(textEdit);
 
 	decrementButton = new ButtonImpl();
 	decrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
@@ -159,8 +159,8 @@ SpinnerImpl::SpinnerImpl()
 	decrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
 	decrementButton->setDrawCallback(wz_spinner_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_spinner_decrement_button_clicked);
-	wz_widget_set_overlap(decrementButton, true);
-	wz_widget_add_child_widget(this, decrementButton);
+	decrementButton->setOverlap(true);
+	addChildWidget(decrementButton);
 
 	incrementButton = new ButtonImpl();
 	incrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
@@ -169,8 +169,8 @@ SpinnerImpl::SpinnerImpl()
 	incrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
 	incrementButton->setDrawCallback(wz_spinner_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
-	wz_widget_set_overlap(incrementButton, true);
-	wz_widget_add_child_widget(this, incrementButton);
+	incrementButton->setOverlap(true);
+	addChildWidget(incrementButton);
 }
 
 int SpinnerImpl::getValue() const

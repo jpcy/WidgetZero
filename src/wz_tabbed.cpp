@@ -56,7 +56,7 @@ void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
 	if (tabPage->type != WZ_TYPE_TAB_PAGE || widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(tabPage, widget);
+	tabPage->addChildWidget(widget);
 }
 
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
@@ -67,7 +67,7 @@ void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
 	if (tabPage->type != WZ_TYPE_TAB_PAGE)
 		return;
 
-	wz_widget_remove_child_widget(tabPage, widget);
+	tabPage->removeChildWidget(widget);
 }
 
 /*
@@ -223,7 +223,7 @@ static void wz_tabbed_set_rect(struct WidgetImpl *widget, Rect rect)
 	tabbed = (struct TabbedImpl *)widget;
 
 	// Set the tab bar width to match.
-	wz_widget_set_width_internal(tabbed->tabBar, rect.w);
+	tabbed->tabBar->setWidthInternal(rect.w);
 
 	// Resize the pages to take up the remaining space.
 	pageSize.w = rect.w;
@@ -231,7 +231,7 @@ static void wz_tabbed_set_rect(struct WidgetImpl *widget, Rect rect)
 
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
 	{
-		wz_widget_set_size_internal(tabbed->pages[i].page, pageSize);
+		tabbed->pages[i].page->setSizeInternal(pageSize);
 	}
 }
 
@@ -257,7 +257,7 @@ TabbedImpl::TabbedImpl()
 
 	tabBar = new TabBarImpl;
 	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
-	wz_widget_add_child_widget(this, tabBar);
+	addChildWidget(tabBar);
 }
 
 void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
@@ -271,11 +271,11 @@ void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
 	// Add the page widget.
 	*page = wz_tab_page_create();
 	(*page)->setVisible(tabBar->getSelectedTab() == *tab);
-	wz_widget_add_child_widget(this, *page);
+	addChildWidget(*page);
 
 	// Set the page widget rect.
 	int tabBarHeight = tabBar->getHeight();
-	wz_widget_set_rect_args_internal(*page, 0, tabBarHeight, rect.w, rect.h - tabBarHeight);
+	(*page)->setRectInternal(0, tabBarHeight, rect.w, rect.h - tabBarHeight);
 
 	// Add the tabbed page.
 	TabbedPage newPage;

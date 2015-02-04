@@ -49,7 +49,7 @@ static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
 		int textWidth, textHeight;
 		Rect borderRect;
 
-		wz_widget_measure_text(widget, groupBox->label.c_str(), 0, &textWidth, &textHeight);
+		widget->measureText(groupBox->label.c_str(), 0, &textWidth, &textHeight);
 		borderRect = rect;
 		borderRect.y += textHeight / 2;
 		borderRect.h -= textHeight / 2;
@@ -79,7 +79,7 @@ static void wz_group_box_refresh_margin(struct GroupBoxImpl *groupBox)
 
 	if (!groupBox->label.empty())
 	{
-		margin.top = wz_widget_get_line_height(groupBox) + WZ_SKIN_GROUP_BOX_MARGIN;
+		margin.top = groupBox->getLineHeight() + WZ_SKIN_GROUP_BOX_MARGIN;
 	}
 
 	groupBox->content->setMargin(margin);
@@ -99,7 +99,7 @@ GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
 	// Create content widget.
 	content = new WidgetImpl;
 	content->stretch = WZ_STRETCH;
-	wz_widget_add_child_widget(this, content);
+	addChildWidget(content);
 }
 
 void GroupBoxImpl::setLabel(const char *label)
@@ -125,13 +125,13 @@ void GroupBoxImpl::add(struct WidgetImpl *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(content, widget);
+	content->addChildWidget(widget);
 }
 
 void GroupBoxImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(content, widget);
+	content->removeChildWidget(widget);
 }
 
 /*

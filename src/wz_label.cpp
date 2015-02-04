@@ -74,7 +74,7 @@ Size LabelImpl::measure()
 	}
 	else
 	{
-		wz_widget_measure_text(this, text_.c_str(), 0, &size.w, &size.h);
+		measureText(text_.c_str(), 0, &size.w, &size.h);
 	}
 
 	return size;

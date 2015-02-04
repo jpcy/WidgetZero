@@ -121,7 +121,7 @@ static void wz_vertical_stack_layout_set_rect(struct WidgetImpl *widget, Rect re
 			childRect.h = child->rect.h;
 		}
 
-		wz_widget_set_rect_internal(child, childRect);
+		child->setRectInternal(childRect);
 		y += childRect.h + child->margin.bottom;
 	}
 }
@@ -221,7 +221,7 @@ static void wz_horizontal_stack_layout_set_rect(struct WidgetImpl *widget, Rect 
 			}
 		}
 
-		wz_widget_set_rect_internal(child, childRect);
+		child->setRectInternal(childRect);
 		x += childRect.w + child->margin.right;
 	}
 }
@@ -259,13 +259,13 @@ StackLayoutImpl::StackLayoutImpl(StackLayoutDirection direction, int spacing)
 void StackLayoutImpl::setDirection(StackLayoutDirection direction)
 {
 	this->direction = direction;
-	wz_widget_refresh_rect(this);
+	refreshRect();
 }
 
 void StackLayoutImpl::setSpacing(int spacing)
 {
 	this->spacing = spacing;
-	wz_widget_refresh_rect(this);
+	refreshRect();
 }
 
 int StackLayoutImpl::getSpacing() const
@@ -280,13 +280,13 @@ void StackLayoutImpl::add(struct WidgetImpl *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(this, widget);
+	addChildWidget(widget);
 }
 
 void StackLayoutImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(this, widget);
+	removeChildWidget(widget);
 }
 
 /*

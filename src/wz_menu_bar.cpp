@@ -39,7 +39,7 @@ static Size wz_menu_bar_button_measure(struct WidgetImpl *widget)
 	Size size;
 	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
 
-	wz_widget_measure_text(widget, button->label.c_str(), 0, &size.w, &size.h);
+	widget->measureText(button->label.c_str(), 0, &size.w, &size.h);
 	size.w += 12;
 	return size;
 }
@@ -172,7 +172,7 @@ static void wz_menu_bar_draw(struct WidgetImpl *widget, Rect clip)
 static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	widget->setHeight(wz_widget_get_line_height(widget) + WZ_SKIN_MENU_BAR_PADDING);
+	widget->setHeight(widget->getLineHeight() + WZ_SKIN_MENU_BAR_PADDING);
 }
 
 MenuBarImpl::MenuBarImpl()
@@ -184,7 +184,7 @@ MenuBarImpl::MenuBarImpl()
 
 	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
-	wz_widget_add_child_widget(this, layout);
+	addChildWidget(layout);
 }
 
 struct MenuBarButtonImpl *MenuBarImpl::createButton()

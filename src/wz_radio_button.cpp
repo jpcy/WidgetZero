@@ -59,7 +59,7 @@ static Size wz_radio_button_measure(struct WidgetImpl *widget)
 {
 	Size size;
 	struct RadioButtonImpl *radioButton = (struct RadioButtonImpl *)widget;
-	wz_widget_measure_text(widget, radioButton->label.c_str(), 0, &size.w, &size.h);
+	widget->measureText(radioButton->label.c_str(), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING;
 	size.h = WZ_MAX(size.h, WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS);
 	return size;

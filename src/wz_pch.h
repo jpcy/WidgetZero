@@ -49,7 +49,7 @@ typedef struct
 
 	void (*destroy)(struct WidgetImpl *widget);
 
-	// The widget was added to a parent widget (see wz_widget_add_child_widget). 
+	// The widget was added to a parent widget (see WidgetImpl::addChildWidget).
 	void (*added)(struct WidgetImpl *parent, struct WidgetImpl *widget);
 
 	// WidgetImpl.renderer has been changed
@@ -164,6 +164,42 @@ struct WidgetImpl
 	// Resize the widget to the result of calling the widget "measure" callback.
 	void resizeToMeasured();
 
+	void addChildWidget(struct WidgetImpl *child);
+	void removeChildWidget(struct WidgetImpl *child);
+	void destroyChildWidget(struct WidgetImpl *child);
+	void setPositionInternal(int x, int y);
+	void setPositionInternal(Position position);
+	void setWidthInternal(int w);
+	void setHeightInternal(int h);
+	void setSizeInternal(int w, int h);
+	void setSizeInternal(Size size);
+
+private:
+	void setRectInternalRecursive(Rect rect);
+
+public:
+	void setRectInternal(int x, int y, int w, int h);
+	void setRectInternal(Rect rect);
+	void refreshRect();
+	const struct WidgetImpl *findClosestAncestor(WidgetType type) const;
+	struct WidgetImpl *findClosestAncestor(WidgetType type);
+	void setDrawManually(bool value);
+	void setDrawLast(bool value);
+	void setOverlap(bool value);
+	bool overlapsParentWindow() const;
+	void setClipInputToParent(bool value);
+	void setInternalMetadata(void *metadata);
+	void *getInternalMetadata();
+
+	// Shortcut for IRenderer::getLineHeight, using the widget's renderer, font face and font size.
+	int getLineHeight() const;
+
+	// Shortcut for IRenderer::measureText, using the widget's renderer, font face and font size.
+	void measureText(const char *text, int n, int *width, int *height) const;
+
+	// Shortcut for IRenderer::lineBreakText, using the widget's renderer, font face and font size.
+	LineBreakResult lineBreakText(const char *text, int n, int lineWidth) const;
+
 	WidgetType type;
 
 	// Explicitly set by the user.
@@ -217,7 +253,7 @@ struct WidgetImpl
 
 	struct MainWindowImpl *mainWindow;
 
-	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in wz_widget_add_child_widget.
+	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in WidgetImpl::addChildWidget.
 	struct WindowImpl *window;
 
 	struct WidgetImpl *parent;
@@ -238,46 +274,6 @@ enum
 	WZ_COMPASS_NW,
 	WZ_NUM_COMPASS_POINTS
 };
-
-void wz_widget_add_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
-void wz_widget_remove_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
-void wz_widget_destroy_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child);
-
-void wz_widget_set_position_args_internal(struct WidgetImpl *widget, int x, int y);
-void wz_widget_set_position_internal(struct WidgetImpl *widget, Position position);
-void wz_widget_set_width_internal(struct WidgetImpl *widget, int w);
-void wz_widget_set_height_internal(struct WidgetImpl *widget, int h);
-void wz_widget_set_size_args_internal(struct WidgetImpl *widget, int w, int h);
-void wz_widget_set_size_internal(struct WidgetImpl *widget, Size size);
-void wz_widget_set_rect_args_internal(struct WidgetImpl *widget, int x, int y, int w, int h);
-void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect);
-
-void wz_widget_refresh_rect(struct WidgetImpl *widget);
-
-const struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type);
-struct WidgetImpl *wz_widget_find_closest_ancestor(struct WidgetImpl *widget, WidgetType type);
-
-void wz_widget_set_draw_manually(struct WidgetImpl *widget, bool value);
-
-void wz_widget_set_draw_last(struct WidgetImpl *widget, bool value);
-
-void wz_widget_set_overlap(struct WidgetImpl *widget, bool value);
-
-bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget);
-
-void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value);
-
-void wz_widget_set_internal_metadata(struct WidgetImpl *widget, void *metadata);
-void *wz_widget_get_internal_metadata(struct WidgetImpl *widget);
-
-// Shortcut for IRenderer::getLineHeight, using the widget's renderer, font face and font size.
-int wz_widget_get_line_height(const struct WidgetImpl *widget);
-
-// Shortcut for IRenderer::measureText, using the widget's renderer, font face and font size.
-void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height);
-
-// Shortcut for IRenderer::lineBreakText, using the widget's renderer, font face and font size.
-LineBreakResult wz_widget_line_break_text(const struct WidgetImpl *widget, const char *text, int n, int lineWidth);
 
 typedef enum
 {

@@ -200,7 +200,7 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 		rect.h = containerSize.h;
 	}
 
-	wz_widget_set_rect_internal(nub, rect);
+	nub->setRectInternal(rect);
 }
 
 ScrollerNub::ScrollerNub()
@@ -502,7 +502,7 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 
 	struct StackLayoutImpl *layout = new StackLayoutImpl(scrollerType == WZ_SCROLLER_VERTICAL ? WZ_STACK_LAYOUT_VERTICAL : WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
-	wz_widget_add_child_widget(this, layout);
+	addChildWidget(layout);
 
 	struct ButtonImpl *decrementButton = new ButtonImpl();
 	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
@@ -516,7 +516,7 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	layout->add(nubContainer);
 
 	nub = wz_scroller_nub_create(this);
-	wz_widget_add_child_widget(nubContainer, nub);
+	nubContainer->addChildWidget(nub);
 
 	struct ButtonImpl *incrementButton = new ButtonImpl();
 	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);

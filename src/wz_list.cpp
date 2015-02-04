@@ -53,7 +53,7 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	rect.x = listRect.w - list->itemsBorder.right - rect.w;
 	rect.y = list->itemsBorder.top;
 	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
-	wz_widget_set_rect_internal(list->scroller, rect);
+	list->scroller->setRectInternal(rect);
 
 	// Now that the height has been calculated, update the nub scale.
 	list->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
@@ -175,7 +175,7 @@ static void wz_list_refresh_item_height(struct ListImpl *list)
 		return;
 
 	// Add a little padding.
-	wz_list_set_item_height_internal(list, wz_widget_get_line_height(list) + 2);
+	wz_list_set_item_height_internal(list, list->getLineHeight() + 2);
 }
 
 static void wz_list_renderer_changed(struct WidgetImpl *widget)
@@ -376,7 +376,7 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	this->nItems = nItems;
 
 	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-	wz_widget_add_child_widget(this, scroller);
+	addChildWidget(scroller);
 	wz_list_update_scroller(this);
 	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
 }

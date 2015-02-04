@@ -74,7 +74,7 @@ static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 static void wz_window_refresh_header_height(struct WidgetImpl *widget)
 {
 	struct WindowImpl *window = (struct WindowImpl *)widget;
-	window->headerHeight = wz_widget_get_line_height(widget) + 6; // Padding.
+	window->headerHeight = widget->getLineHeight() + 6; // Padding.
 }
 
 static void wz_window_renderer_changed(struct WidgetImpl *widget)
@@ -82,13 +82,13 @@ static void wz_window_renderer_changed(struct WidgetImpl *widget)
 	struct WindowImpl *window = (struct WindowImpl *)widget;
 	WZ_ASSERT(window);
 	wz_window_refresh_header_height(widget);
-	wz_widget_refresh_rect(widget);
+	widget->refreshRect();
 }
 
 static void wz_window_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
 {
 	wz_window_refresh_header_height(widget);
-	wz_widget_refresh_rect(widget);
+	widget->refreshRect();
 }
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
@@ -294,7 +294,7 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 			rect.x = mouseX - rect.w / 2;
 		}
 
-		wz_widget_set_rect_internal(widget, rect);
+		widget->setRectInternal(rect);
 		widget->mainWindow->updateContentRect();
 	}
 
@@ -372,7 +372,7 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		return; // Not dragging, don't call MainWindowImpl::updateContentRect.
 	}
 
-	wz_widget_set_rect_internal(widget, rect);
+	widget->setRectInternal(rect);
 
 	// Resizing a docked window: 
 	if (widget->mainWindow->getWindowDockPosition(window) != WZ_DOCK_POSITION_NONE)
@@ -408,7 +408,7 @@ static void wz_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	contentRect.w = rect.w - window->borderSize * 2;
 	contentRect.h = rect.h - (window->headerHeight + window->borderSize * 2);
 
-	wz_widget_set_rect_internal(window->content, contentRect);
+	window->content->setRectInternal(contentRect);
 }
 
 WindowImpl::WindowImpl(const std::string &title)
@@ -430,7 +430,7 @@ WindowImpl::WindowImpl(const std::string &title)
 	this->title = title;
 
 	content = new struct WidgetImpl;
-	wz_widget_add_child_widget(this, content);
+	addChildWidget(content);
 }
 
 int WindowImpl::getHeaderHeight() const
@@ -470,13 +470,13 @@ void WindowImpl::add(struct WidgetImpl *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(content, widget);
+	content->addChildWidget(widget);
 }
 
 void WindowImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(content, widget);
+	content->removeChildWidget(widget);
 }
 
 struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window)

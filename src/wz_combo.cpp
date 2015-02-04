@@ -42,12 +42,12 @@ static Size wz_combo_measure(struct WidgetImpl *widget)
 	for (i = 0; i < nItems; i++)
 	{
 		int w;
-		wz_widget_measure_text(widget, *((const char **)&itemData[i * itemStride]), 0, &w, NULL);
+		widget->measureText(*((const char **)&itemData[i * itemStride]), 0, &w, NULL);
 		size.w = WZ_MAX(size.w, w);
 	}
 
 	// Use line height.
-	size.h = wz_widget_get_line_height(widget);
+	size.h = widget->getLineHeight();
 
 	// Add scroller width or button width, whichever is largest.
 	scroller = wz_list_get_scroller(combo->list);
@@ -163,7 +163,7 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 		listRect.h -= over;
 	}
 
-	wz_widget_set_rect_internal(combo->list, listRect);
+	combo->list->setRectInternal(listRect);
 }
 
 static void wz_combo_set_rect(struct WidgetImpl *widget, Rect rect)
@@ -256,9 +256,9 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	list = new ListImpl(itemData, itemStride, nItems);
-	wz_widget_add_child_widget(this, list);
+	addChildWidget(list);
 	list->setVisible(false);
-	wz_widget_set_clip_input_to_parent(list, false);
+	list->setClipInputToParent(false);
 	list->addCallbackItemSelected(wz_combo_list_item_selected);
 }
 

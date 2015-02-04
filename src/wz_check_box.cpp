@@ -38,7 +38,7 @@ static Size wz_check_box_measure(struct WidgetImpl *widget)
 {
 	Size size;
 	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
-	wz_widget_measure_text(widget, checkBox->getLabel(), 0, &size.w, &size.h);
+	widget->measureText(checkBox->getLabel(), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
 	return size;
 }

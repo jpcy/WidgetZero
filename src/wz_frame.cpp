@@ -38,13 +38,13 @@ void FrameImpl::add(struct WidgetImpl *widget)
 	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	wz_widget_add_child_widget(this, widget);
+	addChildWidget(widget);
 }
 
 void FrameImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_remove_child_widget(this, widget);
+	removeChildWidget(widget);
 }
 
 /*

@@ -119,6 +119,89 @@ void WidgetChildren::erase(size_t i)
 		impls_.erase(impls_.begin() + (i - widgets_.size()));
 }
 
+void wz_widget_destroy(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+
+	// Destroy children.
+	for (size_t i = 0; i < widget->children.size(); i++)
+	{
+		wz_widget_destroy(widget->children[i]);
+	}
+
+	widget->children.clear();
+
+	if (widget->vtable.destroy)
+	{
+		widget->vtable.destroy(widget);
+	}
+
+	delete widget;
+}
+
+static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widget)
+{
+	for (;;)
+	{
+		if (!widget)
+			break;
+
+		if (widget->type == WZ_TYPE_MAIN_WINDOW)
+			return (struct MainWindowImpl *)widget;
+
+		widget = widget->parent;
+	}
+
+	return NULL;
+}
+
+static void wz_widget_set_renderer(struct WidgetImpl *widget, IRenderer *renderer)
+{
+	IRenderer *oldRenderer;
+
+	WZ_ASSERT(widget);
+	oldRenderer = widget->renderer;
+	widget->renderer = renderer;
+
+	if (oldRenderer != widget->renderer && widget->vtable.renderer_changed)
+	{
+		widget->vtable.renderer_changed(widget);
+	}
+}
+
+// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via WidgetImpl::addChildWidget.
+// Example: scroller does this with it's button children.
+static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *widget, struct MainWindowImpl *mainWindow, struct WindowImpl *window)
+{
+	WZ_ASSERT(widget);
+
+	for (size_t i = 0; i < widget->children.size(); i++)
+	{
+		struct WidgetImpl *child = widget->children[i];
+		child->mainWindow = mainWindow;
+		child->window = window;
+
+		// Set the renderer too.
+		if (mainWindow)
+		{
+			wz_widget_set_renderer(child, mainWindow->renderer);
+		}
+
+		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
+	}
+}
+
+static void wz_widget_measure_and_resize_recursive(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+	widget->resizeToMeasured();
+
+	for (size_t i = 0; i < widget->children.size(); i++)
+	{
+		wz_widget_measure_and_resize_recursive(widget->children[i]);
+	}
+}
+
 WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
@@ -234,7 +317,7 @@ void WidgetImpl::setRect(int x, int y, int w, int h)
 void WidgetImpl::setRect(Rect rect)
 {
 	userRect = rect;
-	wz_widget_set_rect_internal(this, rect);
+	setRectInternal(rect);
 }
 
 Rect WidgetImpl::getRect() const
@@ -259,7 +342,7 @@ Rect WidgetImpl::getAbsoluteRect() const
 void WidgetImpl::setMargin(Border margin)
 {
 	this->margin = margin;
-	wz_widget_refresh_rect(this);
+	refreshRect();
 }
 
 void WidgetImpl::setMargin(int top, int right, int bottom, int left)
@@ -284,7 +367,7 @@ void WidgetImpl::setStretch(int stretch)
 	// If the parent is a layout widget, refresh it.
 	if (parent && parent->isLayout())
 	{
-		wz_widget_refresh_rect(parent);
+		parent->refreshRect();
 	}
 }
 
@@ -316,7 +399,7 @@ void WidgetImpl::setAlign(int align)
 	// If the parent is a layout widget, refresh it.
 	if (parent && parent->isLayout())
 	{
-		wz_widget_refresh_rect(parent);
+		parent->refreshRect();
 	}
 }
 
@@ -455,7 +538,278 @@ void WidgetImpl::resizeToMeasured()
 	}
 		
 	// Set the size.
-	wz_widget_set_size_internal(this, size);
+	setSizeInternal(size);
+}
+
+void WidgetImpl::addChildWidget(struct WidgetImpl *child)
+{
+	WZ_ASSERT(child);
+
+	// Set mainWindow.
+	child->mainWindow = wz_widget_find_main_window(this);
+
+	// Find the closest ancestor window.
+	child->window = (struct WindowImpl *)findClosestAncestor(WZ_TYPE_WINDOW);
+
+	// Set the renderer.
+	if (child->mainWindow)
+	{
+		wz_widget_set_renderer(child, child->mainWindow->renderer);
+	}
+
+	// Set children mainWindow, window and renderer.
+	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
+
+	child->parent = this;
+	children.push_back(child);
+
+	// Resize the widget and children to their measured sizes.
+	wz_widget_measure_and_resize_recursive(child);
+	child->refreshRect();
+
+	if (child->vtable.added)
+	{
+		child->vtable.added(this, child);
+	}
+}
+
+void WidgetImpl::removeChildWidget(struct WidgetImpl *child)
+{
+	int deleteIndex;
+
+	WZ_ASSERT(child);
+
+	// Ensure the child is actually a child of this widget before destroying it.
+	deleteIndex = -1;
+
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		if (children[i] == child)
+		{
+			deleteIndex = (int)i;
+			break;
+		}
+	}
+
+	if (deleteIndex == -1)
+		return;
+
+	children.erase(deleteIndex);
+
+	// The child is no longer connected to the widget hierarchy, so reset some state.
+	child->mainWindow = NULL;
+	child->parent = NULL;
+	child->window = NULL;
+}
+
+void WidgetImpl::destroyChildWidget(struct WidgetImpl *child)
+{
+	const size_t n = children.size();
+	removeChildWidget(child);
+
+	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see remove_child_widget.
+	if (n == children.size())
+		return;
+
+	wz_widget_destroy(child);
+}
+
+void WidgetImpl::setPositionInternal(int x, int y)
+{
+	Position position;
+	position.x = x;
+	position.y = y;
+	setPositionInternal(position);
+}
+
+void WidgetImpl::setPositionInternal(Position position)
+{
+	Rect rect = this->rect;
+	rect.x = position.x;
+	rect.y = position.y;
+	setRectInternal(rect);
+}
+
+void WidgetImpl::setWidthInternal(int w)
+{
+	Rect rect = this->rect;
+	rect.w = w;
+	setRectInternal(rect);
+}
+
+void WidgetImpl::setHeightInternal(int h)
+{
+	Rect rect = this->rect;
+	rect.h = h;
+	setRectInternal(rect);
+}
+
+void WidgetImpl::setSizeInternal(int w, int h)
+{
+	setSizeInternal(Size(w, h));
+}
+
+void WidgetImpl::setSizeInternal(Size size)
+{
+	Rect rect = this->rect;
+	rect.w = size.w;
+	rect.h = size.h;
+	setRectInternal(rect);
+}
+
+void WidgetImpl::setRectInternal(int x, int y, int w, int h)
+{
+	setRectInternal(Rect(x, y, w, h));
+}
+
+void WidgetImpl::setRectInternalRecursive(Rect rect)
+{
+	Rect oldRect = this->rect;
+
+	// Apply alignment and stretching.
+	rect = wz_widget_calculate_aligned_stretched_rect(this, rect);
+
+	if (vtable.set_rect)
+	{
+		vtable.set_rect(this, rect);
+	}
+	else
+	{
+		this->rect = rect;
+	}
+
+	// Don't recurse if the rect hasn't changed.
+	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
+	{
+		for (size_t i = 0; i < children.size(); i++)
+		{
+			children[i]->setRectInternalRecursive(children[i]->rect);
+		}
+	}
+}
+
+void WidgetImpl::setRectInternal(Rect rect)
+{
+	Rect oldRect = this->rect;
+	setRectInternalRecursive(rect);	
+
+	// If the parent is a layout widget, it may need refreshing.
+	if (parent && parent->isLayout())
+	{
+		// Refresh if the width or height has changed.
+		if (this->rect.w != oldRect.w || this->rect.h != oldRect.h)
+		{
+			parent->refreshRect();
+		}
+	}
+}
+
+void WidgetImpl::refreshRect()
+{
+	setRectInternal(getRect());
+}
+
+const struct WidgetImpl *WidgetImpl::findClosestAncestor(WidgetType type) const
+{
+	const struct WidgetImpl *temp = this;
+
+	for (;;)
+	{
+		if (temp == NULL)
+			break;
+
+		if (temp->type == type)
+		{
+			return temp;
+		}
+
+		temp = temp->parent;
+	}
+
+	return NULL;
+}
+
+struct WidgetImpl *WidgetImpl::findClosestAncestor(WidgetType type)
+{
+	struct WidgetImpl *temp = this;
+
+	for (;;)
+	{
+		if (temp == NULL)
+			break;
+
+		if (temp->type == type)
+		{
+			return temp;
+		}
+
+		temp = temp->parent;
+	}
+
+	return NULL;
+}
+
+void WidgetImpl::setDrawManually(bool value)
+{
+	drawManually = value;
+}
+
+void WidgetImpl::setDrawLast(bool value)
+{
+	if (value)
+	{
+		flags |= WZ_WIDGET_FLAG_DRAW_LAST;
+	}
+	else
+	{
+		flags &= ~WZ_WIDGET_FLAG_DRAW_LAST;
+	}
+}
+
+void WidgetImpl::setOverlap(bool value)
+{
+	overlap = value;
+}
+
+bool WidgetImpl::overlapsParentWindow() const
+{
+	if (!window)
+		return true;
+
+	return WZ_RECTS_OVERLAP(window->getAbsoluteRect(), getAbsoluteRect());
+}
+
+void WidgetImpl::setClipInputToParent(bool value)
+{
+	inputNotClippedToParent = !value;
+}
+
+void WidgetImpl::setInternalMetadata(void *metadata)
+{
+	internalMetadata = metadata;
+}
+
+void *WidgetImpl::getInternalMetadata()
+{
+	return internalMetadata;
+}
+
+int WidgetImpl::getLineHeight() const
+{
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	return r->getLineHeight(fontFace, fontSize);
+}
+
+void WidgetImpl::measureText(const char *text, int n, int *width, int *height) const
+{
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	return r->measureText(fontFace, fontSize, text, n, width, height);
+}
+
+LineBreakResult WidgetImpl::lineBreakText(const char *text, int n, int lineWidth) const
+{
+	NVGRenderer *r = (NVGRenderer *)renderer;
+	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
 }
 
 /*
@@ -504,412 +858,6 @@ bool Rect::intersect(const Rect A, const Rect B, Rect *result)
     result->h = Amax - Amin;
 
     return !result->isEmpty();
-}
-
-/*
-================================================================================
-
-PUBLIC WIDGET FUNCTIONS
-
-================================================================================
-*/
-
-void wz_widget_destroy(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-
-	// Destroy children.
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		wz_widget_destroy(widget->children[i]);
-	}
-
-	widget->children.clear();
-
-	if (widget->vtable.destroy)
-	{
-		widget->vtable.destroy(widget);
-	}
-
-	delete widget;
-}
-
-static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widget)
-{
-	for (;;)
-	{
-		if (!widget)
-			break;
-
-		if (widget->type == WZ_TYPE_MAIN_WINDOW)
-			return (struct MainWindowImpl *)widget;
-
-		widget = widget->parent;
-	}
-
-	return NULL;
-}
-
-static void wz_widget_set_renderer(struct WidgetImpl *widget, IRenderer *renderer)
-{
-	IRenderer *oldRenderer;
-
-	WZ_ASSERT(widget);
-	oldRenderer = widget->renderer;
-	widget->renderer = renderer;
-
-	if (oldRenderer != widget->renderer && widget->vtable.renderer_changed)
-	{
-		widget->vtable.renderer_changed(widget);
-	}
-}
-
-// Do this recursively, since it's possible to setup a widget heirarchy *before* adding the root widget via wz_widget_add_child_widget.
-// Example: scroller does this with it's button children.
-static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *widget, struct MainWindowImpl *mainWindow, struct WindowImpl *window)
-{
-	WZ_ASSERT(widget);
-
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		struct WidgetImpl *child = widget->children[i];
-		child->mainWindow = mainWindow;
-		child->window = window;
-
-		// Set the renderer too.
-		if (mainWindow)
-		{
-			wz_widget_set_renderer(child, (mainWindow)->renderer);
-		}
-
-		wz_widget_set_main_window_and_window_recursive(child, mainWindow, window);
-	}
-}
-
-static void wz_widget_measure_and_resize_recursive(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	widget->resizeToMeasured();
-
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		wz_widget_measure_and_resize_recursive(widget->children[i]);
-	}
-}
-
-/*
-================================================================================
-
-INTERNAL WIDGET FUNCTIONS
-
-================================================================================
-*/
-
-void wz_widget_add_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
-{
-	WZ_ASSERT(widget);
-	WZ_ASSERT(child);
-
-	// Set mainWindow.
-	child->mainWindow = wz_widget_find_main_window(widget);
-
-	// Find the closest ancestor window.
-	child->window = (struct WindowImpl *)wz_widget_find_closest_ancestor(widget, WZ_TYPE_WINDOW);
-
-	// Set the renderer.
-	if (child->mainWindow)
-	{
-		wz_widget_set_renderer(child, (child->mainWindow)->renderer);
-	}
-
-	// Set children mainWindow, window and renderer.
-	wz_widget_set_main_window_and_window_recursive(child, child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
-
-	child->parent = widget;
-	widget->children.push_back(child);
-
-	// Resize the widget and children to their measured sizes.
-	wz_widget_measure_and_resize_recursive(child);
-	wz_widget_refresh_rect(child);
-
-	if (child->vtable.added)
-	{
-		child->vtable.added(widget, child);
-	}
-}
-
-void wz_widget_remove_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
-{
-	int deleteIndex;
-
-	WZ_ASSERT(widget);
-	WZ_ASSERT(child);
-
-	// Ensure the child is actually a child of widget before destroying it.
-	deleteIndex = -1;
-
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		if (widget->children[i] == child)
-		{
-			deleteIndex = (int)i;
-			break;
-		}
-	}
-
-	if (deleteIndex == -1)
-		return;
-
-	widget->children.erase(deleteIndex);
-
-	// The child is no longer connected to the widget hierarchy, so reset some state.
-	child->mainWindow = NULL;
-	child->parent = NULL;
-	child->window = NULL;
-}
-
-void wz_widget_destroy_child_widget(struct WidgetImpl *widget, struct WidgetImpl *child)
-{
-	WZ_ASSERT(widget);
-	const size_t n = widget->children.size();
-	wz_widget_remove_child_widget(widget, child);
-
-	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see wz_widget_remove_child_widget.
-	if (n == widget->children.size())
-		return;
-
-	wz_widget_destroy(child);
-}
-
-void wz_widget_set_position_args_internal(struct WidgetImpl *widget, int x, int y)
-{
-	Position position;
-	position.x = x;
-	position.y = y;
-	wz_widget_set_position_internal(widget, position);
-}
-
-void wz_widget_set_position_internal(struct WidgetImpl *widget, Position position)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->rect;
-	rect.x = position.x;
-	rect.y = position.y;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-void wz_widget_set_width_internal(struct WidgetImpl *widget, int w)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->rect;
-	rect.w = w;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-void wz_widget_set_height_internal(struct WidgetImpl *widget, int h)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->rect;
-	rect.h = h;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-void wz_widget_set_size_args_internal(struct WidgetImpl *widget, int w, int h)
-{
-	Size size;
-	size.w = w;
-	size.h = h;
-	wz_widget_set_size_internal(widget, size);
-}
-
-void wz_widget_set_size_internal(struct WidgetImpl *widget, Size size)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->rect;
-	rect.w = size.w;
-	rect.h = size.h;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-void wz_widget_set_rect_args_internal(struct WidgetImpl *widget, int x, int y, int w, int h)
-{
-	Rect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-static void wz_widget_set_rect_internal_recursive(struct WidgetImpl *widget, Rect rect)
-{
-	Rect oldRect;
-
-	WZ_ASSERT(widget);
-	oldRect = widget->rect;
-
-	// Apply alignment and stretching.
-	rect = wz_widget_calculate_aligned_stretched_rect(widget, rect);
-
-	if (widget->vtable.set_rect)
-	{
-		widget->vtable.set_rect(widget, rect);
-	}
-	else
-	{
-		widget->rect = rect;
-	}
-
-	// Don't recurse if the rect hasn't changed.
-	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
-	{
-		for (size_t i = 0; i < widget->children.size(); i++)
-		{
-			wz_widget_set_rect_internal_recursive(widget->children[i], widget->children[i]->rect);
-		}
-	}
-}
-
-void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect)
-{
-	Rect oldRect;
-
-	WZ_ASSERT(widget);
-	oldRect = widget->rect;
-	wz_widget_set_rect_internal_recursive(widget, rect);	
-
-	// If the parent is a layout widget, it may need refreshing.
-	if (widget->parent && widget->parent->isLayout())
-	{
-		// Refresh if the width or height has changed.
-		if (widget->rect.w != oldRect.w || widget->rect.h != oldRect.h)
-		{
-			wz_widget_refresh_rect(widget->parent);
-		}
-	}
-}
-
-void wz_widget_refresh_rect(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	wz_widget_set_rect_internal(widget, widget->getRect());
-}
-
-const struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type)
-{
-	const struct WidgetImpl *temp = widget;
-
-	for (;;)
-	{
-		if (temp == NULL)
-			break;
-
-		if (temp->type == type)
-		{
-			return temp;
-		}
-
-		temp = temp->parent;
-	}
-
-	return NULL;
-}
-
-struct WidgetImpl *wz_widget_find_closest_ancestor(struct WidgetImpl *widget, WidgetType type)
-{
-	struct WidgetImpl *temp = widget;
-
-	for (;;)
-	{
-		if (temp == NULL)
-			break;
-
-		if (temp->type == type)
-		{
-			return temp;
-		}
-
-		temp = temp->parent;
-	}
-
-	return NULL;
-}
-
-void wz_widget_set_draw_manually(struct WidgetImpl *widget, bool value)
-{
-	widget->drawManually = value;
-}
-
-void wz_widget_set_draw_last(struct WidgetImpl *widget, bool value)
-{
-	if (value)
-	{
-		widget->flags |= WZ_WIDGET_FLAG_DRAW_LAST;
-	}
-	else
-	{
-		widget->flags &= ~WZ_WIDGET_FLAG_DRAW_LAST;
-	}
-}
-
-void wz_widget_set_overlap(struct WidgetImpl *widget, bool value)
-{
-	widget->overlap = value;
-}
-
-bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget)
-{
-	if (!widget->window)
-		return true;
-
-	return WZ_RECTS_OVERLAP(widget->window->getAbsoluteRect(), widget->getAbsoluteRect());
-}
-
-void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value)
-{
-	WZ_ASSERT(widget);
-	widget->inputNotClippedToParent = !value;
-}
-
-void wz_widget_set_internal_metadata(struct WidgetImpl *widget, void *metadata)
-{
-	WZ_ASSERT(widget);
-	widget->internalMetadata = metadata;
-}
-
-void *wz_widget_get_internal_metadata(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->internalMetadata;
-}
-
-int wz_widget_get_line_height(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	return r->getLineHeight(widget->fontFace, widget->fontSize);
-}
-
-void wz_widget_measure_text(const struct WidgetImpl *widget, const char *text, int n, int *width, int *height)
-{
-	WZ_ASSERT(widget);
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	return r->measureText(widget->fontFace, widget->fontSize, text, n, width, height);
-}
-
-LineBreakResult wz_widget_line_break_text(const struct WidgetImpl *widget, const char *text, int n, int lineWidth)
-{
-	WZ_ASSERT(widget);
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	return r->lineBreakText(widget->fontFace, widget->fontSize, text, n, lineWidth);
 }
 
 //------------------------------------------------------------------------------

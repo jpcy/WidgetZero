@@ -106,14 +106,14 @@ static void wz_tab_bar_update_scroll_buttons(struct TabBarImpl *tabBar)
 	rect.x = tabBar->rect.w - rect.w * 2;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
-	wz_widget_set_rect_internal(tabBar->decrementButton, rect);
+	tabBar->decrementButton->setRectInternal(rect);
 	tabBar->decrementButton->setVisible(showScrollButtons);
 
 	rect.w = tabBar->incrementButton->getWidth();
 	rect.x = tabBar->rect.w - rect.w;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
-	wz_widget_set_rect_internal(tabBar->incrementButton, rect);
+	tabBar->incrementButton->setRectInternal(rect);
 	tabBar->incrementButton->setVisible(showScrollButtons);
 
 	if (wereScrollButtonsVisible && showScrollButtons)
@@ -149,7 +149,7 @@ static void wz_tab_bar_update_tabs(struct TabBarImpl *tabBar)
 			rect.y = 0;
 			rect.w = widget->rect.w;
 			rect.h = tabBar->rect.h;
-			wz_widget_set_rect_internal(widget, rect);
+			widget->setRectInternal(rect);
 			widget->setVisible(true);
 			x += rect.w;
 		}
@@ -191,7 +191,7 @@ static Size wz_tab_bar_measure(struct WidgetImpl *widget)
 {
 	Size size;
 	struct TabBarImpl *tabBar = (struct TabBarImpl *)widget;
-	size.h = wz_widget_get_line_height(widget) + 8; // Padding.
+	size.h = widget->getLineHeight() + 8; // Padding.
 	return size;
 }
 
@@ -203,7 +203,7 @@ static void wz_tab_bar_set_rect(struct WidgetImpl *widget, Rect rect)
 	// Set button heights to match.
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
-		wz_widget_set_height_internal(widget->children[i], rect.h);
+		widget->children[i]->setHeightInternal(rect.h);
 	}
 
 	wz_tab_bar_update_tabs((struct TabBarImpl *)widget);
@@ -249,19 +249,19 @@ TabBarImpl::TabBarImpl()
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton = new ButtonImpl("<");
 	decrementButton->addCallbackClicked(wz_tab_bar_decrement_button_clicked);
-	wz_widget_add_child_widget(this, decrementButton);
-	wz_widget_set_width_internal(decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
+	addChildWidget(decrementButton);
+	decrementButton->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	decrementButton->setVisible(false);
-	wz_widget_set_draw_last(decrementButton, true);
-	wz_widget_set_overlap(decrementButton, true);
+	decrementButton->setDrawLast(true);
+	decrementButton->setOverlap(true);
 
 	incrementButton = new ButtonImpl(">");
 	incrementButton->addCallbackClicked(wz_tab_bar_increment_button_clicked);
-	wz_widget_add_child_widget(this, incrementButton);
-	wz_widget_set_width_internal(incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
+	addChildWidget(incrementButton);
+	incrementButton->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	incrementButton->setVisible(false);
-	wz_widget_set_draw_last(incrementButton, true);
-	wz_widget_set_overlap(incrementButton, true);
+	incrementButton->setDrawLast(true);
+	incrementButton->setOverlap(true);
 }
 
 struct ButtonImpl *TabBarImpl::createTab()
@@ -283,9 +283,9 @@ struct ButtonImpl *TabBarImpl::createTab()
 	tab->addCallbackPressed(wz_tab_bar_button_pressed);
 	tab->setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	tab->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	wz_widget_add_child_widget(this, tab);
+	addChildWidget(tab);
 	tabs.push_back(tab);
-	wz_widget_set_rect_internal(tab, rect);
+	tab->setRectInternal(rect);
 
 	// Select the first tab added.
 	if (!selectedTab)
@@ -333,7 +333,7 @@ void TabBarImpl::destroyTab(struct ButtonImpl *tab)
 
 	// Delete the tab.
 	tabs.erase(tabs.begin() + deleteIndex);
-	wz_widget_destroy_child_widget(this, tab);
+	destroyChildWidget(tab);
 }
 
 void TabBarImpl::clearTabs()
@@ -348,7 +348,7 @@ void TabBarImpl::clearTabs()
 		wz_invoke_event(&e);
 
 		// Destroy the tab.
-		wz_widget_destroy_child_widget(this, tabs[i]);
+		destroyChildWidget(tabs[i]);
 	}
 
 	tabs.clear();

@@ -228,7 +228,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 	}
 
 	int labelWidth;
-	wz_widget_measure_text(button, button->getLabel(), 0, &labelWidth, NULL);
+	button->measureText(button->getLabel(), 0, &labelWidth, NULL);
 
 	// Position the icon and label centered.
 	int iconX, labelX;
@@ -270,7 +270,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 Size NVGRenderer::measureButton(const ButtonImpl *button)
 {
 	Size size;
-	wz_widget_measure_text(button, button->getLabel(), 0, &size.w, &size.h);
+	button->measureText(button->getLabel(), 0, &size.w, &size.h);
 
 	if (button->getIcon() && button->getIcon()[0])
 	{
