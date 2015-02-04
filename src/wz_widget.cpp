@@ -144,6 +144,320 @@ WidgetImpl::WidgetImpl()
 	memset(&vtable, 0, sizeof(vtable));
 }
 
+WidgetType WidgetImpl::getType() const
+{
+	return type;
+}
+
+bool WidgetImpl::isLayout() const
+{
+	return type == WZ_TYPE_STACK_LAYOUT;
+}
+
+struct MainWindowImpl *WidgetImpl::getMainWindow()
+{
+	return mainWindow;
+}
+
+void WidgetImpl::setPosition(int x, int y)
+{
+	setPosition(Position(x, y));
+}
+
+void WidgetImpl::setPosition(Position position)
+{
+	Rect rect = userRect;
+	rect.x = position.x;
+	rect.y = position.y;
+	setRect(rect);
+}
+
+Position WidgetImpl::getPosition() const
+{
+	const Rect rect = getRect();
+	return Position(rect.x, rect.y);
+}
+
+Position WidgetImpl::getAbsolutePosition() const
+{
+	const Rect rect = getAbsoluteRect();
+	return Position(rect.x, rect.y);
+}
+
+void WidgetImpl::setWidth(int w)
+{
+	Rect rect = userRect;
+	rect.w = w;
+	setRect(rect);
+}
+
+void WidgetImpl::setHeight(int h)
+{
+	Rect rect = userRect;
+	rect.h = h;
+	setRect(rect);
+}
+
+void WidgetImpl::setSize(int w, int h)
+{
+	setSize(Size(w, h));
+}
+
+void WidgetImpl::setSize(Size size)
+{
+	Rect rect = userRect;
+	rect.w = size.w;
+	rect.h = size.h;
+	setRect(rect);
+}
+
+int WidgetImpl::getWidth() const
+{
+	return rect.w;
+}
+
+int WidgetImpl::getHeight() const
+{
+	return rect.h;
+}
+
+Size WidgetImpl::getSize() const
+{
+	return Size(rect.w, rect.h);
+}
+
+void WidgetImpl::setRect(int x, int y, int w, int h)
+{
+	setRect(Rect(x, y, w, h));
+}
+
+void WidgetImpl::setRect(Rect rect)
+{
+	userRect = rect;
+	wz_widget_set_rect_internal(this, rect);
+}
+
+Rect WidgetImpl::getRect() const
+{
+	return rect;
+}
+
+Rect WidgetImpl::getAbsoluteRect() const
+{
+	Rect rect = this->rect;
+
+	if (parent)
+	{
+		const Position parentPosition = parent->getAbsolutePosition();
+		rect.x += parentPosition.x;
+		rect.y += parentPosition.y;
+	}
+
+	return rect;
+}
+
+void WidgetImpl::setMargin(Border margin)
+{
+	this->margin = margin;
+	wz_widget_refresh_rect(this);
+}
+
+void WidgetImpl::setMargin(int top, int right, int bottom, int left)
+{
+	setMargin(Border(top, right, bottom, left));
+}
+
+void WidgetImpl::setUniformMargin(int value)
+{
+	setMargin(Border(value, value, value, value));
+}
+
+Border WidgetImpl::getMargin() const
+{
+	return margin;
+}
+
+void WidgetImpl::setStretch(int stretch)
+{
+	this->stretch = stretch;
+
+	// If the parent is a layout widget, refresh it.
+	if (parent && parent->isLayout())
+	{
+		wz_widget_refresh_rect(parent);
+	}
+}
+
+int WidgetImpl::getStretch() const
+{
+	return stretch;
+}
+
+void WidgetImpl::setStretchScale(float width, float height)
+{
+	stretchWidthScale = width;
+	stretchHeightScale = height;
+}
+
+float WidgetImpl::getStretchWidthScale() const
+{
+	return stretchWidthScale;
+}
+
+float WidgetImpl::getStretchHeightScale() const
+{
+	return stretchHeightScale;
+}
+
+void WidgetImpl::setAlign(int align)
+{
+	this->align = align;
+
+	// If the parent is a layout widget, refresh it.
+	if (parent && parent->isLayout())
+	{
+		wz_widget_refresh_rect(parent);
+	}
+}
+
+int WidgetImpl::getAlign() const
+{
+	return align;
+}
+
+void WidgetImpl::setFontFace(const char *fontFace)
+{
+	strcpy(this->fontFace, fontFace);
+	resizeToMeasured();
+
+	if (vtable.font_changed)
+	{
+		vtable.font_changed(this, fontFace, fontSize);
+	}
+}
+
+const char *WidgetImpl::getFontFace() const
+{
+	return fontFace;
+}
+
+void WidgetImpl::setFontSize(float fontSize)
+{
+	this->fontSize = fontSize;
+	resizeToMeasured();
+
+	if (vtable.font_changed)
+	{
+		vtable.font_changed(this, fontFace, fontSize);
+	}
+}
+
+float WidgetImpl::getFontSize() const
+{
+	return fontSize;
+}
+
+void WidgetImpl::setFont(const char *fontFace, float fontSize)
+{
+	strcpy(this->fontFace, fontFace);
+	this->fontSize = fontSize;
+	resizeToMeasured();
+
+	if (vtable.font_changed)
+	{
+		vtable.font_changed(this, fontFace, fontSize);
+	}
+}
+
+bool WidgetImpl::getHover() const
+{
+	return hover;
+}
+
+void WidgetImpl::setVisible(bool visible)
+{
+	if (vtable.set_visible)
+	{
+		vtable.set_visible(this, visible);
+	}
+	else
+	{
+		hidden = !visible;
+	}
+}
+
+bool WidgetImpl::getVisible() const
+{
+	return !hidden;
+}
+
+bool WidgetImpl::hasKeyboardFocus() const
+{
+	return mainWindow->getKeyboardFocusWidget() == this;
+}
+
+void WidgetImpl::setMetadata(void *metadata)
+{
+	this->metadata = metadata;
+}
+
+void *WidgetImpl::getMetadata()
+{
+	return metadata;
+}
+
+void WidgetImpl::setDrawCallback(WidgetDrawCallback draw)
+{
+	vtable.draw = draw;
+}
+
+void WidgetImpl::setMeasureCallback(WidgetMeasureCallback measure)
+{
+	vtable.measure = measure;
+}
+
+void WidgetImpl::resizeToMeasured()
+{
+	if (!renderer)
+		return;
+
+	Size size;
+
+	if (vtable.measure)
+	{
+		size = vtable.measure(this);
+	}
+	else
+	{
+		size = measure();
+	}
+
+	// The explicitly set size overrides the measured size.
+	if (userRect.w != 0)
+	{
+		size.w = userRect.w;
+	}
+
+	if (userRect.h != 0)
+	{
+		size.h = userRect.h;
+	}
+
+	// Keep the current size if 0.
+	if (size.w == 0)
+	{
+		size.w = getWidth();
+	}
+
+	if (size.h == 0)
+	{
+		size.h = getHeight();
+	}
+		
+	// Set the size.
+	wz_widget_set_size_internal(this, size);
+}
+
 /*
 ================================================================================
 
@@ -220,358 +534,6 @@ void wz_widget_destroy(struct WidgetImpl *widget)
 	delete widget;
 }
 
-struct MainWindowImpl *wz_widget_get_main_window(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->mainWindow;
-}
-
-WidgetType wz_widget_get_type(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->type;
-}
-
-bool wz_widget_is_layout(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->type == WZ_TYPE_STACK_LAYOUT;
-}
-
-void wz_widget_set_position_args(struct WidgetImpl *widget, int x, int y)
-{
-	Position position;
-	position.x = x;
-	position.y = y;
-	wz_widget_set_position(widget, position);
-}
-
-void wz_widget_set_position(struct WidgetImpl *widget, Position position)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->userRect;
-	rect.x = position.x;
-	rect.y = position.y;
-	wz_widget_set_rect(widget, rect);
-}
-
-Position wz_widget_get_position(const struct WidgetImpl *widget)
-{
-	Rect rect;
-	Position pos;
-
-	WZ_ASSERT(widget);
-	rect = wz_widget_get_rect(widget);
-	pos.x = rect.x;
-	pos.y = rect.y;
-	return pos;
-}
-
-Position wz_widget_get_absolute_position(const struct WidgetImpl *widget)
-{
-	Rect rect;
-	Position pos;
-
-	WZ_ASSERT(widget);
-	rect = wz_widget_get_absolute_rect(widget);
-	pos.x = rect.x;
-	pos.y = rect.y;
-	return pos;
-}
-
-void wz_widget_set_width(struct WidgetImpl *widget, int w)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->userRect;
-	rect.w = w;
-	wz_widget_set_rect(widget, rect);
-}
-
-void wz_widget_set_height(struct WidgetImpl *widget, int h)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->userRect;
-	rect.h = h;
-	wz_widget_set_rect(widget, rect);
-}
-
-void wz_widget_set_size_args(struct WidgetImpl *widget, int w, int h)
-{
-	Size size;
-	size.w = w;
-	size.h = h;
-	wz_widget_set_size(widget, size);
-}
-
-void wz_widget_set_size(struct WidgetImpl *widget, Size size)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = widget->userRect;
-	rect.w = size.w;
-	rect.h = size.h;
-	wz_widget_set_rect(widget, rect);
-}
-
-int wz_widget_get_width(const struct WidgetImpl *widget)
-{
-	return wz_widget_get_rect(widget).w;
-}
-
-int wz_widget_get_height(const struct WidgetImpl *widget)
-{
-	return wz_widget_get_rect(widget).h;
-}
-
-Size wz_widget_get_size(const struct WidgetImpl *widget)
-{
-	Rect rect;
-	Size size;
-
-	WZ_ASSERT(widget);
-	rect = wz_widget_get_rect(widget);
-	size.w = rect.w;
-	size.h = rect.h;
-	return size;
-}
-
-void wz_widget_set_rect_args(struct WidgetImpl *widget, int x, int y, int w, int h)
-{
-	Rect rect;
-	rect.x = x;
-	rect.y = y;
-	rect.w = w;
-	rect.h = h;
-	wz_widget_set_rect(widget, rect);
-}
-
-void wz_widget_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	WZ_ASSERT(widget);
-	widget->userRect = rect;
-	wz_widget_set_rect_internal(widget, rect);
-}
-
-Rect wz_widget_get_rect(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->rect;
-}
-
-Rect wz_widget_get_absolute_rect(const struct WidgetImpl *widget)
-{
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	rect = wz_widget_get_rect(widget);
-
-	if (widget->parent)
-	{
-		const Position parentPosition = wz_widget_get_absolute_position(widget->parent);
-		rect.x += parentPosition.x;
-		rect.y += parentPosition.y;
-	}
-
-	return rect;
-}
-
-void wz_widget_set_margin(struct WidgetImpl *widget, Border margin)
-{
-	WZ_ASSERT(widget);
-	widget->margin = margin;
-	wz_widget_refresh_rect(widget);
-}
-
-void wz_widget_set_margin_args(struct WidgetImpl *widget, int top, int right, int bottom, int left)
-{
-	Border margin;
-	margin.top = top;
-	margin.right = right;
-	margin.bottom = bottom;
-	margin.left = left;
-	wz_widget_set_margin(widget, margin);
-}
-
-void wz_widget_set_margin_uniform(struct WidgetImpl *widget, int value)
-{
-	Border margin;
-	margin.top = margin.right = margin.bottom = margin.left = value;
-	wz_widget_set_margin(widget, margin);
-}
-
-Border wz_widget_get_margin(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->margin;
-}
-
-void wz_widget_set_stretch(struct WidgetImpl *widget, int stretch)
-{
-	WZ_ASSERT(widget);
-	widget->stretch = stretch;
-
-	// If the parent is a layout widget, refresh it.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
-	{
-		wz_widget_refresh_rect(widget->parent);
-	}
-}
-
-int wz_widget_get_stretch(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->stretch;
-}
-
-void wz_widget_set_stretch_scale(struct WidgetImpl *widget, float width, float height)
-{
-	WZ_ASSERT(widget);
-	widget->stretchWidthScale = width;
-	widget->stretchHeightScale = height;
-}
-
-float wz_widget_get_stretch_width_scale(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->stretchWidthScale;
-}
-
-float wz_widget_get_stretch_height_scale(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->stretchHeightScale;
-}
-
-void wz_widget_set_align(struct WidgetImpl *widget, int align)
-{
-	WZ_ASSERT(widget);
-	widget->align = align;
-
-	// If the parent is a layout widget, refresh it.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
-	{
-		wz_widget_refresh_rect(widget->parent);
-	}
-}
-
-int wz_widget_get_align(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->align;
-}
-
-void wz_widget_set_font_face(struct WidgetImpl *widget, const char *fontFace)
-{
-	WZ_ASSERT(widget);
-	strcpy(widget->fontFace, fontFace);
-	wz_widget_resize_to_measured(widget);
-
-	if (widget->vtable.font_changed)
-	{
-		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
-	}
-}
-
-const char *wz_widget_get_font_face(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->fontFace;
-}
-
-void wz_widget_set_font_size(struct WidgetImpl *widget, float fontSize)
-{
-	WZ_ASSERT(widget);
-	widget->fontSize = fontSize;
-	wz_widget_resize_to_measured(widget);
-
-	if (widget->vtable.font_changed)
-	{
-		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
-	}
-}
-
-float wz_widget_get_font_size(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->fontSize;
-}
-
-void wz_widget_set_font(struct WidgetImpl *widget, const char *fontFace, float fontSize)
-{
-	WZ_ASSERT(widget);
-	strcpy(widget->fontFace, fontFace);
-	widget->fontSize = fontSize;
-	wz_widget_resize_to_measured(widget);
-
-	if (widget->vtable.font_changed)
-	{
-		widget->vtable.font_changed(widget, widget->fontFace, widget->fontSize);
-	}
-}
-
-bool wz_widget_get_hover(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->hover;
-}
-
-void wz_widget_set_visible(struct WidgetImpl *widget, bool visible)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->vtable.set_visible)
-	{
-		widget->vtable.set_visible(widget, visible);
-	}
-	else
-	{
-		widget->hidden = !visible;
-	}
-}
-
-bool wz_widget_get_visible(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return !widget->hidden;
-}
-
-bool wz_widget_has_keyboard_focus(const struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->mainWindow->getKeyboardFocusWidget() == widget;
-}
-
-void wz_widget_set_metadata(struct WidgetImpl *widget, void *metadata)
-{
-	WZ_ASSERT(widget);
-	widget->metadata = metadata;
-}
-
-void *wz_widget_get_metadata(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->metadata;
-}
-
-void wz_widget_set_draw_callback(struct WidgetImpl *widget, WidgetDrawCallback draw)
-{
-	WZ_ASSERT(widget);
-	widget->vtable.draw = draw;
-}
-
-void wz_widget_set_measure_callback(struct WidgetImpl *widget, WidgetMeasureCallback measure)
-{
-	WZ_ASSERT(widget);
-	widget->vtable.measure = measure;
-}
-
 static struct MainWindowImpl *wz_widget_find_main_window(struct WidgetImpl *widget)
 {
 	for (;;)
@@ -624,92 +586,10 @@ static void wz_widget_set_main_window_and_window_recursive(struct WidgetImpl *wi
 	}
 }
 
-bool wz_widget_is_descendant_of(struct WidgetImpl *widget, WidgetType type)
-{
-	WZ_ASSERT(widget);
-
-	for (;;)
-	{
-		if (!widget->parent)
-			break;
-
-		if (widget->parent->type == type)
-			return true;
-
-		widget = widget->parent;
-	}
-
-	return false;
-}
-
-struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->parent;
-}
-
-struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->window;
-}
-
-/*
-================================================================================
-
-WIDGET MEASURING
-
-================================================================================
-*/
-
-void wz_widget_resize_to_measured(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->renderer)
-	{
-		Size size;
-
-		if (widget->vtable.measure)
-		{
-			size = widget->vtable.measure(widget);
-		}
-		else
-		{
-			size = widget->measure();
-		}
-
-		// The explicitly set size overrides the measured size.
-		if (widget->userRect.w != 0)
-		{
-			size.w = widget->userRect.w;
-		}
-
-		if (widget->userRect.h != 0)
-		{
-			size.h = widget->userRect.h;
-		}
-
-		// Keep the current size if 0.
-		if (size.w == 0)
-		{
-			size.w = wz_widget_get_width(widget);
-		}
-
-		if (size.h == 0)
-		{
-			size.h = wz_widget_get_height(widget);
-		}
-		
-		// Set the size.
-		wz_widget_set_size_internal(widget, size);
-	}
-}
-
 static void wz_widget_measure_and_resize_recursive(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_resize_to_measured(widget);
+	widget->resizeToMeasured();
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
@@ -907,7 +787,7 @@ void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect)
 	wz_widget_set_rect_internal_recursive(widget, rect);	
 
 	// If the parent is a layout widget, it may need refreshing.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
+	if (widget->parent && widget->parent->isLayout())
 	{
 		// Refresh if the width or height has changed.
 		if (widget->rect.w != oldRect.w || widget->rect.h != oldRect.h)
@@ -920,7 +800,7 @@ void wz_widget_set_rect_internal(struct WidgetImpl *widget, Rect rect)
 void wz_widget_refresh_rect(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_set_rect_internal(widget, wz_widget_get_rect(widget));
+	wz_widget_set_rect_internal(widget, widget->getRect());
 }
 
 const struct WidgetImpl *wz_widget_find_closest_ancestor(const struct WidgetImpl *widget, WidgetType type)
@@ -990,7 +870,7 @@ bool wz_widget_overlaps_parent_window(const struct WidgetImpl *widget)
 	if (!widget->window)
 		return true;
 
-	return WZ_RECTS_OVERLAP(wz_widget_get_absolute_rect(widget->window), wz_widget_get_absolute_rect(widget));
+	return WZ_RECTS_OVERLAP(widget->window->getAbsoluteRect(), widget->getAbsoluteRect());
 }
 
 void wz_widget_set_clip_input_to_parent(struct WidgetImpl *widget, bool value)
@@ -1040,90 +920,90 @@ Widget::~Widget()
 
 Rect Widget::getRect() const
 {
-	return wz_widget_get_absolute_rect(impl);
+	return impl->getAbsoluteRect();
 }
 
 Widget *Widget::setPosition(int x, int y)
 { 
-	wz_widget_set_position_args(impl, x, y);
+	impl->setPosition(x, y);
 	return this;
 }
 
 Widget *Widget::setWidth(int w)
 {
-	wz_widget_set_width(impl, w);
+	impl->setWidth(w);
 	return this;
 }
 
 Widget *Widget::setHeight(int h)
 {
-	wz_widget_set_height(impl, h);
+	impl->setHeight(h);
 	return this;
 }
 
 Widget *Widget::setSize(int w, int h)
 {
-	wz_widget_set_size_args(impl, w, h);
+	impl->setSize(w, h);
 	return this;
 }
 
 Widget *Widget::setRect(int x, int y, int w, int h)
 {
-	wz_widget_set_rect_args(impl, x, y, w, h);
+	impl->setRect(x, y, w, h);
 	return this;
 }
 
 Widget *Widget::setStretch(int stretch)
 {
-	wz_widget_set_stretch(impl, stretch);
+	impl->setStretch(stretch);
 	return this;
 }
 
 Widget *Widget::setAlign(int align)
 {
-	wz_widget_set_align(impl, align);
+	impl->setAlign(align);
 	return this;
 }
 
 Widget *Widget::setMargin(int margin)
 {
-	wz_widget_set_margin_args(impl, margin, margin, margin, margin);
+	impl->setUniformMargin(margin);
 	return this;
 }
 
 Widget *Widget::setMargin(int top, int right, int bottom, int left)
 {
-	wz_widget_set_margin_args(impl, top, right, bottom, left);
+	impl->setMargin(top, right, bottom, left);
 	return this;
 }
 
 Widget *Widget::setMargin(Border margin)
 {
-	wz_widget_set_margin(impl, margin);
+	impl->setMargin(margin);
 	return this;
 }
 
 Widget *Widget::setFontFace(const std::string &fontFace)
 {
-	wz_widget_set_font_face(impl, fontFace.c_str());
+	impl->setFontFace(fontFace.c_str());
 	return this;
 }
 
 Widget *Widget::setFontSize(float fontSize)
 {
-	wz_widget_set_font_size(impl, fontSize);
+	impl->setFontSize(fontSize);
 	return this;
 }
 
 Widget *Widget::setFont(const std::string &fontFace, float fontSize)
 {
-	wz_widget_set_font(impl, fontFace.c_str(), fontSize);
+	impl->setFont(fontFace.c_str(), fontSize);
 	return this;
 }
 
 Widget *Widget::setVisible(bool visible)
 {
-	wz_widget_set_visible(impl, visible);
+	impl->setVisible(visible);
 	return this;
 }
 

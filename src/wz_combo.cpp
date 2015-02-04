@@ -76,7 +76,7 @@ static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
 	const struct ComboImpl *combo = (struct ComboImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 	const uint8_t *itemData = combo->list->getItemData();
 	const int itemStride = combo->list->getItemStride();
 	const int nItems = combo->list->getNumItems();
@@ -140,8 +140,8 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 	if (!combo->mainWindow)
 		return;
 
-	rect = wz_widget_get_rect(combo);
-	absRect = wz_widget_get_absolute_rect(combo);
+	rect = combo->getRect();
+	absRect = combo->getAbsoluteRect();
 
 	// Set list rect.
 	listRect.x = 0;
@@ -156,7 +156,7 @@ static void wz_combo_update_list_rect(struct ComboImpl *combo)
 
 	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - wz_widget_get_size(combo->mainWindow).h;
+	over = absRect.y + rect.h + listRect.h - combo->mainWindow->getHeight();
 	
 	if (over > 0)
 	{
@@ -176,7 +176,7 @@ static void wz_combo_font_changed(struct WidgetImpl *widget, const char *fontFac
 {
 	struct ComboImpl *combo = (struct ComboImpl *)widget;
 	WZ_ASSERT(widget);
-	wz_widget_set_font(combo->list, fontFace, fontSize);
+	combo->list->setFont(fontFace, fontSize);
 }
 
 static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
@@ -189,7 +189,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 
 	if (mouseButton == 1)
 	{
-		listRect = wz_widget_get_absolute_rect(combo->list);
+		listRect = combo->list->getAbsoluteRect();
 
 		// Open dropdown.
 		if (!combo->isOpen_)
@@ -198,7 +198,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			widget->mainWindow->pushLockInputWidget(widget);
 
 			// Show dropdown list and set it to draw last.
-			wz_widget_set_visible(combo->list, true);
+			combo->list->setVisible(true);
 			wz_combo_update_list_rect(combo);
 
 			combo->isOpen_ = true;
@@ -211,7 +211,7 @@ static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButto
 			widget->mainWindow->popLockInputWidget(widget);
 
 			// Hide dropdown list.
-			wz_widget_set_visible(combo->list, false);
+			combo->list->setVisible(false);
 
 			combo->isOpen_ = false;
 		}
@@ -238,7 +238,7 @@ static void wz_combo_list_item_selected(Event *e)
 	combo->mainWindow->popLockInputWidget(combo);
 
 	// Hide dropdown list.
-	wz_widget_set_visible(combo->list, false);
+	combo->list->setVisible(false);
 
 	combo->isOpen_ = false;
 }
@@ -257,7 +257,7 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 
 	list = new ListImpl(itemData, itemStride, nItems);
 	wz_widget_add_child_widget(this, list);
-	wz_widget_set_visible(list, false);
+	list->setVisible(false);
 	wz_widget_set_clip_input_to_parent(list, false);
 	list->addCallbackItemSelected(wz_combo_list_item_selected);
 }
@@ -287,7 +287,7 @@ Combo::Combo()
 
 Combo::~Combo()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

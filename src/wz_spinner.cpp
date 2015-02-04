@@ -44,7 +44,7 @@ static void wz_spinner_draw_button(struct WidgetImpl *widget, Rect clip, bool de
 	const struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
 	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
 	const float buttonCenterY = rect.y + rect.h * 0.5f;
@@ -136,7 +136,7 @@ static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontF
 {
 	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
 	WZ_ASSERT(spinner);
-	wz_widget_set_font(spinner->textEdit, fontFace, fontSize);
+	spinner->textEdit->setFont(fontFace, fontSize);
 }
 
 SpinnerImpl::SpinnerImpl()
@@ -148,26 +148,26 @@ SpinnerImpl::SpinnerImpl()
 	vtable.font_changed = wz_spinner_font_changed;
 
 	textEdit = new TextEditImpl(false, 256);
-	wz_widget_set_stretch(textEdit, WZ_STRETCH);
+	textEdit->setStretch(WZ_STRETCH);
 	textEdit->setValidateTextCallback(wz_spinner_validate_text);
 	wz_widget_add_child_widget(this, textEdit);
 
 	decrementButton = new ButtonImpl();
-	wz_widget_set_width(decrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch(decrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale(decrementButton, 1, 0.5f);
-	wz_widget_set_align(decrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	wz_widget_set_draw_callback(decrementButton, wz_spinner_decrement_button_draw);
+	decrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	decrementButton->setStretch(WZ_STRETCH_HEIGHT);
+	decrementButton->setStretchScale(1, 0.5f);
+	decrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
+	decrementButton->setDrawCallback(wz_spinner_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_spinner_decrement_button_clicked);
 	wz_widget_set_overlap(decrementButton, true);
 	wz_widget_add_child_widget(this, decrementButton);
 
 	incrementButton = new ButtonImpl();
-	wz_widget_set_width(incrementButton, WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	wz_widget_set_stretch(incrementButton, WZ_STRETCH_HEIGHT);
-	wz_widget_set_stretch_scale(incrementButton, 1, 0.5f);
-	wz_widget_set_align(incrementButton, WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	wz_widget_set_draw_callback(incrementButton, wz_spinner_increment_button_draw);
+	incrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	incrementButton->setStretch(WZ_STRETCH_HEIGHT);
+	incrementButton->setStretchScale(1, 0.5f);
+	incrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
+	incrementButton->setDrawCallback(wz_spinner_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
 	wz_widget_set_overlap(incrementButton, true);
 	wz_widget_add_child_widget(this, incrementButton);
@@ -202,7 +202,7 @@ Spinner::Spinner()
 
 Spinner::~Spinner()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

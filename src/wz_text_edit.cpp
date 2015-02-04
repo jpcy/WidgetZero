@@ -81,11 +81,11 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 
 	if (lineHeight * nLines > textEdit->rect.h - (textEdit->border.top + textEdit->border.bottom))
 	{
-		wz_widget_set_visible(textEdit->scroller, true);
+		textEdit->scroller->setVisible(true);
 	}
 	else
 	{
-		wz_widget_set_visible(textEdit->scroller, false);
+		textEdit->scroller->setVisible(false);
 		return;
 	}
 
@@ -95,7 +95,7 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 	textEdit->scroller->setMaxValue(max);
 
 	// Fit to the right of the rect. Width doesn't change.
-	textEditRect = wz_widget_get_rect(textEdit);
+	textEditRect = textEdit->getRect();
 	rect.w = (textEdit->scroller)->rect.w;
 	rect.x = textEditRect.w - textEdit->border.right - rect.w;
 	rect.y = textEdit->border.top;
@@ -208,7 +208,7 @@ static int wz_text_edit_index_from_relative_position(const struct TextEditImpl *
 	WZ_ASSERT(textEdit);
 
 	// Calculate relative position.
-	rect = wz_widget_get_absolute_rect(textEdit);
+	rect = textEdit->getAbsoluteRect();
 
 	if (textEdit->multiline)
 	{
@@ -341,7 +341,7 @@ static int wz_text_edit_index_from_position(const struct TextEditImpl *textEdit,
 	Position pos;
 
 	// Make position relative.
-	rect = wz_widget_get_absolute_rect(textEdit);
+	rect = textEdit->getAbsoluteRect();
 	pos.x = x - rect.x;
 	pos.y = y - rect.y;
 
@@ -429,7 +429,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
 	const struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 	const Rect textRect = textEdit->getTextRect();
 	const int lineHeight = wz_widget_get_line_height(widget);
 
@@ -539,7 +539,7 @@ static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
 	}
 
 	// Cursor.
-	if (widget->mainWindow->isTextCursorVisible() && wz_widget_has_keyboard_focus(textEdit))
+	if (widget->mainWindow->isTextCursorVisible() && textEdit->hasKeyboardFocus())
 	{
 		Position position;
 		
@@ -678,7 +678,7 @@ static void wz_text_edit_mouse_wheel_move(struct WidgetImpl *widget, int x, int 
 	WZ_ASSERT(widget);
 	textEdit = (struct TextEditImpl *)widget;
 
-	if (textEdit->multiline && wz_widget_get_visible(textEdit->scroller))
+	if (textEdit->multiline && textEdit->scroller->getVisible())
 	{
 		textEdit->scroller->setValue(textEdit->scroller->getValue() - y);
 	}
@@ -956,15 +956,15 @@ Border TextEditImpl::getBorder() const
 Rect TextEditImpl::getTextRect() const
 {
 	Rect textRect;
-	textRect = wz_widget_get_absolute_rect(this);
+	textRect = getAbsoluteRect();
 	textRect.x += border.left;
 	textRect.y += border.top;
 	textRect.w -= border.left + border.right;
 	textRect.h -= border.top + border.bottom;
 
-	if (multiline && wz_widget_get_visible(scroller))
+	if (multiline && scroller->getVisible())
 	{
-		textRect.w -= wz_widget_get_width(scroller);
+		textRect.w -= scroller->getWidth();
 	}
 
 	return textRect;
@@ -978,7 +978,7 @@ const char *TextEditImpl::getText() const
 void TextEditImpl::setText(const char *text)
 {
 	this->text = text;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 int TextEditImpl::getScrollValue() const
@@ -1138,7 +1138,7 @@ TextEdit::TextEdit(const std::string &text, bool multiline)
 
 TextEdit::~TextEdit()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

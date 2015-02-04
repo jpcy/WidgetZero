@@ -58,12 +58,12 @@ PUBLIC INTERFACE
 Frame::Frame()
 {
 	impl = new FrameImpl;
-	wz_widget_set_size_args(impl, 200, 200);
+	impl->setSize(200, 200);
 }
 
 Frame::~Frame()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

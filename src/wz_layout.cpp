@@ -309,7 +309,7 @@ StackLayout::StackLayout(StackLayoutDirection direction)
 
 StackLayout::~StackLayout()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}
@@ -362,10 +362,10 @@ Rect wz_widget_calculate_aligned_stretched_rect(const struct WidgetImpl *widget,
 		return rect;
 
 	// Don't align or stretch if the widget is a child of a layout. The layout will handle the logic in that case.
-	if (widget->parent && wz_widget_is_layout(widget->parent))
+	if (widget->parent && widget->parent->isLayout())
 		return rect;
 
-	parentRect = wz_widget_get_rect(widget->parent);
+	parentRect = widget->parent->getRect();
 
 	// Handle stretching.
 	if ((widget->stretch & WZ_STRETCH_WIDTH) != 0)

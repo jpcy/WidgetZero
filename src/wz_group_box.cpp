@@ -35,7 +35,7 @@ static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
 
 	nvgSave(vg);
 	r->clipToRect(clip);
-	rect = wz_widget_get_absolute_rect(widget);
+	rect = widget->getAbsoluteRect();
 	
 	if (groupBox->label.empty())
 	{
@@ -82,7 +82,7 @@ static void wz_group_box_refresh_margin(struct GroupBoxImpl *groupBox)
 		margin.top = wz_widget_get_line_height(groupBox) + WZ_SKIN_GROUP_BOX_MARGIN;
 	}
 
-	wz_widget_set_margin(groupBox->content, margin);
+	groupBox->content->setMargin(margin);
 }
 
 static void wz_group_box_renderer_changed(struct WidgetImpl *widget)
@@ -145,18 +145,18 @@ PUBLIC INTERFACE
 GroupBox::GroupBox()
 {
 	impl = new GroupBoxImpl;
-	wz_widget_set_size_args(impl, 200, 200);
+	impl->setSize(200, 200);
 }
 
 GroupBox::GroupBox(const std::string &label)
 {
 	impl = new GroupBoxImpl(label);
-	wz_widget_set_size_args(impl, 200, 200);
+	impl->setSize(200, 200);
 }
 
 GroupBox::~GroupBox()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

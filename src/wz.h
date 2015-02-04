@@ -288,59 +288,6 @@ typedef void (*WidgetDrawCallback)(struct WidgetImpl *widget, Rect clip);
 typedef Size (*WidgetMeasureCallback)(struct WidgetImpl *widget);
 
 void wz_widget_destroy(struct WidgetImpl *widget);
-struct MainWindowImpl *wz_widget_get_main_window(struct WidgetImpl *widget);
-WidgetType wz_widget_get_type(const struct WidgetImpl *widget);
-bool wz_widget_is_layout(const struct WidgetImpl *widget);
-
-// Resize the widget to the result of calling the widget "measure" callback.
-void wz_widget_resize_to_measured(struct WidgetImpl *widget);
-
-void wz_widget_set_position_args(struct WidgetImpl *widget, int x, int y);
-void wz_widget_set_position(struct WidgetImpl *widget, Position position);
-Position wz_widget_get_position(const struct WidgetImpl *widget);
-Position wz_widget_get_absolute_position(const struct WidgetImpl *widget);
-void wz_widget_set_width(struct WidgetImpl *widget, int w);
-void wz_widget_set_height(struct WidgetImpl *widget, int h);
-void wz_widget_set_size_args(struct WidgetImpl *widget, int w, int h);
-void wz_widget_set_size(struct WidgetImpl *widget, Size size);
-int wz_widget_get_width(const struct WidgetImpl *widget);
-int wz_widget_get_height(const struct WidgetImpl *widget);
-Size wz_widget_get_size(const struct WidgetImpl *widget);
-void wz_widget_set_rect_args(struct WidgetImpl *widget, int x, int y, int w, int h);
-void wz_widget_set_rect(struct WidgetImpl *widget, Rect rect);
-Rect wz_widget_get_rect(const struct WidgetImpl *widget);
-Rect wz_widget_get_absolute_rect(const struct WidgetImpl *widget);
-void wz_widget_set_margin(struct WidgetImpl *widget, Border margin);
-void wz_widget_set_margin_args(struct WidgetImpl *widget, int top, int right, int bottom, int left);
-void wz_widget_set_margin_uniform(struct WidgetImpl *widget, int value);
-Border wz_widget_get_margin(const struct WidgetImpl *widget);
-void wz_widget_set_stretch(struct WidgetImpl *widget, int stretch);
-int wz_widget_get_stretch(const struct WidgetImpl *widget);
-void wz_widget_set_stretch_scale(struct WidgetImpl *widget, float width, float height);
-float wz_widget_get_stretch_width_scale(const struct WidgetImpl *widget);
-float wz_widget_get_stretch_height_scale(const struct WidgetImpl *widget);
-void wz_widget_set_align(struct WidgetImpl *widget, int align);
-int wz_widget_get_align(const struct WidgetImpl *widget);
-void wz_widget_set_font_face(struct WidgetImpl *widget, const char *fontFace);
-const char *wz_widget_get_font_face(const struct WidgetImpl *widget);
-void wz_widget_set_font_size(struct WidgetImpl *widget, float fontSize);
-float wz_widget_get_font_size(const struct WidgetImpl *widget);
-void wz_widget_set_font(struct WidgetImpl *widget, const char *fontFace, float fontSize);
-bool wz_widget_get_hover(const struct WidgetImpl *widget);
-void wz_widget_set_visible(struct WidgetImpl *widget, bool visible);
-bool wz_widget_get_visible(const struct WidgetImpl *widget);
-bool wz_widget_has_keyboard_focus(const struct WidgetImpl *widget);
-void wz_widget_set_metadata(struct WidgetImpl *widget, void *metadata);
-void *wz_widget_get_metadata(struct WidgetImpl *widget);
-void wz_widget_set_draw_callback(struct WidgetImpl *widget, WidgetDrawCallback draw);
-void wz_widget_set_measure_callback(struct WidgetImpl *widget, WidgetMeasureCallback measure);
-
-// Determine whether the widget is an descendant of a widget with the provided type.
-bool wz_widget_is_descendant_of(struct WidgetImpl *widget, WidgetType type);
-
-struct WidgetImpl *wz_widget_get_parent(struct WidgetImpl *widget);
-
-struct WindowImpl *wz_widget_get_parent_window(struct WidgetImpl *widget);
 
 void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
@@ -510,7 +457,7 @@ public:
 	void dockWindow(Window *window, DockPosition dockPosition);
 
 private:
-	MainWindowImpl *impl;
+	struct MainWindowImpl *impl;
 };
 
 class RadioButton : public Widget

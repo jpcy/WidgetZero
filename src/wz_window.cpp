@@ -33,8 +33,8 @@ static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
 	const struct WindowImpl *window = (struct WindowImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
-	const Rect contentRect = wz_widget_get_absolute_rect(window->content);
+	const Rect rect = widget->getAbsoluteRect();
+	const Rect contentRect = window->content->getAbsoluteRect();
 	const Rect headerRect = window->getHeaderRect();
 
 	nvgSave(vg);
@@ -282,7 +282,7 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		widget->mainWindow->setMovingWindow(window);
 
 		// Re-position and resize the window.
-		rect = wz_widget_get_rect(widget);
+		rect = widget->getRect();
 		rect.x += delta.x;
 		rect.y += delta.y;
 		rect.w = WZ_MAX(200, window->sizeBeforeDocking.w);
@@ -309,7 +309,7 @@ static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mous
 		resizeDelta.y = mouseY - window->resizeStartPosition.y;
 	}
 
-	rect = wz_widget_get_rect(widget);
+	rect = widget->getRect();
 
 	switch (window->drag)
 	{
@@ -391,7 +391,7 @@ static Rect wz_window_get_children_clip_rect(struct WidgetImpl *widget)
 
 	WZ_ASSERT(widget);
 	window = (struct WindowImpl *)widget;
-	return wz_widget_get_absolute_rect(window->content);
+	return window->content->getAbsoluteRect();
 }
 
 static void wz_window_set_rect(struct WidgetImpl *widget, Rect rect)

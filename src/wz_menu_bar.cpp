@@ -49,7 +49,7 @@ static void wz_menu_bar_button_draw(struct WidgetImpl *widget, Rect clip)
 	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 
 	nvgSave(vg);
 	r->clipToRect(clip);
@@ -125,7 +125,7 @@ MenuBarButtonImpl::MenuBarButtonImpl()
 void MenuBarButtonImpl::setLabel(const char *label)
 {
 	this->label = label;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 const char *MenuBarButtonImpl::getLabel() const
@@ -165,14 +165,14 @@ static void wz_menu_bar_draw(struct WidgetImpl *widget, Rect clip)
 
 	nvgSave(vg);
 	r->clipToRect(clip);
-	r->drawFilledRect(wz_widget_get_absolute_rect(widget), WZ_SKIN_MENU_BAR_BG_COLOR);
+	r->drawFilledRect(widget->getAbsoluteRect(), WZ_SKIN_MENU_BAR_BG_COLOR);
 	nvgRestore(vg);
 }
 
 static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
-	wz_widget_set_height(widget, wz_widget_get_line_height(widget) + WZ_SKIN_MENU_BAR_PADDING);
+	widget->setHeight(wz_widget_get_line_height(widget) + WZ_SKIN_MENU_BAR_PADDING);
 }
 
 MenuBarImpl::MenuBarImpl()
@@ -183,14 +183,14 @@ MenuBarImpl::MenuBarImpl()
 	vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
 	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	wz_widget_set_stretch(layout, WZ_STRETCH);
+	layout->setStretch(WZ_STRETCH);
 	wz_widget_add_child_widget(this, layout);
 }
 
 struct MenuBarButtonImpl *MenuBarImpl::createButton()
 {
 	struct MenuBarButtonImpl *button = wz_menu_bar_button_create(this);
-	wz_widget_set_stretch(button, WZ_STRETCH_HEIGHT);
+	button->setStretch(WZ_STRETCH_HEIGHT);
 	layout->add(button);
 	return button;
 }

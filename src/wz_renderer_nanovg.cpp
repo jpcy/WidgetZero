@@ -175,7 +175,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
 	nvgSave(impl->vg);
-	const Rect rect = wz_widget_get_absolute_rect(button);
+	const Rect rect = button->getAbsoluteRect();
 
 	if (!clipToRectIntersection(clip, rect))
 		return;
@@ -183,7 +183,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 	// Background color.
 	NVGcolor bgColor1, bgColor2;
 
-	if (button->isPressed() && wz_widget_get_hover(button))
+	if (button->isPressed() && button->getHover())
 	{
 		bgColor1 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR1;
 		bgColor2 = WZ_SKIN_BUTTON_BG_PRESSED_COLOR2;
@@ -207,7 +207,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 	nvgFill(impl->vg);
 
 	// Border.
-	nvgStrokeColor(impl->vg, wz_widget_get_hover(button) ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
+	nvgStrokeColor(impl->vg, button->getHover() ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
 	nvgStroke(impl->vg);
 
 	// Calculate padded rect.
@@ -261,7 +261,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 	// Draw the label.
 	if (button->getLabel() && button->getLabel()[0])
 	{
-		print(labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, wz_widget_get_font_face(button), wz_widget_get_font_size(button), WZ_SKIN_BUTTON_TEXT_COLOR, button->getLabel(), 0);
+		print(labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), WZ_SKIN_BUTTON_TEXT_COLOR, button->getLabel(), 0);
 	}
 
 	nvgRestore(impl->vg);

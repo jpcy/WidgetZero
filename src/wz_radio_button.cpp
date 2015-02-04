@@ -73,7 +73,7 @@ static void wz_radio_button_draw(struct WidgetImpl *widget, Rect clip)
 	struct NVGcontext *vg = r->getContext();
 
 	nvgSave(vg);
-	rect = wz_widget_get_absolute_rect(widget);
+	rect = widget->getAbsoluteRect();
 
 	if (!r->clipToRectIntersection(clip, rect))
 		return;
@@ -129,7 +129,7 @@ RadioButton::RadioButton(const std::string &label)
 
 RadioButton::~RadioButton()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

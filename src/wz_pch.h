@@ -118,6 +118,52 @@ struct WidgetImpl
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
 
+	WidgetType getType() const;
+	bool isLayout() const;
+	struct MainWindowImpl *getMainWindow();
+	void setPosition(int x, int y);
+	void setPosition(Position position);
+	Position getPosition() const;
+	Position getAbsolutePosition() const;
+	void setWidth(int w);
+	void setHeight(int h);
+	void setSize(int w, int h);
+	void setSize(Size size);
+	int getWidth() const;
+	int getHeight() const;
+	Size getSize() const;
+	void setRect(int x, int y, int w, int h);
+	void setRect(Rect rect);
+	Rect getRect() const;
+	Rect getAbsoluteRect() const;
+	void setMargin(Border margin);
+	void setMargin(int top, int right, int bottom, int left);
+	void setUniformMargin(int value);
+	Border getMargin() const;
+	void setStretch(int stretch);
+	int getStretch() const;
+	void setStretchScale(float width, float height);
+	float getStretchWidthScale() const;
+	float getStretchHeightScale() const;
+	void setAlign(int align);
+	int getAlign() const;
+	void setFontFace(const char *fontFace);
+	const char *getFontFace() const;
+	void setFontSize(float fontSize);
+	float getFontSize() const;
+	void setFont(const char *fontFace, float fontSize);
+	bool getHover() const;
+	void setVisible(bool visible);
+	bool getVisible() const;
+	bool hasKeyboardFocus() const;
+	void setMetadata(void *metadata);
+	void *getMetadata();
+	void setDrawCallback(WidgetDrawCallback draw);
+	void setMeasureCallback(WidgetMeasureCallback measure);
+
+	// Resize the widget to the result of calling the widget "measure" callback.
+	void resizeToMeasured();
+
 	WidgetType type;
 
 	// Explicitly set by the user.

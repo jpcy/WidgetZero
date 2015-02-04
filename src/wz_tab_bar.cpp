@@ -40,7 +40,7 @@ static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
 	struct ButtonImpl *button = (struct ButtonImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 	const Border padding = button->getPadding();
 
 	nvgSave(vg);
@@ -94,27 +94,27 @@ static void wz_tab_bar_update_scroll_buttons(struct TabBarImpl *tabBar)
 
 	for (size_t i = 0; i < tabBar->tabs.size(); i++)
 	{
-		Size size = wz_widget_get_size(tabBar->tabs[i]);
+		Size size = tabBar->tabs[i]->getSize();
 		totalTabWidth += size.w;
 	}
 
 	// Show/hide the scroll buttons and set their rects.
-	wereScrollButtonsVisible = wz_widget_get_visible(tabBar->decrementButton);
+	wereScrollButtonsVisible = tabBar->decrementButton->getVisible();
 	showScrollButtons = totalTabWidth > tabBar->rect.w;
 
-	rect.w = wz_widget_get_size(tabBar->decrementButton).w;
+	rect.w = tabBar->decrementButton->getWidth();
 	rect.x = tabBar->rect.w - rect.w * 2;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
 	wz_widget_set_rect_internal(tabBar->decrementButton, rect);
-	wz_widget_set_visible(tabBar->decrementButton, showScrollButtons);
+	tabBar->decrementButton->setVisible(showScrollButtons);
 
-	rect.w = wz_widget_get_size(tabBar->incrementButton).w;
+	rect.w = tabBar->incrementButton->getWidth();
 	rect.x = tabBar->rect.w - rect.w;
 	rect.y = 0;
 	rect.h = tabBar->rect.h;
 	wz_widget_set_rect_internal(tabBar->incrementButton, rect);
-	wz_widget_set_visible(tabBar->incrementButton, showScrollButtons);
+	tabBar->incrementButton->setVisible(showScrollButtons);
 
 	if (wereScrollButtonsVisible && showScrollButtons)
 	{
@@ -138,7 +138,7 @@ static void wz_tab_bar_update_tabs(struct TabBarImpl *tabBar)
 		if ((int)i < tabBar->scrollValue)
 		{
 			// Scrolled out of view, hide it.
-			wz_widget_set_visible(widget, false);
+			widget->setVisible(false);
 			continue;
 		}
 		else
@@ -150,7 +150,7 @@ static void wz_tab_bar_update_tabs(struct TabBarImpl *tabBar)
 			rect.w = widget->rect.w;
 			rect.h = tabBar->rect.h;
 			wz_widget_set_rect_internal(widget, rect);
-			wz_widget_set_visible(widget, true);
+			widget->setVisible(true);
 			x += rect.w;
 		}
 	}
@@ -212,7 +212,7 @@ static void wz_tab_bar_set_rect(struct WidgetImpl *widget, Rect rect)
 
 static Rect wz_tab_bar_get_children_clip_rect(struct WidgetImpl *widget)
 {
-	return wz_widget_get_absolute_rect(widget);
+	return widget->getAbsoluteRect();
 }
 
 static void wz_tab_bar_decrement_button_clicked(Event *e)
@@ -251,7 +251,7 @@ TabBarImpl::TabBarImpl()
 	decrementButton->addCallbackClicked(wz_tab_bar_decrement_button_clicked);
 	wz_widget_add_child_widget(this, decrementButton);
 	wz_widget_set_width_internal(decrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
-	wz_widget_set_visible(decrementButton, false);
+	decrementButton->setVisible(false);
 	wz_widget_set_draw_last(decrementButton, true);
 	wz_widget_set_overlap(decrementButton, true);
 
@@ -259,7 +259,7 @@ TabBarImpl::TabBarImpl()
 	incrementButton->addCallbackClicked(wz_tab_bar_increment_button_clicked);
 	wz_widget_add_child_widget(this, incrementButton);
 	wz_widget_set_width_internal(incrementButton, WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
-	wz_widget_set_visible(incrementButton, false);
+	incrementButton->setVisible(false);
 	wz_widget_set_draw_last(incrementButton, true);
 	wz_widget_set_overlap(incrementButton, true);
 }
@@ -276,8 +276,7 @@ struct ButtonImpl *TabBarImpl::createTab()
 
 	for (size_t i = 0; i < tabs.size(); i++)
 	{
-		Size size = wz_widget_get_size(tabs[i]);
-		rect.x += size.w;
+		rect.x += tabs[i]->getWidth();
 	}
 
 	(tab)->vtable.set_rect = wz_tab_set_rect;
@@ -355,8 +354,8 @@ void TabBarImpl::clearTabs()
 	tabs.clear();
 	selectedTab = NULL;
 	scrollValue = 0;
-	wz_widget_set_visible(decrementButton, false);
-	wz_widget_set_visible(incrementButton, false);
+	decrementButton->setVisible(false);
+	incrementButton->setVisible(false);
 }
 
 struct ButtonImpl *TabBarImpl::getDecrementButton()

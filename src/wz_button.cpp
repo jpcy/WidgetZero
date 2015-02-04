@@ -144,7 +144,7 @@ Size ButtonImpl::measure()
 void ButtonImpl::setLabel(const char *label)
 {
 	this->label = label;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 const char *ButtonImpl::getLabel() const
@@ -155,7 +155,7 @@ const char *ButtonImpl::getLabel() const
 void ButtonImpl::setIcon(const char *icon)
 {
 	this->icon = icon;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 const char *ButtonImpl::getIcon() const
@@ -166,7 +166,7 @@ const char *ButtonImpl::getIcon() const
 void ButtonImpl::setPadding(Border padding)
 {
 	this->padding = padding;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 void ButtonImpl::setPadding(int top, int right, int bottom, int left)
@@ -175,7 +175,7 @@ void ButtonImpl::setPadding(int top, int right, int bottom, int left)
 	padding.right = right;
 	padding.bottom = bottom;
 	padding.left = left;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 Border ButtonImpl::getPadding() const
@@ -273,7 +273,7 @@ Button::Button(const std::string &label, const std::string &icon)
 
 Button::~Button()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}
@@ -340,7 +340,7 @@ ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
 
 ToggleButton::~ToggleButton()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

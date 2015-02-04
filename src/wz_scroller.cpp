@@ -48,7 +48,7 @@ static void wz_scroller_nub_container_mouse_button_down(struct WidgetImpl *widge
 		return;
 
 	scroller = (struct ScrollerImpl *)widget->parent->parent;
-	nubRect = wz_widget_get_absolute_rect(scroller->nub);
+	nubRect = scroller->nub->getAbsoluteRect();
 
 	if ((scroller->scrollerType == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->scrollerType == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
 	{
@@ -75,7 +75,7 @@ static void wz_nub_mouse_button_down(struct WidgetImpl *widget, int mouseButton,
 
 	WZ_ASSERT(widget);
 	nub = (struct ScrollerNub *)widget;
-	rect = wz_widget_get_absolute_rect(nub);
+	rect = nub->getAbsoluteRect();
 
 	if (mouseButton == 1 && nub->hover)
 	{
@@ -110,8 +110,8 @@ static void wz_nub_mouse_move(struct WidgetImpl *widget, int mouseX, int mouseY,
 
 	WZ_ASSERT(widget);
 	nub = (struct ScrollerNub *)widget;
-	nubSize = wz_widget_get_size(nub);
-	containerRect = wz_widget_get_absolute_rect(nub->parent);
+	nubSize = nub->getSize();
+	containerRect = nub->parent->getAbsoluteRect();
 
 	// Handle dragging.
 	if (nub->isPressed)
@@ -141,7 +141,7 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 	Rect rect;
 
 	WZ_ASSERT(nub);
-	containerSize = wz_widget_get_size(nub->parent);
+	containerSize = nub->parent->getSize();
 
 	if (nub->scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
@@ -237,7 +237,7 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget->parent;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 
 	nvgSave(vg);
 	r->clipToRect(clip);
@@ -501,26 +501,26 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	this->value = WZ_CLAMPED(0, value, maxValue);
 
 	struct StackLayoutImpl *layout = new StackLayoutImpl(scrollerType == WZ_SCROLLER_VERTICAL ? WZ_STACK_LAYOUT_VERTICAL : WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	wz_widget_set_stretch(layout, WZ_STRETCH);
+	layout->setStretch(WZ_STRETCH);
 	wz_widget_add_child_widget(this, layout);
 
 	struct ButtonImpl *decrementButton = new ButtonImpl();
-	wz_widget_set_size_args(decrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	wz_widget_set_draw_callback(decrementButton, wz_scroller_decrement_button_draw);
+	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
+	decrementButton->setDrawCallback(wz_scroller_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_scroller_decrement_button_clicked);
 	layout->add(decrementButton);
 
 	struct WidgetImpl *nubContainer = new WidgetImpl();
 	(nubContainer)->vtable.mouse_button_down = wz_scroller_nub_container_mouse_button_down;
-	wz_widget_set_stretch(nubContainer, WZ_STRETCH);
+	nubContainer->setStretch(WZ_STRETCH);
 	layout->add(nubContainer);
 
 	nub = wz_scroller_nub_create(this);
 	wz_widget_add_child_widget(nubContainer, nub);
 
 	struct ButtonImpl *incrementButton = new ButtonImpl();
-	wz_widget_set_size_args(incrementButton, WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	wz_widget_set_draw_callback(incrementButton, wz_scroller_increment_button_draw);
+	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
+	incrementButton->setDrawCallback(wz_scroller_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
 	layout->add(incrementButton);
 
@@ -595,13 +595,13 @@ void ScrollerImpl::setNubScale(float nubScale)
 void ScrollerImpl::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const
 {
 	if (containerRect)
-		*containerRect = wz_widget_get_absolute_rect(nub->parent);
+		*containerRect = nub->parent->getAbsoluteRect();
 
 	if (rect)
-		*rect = wz_widget_get_absolute_rect(nub);
+		*rect = nub->getAbsoluteRect();
 
 	if (hover)
-		*hover = wz_widget_get_hover(nub);
+		*hover = nub->getHover();
 
 	if (pressed)
 		*pressed = nub->isPressed;
@@ -627,7 +627,7 @@ Scroller::Scroller(ScrollerType type)
 
 Scroller::~Scroller()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

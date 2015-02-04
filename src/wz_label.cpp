@@ -38,7 +38,7 @@ void LabelImpl::draw(Rect clip)
 {
 	NVGRenderer *r = (NVGRenderer *)renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(this);
+	const Rect rect = getAbsoluteRect();
 
 	nvgSave(vg);
 	r->clipToRect(clip);
@@ -93,7 +93,7 @@ bool LabelImpl::getMultiline() const
 void LabelImpl::setText(const char *text)
 {
 	text_ = text;
-	wz_widget_resize_to_measured(this);
+	resizeToMeasured();
 }
 
 const char *LabelImpl::getText() const
@@ -132,7 +132,7 @@ Label::Label(const std::string &text)
 
 Label::~Label()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

@@ -61,14 +61,14 @@ static void wz_main_window_dock_tab_bar_tab_changed(Event *e)
 		return;
 
 	// Set the window to visible, hide all the other windows at this dock position.
-	wz_widget_set_visible(window, true);
+	window->setVisible(true);
 
 	for (size_t i = 0; i < mainWindow->dockedWindows[dockPosition].size(); i++)
 	{
 		if (mainWindow->dockedWindows[dockPosition][i] == window)
 			continue;
 
-		wz_widget_set_visible(mainWindow->dockedWindows[dockPosition][i], false);
+		mainWindow->dockedWindows[dockPosition][i]->setVisible(false);
 	}
 }
 
@@ -76,7 +76,7 @@ static void wz_main_window_draw_dock_icon(struct WidgetImpl *widget, Rect clip)
 {
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_rect(widget);
+	const Rect rect = widget->getRect();
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	nvgSave(vg);
@@ -94,7 +94,7 @@ static void wz_main_window_draw_dock_preview(struct WidgetImpl *widget, Rect cli
 	clip = clip; // Never clipped, so just ignore that parameter.
 
 	nvgSave(vg);
-	r->drawFilledRect(wz_widget_get_rect(widget), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
+	r->drawFilledRect(widget->getRect(), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
 	nvgRestore(vg);
 }
 
@@ -133,7 +133,7 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 {
 	bool drawLastFound = false;
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 		return;
 
 	// Don't render the widget if it's outside its parent window.
@@ -159,7 +159,7 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 		if (!Rect::intersect(clip, widget->vtable.get_children_clip_rect(widget), &clip))
 		{
 			// Reset to mainWindow clip rect.
-			clip = wz_widget_get_rect(widget->mainWindow);
+			clip = widget->mainWindow->getRect();
 		}
 	}
 
@@ -195,7 +195,7 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 static void wz_widget_draw(struct WidgetImpl *widget, WidgetImplPredicate draw_predicate, WidgetImplPredicate recurse_predicate)
 {
 	WZ_ASSERT(widget);
-	wz_widget_draw_recursive(widget, wz_widget_get_rect(widget), draw_predicate, recurse_predicate);
+	wz_widget_draw_recursive(widget, widget->getRect(), draw_predicate, recurse_predicate);
 }
 
 static int wz_compare_window_draw_priorities_docked(const void *a, const void *b)
@@ -222,7 +222,7 @@ static int wz_compare_window_draw_priorities_docked(const void *a, const void *b
 
 static void wz_widget_draw_if_visible(struct WidgetImpl *widget)
 {
-	if (wz_widget_get_visible(widget))
+	if (widget->getVisible())
 	{
 		Rect clip;
 		clip.x = clip.y = clip.w = clip.h = 0;
@@ -250,7 +250,7 @@ static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
 	// Match the menu bar width to the main window width.
 	if (mainWindow->menuBar)
 	{
-		wz_widget_set_width(mainWindow->menuBar, mainWindow->rect.w);
+		mainWindow->menuBar->setWidth(mainWindow->rect.w);
 	}
 
 	mainWindow->updateDockIconPositions();
@@ -286,9 +286,9 @@ MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 	{
 		dockIcons[i] = new WidgetImpl;
 		struct WidgetImpl *widget = dockIcons[i];
-		wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_icon);
+		widget->setDrawCallback(wz_main_window_draw_dock_icon);
 		wz_widget_set_size_args_internal(dockIcons[i], 48, 48);
-		wz_widget_set_visible(widget, false);
+		widget->setVisible(false);
 		wz_widget_set_draw_manually(widget, true);
 		wz_widget_add_child_widget(this, widget);
 	}
@@ -299,15 +299,15 @@ MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 	dockPreview = new WidgetImpl;
 	struct WidgetImpl *widget = dockPreview;
 	wz_widget_set_draw_manually(widget, true);
-	wz_widget_set_draw_callback(widget, wz_main_window_draw_dock_preview);
-	wz_widget_set_visible(widget, false);
+	widget->setDrawCallback(wz_main_window_draw_dock_preview);
+	widget->setVisible(false);
 	wz_widget_add_child_widget(this, widget);
 
 	// Create dock tab bars.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
 		dockTabBars[i] = new TabBarImpl;
-		wz_widget_set_visible(dockTabBars[i], false);
+		dockTabBars[i]->setVisible(false);
 		wz_widget_add_child_widget(this, dockTabBars[i]);
 		dockTabBars[i]->addCallbackTabChanged(wz_main_window_dock_tab_bar_tab_changed);
 	}
@@ -336,7 +336,7 @@ static void MouseButtonDownRecursive(struct WidgetImpl *widget, int mouseButton,
 {
 	WZ_ASSERT(widget);
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 		return;
 
 	if (widget->vtable.mouse_button_down)
@@ -382,7 +382,7 @@ static void MouseButtonUpRecursive(struct WidgetImpl *widget, int mouseButton, i
 {
 	WZ_ASSERT(widget);
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 		return;
 
 	if (widget->vtable.mouse_button_up)
@@ -402,12 +402,12 @@ void MainWindowImpl::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (movingWindow)
 	{
 		// If the dock preview is visible, movingWindow can be docked.
-		if (wz_widget_get_visible(dockPreview))
+		if (dockPreview->getVisible())
 		{
 			dockWindow(movingWindow, windowDockPosition);
 		}
 
-		wz_widget_set_visible(dockPreview, false);
+		dockPreview->setVisible(false);
 		movingWindow = NULL;
 	}
 
@@ -470,12 +470,12 @@ static void IgnoreOverlappingChildren(struct WidgetImpl *widget, int mouseX, int
 			if (i == j)
 				continue;
 
-			if (!wz_widget_get_visible(widget->children[j]))
+			if (!widget->children[j]->getVisible())
 				continue;
 
 			// If the mouse cursor is in the intersection of the two widget rects.
-			rect1 = wz_widget_get_absolute_rect(widget->children[i]);
-			rect2 = wz_widget_get_absolute_rect(widget->children[j]);
+			rect1 = widget->children[i]->getAbsoluteRect();
+			rect2 = widget->children[j]->getAbsoluteRect();
 
 			if (Rect::intersect(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
@@ -504,7 +504,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 
 	WZ_ASSERT(widget);
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 		return;
 
 	// Don't process mouse move if the widget is ignored.
@@ -528,7 +528,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 	// Special case for combo dropdown list poking outside the window.
 	if (widget->window && !(widget->parent && widget->parent->type == WZ_TYPE_COMBO))
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(wz_window_get_content_widget(widget->window)));
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_window_get_content_widget(widget->window)->getAbsoluteRect());
 	}
 	else
 	{
@@ -538,7 +538,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 	// Determine whether the mouse is hovering over the widget's parent.
 	if (!widget->inputNotClippedToParent && widget->parent && widget->parent != widget->mainWindow && widget->parent != widget->window)
 	{
-		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, wz_widget_get_absolute_rect(widget->parent));
+		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, widget->parent->getAbsoluteRect());
 	}
 	else
 	{
@@ -550,7 +550,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 
 	// Set widget hover.
 	oldHover = widget->hover;
-	rect = wz_widget_get_absolute_rect(widget);
+	rect = widget->getAbsoluteRect();
 	widget->hover = widgetIsChildOfWindow && hoverWindow && hoverParent && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	// Run callbacks if hover has changed.
@@ -608,7 +608,7 @@ static void MouseWheelMoveRecursive(struct WidgetImpl *widget, int x, int y)
 {
 	WZ_ASSERT(widget);
 
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 		return;
 
 	if (widget->vtable.mouse_wheel_move)
@@ -646,7 +646,7 @@ void MainWindowImpl::keyDelta(Key key, bool down)
 {
 	struct WidgetImpl *widget = keyboardFocusWidget;
 
-	if (!widget || !wz_widget_get_visible(widget))
+	if (!widget || !widget->getVisible())
 		return;
 
 	if (down && widget->vtable.key_down)
@@ -697,7 +697,7 @@ void MainWindowImpl::textInput(const char *text)
 {
 	struct WidgetImpl *widget = keyboardFocusWidget;
 
-	if (!widget || !wz_widget_get_visible(widget))
+	if (!widget || !widget->getVisible())
 		return;
 
 	if (widget->vtable.text_input)
@@ -732,7 +732,7 @@ void MainWindowImpl::draw()
 	{
 		struct WidgetImpl *widget = windows[i];
 
-		if (!wz_widget_get_visible(widget))
+		if (!widget->getVisible())
 			continue;
 
 		if (widget->vtable.draw)
@@ -772,7 +772,7 @@ void MainWindowImpl::drawFrame()
 void MainWindowImpl::setMenuBar(struct MenuBarImpl *menuBar)
 {
 	this->menuBar = menuBar;
-	wz_widget_set_width(menuBar, mainWindow->rect.w);
+	menuBar->setWidth(mainWindow->rect.w);
 	wz_widget_add_child_widget(this, menuBar);
 }
 
@@ -784,7 +784,7 @@ void MainWindowImpl::add(struct WidgetImpl *widget)
 		return;
 
 	// Special case for windows: add directly, not to the content widget.
-	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_WINDOW)
 	{
 		wz_widget_add_child_widget(this, widget);
 	}
@@ -799,7 +799,7 @@ void MainWindowImpl::remove(struct WidgetImpl *widget)
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
-	if (wz_widget_get_type(widget) == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_WINDOW)
 	{
 		wz_widget_remove_child_widget(this, widget);
 	}
@@ -870,14 +870,14 @@ void MainWindowImpl::dockWindow(struct WindowImpl *window, DockPosition dockPosi
 	// Hide any other windows docked at the same position.
 	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
 	{
-		wz_widget_set_visible(dockedWindows[dockPosition][i], false);
+		dockedWindows[dockPosition][i]->setVisible(false);
 	}
 
 	// Inform the window it is being docked.
 	wz_window_dock(window);
 
 	// Resize the window.
-	wz_widget_set_rect_internal(window, calculateDockWindowRect(dockPosition, wz_widget_get_size(window)));
+	wz_widget_set_rect_internal(window, calculateDockWindowRect(dockPosition, window->getSize()));
 
 	// Dock the window.
 	dockedWindows[dockPosition].push_back(window);
@@ -925,16 +925,16 @@ void MainWindowImpl::undockWindow(struct WindowImpl *window)
 	int nDockedWindows = dockedWindows[dockPosition].size();
 
 	// If there are other windows docked at this position, make sure one is visible after removing this window.
-	if (wz_widget_get_visible(window) && nDockedWindows > 0)
+	if (window->getVisible() && nDockedWindows > 0)
 	{
-		wz_widget_set_visible(dockedWindows[dockPosition][0], true);
+		dockedWindows[dockPosition][0]->setVisible(true);
 	}
 
 	// Refresh the tab bar for this dock position.
 	refreshDockTabBar(dockPosition);
 
 	// If the dock tab bar is hidden, resize the windows at this dock position to reclaim the space it used.
-	if (!wz_widget_get_visible(dockTabBars[dockPosition]))
+	if (!dockTabBars[dockPosition]->getVisible())
 	{
 		for (size_t j = 0; j < dockedWindows[dockPosition].size(); j++)
 		{
@@ -955,7 +955,7 @@ void MainWindowImpl::undockWindow(struct WindowImpl *window)
 void MainWindowImpl::updateDockedWindowRect(struct WindowImpl *window)
 {
 	WZ_ASSERT(window);
-	Rect rect = wz_widget_get_rect(window);
+	Rect rect = window->getRect();
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
@@ -972,7 +972,7 @@ void MainWindowImpl::updateDockedWindowRect(struct WindowImpl *window)
 				}
 
 				// Update the tab bar too.
-				wz_widget_set_rect_args_internal(dockTabBars[i], rect.x, rect.y + rect.h, rect.w, wz_widget_get_height(dockTabBars[i]));
+				wz_widget_set_rect_args_internal(dockTabBars[i], rect.x, rect.y + rect.h, rect.w, dockTabBars[i]->getHeight());
 				return;
 			}
 		}
@@ -1003,7 +1003,7 @@ void MainWindowImpl::setMovingWindow(struct WindowImpl *window)
 	// Show the dock icons if movingWindow is not NULL.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		wz_widget_set_visible(dockIcons[i], movingWindow != NULL);
+		dockIcons[i]->setVisible(movingWindow != NULL);
 	}
 }
 
@@ -1043,7 +1043,7 @@ void MainWindowImpl::updateContentRect()
 	// Adjust the content rect based on the menu bar height.
 	if (menuBar)
 	{
-		const int h = wz_widget_get_height(menuBar);
+		const int h = menuBar->getHeight();
 		rect.y += h;
 		rect.h -= h;
 	}
@@ -1056,7 +1056,7 @@ void MainWindowImpl::updateContentRect()
 		if (dockedWindows[i].empty())
 			continue;
 
-		windowRect = wz_widget_get_rect(dockedWindows[i][0]);
+		windowRect = dockedWindows[i][0]->getRect();
 
 		switch ((DockPosition)i)
 		{
@@ -1097,7 +1097,7 @@ struct WindowImpl *MainWindowImpl::getHoverWindow(int mouseX, int mouseY)
 		if (widget->type != WZ_TYPE_WINDOW)
 			continue;
 
-		if (!wz_widget_get_visible(widget) || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
+		if (!widget->getVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
 			continue;
 
 		window = (struct WindowImpl *)widget;
@@ -1122,7 +1122,7 @@ void MainWindowImpl::refreshDockTabBar(DockPosition dockPosition)
 	if (dockedWindows[dockPosition].size() < 2)
 	{
 		// Hide the tab bar.
-		wz_widget_set_visible(tabBar, false);
+		tabBar->setVisible(false);
 	}
 	else
 	{
@@ -1133,8 +1133,8 @@ void MainWindowImpl::refreshDockTabBar(DockPosition dockPosition)
 		tabBar->clearTabs();
 
 		// Resize the tab bar to match the window(s) at this dock position. Just use the first window, doesn't matter which.
-		windowRect = wz_widget_get_rect(dockedWindows[dockPosition][0]);
-		tabBarHeight = wz_widget_get_height(tabBar);
+		windowRect = dockedWindows[dockPosition][0]->getRect();
+		tabBarHeight = tabBar->getHeight();
 
 		// Assume space has already been made for the tab bar below the window.
 		wz_widget_set_rect_args_internal(tabBar, windowRect.x, windowRect.y + windowRect.h, windowRect.w, tabBarHeight);
@@ -1152,14 +1152,14 @@ void MainWindowImpl::refreshDockTabBar(DockPosition dockPosition)
 			wz_widget_set_internal_metadata(tab, window);
 
 			// If this window is selected (visible), select the corresponding tab.
-			if (wz_widget_get_visible(window))
+			if (window->getVisible())
 			{
 				tabBar->selectTab(tab);
 			}
 		}
 
 		// Show the tab bar.
-		wz_widget_set_visible(tabBar, true);
+		tabBar->setVisible(true);
 	}
 }
 
@@ -1174,8 +1174,8 @@ void MainWindowImpl::updateDockingRects()
 			continue;
 
 		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
-		Rect windowRect = wz_widget_get_rect(dockedWindows[i][0]);
-		int menuBarHeight = menuBar ? wz_widget_get_height(menuBar) : 0;
+		Rect windowRect = dockedWindows[i][0]->getRect();
+		int menuBarHeight = menuBar ? menuBar->getHeight() : 0;
 
 		switch (i)
 		{
@@ -1198,7 +1198,7 @@ void MainWindowImpl::updateDockingRects()
 		// Update tab bar rect. Adjust window rect to make space for the tab bar.
 		if (nWindows > 1)
 		{
-			Rect tabBarRect = wz_widget_get_rect(dockTabBars[i]);
+			Rect tabBarRect = dockTabBars[i]->getRect();
 
 			switch (i)
 			{
@@ -1237,7 +1237,7 @@ Rect MainWindowImpl::calculateDockWindowRect(DockPosition dockPosition, Size win
 	// e.g. north dock max height is main window height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
-	int menuBarHeight = menuBar ? wz_widget_get_height(menuBar) : 0;
+	int menuBarHeight = menuBar ? menuBar->getHeight() : 0;
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
 	int nDockedWindows = dockedWindows[dockPosition].size();
@@ -1245,12 +1245,12 @@ Rect MainWindowImpl::calculateDockWindowRect(DockPosition dockPosition, Size win
 
 	if (nDockedWindows > 0)
 	{
-		rect = wz_widget_get_rect(dockedWindows[dockPosition][0]);
+		rect = dockedWindows[dockPosition][0]->getRect();
 
 		// If there's exactly one window already docked at this position, leave room for the dock tab bar.
 		if (nDockedWindows == 1)
 		{
-			rect.h -= wz_widget_get_height(dockTabBars[dockPosition]);
+			rect.h -= dockTabBars[dockPosition]->getHeight();
 		}
 	}
 	else
@@ -1296,8 +1296,8 @@ void MainWindowImpl::updateDockIconPositions()
 	// Push icons out this percent/100 from mainWindow edges.
 	const float percent = 0.04f;
 
-	Size ds = wz_widget_get_size(this);
-	Size dis = wz_widget_get_size(dockIcons[WZ_DOCK_POSITION_NORTH]);
+	Size ds = getSize();
+	Size dis = dockIcons[WZ_DOCK_POSITION_NORTH]->getSize();
 	int centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
 	int centerH = (int)(ds.h / 2.0f - dis.h / 2.0f);
 
@@ -1310,7 +1310,7 @@ void MainWindowImpl::updateDockIconPositions()
 void MainWindowImpl::updateDockPreviewRect(DockPosition dockPosition)
 {
 	WZ_ASSERT(movingWindow);
-	const Size windowSize = wz_widget_get_size(movingWindow);
+	const Size windowSize = movingWindow->getSize();
 	const Rect rect = calculateDockWindowRect(dockPosition, windowSize);
 	wz_widget_set_rect_internal(dockPreview, rect);
 }
@@ -1324,7 +1324,7 @@ void MainWindowImpl::updateDockPreviewVisible(int mouseX, int mouseY)
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		const Rect rect = wz_widget_get_rect(dockIcons[i]);
+		const Rect rect = dockIcons[i]->getRect();
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
@@ -1335,7 +1335,7 @@ void MainWindowImpl::updateDockPreviewVisible(int mouseX, int mouseY)
 		}
 	}
 
-	wz_widget_set_visible(dockPreview, showDockPreview);
+	dockPreview->setVisible(showDockPreview);
 }
 
 static int CompareWindowDrawPriorities(const void *a, const void *b)
@@ -1397,17 +1397,17 @@ MainWindow::~MainWindow()
 
 int MainWindow::getWidth() const
 {
-	return wz_widget_get_width(impl);
+	return impl->getWidth();
 }
 
 int MainWindow::getHeight() const
 {
-	return wz_widget_get_height(impl);
+	return impl->getHeight();
 }
 
 void MainWindow::setSize(int w, int h)
 {
-	wz_widget_set_size_args(impl, w, h);
+	impl->setSize(w, h);
 }
 
 void MainWindow::mouseMove(int x, int y, int dx, int dy)

@@ -49,7 +49,7 @@ static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
 	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 
 	nvgSave(vg);
 	r->clipToRect(clip);
@@ -131,7 +131,7 @@ Checkbox::Checkbox(const std::string &label)
 
 Checkbox::~Checkbox()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}

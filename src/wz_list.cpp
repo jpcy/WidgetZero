@@ -47,7 +47,7 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	list->scroller->setMaxValue(max);
 
 	// Fit to the right of items rect. Width doesn't change.
-	listRect = wz_widget_get_rect(list);
+	listRect = list->getRect();
 
 	rect.w = (list->scroller)->rect.w;
 	rect.x = listRect.w - list->itemsBorder.right - rect.w;
@@ -61,11 +61,11 @@ static void wz_list_update_scroller(struct ListImpl *list)
 	// Hide/show scroller depending on if it's needed.
 	if (max <= 0)
 	{
-		wz_widget_set_visible(list->scroller, false);
+		list->scroller->setVisible(false);
 	}
 	else
 	{
-		wz_widget_set_visible(list->scroller, true);
+		list->scroller->setVisible(true);
 	}
 }
 
@@ -108,7 +108,7 @@ static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
 	struct ListImpl *list = (struct ListImpl *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
 	struct NVGcontext *vg = r->getContext();
-	const Rect rect = wz_widget_get_absolute_rect(widget);
+	const Rect rect = widget->getAbsoluteRect();
 	const Rect itemsRect = list->getAbsoluteItemsRect();
 
 	nvgSave(vg);
@@ -199,7 +199,7 @@ static void wz_list_set_visible(struct WidgetImpl *widget, bool visible)
 	widget->hidden = !visible;
 
 	// Clear some additional state when hidden.
-	if (!wz_widget_get_visible(widget))
+	if (!widget->getVisible())
 	{
 		struct ListImpl *list = (struct ListImpl *)widget;
 		list->hoveredItem = -1;
@@ -326,7 +326,7 @@ static void wz_list_mouse_wheel_move(struct WidgetImpl *widget, int x, int y)
 	WZ_ASSERT(widget);
 	list = (struct ListImpl *)widget;
 
-	if (wz_widget_get_visible(list->scroller))
+	if (list->scroller->getVisible())
 	{
 		int value, stepValue;
 
@@ -391,14 +391,14 @@ Rect ListImpl::getItemsRect() const
 	Rect rect;
 	rect.x = itemsBorder.left;
 	rect.y = itemsBorder.top;
-	const Rect listRect = wz_widget_get_rect(this);
+	const Rect listRect = getRect();
 	rect.w = listRect.w - (itemsBorder.left + itemsBorder.right);
 	rect.h = listRect.h - (itemsBorder.top + itemsBorder.bottom);
 
 	// Subtract the scroller width.
-	if (wz_widget_get_visible(scroller))
+	if (scroller->getVisible())
 	{
-		rect.w -= wz_widget_get_size(scroller).w;
+		rect.w -= scroller->getWidth();
 	}
 
 	return rect;
@@ -407,7 +407,7 @@ Rect ListImpl::getItemsRect() const
 Rect ListImpl::getAbsoluteItemsRect() const
 {
 	Rect rect = getItemsRect();
-	const Position offset = wz_widget_get_absolute_position(this);
+	const Position offset = getAbsolutePosition();
 	rect.x += offset.x;
 	rect.y += offset.y;
 	return rect;
@@ -525,7 +525,7 @@ List::List()
 
 List::~List()
 {
-	if (!wz_widget_get_main_window(impl))
+	if (!impl->getMainWindow())
 	{
 		wz_widget_destroy(impl);
 	}
