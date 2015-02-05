@@ -627,10 +627,6 @@ Scroller::Scroller(ScrollerType type)
 
 Scroller::~Scroller()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Scroller *Scroller::setValue(int value)

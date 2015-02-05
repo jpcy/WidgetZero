@@ -1138,10 +1138,6 @@ TextEdit::TextEdit(const std::string &text, bool multiline)
 
 TextEdit::~TextEdit()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 TextEdit *TextEdit::setText(const std::string &text)

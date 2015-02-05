@@ -132,10 +132,6 @@ Label::Label(const std::string &text)
 
 Label::~Label()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Label *Label::setText(const char *format, ...)

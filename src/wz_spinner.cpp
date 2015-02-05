@@ -202,10 +202,6 @@ Spinner::Spinner()
 
 Spinner::~Spinner()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Spinner *Spinner::setValue(int value)

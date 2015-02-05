@@ -309,10 +309,6 @@ StackLayout::StackLayout(StackLayoutDirection direction)
 
 StackLayout::~StackLayout()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 StackLayout *StackLayout::setDirection(StackLayoutDirection direction)

@@ -63,10 +63,6 @@ Frame::Frame()
 
 Frame::~Frame()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Widget *Frame::add(Widget *widget)

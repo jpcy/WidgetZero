@@ -299,10 +299,6 @@ Tabbed::Tabbed()
 
 Tabbed::~Tabbed()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Tab *Tabbed::addTab(Tab *tab)

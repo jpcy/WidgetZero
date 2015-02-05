@@ -156,10 +156,6 @@ GroupBox::GroupBox(const std::string &label)
 
 GroupBox::~GroupBox()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 const char *GroupBox::getLabel() const

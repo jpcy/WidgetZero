@@ -129,10 +129,6 @@ RadioButton::RadioButton(const std::string &label)
 
 RadioButton::~RadioButton()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 const char *RadioButton::getLabel() const

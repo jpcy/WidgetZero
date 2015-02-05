@@ -47,8 +47,6 @@ typedef struct
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
 
-	void (*destroy)(struct WidgetImpl *widget);
-
 	// The widget was added to a parent widget (see WidgetImpl::addChildWidget).
 	void (*added)(struct WidgetImpl *parent, struct WidgetImpl *widget);
 
@@ -104,17 +102,7 @@ private:
 struct WidgetImpl
 {
 	WidgetImpl();
-
-	virtual ~WidgetImpl()
-	{
-		for (size_t i = 0; i < eventHandlers.size(); i++)
-		{
-			delete eventHandlers[i];
-		}
-
-		eventHandlers.clear();
-	}
-
+	virtual ~WidgetImpl();
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
 

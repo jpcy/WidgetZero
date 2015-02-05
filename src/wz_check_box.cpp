@@ -131,10 +131,6 @@ Checkbox::Checkbox(const std::string &label)
 
 Checkbox::~Checkbox()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 const char *Checkbox::getLabel() const

@@ -28,7 +28,6 @@ namespace wz {
 
 WidgetChildren::~WidgetChildren()
 {
-#if 0
 	for (size_t i = 0; i < widgets_.size(); i++)
 	{
 		delete widgets_[i];
@@ -42,7 +41,6 @@ WidgetChildren::~WidgetChildren()
 	}
 
 	impls_.clear();
-#endif
 }
 	
 size_t WidgetChildren::size() const
@@ -95,26 +93,6 @@ void WidgetChildren::erase(size_t i)
 		impls_.erase(impls_.begin() + (i - widgets_.size()));
 }
 
-void wz_widget_destroy(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-
-	// Destroy children.
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		wz_widget_destroy(widget->children[i]);
-	}
-
-	widget->children.clear();
-
-	if (widget->vtable.destroy)
-	{
-		widget->vtable.destroy(widget);
-	}
-
-	delete widget;
-}
-
 WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
@@ -138,6 +116,15 @@ WidgetImpl::WidgetImpl()
 	window = NULL;
 	parent = NULL;
 	memset(&vtable, 0, sizeof(vtable));
+}
+
+WidgetImpl::~WidgetImpl()
+{
+	// Delete event handlers.
+	for (size_t i = 0; i < eventHandlers.size(); i++)
+	{
+		delete eventHandlers[i];
+	}
 }
 
 WidgetType WidgetImpl::getType() const
@@ -524,7 +511,7 @@ void WidgetImpl::destroyChildWidget(struct WidgetImpl *child)
 	if (n == children.size())
 		return;
 
-	wz_widget_destroy(child);
+	delete child;
 }
 
 void WidgetImpl::setPositionInternal(int x, int y)
@@ -854,6 +841,7 @@ PUBLIC INTERFACE
 
 Widget::~Widget()
 {
+	delete impl;
 }
 
 Rect Widget::getRect() const

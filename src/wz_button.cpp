@@ -273,10 +273,6 @@ Button::Button(const std::string &label, const std::string &icon)
 
 Button::~Button()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Border Button::getPadding() const
@@ -340,10 +336,6 @@ ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
 
 ToggleButton::~ToggleButton()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 Border ToggleButton::getPadding() const

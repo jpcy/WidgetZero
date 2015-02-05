@@ -1392,7 +1392,7 @@ MainWindow::MainWindow(IRenderer *renderer)
 
 MainWindow::~MainWindow()
 {
-	wz_widget_destroy(impl);
+	delete impl;
 }
 
 int MainWindow::getWidth() const

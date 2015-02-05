@@ -287,8 +287,6 @@ struct EventHandler : public IEventHandler
 typedef void (*WidgetDrawCallback)(struct WidgetImpl *widget, Rect clip);
 typedef Size (*WidgetMeasureCallback)(struct WidgetImpl *widget);
 
-void wz_widget_destroy(struct WidgetImpl *widget);
-
 void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget);
 

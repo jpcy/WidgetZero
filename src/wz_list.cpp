@@ -525,10 +525,6 @@ List::List()
 
 List::~List()
 {
-	if (!impl->getMainWindow())
-	{
-		wz_widget_destroy(impl);
-	}
 }
 
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
