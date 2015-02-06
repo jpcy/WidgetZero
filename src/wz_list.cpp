@@ -500,14 +500,19 @@ int ListImpl::getScrollValue() const
 	return scroller->getValue();
 }
 
+struct ScrollerImpl *ListImpl::getScroller()
+{
+	return scroller;
+}
+
+const struct ScrollerImpl *ListImpl::getScroller() const
+{
+	return scroller;
+}
+
 void ListImpl::addCallbackItemSelected(EventCallback callback)
 {
 	item_selected_callbacks.push_back(callback);
-}
-
-struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list)
-{
-	return list->scroller;
 }
 
 /*

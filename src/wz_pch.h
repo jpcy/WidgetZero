@@ -341,7 +341,10 @@ struct CheckBoxImpl : public ButtonImpl
 struct ComboImpl : public WidgetImpl
 {
 	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	struct ListImpl *getList();
+	const struct ListImpl *getList() const;
 	bool isOpen() const;
 
 	bool isOpen_;
@@ -411,6 +414,8 @@ struct ListImpl : public WidgetImpl
 	int getPressedItem() const;
 	int getHoveredItem() const;
 	int getScrollValue() const;
+	struct ScrollerImpl *getScroller();
+	const struct ScrollerImpl *getScroller() const;
 	void addCallbackItemSelected(EventCallback callback);
 
 	Border itemsBorder;
@@ -766,8 +771,6 @@ struct WindowImpl : public WidgetImpl
 	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
 	Size sizeBeforeDocking;
 };
-
-struct ScrollerImpl *wz_list_get_scroller(struct ListImpl *list);
 
 void wz_invoke_event(Event *e);
 void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);

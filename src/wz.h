@@ -38,6 +38,7 @@ SOFTWARE.
 namespace wz {
 
 struct CheckBoxImpl;
+struct ComboImpl;
 struct WindowImpl;
 class Window;
 struct MenuBarImpl;
@@ -310,10 +311,12 @@ public:
 	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) = 0;
 
 	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
-	virtual void drawButton(const ButtonImpl *button, Rect clip) = 0;
-	virtual Size measureButton(const ButtonImpl *button) = 0;
-	virtual void drawCheckBox(const CheckBoxImpl *checkBox, Rect clip) = 0;
-	virtual Size measureCheckBox(const CheckBoxImpl *checkBox) = 0;
+	virtual void drawButton(ButtonImpl *button, Rect clip) = 0;
+	virtual Size measureButton(ButtonImpl *button) = 0;
+	virtual void drawCheckBox(CheckBoxImpl *checkBox, Rect clip) = 0;
+	virtual Size measureCheckBox(CheckBoxImpl *checkBox) = 0;
+	virtual void drawCombo(ComboImpl *combo, Rect clip) = 0;
+	virtual Size measureCombo(ComboImpl *combo) = 0;
 };
 
 class Widget

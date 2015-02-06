@@ -59,10 +59,12 @@ public:
 	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
 	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
-	virtual void drawButton(const ButtonImpl *button, Rect clip);
-	virtual Size measureButton(const ButtonImpl *button);
-	virtual void drawCheckBox(const CheckBoxImpl *checkBox, Rect clip);
-	virtual Size measureCheckBox(const CheckBoxImpl *checkBox);
+	virtual void drawButton(ButtonImpl *button, Rect clip);
+	virtual Size measureButton(ButtonImpl *button);
+	virtual void drawCheckBox(CheckBoxImpl *checkBox, Rect clip);
+	virtual Size measureCheckBox(CheckBoxImpl *checkBox);
+	virtual void drawCombo(ComboImpl *combo, Rect clip);
+	virtual Size measureCombo(ComboImpl *combo);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

@@ -171,7 +171,7 @@ LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize,
 	return result;
 }
 
-void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
+void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
 	nvgSave(impl->vg);
@@ -267,7 +267,7 @@ void NVGRenderer::drawButton(const ButtonImpl *button, Rect clip)
 	nvgRestore(impl->vg);
 }
 
-Size NVGRenderer::measureButton(const ButtonImpl *button)
+Size NVGRenderer::measureButton(ButtonImpl *button)
 {
 	Size size;
 	button->measureText(button->getLabel(), 0, &size.w, &size.h);
@@ -290,7 +290,7 @@ Size NVGRenderer::measureButton(const ButtonImpl *button)
 	return size;
 }
 
-void NVGRenderer::drawCheckBox(const CheckBoxImpl *checkBox, Rect clip)
+void NVGRenderer::drawCheckBox(CheckBoxImpl *checkBox, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
 
@@ -334,11 +334,108 @@ void NVGRenderer::drawCheckBox(const CheckBoxImpl *checkBox, Rect clip)
 	nvgRestore(impl->vg);
 }
 
-Size NVGRenderer::measureCheckBox(const CheckBoxImpl *checkBox)
+Size NVGRenderer::measureCheckBox(CheckBoxImpl *checkBox)
 {
 	Size size;
 	checkBox->measureText(checkBox->getLabel(), 0, &size.w, &size.h);
 	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
+	return size;
+}
+
+void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = combo->getAbsoluteRect();
+	const uint8_t *itemData = combo->list->getItemData();
+	const int itemStride = combo->list->getItemStride();
+	const int nItems = combo->list->getNumItems();
+	const int selectedItemIndex = combo->list->getSelectedItem();
+
+	nvgSave(impl->vg);
+	clipToRect(clip);
+	nvgBeginPath(impl->vg);
+
+	// Don't round the bottom corners if the combo is open.
+	if (combo->isOpen())
+	{
+		createRectPath(rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
+	}
+	else
+	{
+		nvgRoundedRect(impl->vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_COMBO_CORNER_RADIUS);
+	}
+
+	// Background.
+	nvgFillPaint(impl->vg, nvgLinearGradient(impl->vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_COMBO_BG_COLOR1, WZ_SKIN_COMBO_BG_COLOR2));
+	nvgFill(impl->vg);
+
+	// Border.
+	nvgStrokeColor(impl->vg, combo->getHover() ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
+	nvgStroke(impl->vg);
+
+	// Internal border.
+	int buttonX = rect.x + rect.w - WZ_SKIN_COMBO_BUTTON_WIDTH;
+	drawLine(buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, combo->getHover() ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
+
+	// Icon.
+	{
+		const float buttonCenterX = buttonX + WZ_SKIN_COMBO_BUTTON_WIDTH * 0.5f;
+		const float buttonCenterY = rect.y + rect.h * 0.5f;
+
+		nvgBeginPath(impl->vg);
+		nvgMoveTo(impl->vg, buttonCenterX, buttonCenterY + WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // bottom
+		nvgLineTo(impl->vg, buttonCenterX + WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // right
+		nvgLineTo(impl->vg, buttonCenterX - WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // left
+		nvgFillColor(impl->vg, WZ_SKIN_COMBO_ICON_COLOR);
+		nvgFill(impl->vg);
+	}
+
+	// Selected item.
+	if (selectedItemIndex >= 0)
+	{
+		print(rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, combo->getFontFace(), combo->getFontSize(), WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
+	}
+
+	nvgRestore(impl->vg);
+}
+
+Size NVGRenderer::measureCombo(ComboImpl *combo)
+{
+	const uint8_t *itemData = combo->list->getItemData();
+	const int itemStride = combo->list->getItemStride();
+
+	// Use the widest item text.
+	Size size;
+	size.w = 0;
+
+	for (int i = 0; i < combo->list->getNumItems(); i++)
+	{
+		int w;
+		combo->measureText(*((const char **)&itemData[i * itemStride]), 0, &w, NULL);
+		size.w = WZ_MAX(size.w, w);
+	}
+
+	// Use line height.
+	size.h = combo->getLineHeight();
+
+	// Add scroller width or button width, whichever is largest.
+	struct ScrollerImpl *scroller = combo->getList()->getScroller();
+	Size scrollerSize;
+
+	if (scroller->vtable.measure)
+	{
+		scrollerSize = scroller->vtable.measure(scroller);
+	}
+	else
+	{
+		scrollerSize = scroller->measure();
+	}
+
+	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
+
+	// Padding.
+	size.w += WZ_SKIN_COMBO_PADDING_X;
+	size.h += WZ_SKIN_COMBO_PADDING_Y;
 	return size;
 }
 

@@ -26,110 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static Size wz_combo_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	int i;
-	struct WidgetImpl *scroller;
-	struct ComboImpl *combo = (struct ComboImpl *)widget;
-	uint8_t *itemData = combo->list->getItemData();
-	int itemStride = combo->list->getItemStride();
-	int nItems = combo->list->getNumItems();
-
-	// Use the widest item text.
-	size.w = 0;
-
-	for (i = 0; i < nItems; i++)
-	{
-		int w;
-		widget->measureText(*((const char **)&itemData[i * itemStride]), 0, &w, NULL);
-		size.w = WZ_MAX(size.w, w);
-	}
-
-	// Use line height.
-	size.h = widget->getLineHeight();
-
-	// Add scroller width or button width, whichever is largest.
-	scroller = wz_list_get_scroller(combo->list);
-	Size scrollerSize;
-
-	if (scroller->vtable.measure)
-	{
-		scrollerSize = scroller->vtable.measure(scroller);
-	}
-	else
-	{
-		scrollerSize = scroller->measure();
-	}
-
-	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
-
-	// Padding.
-	size.w += WZ_SKIN_COMBO_PADDING_X;
-	size.h += WZ_SKIN_COMBO_PADDING_Y;
-	return size;
-}
-
-static void wz_combo_draw(struct WidgetImpl *widget, Rect clip)
-{
-	int buttonX;
-	const struct ComboImpl *combo = (struct ComboImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-	const uint8_t *itemData = combo->list->getItemData();
-	const int itemStride = combo->list->getItemStride();
-	const int nItems = combo->list->getNumItems();
-	const int selectedItemIndex = combo->list->getSelectedItem();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	nvgBeginPath(vg);
-
-	// Don't round the bottom corners if the combo is open.
-	if (combo->isOpen())
-	{
-		r->createRectPath(rect, WZ_SKIN_COMBO_CORNER_RADIUS, WZ_SIDE_ALL, WZ_CORNER_TL | WZ_CORNER_TR);
-	}
-	else
-	{
-		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_COMBO_CORNER_RADIUS);
-	}
-
-	// Background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_COMBO_BG_COLOR1, WZ_SKIN_COMBO_BG_COLOR2));
-	nvgFill(vg);
-
-	// Border.
-	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Internal border.
-	buttonX = rect.x + rect.w - WZ_SKIN_COMBO_BUTTON_WIDTH;
-	r->drawLine(buttonX, rect.y + 1, buttonX, rect.y + rect.h - 1, widget->hover ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
-
-	// Icon.
-	{
-		const float buttonCenterX = buttonX + WZ_SKIN_COMBO_BUTTON_WIDTH * 0.5f;
-		const float buttonCenterY = rect.y + rect.h * 0.5f;
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // bottom
-		nvgLineTo(vg, buttonCenterX + WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // right
-		nvgLineTo(vg, buttonCenterX - WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // left
-		nvgFillColor(vg, WZ_SKIN_COMBO_ICON_COLOR);
-		nvgFill(vg);
-	}
-
-	// Selected item.
-	if (selectedItemIndex >= 0)
-	{
-		r->print(rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_combo_update_list_rect(struct ComboImpl *combo)
 {
 	Rect rect, absRect, listRect;
@@ -248,8 +144,6 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	type = WZ_TYPE_COMBO;
 	isOpen_ = false;
 
-	vtable.measure = wz_combo_measure;
-	vtable.draw = wz_combo_draw;
 	vtable.set_rect = wz_combo_set_rect;
 	vtable.font_changed = wz_combo_font_changed;
 	vtable.mouse_button_down = wz_combo_mouse_button_down;
@@ -262,7 +156,22 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	list->addCallbackItemSelected(wz_combo_list_item_selected);
 }
 
+void ComboImpl::draw(Rect clip)
+{
+	renderer->drawCombo(this, clip);
+}
+
+Size ComboImpl::measure()
+{
+	return renderer->measureCombo(this);
+}
+
 struct ListImpl *ComboImpl::getList()
+{
+	return list;
+}
+
+const struct ListImpl *ComboImpl::getList() const
 {
 	return list;
 }
