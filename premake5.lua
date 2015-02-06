@@ -40,7 +40,7 @@ solution "WidgetZero"
 
 project "WidgetZero"
 	kind "StaticLib"
-	pchheader "wz_pch.h"
+	pchheader "wz_internal.h"
 	pchsource "src/wz_pch.cpp"
 	files { "src/*.*" }
 	includedirs { "nanovg" }
