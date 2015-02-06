@@ -26,74 +26,19 @@ SOFTWARE.
 
 namespace wz {
 
-/*
-================================================================================
-
-PRIVATE INTERFACE
-
-================================================================================
-*/
-
-static Size wz_check_box_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
-	widget->measureText(checkBox->getLabel(), 0, &size.w, &size.h);
-	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
-	return size;
-}
-
-static void wz_check_box_draw(struct WidgetImpl *widget, Rect clip)
-{
-	Rect boxRect;
-	struct CheckBoxImpl *checkBox = (struct CheckBoxImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-
-	// Calculate box rect.
-	boxRect.x = rect.x;
-	boxRect.y = (int)(rect.y + rect.h / 2.0f - WZ_SKIN_CHECK_BOX_BOX_SIZE / 2.0f);
-	boxRect.w = boxRect.h = WZ_SKIN_CHECK_BOX_BOX_SIZE;
-
-	// Box border.
-	r->drawRect(boxRect, widget->hover ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
-
-	// Box checkmark.
-	if (checkBox->isChecked())
-	{
-		const float left = (float)boxRect.x + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
-		const float right = (float)boxRect.x + boxRect.w - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
-		const float top = (float)boxRect.y + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
-		const float bottom = (float)boxRect.y + boxRect.h - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, left, top);
-		nvgLineTo(vg, right, bottom);
-		nvgStrokeColor(vg, WZ_SKIN_CHECK_BOX_CHECK_COLOR);
-		nvgStrokeWidth(vg, WZ_SKIN_CHECK_BOX_CHECK_THICKNESS);
-		nvgStroke(vg);
-
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, left, bottom);
-		nvgLineTo(vg, right, top);
-		nvgStroke(vg);
-	}
-
-	// Label.
-	r->print(rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
-
-	nvgRestore(vg);
-}
-
 CheckBoxImpl::CheckBoxImpl(const std::string &label) : ButtonImpl(label)
 {
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-	vtable.measure = wz_check_box_measure;
-	vtable.draw = wz_check_box_draw;
+}
+
+void CheckBoxImpl::draw(Rect clip)
+{
+	renderer->drawCheckBox(this, clip);
+}
+
+Size CheckBoxImpl::measure()
+{
+	return renderer->measureCheckBox(this);
 }
 
 bool CheckBoxImpl::isChecked() const

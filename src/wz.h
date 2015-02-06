@@ -37,6 +37,7 @@ SOFTWARE.
 
 namespace wz {
 
+struct CheckBoxImpl;
 struct WindowImpl;
 class Window;
 struct MenuBarImpl;
@@ -311,6 +312,8 @@ public:
 	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
 	virtual void drawButton(const ButtonImpl *button, Rect clip) = 0;
 	virtual Size measureButton(const ButtonImpl *button) = 0;
+	virtual void drawCheckBox(const CheckBoxImpl *checkBox, Rect clip) = 0;
+	virtual Size measureCheckBox(const CheckBoxImpl *checkBox) = 0;
 };
 
 class Widget

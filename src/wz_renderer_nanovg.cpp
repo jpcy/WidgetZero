@@ -290,6 +290,58 @@ Size NVGRenderer::measureButton(const ButtonImpl *button)
 	return size;
 }
 
+void NVGRenderer::drawCheckBox(const CheckBoxImpl *checkBox, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+
+	nvgSave(impl->vg);
+	clipToRect(clip);
+
+	// Calculate box rect.
+	const Rect rect = checkBox->getAbsoluteRect();
+	Rect boxRect;
+	boxRect.x = rect.x;
+	boxRect.y = (int)(rect.y + rect.h / 2.0f - WZ_SKIN_CHECK_BOX_BOX_SIZE / 2.0f);
+	boxRect.w = boxRect.h = WZ_SKIN_CHECK_BOX_BOX_SIZE;
+
+	// Box border.
+	drawRect(boxRect, checkBox->getHover() ? WZ_SKIN_CHECK_BOX_BORDER_HOVER_COLOR : WZ_SKIN_CHECK_BOX_BORDER_COLOR);
+
+	// Box checkmark.
+	if (checkBox->isChecked())
+	{
+		const float left = (float)boxRect.x + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float right = (float)boxRect.x + boxRect.w - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float top = (float)boxRect.y + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+		const float bottom = (float)boxRect.y + boxRect.h - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
+
+		nvgBeginPath(impl->vg);
+		nvgMoveTo(impl->vg, left, top);
+		nvgLineTo(impl->vg, right, bottom);
+		nvgStrokeColor(impl->vg, WZ_SKIN_CHECK_BOX_CHECK_COLOR);
+		nvgStrokeWidth(impl->vg, WZ_SKIN_CHECK_BOX_CHECK_THICKNESS);
+		nvgStroke(impl->vg);
+
+		nvgBeginPath(impl->vg);
+		nvgMoveTo(impl->vg, left, bottom);
+		nvgLineTo(impl->vg, right, top);
+		nvgStroke(impl->vg);
+	}
+
+	// Label.
+	print(rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, checkBox->getFontFace(), checkBox->getFontSize(), WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
+
+	nvgRestore(impl->vg);
+}
+
+Size NVGRenderer::measureCheckBox(const CheckBoxImpl *checkBox)
+{
+	Size size;
+	checkBox->measureText(checkBox->getLabel(), 0, &size.w, &size.h);
+	size.w += WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN;
+	return size;
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

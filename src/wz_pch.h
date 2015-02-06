@@ -331,6 +331,8 @@ struct ButtonImpl : public WidgetImpl
 struct CheckBoxImpl : public ButtonImpl
 {
 	CheckBoxImpl(const std::string &label = std::string());
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	bool isChecked() const;
 	void check(bool value);
 	void addCallbackChecked(EventCallback callback);

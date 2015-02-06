@@ -61,6 +61,8 @@ public:
 	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 	virtual void drawButton(const ButtonImpl *button, Rect clip);
 	virtual Size measureButton(const ButtonImpl *button);
+	virtual void drawCheckBox(const CheckBoxImpl *checkBox, Rect clip);
+	virtual Size measureCheckBox(const CheckBoxImpl *checkBox);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;
