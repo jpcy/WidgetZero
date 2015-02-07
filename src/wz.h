@@ -323,6 +323,8 @@ public:
 	virtual Size measureGroupBox(GroupBoxImpl *groupBox) = 0;
 	virtual void drawLabel(LabelImpl *label, Rect clip) = 0;
 	virtual Size measureLabel(LabelImpl *label) = 0;
+	virtual void drawList(ListImpl *list, Rect clip) = 0;
+	virtual Size measureList(ListImpl *list) = 0;
 };
 
 class Widget

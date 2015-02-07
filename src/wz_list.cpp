@@ -102,72 +102,6 @@ LIST WIDGET
 ================================================================================
 */
 
-static void wz_list_draw(struct WidgetImpl *widget, Rect clip)
-{
-	int y, i;
-	struct ListImpl *list = (struct ListImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-	const Rect itemsRect = list->getAbsoluteItemsRect();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	
-	// Background.
-	nvgBeginPath(vg);
-	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_LIST_BG_COLOR1, WZ_SKIN_LIST_BG_COLOR2));
-	nvgFill(vg);
-
-	// Border.
-	r->drawRect(rect, WZ_SKIN_LIST_BORDER_COLOR);
-
-	// Items.
-	if (!r->clipToRectIntersection(clip, itemsRect))
-		return;
-
-	y = itemsRect.y - (list->scroller->getValue() % list->itemHeight);
-
-	for (i = list->getFirstItem(); i < list->nItems; i++)
-	{
-		Rect itemRect;
-		const uint8_t *itemData;
-
-		// Outside widget?
-		if (y > itemsRect.y + itemsRect.h)
-			break;
-
-		itemRect.x = itemsRect.x;
-		itemRect.y = y;
-		itemRect.w = itemsRect.w;
-		itemRect.h = list->itemHeight;
-		itemData = *((uint8_t **)&list->itemData[i * list->itemStride]);
-
-		if (i == list->selectedItem)
-		{
-			r->drawFilledRect(itemRect, WZ_SKIN_LIST_SET_COLOR);
-		}
-		else if (i == list->pressedItem || i == list->hoveredItem)
-		{
-			r->drawFilledRect(itemRect, WZ_SKIN_LIST_HOVER_COLOR);
-		}
-
-		if (list->draw_item)
-		{
-			list->draw_item(widget->renderer, itemRect, list, widget->fontFace, widget->fontSize, i, itemData);
-		}
-		else
-		{
-			r->print(itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
-		}
-
-		y += list->itemHeight;
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_list_refresh_item_height(struct ListImpl *list)
 {
 	// Don't stomp on user set value.
@@ -361,7 +295,6 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	scroller = NULL;
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 
-	vtable.draw = wz_list_draw;
 	vtable.renderer_changed = wz_list_renderer_changed;
 	vtable.set_rect = wz_list_set_rect;
 	vtable.set_visible = wz_list_set_visible;
@@ -379,6 +312,16 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	addChildWidget(scroller);
 	wz_list_update_scroller(this);
 	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
+}
+
+void ListImpl::draw(Rect clip)
+{
+	renderer->drawList(this, clip);
+}
+
+Size ListImpl::measure()
+{
+	return renderer->measureList(this);
 }
 
 Border ListImpl::getItemsBorder() const

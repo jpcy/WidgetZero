@@ -69,6 +69,8 @@ public:
 	virtual Size measureGroupBox(GroupBoxImpl *groupBox);
 	virtual void drawLabel(LabelImpl *label, Rect clip);
 	virtual Size measureLabel(LabelImpl *label);
+	virtual void drawList(ListImpl *list, Rect clip);
+	virtual Size measureList(ListImpl *list);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

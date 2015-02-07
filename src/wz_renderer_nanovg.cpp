@@ -482,6 +482,11 @@ void NVGRenderer::drawGroupBox(GroupBoxImpl *groupBox, Rect clip)
 	nvgRestore(vg);
 }
 
+Size NVGRenderer::measureGroupBox(GroupBoxImpl *groupBox)
+{
+	return Size();
+}
+
 void NVGRenderer::drawLabel(LabelImpl *label, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
@@ -527,7 +532,70 @@ Size NVGRenderer::measureLabel(LabelImpl *label)
 	return size;
 }
 
-Size NVGRenderer::measureGroupBox(GroupBoxImpl *groupBox)
+void NVGRenderer::drawList(ListImpl *list, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = list->getAbsoluteRect();
+	const Rect itemsRect = list->getAbsoluteItemsRect();
+
+	nvgSave(vg);
+	clipToRect(clip);
+	
+	// Background.
+	nvgBeginPath(vg);
+	nvgRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_LIST_BG_COLOR1, WZ_SKIN_LIST_BG_COLOR2));
+	nvgFill(vg);
+
+	// Border.
+	drawRect(rect, WZ_SKIN_LIST_BORDER_COLOR);
+
+	// Items.
+	if (!clipToRectIntersection(clip, itemsRect))
+		return;
+
+	int y = itemsRect.y - (list->getScroller()->getValue() % list->itemHeight);
+
+	for (int i = list->getFirstItem(); i < list->nItems; i++)
+	{
+		Rect itemRect;
+		const uint8_t *itemData;
+
+		// Outside widget?
+		if (y > itemsRect.y + itemsRect.h)
+			break;
+
+		itemRect.x = itemsRect.x;
+		itemRect.y = y;
+		itemRect.w = itemsRect.w;
+		itemRect.h = list->itemHeight;
+		itemData = *((uint8_t **)&list->getItemData()[i * list->itemStride]);
+
+		if (i == list->selectedItem)
+		{
+			drawFilledRect(itemRect, WZ_SKIN_LIST_SET_COLOR);
+		}
+		else if (i == list->pressedItem || i == list->hoveredItem)
+		{
+			drawFilledRect(itemRect, WZ_SKIN_LIST_HOVER_COLOR);
+		}
+
+		if (list->draw_item)
+		{
+			list->draw_item(this, itemRect, list, list->getFontFace(), list->getFontSize(), i, itemData);
+		}
+		else
+		{
+			print(itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, list->getFontFace(), list->getFontSize(), WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
+		}
+
+		y += list->itemHeight;
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureList(ListImpl *list)
 {
 	return Size();
 }

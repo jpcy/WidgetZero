@@ -394,6 +394,8 @@ private:
 struct ListImpl : public WidgetImpl
 {
 	ListImpl(uint8_t *itemData, int itemStride, int nItems);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	Border getItemsBorder() const;
 	Rect getItemsRect() const;
 
