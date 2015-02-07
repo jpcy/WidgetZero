@@ -26,52 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_group_box_draw(struct WidgetImpl *widget, Rect clip)
-{
-	Rect rect;
-	struct GroupBoxImpl *groupBox = (struct GroupBoxImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	rect = widget->getAbsoluteRect();
-	
-	if (groupBox->label.empty())
-	{
-		nvgBeginPath(vg);
-		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_GROUP_BOX_CORNER_RADIUS);
-		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
-		nvgStroke(vg);
-	}
-	else
-	{
-		int textWidth, textHeight;
-		Rect borderRect;
-
-		widget->measureText(groupBox->label.c_str(), 0, &textWidth, &textHeight);
-		borderRect = rect;
-		borderRect.y += textHeight / 2;
-		borderRect.h -= textHeight / 2;
-
-		// Border top, left of text.
-		r->drawLine((int)(borderRect.x + WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN - WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING, borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
-
-		// Border top, right of text.
-		r->drawLine(borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN + textWidth + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING * 2, borderRect.y, (int)(borderRect.x + borderRect.w - WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
-
-		// The rest of the border.
-		r->createRectPath(borderRect, WZ_SKIN_GROUP_BOX_CORNER_RADIUS, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
-		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
-		nvgStroke(vg);
-
-		// Label.
-		r->print(rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label.c_str(), 0);
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_group_box_refresh_margin(struct GroupBoxImpl *groupBox)
 {
 	Border margin;
@@ -93,13 +47,22 @@ static void wz_group_box_renderer_changed(struct WidgetImpl *widget)
 GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
 {
 	type = WZ_TYPE_GROUP_BOX;
-	vtable.draw = wz_group_box_draw;
 	vtable.renderer_changed = wz_group_box_renderer_changed;
 
 	// Create content widget.
 	content = new WidgetImpl;
 	content->stretch = WZ_STRETCH;
 	addChildWidget(content);
+}
+
+void GroupBoxImpl::draw(Rect clip)
+{
+	renderer->drawGroupBox(this, clip);
+}
+
+Size GroupBoxImpl::measure()
+{
+	return renderer->measureGroupBox(this);
 }
 
 void GroupBoxImpl::setLabel(const char *label)

@@ -65,6 +65,8 @@ public:
 	virtual Size measureCheckBox(CheckBoxImpl *checkBox);
 	virtual void drawCombo(ComboImpl *combo, Rect clip);
 	virtual Size measureCombo(ComboImpl *combo);
+	virtual void drawGroupBox(GroupBoxImpl *groupBox, Rect clip);
+	virtual Size measureGroupBox(GroupBoxImpl *groupBox);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

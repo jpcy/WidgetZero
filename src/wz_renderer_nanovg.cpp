@@ -174,7 +174,7 @@ LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize,
 void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
-	nvgSave(impl->vg);
+	nvgSave(vg);
 	const Rect rect = button->getAbsoluteRect();
 
 	if (!clipToRectIntersection(clip, rect))
@@ -199,16 +199,16 @@ void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
 		bgColor2 = WZ_SKIN_BUTTON_BG_COLOR2;
 	}
 
-	nvgBeginPath(impl->vg);
-	nvgRoundedRect(impl->vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_BUTTON_CORNER_RADIUS);
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_BUTTON_CORNER_RADIUS);
 
 	// Background.
-	nvgFillPaint(impl->vg, nvgLinearGradient(impl->vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
-	nvgFill(impl->vg);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
+	nvgFill(vg);
 
 	// Border.
-	nvgStrokeColor(impl->vg, button->getHover() ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
-	nvgStroke(impl->vg);
+	nvgStrokeColor(vg, button->getHover() ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
+	nvgStroke(vg);
 
 	// Calculate padded rect.
 	Rect paddedRect;
@@ -264,7 +264,7 @@ void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
 		print(labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), WZ_SKIN_BUTTON_TEXT_COLOR, button->getLabel(), 0);
 	}
 
-	nvgRestore(impl->vg);
+	nvgRestore(vg);
 }
 
 Size NVGRenderer::measureButton(ButtonImpl *button)
@@ -294,7 +294,7 @@ void NVGRenderer::drawCheckBox(CheckBoxImpl *checkBox, Rect clip)
 {
 	struct NVGcontext *vg = impl->vg;
 
-	nvgSave(impl->vg);
+	nvgSave(vg);
 	clipToRect(clip);
 
 	// Calculate box rect.
@@ -315,23 +315,23 @@ void NVGRenderer::drawCheckBox(CheckBoxImpl *checkBox, Rect clip)
 		const float top = (float)boxRect.y + WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
 		const float bottom = (float)boxRect.y + boxRect.h - WZ_SKIN_CHECK_BOX_BOX_INTERNAL_MARGIN;
 
-		nvgBeginPath(impl->vg);
-		nvgMoveTo(impl->vg, left, top);
-		nvgLineTo(impl->vg, right, bottom);
-		nvgStrokeColor(impl->vg, WZ_SKIN_CHECK_BOX_CHECK_COLOR);
-		nvgStrokeWidth(impl->vg, WZ_SKIN_CHECK_BOX_CHECK_THICKNESS);
-		nvgStroke(impl->vg);
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, left, top);
+		nvgLineTo(vg, right, bottom);
+		nvgStrokeColor(vg, WZ_SKIN_CHECK_BOX_CHECK_COLOR);
+		nvgStrokeWidth(vg, WZ_SKIN_CHECK_BOX_CHECK_THICKNESS);
+		nvgStroke(vg);
 
-		nvgBeginPath(impl->vg);
-		nvgMoveTo(impl->vg, left, bottom);
-		nvgLineTo(impl->vg, right, top);
-		nvgStroke(impl->vg);
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, left, bottom);
+		nvgLineTo(vg, right, top);
+		nvgStroke(vg);
 	}
 
 	// Label.
 	print(rect.x + WZ_SKIN_CHECK_BOX_BOX_SIZE + WZ_SKIN_CHECK_BOX_BOX_RIGHT_MARGIN, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, checkBox->getFontFace(), checkBox->getFontSize(), WZ_SKIN_CHECK_BOX_TEXT_COLOR, checkBox->getLabel(), 0);
 
-	nvgRestore(impl->vg);
+	nvgRestore(vg);
 }
 
 Size NVGRenderer::measureCheckBox(CheckBoxImpl *checkBox)
@@ -351,9 +351,9 @@ void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
 	const int nItems = combo->list->getNumItems();
 	const int selectedItemIndex = combo->list->getSelectedItem();
 
-	nvgSave(impl->vg);
+	nvgSave(vg);
 	clipToRect(clip);
-	nvgBeginPath(impl->vg);
+	nvgBeginPath(vg);
 
 	// Don't round the bottom corners if the combo is open.
 	if (combo->isOpen())
@@ -362,16 +362,16 @@ void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
 	}
 	else
 	{
-		nvgRoundedRect(impl->vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_COMBO_CORNER_RADIUS);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_COMBO_CORNER_RADIUS);
 	}
 
 	// Background.
-	nvgFillPaint(impl->vg, nvgLinearGradient(impl->vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_COMBO_BG_COLOR1, WZ_SKIN_COMBO_BG_COLOR2));
-	nvgFill(impl->vg);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_COMBO_BG_COLOR1, WZ_SKIN_COMBO_BG_COLOR2));
+	nvgFill(vg);
 
 	// Border.
-	nvgStrokeColor(impl->vg, combo->getHover() ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
-	nvgStroke(impl->vg);
+	nvgStrokeColor(vg, combo->getHover() ? WZ_SKIN_COMBO_BORDER_HOVER_COLOR : WZ_SKIN_COMBO_BORDER_COLOR);
+	nvgStroke(vg);
 
 	// Internal border.
 	int buttonX = rect.x + rect.w - WZ_SKIN_COMBO_BUTTON_WIDTH;
@@ -382,12 +382,12 @@ void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
 		const float buttonCenterX = buttonX + WZ_SKIN_COMBO_BUTTON_WIDTH * 0.5f;
 		const float buttonCenterY = rect.y + rect.h * 0.5f;
 
-		nvgBeginPath(impl->vg);
-		nvgMoveTo(impl->vg, buttonCenterX, buttonCenterY + WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // bottom
-		nvgLineTo(impl->vg, buttonCenterX + WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // right
-		nvgLineTo(impl->vg, buttonCenterX - WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // left
-		nvgFillColor(impl->vg, WZ_SKIN_COMBO_ICON_COLOR);
-		nvgFill(impl->vg);
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // bottom
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // right
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_COMBO_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_COMBO_ICON_HEIGHT * 0.5f); // left
+		nvgFillColor(vg, WZ_SKIN_COMBO_ICON_COLOR);
+		nvgFill(vg);
 	}
 
 	// Selected item.
@@ -396,7 +396,7 @@ void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
 		print(rect.x + WZ_SKIN_COMBO_PADDING_X / 2, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, combo->getFontFace(), combo->getFontSize(), WZ_SKIN_COMBO_TEXT_COLOR, *((const char **)&itemData[selectedItemIndex * itemStride]), 0);
 	}
 
-	nvgRestore(impl->vg);
+	nvgRestore(vg);
 }
 
 Size NVGRenderer::measureCombo(ComboImpl *combo)
@@ -437,6 +437,54 @@ Size NVGRenderer::measureCombo(ComboImpl *combo)
 	size.w += WZ_SKIN_COMBO_PADDING_X;
 	size.h += WZ_SKIN_COMBO_PADDING_Y;
 	return size;
+}
+
+void NVGRenderer::drawGroupBox(GroupBoxImpl *groupBox, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+
+	nvgSave(vg);
+	clipToRect(clip);
+	const Rect rect = groupBox->getAbsoluteRect();
+	
+	if (!groupBox->getLabel() || !groupBox->getLabel()[0])
+	{
+		nvgBeginPath(vg);
+		nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_GROUP_BOX_CORNER_RADIUS);
+		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+		nvgStroke(vg);
+	}
+	else
+	{
+		int textWidth, textHeight;
+		Rect borderRect;
+
+		groupBox->measureText(groupBox->getLabel(), 0, &textWidth, &textHeight);
+		borderRect = rect;
+		borderRect.y += textHeight / 2;
+		borderRect.h -= textHeight / 2;
+
+		// Border top, left of text.
+		drawLine((int)(borderRect.x + WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN - WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING, borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+
+		// Border top, right of text.
+		drawLine(borderRect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN + textWidth + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING * 2, borderRect.y, (int)(borderRect.x + borderRect.w - WZ_SKIN_GROUP_BOX_CORNER_RADIUS), borderRect.y, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+
+		// The rest of the border.
+		createRectPath(borderRect, WZ_SKIN_GROUP_BOX_CORNER_RADIUS, WZ_SIDE_LEFT | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM, WZ_CORNER_ALL);
+		nvgStrokeColor(vg, WZ_SKIN_GROUP_BOX_BORDER_COLOR);
+		nvgStroke(vg);
+
+		// Label.
+		print(rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, groupBox->getFontFace(), groupBox->getFontSize(), WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label.c_str(), 0);
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureGroupBox(GroupBoxImpl *groupBox)
+{
+	return Size();
 }
 
 struct NVGcontext *NVGRenderer::getContext()

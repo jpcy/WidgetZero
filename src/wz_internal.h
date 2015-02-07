@@ -361,6 +361,8 @@ struct FrameImpl : public WidgetImpl
 struct GroupBoxImpl : public WidgetImpl
 {
 	GroupBoxImpl(const std::string &label = std::string());
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
 	void add(struct WidgetImpl *widget);

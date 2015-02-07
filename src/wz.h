@@ -39,6 +39,7 @@ namespace wz {
 
 struct CheckBoxImpl;
 struct ComboImpl;
+struct GroupBoxImpl;
 struct WindowImpl;
 class Window;
 struct MenuBarImpl;
@@ -317,6 +318,8 @@ public:
 	virtual Size measureCheckBox(CheckBoxImpl *checkBox) = 0;
 	virtual void drawCombo(ComboImpl *combo, Rect clip) = 0;
 	virtual Size measureCombo(ComboImpl *combo) = 0;
+	virtual void drawGroupBox(GroupBoxImpl *groupBox, Rect clip) = 0;
+	virtual Size measureGroupBox(GroupBoxImpl *groupBox) = 0;
 };
 
 class Widget
