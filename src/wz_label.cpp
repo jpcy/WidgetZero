@@ -36,48 +36,12 @@ LabelImpl::LabelImpl(const std::string &text) : text_(text)
 
 void LabelImpl::draw(Rect clip)
 {
-	NVGRenderer *r = (NVGRenderer *)renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = getAbsoluteRect();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-
-	if (multiline_)
-	{
-		r->printBox(rect, fontFace, fontSize, textColor_, text_.c_str(), 0);
-	}
-	else
-	{
-		r->print(rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, textColor_, text_.c_str(), 0);
-	}
-
-	nvgRestore(vg);
+	renderer->drawLabel(this, clip);
 }
 
 Size LabelImpl::measure()
 {
-	Size size;
-	NVGRenderer *r = (NVGRenderer *)renderer;
-	struct NVGcontext *vg = r->getContext();
-
-	if (multiline_)
-	{
-		nvgFontSize(vg, fontSize == 0 ? r->getDefaultFontSize() : fontSize);
-		r->setFontFace(fontFace);
-		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-		nvgTextLineHeight(vg, 1.2f);
-		float bounds[4];
-		nvgTextBoxBounds(vg, 0, 0, (float)rect.w, text_.c_str(), NULL, bounds);
-		size.w = (int)bounds[2];
-		size.h = (int)bounds[3];
-	}
-	else
-	{
-		measureText(text_.c_str(), 0, &size.w, &size.h);
-	}
-
-	return size;
+	return renderer->measureLabel(this);
 }
 
 void LabelImpl::setMultiline(bool multiline)

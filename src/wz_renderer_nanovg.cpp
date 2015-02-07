@@ -482,6 +482,51 @@ void NVGRenderer::drawGroupBox(GroupBoxImpl *groupBox, Rect clip)
 	nvgRestore(vg);
 }
 
+void NVGRenderer::drawLabel(LabelImpl *label, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = label->getAbsoluteRect();
+
+	nvgSave(vg);
+	clipToRect(clip);
+
+	if (label->getMultiline())
+	{
+		printBox(rect, label->getFontFace(), label->getFontSize(), label->getTextColor(), label->getText(), 0);
+	}
+	else
+	{
+		print(rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, label->getFontFace(), label->getFontSize(), label->getTextColor(), label->getText(), 0);
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureLabel(LabelImpl *label)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = label->getAbsoluteRect();
+	Size size;
+
+	if (label->getMultiline())
+	{
+		nvgFontSize(vg, label->getFontSize() == 0 ? getDefaultFontSize() : label->getFontSize());
+		setFontFace(label->getFontFace());
+		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+		nvgTextLineHeight(vg, 1.2f);
+		float bounds[4];
+		nvgTextBoxBounds(vg, 0, 0, (float)rect.w, label->getText(), NULL, bounds);
+		size.w = (int)bounds[2];
+		size.h = (int)bounds[3];
+	}
+	else
+	{
+		label->measureText(label->getText(), 0, &size.w, &size.h);
+	}
+
+	return size;
+}
+
 Size NVGRenderer::measureGroupBox(GroupBoxImpl *groupBox)
 {
 	return Size();
