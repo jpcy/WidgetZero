@@ -463,6 +463,16 @@ const char *WindowImpl::getTitle() const
 	return title.c_str();
 }
 
+void WindowImpl::add(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+		return;
+
+	content->addChildWidget(widget);
+}
+
 void WindowImpl::add(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
@@ -471,6 +481,12 @@ void WindowImpl::add(struct WidgetImpl *widget)
 		return;
 
 	content->addChildWidget(widget);
+}
+
+void WindowImpl::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+	content->removeChildWidget(widget);
 }
 
 void WindowImpl::remove(struct WidgetImpl *widget)
@@ -505,6 +521,14 @@ void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority)
 	window->drawPriority = drawPriority;
 }
 
+/*
+================================================================================
+
+PUBLIC INTERFACE
+
+================================================================================
+*/
+
 Window::Window()
 {
 	impl = new WindowImpl(NULL);
@@ -517,7 +541,6 @@ Window::Window(const std::string &title)
 
 Window::~Window()
 {
-	delete impl;
 }
 
 const char *Window::getTitle() const
@@ -533,13 +556,13 @@ Window *Window::setTitle(const std::string &title)
 
 Widget *Window::add(Widget *widget)
 {
-	((WindowImpl *)impl)->add(widget->impl);
+	((WindowImpl *)impl)->add(widget);
 	return widget;
 }
 
 void Window::remove(Widget *widget)
 {
-	((WindowImpl *)impl)->remove(widget->impl);
+	((WindowImpl *)impl)->remove(widget);
 }
 
 } // namespace wz

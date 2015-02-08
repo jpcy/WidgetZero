@@ -31,6 +31,16 @@ FrameImpl::FrameImpl()
 	type = WZ_TYPE_FRAME;
 }
 
+void FrameImpl::add(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+		return;
+
+	addChildWidget(widget);
+}
+
 void FrameImpl::add(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
@@ -39,6 +49,12 @@ void FrameImpl::add(struct WidgetImpl *widget)
 		return;
 
 	addChildWidget(widget);
+}
+
+void FrameImpl::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+	removeChildWidget(widget);
 }
 
 void FrameImpl::remove(struct WidgetImpl *widget)
@@ -67,13 +83,13 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	((FrameImpl *)impl)->add(widget->impl);
+	((FrameImpl *)impl)->add(widget);
 	return widget;
 }
 
 void Frame::remove(Widget *widget)
 {
-	((FrameImpl *)impl)->remove(widget->impl);
+	((FrameImpl *)impl)->remove(widget);
 }
 
 } // namespace wz

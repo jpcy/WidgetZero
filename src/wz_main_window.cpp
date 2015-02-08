@@ -776,15 +776,15 @@ void MainWindowImpl::setMenuBar(struct MenuBarImpl *menuBar)
 	addChildWidget(menuBar);
 }
 
-void MainWindowImpl::add(struct WidgetImpl *widget)
+void MainWindowImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->type == WZ_TYPE_MAIN_WINDOW)
+	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW)
 		return;
 
 	// Special case for windows: add directly, not to the content widget.
-	if (widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->impl->type == WZ_TYPE_WINDOW)
 	{
 		addChildWidget(widget);
 	}
@@ -794,12 +794,45 @@ void MainWindowImpl::add(struct WidgetImpl *widget)
 	}
 }
 
+void MainWindowImpl::add(struct WidgetImpl *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW)
+		return;
+
+	// Special case for windows: add directly, not to the content widget.
+	if (widget->type == WZ_TYPE_WINDOW)
+	{
+		addChildWidget(widget);
+	}
+	else
+	{
+		content->addChildWidget(widget);
+	}
+}
+
+void MainWindowImpl::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	// Special case for windows: remove directly, not from the content widget.
+	if (widget->impl->type == WZ_TYPE_WINDOW)
+	{
+		removeChildWidget(widget);
+	}
+	else
+	{
+		content->removeChildWidget(widget);
+	}
+}
+
 void MainWindowImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
-	if (widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->type == WZ_TYPE_WINDOW)
 	{
 		removeChildWidget(widget);
 	}
@@ -1472,13 +1505,13 @@ void MainWindowImpl::setCursor(Cursor cursor)
 
 Widget *MainWindow::add(Widget *widget)
 {
-	impl->add(widget->impl);
+	impl->add(widget);
 	return widget;
 }
 
 void MainWindow::remove(Widget *widget)
 {
-	impl->remove(widget->impl);
+	impl->remove(widget);
 }
 
 void MainWindow::createMenuButton(const std::string &label)

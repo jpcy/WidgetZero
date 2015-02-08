@@ -81,6 +81,16 @@ const char *GroupBoxImpl::getLabel() const
 	return label.c_str();
 }
 
+void GroupBoxImpl::add(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+		return;
+
+	content->addChildWidget(widget);
+}
+
 void GroupBoxImpl::add(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
@@ -89,6 +99,12 @@ void GroupBoxImpl::add(struct WidgetImpl *widget)
 		return;
 
 	content->addChildWidget(widget);
+}
+
+void GroupBoxImpl::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+	content->removeChildWidget(widget);
 }
 
 void GroupBoxImpl::remove(struct WidgetImpl *widget)
@@ -134,13 +150,13 @@ GroupBox *GroupBox::setLabel(const std::string &label)
 
 Widget *GroupBox::add(Widget *widget)
 {
-	((GroupBoxImpl *)impl)->add(widget->impl);
+	((GroupBoxImpl *)impl)->add(widget);
 	return widget;
 }
 
 void GroupBox::remove(Widget *widget)
 {
-	((GroupBoxImpl *)impl)->remove(widget->impl);
+	((GroupBoxImpl *)impl)->remove(widget);
 }
 
 } // namespace wz

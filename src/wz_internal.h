@@ -93,6 +93,8 @@ public:
 	void push_back(Widget *widget);
 	void push_back(struct WidgetImpl *widgetImpl);
 	void erase(size_t i);
+	void erase(Widget *widget);
+	void erase(struct WidgetImpl *widget);
 
 private:
 	std::vector<Widget *> widgets_;
@@ -152,7 +154,14 @@ struct WidgetImpl
 	// Resize the widget to the result of calling the widget "measure" callback.
 	void resizeToMeasured();
 
+private:
+	// Does everything but actually add the widget to WidgetImpl::children. Used by both WidgetImpl::addChildWidget overloads.
+	void addChildWidgetInternal(struct WidgetImpl *child);
+
+public:
+	void addChildWidget(Widget *child);
 	void addChildWidget(struct WidgetImpl *child);
+	void removeChildWidget(Widget *child);
 	void removeChildWidget(struct WidgetImpl *child);
 	void destroyChildWidget(struct WidgetImpl *child);
 	void setPositionInternal(int x, int y);
@@ -354,7 +363,9 @@ struct ComboImpl : public WidgetImpl
 struct FrameImpl : public WidgetImpl
 {
 	FrameImpl();
+	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
+	void remove(Widget *widget);
 	void remove(struct WidgetImpl *widget);
 };
 
@@ -365,7 +376,9 @@ struct GroupBoxImpl : public WidgetImpl
 	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
+	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
+	void remove(Widget *widget);
 	void remove(struct WidgetImpl *widget);
 
 	struct WidgetImpl *content;
@@ -470,7 +483,9 @@ public:
 	void draw();
 	void drawFrame();
 	void setMenuBar(struct MenuBarImpl *menuBar);
+	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
+	void remove(Widget *widget);
 	void remove(struct WidgetImpl *widget);
 	bool isTextCursorVisible() const;
 	void toggleTextCursor();
@@ -638,7 +653,9 @@ struct StackLayoutImpl : public WidgetImpl
 	void setDirection(StackLayoutDirection direction);
 	void setSpacing(int spacing);
 	int getSpacing() const;
+	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
+	void remove(Widget *widget);
 	void remove(struct WidgetImpl *widget);
 
 	StackLayoutDirection direction;
@@ -754,7 +771,9 @@ struct WindowImpl : public WidgetImpl
 	Rect getHeaderRect() const;
 	void setTitle(const char *title);
 	const char *getTitle() const;
+	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
+	void remove(Widget *widget);
 	void remove(struct WidgetImpl *widget);
 
 	int drawPriority;

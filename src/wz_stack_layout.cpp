@@ -273,6 +273,16 @@ int StackLayoutImpl::getSpacing() const
 	return spacing;
 }
 
+void StackLayoutImpl::add(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+		return;
+
+	addChildWidget(widget);
+}
+
 void StackLayoutImpl::add(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
@@ -281,6 +291,12 @@ void StackLayoutImpl::add(struct WidgetImpl *widget)
 		return;
 
 	addChildWidget(widget);
+}
+
+void StackLayoutImpl::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+	removeChildWidget(widget);
 }
 
 void StackLayoutImpl::remove(struct WidgetImpl *widget)
@@ -330,13 +346,13 @@ int StackLayout::getSpacing() const
 
 Widget *StackLayout::add(Widget *widget)
 {
-	((StackLayoutImpl *)impl)->add(widget->impl);
+	((StackLayoutImpl *)impl)->add(widget);
 	return widget;
 }
 
 void StackLayout::remove(Widget *widget)
 {
-	((StackLayoutImpl *)impl)->remove(widget->impl);
+	((StackLayoutImpl *)impl)->remove(widget);
 }
 
 } // namespace wz

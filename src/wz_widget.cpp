@@ -93,6 +93,44 @@ void WidgetChildren::erase(size_t i)
 		impls_.erase(impls_.begin() + (i - widgets_.size()));
 }
 
+void WidgetChildren::erase(Widget *widget)
+{
+	int eraseIndex = -1;
+
+	for (size_t i = 0; i < widgets_.size(); i++)
+	{
+		if (widgets_[i] == widget)
+		{
+			eraseIndex = (int)i;
+			break;
+		}
+	}
+
+	if (eraseIndex != -1)
+	{
+		widgets_.erase(widgets_.begin() + eraseIndex);
+	}
+}
+
+void WidgetChildren::erase(struct WidgetImpl *widget)
+{
+	int eraseIndex = -1;
+
+	for (size_t i = 0; i < impls_.size(); i++)
+	{
+		if (impls_[i] == widget)
+		{
+			eraseIndex = (int)i;
+			break;
+		}
+	}
+
+	if (eraseIndex != -1)
+	{
+		impls_.erase(impls_.begin() + eraseIndex);
+	}
+}
+
 WidgetImpl::WidgetImpl()
 {
 	type = WZ_TYPE_WIDGET;
@@ -441,15 +479,14 @@ void WidgetImpl::resizeToMeasured()
 	setSizeInternal(size);
 }
 
-void WidgetImpl::addChildWidget(struct WidgetImpl *child)
+void WidgetImpl::addChildWidgetInternal(struct WidgetImpl *child)
 {
 	WZ_ASSERT(child);
 
-	// Set mainWindow.
-	child->mainWindow = findMainWindow();
+	child->parent = this;
 
-	// Find the closest ancestor window.
-	child->window = (struct WindowImpl *)findClosestAncestor(WZ_TYPE_WINDOW);
+	// Set the main window to the ancestor main window.
+	child->mainWindow = findMainWindow();
 
 	// Set the renderer.
 	if (child->mainWindow)
@@ -457,11 +494,11 @@ void WidgetImpl::addChildWidget(struct WidgetImpl *child)
 		child->setRenderer(child->mainWindow->renderer);
 	}
 
+	// Set window to the closest ancestor window.
+	child->window = (struct WindowImpl *)findClosestAncestor(WZ_TYPE_WINDOW);
+
 	// Set children mainWindow, window and renderer.
 	child->setMainWindowAndWindowRecursive(child->mainWindow, child->type == WZ_TYPE_WINDOW ? (struct WindowImpl *)child : child->window);
-
-	child->parent = this;
-	children.push_back(child);
 
 	// Resize the widget and children to their measured sizes.
 	child->resizeToMeasuredRecursive();
@@ -473,28 +510,35 @@ void WidgetImpl::addChildWidget(struct WidgetImpl *child)
 	}
 }
 
+void WidgetImpl::addChildWidget(Widget *child)
+{
+	WZ_ASSERT(child);
+	children.push_back(child);
+	addChildWidgetInternal(child->impl);
+}
+
+void WidgetImpl::addChildWidget(struct WidgetImpl *child)
+{
+	WZ_ASSERT(child);
+	children.push_back(child);
+	addChildWidgetInternal(child);
+}
+
+void WidgetImpl::removeChildWidget(Widget *child)
+{
+	WZ_ASSERT(child);
+	children.erase(child);
+
+	// The child is no longer connected to the widget hierarchy, so reset some state.
+	child->impl->mainWindow = NULL;
+	child->impl->parent = NULL;
+	child->impl->window = NULL;
+}
+
 void WidgetImpl::removeChildWidget(struct WidgetImpl *child)
 {
-	int deleteIndex;
-
 	WZ_ASSERT(child);
-
-	// Ensure the child is actually a child of this widget before destroying it.
-	deleteIndex = -1;
-
-	for (size_t i = 0; i < children.size(); i++)
-	{
-		if (children[i] == child)
-		{
-			deleteIndex = (int)i;
-			break;
-		}
-	}
-
-	if (deleteIndex == -1)
-		return;
-
-	children.erase(deleteIndex);
+	children.erase(child);
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
 	child->mainWindow = NULL;
