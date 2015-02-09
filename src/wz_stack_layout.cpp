@@ -315,12 +315,12 @@ PUBLIC INTERFACE
 
 StackLayout::StackLayout()
 {
-	impl = new StackLayoutImpl(WZ_STACK_LAYOUT_VERTICAL, 0);
+	impl.reset(new StackLayoutImpl(WZ_STACK_LAYOUT_VERTICAL, 0));
 }
 
 StackLayout::StackLayout(StackLayoutDirection direction)
 {
-	impl = new StackLayoutImpl(direction, 0);
+	impl.reset(new StackLayoutImpl(direction, 0));
 }
 
 StackLayout::~StackLayout()
@@ -329,30 +329,30 @@ StackLayout::~StackLayout()
 
 StackLayout *StackLayout::setDirection(StackLayoutDirection direction)
 {
-	((StackLayoutImpl *)impl)->setDirection(direction);
+	((StackLayoutImpl *)impl.get())->setDirection(direction);
 	return this;
 }
 
 StackLayout *StackLayout::setSpacing(int spacing)
 {
-	((StackLayoutImpl *)impl)->setSpacing(spacing);
+	((StackLayoutImpl *)impl.get())->setSpacing(spacing);
 	return this;
 }
 
 int StackLayout::getSpacing() const
 {
-	return ((StackLayoutImpl *)impl)->getSpacing();
+	return ((StackLayoutImpl *)impl.get())->getSpacing();
 }
 
 Widget *StackLayout::add(Widget *widget)
 {
-	((StackLayoutImpl *)impl)->add(widget);
+	((StackLayoutImpl *)impl.get())->add(widget);
 	return widget;
 }
 
 void StackLayout::remove(Widget *widget)
 {
-	((StackLayoutImpl *)impl)->remove(widget);
+	((StackLayoutImpl *)impl.get())->remove(widget);
 }
 
 } // namespace wz

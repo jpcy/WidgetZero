@@ -88,12 +88,11 @@ struct TabImpl
 
 Tab::Tab()
 {
-	impl = new TabImpl();
+	impl.reset(new TabImpl());
 }
 
 Tab::~Tab()
 {
-	delete impl;
 }
 
 Tab *Tab::setLabel(const std::string &label)
@@ -104,13 +103,13 @@ Tab *Tab::setLabel(const std::string &label)
 
 Widget *Tab::add(Widget *widget)
 {
-	wz_tab_page_add(impl->page, widget->impl);
+	wz_tab_page_add(impl->page, widget->impl.get());
 	return widget;
 }
 
 void Tab::remove(Widget *widget)
 {
-	wz_tab_page_remove(impl->page, widget->impl);
+	wz_tab_page_remove(impl->page, widget->impl.get());
 }
 
 /*
@@ -294,7 +293,7 @@ PUBLIC INTERFACE
 
 Tabbed::Tabbed()
 {
-	impl = new TabbedImpl;
+	impl.reset(new TabbedImpl);
 }
 
 Tabbed::~Tabbed()
@@ -303,7 +302,7 @@ Tabbed::~Tabbed()
 
 Tab *Tabbed::addTab(Tab *tab)
 {
-	((TabbedImpl *)impl)->addTab(&tab->impl->button, &tab->impl->page);
+	((TabbedImpl *)impl.get())->addTab(&tab->impl->button, &tab->impl->page);
 	return tab;
 }
 

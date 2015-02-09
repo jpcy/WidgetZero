@@ -86,12 +86,12 @@ PUBLIC INTERFACE
 
 Label::Label()
 {
-	impl = new LabelImpl;
+	impl.reset(new LabelImpl);
 }
 
 Label::Label(const std::string &text)
 {
-	impl = new LabelImpl(text);
+	impl.reset(new LabelImpl(text));
 }
 
 Label::~Label()
@@ -107,7 +107,7 @@ Label *Label::setText(const char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 	
-	((LabelImpl *)impl)->setText(buffer);
+	((LabelImpl *)impl.get())->setText(buffer);
 	return this;
 }
 
@@ -118,13 +118,13 @@ Label *Label::setTextColor(float r, float g, float b, float a)
 	color.g = g;
 	color.b = b;
 	color.a = a;
-	((LabelImpl *)impl)->setTextColor(color);
+	((LabelImpl *)impl.get())->setTextColor(color);
 	return this;
 }
 
 Label *Label::setMultiline(bool multiline)
 {
-	((LabelImpl *)impl)->setMultiline(multiline);
+	((LabelImpl *)impl.get())->setMultiline(multiline);
 	return this;
 }
 

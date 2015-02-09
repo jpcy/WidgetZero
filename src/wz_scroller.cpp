@@ -622,7 +622,7 @@ PUBLIC INTERFACE
 
 Scroller::Scroller(ScrollerType type)
 {
-	impl = new ScrollerImpl(type, 0, 1, 0);
+	impl.reset(new ScrollerImpl(type, 0, 1, 0));
 }
 
 Scroller::~Scroller()
@@ -631,25 +631,25 @@ Scroller::~Scroller()
 
 Scroller *Scroller::setValue(int value)
 {
-	((ScrollerImpl *)impl)->setValue(value);
+	((ScrollerImpl *)impl.get())->setValue(value);
 	return this;
 }
 
 Scroller *Scroller::setStepValue(int stepValue)
 {
-	((ScrollerImpl *)impl)->setStepValue(stepValue);
+	((ScrollerImpl *)impl.get())->setStepValue(stepValue);
 	return this;
 }
 
 Scroller *Scroller::setMaxValue(int maxValue)
 {
-	((ScrollerImpl *)impl)->setMaxValue(maxValue);
+	((ScrollerImpl *)impl.get())->setMaxValue(maxValue);
 	return this;
 }
 
 int Scroller::getValue() const
 {
-	return ((ScrollerImpl *)impl)->getValue();
+	return ((ScrollerImpl *)impl.get())->getValue();
 }
 
 } // namespace wz

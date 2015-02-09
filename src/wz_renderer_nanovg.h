@@ -87,7 +87,7 @@ public:
 	void createRectPath(Rect rect, float r, int sides, int roundedCorners);
 
 private:
-	NVGRendererImpl *impl;
+	std::auto_ptr<NVGRendererImpl> impl;
 };
 
 } // namespace wz

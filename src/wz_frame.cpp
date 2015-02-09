@@ -73,7 +73,7 @@ PUBLIC INTERFACE
 
 Frame::Frame()
 {
-	impl = new FrameImpl;
+	impl.reset(new FrameImpl);
 	impl->setSize(200, 200);
 }
 
@@ -83,13 +83,13 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	((FrameImpl *)impl)->add(widget);
+	((FrameImpl *)impl.get())->add(widget);
 	return widget;
 }
 
 void Frame::remove(Widget *widget)
 {
-	((FrameImpl *)impl)->remove(widget);
+	((FrameImpl *)impl.get())->remove(widget);
 }
 
 } // namespace wz

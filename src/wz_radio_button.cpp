@@ -119,12 +119,12 @@ PUBLIC INTERFACE
 
 RadioButton::RadioButton()
 {
-	impl = new RadioButtonImpl;
+	impl.reset(new RadioButtonImpl);
 }
 
 RadioButton::RadioButton(const std::string &label)
 {
-	impl = new RadioButtonImpl(label);
+	impl.reset(new RadioButtonImpl(label));
 }
 
 RadioButton::~RadioButton()
@@ -133,12 +133,12 @@ RadioButton::~RadioButton()
 
 const char *RadioButton::getLabel() const
 {
-	return ((const ButtonImpl *)impl)->getLabel();
+	return ((const ButtonImpl *)impl.get())->getLabel();
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	((ButtonImpl *)impl)->setLabel(label.c_str());
+	((ButtonImpl *)impl.get())->setLabel(label.c_str());
 	return this;
 }
 

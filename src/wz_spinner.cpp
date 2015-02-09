@@ -197,7 +197,7 @@ PUBLIC INTERFACE
 
 Spinner::Spinner()
 {
-	impl = new SpinnerImpl;
+	impl.reset(new SpinnerImpl);
 }
 
 Spinner::~Spinner()
@@ -206,13 +206,13 @@ Spinner::~Spinner()
 
 Spinner *Spinner::setValue(int value)
 {
-	((SpinnerImpl *)impl)->setValue(value);
+	((SpinnerImpl *)impl.get())->setValue(value);
 	return this;
 }
 
 int Spinner::getValue() const
 {
-	return ((SpinnerImpl *)impl)->getValue();
+	return ((SpinnerImpl *)impl.get())->getValue();
 }
 
 } // namespace wz

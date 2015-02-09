@@ -531,12 +531,12 @@ PUBLIC INTERFACE
 
 Window::Window()
 {
-	impl = new WindowImpl(NULL);
+	impl.reset(new WindowImpl(NULL));
 }
 
 Window::Window(const std::string &title)
 {
-	impl = new WindowImpl(title);
+	impl.reset(new WindowImpl(title));
 }
 
 Window::~Window()
@@ -545,24 +545,24 @@ Window::~Window()
 
 const char *Window::getTitle() const
 {
-	return ((WindowImpl *)impl)->getTitle();
+	return ((WindowImpl *)impl.get())->getTitle();
 }
 
 Window *Window::setTitle(const std::string &title)
 {
-	((WindowImpl *)impl)->setTitle(title.c_str());
+	((WindowImpl *)impl.get())->setTitle(title.c_str());
 	return this;
 }
 
 Widget *Window::add(Widget *widget)
 {
-	((WindowImpl *)impl)->add(widget);
+	((WindowImpl *)impl.get())->add(widget);
 	return widget;
 }
 
 void Window::remove(Widget *widget)
 {
-	((WindowImpl *)impl)->remove(widget);
+	((WindowImpl *)impl.get())->remove(widget);
 }
 
 } // namespace wz

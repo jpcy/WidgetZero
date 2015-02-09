@@ -88,7 +88,7 @@ NVGRenderer::NVGRenderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int
 	WZ_ASSERT(create);
 	WZ_ASSERT(destroy);
 
-	impl = new NVGRendererImpl;
+	impl.reset(new NVGRendererImpl);
 	impl->destroy = destroy;
 	impl->defaultFontSize = defaultFontSize;
 
@@ -104,7 +104,7 @@ NVGRenderer::NVGRenderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int
 	// Load the default font.
 	strncpy(impl->fontDirectory, fontDirectory, WZ_NANOVG_MAX_PATH);
 
-	if (wz_nanovg_create_font(impl, defaultFontFace) == -1)
+	if (wz_nanovg_create_font(impl.get(), defaultFontFace) == -1)
 	{
 		sprintf(impl->errorMessage, "Error loading font %s", defaultFontFace);
 		return;
@@ -117,8 +117,6 @@ NVGRenderer::~NVGRenderer()
 	{
 		impl->destroy(impl->vg);
 	}
-
-	delete impl;
 }
 
 const char *NVGRenderer::getError()
@@ -643,7 +641,7 @@ void NVGRenderer::setFontFace(const char *face)
 {
 	int id;
 	
-	id = wz_nanovg_create_font(impl, face);
+	id = wz_nanovg_create_font(impl.get(), face);
 
 	// Use the first font if creating failed.
 	if (id == -1)

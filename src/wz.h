@@ -37,6 +37,7 @@ SOFTWARE.
 
 namespace wz {
 
+struct ButtomImpl;
 struct CheckBoxImpl;
 struct ComboImpl;
 struct GroupBoxImpl;
@@ -360,7 +361,7 @@ public:
 		return this;
 	}
 
-	WidgetImpl *impl;
+	std::auto_ptr<WidgetImpl> impl;
 };
 
 class Button : public Widget
@@ -469,7 +470,7 @@ public:
 	void dockWindow(Window *window, DockPosition dockPosition);
 
 private:
-	struct MainWindowImpl *impl;
+	std::auto_ptr<struct MainWindowImpl> impl;
 };
 
 class RadioButton : public Widget
@@ -540,7 +541,7 @@ public:
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
 
-	TabImpl *impl;
+	std::auto_ptr<TabImpl> impl;
 };
 
 class Tabbed : public Widget
@@ -575,6 +576,8 @@ public:
 	ToggleButton *setIcon(const std::string &icon);
 	const char *getLabel() const;
 	ToggleButton *setLabel(const std::string &label);
+
+	ButtomImpl *bimpl;
 };
 
 class Window : public Widget

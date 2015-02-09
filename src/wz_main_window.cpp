@@ -1420,12 +1420,11 @@ PUBLIC INTERFACE
 MainWindow::MainWindow(IRenderer *renderer)
 {
 	WZ_ASSERT(renderer);
-	impl = new MainWindowImpl(renderer);
+	impl.reset(new MainWindowImpl(renderer));
 }
 
 MainWindow::~MainWindow()
 {
-	delete impl;
 }
 
 int MainWindow::getWidth() const
@@ -1522,7 +1521,7 @@ void MainWindow::createMenuButton(const std::string &label)
 
 void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 {
-	impl->dockWindow((WindowImpl *)window->impl, dockPosition);
+	impl->dockWindow((WindowImpl *)(window->impl.get()), dockPosition);
 }
 
 } // namespace wz

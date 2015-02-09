@@ -56,7 +56,7 @@ bool WidgetChildren::empty() const
 const struct WidgetImpl *WidgetChildren::operator[](size_t i) const
 {
 	if (i < widgets_.size())
-		return widgets_[i]->impl;
+		return widgets_[i]->impl.get();
 
 	return impls_[i - widgets_.size()];
 }
@@ -64,7 +64,7 @@ const struct WidgetImpl *WidgetChildren::operator[](size_t i) const
 struct WidgetImpl *WidgetChildren::operator[](size_t i)
 {
 	if (i < widgets_.size())
-		return widgets_[i]->impl;
+		return widgets_[i]->impl.get();
 
 	return impls_[i - widgets_.size()];
 }
@@ -514,7 +514,7 @@ void WidgetImpl::addChildWidget(Widget *child)
 {
 	WZ_ASSERT(child);
 	children.push_back(child);
-	addChildWidgetInternal(child->impl);
+	addChildWidgetInternal(child->impl.get());
 }
 
 void WidgetImpl::addChildWidget(struct WidgetImpl *child)
@@ -885,7 +885,6 @@ PUBLIC INTERFACE
 
 Widget::~Widget()
 {
-	delete impl;
 }
 
 Rect Widget::getRect() const

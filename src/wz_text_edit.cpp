@@ -1127,12 +1127,12 @@ PUBLIC INTERFACE
 
 TextEdit::TextEdit(bool multiline)
 {
-	impl = new TextEditImpl(multiline, 256);
+	impl.reset(new TextEditImpl(multiline, 256));
 }
 
 TextEdit::TextEdit(const std::string &text, bool multiline)
 {
-	impl = new TextEditImpl(multiline, 256);
+	impl.reset(new TextEditImpl(multiline, 256));
 	setText(text);
 }
 
@@ -1142,7 +1142,7 @@ TextEdit::~TextEdit()
 
 TextEdit *TextEdit::setText(const std::string &text)
 {
-	((TextEditImpl *)impl)->setText(text.c_str());
+	((TextEditImpl *)impl.get())->setText(text.c_str());
 	return this;
 }
 

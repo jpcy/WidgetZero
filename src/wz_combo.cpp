@@ -191,7 +191,7 @@ PUBLIC INTERFACE
 
 Combo::Combo()
 {
-	impl = new ComboImpl(NULL, 0, 0);
+	impl.reset(new ComboImpl(NULL, 0, 0));
 }
 
 Combo::~Combo()
@@ -200,7 +200,7 @@ Combo::~Combo()
 
 Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	ListImpl *list = ((ComboImpl *)impl)->getList();
+	ListImpl *list = ((ComboImpl *)impl.get())->getList();
 	list->setItemData(itemData);
 	list->setItemStride(itemStride);
 	list->setNumItems(nItems);

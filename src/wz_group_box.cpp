@@ -123,13 +123,13 @@ PUBLIC INTERFACE
 
 GroupBox::GroupBox()
 {
-	impl = new GroupBoxImpl;
+	impl.reset(new GroupBoxImpl);
 	impl->setSize(200, 200);
 }
 
 GroupBox::GroupBox(const std::string &label)
 {
-	impl = new GroupBoxImpl(label);
+	impl.reset(new GroupBoxImpl(label));
 	impl->setSize(200, 200);
 }
 
@@ -139,24 +139,24 @@ GroupBox::~GroupBox()
 
 const char *GroupBox::getLabel() const
 {
-	return ((GroupBoxImpl *)impl)->getLabel();
+	return ((GroupBoxImpl *)impl.get())->getLabel();
 }
 
 GroupBox *GroupBox::setLabel(const std::string &label)
 {
-	((GroupBoxImpl *)impl)->setLabel(label.c_str());
+	((GroupBoxImpl *)impl.get())->setLabel(label.c_str());
 	return this;
 }
 
 Widget *GroupBox::add(Widget *widget)
 {
-	((GroupBoxImpl *)impl)->add(widget);
+	((GroupBoxImpl *)impl.get())->add(widget);
 	return widget;
 }
 
 void GroupBox::remove(Widget *widget)
 {
-	((GroupBoxImpl *)impl)->remove(widget);
+	((GroupBoxImpl *)impl.get())->remove(widget);
 }
 
 } // namespace wz

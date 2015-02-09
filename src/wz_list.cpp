@@ -468,7 +468,7 @@ PUBLIC INTERFACE
 
 List::List()
 {
-	impl = new ListImpl(NULL, 0, 0);
+	impl.reset(new ListImpl(NULL, 0, 0));
 }
 
 List::~List()
@@ -477,27 +477,27 @@ List::~List()
 
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	((ListImpl *)impl)->setItemData(itemData);
-	((ListImpl *)impl)->setItemStride(itemStride);
-	((ListImpl *)impl)->setNumItems(nItems);
+	((ListImpl *)impl.get())->setItemData(itemData);
+	((ListImpl *)impl.get())->setItemStride(itemStride);
+	((ListImpl *)impl.get())->setNumItems(nItems);
 	return this;
 }
 
 List *List::setSelectedItem(int index)
 {
-	((ListImpl *)impl)->setSelectedItem(index);
+	((ListImpl *)impl.get())->setSelectedItem(index);
 	return this;
 }
 
 List *List::setItemHeight(int height)
 {
-	((ListImpl *)impl)->setItemHeight(height);
+	((ListImpl *)impl.get())->setItemHeight(height);
 	return this;
 }
 
 List *List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	((ListImpl *)impl)->setDrawItemCallback(callback);
+	((ListImpl *)impl.get())->setDrawItemCallback(callback);
 	return this;
 }
 

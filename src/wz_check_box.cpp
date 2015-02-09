@@ -66,12 +66,12 @@ PUBLIC INTERFACE
 
 Checkbox::Checkbox()
 {
-	impl = new CheckBoxImpl();
+	impl.reset(new CheckBoxImpl());
 }
 
 Checkbox::Checkbox(const std::string &label)
 {
-	impl = new CheckBoxImpl(label.c_str());
+	impl.reset(new CheckBoxImpl(label.c_str()));
 }
 
 Checkbox::~Checkbox()
@@ -80,18 +80,18 @@ Checkbox::~Checkbox()
 
 const char *Checkbox::getLabel() const
 {
-	return ((const CheckBoxImpl *)impl)->getLabel();
+	return ((const CheckBoxImpl *)impl.get())->getLabel();
 }
 
 Checkbox *Checkbox::setLabel(const std::string &label)
 {
-	((CheckBoxImpl *)impl)->setLabel(label.c_str());
+	((CheckBoxImpl *)impl.get())->setLabel(label.c_str());
 	return this;
 }
 
 Checkbox *Checkbox::bindValue(bool *value)
 {
-	((CheckBoxImpl *)impl)->bindValue(value);
+	((CheckBoxImpl *)impl.get())->bindValue(value);
 	return this;
 }
 
