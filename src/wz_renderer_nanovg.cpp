@@ -758,6 +758,19 @@ Size NVGRenderer::measureScroller(ScrollerImpl *scroller)
 	return scroller->getType() == WZ_SCROLLER_VERTICAL ? Size(WZ_SKIN_SCROLLER_DEFAULT_SIZE, 0) : Size(0, WZ_SKIN_SCROLLER_DEFAULT_SIZE);
 }
 
+void NVGRenderer::drawSpinner(SpinnerImpl *spinner, Rect clip)
+{
+}
+
+Size NVGRenderer::measureSpinner(SpinnerImpl *spinner)
+{
+	const Border border = spinner->textEdit->getBorder();
+	Size size;
+	size.w = 100;
+	size.h = spinner->getLineHeight() + border.top + border.bottom;
+	return size;
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

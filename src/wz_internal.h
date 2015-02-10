@@ -647,6 +647,8 @@ struct ScrollerImpl : public WidgetImpl
 struct SpinnerImpl : public WidgetImpl
 {
 	SpinnerImpl();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	int getValue() const;
 	void setValue(int value);
 

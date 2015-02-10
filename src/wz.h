@@ -343,6 +343,8 @@ public:
 	virtual Size measureRadioButton(RadioButtonImpl *button) = 0;
 	virtual void drawScroller(ScrollerImpl *scroller, Rect clip) = 0;
 	virtual Size measureScroller(ScrollerImpl *scroller) = 0;
+	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip) = 0;
+	virtual Size measureSpinner(SpinnerImpl *spinner) = 0;
 };
 
 class Widget

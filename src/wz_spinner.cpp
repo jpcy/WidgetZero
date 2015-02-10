@@ -105,18 +105,6 @@ static void wz_spinner_increment_button_clicked(Event *e)
 	spinner->setValue(spinner->getValue() + 1);
 }
 
-static Size wz_spinner_measure(struct WidgetImpl *widget)
-{
-	Border border;
-	Size size;
-	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
-
-	border = spinner->textEdit->getBorder();
-	size.w = 100;
-	size.h = widget->getLineHeight() + border.top + border.bottom;
-	return size;
-}
-
 static void wz_spinner_renderer_changed(struct WidgetImpl *widget)
 {
 	struct SpinnerImpl *spinner;
@@ -143,7 +131,6 @@ SpinnerImpl::SpinnerImpl()
 {
 	type = WZ_TYPE_SPINNER;
 
-	vtable.measure = wz_spinner_measure;
 	vtable.renderer_changed = wz_spinner_renderer_changed;
 	vtable.font_changed = wz_spinner_font_changed;
 
@@ -171,6 +158,16 @@ SpinnerImpl::SpinnerImpl()
 	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
 	incrementButton->setOverlap(true);
 	addChildWidget(incrementButton);
+}
+
+void SpinnerImpl::draw(Rect clip)
+{
+	renderer->drawSpinner(this, clip);
+}
+
+Size SpinnerImpl::measure()
+{
+	return renderer->measureSpinner(this);
 }
 
 int SpinnerImpl::getValue() const
