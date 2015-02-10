@@ -336,6 +336,8 @@ public:
 	virtual Size measureList(ListImpl *list) = 0;
 	virtual void drawMenuBarButton(MenuBarButtonImpl *button, Rect clip) = 0;
 	virtual Size measureMenuBarButton(MenuBarButtonImpl *button) = 0;
+	virtual void drawMenuBar(MenuBarImpl *menuBar, Rect clip) = 0;
+	virtual Size measureMenuBar(MenuBarImpl *menuBar) = 0;
 };
 
 class Widget

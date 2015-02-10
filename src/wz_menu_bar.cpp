@@ -131,17 +131,6 @@ MENU BAR
 ================================================================================
 */
 
-static void wz_menu_bar_draw(struct WidgetImpl *widget, Rect clip)
-{
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	r->drawFilledRect(widget->getAbsoluteRect(), WZ_SKIN_MENU_BAR_BG_COLOR);
-	nvgRestore(vg);
-}
-
 static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
@@ -151,13 +140,21 @@ static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
 MenuBarImpl::MenuBarImpl()
 {
 	type = WZ_TYPE_MENU_BAR;
-
-	vtable.draw = wz_menu_bar_draw;
 	vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
 	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
 	addChildWidget(layout);
+}
+
+void MenuBarImpl::draw(Rect clip)
+{
+	renderer->drawMenuBar(this, clip);
+}
+
+Size MenuBarImpl::measure()
+{
+	return renderer->measureMenuBar(this);
 }
 
 struct MenuBarButtonImpl *MenuBarImpl::createButton()

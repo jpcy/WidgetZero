@@ -73,6 +73,8 @@ public:
 	virtual Size measureList(ListImpl *list);
 	virtual void drawMenuBarButton(MenuBarButtonImpl *button, Rect clip);
 	virtual Size measureMenuBarButton(MenuBarButtonImpl *button);
+	virtual void drawMenuBar(MenuBarImpl *menuBar, Rect clip);
+	virtual Size measureMenuBar(MenuBarImpl *menuBar);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

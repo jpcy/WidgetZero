@@ -629,6 +629,19 @@ Size NVGRenderer::measureMenuBarButton(MenuBarButtonImpl *button)
 	return size;
 }
 
+void NVGRenderer::drawMenuBar(MenuBarImpl *menuBar, Rect clip)
+{
+	nvgSave(impl->vg);
+	clipToRect(clip);
+	drawFilledRect(menuBar->getAbsoluteRect(), WZ_SKIN_MENU_BAR_BG_COLOR);
+	nvgRestore(impl->vg);
+}
+
+Size NVGRenderer::measureMenuBar(MenuBarImpl * /*menuBar*/)
+{
+	return Size();
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

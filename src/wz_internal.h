@@ -592,6 +592,8 @@ struct MenuBarButtonImpl : public WidgetImpl
 struct MenuBarImpl : public WidgetImpl
 {
 	MenuBarImpl();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	struct MenuBarButtonImpl *createButton();
 
 	struct StackLayoutImpl *layout;
