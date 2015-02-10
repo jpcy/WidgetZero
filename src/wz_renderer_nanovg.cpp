@@ -771,6 +771,16 @@ Size NVGRenderer::measureSpinner(SpinnerImpl *spinner)
 	return size;
 }
 
+void NVGRenderer::drawTabBar(TabBarImpl *tabBar, Rect clip)
+{
+}
+
+Size NVGRenderer::measureTabBar(TabBarImpl *tabBar)
+{
+	// Padding.
+	return Size(0, tabBar->getLineHeight() + 8);
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

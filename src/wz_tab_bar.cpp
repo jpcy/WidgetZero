@@ -187,14 +187,6 @@ static void wz_tab_bar_button_pressed(Event *e)
 	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct ButtonImpl *)e->base.widget);
 }
 
-static Size wz_tab_bar_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	struct TabBarImpl *tabBar = (struct TabBarImpl *)widget;
-	size.h = widget->getLineHeight() + 8; // Padding.
-	return size;
-}
-
 static void wz_tab_bar_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	WZ_ASSERT(widget);
@@ -242,7 +234,6 @@ TabBarImpl::TabBarImpl()
 	type = WZ_TYPE_TAB_BAR;
 	selectedTab = NULL;
 	scrollValue = 0;
-	vtable.measure = wz_tab_bar_measure;
 	vtable.set_rect = wz_tab_bar_set_rect;
 	vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
@@ -262,6 +253,16 @@ TabBarImpl::TabBarImpl()
 	incrementButton->setVisible(false);
 	incrementButton->setDrawLast(true);
 	incrementButton->setOverlap(true);
+}
+
+void TabBarImpl::draw(Rect clip)
+{
+	renderer->drawTabBar(this, clip);
+}
+
+Size TabBarImpl::measure()
+{
+	return renderer->measureTabBar(this);
 }
 
 struct ButtonImpl *TabBarImpl::createTab()

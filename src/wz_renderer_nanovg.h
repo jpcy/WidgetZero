@@ -81,6 +81,8 @@ public:
 	virtual Size measureScroller(ScrollerImpl *scroller);
 	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip);
 	virtual Size measureSpinner(SpinnerImpl *spinner);
+	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip);
+	virtual Size measureTabBar(TabBarImpl *tabBar);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

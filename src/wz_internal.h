@@ -677,6 +677,8 @@ struct StackLayoutImpl : public WidgetImpl
 struct TabBarImpl : public WidgetImpl
 {
 	TabBarImpl();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	struct ButtonImpl *createTab();
 	void destroyTab(struct ButtonImpl *tab);
 	void clearTabs();

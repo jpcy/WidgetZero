@@ -345,6 +345,8 @@ public:
 	virtual Size measureScroller(ScrollerImpl *scroller) = 0;
 	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip) = 0;
 	virtual Size measureSpinner(SpinnerImpl *spinner) = 0;
+	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip) = 0;
+	virtual Size measureTabBar(TabBarImpl *tabBar) = 0;
 };
 
 class Widget
