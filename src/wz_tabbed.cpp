@@ -120,98 +120,6 @@ TABBED WIDGET
 ================================================================================
 */
 
-static void wz_tabbed_draw(struct WidgetImpl *widget, Rect clip)
-{
-	int selectedTabIndex;
-	Rect tr; // Tab rect.
-	struct TabbedImpl *tabbed = (struct TabbedImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	Rect rect = widget->getAbsoluteRect();
-	const struct ButtonImpl *selectedTab = tabbed->tabBar->getSelectedTab();
-
-	// Use the page rect.
-	const int tabBarHeight = tabbed->tabBar->getHeight();
-	rect.y += tabBarHeight;
-	rect.h -= tabBarHeight;
-
-	nvgSave(vg);
-	r->clipToRectIntersection(clip, widget->getAbsoluteRect());
-
-	// Draw an outline around the selected tab and the tab page.
-	nvgBeginPath(vg);
-
-	if (selectedTab->getVisible())
-	{
-		// Selected tab.
-		tr = selectedTab->getAbsoluteRect();
-		nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
-		nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
-
-		// The tab page.
-		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + 0.5f); // tr
-		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + rect.h - 0.5f); // br
-		nvgLineTo(vg, rect.x + 0.5f, rect.y + rect.h - 0.5f); // bl
-		nvgLineTo(vg, rect.x + 0.5f, rect.y + 0.5f); // tl
-		nvgClosePath(vg);
-	}
-	else
-	{
-		nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
-	}
-	
-	nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Get the selected tab index.
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		if (tabbed->pages[i].tab == selectedTab)
-		{
-			selectedTabIndex = (int)i;
-			break;
-		}
-	}
-
-	// Draw an outline around the non-selected tabs.
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		const struct ButtonImpl *tab = tabbed->pages[i].tab;
-
-		if (tab == selectedTab || !tab->getVisible())
-			continue;
-
-		tr = tab->getAbsoluteRect();
-		nvgBeginPath(vg);
-
-		// Only draw the left side if this is the leftmost tab.
-		if (i == tabbed->tabBar->getScrollValue())
-		{
-			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
-			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		}
-		else
-		{
-			nvgMoveTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		}
-
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-
-		// If the selected tab is next to this tab, on the right, don't draw the right side.
-		if (selectedTabIndex != i + 1)
-		{
-			nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h - 0.5f); // br
-		}
-
-		nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
-		nvgStroke(vg);
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_tabbed_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	struct TabbedImpl *tabbed;
@@ -251,12 +159,21 @@ static void wz_tabbed_tab_bar_tab_changed(Event *e)
 TabbedImpl::TabbedImpl()
 {
 	type = WZ_TYPE_TABBED;
-	vtable.draw = wz_tabbed_draw;
 	vtable.set_rect = wz_tabbed_set_rect;
 
 	tabBar = new TabBarImpl;
 	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
 	addChildWidget(tabBar);
+}
+
+void TabbedImpl::draw(Rect clip)
+{
+	renderer->drawTabbed(this, clip);
+}
+
+Size TabbedImpl::measure()
+{
+	return renderer->measureTabbed(this);
 }
 
 void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)

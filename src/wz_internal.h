@@ -709,6 +709,8 @@ TabbedPage;
 struct TabbedImpl : public WidgetImpl
 {
 	TabbedImpl();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void addTab(struct ButtonImpl **tab, struct WidgetImpl **page);
 
 	struct TabBarImpl *tabBar;

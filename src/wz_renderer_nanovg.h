@@ -83,6 +83,8 @@ public:
 	virtual Size measureSpinner(SpinnerImpl *spinner);
 	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip);
 	virtual Size measureTabBar(TabBarImpl *tabBar);
+	virtual void drawTabbed(TabbedImpl *tabbed, Rect clip);
+	virtual Size measureTabbed(TabbedImpl *tabbed);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;
