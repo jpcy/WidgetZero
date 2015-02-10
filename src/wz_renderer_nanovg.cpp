@@ -682,6 +682,82 @@ Size NVGRenderer::measureRadioButton(RadioButtonImpl *button)
 	return size;
 }
 
+void NVGRenderer::drawScroller(ScrollerImpl *scroller, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	
+	nvgSave(vg);
+	clipToRect(clip);
+
+	Rect nubContainerRect, nubRect;
+	bool hover, pressed;
+	scroller->getNubState(&nubContainerRect, &nubRect, &hover, &pressed);
+
+	// Nub container.
+	drawFilledRect(nubContainerRect, WZ_SKIN_SCROLLER_BG_COLOR1);
+
+	// Nub.
+	{
+		const Rect r = nubRect;
+		NVGcolor bgColor1, bgColor2;
+		int i;
+
+		// Background color.
+		if (pressed)
+		{
+			bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
+			bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
+		}
+		else
+		{
+			bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
+			bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
+		}
+
+		nvgBeginPath(vg);
+		nvgRect(vg, r.x + 0.5f, r.y + 0.5f, r.w - 1.0f, r.h - 1.0f);
+
+		// Background.
+		nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
+		nvgFill(vg);
+
+		// Border.
+		nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
+		nvgStroke(vg);
+
+		// Icon.
+		for (i = 0; i < 3; i++)
+		{
+			nvgBeginPath(vg);
+
+			if (scroller->getType() == WZ_STACK_LAYOUT_VERTICAL)
+			{
+				const float y = (float)((int)(r.y + r.h * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
+				nvgMoveTo(vg, (float)r.x + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
+				nvgLineTo(vg, (float)r.x + r.w - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
+			}
+			else
+			{
+				const float x = (float)((int)(r.x + r.w * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
+				nvgMoveTo(vg, x, (float)r.y + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
+				nvgLineTo(vg, x, (float)r.y + r.h - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
+			}
+
+			nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
+			nvgStrokeWidth(vg, 2);
+			nvgLineCap(vg, NVG_ROUND);
+			nvgStroke(vg);
+		}
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureScroller(ScrollerImpl *scroller)
+{
+	return scroller->getType() == WZ_SCROLLER_VERTICAL ? Size(WZ_SKIN_SCROLLER_DEFAULT_SIZE, 0) : Size(0, WZ_SKIN_SCROLLER_DEFAULT_SIZE);
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

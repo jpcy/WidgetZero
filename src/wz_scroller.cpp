@@ -385,97 +385,6 @@ static void wz_scroller_increment_button_clicked(Event *e)
 	((struct ScrollerImpl *)e->base.widget->parent->parent)->incrementValue();
 }
 
-static Size wz_scroller_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget;
-
-	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
-	{
-		size.w = WZ_SKIN_SCROLLER_DEFAULT_SIZE;
-		size.h = 0;
-	}
-	else
-	{
-		size.w = 0;
-		size.h = WZ_SKIN_SCROLLER_DEFAULT_SIZE;
-	}
-
-	return size;
-}
-
-static void wz_scroller_draw(struct WidgetImpl *widget, Rect clip)
-{
-	const struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-struct NVGcontext *vg = r->getContext();
-	Rect nubContainerRect, nubRect;
-	bool hover, pressed;
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	scroller->getNubState(&nubContainerRect, &nubRect, &hover, &pressed);
-
-	// Nub container.
-	r->drawFilledRect(nubContainerRect, WZ_SKIN_SCROLLER_BG_COLOR1);
-
-	// Nub.
-	{
-		const Rect r = nubRect;
-		NVGcolor bgColor1, bgColor2;
-		int i;
-
-		// Background color.
-		if (pressed)
-		{
-			bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
-			bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
-		}
-		else
-		{
-			bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
-			bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
-		}
-
-		nvgBeginPath(vg);
-		nvgRect(vg, r.x + 0.5f, r.y + 0.5f, r.w - 1.0f, r.h - 1.0f);
-
-		// Background.
-		nvgFillPaint(vg, nvgLinearGradient(vg, (float)r.x, (float)r.y, (float)r.x, (float)r.y + r.h, bgColor1, bgColor2));
-		nvgFill(vg);
-
-		// Border.
-		nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
-		nvgStroke(vg);
-
-		// Icon.
-		for (i = 0; i < 3; i++)
-		{
-			nvgBeginPath(vg);
-
-			if (scroller->scrollerType == WZ_STACK_LAYOUT_VERTICAL)
-			{
-				const float y = (float)((int)(r.y + r.h * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
-				nvgMoveTo(vg, (float)r.x + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
-				nvgLineTo(vg, (float)r.x + r.w - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
-			}
-			else
-			{
-				const float x = (float)((int)(r.x + r.w * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
-				nvgMoveTo(vg, x, (float)r.y + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
-				nvgLineTo(vg, x, (float)r.y + r.h - WZ_SKIN_SCROLLER_NUB_ICON_MARGIN);
-			}
-
-			nvgStrokeColor(vg, hover || pressed ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
-			nvgStrokeWidth(vg, 2);
-			nvgLineCap(vg, NVG_ROUND);
-			nvgStroke(vg);
-		}
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_scroller_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	struct ScrollerImpl *scroller;
@@ -490,8 +399,6 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 {
 	type = WZ_TYPE_SCROLLER;
 	nubScale = 0;
-	vtable.measure = wz_scroller_measure;
-	vtable.draw = wz_scroller_draw;
 	vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
 	vtable.set_rect = wz_scroller_set_rect;
@@ -525,6 +432,16 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	layout->add(incrementButton);
 
 	wz_scroller_nub_update_rect(nub);
+}
+
+void ScrollerImpl::draw(Rect clip)
+{
+	renderer->drawScroller(this, clip);
+}
+
+Size ScrollerImpl::measure()
+{
+	return renderer->measureScroller(this);
 }
 
 ScrollerType ScrollerImpl::getType() const

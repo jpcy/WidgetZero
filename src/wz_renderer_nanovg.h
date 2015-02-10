@@ -77,6 +77,8 @@ public:
 	virtual Size measureMenuBar(MenuBarImpl *menuBar);
 	virtual void drawRadioButton(RadioButtonImpl *button, Rect clip);
 	virtual Size measureRadioButton(RadioButtonImpl *button);
+	virtual void drawScroller(ScrollerImpl *scroller, Rect clip);
+	virtual Size measureScroller(ScrollerImpl *scroller);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

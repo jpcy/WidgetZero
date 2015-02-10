@@ -623,6 +623,8 @@ struct ScrollerNub : public WidgetImpl
 struct ScrollerImpl : public WidgetImpl
 {
 	ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	ScrollerType getType() const;
 	int getValue() const;
 	void setValue(int value);

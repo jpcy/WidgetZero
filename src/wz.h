@@ -341,6 +341,8 @@ public:
 	virtual Size measureMenuBar(MenuBarImpl *menuBar) = 0;
 	virtual void drawRadioButton(RadioButtonImpl *button, Rect clip) = 0;
 	virtual Size measureRadioButton(RadioButtonImpl *button) = 0;
+	virtual void drawScroller(ScrollerImpl *scroller, Rect clip) = 0;
+	virtual Size measureScroller(ScrollerImpl *scroller) = 0;
 };
 
 class Widget
