@@ -782,6 +782,8 @@ WindowDrag;
 struct WindowImpl : public WidgetImpl
 {
 	WindowImpl(const std::string &title);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	int getHeaderHeight() const;
 	int getBorderSize() const;
 	Rect getHeaderRect() const;

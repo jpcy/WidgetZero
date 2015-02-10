@@ -351,6 +351,8 @@ public:
 	virtual Size measureTabbed(TabbedImpl *tabbed) = 0;
 	virtual void drawTextEdit(TextEditImpl *textEdit, Rect clip) = 0;
 	virtual Size measureTextEdit(TextEditImpl *textEdit) = 0;
+	virtual void drawWindow(WindowImpl *window, Rect clip) = 0;
+	virtual Size measureWindow(WindowImpl *window) = 0;
 };
 
 class Widget

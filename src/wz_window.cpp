@@ -28,49 +28,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_window_draw(struct WidgetImpl *widget, Rect clip)
-{
-	const struct WindowImpl *window = (struct WindowImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-	const Rect contentRect = window->content->getAbsoluteRect();
-	const Rect headerRect = window->getHeaderRect();
-
-	nvgSave(vg);
-	nvgBeginPath(vg);
-	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, WZ_SKIN_WINDOW_CORNER_RADIUS);
-
-	// Border/header background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x + rect.w, (float)rect.y, WZ_SKIN_WINDOW_BORDER_BG_COLOR1, WZ_SKIN_WINDOW_BORDER_BG_COLOR2));
-	nvgFill(vg);
-
-	// Outer border.
-	nvgStrokeColor(vg, WZ_SKIN_WINDOW_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Inner border.
-	nvgBeginPath(vg);
-	nvgRect(vg, contentRect.x - 1.0f, contentRect.y - 1.0f, contentRect.w + 2.0f, contentRect.h + 2.0f);
-	nvgStrokeColor(vg, WZ_SKIN_WINDOW_INNER_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Background/content.
-	nvgBeginPath(vg);
-	nvgRect(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.w, (float)contentRect.h);
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.x, (float)contentRect.y + contentRect.h, WZ_SKIN_WINDOW_BG_COLOR1, WZ_SKIN_WINDOW_BG_COLOR2));
-	nvgFill(vg);
-
-	// Header.
-	if (headerRect.w > 0 && headerRect.h > 0)
-	{
-		r->clipToRect(headerRect);
-		r->print(headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_WINDOW_TEXT_COLOR, window->title.c_str(), 0);
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_window_refresh_header_height(struct WidgetImpl *widget)
 {
 	struct WindowImpl *window = (struct WindowImpl *)widget;
@@ -419,7 +376,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
 
-	vtable.draw = wz_window_draw;
 	vtable.renderer_changed = wz_window_renderer_changed;
 	vtable.font_changed = wz_window_font_changed;
 	vtable.mouse_button_down = wz_window_mouse_button_down;
@@ -431,6 +387,16 @@ WindowImpl::WindowImpl(const std::string &title)
 
 	content = new struct WidgetImpl;
 	addChildWidget(content);
+}
+
+void WindowImpl::draw(Rect clip)
+{
+	renderer->drawWindow(this, clip);
+}
+
+Size WindowImpl::measure()
+{
+	return renderer->measureWindow(this);
 }
 
 int WindowImpl::getHeaderHeight() const

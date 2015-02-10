@@ -1017,6 +1017,52 @@ Size NVGRenderer::measureTextEdit(TextEditImpl *textEdit)
 	}
 }
 
+void NVGRenderer::drawWindow(WindowImpl *window, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = window->getAbsoluteRect();
+	const Rect contentRect = window->content->getAbsoluteRect();
+	const Rect headerRect = window->getHeaderRect();
+
+	nvgSave(vg);
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, WZ_SKIN_WINDOW_CORNER_RADIUS);
+
+	// Border/header background.
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x + rect.w, (float)rect.y, WZ_SKIN_WINDOW_BORDER_BG_COLOR1, WZ_SKIN_WINDOW_BORDER_BG_COLOR2));
+	nvgFill(vg);
+
+	// Outer border.
+	nvgStrokeColor(vg, WZ_SKIN_WINDOW_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Inner border.
+	nvgBeginPath(vg);
+	nvgRect(vg, contentRect.x - 1.0f, contentRect.y - 1.0f, contentRect.w + 2.0f, contentRect.h + 2.0f);
+	nvgStrokeColor(vg, WZ_SKIN_WINDOW_INNER_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Background/content.
+	nvgBeginPath(vg);
+	nvgRect(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.w, (float)contentRect.h);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)contentRect.x, (float)contentRect.y, (float)contentRect.x, (float)contentRect.y + contentRect.h, WZ_SKIN_WINDOW_BG_COLOR1, WZ_SKIN_WINDOW_BG_COLOR2));
+	nvgFill(vg);
+
+	// Header.
+	if (headerRect.w > 0 && headerRect.h > 0)
+	{
+		clipToRect(headerRect);
+		print(headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, window->getFontFace(), window->getFontSize(), WZ_SKIN_WINDOW_TEXT_COLOR, window->getTitle(), 0);
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureWindow(WindowImpl *window)
+{
+	return Size();
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;
