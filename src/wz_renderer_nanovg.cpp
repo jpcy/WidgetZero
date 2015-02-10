@@ -598,6 +598,37 @@ Size NVGRenderer::measureList(ListImpl *list)
 	return Size();
 }
 
+void NVGRenderer::drawMenuBarButton(MenuBarButtonImpl *button, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = button->getAbsoluteRect();
+
+	nvgSave(vg);
+	clipToRect(clip);
+
+	if (button->isPressed())
+	{
+		drawFilledRect(rect, WZ_SKIN_MENU_BAR_SET_COLOR);
+	}
+
+	if (button->getHover())
+	{
+		drawRect(rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
+	}
+
+	print(rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), WZ_SKIN_MENU_BAR_TEXT_COLOR, button->getLabel(), 0);
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureMenuBarButton(MenuBarButtonImpl *button)
+{
+	Size size;
+	button->measureText(button->getLabel(), 0, &size.w, &size.h);
+	size.w += 12;
+	return size;
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;

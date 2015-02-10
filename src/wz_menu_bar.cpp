@@ -34,41 +34,6 @@ MENU BAR BUTTON
 ================================================================================
 */
 
-static Size wz_menu_bar_button_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-
-	widget->measureText(button->label.c_str(), 0, &size.w, &size.h);
-	size.w += 12;
-	return size;
-}
-
-static void wz_menu_bar_button_draw(struct WidgetImpl *widget, Rect clip)
-{
-	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-
-	if (button->isPressed())
-	{
-		r->drawFilledRect(rect, WZ_SKIN_MENU_BAR_SET_COLOR);
-	}
-
-	if (widget->hover)
-	{
-		r->drawRect(rect, WZ_SKIN_MENU_BAR_BORDER_HOVER_COLOR);
-	}
-
-	r->print(rect.x + rect.w / 2, rect.y + rect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_MENU_BAR_TEXT_COLOR, button->label.c_str(), 0);
-
-	nvgRestore(vg);
-}
-
 static void wz_menu_bar_button_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
@@ -122,6 +87,16 @@ MenuBarButtonImpl::MenuBarButtonImpl()
 	menuBar = NULL;
 }
 
+void MenuBarButtonImpl::draw(Rect clip)
+{
+	renderer->drawMenuBarButton(this, clip);
+}
+
+Size MenuBarButtonImpl::measure()
+{
+	return renderer->measureMenuBarButton(this);
+}
+
 void MenuBarButtonImpl::setLabel(const char *label)
 {
 	this->label = label;
@@ -141,8 +116,6 @@ bool MenuBarButtonImpl::isPressed() const
 static struct MenuBarButtonImpl *wz_menu_bar_button_create(struct MenuBarImpl *menuBar)
 {
 	struct MenuBarButtonImpl *button = new struct MenuBarButtonImpl;
-	button->vtable.measure = wz_menu_bar_button_measure;
-	button->vtable.draw = wz_menu_bar_button_draw;
 	button->vtable.mouse_button_down = wz_menu_bar_button_mouse_button_down;
 	button->vtable.mouse_button_up = wz_menu_bar_button_mouse_button_up;
 	button->vtable.mouse_hover_on = wz_menu_bar_button_mouse_hover_on;

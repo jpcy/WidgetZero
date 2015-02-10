@@ -575,6 +575,8 @@ private:
 struct MenuBarButtonImpl : public WidgetImpl
 {
 	MenuBarButtonImpl();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
 	bool isPressed() const;

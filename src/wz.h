@@ -45,6 +45,7 @@ struct GroupBoxImpl;
 struct LabelImpl;
 struct ListImpl;
 struct MenuBarImpl;
+struct MenuBarButtonImpl;
 struct ScrollerImpl;
 struct SpinnerImpl;
 struct StackLayoutImpl;
@@ -333,6 +334,8 @@ public:
 	virtual Size measureLabel(LabelImpl *label) = 0;
 	virtual void drawList(ListImpl *list, Rect clip) = 0;
 	virtual Size measureList(ListImpl *list) = 0;
+	virtual void drawMenuBarButton(MenuBarButtonImpl *button, Rect clip) = 0;
+	virtual Size measureMenuBarButton(MenuBarButtonImpl *button) = 0;
 };
 
 class Widget
