@@ -85,6 +85,8 @@ public:
 	virtual Size measureTabBar(TabBarImpl *tabBar);
 	virtual void drawTabbed(TabbedImpl *tabbed, Rect clip);
 	virtual Size measureTabbed(TabbedImpl *tabbed);
+	virtual void drawTextEdit(TextEditImpl *textEdit, Rect clip);
+	virtual Size measureTextEdit(TextEditImpl *textEdit);
 
 	struct NVGcontext *getContext();
 	float getDefaultFontSize() const;

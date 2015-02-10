@@ -720,6 +720,8 @@ struct TabbedImpl : public WidgetImpl
 struct TextEditImpl : public WidgetImpl
 {
 	TextEditImpl(bool multiline, int maximumTextLength);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
 	bool isMultiline() const;
 	Border getBorder() const;

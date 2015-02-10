@@ -405,159 +405,6 @@ EVENT HANDLING
 ================================================================================
 */
 
-static Size wz_text_edit_measure(struct WidgetImpl *widget)
-{
-	Size size;
-	const struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
-
-	if (textEdit->multiline)
-	{
-		size.w = 100;
-		size.h = 100;
-	}
-	else
-	{
-		size.w = 100;
-		size.h = widget->getLineHeight() + textEdit->border.top + textEdit->border.bottom;
-	}
-
-	return size;
-}
-
-static void wz_text_edit_draw(struct WidgetImpl *widget, Rect clip)
-{
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
-	const Rect rect = widget->getAbsoluteRect();
-	const Rect textRect = textEdit->getTextRect();
-	const int lineHeight = widget->getLineHeight();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	
-	nvgBeginPath(vg);
-	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_TEXT_EDIT_CORNER_RADIUS);
-
-	// Background.
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_TEXT_EDIT_BG_COLOR1, WZ_SKIN_TEXT_EDIT_BG_COLOR2));
-	nvgFill(vg);
-
-	// Border.
-	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_TEXT_EDIT_BORDER_HOVER_COLOR : WZ_SKIN_TEXT_EDIT_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Clip to the text rect.
-	if (!r->clipToRectIntersection(clip, textRect))
-		return;
-
-	// Text.
-	if (textEdit->multiline)
-	{
-		LineBreakResult line;
-		int selectionStartIndex, selectionEndIndex, lineY = 0;
-
-		selectionStartIndex = textEdit->getSelectionStartIndex();
-		selectionEndIndex = textEdit->getSelectionEndIndex();
-		line.next = textEdit->getVisibleText();
-
-		for (;;)
-		{
-			line = widget->lineBreakText(line.next, 0, textRect.w);
-
-			if (line.length > 0)
-			{
-				// Draw this line.
-				r->print(textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, line.start, line.length);
-
-				// Selection.
-				if (textEdit->hasSelection())
-				{
-					int lineStartIndex;
-					bool startOnThisLine, endOnThisLine, straddleThisLine;
-					Position start, end;
-
-					lineStartIndex = line.start - textEdit->getText();
-					startOnThisLine = selectionStartIndex >= lineStartIndex && selectionStartIndex <= lineStartIndex + (int)line.length;
-					endOnThisLine = selectionEndIndex >= lineStartIndex && selectionEndIndex <= lineStartIndex + (int)line.length;
-					straddleThisLine = selectionStartIndex < lineStartIndex && selectionEndIndex > lineStartIndex + (int)line.length;
-
-					if (startOnThisLine)
-					{
-						start = textEdit->positionFromIndex(selectionStartIndex);
-					}
-					else
-					{
-						start = textEdit->positionFromIndex(lineStartIndex);
-					}
-
-					if (endOnThisLine)
-					{
-						end = textEdit->positionFromIndex(selectionEndIndex);
-					}
-					else
-					{
-						end = textEdit->positionFromIndex(lineStartIndex + (int)line.length);
-					}
-
-					if (startOnThisLine || straddleThisLine || endOnThisLine)
-					{
-						Rect selectionRect;
-						selectionRect.x = textRect.x + start.x;
-						selectionRect.y = textRect.y + start.y - lineHeight / 2;
-						selectionRect.w = end.x - start.x;
-						selectionRect.h = lineHeight;
-						r->drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
-					}
-				}
-			}
-
-			if (!line.next || !line.next[0])
-				break;
-
-			lineY += lineHeight;
-		}
-	}
-	else
-	{
-		r->print(textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, WZ_SKIN_TEXT_EDIT_TEXT_COLOR, textEdit->getVisibleText(), 0);
-
-		// Selection.
-		if (textEdit->hasSelection())
-		{
-			Position position1, position2;
-			Rect selectionRect;
-
-			position1 = textEdit->getSelectionStartPosition();
-			position2 = textEdit->getSelectionEndPosition();
-			selectionRect.x = textRect.x + position1.x;
-			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
-			selectionRect.w = position2.x - position1.x;
-			selectionRect.h = lineHeight;
-			r->drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
-		}
-	}
-
-	// Cursor.
-	if (widget->mainWindow->isTextCursorVisible() && textEdit->hasKeyboardFocus())
-	{
-		Position position;
-		
-		position = textEdit->getCursorPosition();
-		position.x += textRect.x;
-		position.y += textRect.y;
-
-		r->clipToRect(rect);
-		nvgBeginPath(vg);
-		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
-		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);
-		nvgStrokeColor(vg, WZ_SKIN_TEXT_EDIT_CURSOR_COLOR);
-		nvgStroke(vg);
-	}
-
-	nvgRestore(vg);
-}
-
 static void wz_text_edit_renderer_changed(struct WidgetImpl *widget)
 {
 	struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
@@ -915,8 +762,6 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 	cursorIndex = scrollValue = 0;
 	selectionStartIndex = selectionEndIndex = 0;
 
-	vtable.measure = wz_text_edit_measure;
-	vtable.draw = wz_text_edit_draw;
 	vtable.renderer_changed = wz_text_edit_renderer_changed;
 	vtable.set_rect = wz_text_edit_set_rect;
 	vtable.mouse_button_down = wz_text_edit_mouse_button_down;
@@ -936,6 +781,16 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 
 	this->multiline = multiline;
 	this->maximumTextLength = maximumTextLength;
+}
+
+void TextEditImpl::draw(Rect clip)
+{
+	renderer->drawTextEdit(this, clip);
+}
+
+Size TextEditImpl::measure()
+{
+	return renderer->measureTextEdit(this);
 }
 
 void TextEditImpl::setValidateTextCallback(TextEditValidateTextCallback callback)

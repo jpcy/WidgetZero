@@ -876,6 +876,147 @@ Size NVGRenderer::measureTabbed(TabbedImpl *tabbed)
 	return Size();
 }
 
+void NVGRenderer::drawTextEdit(TextEditImpl *textEdit, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = textEdit->getAbsoluteRect();
+	const Rect textRect = textEdit->getTextRect();
+	const int lineHeight = textEdit->getLineHeight();
+
+	nvgSave(vg);
+	clipToRect(clip);
+	
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f, WZ_SKIN_TEXT_EDIT_CORNER_RADIUS);
+
+	// Background.
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, WZ_SKIN_TEXT_EDIT_BG_COLOR1, WZ_SKIN_TEXT_EDIT_BG_COLOR2));
+	nvgFill(vg);
+
+	// Border.
+	nvgStrokeColor(vg, textEdit->getHover() ? WZ_SKIN_TEXT_EDIT_BORDER_HOVER_COLOR : WZ_SKIN_TEXT_EDIT_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Clip to the text rect.
+	if (!clipToRectIntersection(clip, textRect))
+		return;
+
+	// Text.
+	if (textEdit->multiline)
+	{
+		int lineY = 0;
+		int selectionStartIndex = textEdit->getSelectionStartIndex();
+		int selectionEndIndex = textEdit->getSelectionEndIndex();
+		LineBreakResult line;
+		line.next = textEdit->getVisibleText();
+
+		for (;;)
+		{
+			line = textEdit->lineBreakText(line.next, 0, textRect.w);
+
+			if (line.length > 0)
+			{
+				// Draw this line.
+				print(textRect.x, textRect.y + lineY, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, textEdit->getFontFace(), textEdit->getFontSize(), WZ_SKIN_TEXT_EDIT_TEXT_COLOR, line.start, line.length);
+
+				// Selection.
+				if (textEdit->hasSelection())
+				{
+					int lineStartIndex;
+					bool startOnThisLine, endOnThisLine, straddleThisLine;
+					Position start, end;
+
+					lineStartIndex = line.start - textEdit->getText();
+					startOnThisLine = selectionStartIndex >= lineStartIndex && selectionStartIndex <= lineStartIndex + (int)line.length;
+					endOnThisLine = selectionEndIndex >= lineStartIndex && selectionEndIndex <= lineStartIndex + (int)line.length;
+					straddleThisLine = selectionStartIndex < lineStartIndex && selectionEndIndex > lineStartIndex + (int)line.length;
+
+					if (startOnThisLine)
+					{
+						start = textEdit->positionFromIndex(selectionStartIndex);
+					}
+					else
+					{
+						start = textEdit->positionFromIndex(lineStartIndex);
+					}
+
+					if (endOnThisLine)
+					{
+						end = textEdit->positionFromIndex(selectionEndIndex);
+					}
+					else
+					{
+						end = textEdit->positionFromIndex(lineStartIndex + (int)line.length);
+					}
+
+					if (startOnThisLine || straddleThisLine || endOnThisLine)
+					{
+						Rect selectionRect;
+						selectionRect.x = textRect.x + start.x;
+						selectionRect.y = textRect.y + start.y - lineHeight / 2;
+						selectionRect.w = end.x - start.x;
+						selectionRect.h = lineHeight;
+						drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
+					}
+				}
+			}
+
+			if (!line.next || !line.next[0])
+				break;
+
+			lineY += lineHeight;
+		}
+	}
+	else
+	{
+		print(textRect.x, textRect.y + textRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, textEdit->getFontFace(), textEdit->getFontSize(), WZ_SKIN_TEXT_EDIT_TEXT_COLOR, textEdit->getVisibleText(), 0);
+
+		// Selection.
+		if (textEdit->hasSelection())
+		{
+			Position position1, position2;
+			Rect selectionRect;
+
+			position1 = textEdit->getSelectionStartPosition();
+			position2 = textEdit->getSelectionEndPosition();
+			selectionRect.x = textRect.x + position1.x;
+			selectionRect.y = textRect.y + position1.y - lineHeight / 2;
+			selectionRect.w = position2.x - position1.x;
+			selectionRect.h = lineHeight;
+			drawFilledRect(selectionRect, WZ_SKIN_TEXT_EDIT_SELECTION_COLOR);
+		}
+	}
+
+	// Cursor.
+	if (textEdit->getMainWindow()->isTextCursorVisible() && textEdit->hasKeyboardFocus())
+	{
+		Position position = textEdit->getCursorPosition();
+		position.x += textRect.x;
+		position.y += textRect.y;
+
+		clipToRect(rect);
+		nvgBeginPath(vg);
+		nvgMoveTo(vg, (float)position.x, position.y - lineHeight / 2.0f);
+		nvgLineTo(vg, (float)position.x, position.y + lineHeight / 2.0f);
+		nvgStrokeColor(vg, WZ_SKIN_TEXT_EDIT_CURSOR_COLOR);
+		nvgStroke(vg);
+	}
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureTextEdit(TextEditImpl *textEdit)
+{
+	if (textEdit->multiline)
+	{
+		return Size(100, 100);
+	}
+	else
+	{
+		return Size(100, textEdit->getLineHeight() + textEdit->border.top + textEdit->border.bottom);
+	}
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;
