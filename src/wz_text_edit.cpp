@@ -1142,8 +1142,18 @@ TextEdit::~TextEdit()
 
 TextEdit *TextEdit::setText(const std::string &text)
 {
-	((TextEditImpl *)impl.get())->setText(text.c_str());
+	getImpl()->setText(text.c_str());
 	return this;
+}
+
+TextEditImpl *TextEdit::getImpl()
+{
+	return (TextEditImpl *)impl.get();
+}
+
+const TextEditImpl *TextEdit::getImpl() const
+{
+	return (const TextEditImpl *)impl.get();
 }
 
 } // namespace wz

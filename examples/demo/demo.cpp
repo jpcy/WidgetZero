@@ -105,7 +105,7 @@ public:
 		mainWindow.createMenuButton("Options");
 		mainWindow.createMenuButton("Window");
 		createButtonFrame();
-		createCheckboxFrame();
+		createCheckBoxFrame();
 		createComboFrame();
 		createGroupBoxFrame();
 		createLabelFrame();
@@ -161,15 +161,15 @@ private:
 		layout->add(toggleButton);
 	}
 
-	void createCheckboxFrame()
+	void createCheckBoxFrame()
 	{
-		wz::Frame *frame = createFrame("Checkbox");
+		wz::Frame *frame = createFrame("CheckBox");
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::WZ_STACK_LAYOUT_VERTICAL);
 		layout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(layout);
 
-		wz::Checkbox *checkbox = new wz::Checkbox("Toggle me!");
+		wz::CheckBox *checkbox = new wz::CheckBox("Toggle me!");
 		layout->add(checkbox);
 	}
 
@@ -339,11 +339,11 @@ private:
 		frameLayout->setSpacing(8)->setMargin(8)->setStretch(wz::WZ_STRETCH);
 		frame->add(frameLayout);
 
-		wz::Checkbox *showWindow1 = new wz::Checkbox("Show Window 1");
+		wz::CheckBox *showWindow1 = new wz::CheckBox("Show Window 1");
 		showWindow1->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
 		frameLayout->add(showWindow1);
 
-		wz::Checkbox *showWindow2 = new wz::Checkbox("Show Window 2");
+		wz::CheckBox *showWindow2 = new wz::CheckBox("Show Window 2");
 		showWindow2->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
 		frameLayout->add(showWindow2);
 	}
@@ -454,7 +454,7 @@ private:
 		button->setStretch(wz::WZ_STRETCH_WIDTH);
 		layout->add(button);
 
-		wz::Checkbox *checkbox = new wz::Checkbox("Checkbox");
+		wz::CheckBox *checkbox = new wz::CheckBox("CheckBox");
 		checkbox->setAlign(wz::WZ_ALIGN_CENTER);
 		layout->add(checkbox);
 

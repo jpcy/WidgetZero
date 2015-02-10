@@ -467,7 +467,7 @@ void WindowImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	content->addChildWidget(widget);
@@ -545,24 +545,34 @@ Window::~Window()
 
 const char *Window::getTitle() const
 {
-	return ((WindowImpl *)impl.get())->getTitle();
+	return getImpl()->getTitle();
 }
 
 Window *Window::setTitle(const std::string &title)
 {
-	((WindowImpl *)impl.get())->setTitle(title.c_str());
+	getImpl()->setTitle(title.c_str());
 	return this;
 }
 
 Widget *Window::add(Widget *widget)
 {
-	((WindowImpl *)impl.get())->add(widget);
+	getImpl()->add(widget);
 	return widget;
 }
 
 void Window::remove(Widget *widget)
 {
-	((WindowImpl *)impl.get())->remove(widget);
+	getImpl()->remove(widget);
+}
+
+WindowImpl *Window::getImpl()
+{
+	return (WindowImpl *)impl.get();
+}
+
+const WindowImpl *Window::getImpl() const
+{
+	return (const WindowImpl *)impl.get();
 }
 
 } // namespace wz

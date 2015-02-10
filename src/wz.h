@@ -40,11 +40,18 @@ namespace wz {
 struct ButtomImpl;
 struct CheckBoxImpl;
 struct ComboImpl;
+struct FrameImpl;
 struct GroupBoxImpl;
 struct LabelImpl;
+struct ListImpl;
+struct MenuBarImpl;
+struct ScrollerImpl;
+struct SpinnerImpl;
+struct StackLayoutImpl;
+struct TabbedImpl;
+struct TextEditImpl;
 struct WindowImpl;
 class Window;
-struct MenuBarImpl;
 
 typedef enum
 {
@@ -361,6 +368,10 @@ public:
 		return this;
 	}
 
+	WidgetImpl *getImpl();
+	const WidgetImpl *getImpl() const;
+
+protected:
 	std::auto_ptr<WidgetImpl> impl;
 };
 
@@ -377,17 +388,21 @@ public:
 	Button *setIcon(const std::string &icon);
 	const char *getLabel() const;
 	Button *setLabel(const std::string &label);
+	ButtonImpl *getImpl();
+	const ButtonImpl *getImpl() const;
 };
 
-class Checkbox : public Widget
+class CheckBox : public Widget
 {
 public:
-	Checkbox();
-	Checkbox( const std::string &label);
-	~Checkbox();
+	CheckBox();
+	CheckBox(const std::string &label);
+	~CheckBox();
 	const char *getLabel() const;
-	Checkbox *setLabel(const std::string &label);
-	Checkbox *bindValue(bool *value);
+	CheckBox *setLabel(const std::string &label);
+	CheckBox *bindValue(bool *value);
+	CheckBoxImpl *getImpl();
+	const CheckBoxImpl *getImpl() const;
 };
 
 class Combo : public Widget
@@ -396,6 +411,8 @@ public:
 	Combo();
 	~Combo();
 	Combo *setItems(uint8_t *itemData, size_t itemStride, int nItems);
+	ComboImpl *getImpl();
+	const ComboImpl *getImpl() const;
 };
 
 class Frame : public Widget
@@ -405,6 +422,8 @@ public:
 	~Frame();
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
+	FrameImpl *getImpl();
+	const FrameImpl *getImpl() const;
 };
 
 class GroupBox : public Widget
@@ -417,6 +436,8 @@ public:
 	GroupBox *setLabel(const std::string &label);
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
+	GroupBoxImpl *getImpl();
+	const GroupBoxImpl *getImpl() const;
 };
 
 class Label : public Widget
@@ -428,6 +449,8 @@ public:
 	Label *setText(const char *format, ...);
 	Label *setTextColor(float r, float g, float b, float a = 1.0f);
 	Label *setMultiline(bool multiline);
+	LabelImpl *getImpl();
+	const LabelImpl *getImpl() const;
 };
 
 typedef void (*DrawListItemCallback)(IRenderer *renderer, Rect clip, const struct ListImpl *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData);
@@ -441,6 +464,8 @@ public:
 	List *setSelectedItem(int index);
 	List *setItemHeight(int height);
 	List *setDrawItemCallback(DrawListItemCallback callback);
+	ListImpl *getImpl();
+	const ListImpl *getImpl() const;
 };
 
 class MainWindow
@@ -481,6 +506,8 @@ public:
 	~RadioButton();
 	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);
+	ButtonImpl *getImpl();
+	const ButtonImpl *getImpl() const;
 };
 
 typedef enum
@@ -499,6 +526,8 @@ public:
 	Scroller *setStepValue(int stepValue);
 	Scroller *setMaxValue(int maxValue);	
 	int getValue() const;
+	ScrollerImpl *getImpl();
+	const ScrollerImpl *getImpl() const;
 };
 
 class Spinner : public Widget
@@ -508,6 +537,8 @@ public:
 	~Spinner();
 	Spinner *setValue(int value);
 	int getValue() const;
+	SpinnerImpl *getImpl();
+	const SpinnerImpl *getImpl() const;
 };
 
 typedef enum
@@ -528,6 +559,8 @@ public:
 	int getSpacing() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
+	StackLayoutImpl *getImpl();
+	const StackLayoutImpl *getImpl() const;
 };
 
 struct TabImpl;
@@ -550,6 +583,8 @@ public:
 	Tabbed();
 	~Tabbed();
 	Tab *addTab(Tab *tab);
+	TabbedImpl *getImpl();
+	const TabbedImpl *getImpl() const;
 };
 
 typedef bool (*TextEditValidateTextCallback)(const char *text);
@@ -561,6 +596,8 @@ public:
 	TextEdit(const std::string &text, bool multiline);
 	~TextEdit();
 	TextEdit *setText(const std::string &text);
+	TextEditImpl *getImpl();
+	const TextEditImpl *getImpl() const;
 };
 
 class ToggleButton : public Widget
@@ -576,8 +613,8 @@ public:
 	ToggleButton *setIcon(const std::string &icon);
 	const char *getLabel() const;
 	ToggleButton *setLabel(const std::string &label);
-
-	ButtomImpl *bimpl;
+	ButtonImpl *getImpl();
+	const ButtonImpl *getImpl() const;
 };
 
 class Window : public Widget
@@ -590,6 +627,8 @@ public:
 	Window *setTitle(const std::string &title);
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
+	WindowImpl *getImpl();
+	const WindowImpl *getImpl() const;
 };
 
 } // namespace wz

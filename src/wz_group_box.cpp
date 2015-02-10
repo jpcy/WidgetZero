@@ -85,7 +85,7 @@ void GroupBoxImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	content->addChildWidget(widget);
@@ -139,24 +139,34 @@ GroupBox::~GroupBox()
 
 const char *GroupBox::getLabel() const
 {
-	return ((GroupBoxImpl *)impl.get())->getLabel();
+	return getImpl()->getLabel();
 }
 
 GroupBox *GroupBox::setLabel(const std::string &label)
 {
-	((GroupBoxImpl *)impl.get())->setLabel(label.c_str());
+	getImpl()->setLabel(label.c_str());
 	return this;
 }
 
 Widget *GroupBox::add(Widget *widget)
 {
-	((GroupBoxImpl *)impl.get())->add(widget);
+	getImpl()->add(widget);
 	return widget;
 }
 
 void GroupBox::remove(Widget *widget)
 {
-	((GroupBoxImpl *)impl.get())->remove(widget);
+	getImpl()->remove(widget);
+}
+
+GroupBoxImpl *GroupBox::getImpl()
+{
+	return (GroupBoxImpl *)impl.get();
+}
+
+const GroupBoxImpl *GroupBox::getImpl() const
+{
+	return (const GroupBoxImpl *)impl.get();
 }
 
 } // namespace wz

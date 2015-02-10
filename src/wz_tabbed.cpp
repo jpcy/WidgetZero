@@ -103,13 +103,13 @@ Tab *Tab::setLabel(const std::string &label)
 
 Widget *Tab::add(Widget *widget)
 {
-	wz_tab_page_add(impl->page, widget->impl.get());
+	wz_tab_page_add(impl->page, widget->getImpl());
 	return widget;
 }
 
 void Tab::remove(Widget *widget)
 {
-	wz_tab_page_remove(impl->page, widget->impl.get());
+	wz_tab_page_remove(impl->page, widget->getImpl());
 }
 
 /*
@@ -302,8 +302,18 @@ Tabbed::~Tabbed()
 
 Tab *Tabbed::addTab(Tab *tab)
 {
-	((TabbedImpl *)impl.get())->addTab(&tab->impl->button, &tab->impl->page);
+	getImpl()->addTab(&tab->impl->button, &tab->impl->page);
 	return tab;
+}
+
+TabbedImpl *Tabbed::getImpl()
+{
+	return (TabbedImpl *)impl.get();
+}
+
+const TabbedImpl *Tabbed::getImpl() const
+{
+	return (const TabbedImpl *)impl.get();
 }
 
 } // namespace wz

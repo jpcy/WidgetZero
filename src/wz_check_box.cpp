@@ -64,35 +64,45 @@ PUBLIC INTERFACE
 ================================================================================
 */
 
-Checkbox::Checkbox()
+CheckBox::CheckBox()
 {
 	impl.reset(new CheckBoxImpl());
 }
 
-Checkbox::Checkbox(const std::string &label)
+CheckBox::CheckBox(const std::string &label)
 {
 	impl.reset(new CheckBoxImpl(label.c_str()));
 }
 
-Checkbox::~Checkbox()
+CheckBox::~CheckBox()
 {
 }
 
-const char *Checkbox::getLabel() const
+const char *CheckBox::getLabel() const
 {
 	return ((const CheckBoxImpl *)impl.get())->getLabel();
 }
 
-Checkbox *Checkbox::setLabel(const std::string &label)
+CheckBox *CheckBox::setLabel(const std::string &label)
 {
-	((CheckBoxImpl *)impl.get())->setLabel(label.c_str());
+	getImpl()->setLabel(label.c_str());
 	return this;
 }
 
-Checkbox *Checkbox::bindValue(bool *value)
+CheckBox *CheckBox::bindValue(bool *value)
 {
-	((CheckBoxImpl *)impl.get())->bindValue(value);
+	getImpl()->bindValue(value);
 	return this;
+}
+
+CheckBoxImpl *CheckBox::getImpl()
+{
+	return (CheckBoxImpl *)impl.get();
+}
+
+const CheckBoxImpl *CheckBox::getImpl() const
+{
+	return (const CheckBoxImpl *)impl.get();
 }
 
 } // namespace wz

@@ -780,11 +780,11 @@ void MainWindowImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW)
 		return;
 
 	// Special case for windows: add directly, not to the content widget.
-	if (widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 	{
 		addChildWidget(widget);
 	}
@@ -817,7 +817,7 @@ void MainWindowImpl::remove(Widget *widget)
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
-	if (widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 	{
 		removeChildWidget(widget);
 	}
@@ -1521,7 +1521,7 @@ void MainWindow::createMenuButton(const std::string &label)
 
 void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 {
-	impl->dockWindow((WindowImpl *)(window->impl.get()), dockPosition);
+	impl->dockWindow((WindowImpl *)(window->getImpl()), dockPosition);
 }
 
 } // namespace wz

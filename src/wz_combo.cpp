@@ -200,11 +200,21 @@ Combo::~Combo()
 
 Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	ListImpl *list = ((ComboImpl *)impl.get())->getList();
+	ListImpl *list = getImpl()->getList();
 	list->setItemData(itemData);
 	list->setItemStride(itemStride);
 	list->setNumItems(nItems);
 	return this;
+}
+
+ComboImpl *Combo::getImpl()
+{
+	return (ComboImpl *)impl.get();
+}
+
+const ComboImpl *Combo::getImpl() const
+{
+	return (const ComboImpl *)impl.get();
 }
 
 } // namespace wz

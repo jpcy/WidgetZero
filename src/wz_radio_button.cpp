@@ -133,13 +133,23 @@ RadioButton::~RadioButton()
 
 const char *RadioButton::getLabel() const
 {
-	return ((const ButtonImpl *)impl.get())->getLabel();
+	return getImpl()->getLabel();
 }
 
 RadioButton *RadioButton::setLabel(const std::string &label)
 {
-	((ButtonImpl *)impl.get())->setLabel(label.c_str());
+	getImpl()->setLabel(label.c_str());
 	return this;
+}
+
+ButtonImpl *RadioButton::getImpl()
+{
+	return (ButtonImpl *)impl.get();
+}
+
+const ButtonImpl *RadioButton::getImpl() const
+{
+	return (const ButtonImpl *)impl.get();
 }
 
 } // namespace wz

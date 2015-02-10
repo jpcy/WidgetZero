@@ -107,7 +107,7 @@ Label *Label::setText(const char *format, ...)
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 	
-	((LabelImpl *)impl.get())->setText(buffer);
+	getImpl()->setText(buffer);
 	return this;
 }
 
@@ -118,14 +118,24 @@ Label *Label::setTextColor(float r, float g, float b, float a)
 	color.g = g;
 	color.b = b;
 	color.a = a;
-	((LabelImpl *)impl.get())->setTextColor(color);
+	getImpl()->setTextColor(color);
 	return this;
 }
 
 Label *Label::setMultiline(bool multiline)
 {
-	((LabelImpl *)impl.get())->setMultiline(multiline);
+	getImpl()->setMultiline(multiline);
 	return this;
+}
+
+LabelImpl *Label::getImpl()
+{
+	return (LabelImpl *)impl.get();
+}
+
+const LabelImpl *Label::getImpl() const
+{
+	return (const LabelImpl *)impl.get();
 }
 
 } // namespace wz

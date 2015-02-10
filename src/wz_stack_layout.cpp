@@ -277,7 +277,7 @@ void StackLayoutImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	addChildWidget(widget);
@@ -329,30 +329,40 @@ StackLayout::~StackLayout()
 
 StackLayout *StackLayout::setDirection(StackLayoutDirection direction)
 {
-	((StackLayoutImpl *)impl.get())->setDirection(direction);
+	getImpl()->setDirection(direction);
 	return this;
 }
 
 StackLayout *StackLayout::setSpacing(int spacing)
 {
-	((StackLayoutImpl *)impl.get())->setSpacing(spacing);
+	getImpl()->setSpacing(spacing);
 	return this;
 }
 
 int StackLayout::getSpacing() const
 {
-	return ((StackLayoutImpl *)impl.get())->getSpacing();
+	return getImpl()->getSpacing();
 }
 
 Widget *StackLayout::add(Widget *widget)
 {
-	((StackLayoutImpl *)impl.get())->add(widget);
+	getImpl()->add(widget);
 	return widget;
 }
 
 void StackLayout::remove(Widget *widget)
 {
-	((StackLayoutImpl *)impl.get())->remove(widget);
+	getImpl()->remove(widget);
+}
+
+StackLayoutImpl *StackLayout::getImpl()
+{
+	return (StackLayoutImpl *)impl.get();
+}
+
+const StackLayoutImpl *StackLayout::getImpl() const
+{
+	return (const StackLayoutImpl *)impl.get();
 }
 
 } // namespace wz

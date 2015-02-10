@@ -56,7 +56,7 @@ bool WidgetChildren::empty() const
 const struct WidgetImpl *WidgetChildren::operator[](size_t i) const
 {
 	if (i < widgets_.size())
-		return widgets_[i]->impl.get();
+		return widgets_[i]->getImpl();
 
 	return impls_[i - widgets_.size()];
 }
@@ -64,7 +64,7 @@ const struct WidgetImpl *WidgetChildren::operator[](size_t i) const
 struct WidgetImpl *WidgetChildren::operator[](size_t i)
 {
 	if (i < widgets_.size())
-		return widgets_[i]->impl.get();
+		return widgets_[i]->getImpl();
 
 	return impls_[i - widgets_.size()];
 }
@@ -514,7 +514,7 @@ void WidgetImpl::addChildWidget(Widget *child)
 {
 	WZ_ASSERT(child);
 	children.push_back(child);
-	addChildWidgetInternal(child->impl.get());
+	addChildWidgetInternal(child->getImpl());
 }
 
 void WidgetImpl::addChildWidget(struct WidgetImpl *child)
@@ -530,9 +530,9 @@ void WidgetImpl::removeChildWidget(Widget *child)
 	children.erase(child);
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
-	child->impl->mainWindow = NULL;
-	child->impl->parent = NULL;
-	child->impl->window = NULL;
+	child->getImpl()->mainWindow = NULL;
+	child->getImpl()->parent = NULL;
+	child->getImpl()->window = NULL;
 }
 
 void WidgetImpl::removeChildWidget(struct WidgetImpl *child)
@@ -980,6 +980,16 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 {
 	impl->eventHandlers.push_back(eventHandler);
 	return this;
+}
+
+WidgetImpl *Widget::getImpl()
+{
+	return impl.get();
+}
+
+const WidgetImpl *Widget::getImpl() const
+{
+	return impl.get();
 }
 
 } // namespace wz

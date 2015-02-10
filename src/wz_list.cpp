@@ -477,28 +477,38 @@ List::~List()
 
 List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	((ListImpl *)impl.get())->setItemData(itemData);
-	((ListImpl *)impl.get())->setItemStride(itemStride);
-	((ListImpl *)impl.get())->setNumItems(nItems);
+	getImpl()->setItemData(itemData);
+	getImpl()->setItemStride(itemStride);
+	getImpl()->setNumItems(nItems);
 	return this;
 }
 
 List *List::setSelectedItem(int index)
 {
-	((ListImpl *)impl.get())->setSelectedItem(index);
+	getImpl()->setSelectedItem(index);
 	return this;
 }
 
 List *List::setItemHeight(int height)
 {
-	((ListImpl *)impl.get())->setItemHeight(height);
+	getImpl()->setItemHeight(height);
 	return this;
 }
 
 List *List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	((ListImpl *)impl.get())->setDrawItemCallback(callback);
+	getImpl()->setDrawItemCallback(callback);
 	return this;
+}
+
+ListImpl *List::getImpl()
+{
+	return (ListImpl *)impl.get();
+}
+
+const ListImpl *List::getImpl() const
+{
+	return (const ListImpl *)impl.get();
 }
 
 } // namespace wz

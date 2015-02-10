@@ -206,13 +206,23 @@ Spinner::~Spinner()
 
 Spinner *Spinner::setValue(int value)
 {
-	((SpinnerImpl *)impl.get())->setValue(value);
+	getImpl()->setValue(value);
 	return this;
 }
 
 int Spinner::getValue() const
 {
-	return ((SpinnerImpl *)impl.get())->getValue();
+	return getImpl()->getValue();
+}
+
+SpinnerImpl *Spinner::getImpl()
+{
+	return (SpinnerImpl *)impl.get();
+}
+
+const SpinnerImpl *Spinner::getImpl() const
+{
+	return (const SpinnerImpl *)impl.get();
 }
 
 } // namespace wz

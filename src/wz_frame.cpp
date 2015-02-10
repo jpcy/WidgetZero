@@ -35,7 +35,7 @@ void FrameImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->impl->type == WZ_TYPE_MAIN_WINDOW || widget->impl->type == WZ_TYPE_WINDOW)
+	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	addChildWidget(widget);
@@ -83,13 +83,23 @@ Frame::~Frame()
 
 Widget *Frame::add(Widget *widget)
 {
-	((FrameImpl *)impl.get())->add(widget);
+	getImpl()->add(widget);
 	return widget;
 }
 
 void Frame::remove(Widget *widget)
 {
-	((FrameImpl *)impl.get())->remove(widget);
+	getImpl()->remove(widget);
+}
+
+FrameImpl *Frame::getImpl()
+{
+	return (FrameImpl *)impl.get();
+}
+
+const FrameImpl *Frame::getImpl() const
+{
+	return (const FrameImpl *)impl.get();
 }
 
 } // namespace wz

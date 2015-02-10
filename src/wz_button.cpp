@@ -277,41 +277,51 @@ Button::~Button()
 
 Border Button::getPadding() const
 {
-	return ((ButtonImpl *)impl.get())->getPadding();
+	return getImpl()->getPadding();
 }
 
 Button *Button::setPadding(Border padding)
 {
-	((ButtonImpl *)impl.get())->setPadding(padding);
+	getImpl()->setPadding(padding);
 	return this;
 }
 
 Button *Button::setPadding(int top, int right, int bottom, int left)
 {
-	((ButtonImpl *)impl.get())->setPadding(top, right, bottom, left);
+	getImpl()->setPadding(top, right, bottom, left);
 	return this;
 }
 
 const char *Button::getIcon() const
 {
-	return ((ButtonImpl *)impl.get())->getIcon();
+	return getImpl()->getIcon();
 }
 
 Button *Button::setIcon(const std::string &icon)
 {
-	((ButtonImpl *)impl.get())->setIcon(icon.c_str());
+	getImpl()->setIcon(icon.c_str());
 	return this;
 }
 
 const char *Button::getLabel() const
 {
-	return ((ButtonImpl *)impl.get())->getLabel();
+	return getImpl()->getLabel();
 }
 
 Button *Button::setLabel(const std::string &label)
 {
-	((ButtonImpl *)impl.get())->setLabel(label.c_str());
+	getImpl()->setLabel(label.c_str());
 	return this;
+}
+
+ButtonImpl *Button::getImpl()
+{
+	return (ButtonImpl *)impl.get();
+}
+
+const ButtonImpl *Button::getImpl() const
+{
+	return (const ButtonImpl *)impl.get();
 }
 
 /*
@@ -325,13 +335,13 @@ TOGGLE BUTTON PUBLIC INTERFACE
 ToggleButton::ToggleButton()
 {
 	impl.reset(new ButtonImpl);
-	((ButtonImpl *)impl.get())->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	getImpl()->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
 {
 	impl.reset(new ButtonImpl(label.c_str(), icon.c_str()));
-	((ButtonImpl *)impl.get())->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	getImpl()->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 ToggleButton::~ToggleButton()
@@ -340,41 +350,51 @@ ToggleButton::~ToggleButton()
 
 Border ToggleButton::getPadding() const
 {
-	return ((ButtonImpl *)impl.get())->getPadding();
+	return getImpl()->getPadding();
 }
 
 ToggleButton *ToggleButton::setPadding(Border padding)
 {
-	((ButtonImpl *)impl.get())->setPadding(padding);
+	getImpl()->setPadding(padding);
 	return this;
 }
 
 ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
 {
-	((ButtonImpl *)impl.get())->setPadding(top, right, bottom, left);
+	getImpl()->setPadding(top, right, bottom, left);
 	return this;
 }
 
 const char *ToggleButton::getIcon() const
 {
-	return ((ButtonImpl *)impl.get())->getIcon();
+	return getImpl()->getIcon();
 }
 
 ToggleButton *ToggleButton::setIcon(const std::string &icon)
 {
-	((ButtonImpl *)impl.get())->setIcon(icon.c_str());
+	getImpl()->setIcon(icon.c_str());
 	return this;
 }
 
 const char *ToggleButton::getLabel() const
 {
-	return ((ButtonImpl *)impl.get())->getLabel();
+	return getImpl()->getLabel();
 }
 
 ToggleButton *ToggleButton::setLabel(const std::string &label)
 {
-	((ButtonImpl *)impl.get())->setLabel(label.c_str());
+	getImpl()->setLabel(label.c_str());
 	return this;
+}
+
+ButtonImpl *ToggleButton::getImpl()
+{
+	return (ButtonImpl *)impl.get();
+}
+
+const ButtonImpl *ToggleButton::getImpl() const
+{
+	return (const ButtonImpl *)impl.get();
 }
 
 } // namespace wz

@@ -631,25 +631,35 @@ Scroller::~Scroller()
 
 Scroller *Scroller::setValue(int value)
 {
-	((ScrollerImpl *)impl.get())->setValue(value);
+	getImpl()->setValue(value);
 	return this;
 }
 
 Scroller *Scroller::setStepValue(int stepValue)
 {
-	((ScrollerImpl *)impl.get())->setStepValue(stepValue);
+	getImpl()->setStepValue(stepValue);
 	return this;
 }
 
 Scroller *Scroller::setMaxValue(int maxValue)
 {
-	((ScrollerImpl *)impl.get())->setMaxValue(maxValue);
+	getImpl()->setMaxValue(maxValue);
 	return this;
 }
 
 int Scroller::getValue() const
 {
-	return ((ScrollerImpl *)impl.get())->getValue();
+	return getImpl()->getValue();
+}
+
+ScrollerImpl *Scroller::getImpl()
+{
+	return (ScrollerImpl *)impl.get();
+}
+
+const ScrollerImpl *Scroller::getImpl() const
+{
+	return (const ScrollerImpl *)impl.get();
 }
 
 } // namespace wz
