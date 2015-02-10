@@ -46,6 +46,7 @@ struct LabelImpl;
 struct ListImpl;
 struct MenuBarImpl;
 struct MenuBarButtonImpl;
+struct RadioButtonImpl;
 struct ScrollerImpl;
 struct SpinnerImpl;
 struct StackLayoutImpl;
@@ -338,6 +339,8 @@ public:
 	virtual Size measureMenuBarButton(MenuBarButtonImpl *button) = 0;
 	virtual void drawMenuBar(MenuBarImpl *menuBar, Rect clip) = 0;
 	virtual Size measureMenuBar(MenuBarImpl *menuBar) = 0;
+	virtual void drawRadioButton(RadioButtonImpl *button, Rect clip) = 0;
+	virtual Size measureRadioButton(RadioButtonImpl *button) = 0;
 };
 
 class Widget
@@ -511,8 +514,8 @@ public:
 	~RadioButton();
 	const char *getLabel() const;
 	RadioButton *setLabel(const std::string &label);
-	ButtonImpl *getImpl();
-	const ButtonImpl *getImpl() const;
+	RadioButtonImpl *getImpl();
+	const RadioButtonImpl *getImpl() const;
 };
 
 typedef enum

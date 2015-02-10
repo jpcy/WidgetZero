@@ -602,6 +602,8 @@ struct MenuBarImpl : public WidgetImpl
 struct RadioButtonImpl : public ButtonImpl
 {
 	RadioButtonImpl(const std::string &label = std::string());
+	virtual void draw(Rect clip);
+	virtual Size measure();
 };
 
 struct ScrollerNub : public WidgetImpl

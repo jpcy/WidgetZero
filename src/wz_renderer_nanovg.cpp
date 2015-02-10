@@ -642,6 +642,46 @@ Size NVGRenderer::measureMenuBar(MenuBarImpl * /*menuBar*/)
 	return Size();
 }
 
+void NVGRenderer::drawRadioButton(RadioButtonImpl *button, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+	const Rect rect = button->getAbsoluteRect();
+
+	nvgSave(vg);
+
+	if (!clipToRectIntersection(clip, rect))
+		return;
+
+	// Inner circle.
+	if (button->isSet())
+	{
+		nvgBeginPath(vg);
+		nvgCircle(vg, (float)(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS), rect.y + rect.h / 2.0f, (float)WZ_SKIN_RADIO_BUTTON_INNER_RADIUS);
+		nvgFillColor(vg, WZ_SKIN_RADIO_BUTTON_SET_COLOR);
+		nvgFill(vg);
+	}
+
+	// Outer circle.
+	nvgBeginPath(vg);
+	nvgCircle(vg, (float)(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS), rect.y + rect.h / 2.0f, (float)WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS - 0.5f);
+	nvgStrokeColor(vg, button->getHover() ? WZ_SKIN_RADIO_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_RADIO_BUTTON_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Label.
+	print(rect.x + WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), WZ_SKIN_RADIO_BUTTON_TEXT_COLOR, button->getLabel(), 0);
+
+	nvgRestore(vg);
+}
+
+Size NVGRenderer::measureRadioButton(RadioButtonImpl *button)
+{
+	Size size;
+	button->measureText(button->getLabel(), 0, &size.w, &size.h);
+	size.w += WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS * 2 + WZ_SKIN_RADIO_BUTTON_SPACING;
+	size.h = WZ_MAX(size.h, WZ_SKIN_RADIO_BUTTON_OUTER_RADIUS);
+	return size;
+}
+
 struct NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;
