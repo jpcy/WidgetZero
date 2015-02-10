@@ -504,10 +504,8 @@ void WidgetImpl::addChildWidgetInternal(struct WidgetImpl *child)
 	child->resizeToMeasuredRecursive();
 	child->refreshRect();
 
-	if (child->vtable.added)
-	{
-		child->vtable.added(this, child);
-	}
+	// Inform the child it now has a parent.
+	child->onParented(this);
 }
 
 void WidgetImpl::addChildWidget(Widget *child)

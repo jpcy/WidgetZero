@@ -47,9 +47,6 @@ typedef struct
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
 
-	// The widget was added to a parent widget (see WidgetImpl::addChildWidget).
-	void (*added)(struct WidgetImpl *parent, struct WidgetImpl *widget);
-
 	// WidgetImpl.renderer has been changed
 	void (*renderer_changed)(struct WidgetImpl *widget);
 
@@ -105,6 +102,10 @@ struct WidgetImpl
 {
 	WidgetImpl();
 	virtual ~WidgetImpl();
+	
+	// The widget was added to a parent widget (see WidgetImpl::addChildWidget).
+	virtual void onParented(struct WidgetImpl *parent) {}
+	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
 
@@ -602,6 +603,7 @@ struct MenuBarImpl : public WidgetImpl
 struct RadioButtonImpl : public ButtonImpl
 {
 	RadioButtonImpl(const std::string &label = std::string());
+	virtual void onParented(struct WidgetImpl *parent);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 };

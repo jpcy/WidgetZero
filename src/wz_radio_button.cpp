@@ -42,25 +42,24 @@ static void wz_radio_button_clicked(Event *e)
 	}
 }
 
-static void wz_radio_button_added(struct WidgetImpl *parent, struct WidgetImpl *widget)
+RadioButtonImpl::RadioButtonImpl(const std::string &label) : ButtonImpl(label)
+{
+	type = WZ_TYPE_RADIO_BUTTON;
+	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	addCallbackClicked(wz_radio_button_clicked);
+}
+
+void RadioButtonImpl::onParented(struct WidgetImpl *parent)
 {
 	// If this is the only radio button child, set it.
 	// This means that the first radio button will be selected.
 	for (size_t i = 0; i < parent->children.size(); i++)
 	{
-		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != widget)
+		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != this)
 			return;
 	}
 
-	((struct ButtonImpl *)widget)->set(true);
-}
-
-RadioButtonImpl::RadioButtonImpl(const std::string &label) : ButtonImpl(label)
-{
-	type = WZ_TYPE_RADIO_BUTTON;
-	vtable.added = wz_radio_button_added;
-	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	addCallbackClicked(wz_radio_button_clicked);
+	set(true);
 }
 
 void RadioButtonImpl::draw(Rect clip)
