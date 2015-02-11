@@ -741,12 +741,6 @@ static void wz_text_edit_text_input(struct WidgetImpl *widget, const char *text)
 	wz_text_edit_enter_text(textEdit, text);
 }
 
-void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border)
-{
-	WZ_ASSERT(textEdit);
-	textEdit->border = border;
-}
-
 TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 {
 	type = WZ_TYPE_TEXT_EDIT;
@@ -803,6 +797,11 @@ bool TextEditImpl::isMultiline() const
 Border TextEditImpl::getBorder() const
 {
 	return border;
+}
+
+void TextEditImpl::setBorder(Border border)
+{
+	this->border = border;
 }
 
 Rect TextEditImpl::getTextRect() const

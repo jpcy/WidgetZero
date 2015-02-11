@@ -738,6 +738,7 @@ struct TextEditImpl : public WidgetImpl
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
 	bool isMultiline() const;
 	Border getBorder() const;
+	void setBorder(Border border);
 	Rect getTextRect() const;
 	const char *getText() const;
 	void setText(const char *text);
@@ -840,7 +841,5 @@ private:
 
 void wz_invoke_event(Event *e);
 void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
-
-void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
 
 } // namespace wz

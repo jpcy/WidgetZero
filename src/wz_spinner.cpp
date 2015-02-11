@@ -140,7 +140,7 @@ void SpinnerImpl::onRendererChanged()
 	// Shrink the text edit border to exclude the increment and decrement buttons.
 	Border textEditBorder = textEdit->getBorder();
 	textEditBorder.right += 16;
-	wz_text_edit_set_border(textEdit, textEditBorder);
+	textEdit->setBorder(textEditBorder);
 }
 
 void SpinnerImpl::onFontChanged(const char *fontFace, float fontSize)
