@@ -122,19 +122,6 @@ static void wz_list_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_list_update_scroller(list);
 }
 
-static void wz_list_set_visible(struct WidgetImpl *widget, bool visible)
-{
-	WZ_ASSERT(widget);
-	widget->hidden = !visible;
-
-	// Clear some additional state when hidden.
-	if (!widget->getVisible())
-	{
-		struct ListImpl *list = (struct ListImpl *)widget;
-		list->hoveredItem = -1;
-	}
-}
-
 static void wz_list_update_mouse_over_item(struct ListImpl *list, int mouseX, int mouseY)
 {
 	Rect itemsRect, rect;
@@ -280,7 +267,6 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 
 	vtable.set_rect = wz_list_set_rect;
-	vtable.set_visible = wz_list_set_visible;
 	vtable.mouse_button_down = wz_list_mouse_button_down;
 	vtable.mouse_button_up = wz_list_mouse_button_up;
 	vtable.mouse_move = wz_list_mouse_move;
@@ -307,6 +293,15 @@ void ListImpl::onFontChanged(const char *fontFace, float fontSize)
 	if (renderer)
 	{
 		wz_list_refresh_item_height(this);
+	}
+}
+
+void ListImpl::onVisibilityChanged()
+{
+	// Clear some additional state when hidden.
+	if (!getVisible())
+	{
+		hoveredItem = -1;
 	}
 }
 

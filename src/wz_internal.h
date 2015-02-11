@@ -50,9 +50,6 @@ typedef struct
 	// If NULL, WidgetImpl.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct WidgetImpl *widget, Rect rect);
 
-	// Some additional widget state may been to be cleared when a widget is hidden.
-	void (*set_visible)(struct WidgetImpl *widget, bool visible);
-
 	void (*mouse_button_down)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -105,6 +102,9 @@ struct WidgetImpl
 	virtual void onRendererChanged() {}
 
 	virtual void onFontChanged(const char *fontFace, float fontSize) {}
+
+	// Some additional widget state may been to be cleared when a widget is hidden.
+	virtual void onVisibilityChanged() {}
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -415,6 +415,7 @@ struct ListImpl : public WidgetImpl
 	ListImpl(uint8_t *itemData, int itemStride, int nItems);
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
+	virtual void onVisibilityChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	Border getItemsBorder() const;

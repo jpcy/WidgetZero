@@ -385,14 +385,8 @@ bool WidgetImpl::getHover() const
 
 void WidgetImpl::setVisible(bool visible)
 {
-	if (vtable.set_visible)
-	{
-		vtable.set_visible(this, visible);
-	}
-	else
-	{
-		hidden = !visible;
-	}
+	hidden = !visible;
+	onVisibilityChanged();
 }
 
 bool WidgetImpl::getVisible() const
