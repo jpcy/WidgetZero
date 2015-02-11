@@ -804,6 +804,13 @@ struct WindowImpl : public WidgetImpl
 	Rect getHeaderRect() const;
 	void setTitle(const char *title);
 	const char *getTitle() const;
+	struct WidgetImpl *getContentWidget();
+	int getDrawPriority() const;
+	void setDrawPriority(int drawPriority);
+
+	// Tell the window it's being docked.
+	void dock();
+
 	void add(Widget *widget);
 	void add(struct WidgetImpl *widget);
 	void remove(Widget *widget);
@@ -835,13 +842,5 @@ void wz_invoke_event(Event *e);
 void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
 
 void wz_text_edit_set_border(struct TextEditImpl *textEdit, Border border);
-
-struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window);
-
-// Tell the window it's being docked.
-void wz_window_dock(struct WindowImpl *window);
-
-int wz_window_get_draw_priority(const struct WindowImpl *window);
-void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority);
 
 } // namespace wz

@@ -419,6 +419,28 @@ const char *WindowImpl::getTitle() const
 	return title.c_str();
 }
 
+struct WidgetImpl *WindowImpl::getContentWidget()
+{
+	return content;
+}
+
+int WindowImpl::getDrawPriority() const
+{
+	return drawPriority;
+}
+
+void WindowImpl::setDrawPriority(int drawPriority)
+{
+	this->drawPriority = drawPriority;
+}
+
+void WindowImpl::dock()
+{
+	// Save the window size before docking so it can be restored if the window is undocked later.
+	sizeBeforeDocking.w = rect.w;
+	sizeBeforeDocking.h = rect.h;
+}
+
 void WindowImpl::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
@@ -454,32 +476,6 @@ void WindowImpl::remove(struct WidgetImpl *widget)
 void WindowImpl::refreshHeaderHeight()
 {
 	headerHeight = getLineHeight() + 6; // Padding.
-}
-
-struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window)
-{
-	WZ_ASSERT(window);
-	return window->content;
-}
-
-// Save the window size before docking so it can be restored if the window is undocked later.
-void wz_window_dock(struct WindowImpl *window)
-{
-	WZ_ASSERT(window);
-	window->sizeBeforeDocking.w = window->rect.w;
-	window->sizeBeforeDocking.h = window->rect.h;
-}
-
-int wz_window_get_draw_priority(const struct WindowImpl *window)
-{
-	WZ_ASSERT(window);
-	return window->drawPriority;
-}
-
-void wz_window_set_draw_priority(struct WindowImpl *window, int drawPriority)
-{
-	WZ_ASSERT(window);
-	window->drawPriority = drawPriority;
 }
 
 /*

@@ -217,7 +217,7 @@ static int wz_compare_window_draw_priorities_docked(const void *a, const void *b
 		return 1;
 	}
 
-	return wz_window_get_draw_priority(window1) - wz_window_get_draw_priority(window2);
+	return window1->getDrawPriority() - window2->getDrawPriority();
 }
 
 static void wz_widget_draw_if_visible(struct WidgetImpl *widget)
@@ -528,7 +528,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 	// Special case for combo dropdown list poking outside the window.
 	if (widget->window && !(widget->parent && widget->parent->type == WZ_TYPE_COMBO))
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, wz_window_get_content_widget(widget->window)->getAbsoluteRect());
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, widget->window->getContentWidget()->getAbsoluteRect());
 	}
 	else
 	{
@@ -907,7 +907,7 @@ void MainWindowImpl::dockWindow(struct WindowImpl *window, DockPosition dockPosi
 	}
 
 	// Inform the window it is being docked.
-	wz_window_dock(window);
+	window->dock();
 
 	// Resize the window.
 	window->setRectInternal(calculateDockWindowRect(dockPosition, window->getSize()));
@@ -1137,9 +1137,9 @@ struct WindowImpl *MainWindowImpl::getHoverWindow(int mouseX, int mouseY)
 		docked = getWindowDockPosition(window) != WZ_DOCK_POSITION_NONE;
 
 		// Undocked always takes priority over docked.
-		if (wz_window_get_draw_priority(window) >= drawPriority || (resultIsDocked && !docked))
+		if (window->getDrawPriority() >= drawPriority || (resultIsDocked && !docked))
 		{
-			drawPriority = wz_window_get_draw_priority((struct WindowImpl *)widget);
+			drawPriority = ((struct WindowImpl *)widget)->getDrawPriority();
 			resultIsDocked = docked;
 			result = window;
 		}
@@ -1373,7 +1373,7 @@ void MainWindowImpl::updateDockPreviewVisible(int mouseX, int mouseY)
 
 static int CompareWindowDrawPriorities(const void *a, const void *b)
 {
-	return wz_window_get_draw_priority((const struct WindowImpl *)a) - wz_window_get_draw_priority((const struct WindowImpl *)b);
+	return ((const struct WindowImpl *)a)->getDrawPriority() - ((const struct WindowImpl *)b)->getDrawPriority();
 }
 
 void MainWindowImpl::updateWindowDrawPriorities(struct WindowImpl *top)
@@ -1399,13 +1399,13 @@ void MainWindowImpl::updateWindowDrawPriorities(struct WindowImpl *top)
 
 	for (i = 0; i < nWindows; i++)
 	{
-		wz_window_set_draw_priority(windows[i], i);
+		windows[i]->setDrawPriority(i);
 	}
 
 	// Give the top window the highest priority.
 	if (top)
 	{
-		wz_window_set_draw_priority(top, i);
+		top->setDrawPriority(i);
 	}
 }
 
