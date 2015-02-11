@@ -331,23 +331,6 @@ static Rect wz_window_get_children_clip_rect(struct WidgetImpl *widget)
 	return window->content->getAbsoluteRect();
 }
 
-static void wz_window_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	struct WindowImpl *window;
-	Rect contentRect;
-
-	WZ_ASSERT(widget);
-	window = (struct WindowImpl *)widget;
-	window->rect = rect;
-
-	contentRect.x = window->borderSize;
-	contentRect.y = window->borderSize + window->headerHeight;
-	contentRect.w = rect.w - window->borderSize * 2;
-	contentRect.h = rect.h - (window->headerHeight + window->borderSize * 2);
-
-	window->content->setRectInternal(contentRect);
-}
-
 WindowImpl::WindowImpl(const std::string &title)
 {
 	type = WZ_TYPE_WINDOW;
@@ -360,7 +343,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	vtable.mouse_button_up = wz_window_mouse_button_up;
 	vtable.mouse_move = wz_window_mouse_move;
 	vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
-	vtable.set_rect = wz_window_set_rect;
 	this->title = title;
 
 	content = new struct WidgetImpl;
@@ -377,6 +359,16 @@ void WindowImpl::onFontChanged(const char *fontFace, float fontSize)
 {
 	refreshHeaderHeight();
 	refreshRect();
+}
+
+void WindowImpl::onRectChanged()
+{
+	Rect contentRect;
+	contentRect.x = borderSize;
+	contentRect.y = borderSize + headerHeight;
+	contentRect.w = rect.w - borderSize * 2;
+	contentRect.h = rect.h - (headerHeight + borderSize * 2);
+	content->setRectInternal(contentRect);
 }
 
 void WindowImpl::draw(Rect clip)

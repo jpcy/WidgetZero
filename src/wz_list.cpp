@@ -112,16 +112,6 @@ static void wz_list_refresh_item_height(struct ListImpl *list)
 	wz_list_set_item_height_internal(list, list->getLineHeight() + 2);
 }
 
-static void wz_list_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	struct ListImpl *list;
-
-	WZ_ASSERT(widget);
-	widget->rect = rect;
-	list = (struct ListImpl *)widget;
-	wz_list_update_scroller(list);
-}
-
 static void wz_list_update_mouse_over_item(struct ListImpl *list, int mouseX, int mouseY)
 {
 	Rect itemsRect, rect;
@@ -266,7 +256,6 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	scroller = NULL;
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 
-	vtable.set_rect = wz_list_set_rect;
 	vtable.mouse_button_down = wz_list_mouse_button_down;
 	vtable.mouse_button_up = wz_list_mouse_button_up;
 	vtable.mouse_move = wz_list_mouse_move;
@@ -303,6 +292,11 @@ void ListImpl::onVisibilityChanged()
 	{
 		hoveredItem = -1;
 	}
+}
+
+void ListImpl::onRectChanged()
+{
+	wz_list_update_scroller(this);
 }
 
 void ListImpl::draw(Rect clip)

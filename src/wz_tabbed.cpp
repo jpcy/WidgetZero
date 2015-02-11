@@ -120,28 +120,6 @@ TABBED WIDGET
 ================================================================================
 */
 
-static void wz_tabbed_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	struct TabbedImpl *tabbed;
-	Size pageSize;
-
-	WZ_ASSERT(widget);
-	widget->rect = rect;
-	tabbed = (struct TabbedImpl *)widget;
-
-	// Set the tab bar width to match.
-	tabbed->tabBar->setWidthInternal(rect.w);
-
-	// Resize the pages to take up the remaining space.
-	pageSize.w = rect.w;
-	pageSize.h = rect.h - tabbed->tabBar->getHeight();
-
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		tabbed->pages[i].page->setSizeInternal(pageSize);
-	}
-}
-
 static void wz_tabbed_tab_bar_tab_changed(Event *e)
 {
 	struct TabbedImpl *tabbed;
@@ -159,11 +137,26 @@ static void wz_tabbed_tab_bar_tab_changed(Event *e)
 TabbedImpl::TabbedImpl()
 {
 	type = WZ_TYPE_TABBED;
-	vtable.set_rect = wz_tabbed_set_rect;
 
 	tabBar = new TabBarImpl;
 	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
 	addChildWidget(tabBar);
+}
+
+void TabbedImpl::onRectChanged()
+{
+	// Set the tab bar width to match.
+	tabBar->setWidthInternal(rect.w);
+
+	// Resize the pages to take up the remaining space.
+	Size pageSize;
+	pageSize.w = rect.w;
+	pageSize.h = rect.h - tabBar->getHeight();
+
+	for (size_t i = 0; i < pages.size(); i++)
+	{
+		pages[i].page->setSizeInternal(pageSize);
+	}
 }
 
 void TabbedImpl::draw(Rect clip)

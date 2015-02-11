@@ -135,19 +135,21 @@ static void wz_nub_mouse_move(struct WidgetImpl *widget, int mouseX, int mouseY,
 	}
 }
 
-static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
+ScrollerNub::ScrollerNub()
 {
-	Size containerSize;
+	isPressed = false;
+}
+
+void ScrollerNub::updateRect()
+{
+	const Size containerSize = parent->getSize();
 	Rect rect;
 
-	WZ_ASSERT(nub);
-	containerSize = nub->parent->getSize();
-
-	if (nub->scroller->scrollerType == WZ_SCROLLER_VERTICAL)
+	if (scroller->scrollerType == WZ_SCROLLER_VERTICAL)
 	{
 		int availableSpace = containerSize.h;
 
-		if (nub->scroller->maxValue == 0)
+		if (scroller->maxValue == 0)
 		{
 			// Max value not set, fill available space.
 			rect.y = 0;
@@ -155,9 +157,9 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 		}
 		else
 		{
-			if (nub->scroller->nubScale > 0)
+			if (scroller->nubScale > 0)
 			{
-				rect.h = WZ_CLAMPED(WZ_MINIMUM_NUB_SIZE, (int)(availableSpace * nub->scroller->nubScale), availableSpace);
+				rect.h = WZ_CLAMPED(WZ_MINIMUM_NUB_SIZE, (int)(availableSpace * scroller->nubScale), availableSpace);
 			}
 			else
 			{
@@ -165,7 +167,7 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 			}
 
 			availableSpace -= rect.h;
-			rect.y = (int)(availableSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
+			rect.y = (int)(availableSpace * (scroller->value / (float)scroller->maxValue));
 		}
 
 		rect.x = 0;
@@ -175,7 +177,7 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 	{
 		int availableSpace = containerSize.w;
 
-		if (nub->scroller->maxValue == 0)
+		if (scroller->maxValue == 0)
 		{
 			// Max value not set, just display at the left.
 			rect.x = 0;
@@ -183,9 +185,9 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 		}
 		else
 		{
-			if (nub->scroller->nubScale > 0)
+			if (scroller->nubScale > 0)
 			{
-				rect.w = WZ_CLAMPED(WZ_MINIMUM_NUB_SIZE, (int)(availableSpace * nub->scroller->nubScale), availableSpace);
+				rect.w = WZ_CLAMPED(WZ_MINIMUM_NUB_SIZE, (int)(availableSpace * scroller->nubScale), availableSpace);
 			}
 			else
 			{
@@ -193,19 +195,14 @@ static void wz_scroller_nub_update_rect(struct ScrollerNub *nub)
 			}
 
 			availableSpace -= rect.w;
-			rect.x = (int)(availableSpace * (nub->scroller->value / (float)nub->scroller->maxValue));
+			rect.x = (int)(availableSpace * (scroller->value / (float)scroller->maxValue));
 		}
 
 		rect.y = 0;
 		rect.h = containerSize.h;
 	}
 
-	nub->setRectInternal(rect);
-}
-
-ScrollerNub::ScrollerNub()
-{
-	isPressed = false;
+	setRectInternal(rect);
 }
 
 static struct ScrollerNub *wz_scroller_nub_create(struct ScrollerImpl *scroller)
@@ -385,23 +382,12 @@ static void wz_scroller_increment_button_clicked(Event *e)
 	((struct ScrollerImpl *)e->base.widget->parent->parent)->incrementValue();
 }
 
-static void wz_scroller_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	struct ScrollerImpl *scroller;
-
-	WZ_ASSERT(widget);
-	scroller = (struct ScrollerImpl *)widget;
-	widget->rect = rect;
-	wz_scroller_nub_update_rect(scroller->nub);
-}
-
 ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	type = WZ_TYPE_SCROLLER;
 	nubScale = 0;
 	vtable.mouse_button_up = wz_scroller_mouse_button_up;
 	vtable.mouse_wheel_move = wz_scroller_mouse_wheel_move;
-	vtable.set_rect = wz_scroller_set_rect;
 	this->scrollerType = scrollerType;
 	this->stepValue = WZ_MAX(1, stepValue);
 	this->maxValue = WZ_MAX(0, maxValue);
@@ -431,7 +417,12 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
 	layout->add(incrementButton);
 
-	wz_scroller_nub_update_rect(nub);
+	nub->updateRect();
+}
+
+void ScrollerImpl::onRectChanged()
+{
+	nub->updateRect();
 }
 
 void ScrollerImpl::draw(Rect clip)
@@ -471,7 +462,7 @@ void ScrollerImpl::setValue(int value)
 	e.scroller.value = this->value;
 	wz_invoke_event(&e, value_changed_callbacks);
 
-	wz_scroller_nub_update_rect(nub);
+	nub->updateRect();
 }
 
 void ScrollerImpl::decrementValue()
@@ -506,7 +497,7 @@ void ScrollerImpl::setMaxValue(int maxValue)
 void ScrollerImpl::setNubScale(float nubScale)
 {
 	this->nubScale = nubScale;
-	wz_scroller_nub_update_rect(nub);
+	nub->updateRect();
 }
 
 void ScrollerImpl::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const

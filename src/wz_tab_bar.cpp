@@ -72,6 +72,7 @@ TAB BAR
 ================================================================================
 */
 
+#if 0
 // Ensure tab height stay the same as the tab bar.
 static void wz_tab_set_rect(struct WidgetImpl *widget, Rect rect)
 {
@@ -79,6 +80,7 @@ static void wz_tab_set_rect(struct WidgetImpl *widget, Rect rect)
 	rect.h = ((struct TabBarImpl *)widget->parent)->rect.h;
 	widget->rect = rect;
 }
+#endif
 
 // Show the scroll buttons if they're required, hides them if they're not.
 static void wz_tab_bar_update_scroll_buttons(struct TabBarImpl *tabBar)
@@ -187,21 +189,6 @@ static void wz_tab_bar_button_pressed(Event *e)
 	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct ButtonImpl *)e->base.widget);
 }
 
-static void wz_tab_bar_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	WZ_ASSERT(widget);
-	widget->rect = rect;
-
-	// Set button heights to match.
-	for (size_t i = 0; i < widget->children.size(); i++)
-	{
-		widget->children[i]->setHeightInternal(rect.h);
-	}
-
-	wz_tab_bar_update_tabs((struct TabBarImpl *)widget);
-	wz_tab_bar_update_scroll_buttons((struct TabBarImpl *)widget);
-}
-
 static Rect wz_tab_bar_get_children_clip_rect(struct WidgetImpl *widget)
 {
 	return widget->getAbsoluteRect();
@@ -234,7 +221,6 @@ TabBarImpl::TabBarImpl()
 	type = WZ_TYPE_TAB_BAR;
 	selectedTab = NULL;
 	scrollValue = 0;
-	vtable.set_rect = wz_tab_bar_set_rect;
 	vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
@@ -253,6 +239,18 @@ TabBarImpl::TabBarImpl()
 	incrementButton->setVisible(false);
 	incrementButton->setDrawLast(true);
 	incrementButton->setOverlap(true);
+}
+
+void TabBarImpl::onRectChanged()
+{
+	// Set button heights to match.
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->setHeightInternal(rect.h);
+	}
+
+	wz_tab_bar_update_tabs(this);
+	wz_tab_bar_update_scroll_buttons(this);
 }
 
 void TabBarImpl::draw(Rect clip)
@@ -280,7 +278,6 @@ struct ButtonImpl *TabBarImpl::createTab()
 		rect.x += tabs[i]->getWidth();
 	}
 
-	(tab)->vtable.set_rect = wz_tab_set_rect;
 	tab->addCallbackPressed(wz_tab_bar_button_pressed);
 	tab->setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
 	tab->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);

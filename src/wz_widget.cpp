@@ -593,14 +593,8 @@ void WidgetImpl::setRectInternalRecursive(Rect rect)
 	// Apply alignment and stretching.
 	rect = calculateAlignedStretchedRect(rect);
 
-	if (vtable.set_rect)
-	{
-		vtable.set_rect(this, rect);
-	}
-	else
-	{
-		this->rect = rect;
-	}
+	this->rect = rect;
+	onRectChanged();
 
 	// Don't recurse if the rect hasn't changed.
 	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)

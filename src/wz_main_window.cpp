@@ -238,26 +238,6 @@ static void wz_widget_draw_if_visible(struct WidgetImpl *widget)
 	}
 }
 
-static void wz_main_window_set_rect(struct WidgetImpl *widget, Rect rect)
-{
-	struct MainWindowImpl *mainWindow;
-
-	WZ_ASSERT(widget);
-	mainWindow = (struct MainWindowImpl *)widget;
-	mainWindow->rect.w = rect.w;
-	mainWindow->rect.h = rect.h;
-
-	// Match the menu bar width to the main window width.
-	if (mainWindow->menuBar)
-	{
-		mainWindow->menuBar->setWidth(mainWindow->rect.w);
-	}
-
-	mainWindow->updateDockIconPositions();
-	mainWindow->updateDockingRects();
-	mainWindow->updateContentRect();
-}
-
 MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 {
 	type = WZ_TYPE_MAIN_WINDOW;
@@ -273,7 +253,6 @@ MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 
 	this->renderer = renderer;
 	mainWindow = this;
-	vtable.set_rect = wz_main_window_set_rect;
 	isTextCursorVisible_ = true;
 
 	// Create content widget.
@@ -315,6 +294,19 @@ MainWindowImpl::MainWindowImpl(IRenderer *renderer)
 	// Create menu bar.
 	menuBar = new MenuBarImpl;
 	setMenuBar(menuBar);
+}
+
+void MainWindowImpl::onRectChanged()
+{
+	// Match the menu bar width to the main window width.
+	if (menuBar)
+	{
+		menuBar->setWidth(rect.w);
+	}
+
+	updateDockIconPositions();
+	updateDockingRects();
+	updateContentRect();
 }
 
 bool MainWindowImpl::isShiftKeyDown() const

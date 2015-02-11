@@ -47,9 +47,6 @@ typedef struct
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
 
-	// If NULL, WidgetImpl.rect will be set to rect, otherwise this function is called.
-	void (*set_rect)(struct WidgetImpl *widget, Rect rect);
-
 	void (*mouse_button_down)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -105,6 +102,8 @@ struct WidgetImpl
 
 	// Some additional widget state may been to be cleared when a widget is hidden.
 	virtual void onVisibilityChanged() {}
+
+	virtual void onRectChanged() {}
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -352,6 +351,7 @@ struct ComboImpl : public WidgetImpl
 {
 	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
 	virtual void onFontChanged(const char *fontFace, float fontSize);
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct ListImpl *getList();
@@ -416,6 +416,7 @@ struct ListImpl : public WidgetImpl
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onVisibilityChanged();
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	Border getItemsBorder() const;
@@ -470,6 +471,7 @@ struct ListImpl : public WidgetImpl
 struct MainWindowImpl : public WidgetImpl
 {
 	MainWindowImpl(IRenderer *renderer);
+	virtual void onRectChanged();
 
 	bool isShiftKeyDown() const;
 	bool isControlKeyDown() const;
@@ -620,6 +622,7 @@ struct RadioButtonImpl : public ButtonImpl
 struct ScrollerNub : public WidgetImpl
 {
 	ScrollerNub();
+	void updateRect();
 
 	struct ScrollerImpl *scroller;
 	bool isPressed;
@@ -634,6 +637,7 @@ struct ScrollerNub : public WidgetImpl
 struct ScrollerImpl : public WidgetImpl
 {
 	ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue);
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	ScrollerType getType() const;
@@ -673,6 +677,7 @@ struct SpinnerImpl : public WidgetImpl
 struct StackLayoutImpl : public WidgetImpl
 {
 	StackLayoutImpl(StackLayoutDirection direction, int spacing);
+	virtual void onRectChanged();
 	void setDirection(StackLayoutDirection direction);
 	void setSpacing(int spacing);
 	int getSpacing() const;
@@ -685,11 +690,16 @@ struct StackLayoutImpl : public WidgetImpl
 
 	// Spacing between child widgets. Applied to the top/left of children.
 	int spacing;
+
+private:
+	void layoutVertical();
+	void layoutHorizontal();
 };
 
 struct TabBarImpl : public WidgetImpl
 {
 	TabBarImpl();
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct ButtonImpl *createTab();
@@ -722,6 +732,7 @@ TabbedPage;
 struct TabbedImpl : public WidgetImpl
 {
 	TabbedImpl();
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void addTab(struct ButtonImpl **tab, struct WidgetImpl **page);
@@ -734,6 +745,7 @@ struct TextEditImpl : public WidgetImpl
 {
 	TextEditImpl(bool multiline, int maximumTextLength);
 	virtual void onRendererChanged();
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
@@ -799,6 +811,7 @@ struct WindowImpl : public WidgetImpl
 	WindowImpl(const std::string &title);
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
+	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getHeaderHeight() const;
