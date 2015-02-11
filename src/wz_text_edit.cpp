@@ -405,13 +405,6 @@ EVENT HANDLING
 ================================================================================
 */
 
-static void wz_text_edit_renderer_changed(struct WidgetImpl *widget)
-{
-	struct TextEditImpl *textEdit = (struct TextEditImpl *)widget;
-	WZ_ASSERT(textEdit);
-	textEdit->border.left = textEdit->border.top = textEdit->border.right = textEdit->border.bottom = 4;
-}
-
 static void wz_text_edit_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	struct TextEditImpl *textEdit;
@@ -762,7 +755,6 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 	cursorIndex = scrollValue = 0;
 	selectionStartIndex = selectionEndIndex = 0;
 
-	vtable.renderer_changed = wz_text_edit_renderer_changed;
 	vtable.set_rect = wz_text_edit_set_rect;
 	vtable.mouse_button_down = wz_text_edit_mouse_button_down;
 	vtable.mouse_button_up = wz_text_edit_mouse_button_up;
@@ -781,6 +773,11 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 
 	this->multiline = multiline;
 	this->maximumTextLength = maximumTextLength;
+}
+
+void TextEditImpl::onRendererChanged()
+{
+	border.left = border.top = border.right = border.bottom = 4;
 }
 
 void TextEditImpl::draw(Rect clip)

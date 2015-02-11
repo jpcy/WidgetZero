@@ -837,9 +837,9 @@ void WidgetImpl::setRenderer(IRenderer *renderer)
 	IRenderer *oldRenderer = this->renderer;
 	this->renderer = renderer;
 
-	if (oldRenderer != this->renderer && vtable.renderer_changed)
+	if (oldRenderer != this->renderer)
 	{
-		vtable.renderer_changed(this);
+		onRendererChanged();
 	}
 }
 

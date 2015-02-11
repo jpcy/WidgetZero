@@ -34,14 +34,6 @@ static void wz_window_refresh_header_height(struct WidgetImpl *widget)
 	window->headerHeight = widget->getLineHeight() + 6; // Padding.
 }
 
-static void wz_window_renderer_changed(struct WidgetImpl *widget)
-{
-	struct WindowImpl *window = (struct WindowImpl *)widget;
-	WZ_ASSERT(window);
-	wz_window_refresh_header_height(widget);
-	widget->refreshRect();
-}
-
 static void wz_window_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
 {
 	wz_window_refresh_header_height(widget);
@@ -376,7 +368,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
 
-	vtable.renderer_changed = wz_window_renderer_changed;
 	vtable.font_changed = wz_window_font_changed;
 	vtable.mouse_button_down = wz_window_mouse_button_down;
 	vtable.mouse_button_up = wz_window_mouse_button_up;
@@ -387,6 +378,12 @@ WindowImpl::WindowImpl(const std::string &title)
 
 	content = new struct WidgetImpl;
 	addChildWidget(content);
+}
+
+void WindowImpl::onRendererChanged()
+{
+	wz_window_refresh_header_height(this);
+	refreshRect();
 }
 
 void WindowImpl::draw(Rect clip)

@@ -105,20 +105,6 @@ static void wz_spinner_increment_button_clicked(Event *e)
 	spinner->setValue(spinner->getValue() + 1);
 }
 
-static void wz_spinner_renderer_changed(struct WidgetImpl *widget)
-{
-	struct SpinnerImpl *spinner;
-	Border textEditBorder;
-
-	WZ_ASSERT(widget);
-	spinner = (struct SpinnerImpl *)widget;
-
-	// Shrink the text edit border to exclude the increment and decrement buttons.
-	textEditBorder = spinner->textEdit->getBorder();
-	textEditBorder.right += 16;
-	wz_text_edit_set_border(spinner->textEdit, textEditBorder);
-}
-
 // Set the text edit font to match.
 static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
 {
@@ -131,7 +117,6 @@ SpinnerImpl::SpinnerImpl()
 {
 	type = WZ_TYPE_SPINNER;
 
-	vtable.renderer_changed = wz_spinner_renderer_changed;
 	vtable.font_changed = wz_spinner_font_changed;
 
 	textEdit = new TextEditImpl(false, 256);
@@ -158,6 +143,14 @@ SpinnerImpl::SpinnerImpl()
 	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
 	incrementButton->setOverlap(true);
 	addChildWidget(incrementButton);
+}
+
+void SpinnerImpl::onRendererChanged()
+{
+	// Shrink the text edit border to exclude the increment and decrement buttons.
+	Border textEditBorder = textEdit->getBorder();
+	textEditBorder.right += 16;
+	wz_text_edit_set_border(textEdit, textEditBorder);
 }
 
 void SpinnerImpl::draw(Rect clip)

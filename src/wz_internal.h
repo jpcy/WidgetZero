@@ -47,9 +47,6 @@ typedef struct
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
 
-	// WidgetImpl.renderer has been changed
-	void (*renderer_changed)(struct WidgetImpl *widget);
-
 	// If NULL, WidgetImpl.rect will be set to rect, otherwise this function is called.
 	void (*set_rect)(struct WidgetImpl *widget, Rect rect);
 
@@ -105,6 +102,9 @@ struct WidgetImpl
 	
 	// The widget was added to a parent widget (see WidgetImpl::addChildWidget).
 	virtual void onParented(struct WidgetImpl *parent) {}
+
+	// WidgetImpl::renderer has been changed.
+	virtual void onRendererChanged() {}
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -373,6 +373,7 @@ struct FrameImpl : public WidgetImpl
 struct GroupBoxImpl : public WidgetImpl
 {
 	GroupBoxImpl(const std::string &label = std::string());
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setLabel(const char *label);
@@ -384,6 +385,9 @@ struct GroupBoxImpl : public WidgetImpl
 
 	struct WidgetImpl *content;
 	std::string label;
+
+private:
+	void refreshMargin();
 };
 
 struct LabelImpl : public WidgetImpl
@@ -408,6 +412,7 @@ private:
 struct ListImpl : public WidgetImpl
 {
 	ListImpl(uint8_t *itemData, int itemStride, int nItems);
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	Border getItemsBorder() const;
@@ -593,6 +598,7 @@ struct MenuBarButtonImpl : public WidgetImpl
 struct MenuBarImpl : public WidgetImpl
 {
 	MenuBarImpl();
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct MenuBarButtonImpl *createButton();
@@ -649,6 +655,7 @@ struct ScrollerImpl : public WidgetImpl
 struct SpinnerImpl : public WidgetImpl
 {
 	SpinnerImpl();
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getValue() const;
@@ -722,6 +729,7 @@ struct TabbedImpl : public WidgetImpl
 struct TextEditImpl : public WidgetImpl
 {
 	TextEditImpl(bool multiline, int maximumTextLength);
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
@@ -784,6 +792,7 @@ WindowDrag;
 struct WindowImpl : public WidgetImpl
 {
 	WindowImpl(const std::string &title);
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getHeaderHeight() const;

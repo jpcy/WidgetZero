@@ -112,11 +112,6 @@ static void wz_list_refresh_item_height(struct ListImpl *list)
 	wz_list_set_item_height_internal(list, list->getLineHeight() + 2);
 }
 
-static void wz_list_renderer_changed(struct WidgetImpl *widget)
-{
-	wz_list_refresh_item_height((struct ListImpl *)widget);
-}
-
 static void wz_list_set_rect(struct WidgetImpl *widget, Rect rect)
 {
 	struct ListImpl *list;
@@ -144,7 +139,7 @@ static void wz_list_font_changed(struct WidgetImpl *widget, const char *fontFace
 {
 	WZ_ASSERT(widget);
 
-	// Doesn't matter if we can't call this yet (NULL renderer), since wz_list_renderer_changed will call it too.
+	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
 	if (widget->renderer)
 	{
 		wz_list_refresh_item_height((struct ListImpl *)widget);
@@ -295,7 +290,6 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	scroller = NULL;
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 
-	vtable.renderer_changed = wz_list_renderer_changed;
 	vtable.set_rect = wz_list_set_rect;
 	vtable.set_visible = wz_list_set_visible;
 	vtable.font_changed = wz_list_font_changed;
@@ -312,6 +306,11 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	addChildWidget(scroller);
 	wz_list_update_scroller(this);
 	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
+}
+
+void ListImpl::onRendererChanged()
+{
+	wz_list_refresh_item_height(this);
 }
 
 void ListImpl::draw(Rect clip)

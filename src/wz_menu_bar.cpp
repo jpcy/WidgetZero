@@ -131,20 +131,18 @@ MENU BAR
 ================================================================================
 */
 
-static void wz_menu_bar_renderer_changed(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	widget->setHeight(widget->getLineHeight() + WZ_SKIN_MENU_BAR_PADDING);
-}
-
 MenuBarImpl::MenuBarImpl()
 {
 	type = WZ_TYPE_MENU_BAR;
-	vtable.renderer_changed = wz_menu_bar_renderer_changed;
 
 	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
 	addChildWidget(layout);
+}
+
+void MenuBarImpl::onRendererChanged()
+{
+	setHeight(getLineHeight() + WZ_SKIN_MENU_BAR_PADDING);
 }
 
 void MenuBarImpl::draw(Rect clip)

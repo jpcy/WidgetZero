@@ -26,33 +26,19 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_group_box_refresh_margin(struct GroupBoxImpl *groupBox)
-{
-	Border margin;
-	margin.top = margin.bottom = margin.left = margin.right = WZ_SKIN_GROUP_BOX_MARGIN;
-
-	if (!groupBox->label.empty())
-	{
-		margin.top = groupBox->getLineHeight() + WZ_SKIN_GROUP_BOX_MARGIN;
-	}
-
-	groupBox->content->setMargin(margin);
-}
-
-static void wz_group_box_renderer_changed(struct WidgetImpl *widget)
-{
-	wz_group_box_refresh_margin((struct GroupBoxImpl *)widget);
-}
-
 GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
 {
 	type = WZ_TYPE_GROUP_BOX;
-	vtable.renderer_changed = wz_group_box_renderer_changed;
 
 	// Create content widget.
 	content = new WidgetImpl;
 	content->stretch = WZ_STRETCH;
 	addChildWidget(content);
+}
+
+void GroupBoxImpl::onRendererChanged()
+{
+	refreshMargin();
 }
 
 void GroupBoxImpl::draw(Rect clip)
@@ -72,7 +58,7 @@ void GroupBoxImpl::setLabel(const char *label)
 	// Update the margin.
 	if (renderer)
 	{
-		wz_group_box_refresh_margin(this);
+		refreshMargin();
 	}
 }
 
@@ -111,6 +97,19 @@ void GroupBoxImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	content->removeChildWidget(widget);
+}
+
+void GroupBoxImpl::refreshMargin()
+{
+	Border margin;
+	margin.top = margin.bottom = margin.left = margin.right = WZ_SKIN_GROUP_BOX_MARGIN;
+
+	if (!label.empty())
+	{
+		margin.top = getLineHeight() + WZ_SKIN_GROUP_BOX_MARGIN;
+	}
+
+	content->setMargin(margin);
 }
 
 /*
