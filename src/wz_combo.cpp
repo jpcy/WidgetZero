@@ -68,13 +68,6 @@ static void wz_combo_set_rect(struct WidgetImpl *widget, Rect rect)
 	wz_combo_update_list_rect((struct ComboImpl *)widget);
 }
 
-static void wz_combo_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
-{
-	struct ComboImpl *combo = (struct ComboImpl *)widget;
-	WZ_ASSERT(widget);
-	combo->list->setFont(fontFace, fontSize);
-}
-
 static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
 {
 	struct ComboImpl *combo;
@@ -145,7 +138,6 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	isOpen_ = false;
 
 	vtable.set_rect = wz_combo_set_rect;
-	vtable.font_changed = wz_combo_font_changed;
 	vtable.mouse_button_down = wz_combo_mouse_button_down;
 	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
@@ -154,6 +146,11 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	list->setVisible(false);
 	list->setClipInputToParent(false);
 	list->addCallbackItemSelected(wz_combo_list_item_selected);
+}
+
+void ComboImpl::onFontChanged(const char *fontFace, float fontSize)
+{
+	list->setFont(fontFace, fontSize);
 }
 
 void ComboImpl::draw(Rect clip)

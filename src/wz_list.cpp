@@ -135,17 +135,6 @@ static void wz_list_set_visible(struct WidgetImpl *widget, bool visible)
 	}
 }
 
-static void wz_list_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
-{
-	WZ_ASSERT(widget);
-
-	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
-	if (widget->renderer)
-	{
-		wz_list_refresh_item_height((struct ListImpl *)widget);
-	}
-}
-
 static void wz_list_update_mouse_over_item(struct ListImpl *list, int mouseX, int mouseY)
 {
 	Rect itemsRect, rect;
@@ -292,7 +281,6 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 
 	vtable.set_rect = wz_list_set_rect;
 	vtable.set_visible = wz_list_set_visible;
-	vtable.font_changed = wz_list_font_changed;
 	vtable.mouse_button_down = wz_list_mouse_button_down;
 	vtable.mouse_button_up = wz_list_mouse_button_up;
 	vtable.mouse_move = wz_list_mouse_move;
@@ -311,6 +299,15 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 void ListImpl::onRendererChanged()
 {
 	wz_list_refresh_item_height(this);
+}
+
+void ListImpl::onFontChanged(const char *fontFace, float fontSize)
+{
+	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
+	if (renderer)
+	{
+		wz_list_refresh_item_height(this);
+	}
 }
 
 void ListImpl::draw(Rect clip)

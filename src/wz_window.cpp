@@ -28,18 +28,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_window_refresh_header_height(struct WidgetImpl *widget)
-{
-	struct WindowImpl *window = (struct WindowImpl *)widget;
-	window->headerHeight = widget->getLineHeight() + 6; // Padding.
-}
-
-static void wz_window_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
-{
-	wz_window_refresh_header_height(widget);
-	widget->refreshRect();
-}
-
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
 static void wz_window_calculate_border_rects(struct WindowImpl *window, Rect *rects)
 {
@@ -368,7 +356,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
 
-	vtable.font_changed = wz_window_font_changed;
 	vtable.mouse_button_down = wz_window_mouse_button_down;
 	vtable.mouse_button_up = wz_window_mouse_button_up;
 	vtable.mouse_move = wz_window_mouse_move;
@@ -382,7 +369,13 @@ WindowImpl::WindowImpl(const std::string &title)
 
 void WindowImpl::onRendererChanged()
 {
-	wz_window_refresh_header_height(this);
+	refreshHeaderHeight();
+	refreshRect();
+}
+
+void WindowImpl::onFontChanged(const char *fontFace, float fontSize)
+{
+	refreshHeaderHeight();
 	refreshRect();
 }
 
@@ -456,6 +449,11 @@ void WindowImpl::remove(struct WidgetImpl *widget)
 {
 	WZ_ASSERT(widget);
 	content->removeChildWidget(widget);
+}
+
+void WindowImpl::refreshHeaderHeight()
+{
+	headerHeight = getLineHeight() + 6; // Padding.
 }
 
 struct WidgetImpl *wz_window_get_content_widget(struct WindowImpl *window)

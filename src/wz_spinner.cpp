@@ -105,19 +105,9 @@ static void wz_spinner_increment_button_clicked(Event *e)
 	spinner->setValue(spinner->getValue() + 1);
 }
 
-// Set the text edit font to match.
-static void wz_spinner_font_changed(struct WidgetImpl *widget, const char *fontFace, float fontSize)
-{
-	struct SpinnerImpl *spinner = (struct SpinnerImpl *)widget;
-	WZ_ASSERT(spinner);
-	spinner->textEdit->setFont(fontFace, fontSize);
-}
-
 SpinnerImpl::SpinnerImpl()
 {
 	type = WZ_TYPE_SPINNER;
-
-	vtable.font_changed = wz_spinner_font_changed;
 
 	textEdit = new TextEditImpl(false, 256);
 	textEdit->setStretch(WZ_STRETCH);
@@ -151,6 +141,12 @@ void SpinnerImpl::onRendererChanged()
 	Border textEditBorder = textEdit->getBorder();
 	textEditBorder.right += 16;
 	wz_text_edit_set_border(textEdit, textEditBorder);
+}
+
+void SpinnerImpl::onFontChanged(const char *fontFace, float fontSize)
+{
+	// Set the text edit font to match.
+	textEdit->setFont(fontFace, fontSize);
 }
 
 void SpinnerImpl::draw(Rect clip)

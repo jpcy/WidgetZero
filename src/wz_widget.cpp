@@ -350,11 +350,7 @@ void WidgetImpl::setFontFace(const char *fontFace)
 {
 	strcpy(this->fontFace, fontFace);
 	resizeToMeasured();
-
-	if (vtable.font_changed)
-	{
-		vtable.font_changed(this, fontFace, fontSize);
-	}
+	onFontChanged(fontFace, fontSize);
 }
 
 const char *WidgetImpl::getFontFace() const
@@ -366,11 +362,7 @@ void WidgetImpl::setFontSize(float fontSize)
 {
 	this->fontSize = fontSize;
 	resizeToMeasured();
-
-	if (vtable.font_changed)
-	{
-		vtable.font_changed(this, fontFace, fontSize);
-	}
+	onFontChanged(fontFace, fontSize);
 }
 
 float WidgetImpl::getFontSize() const
@@ -383,11 +375,7 @@ void WidgetImpl::setFont(const char *fontFace, float fontSize)
 	strcpy(this->fontFace, fontFace);
 	this->fontSize = fontSize;
 	resizeToMeasured();
-
-	if (vtable.font_changed)
-	{
-		vtable.font_changed(this, fontFace, fontSize);
-	}
+	onFontChanged(fontFace, fontSize);
 }
 
 bool WidgetImpl::getHover() const

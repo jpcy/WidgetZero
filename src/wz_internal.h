@@ -53,8 +53,6 @@ typedef struct
 	// Some additional widget state may been to be cleared when a widget is hidden.
 	void (*set_visible)(struct WidgetImpl *widget, bool visible);
 
-	void (*font_changed)(struct WidgetImpl *widget, const char *fontFace, float fontSize);
-
 	void (*mouse_button_down)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_button_up)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
 	void (*mouse_move)(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -105,6 +103,8 @@ struct WidgetImpl
 
 	// WidgetImpl::renderer has been changed.
 	virtual void onRendererChanged() {}
+
+	virtual void onFontChanged(const char *fontFace, float fontSize) {}
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -351,6 +351,7 @@ struct CheckBoxImpl : public ButtonImpl
 struct ComboImpl : public WidgetImpl
 {
 	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
+	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct ListImpl *getList();
@@ -413,6 +414,7 @@ struct ListImpl : public WidgetImpl
 {
 	ListImpl(uint8_t *itemData, int itemStride, int nItems);
 	virtual void onRendererChanged();
+	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	Border getItemsBorder() const;
@@ -656,6 +658,7 @@ struct SpinnerImpl : public WidgetImpl
 {
 	SpinnerImpl();
 	virtual void onRendererChanged();
+	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getValue() const;
@@ -793,6 +796,7 @@ struct WindowImpl : public WidgetImpl
 {
 	WindowImpl(const std::string &title);
 	virtual void onRendererChanged();
+	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getHeaderHeight() const;
@@ -822,6 +826,9 @@ struct WindowImpl : public WidgetImpl
 
 	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
 	Size sizeBeforeDocking;
+
+private:
+	void refreshHeaderHeight();
 };
 
 void wz_invoke_event(Event *e);
