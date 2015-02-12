@@ -26,81 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_combo_update_list_rect(struct ComboImpl *combo)
-{
-	Rect rect, absRect, listRect;
-	Border listItemsBorder;
-	int listItemHeight, listNumItems, over;
-
-	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
-	if (!combo->mainWindow)
-		return;
-
-	rect = combo->getRect();
-	absRect = combo->getAbsoluteRect();
-
-	// Set list rect.
-	listRect.x = 0;
-	listRect.y = rect.h;
-	listRect.w = rect.w;
-
-	// Make the height large enough to avoid scrolling.
-	listItemsBorder = combo->list->getItemsBorder();
-	listItemHeight = combo->list->getItemHeight();
-	listNumItems = combo->list->getNumItems();
-	listRect.h = listItemsBorder.top + listItemHeight * listNumItems + listItemsBorder.bottom;
-
-	// Clip the height to the mainWindow.
-	// Need to use absolute widget rect y coord to take into account parent window position.
-	over = absRect.y + rect.h + listRect.h - combo->mainWindow->getHeight();
-	
-	if (over > 0)
-	{
-		listRect.h -= over;
-	}
-
-	combo->list->setRectInternal(listRect);
-}
-
-static void wz_combo_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct ComboImpl *combo;
-	Rect listRect;
-
-	WZ_ASSERT(widget);
-	combo = (struct ComboImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		listRect = combo->list->getAbsoluteRect();
-
-		// Open dropdown.
-		if (!combo->isOpen_)
-		{
-			// Lock input.
-			widget->mainWindow->pushLockInputWidget(widget);
-
-			// Show dropdown list and set it to draw last.
-			combo->list->setVisible(true);
-			wz_combo_update_list_rect(combo);
-
-			combo->isOpen_ = true;
-		}
-		// Close dropdown.
-		// Don't do it if the mouse cursor is over the dropdown list.
-		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
-		{
-			// Unlock input.
-			widget->mainWindow->popLockInputWidget(widget);
-
-			// Hide dropdown list.
-			combo->list->setVisible(false);
-
-			combo->isOpen_ = false;
-		}
-	}
-}
-
 static Rect wz_combo_get_children_clip_rect(struct WidgetImpl *widget)
 {
 	// Don't clip children.
@@ -131,7 +56,6 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 	type = WZ_TYPE_COMBO;
 	isOpen_ = false;
 
-	vtable.mouse_button_down = wz_combo_mouse_button_down;
 	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	list = new ListImpl(itemData, itemStride, nItems);
@@ -148,7 +72,40 @@ void ComboImpl::onFontChanged(const char *fontFace, float fontSize)
 
 void ComboImpl::onRectChanged()
 {
-	wz_combo_update_list_rect(this);
+	updateListRect();
+}
+
+void ComboImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		const Rect listRect = list->getAbsoluteRect();
+
+		// Open dropdown.
+		if (!isOpen_)
+		{
+			// Lock input.
+			mainWindow->pushLockInputWidget(this);
+
+			// Show dropdown list and set it to draw last.
+			list->setVisible(true);
+			updateListRect();
+
+			isOpen_ = true;
+		}
+		// Close dropdown.
+		// Don't do it if the mouse cursor is over the dropdown list.
+		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
+		{
+			// Unlock input.
+			mainWindow->popLockInputWidget(this);
+
+			// Hide dropdown list.
+			list->setVisible(false);
+
+			isOpen_ = false;
+		}
+	}
 }
 
 void ComboImpl::draw(Rect clip)
@@ -174,6 +131,29 @@ const struct ListImpl *ComboImpl::getList() const
 bool ComboImpl::isOpen() const
 {
 	return isOpen_;
+}
+
+void ComboImpl::updateListRect()
+{
+	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
+	if (!mainWindow)
+		return;
+
+	// Make the height large enough to avoid scrolling.
+	Border listItemsBorder = list->getItemsBorder();
+	Rect listRect(0, rect.h, rect.w, listItemsBorder.top + list->getItemHeight() * list->getNumItems() + listItemsBorder.bottom);
+
+	// Clip the height to the mainWindow.
+	// Need to use absolute widget rect y coord to take into account parent window position.
+	const Rect absRect = getAbsoluteRect();
+	int over = absRect.y + rect.h + listRect.h - mainWindow->getHeight();
+	
+	if (over > 0)
+	{
+		listRect.h -= over;
+	}
+
+	list->setRectInternal(listRect);
 }
 
 /*

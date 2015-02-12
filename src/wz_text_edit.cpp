@@ -405,115 +405,6 @@ EVENT HANDLING
 ================================================================================
 */
 
-static void wz_text_edit_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct TextEditImpl *textEdit;
-	
-	WZ_ASSERT(widget);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		// Set keyboard focus to this widget.
-		widget->mainWindow->setKeyboardFocusWidget(widget);
-	}
-
-	if (mouseButton == 1 && WZ_POINT_IN_RECT(mouseX, mouseY, textEdit->getTextRect()))
-	{
-		int oldCursorIndex;
-
-		// Lock input to this widget.
-		widget->mainWindow->pushLockInputWidget(widget);
-
-		// Move the cursor to the mouse position.
-		oldCursorIndex = textEdit->cursorIndex;
-		textEdit->cursorIndex = wz_text_edit_index_from_position(textEdit, mouseX, mouseY);
-
-		if (textEdit->cursorIndex == -1)
-		{
-			// Couldn't get a valid index.
-			textEdit->cursorIndex = oldCursorIndex;
-			return;
-		}
-
-		wz_text_edit_update_scroll_index(textEdit);
-		textEdit->pressed = true;
-
-		// Handle selecting.
-		if (widget->mainWindow->isShiftKeyDown())
-		{
-			// Start a new selection if there isn't one.
-			if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
-			{
-				// Use the old cursor index as the selection start.
-				textEdit->selectionStartIndex = oldCursorIndex;
-			}
-
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-		else
-		{
-			textEdit->selectionStartIndex = textEdit->cursorIndex;
-			textEdit->selectionEndIndex = textEdit->cursorIndex;
-		}
-	}
-}
-
-static void wz_text_edit_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct TextEditImpl *textEdit;
-	
-	WZ_ASSERT(widget);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		widget->mainWindow->popLockInputWidget(widget);
-		textEdit->pressed = false;
-	}
-}
-
-static void wz_text_edit_mouse_move(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct TextEditImpl *textEdit;
-
-	WZ_ASSERT(widget);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (!(widget->hover && WZ_POINT_IN_RECT(mouseX, mouseY, textEdit->getTextRect())))
-		return;
-	
-	widget->mainWindow->setCursor(WZ_CURSOR_IBEAM);
-
-	if (textEdit->pressed)
-	{
-		// Move the cursor to the mouse position.
-		int index = wz_text_edit_index_from_position(textEdit, mouseX, mouseY);
-
-		if (index == -1)
-			return;
-
-		textEdit->cursorIndex = index;
-		wz_text_edit_update_scroll_index(textEdit);
-
-		// Set the selection end to the new cursor index.
-		textEdit->selectionEndIndex = textEdit->cursorIndex;
-	}
-}
-
-static void wz_text_edit_mouse_wheel_move(struct WidgetImpl *widget, int x, int y)
-{
-	struct TextEditImpl *textEdit;
-
-	WZ_ASSERT(widget);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (textEdit->multiline && textEdit->scroller->getVisible())
-	{
-		textEdit->scroller->setValue(textEdit->scroller->getValue() - y);
-	}
-}
-
 // Helper function for moving the cursor while the selection (shift) key is held.
 static void wz_text_edit_move_cursor_and_selection(struct TextEditImpl *textEdit, int newCursorIndex)
 {
@@ -739,10 +630,6 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 	cursorIndex = scrollValue = 0;
 	selectionStartIndex = selectionEndIndex = 0;
 
-	vtable.mouse_button_down = wz_text_edit_mouse_button_down;
-	vtable.mouse_button_up = wz_text_edit_mouse_button_up;
-	vtable.mouse_move = wz_text_edit_mouse_move;
-	vtable.mouse_wheel_move = wz_text_edit_mouse_wheel_move;
 	vtable.key_down = wz_text_edit_key_down;
 	vtable.text_input = wz_text_edit_text_input;
 
@@ -766,6 +653,93 @@ void TextEditImpl::onRendererChanged()
 void TextEditImpl::onRectChanged()
 {
 	wz_text_edit_update_scroller(this);
+}
+
+void TextEditImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		// Set keyboard focus to this widget.
+		mainWindow->setKeyboardFocusWidget(this);
+	}
+
+	if (mouseButton == 1 && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect()))
+	{
+		// Lock input to this widget.
+		mainWindow->pushLockInputWidget(this);
+
+		// Move the cursor to the mouse position.
+		int oldCursorIndex = cursorIndex;
+		cursorIndex = wz_text_edit_index_from_position(this, mouseX, mouseY);
+
+		if (cursorIndex == -1)
+		{
+			// Couldn't get a valid index.
+			cursorIndex = oldCursorIndex;
+			return;
+		}
+
+		wz_text_edit_update_scroll_index(this);
+		pressed = true;
+
+		// Handle selecting.
+		if (mainWindow->isShiftKeyDown())
+		{
+			// Start a new selection if there isn't one.
+			if (selectionStartIndex == selectionEndIndex)
+			{
+				// Use the old cursor index as the selection start.
+				selectionStartIndex = oldCursorIndex;
+			}
+
+			selectionEndIndex = cursorIndex;
+		}
+		else
+		{
+			selectionStartIndex = cursorIndex;
+			selectionEndIndex = cursorIndex;
+		}
+	}
+}
+
+void TextEditImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		mainWindow->popLockInputWidget(this);
+		pressed = false;
+	}
+}
+
+void TextEditImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	if (!(hover && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
+		return;
+	
+	mainWindow->setCursor(WZ_CURSOR_IBEAM);
+
+	if (pressed)
+	{
+		// Move the cursor to the mouse position.
+		int index = wz_text_edit_index_from_position(this, mouseX, mouseY);
+
+		if (index == -1)
+			return;
+
+		cursorIndex = index;
+		wz_text_edit_update_scroll_index(this);
+
+		// Set the selection end to the new cursor index.
+		selectionEndIndex = cursorIndex;
+	}
+}
+
+void TextEditImpl::onMouseWheelMove(int /*x*/, int y)
+{
+	if (multiline && scroller->getVisible())
+	{
+		scroller->setValue(scroller->getValue() - y);
+	}
 }
 
 void TextEditImpl::draw(Rect clip)

@@ -26,101 +26,9 @@ SOFTWARE.
 
 namespace wz {
 
-/*
-================================================================================
-
-VTABLE FUNCTIONS
-
-================================================================================
-*/
-
-static void wz_button_click(struct ButtonImpl *button)
-{
-	Event e;
-
-	if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
-	{
-		button->isSet_ = !button->isSet_;
-	}
-	else if (button->setBehavior == WZ_BUTTON_SET_BEHAVIOR_STICKY)
-	{
-		// Don't invoke the clicked event if already set.
-		if (button->isSet_)
-			return;
-
-		button->isSet_ = true;
-	}
-
-	// isSet assigned to, update the bound value.
-	if (button->boundValue)
-	{
-		*button->boundValue = button->isSet_;
-	}
-
-	e.button.type = WZ_EVENT_BUTTON_CLICKED;
-	e.button.button = button;
-	e.button.isSet = button->isSet_;
-	wz_invoke_event(&e, button->clicked_callbacks);
-}
-
-static void wz_button_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct ButtonImpl *button;
-
-	WZ_ASSERT(widget);
-	button = (struct ButtonImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		Event e;
-
-		button->isPressed_ = true;
-		widget->mainWindow->pushLockInputWidget(widget);
-
-		e.button.type = WZ_EVENT_BUTTON_PRESSED;
-		e.button.button = button;
-		e.button.isSet = button->isSet_;
-		wz_invoke_event(&e, button->pressed_callbacks);
-
-		if (button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
-		{
-			wz_button_click(button);
-		}
-	}
-}
-
-static void wz_button_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct ButtonImpl *button;
-
-	WZ_ASSERT(widget);
-	button = (struct ButtonImpl *)widget;
-
-	if (mouseButton == 1 && button->isPressed_)
-	{
-		button->isPressed_ = false;
-		widget->mainWindow->popLockInputWidget(widget);
-
-		if (widget->hover && button->clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
-		{
-			wz_button_click(button);
-		}
-	}
-}
-
-/*
-================================================================================
-
-PRIVATE INTERFACE
-
-================================================================================
-*/
-
 ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 {
 	type = WZ_TYPE_BUTTON;
-	vtable.mouse_button_down = wz_button_mouse_button_down;
-	vtable.mouse_button_up = wz_button_mouse_button_up;
 	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
 	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
 	isPressed_ = isSet_ = false;
@@ -129,6 +37,40 @@ ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 	padding.top = padding.bottom = 4;
 	this->label = label;
 	this->icon = icon;
+}
+
+void ButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		isPressed_ = true;
+		mainWindow->pushLockInputWidget(this);
+
+		Event e;
+		e.button.type = WZ_EVENT_BUTTON_PRESSED;
+		e.button.button = this;
+		e.button.isSet = isSet_;
+		wz_invoke_event(&e, pressed_callbacks);
+
+		if (clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
+		{
+			click();
+		}
+	}
+}
+
+void ButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1 && isPressed_)
+	{
+		isPressed_ = false;
+		mainWindow->popLockInputWidget(this);
+
+		if (hover && clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
+		{
+			click();
+		}
+	}
 }
 
 void ButtonImpl::draw(Rect clip)
@@ -251,6 +193,34 @@ void ButtonImpl::setClickBehavior(ButtonClickBehavior clickBehavior)
 void ButtonImpl::setSetBehavior(ButtonSetBehavior setBehavior)
 {
 	this->setBehavior = setBehavior;
+}
+
+void ButtonImpl::click()
+{
+	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
+	{
+		isSet_ = !isSet_;
+	}
+	else if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_STICKY)
+	{
+		// Don't invoke the clicked event if already set.
+		if (isSet_)
+			return;
+
+		isSet_ = true;
+	}
+
+	// isSet assigned to, update the bound value.
+	if (boundValue)
+	{
+		*boundValue = isSet_;
+	}
+
+	Event e;
+	e.button.type = WZ_EVENT_BUTTON_CLICKED;
+	e.button.button = this;
+	e.button.isSet = isSet_;
+	wz_invoke_event(&e, clicked_callbacks);
 }
 
 /*

@@ -26,49 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-/*
-================================================================================
-
-SCROLLER
-
-================================================================================
-*/
-
-static void wz_list_update_scroller(struct ListImpl *list)
-{
-	Rect listRect, rect;
-	int maxHeight, max;
-
-	WZ_ASSERT(list);
-
-	// Update max value.
-	maxHeight = list->nItems * list->itemHeight;
-	max = maxHeight - list->getItemsRect().h;
-	list->scroller->setMaxValue(max);
-
-	// Fit to the right of items rect. Width doesn't change.
-	listRect = list->getRect();
-
-	rect.w = (list->scroller)->rect.w;
-	rect.x = listRect.w - list->itemsBorder.right - rect.w;
-	rect.y = list->itemsBorder.top;
-	rect.h = listRect.h - (list->itemsBorder.top + list->itemsBorder.bottom);
-	list->scroller->setRectInternal(rect);
-
-	// Now that the height has been calculated, update the nub scale.
-	list->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
-
-	// Hide/show scroller depending on if it's needed.
-	if (max <= 0)
-	{
-		list->scroller->setVisible(false);
-	}
-	else
-	{
-		list->scroller->setVisible(true);
-	}
-}
-
 static void wz_list_scroller_value_changed(Event *e)
 {
 	struct ListImpl *list;
@@ -76,173 +33,6 @@ static void wz_list_scroller_value_changed(Event *e)
 	WZ_ASSERT(e);
 	list = (struct ListImpl *)e->base.widget->parent;
 	list->firstItem = e->scroller.value / list->itemHeight;
-}
-
-/*
-================================================================================
-
-PRIVATE UTILITY FUNCTIONS
-
-================================================================================
-*/
-
-static void wz_list_set_item_height_internal(struct ListImpl *list, int itemHeight)
-{
-	WZ_ASSERT(list);
-	list->itemHeight = itemHeight;
-	list->scroller->setStepValue(itemHeight);
-	wz_list_update_scroller(list);
-}
-
-/*
-================================================================================
-
-LIST WIDGET
-
-================================================================================
-*/
-
-static void wz_list_refresh_item_height(struct ListImpl *list)
-{
-	// Don't stomp on user set value.
-	if (list->isItemHeightUserSet)
-		return;
-
-	// Add a little padding.
-	wz_list_set_item_height_internal(list, list->getLineHeight() + 2);
-}
-
-static void wz_list_update_mouse_over_item(struct ListImpl *list, int mouseX, int mouseY)
-{
-	Rect itemsRect, rect;
-	int i;
-
-	list->mouseOverItem = -1;
-
-	if (!list->hover)
-		return;
-
-	itemsRect = list->getAbsoluteItemsRect();
-	rect.x = itemsRect.x;
-	rect.y = itemsRect.y - (list->scroller->getValue() % list->itemHeight);
-	rect.w = itemsRect.w;
-	rect.h = list->itemHeight;
-
-	for (i = list->firstItem; i < list->nItems; i++)
-	{
-		// Outside widget?
-		if (rect.y > itemsRect.y + itemsRect.h)
-			break;
-
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
-		{
-			list->mouseOverItem = i;
-			break;
-		}
-
-		rect.y += list->itemHeight;
-	}
-}
-
-static void wz_list_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct ListImpl *list;
-
-	WZ_ASSERT(widget);
-	list = (struct ListImpl *)widget;
-
-	if (mouseButton == 1 && list->hoveredItem != -1)
-	{
-		list->pressedItem = list->hoveredItem;
-		list->hoveredItem = -1;
-		widget->mainWindow->pushLockInputWidget(widget);
-	}
-}
-
-static void wz_list_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct ListImpl *list;
-	bool selectedItemAssignedTo = false;
-
-	WZ_ASSERT(widget);
-	list = (struct ListImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		if (list->pressedItem != -1)
-		{
-			list->selectedItem = list->pressedItem;
-			selectedItemAssignedTo = true;
-			list->pressedItem = -1;
-		}
-
-		// Refresh hovered item.
-		wz_list_update_mouse_over_item(list, mouseX, mouseY);
-		list->hoveredItem = list->mouseOverItem;
-
-		widget->mainWindow->popLockInputWidget(widget);
-	}
-
-	if (selectedItemAssignedTo)
-	{
-		Event e;
-		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
-		e.list.list = list;
-		e.list.selectedItem = list->selectedItem;
-		wz_invoke_event(&e, list->item_selected_callbacks);
-	}
-}
-
-static void wz_list_mouse_move(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct ListImpl *list;
-
-	WZ_ASSERT(widget);
-	list = (struct ListImpl *)widget;
-	list->lastMousePosition.x = mouseX;
-	list->lastMousePosition.y = mouseY;
-	wz_list_update_mouse_over_item(list, mouseX, mouseY);
-	
-	if (list->pressedItem != -1)
-	{
-		if (list->mouseOverItem != -1)
-			list->pressedItem = list->mouseOverItem;
-	}
-	else
-	{
-		list->hoveredItem = list->mouseOverItem;
-	}
-}
-
-static void wz_list_mouse_wheel_move(struct WidgetImpl *widget, int x, int y)
-{
-	struct ListImpl *list;
-
-	WZ_ASSERT(widget);
-	list = (struct ListImpl *)widget;
-
-	if (list->scroller->getVisible())
-	{
-		int value, stepValue;
-
-		value = list->scroller->getValue();
-		stepValue = list->scroller->getStepValue();
-		list->scroller->setValue(value - y * stepValue);
-
-		// Refresh hovered item.
-		wz_list_update_mouse_over_item(list, list->lastMousePosition.x, list->lastMousePosition.y);
-		list->hoveredItem = list->mouseOverItem;
-	}
-}
-
-static void wz_list_mouse_hover_off(struct WidgetImpl *widget)
-{
-	struct ListImpl *list;
-
-	WZ_ASSERT(widget);
-	list = (struct ListImpl *)widget;
-	list->hoveredItem = -1;
-	list->mouseOverItem = -1;
 }
 
 ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
@@ -256,24 +46,19 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	scroller = NULL;
 	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
 
-	vtable.mouse_button_down = wz_list_mouse_button_down;
-	vtable.mouse_button_up = wz_list_mouse_button_up;
-	vtable.mouse_move = wz_list_mouse_move;
-	vtable.mouse_wheel_move = wz_list_mouse_wheel_move;
-	vtable.mouse_hover_off = wz_list_mouse_hover_off;
 	this->itemData = itemData;
 	this->itemStride = itemStride;
 	this->nItems = nItems;
 
 	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	addChildWidget(scroller);
-	wz_list_update_scroller(this);
+	updateScroller();
 	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
 }
 
 void ListImpl::onRendererChanged()
 {
-	wz_list_refresh_item_height(this);
+	refreshItemHeight();
 }
 
 void ListImpl::onFontChanged(const char *fontFace, float fontSize)
@@ -281,7 +66,7 @@ void ListImpl::onFontChanged(const char *fontFace, float fontSize)
 	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
 	if (renderer)
 	{
-		wz_list_refresh_item_height(this);
+		refreshItemHeight();
 	}
 }
 
@@ -296,7 +81,84 @@ void ListImpl::onVisibilityChanged()
 
 void ListImpl::onRectChanged()
 {
-	wz_list_update_scroller(this);
+	updateScroller();
+}
+
+void ListImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1 && hoveredItem != -1)
+	{
+		pressedItem = hoveredItem;
+		hoveredItem = -1;
+		mainWindow->pushLockInputWidget(this);
+	}
+}
+
+void ListImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	bool selectedItemAssignedTo = false;
+
+	if (mouseButton == 1)
+	{
+		if (pressedItem != -1)
+		{
+			selectedItem = pressedItem;
+			selectedItemAssignedTo = true;
+			pressedItem = -1;
+		}
+
+		// Refresh hovered item.
+		updateMouseOverItem(mouseX, mouseY);
+		hoveredItem = mouseOverItem;
+
+		mainWindow->popLockInputWidget(this);
+	}
+
+	if (selectedItemAssignedTo)
+	{
+		Event e;
+		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+		e.list.list = this;
+		e.list.selectedItem = selectedItem;
+		wz_invoke_event(&e, item_selected_callbacks);
+	}
+}
+
+void ListImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	lastMousePosition.x = mouseX;
+	lastMousePosition.y = mouseY;
+	updateMouseOverItem(mouseX, mouseY);
+	
+	if (pressedItem != -1)
+	{
+		if (mouseOverItem != -1)
+			pressedItem = mouseOverItem;
+	}
+	else
+	{
+		hoveredItem = mouseOverItem;
+	}
+}
+
+void ListImpl::onMouseWheelMove(int x, int y)
+{
+	if (scroller->getVisible())
+	{
+		int value = scroller->getValue();
+		int stepValue = scroller->getStepValue();
+		scroller->setValue(value - y * stepValue);
+
+		// Refresh hovered item.
+		updateMouseOverItem(lastMousePosition.x, lastMousePosition.y);
+		hoveredItem = mouseOverItem;
+	}
+}
+
+void ListImpl::onMouseHoverOff()
+{
+	hoveredItem = -1;
+	mouseOverItem = -1;
 }
 
 void ListImpl::draw(Rect clip)
@@ -373,7 +235,7 @@ int ListImpl::getItemStride() const
 void ListImpl::setItemHeight(int itemHeight)
 {
 	isItemHeightUserSet = true;
-	wz_list_set_item_height_internal(this, itemHeight);
+	setItemHeightInternal(itemHeight);
 }
 
 int ListImpl::getItemHeight() const
@@ -384,7 +246,7 @@ int ListImpl::getItemHeight() const
 void ListImpl::setNumItems(int nItems)
 {
 	this->nItems = WZ_MAX(0, nItems);
-	wz_list_update_scroller(this);
+	updateScroller();
 }
 
 int ListImpl::getNumItems() const
@@ -441,6 +303,76 @@ const struct ScrollerImpl *ListImpl::getScroller() const
 void ListImpl::addCallbackItemSelected(EventCallback callback)
 {
 	item_selected_callbacks.push_back(callback);
+}
+
+void ListImpl::setItemHeightInternal(int itemHeight)
+{
+	this->itemHeight = itemHeight;
+	scroller->setStepValue(itemHeight);
+	updateScroller();
+}
+
+void ListImpl::refreshItemHeight()
+{
+	// Don't stomp on user set value.
+	if (isItemHeightUserSet)
+		return;
+
+	// Add a little padding.
+	setItemHeightInternal(getLineHeight() + 2);
+}
+
+void ListImpl::updateMouseOverItem(int mouseX, int mouseY)
+{
+	mouseOverItem = -1;
+
+	if (!hover)
+		return;
+
+	const Rect itemsRect = getAbsoluteItemsRect();
+
+	Rect currentItemRect;
+	currentItemRect.x = itemsRect.x;
+	currentItemRect.y = itemsRect.y - (scroller->getValue() % itemHeight);
+	currentItemRect.w = itemsRect.w;
+	currentItemRect.h = itemHeight;
+
+	for (int i = firstItem; i < nItems; i++)
+	{
+		// Outside widget?
+		if (currentItemRect.y > itemsRect.y + itemsRect.h)
+			break;
+
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, currentItemRect))
+		{
+			mouseOverItem = i;
+			break;
+		}
+
+		currentItemRect.y += itemHeight;
+	}
+}
+
+void ListImpl::updateScroller()
+{
+	// Update max value.
+	const int maxHeight = nItems * itemHeight;
+	const int max = maxHeight - getItemsRect().h;
+	scroller->setMaxValue(max);
+
+	// Fit to the right of items rect. Width doesn't change.
+	Rect scrollerRect;
+	scrollerRect.w = scroller->rect.w;
+	scrollerRect.x = rect.w - itemsBorder.right - scrollerRect.w;
+	scrollerRect.y = itemsBorder.top;
+	scrollerRect.h = rect.h - (itemsBorder.top + itemsBorder.bottom);
+	scroller->setRectInternal(scrollerRect);
+
+	// Now that the height has been calculated, update the nub scale.
+	scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
+
+	// Hide/show scroller depending on if it's needed.
+	scroller->setVisible(max > 0);
 }
 
 /*

@@ -34,57 +34,48 @@ MENU BAR BUTTON
 ================================================================================
 */
 
-static void wz_menu_bar_button_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-	WZ_ASSERT(button);
-
-	if (mouseButton == 1)
-	{
-		button->isPressed_ = true;
-
-		// Lock input to the menu bar, not this button.
-		widget->mainWindow->pushLockInputWidget(button->menuBar);
-	}
-}
-
-static void wz_menu_bar_button_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-	WZ_ASSERT(button);
-
-	if (mouseButton == 1 && button->isPressed_)
-	{
-		button->isPressed_ = false;
-		widget->mainWindow->popLockInputWidget(widget->parent->parent);
-	}
-}
-
-static void wz_menu_bar_button_mouse_hover_on(struct WidgetImpl *widget)
-{
-	struct MenuBarButtonImpl *button = (struct MenuBarButtonImpl *)widget;
-	WZ_ASSERT(button);
-
-	// See if any of the other buttons in the menubar are pressed.
-	// If one is pressed, unpress it and press this one instead.
-	for (size_t i = 0; i < button->menuBar->children[0]->children.size(); i++)
-	{
-		struct MenuBarButtonImpl *otherButton = (struct MenuBarButtonImpl *)button->menuBar->children[0]->children[i];
-
-		if (otherButton == button || !otherButton->isPressed_)
-			continue;
-
-		otherButton->isPressed_ = false;
-		button->isPressed_ = true;
-		return;
-	}
-}
-
 MenuBarButtonImpl::MenuBarButtonImpl()
 {
 	type = WZ_TYPE_BUTTON;
 	isPressed_ = isSet = false;
 	menuBar = NULL;
+}
+
+void MenuBarButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		isPressed_ = true;
+
+		// Lock input to the menu bar, not this button.
+		mainWindow->pushLockInputWidget(menuBar);
+	}
+}
+
+void MenuBarButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1 && isPressed_)
+	{
+		isPressed_ = false;
+		mainWindow->popLockInputWidget(parent->parent);
+	}
+}
+
+void MenuBarButtonImpl::onMouseHoverOn()
+{
+	// See if any of the other buttons in the menubar are pressed.
+	// If one is pressed, unpress it and press this one instead.
+	for (size_t i = 0; i < menuBar->children[0]->children.size(); i++)
+	{
+		struct MenuBarButtonImpl *otherButton = (struct MenuBarButtonImpl *)menuBar->children[0]->children[i];
+
+		if (otherButton == this || !otherButton->isPressed_)
+			continue;
+
+		otherButton->isPressed_ = false;
+		isPressed_ = true;
+		return;
+	}
 }
 
 void MenuBarButtonImpl::draw(Rect clip)
@@ -116,9 +107,6 @@ bool MenuBarButtonImpl::isPressed() const
 static struct MenuBarButtonImpl *wz_menu_bar_button_create(struct MenuBarImpl *menuBar)
 {
 	struct MenuBarButtonImpl *button = new struct MenuBarButtonImpl;
-	button->vtable.mouse_button_down = wz_menu_bar_button_mouse_button_down;
-	button->vtable.mouse_button_up = wz_menu_bar_button_mouse_button_up;
-	button->vtable.mouse_hover_on = wz_menu_bar_button_mouse_hover_on;
 	button->menuBar = menuBar;
 	return button;
 }

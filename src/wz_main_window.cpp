@@ -331,10 +331,7 @@ static void MouseButtonDownRecursive(struct WidgetImpl *widget, int mouseButton,
 	if (!widget->getVisible())
 		return;
 
-	if (widget->vtable.mouse_button_down)
-	{
-		widget->vtable.mouse_button_down(widget, mouseButton, mouseX, mouseY);
-	}
+	widget->onMouseButtonDown(mouseButton, mouseX, mouseY);
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
@@ -377,10 +374,7 @@ static void MouseButtonUpRecursive(struct WidgetImpl *widget, int mouseButton, i
 	if (!widget->getVisible())
 		return;
 
-	if (widget->vtable.mouse_button_up)
-	{
-		widget->vtable.mouse_button_up(widget, mouseButton, mouseX, mouseY);
-	}
+	widget->onMouseButtonUp(mouseButton, mouseX, mouseY);
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{
@@ -430,11 +424,7 @@ static void ClearHoverRecursive(struct WindowImpl *ignoreWindow, struct WidgetIm
 	{
 		// Stop hovering.
 		widget->hover = false;
-
-		if (widget->vtable.mouse_hover_off)
-		{
-			widget->vtable.mouse_hover_off(widget);
-		}
+		widget->onMouseHoverOff();
 	}
 
 	for (size_t i = 0; i < widget->children.size(); i++)
@@ -485,7 +475,7 @@ static void IgnoreOverlappingChildren(struct WidgetImpl *widget, int mouseX, int
 	}
 }
 
-// If window is not NULL, only call mouse_move in widgets that are children of the window and the window itself.
+// If window is not NULL, only call onMouseMove in widgets that are children of the window and the window itself.
 static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	Rect rect;
@@ -506,11 +496,7 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 		{
 			// Stop hovering.
 			widget->hover = false;
-
-			if (widget->vtable.mouse_hover_off)
-			{
-				widget->vtable.mouse_hover_off(widget);
-			}
+			widget->onMouseHoverOff();
 		}
 
 		return;
@@ -546,23 +532,19 @@ static void MouseMoveRecursive(struct WindowImpl *window, struct WidgetImpl *wid
 	widget->hover = widgetIsChildOfWindow && hoverWindow && hoverParent && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	// Run callbacks if hover has changed.
-	if (!oldHover && widget->hover && widget->vtable.mouse_hover_on)
+	if (!oldHover && widget->hover)
 	{
-		widget->vtable.mouse_hover_on(widget);
+		widget->onMouseHoverOn();
 	}
-	else if (oldHover && !widget->hover && widget->vtable.mouse_hover_off)
+	else if (oldHover && !widget->hover)
 	{
-		widget->vtable.mouse_hover_off(widget);
+		widget->onMouseHoverOff();
 	}
 
-	// Run mouse move callback.
-	if (widget->vtable.mouse_move)
+	// Run mouse move if the mouse is hovering over the widget, or if input is locked to the widget.
+	if (widget->hover || (widgetIsChildOfWindow && !widget->mainWindow->lockInputWidgetStack.empty() && widget == widget->mainWindow->lockInputWidgetStack.back()))
 	{
-		// If the mouse is hovering over the widget, or if input is locked to the widget.
-		if (widget->hover || (widgetIsChildOfWindow && !widget->mainWindow->lockInputWidgetStack.empty() && widget == widget->mainWindow->lockInputWidgetStack.back()))
-		{
-			widget->vtable.mouse_move(widget, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
-		}
+		widget->onMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 
 	IgnoreOverlappingChildren(widget, mouseX, mouseY);
@@ -603,10 +585,7 @@ static void MouseWheelMoveRecursive(struct WidgetImpl *widget, int x, int y)
 	if (!widget->getVisible())
 		return;
 
-	if (widget->vtable.mouse_wheel_move)
-	{
-		widget->vtable.mouse_wheel_move(widget, x, y);
-	}
+	widget->onMouseWheelMove(x, y);
 
 	for (size_t i = 0; i < widget->children.size(); i++)
 	{

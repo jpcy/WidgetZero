@@ -96,232 +96,6 @@ static void wz_window_calculate_mouse_over_border_rects(struct WindowImpl *windo
 	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && dockPosition == WZ_DOCK_POSITION_NONE);
 }
 
-static void wz_window_mouse_button_down(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct WindowImpl *window;
-	
-	WZ_ASSERT(widget);
-	window = (struct WindowImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		Rect borderRects[WZ_NUM_COMPASS_POINTS];
-		bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
-		int i;
-
-		// Drag the header.
-		if (WZ_POINT_IN_RECT(mouseX, mouseY, window->getHeaderRect()))
-		{
-			window->drag = WZ_DRAG_HEADER;
-			widget->mainWindow->pushLockInputWidget(widget);
-
-			// Don't actually move the window yet if it's docked.
-			if (window->mainWindow->getWindowDockPosition(window) == WZ_DOCK_POSITION_NONE)
-			{
-				widget->mainWindow->setMovingWindow(window);
-			}
-			else
-			{
-				window->undockStartPosition.x = mouseX;
-				window->undockStartPosition.y = mouseY;
-			}
-
-			return;
-		}
-
-		// Resize by dragging the border.
-		wz_window_calculate_border_rects(window, borderRects);
-		wz_window_calculate_mouse_over_border_rects(window, mouseX, mouseY, borderRects, mouseOverBorderRects);
-
-		for (i = 0; i < WZ_NUM_COMPASS_POINTS; i++)
-		{
-			if (mouseOverBorderRects[i])
-			{
-				window->drag = (WindowDrag)(WZ_DRAG_RESIZE_N + i);
-				window->resizeStartPosition.x = mouseX;
-				window->resizeStartPosition.y = mouseY;
-				window->resizeStartRect = window->rect;
-				widget->mainWindow->pushLockInputWidget(widget);
-				return;
-			}
-		}
-	}
-}
-
-static void wz_window_mouse_button_up(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY)
-{
-	struct WindowImpl *window;
-
-	WZ_ASSERT(widget);
-	window = (struct WindowImpl *)widget;
-
-	if (mouseButton == 1)
-	{
-		if (window->drag == WZ_DRAG_HEADER)
-		{
-			widget->mainWindow->setMovingWindow(NULL);
-		}
-
-		window->drag = WZ_DRAG_NONE;
-		widget->mainWindow->popLockInputWidget(widget);
-	}
-}
-
-static void wz_window_mouse_move(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	struct WindowImpl *window;
-	Rect borderRects[WZ_NUM_COMPASS_POINTS];
-	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
-	DockPosition dockPosition;
-	Size minimumWindowSize;
-	Position resizeDelta;
-	Rect rect;
-
-	WZ_ASSERT(widget);
-	window = (struct WindowImpl *)widget;
-
-	// Set the mouse cursor.
-	wz_window_calculate_border_rects(window, borderRects);
-	wz_window_calculate_mouse_over_border_rects(window, mouseX, mouseY, borderRects, mouseOverBorderRects);
-
-	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || window->drag == WZ_DRAG_RESIZE_N || window->drag == WZ_DRAG_RESIZE_S)
-	{
-		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_N_S);
-	}
-	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || window->drag == WZ_DRAG_RESIZE_E || window->drag == WZ_DRAG_RESIZE_W)
-	{
-		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_E_W);
-	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || window->drag == WZ_DRAG_RESIZE_NE || window->drag == WZ_DRAG_RESIZE_SW)
-	{
-		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_NE_SW);
-	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || window->drag == WZ_DRAG_RESIZE_NW || window->drag == WZ_DRAG_RESIZE_SE)
-	{
-		widget->mainWindow->setCursor(WZ_CURSOR_RESIZE_NW_SE);
-	}
-
-	// Don't actually move the window yet if it's docked.
-	dockPosition = widget->mainWindow->getWindowDockPosition(window);
-
-	if (window->drag == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
-	{
-		Position delta;
-
-		delta.x = mouseX - window->undockStartPosition.x;
-		delta.y = mouseY - window->undockStartPosition.y;
-
-		// Undock and start moving if the mouse has moved far enough.
-		if ((int)sqrtf((float)(delta.x * delta.x + delta.y * delta.y)) < WZ_WINDOW_UNDOCK_DISTANCE)
-			return;
-
-		widget->mainWindow->undockWindow(window);
-		widget->mainWindow->setMovingWindow(window);
-
-		// Re-position and resize the window.
-		rect = widget->getRect();
-		rect.x += delta.x;
-		rect.y += delta.y;
-		rect.w = WZ_MAX(200, window->sizeBeforeDocking.w);
-		rect.h = WZ_MAX(200, window->sizeBeforeDocking.h);
-
-		// If the mouse cursor would be outside the window, center the window on the mouse cursor.
-		if (mouseX < rect.x + window->borderSize || mouseX > rect.x + rect.w - window->borderSize)
-		{
-			rect.x = mouseX - rect.w / 2;
-		}
-
-		widget->setRectInternal(rect);
-		widget->mainWindow->updateContentRect();
-	}
-
-	// Calculate the minimum allowed window size.
-	minimumWindowSize.w = window->borderSize * 2;
-	minimumWindowSize.h = window->headerHeight + window->borderSize * 2;
-
-	// Calculate mouse deltas for dragging. Deltas are relative to the dragging start position (mouseDeltaX and mouseDeltaY are relative to the last mouse position).
-	if (window->drag >= WZ_DRAG_RESIZE_N)
-	{
-		resizeDelta.x = mouseX - window->resizeStartPosition.x;
-		resizeDelta.y = mouseY - window->resizeStartPosition.y;
-	}
-
-	rect = widget->getRect();
-
-	switch (window->drag)
-	{
-	case WZ_DRAG_HEADER:
-		rect.x += mouseDeltaX;
-		rect.y += mouseDeltaY;
-		break;
-	case WZ_DRAG_RESIZE_N:
-		{
-			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			rect.y = window->resizeStartRect.y + delta;
-			rect.h = window->resizeStartRect.h - delta;
-		}
-		break;
-	case WZ_DRAG_RESIZE_NE:
-		{
-			int delta = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			rect.y = window->resizeStartRect.y + delta;
-			rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
-			rect.h = window->resizeStartRect.h - delta;
-		}
-		break;
-	case WZ_DRAG_RESIZE_E:
-		rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
-		break;
-	case WZ_DRAG_RESIZE_SE:
-		rect.w = WZ_MAX(minimumWindowSize.w, window->resizeStartRect.w + resizeDelta.x);
-		rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
-		break;
-	case WZ_DRAG_RESIZE_S:
-		rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
-		break;
-	case WZ_DRAG_RESIZE_SW:
-		{
-			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
-			rect.x = window->resizeStartRect.x + delta;
-			rect.w = window->resizeStartRect.w - delta;
-			rect.h = WZ_MAX(minimumWindowSize.h, window->resizeStartRect.h + resizeDelta.y);
-		}
-		break;
-	case WZ_DRAG_RESIZE_W:
-		{
-			int delta = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
-			rect.x = window->resizeStartRect.x + delta;
-			rect.w = window->resizeStartRect.w - delta;
-		}
-		break;
-	case WZ_DRAG_RESIZE_NW:
-		{
-			int deltaX, deltaY;
-			deltaX = WZ_MIN(resizeDelta.x, window->resizeStartRect.w - minimumWindowSize.w);
-			deltaY = WZ_MIN(resizeDelta.y, window->resizeStartRect.h - minimumWindowSize.h);
-			rect.x = window->resizeStartRect.x + deltaX;
-			rect.y = window->resizeStartRect.y + deltaY;
-			rect.w = window->resizeStartRect.w - deltaX;
-			rect.h = window->resizeStartRect.h - deltaY;
-		}
-		break;
-	default:
-		return; // Not dragging, don't call MainWindowImpl::updateContentRect.
-	}
-
-	widget->setRectInternal(rect);
-
-	// Resizing a docked window: 
-	if (widget->mainWindow->getWindowDockPosition(window) != WZ_DOCK_POSITION_NONE)
-	{
-		// Tell the mainWindow so it can resize other windows docked at the same position too.
-		widget->mainWindow->updateDockedWindowRect(window);
-
-		// Update the mainWindow content rect.
-		widget->mainWindow->updateContentRect();
-	}
-}
-
 static Rect wz_window_get_children_clip_rect(struct WidgetImpl *widget)
 {
 	struct WindowImpl *window;
@@ -339,9 +113,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
 
-	vtable.mouse_button_down = wz_window_mouse_button_down;
-	vtable.mouse_button_up = wz_window_mouse_button_up;
-	vtable.mouse_move = wz_window_mouse_move;
 	vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	this->title = title;
 
@@ -369,6 +140,214 @@ void WindowImpl::onRectChanged()
 	contentRect.w = rect.w - borderSize * 2;
 	contentRect.h = rect.h - (headerHeight + borderSize * 2);
 	content->setRectInternal(contentRect);
+}
+
+void WindowImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		// Drag the header.
+		if (WZ_POINT_IN_RECT(mouseX, mouseY, getHeaderRect()))
+		{
+			drag = WZ_DRAG_HEADER;
+			mainWindow->pushLockInputWidget(this);
+
+			// Don't actually move the window yet if it's docked.
+			if (mainWindow->getWindowDockPosition(this) == WZ_DOCK_POSITION_NONE)
+			{
+				mainWindow->setMovingWindow(this);
+			}
+			else
+			{
+				undockStartPosition.x = mouseX;
+				undockStartPosition.y = mouseY;
+			}
+
+			return;
+		}
+
+		// Resize by dragging the border.
+		Rect borderRects[WZ_NUM_COMPASS_POINTS];
+		bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+
+		wz_window_calculate_border_rects(this, borderRects);
+		wz_window_calculate_mouse_over_border_rects(this, mouseX, mouseY, borderRects, mouseOverBorderRects);
+
+		for (int i = 0; i < WZ_NUM_COMPASS_POINTS; i++)
+		{
+			if (mouseOverBorderRects[i])
+			{
+				drag = (WindowDrag)(WZ_DRAG_RESIZE_N + i);
+				resizeStartPosition.x = mouseX;
+				resizeStartPosition.y = mouseY;
+				resizeStartRect = rect;
+				mainWindow->pushLockInputWidget(this);
+				return;
+			}
+		}
+	}
+}
+
+void WindowImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		if (drag == WZ_DRAG_HEADER)
+		{
+			mainWindow->setMovingWindow(NULL);
+		}
+
+		drag = WZ_DRAG_NONE;
+		mainWindow->popLockInputWidget(this);
+	}
+}
+
+void WindowImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	// Set the mouse cursor.
+	Rect borderRects[WZ_NUM_COMPASS_POINTS];
+	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+
+	wz_window_calculate_border_rects(this, borderRects);
+	wz_window_calculate_mouse_over_border_rects(this, mouseX, mouseY, borderRects, mouseOverBorderRects);
+
+	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || drag == WZ_DRAG_RESIZE_N || drag == WZ_DRAG_RESIZE_S)
+	{
+		mainWindow->setCursor(WZ_CURSOR_RESIZE_N_S);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || drag == WZ_DRAG_RESIZE_E || drag == WZ_DRAG_RESIZE_W)
+	{
+		mainWindow->setCursor(WZ_CURSOR_RESIZE_E_W);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || drag == WZ_DRAG_RESIZE_NE || drag == WZ_DRAG_RESIZE_SW)
+	{
+		mainWindow->setCursor(WZ_CURSOR_RESIZE_NE_SW);
+	}
+	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || drag == WZ_DRAG_RESIZE_NW || drag == WZ_DRAG_RESIZE_SE)
+	{
+		mainWindow->setCursor(WZ_CURSOR_RESIZE_NW_SE);
+	}
+
+	// Don't actually move the window yet if it's docked.
+	const DockPosition dockPosition = mainWindow->getWindowDockPosition(this);
+
+	if (drag == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
+	{
+		Position delta;
+
+		delta.x = mouseX - undockStartPosition.x;
+		delta.y = mouseY - undockStartPosition.y;
+
+		// Undock and start moving if the mouse has moved far enough.
+		if ((int)sqrtf((float)(delta.x * delta.x + delta.y * delta.y)) < WZ_WINDOW_UNDOCK_DISTANCE)
+			return;
+
+		mainWindow->undockWindow(this);
+		mainWindow->setMovingWindow(this);
+
+		// Re-position and resize the window.
+		Rect newRect = rect;
+		newRect.x += delta.x;
+		newRect.y += delta.y;
+		newRect.w = WZ_MAX(200, sizeBeforeDocking.w);
+		newRect.h = WZ_MAX(200, sizeBeforeDocking.h);
+
+		// If the mouse cursor would be outside the window, center the window on the mouse cursor.
+		if (mouseX < newRect.x + borderSize || mouseX > newRect.x + newRect.w - borderSize)
+		{
+			newRect.x = mouseX - newRect.w / 2;
+		}
+
+		setRectInternal(newRect);
+		mainWindow->updateContentRect();
+	}
+
+	// Calculate the minimum allowed window size.
+	const Size minimumWindowSize(borderSize * 2, headerHeight + borderSize * 2);
+
+	// Calculate mouse deltas for dragging. Deltas are relative to the dragging start position (mouseDeltaX and mouseDeltaY are relative to the last mouse position).
+	Position resizeDelta;
+
+	if (drag >= WZ_DRAG_RESIZE_N)
+	{
+		resizeDelta.x = mouseX - resizeStartPosition.x;
+		resizeDelta.y = mouseY - resizeStartPosition.y;
+	}
+
+	Rect newRect = rect;
+
+	switch (drag)
+	{
+	case WZ_DRAG_HEADER:
+		newRect.x += mouseDeltaX;
+		newRect.y += mouseDeltaY;
+		break;
+	case WZ_DRAG_RESIZE_N:
+		{
+			int delta = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
+			newRect.y = resizeStartRect.y + delta;
+			newRect.h = resizeStartRect.h - delta;
+		}
+		break;
+	case WZ_DRAG_RESIZE_NE:
+		{
+			int delta = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
+			newRect.y = resizeStartRect.y + delta;
+			newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
+			newRect.h = resizeStartRect.h - delta;
+		}
+		break;
+	case WZ_DRAG_RESIZE_E:
+		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
+		break;
+	case WZ_DRAG_RESIZE_SE:
+		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
+		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
+		break;
+	case WZ_DRAG_RESIZE_S:
+		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
+		break;
+	case WZ_DRAG_RESIZE_SW:
+		{
+			int delta = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
+			newRect.x = resizeStartRect.x + delta;
+			newRect.w = resizeStartRect.w - delta;
+			newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
+		}
+		break;
+	case WZ_DRAG_RESIZE_W:
+		{
+			int delta = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
+			newRect.x = resizeStartRect.x + delta;
+			newRect.w = resizeStartRect.w - delta;
+		}
+		break;
+	case WZ_DRAG_RESIZE_NW:
+		{
+			int deltaX, deltaY;
+			deltaX = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
+			deltaY = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
+			newRect.x = resizeStartRect.x + deltaX;
+			newRect.y = resizeStartRect.y + deltaY;
+			newRect.w = resizeStartRect.w - deltaX;
+			newRect.h = resizeStartRect.h - deltaY;
+		}
+		break;
+	default:
+		return; // Not dragging, don't call MainWindowImpl::updateContentRect.
+	}
+
+	setRectInternal(newRect);
+
+	// Resizing a docked window: 
+	if (mainWindow->getWindowDockPosition(this) != WZ_DOCK_POSITION_NONE)
+	{
+		// Tell the mainWindow so it can resize other windows docked at the same position too.
+		mainWindow->updateDockedWindowRect(this);
+
+		// Update the mainWindow content rect.
+		mainWindow->updateContentRect();
+	}
 }
 
 void WindowImpl::draw(Rect clip)

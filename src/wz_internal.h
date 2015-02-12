@@ -46,13 +46,6 @@ typedef struct
 {
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
-
-	void (*mouse_button_down)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
-	void (*mouse_button_up)(struct WidgetImpl *widget, int mouseButton, int mouseX, int mouseY);
-	void (*mouse_move)(struct WidgetImpl *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	void (*mouse_wheel_move)(struct WidgetImpl *widget, int x, int y);
-	void (*mouse_hover_on)(struct WidgetImpl *widget);
-	void (*mouse_hover_off)(struct WidgetImpl *widget);
 	void (*key_down)(struct WidgetImpl *widget, Key key);
 	void (*key_up)(struct WidgetImpl *widget, Key key);
 	void (*text_input)(struct WidgetImpl *widget, const char *text);
@@ -104,6 +97,13 @@ struct WidgetImpl
 	virtual void onVisibilityChanged() {}
 
 	virtual void onRectChanged() {}
+
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY) {}
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY) {}
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY) {}
+	virtual void onMouseWheelMove(int x, int y) {}
+	virtual void onMouseHoverOn() {}
+	virtual void onMouseHoverOff() {}
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -307,6 +307,8 @@ ButtonSetBehavior;
 struct ButtonImpl : public WidgetImpl
 {
 	ButtonImpl(const std::string &label = std::string(), const std::string &icon = std::string());
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setLabel(const char *label);
@@ -335,6 +337,9 @@ struct ButtonImpl : public WidgetImpl
 	bool *boundValue;
 	std::vector<EventCallback> pressed_callbacks;
 	std::vector<EventCallback> clicked_callbacks;
+
+private:
+	void click();
 };
 
 struct CheckBoxImpl : public ButtonImpl
@@ -352,6 +357,7 @@ struct ComboImpl : public WidgetImpl
 	ComboImpl(uint8_t *itemData, int itemStride, int nItems);
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct ListImpl *getList();
@@ -360,6 +366,9 @@ struct ComboImpl : public WidgetImpl
 
 	bool isOpen_;
 	struct ListImpl *list;
+
+private:
+	void updateListRect();
 };
 
 struct FrameImpl : public WidgetImpl
@@ -417,6 +426,11 @@ struct ListImpl : public WidgetImpl
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onVisibilityChanged();
 	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void onMouseHoverOff();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	Border getItemsBorder() const;
@@ -466,6 +480,12 @@ struct ListImpl : public WidgetImpl
 
 	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
 	Position lastMousePosition;
+
+private:
+	void setItemHeightInternal(int itemHeight);
+	void refreshItemHeight();
+	void updateMouseOverItem(int mouseX, int mouseY);
+	void updateScroller();
 };
 
 struct MainWindowImpl : public WidgetImpl
@@ -536,7 +556,7 @@ public:
 
 	std::vector<struct WidgetImpl *> lockInputWidgetStack;
 
-	// Lock input to this window, i.e. don't call mouse_move, mouse_button_down or mouse_button_up on any widget that isn't this window or it's descendants.
+	// Lock input to this window, i.e. don't call onMouseMove, onMouseButtonDown or onMouseButtonUp on any widget that isn't this window or it's descendants.
 	struct WindowImpl *lockInputWindow;
 
 	struct WidgetImpl *keyboardFocusWidget;
@@ -586,6 +606,9 @@ private:
 struct MenuBarButtonImpl : public WidgetImpl
 {
 	MenuBarButtonImpl();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseHoverOn();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setLabel(const char *label);
@@ -621,7 +644,10 @@ struct RadioButtonImpl : public ButtonImpl
 
 struct ScrollerNub : public WidgetImpl
 {
-	ScrollerNub();
+	ScrollerNub(struct ScrollerImpl *scroller);
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	void updateRect();
 
 	struct ScrollerImpl *scroller;
@@ -638,6 +664,7 @@ struct ScrollerImpl : public WidgetImpl
 {
 	ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue);
 	virtual void onRectChanged();
+	virtual void onMouseWheelMove(int x, int y);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	ScrollerType getType() const;
@@ -746,6 +773,10 @@ struct TextEditImpl : public WidgetImpl
 	TextEditImpl(bool multiline, int maximumTextLength);
 	virtual void onRendererChanged();
 	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
@@ -812,6 +843,9 @@ struct WindowImpl : public WidgetImpl
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getHeaderHeight() const;
