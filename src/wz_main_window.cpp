@@ -1143,7 +1143,7 @@ void MainWindowImpl::refreshDockTabBar(DockPosition dockPosition)
 			struct WindowImpl *window = dockedWindows[dockPosition][i];
 
 			// Create a new tab.
-			struct ButtonImpl *tab = tabBar->createTab();
+			struct TabButtonImpl *tab = tabBar->createTab();
 			tab->setLabel(window->getTitle());
 
 			// Set the tab internal metadata to the window.

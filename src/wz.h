@@ -50,6 +50,7 @@ struct RadioButtonImpl;
 struct ScrollerImpl;
 struct SpinnerImpl;
 struct StackLayoutImpl;
+struct TabButtonImpl;
 struct TabbedImpl;
 struct TextEditImpl;
 struct WindowImpl;
@@ -202,7 +203,7 @@ typedef struct
 {
 	WidgetEventType type;
 	struct TabBarImpl *tabBar;
-	struct ButtonImpl *tab;
+	struct TabButtonImpl *tab;
 }
 TabBarEvent;
 
@@ -342,6 +343,7 @@ public:
 	virtual Size measureScroller(ScrollerImpl *scroller) = 0;
 	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip) = 0;
 	virtual Size measureSpinner(SpinnerImpl *spinner) = 0;
+	virtual void drawTabButton(TabButtonImpl *button, Rect clip) = 0;
 	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip) = 0;
 	virtual Size measureTabBar(TabBarImpl *tabBar) = 0;
 	virtual void drawTabbed(TabbedImpl *tabbed, Rect clip) = 0;

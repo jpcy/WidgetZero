@@ -81,6 +81,7 @@ public:
 	virtual Size measureScroller(ScrollerImpl *scroller);
 	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip);
 	virtual Size measureSpinner(SpinnerImpl *spinner);
+	virtual void drawTabButton(TabButtonImpl *button, Rect clip);
 	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip);
 	virtual Size measureTabBar(TabBarImpl *tabBar);
 	virtual void drawTabbed(TabbedImpl *tabbed, Rect clip);

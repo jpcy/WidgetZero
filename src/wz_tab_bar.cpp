@@ -34,34 +34,15 @@ TAB BUTTON
 ================================================================================
 */
 
-static void wz_tab_button_draw(struct WidgetImpl *widget, Rect clip)
+TabButtonImpl::TabButtonImpl(const std::string &label) : ButtonImpl(label)
 {
-	Rect labelRect;
-	struct ButtonImpl *button = (struct ButtonImpl *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-	const Border padding = button->getPadding();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-
-	// Label.
-	labelRect.x = rect.x + padding.left;
-	labelRect.y = rect.y + padding.top;
-	labelRect.w = rect.w - (padding.left + padding.right);
-	labelRect.h = rect.h - (padding.top + padding.bottom);
-	r->print(labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, widget->fontFace, widget->fontSize, widget->hover ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
-
-	nvgRestore(vg);
+	setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
+	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
 }
 
-static struct ButtonImpl *wz_tab_button_create()
+void TabButtonImpl::draw(Rect clip)
 {
-	struct ButtonImpl *button = new ButtonImpl;
-	struct WidgetImpl *widget = button;
-	widget->vtable.draw = wz_tab_button_draw;
-	return button;
+	renderer->drawTabButton(this, clip);
 }
 
 /*
@@ -186,7 +167,7 @@ static void wz_tab_bar_invoke_tab_changed(struct TabBarImpl *tabBar)
 static void wz_tab_bar_button_pressed(Event *e)
 {
 	WZ_ASSERT(e);
-	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct ButtonImpl *)e->base.widget);
+	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct TabButtonImpl *)e->base.widget);
 }
 
 static void wz_tab_bar_decrement_button_clicked(Event *e)
@@ -257,9 +238,12 @@ Size TabBarImpl::measure()
 	return renderer->measureTabBar(this);
 }
 
-struct ButtonImpl *TabBarImpl::createTab()
+struct TabButtonImpl *TabBarImpl::createTab()
 {
-	struct ButtonImpl *tab = wz_tab_button_create();
+	struct TabButtonImpl *tab = new TabButtonImpl();
+	tab->addCallbackPressed(wz_tab_bar_button_pressed);
+	addChildWidget(tab);
+	tabs.push_back(tab);
 
 	// Position to the right of the last tab.
 	Rect rect;
@@ -272,11 +256,6 @@ struct ButtonImpl *TabBarImpl::createTab()
 		rect.x += tabs[i]->getWidth();
 	}
 
-	tab->addCallbackPressed(wz_tab_bar_button_pressed);
-	tab->setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
-	tab->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	addChildWidget(tab);
-	tabs.push_back(tab);
 	tab->setRectInternal(rect);
 
 	// Select the first tab added.
@@ -299,7 +278,7 @@ struct ButtonImpl *TabBarImpl::createTab()
 	return tab;
 }
 
-void TabBarImpl::destroyTab(struct ButtonImpl *tab)
+void TabBarImpl::destroyTab(struct TabButtonImpl *tab)
 {
 	WZ_ASSERT(tab);
 	int deleteIndex = -1;
@@ -360,12 +339,12 @@ struct ButtonImpl *TabBarImpl::getIncrementButton()
 	return incrementButton;
 }
 
-struct ButtonImpl *TabBarImpl::getSelectedTab()
+struct TabButtonImpl *TabBarImpl::getSelectedTab()
 {
 	return selectedTab;
 }
 
-void TabBarImpl::selectTab(struct ButtonImpl *tab)
+void TabBarImpl::selectTab(struct TabButtonImpl *tab)
 {
 	WZ_ASSERT(tab);
 

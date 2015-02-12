@@ -724,24 +724,30 @@ private:
 	void layoutHorizontal();
 };
 
+struct TabButtonImpl : public ButtonImpl
+{
+	TabButtonImpl(const std::string &label = std::string());
+	virtual void draw(Rect clip);
+};
+
 struct TabBarImpl : public WidgetImpl
 {
 	TabBarImpl();
 	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	struct ButtonImpl *createTab();
-	void destroyTab(struct ButtonImpl *tab);
+	struct TabButtonImpl *createTab();
+	void destroyTab(struct TabButtonImpl *tab);
 	void clearTabs();
 	struct ButtonImpl *getDecrementButton();
 	struct ButtonImpl *getIncrementButton();
-	struct ButtonImpl *getSelectedTab();
-	void selectTab(struct ButtonImpl *tab);
+	struct TabButtonImpl *getSelectedTab();
+	void selectTab(struct TabButtonImpl *tab);
 	void addCallbackTabChanged(EventCallback callback);
 	int getScrollValue() const;
 
-	struct ButtonImpl *selectedTab;
-	std::vector<struct ButtonImpl *> tabs;
+	struct TabButtonImpl *selectedTab;
+	std::vector<struct TabButtonImpl *> tabs;
 
 	int scrollValue;
 	struct ButtonImpl *decrementButton;
@@ -759,7 +765,7 @@ struct TabPage : public WidgetImpl
 
 typedef struct
 {
-	struct ButtonImpl *tab;
+	struct TabButtonImpl *tab;
 	struct TabPage *page;
 }
 TabbedPage;
@@ -770,7 +776,7 @@ struct TabbedImpl : public WidgetImpl
 	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	void addTab(struct ButtonImpl **tab, struct TabPage **page);
+	void addTab(struct TabButtonImpl **tab, struct TabPage **page);
 
 	struct TabBarImpl *tabBar;
 	std::vector<TabbedPage> pages;

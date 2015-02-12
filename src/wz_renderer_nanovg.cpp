@@ -771,6 +771,27 @@ Size NVGRenderer::measureSpinner(SpinnerImpl *spinner)
 	return size;
 }
 
+void NVGRenderer::drawTabButton(TabButtonImpl *button, Rect clip)
+{
+	struct NVGcontext *vg = impl->vg;
+
+	nvgSave(vg);
+	clipToRect(clip);
+
+	// Label.
+	const Rect rect = button->getAbsoluteRect();
+	const Border padding = button->getPadding();
+	Rect labelRect;
+
+	labelRect.x = rect.x + padding.left;
+	labelRect.y = rect.y + padding.top;
+	labelRect.w = rect.w - (padding.left + padding.right);
+	labelRect.h = rect.h - (padding.top + padding.bottom);
+	print(labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), button->getHover() ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
+
+	nvgRestore(vg);
+}
+
 void NVGRenderer::drawTabBar(TabBarImpl *tabBar, Rect clip)
 {
 }

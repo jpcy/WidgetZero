@@ -67,7 +67,7 @@ TAB PUBLIC INTERFACE
 struct TabImpl
 {
 	TabImpl() : button(NULL), page(NULL) {}
-	ButtonImpl *button;
+	TabButtonImpl *button;
 	TabPage *page;
 };
 
@@ -154,7 +154,7 @@ Size TabbedImpl::measure()
 	return renderer->measureTabbed(this);
 }
 
-void TabbedImpl::addTab(struct ButtonImpl **tab, struct TabPage **page)
+void TabbedImpl::addTab(struct TabButtonImpl **tab, struct TabPage **page)
 {
 	WZ_ASSERT(tab);
 	WZ_ASSERT(page);
