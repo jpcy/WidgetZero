@@ -620,13 +620,13 @@ void MainWindowImpl::keyDelta(Key key, bool down)
 	if (!widget || !widget->getVisible())
 		return;
 
-	if (down && widget->vtable.key_down)
+	if (down)
 	{
-		widget->vtable.key_down(widget, key);
+		widget->onKeyDown(key);
 	}
-	else if (!down && widget->vtable.key_up)
+	else if (!down)
 	{
-		widget->vtable.key_up(widget, key);
+		widget->onKeyUp(key);
 	}
 }
 
@@ -671,10 +671,7 @@ void MainWindowImpl::textInput(const char *text)
 	if (!widget || !widget->getVisible())
 		return;
 
-	if (widget->vtable.text_input)
-	{
-		widget->vtable.text_input(widget, text);
-	}
+	widget->onTextInput(text);
 }
 
 void MainWindowImpl::draw()

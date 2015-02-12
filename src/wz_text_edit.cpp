@@ -425,203 +425,6 @@ static void wz_text_edit_move_cursor_and_selection(struct TextEditImpl *textEdit
 	}
 }
 
-static void wz_text_edit_key_down(struct WidgetImpl *widget, Key key)
-{
-	struct TextEditImpl *textEdit;
-
-	WZ_ASSERT(widget);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (key == WZ_KEY_LEFT)
-	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If the cursor is to the right of the selection start, move the cursor to the start of the selection.
-			if (textEdit->cursorIndex > textEdit->selectionStartIndex)
-			{
-				textEdit->cursorIndex = textEdit->selectionStartIndex;
-			}
-
-			// Clear the selection.
-			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-		}
-		// Move the cursor to the left, if there's room.
-		else if (textEdit->cursorIndex > 0)
-		{
-			textEdit->cursorIndex--;
-		}
-	}
-	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex > 0)
-	{
-		wz_text_edit_move_cursor_and_selection(textEdit, textEdit->cursorIndex - 1);
-	}
-	else if (key == WZ_KEY_RIGHT)
-	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			// If the cursor is to the left of the selection start, move the cursor to the start of the selection.
-			if (textEdit->cursorIndex < textEdit->selectionStartIndex)
-			{
-				textEdit->cursorIndex = textEdit->selectionStartIndex;
-			}
-
-			// Clear the selection.
-			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-		}
-		// Move the cursor to the right, if there's room.
-		else if (textEdit->cursorIndex < (int)textEdit->text.length())
-		{
-			textEdit->cursorIndex++;
-		}
-	}
-	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && textEdit->cursorIndex < (int)textEdit->text.length())
-	{
-		wz_text_edit_move_cursor_and_selection(textEdit, textEdit->cursorIndex + 1);
-	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
-	{
-		Position cursorPosition;
-		int lineHeight, newCursorIndex;
-
-		// Get the cursor position.
-		cursorPosition = textEdit->positionFromIndex(textEdit->cursorIndex);
-
-		// Get line height.
-		lineHeight = textEdit->getLineHeight();
-
-		// Move the cursor up/down.
-		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
-		newCursorIndex = wz_text_edit_index_from_relative_position(textEdit, cursorPosition);
-
-		if (newCursorIndex == -1)
-			return; // Couldn't move cursor.
-
-		// Apply the new cursor index.
-		if ((key & WZ_KEY_SHIFT_BIT) != 0)
-		{
-			wz_text_edit_move_cursor_and_selection(textEdit, newCursorIndex);
-		}
-		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
-		{
-			textEdit->cursorIndex = newCursorIndex;
-
-			// Clear the selection.
-			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-		}
-	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME || WZ_KEY_MOD_OFF(key) == WZ_KEY_END)
-	{
-		int newCursorIndex;
-
-		// Go to text start/end.
-		if (!textEdit->multiline || (textEdit->multiline && (key & WZ_KEY_CONTROL_BIT)))
-		{
-			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
-			{
-				newCursorIndex = 0;
-			}
-			else
-			{
-				newCursorIndex = textEdit->text.length();
-			}
-		}
-		// Go to line start/end.
-		else
-		{
-			// Find the line we're on.
-			LineBreakResult line;
-			int lineStartIndex, lineEndIndex;
-
-			line.next = textEdit->text.c_str();
-
-			for (;;)
-			{
-				line = textEdit->lineBreakText(line.next, 0, textEdit->getTextRect().w);
-				WZ_ASSERT(line.start);
-				WZ_ASSERT(line.next);
-
-				lineStartIndex = line.start - textEdit->text.c_str();
-				lineEndIndex = lineStartIndex + line.length;
-
-				// Is the cursor index on this line?
-				if (textEdit->cursorIndex >= lineStartIndex && textEdit->cursorIndex <= lineEndIndex)
-					break;
-
-				if (!line.next || !line.next[0])
-					return;
-			}
-
-			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
-			{
-				newCursorIndex = lineStartIndex;
-			}
-			else
-			{
-				newCursorIndex = lineEndIndex;
-			}
-		}
-
-		if (key & WZ_KEY_SHIFT_BIT)
-		{
-			wz_text_edit_move_cursor_and_selection(textEdit, newCursorIndex);
-		}
-		else
-		{
-			textEdit->cursorIndex = newCursorIndex;
-
-			// Clear the selection.
-			textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-		}
-	}
-	else if (textEdit->multiline && key == WZ_KEY_ENTER)
-	{
-		wz_text_edit_enter_text(textEdit, "\r");
-	}
-	else if (key == WZ_KEY_DELETE)
-	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			wz_text_edit_delete_selection(textEdit);
-		}
-		else
-		{
-			wz_text_edit_delete_text(textEdit, textEdit->cursorIndex, 1);
-		}
-	}
-	else if (key == WZ_KEY_BACKSPACE && textEdit->cursorIndex > 0)
-	{
-		if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-		{
-			wz_text_edit_delete_selection(textEdit);
-		}
-		else
-		{
-			wz_text_edit_delete_text(textEdit, textEdit->cursorIndex - 1, 1);
-			textEdit->cursorIndex--;
-		}
-	}
-	else
-	{
-		return;
-	}
-
-	wz_text_edit_update_scroll_index(textEdit);
-}
-
-static void wz_text_edit_text_input(struct WidgetImpl *widget, const char *text)
-{
-	struct TextEditImpl *textEdit;
-
-	WZ_ASSERT(widget);
-	WZ_ASSERT(text);
-	textEdit = (struct TextEditImpl *)widget;
-
-	if (textEdit->validate_text && !textEdit->validate_text(text))
-		return;
-
-	wz_text_edit_enter_text(textEdit, text);
-}
-
 TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 {
 	type = WZ_TYPE_TEXT_EDIT;
@@ -629,9 +432,6 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 	pressed = false;
 	cursorIndex = scrollValue = 0;
 	selectionStartIndex = selectionEndIndex = 0;
-
-	vtable.key_down = wz_text_edit_key_down;
-	vtable.text_input = wz_text_edit_text_input;
 
 	if (multiline)
 	{
@@ -740,6 +540,192 @@ void TextEditImpl::onMouseWheelMove(int /*x*/, int y)
 	{
 		scroller->setValue(scroller->getValue() - y);
 	}
+}
+
+void TextEditImpl::onKeyDown(Key key)
+{
+	if (key == WZ_KEY_LEFT)
+	{
+		if (selectionStartIndex != selectionEndIndex)
+		{
+			// If the cursor is to the right of the selection start, move the cursor to the start of the selection.
+			if (cursorIndex > selectionStartIndex)
+			{
+				cursorIndex = selectionStartIndex;
+			}
+
+			// Clear the selection.
+			selectionStartIndex = selectionEndIndex = 0;
+		}
+		// Move the cursor to the left, if there's room.
+		else if (cursorIndex > 0)
+		{
+			cursorIndex--;
+		}
+	}
+	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && cursorIndex > 0)
+	{
+		wz_text_edit_move_cursor_and_selection(this, cursorIndex - 1);
+	}
+	else if (key == WZ_KEY_RIGHT)
+	{
+		if (selectionStartIndex != selectionEndIndex)
+		{
+			// If the cursor is to the left of the selection start, move the cursor to the start of the selection.
+			if (cursorIndex < selectionStartIndex)
+			{
+				cursorIndex = selectionStartIndex;
+			}
+
+			// Clear the selection.
+			selectionStartIndex = selectionEndIndex = 0;
+		}
+		// Move the cursor to the right, if there's room.
+		else if (cursorIndex < (int)text.length())
+		{
+			cursorIndex++;
+		}
+	}
+	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && cursorIndex < (int)text.length())
+	{
+		wz_text_edit_move_cursor_and_selection(this, cursorIndex + 1);
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
+	{
+		Position cursorPosition;
+		int lineHeight, newCursorIndex;
+
+		// Get the cursor position.
+		cursorPosition = positionFromIndex(cursorIndex);
+
+		// Get line height.
+		lineHeight = getLineHeight();
+
+		// Move the cursor up/down.
+		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
+		newCursorIndex = wz_text_edit_index_from_relative_position(this, cursorPosition);
+
+		if (newCursorIndex == -1)
+			return; // Couldn't move cursor.
+
+		// Apply the new cursor index.
+		if ((key & WZ_KEY_SHIFT_BIT) != 0)
+		{
+			wz_text_edit_move_cursor_and_selection(this, newCursorIndex);
+		}
+		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
+		{
+			cursorIndex = newCursorIndex;
+
+			// Clear the selection.
+			selectionStartIndex = selectionEndIndex = 0;
+		}
+	}
+	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME || WZ_KEY_MOD_OFF(key) == WZ_KEY_END)
+	{
+		int newCursorIndex;
+
+		// Go to text start/end.
+		if (!multiline || (multiline && (key & WZ_KEY_CONTROL_BIT)))
+		{
+			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			{
+				newCursorIndex = 0;
+			}
+			else
+			{
+				newCursorIndex = text.length();
+			}
+		}
+		// Go to line start/end.
+		else
+		{
+			// Find the line we're on.
+			LineBreakResult line;
+			int lineStartIndex, lineEndIndex;
+
+			line.next = text.c_str();
+
+			for (;;)
+			{
+				line = lineBreakText(line.next, 0, getTextRect().w);
+				WZ_ASSERT(line.start);
+				WZ_ASSERT(line.next);
+
+				lineStartIndex = line.start - text.c_str();
+				lineEndIndex = lineStartIndex + line.length;
+
+				// Is the cursor index on this line?
+				if (cursorIndex >= lineStartIndex && cursorIndex <= lineEndIndex)
+					break;
+
+				if (!line.next || !line.next[0])
+					return;
+			}
+
+			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			{
+				newCursorIndex = lineStartIndex;
+			}
+			else
+			{
+				newCursorIndex = lineEndIndex;
+			}
+		}
+
+		if (key & WZ_KEY_SHIFT_BIT)
+		{
+			wz_text_edit_move_cursor_and_selection(this, newCursorIndex);
+		}
+		else
+		{
+			cursorIndex = newCursorIndex;
+
+			// Clear the selection.
+			selectionStartIndex = selectionEndIndex = 0;
+		}
+	}
+	else if (multiline && key == WZ_KEY_ENTER)
+	{
+		wz_text_edit_enter_text(this, "\r");
+	}
+	else if (key == WZ_KEY_DELETE)
+	{
+		if (selectionStartIndex != selectionEndIndex)
+		{
+			wz_text_edit_delete_selection(this);
+		}
+		else
+		{
+			wz_text_edit_delete_text(this, cursorIndex, 1);
+		}
+	}
+	else if (key == WZ_KEY_BACKSPACE && cursorIndex > 0)
+	{
+		if (selectionStartIndex != selectionEndIndex)
+		{
+			wz_text_edit_delete_selection(this);
+		}
+		else
+		{
+			wz_text_edit_delete_text(this, cursorIndex - 1, 1);
+			cursorIndex--;
+		}
+	}
+	else
+	{
+		return;
+	}
+
+	wz_text_edit_update_scroll_index(this);
+}
+
+void TextEditImpl::onTextInput(const char *text)
+{
+	if (validate_text && !validate_text(text))
+		return;
+
+	wz_text_edit_enter_text(this, text);
 }
 
 void TextEditImpl::draw(Rect clip)
