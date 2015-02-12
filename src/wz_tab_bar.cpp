@@ -189,11 +189,6 @@ static void wz_tab_bar_button_pressed(Event *e)
 	((struct TabBarImpl *)e->base.widget->parent)->selectTab((struct ButtonImpl *)e->base.widget);
 }
 
-static Rect wz_tab_bar_get_children_clip_rect(struct WidgetImpl *widget)
-{
-	return widget->getAbsoluteRect();
-}
-
 static void wz_tab_bar_decrement_button_clicked(Event *e)
 {
 	struct TabBarImpl *tabBar;
@@ -221,7 +216,6 @@ TabBarImpl::TabBarImpl()
 	type = WZ_TYPE_TAB_BAR;
 	selectedTab = NULL;
 	scrollValue = 0;
-	vtable.get_children_clip_rect = wz_tab_bar_get_children_clip_rect;
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton = new ButtonImpl("<");

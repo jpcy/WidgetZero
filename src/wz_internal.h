@@ -46,9 +46,6 @@ typedef struct
 {
 	WidgetDrawCallback draw;
 	WidgetMeasureCallback measure;
-
-	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
-	Rect (*get_children_clip_rect)(struct WidgetImpl *widget);
 }
 WidgetVtable;
 
@@ -104,6 +101,9 @@ struct WidgetImpl
 	virtual void onKeyDown(Key key) {}
 	virtual void onKeyUp(Key key) {}
 	virtual void onTextInput(const char *text) {}
+
+	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
+	virtual Rect getChildrenClipRect() const { return getAbsoluteRect(); }
 	
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
@@ -358,6 +358,7 @@ struct ComboImpl : public WidgetImpl
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onRectChanged();
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual Rect getChildrenClipRect() const;
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	struct ListImpl *getList();
@@ -855,6 +856,7 @@ struct WindowImpl : public WidgetImpl
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual Rect getChildrenClipRect() const;
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	int getHeaderHeight() const;

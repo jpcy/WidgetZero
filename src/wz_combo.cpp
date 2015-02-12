@@ -26,14 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static Rect wz_combo_get_children_clip_rect(struct WidgetImpl *widget)
-{
-	// Don't clip children.
-	Rect zero;
-	zero.x = zero.y = zero.w = zero.h = 0;
-	return zero;
-}
-
 static void wz_combo_list_item_selected(Event *e)
 {
 	struct ComboImpl *combo;
@@ -55,8 +47,6 @@ ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_COMBO;
 	isOpen_ = false;
-
-	vtable.get_children_clip_rect = wz_combo_get_children_clip_rect;
 
 	list = new ListImpl(itemData, itemStride, nItems);
 	addChildWidget(list);
@@ -106,6 +96,12 @@ void ComboImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 			isOpen_ = false;
 		}
 	}
+}
+
+Rect ComboImpl::getChildrenClipRect() const
+{
+	// Don't clip children.
+	return Rect();
 }
 
 void ComboImpl::draw(Rect clip)

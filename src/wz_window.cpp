@@ -96,15 +96,6 @@ static void wz_window_calculate_mouse_over_border_rects(struct WindowImpl *windo
 	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && dockPosition == WZ_DOCK_POSITION_NONE);
 }
 
-static Rect wz_window_get_children_clip_rect(struct WidgetImpl *widget)
-{
-	struct WindowImpl *window;
-
-	WZ_ASSERT(widget);
-	window = (struct WindowImpl *)widget;
-	return window->content->getAbsoluteRect();
-}
-
 WindowImpl::WindowImpl(const std::string &title)
 {
 	type = WZ_TYPE_WINDOW;
@@ -113,7 +104,6 @@ WindowImpl::WindowImpl(const std::string &title)
 	borderSize = 4;
 	drag = WZ_DRAG_NONE;
 
-	vtable.get_children_clip_rect = wz_window_get_children_clip_rect;
 	this->title = title;
 
 	content = new struct WidgetImpl;
@@ -348,6 +338,12 @@ void WindowImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseD
 		// Update the mainWindow content rect.
 		mainWindow->updateContentRect();
 	}
+}
+
+Rect WindowImpl::getChildrenClipRect() const
+{
+	// Use the content rect.
+	return content->getAbsoluteRect();
 }
 
 void WindowImpl::draw(Rect clip)

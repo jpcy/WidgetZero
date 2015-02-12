@@ -154,13 +154,10 @@ static void wz_widget_draw_recursive(struct WidgetImpl *widget, Rect clip, Widge
 	}
 
 	// Update clip rect.
-	if (widget->vtable.get_children_clip_rect)
+	if (!Rect::intersect(clip, widget->getChildrenClipRect(), &clip))
 	{
-		if (!Rect::intersect(clip, widget->vtable.get_children_clip_rect(widget), &clip))
-		{
-			// Reset to mainWindow clip rect.
-			clip = widget->mainWindow->getRect();
-		}
+		// Reset to mainWindow clip rect.
+		clip = widget->mainWindow->getRect();
 	}
 
 	if (!recurse_predicate(widget))

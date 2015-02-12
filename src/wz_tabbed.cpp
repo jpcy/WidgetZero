@@ -34,16 +34,9 @@ TAB PAGE WIDGET
 ================================================================================
 */
 
-static Rect wz_tab_page_get_children_clip_rect(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	return widget->getAbsoluteRect();
-}
-
 TabPage::TabPage()
 {
 	type = WZ_TYPE_TAB_PAGE;
-	vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
 }
 
 void TabPage::add(struct WidgetImpl *widget)
