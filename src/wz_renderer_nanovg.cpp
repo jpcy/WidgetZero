@@ -418,17 +418,7 @@ Size NVGRenderer::measureCombo(ComboImpl *combo)
 
 	// Add scroller width or button width, whichever is largest.
 	struct ScrollerImpl *scroller = combo->getList()->getScroller();
-	Size scrollerSize;
-
-	if (scroller->vtable.measure)
-	{
-		scrollerSize = scroller->vtable.measure(scroller);
-	}
-	else
-	{
-		scrollerSize = scroller->measure();
-	}
-
+	Size scrollerSize = scroller->measure();
 	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
 	// Padding.

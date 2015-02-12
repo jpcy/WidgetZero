@@ -45,7 +45,6 @@ struct WindowImpl;
 typedef struct
 {
 	WidgetDrawCallback draw;
-	WidgetMeasureCallback measure;
 }
 WidgetVtable;
 
@@ -149,7 +148,6 @@ struct WidgetImpl
 	void setMetadata(void *metadata);
 	void *getMetadata();
 	void setDrawCallback(WidgetDrawCallback draw);
-	void setMeasureCallback(WidgetMeasureCallback measure);
 
 	// Resize the widget to the result of calling the widget "measure" callback.
 	void resizeToMeasured();

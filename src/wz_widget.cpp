@@ -414,26 +414,12 @@ void WidgetImpl::setDrawCallback(WidgetDrawCallback draw)
 	vtable.draw = draw;
 }
 
-void WidgetImpl::setMeasureCallback(WidgetMeasureCallback measure)
-{
-	vtable.measure = measure;
-}
-
 void WidgetImpl::resizeToMeasured()
 {
 	if (!renderer)
 		return;
 
-	Size size;
-
-	if (vtable.measure)
-	{
-		size = vtable.measure(this);
-	}
-	else
-	{
-		size = measure();
-	}
+	Size size = measure();
 
 	// The explicitly set size overrides the measured size.
 	if (userRect.w != 0)
