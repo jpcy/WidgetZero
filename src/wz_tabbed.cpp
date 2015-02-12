@@ -40,40 +40,32 @@ static Rect wz_tab_page_get_children_clip_rect(struct WidgetImpl *widget)
 	return widget->getAbsoluteRect();
 }
 
-static struct WidgetImpl *wz_tab_page_create()
+TabPage::TabPage()
 {
-	struct WidgetImpl *page = new struct WidgetImpl;
-	page->type = WZ_TYPE_TAB_PAGE;
-	page->vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
-	return page;
+	type = WZ_TYPE_TAB_PAGE;
+	vtable.get_children_clip_rect = wz_tab_page_get_children_clip_rect;
 }
 
-void wz_tab_page_add(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
+void TabPage::add(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(tabPage);
 	WZ_ASSERT(widget);
 
-	if (tabPage->type != WZ_TYPE_TAB_PAGE || widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
 		return;
 
-	tabPage->addChildWidget(widget);
+	addChildWidget(widget);
 }
 
-void wz_tab_page_remove(struct WidgetImpl *tabPage, struct WidgetImpl *widget)
+void TabPage::remove(struct WidgetImpl *widget)
 {
-	WZ_ASSERT(tabPage);
 	WZ_ASSERT(widget);
-
-	if (tabPage->type != WZ_TYPE_TAB_PAGE)
-		return;
-
-	tabPage->removeChildWidget(widget);
+	removeChildWidget(widget);
 }
 
 /*
 ================================================================================
 
-TAB
+TAB PUBLIC INTERFACE
 
 ================================================================================
 */
@@ -83,7 +75,7 @@ struct TabImpl
 {
 	TabImpl() : button(NULL), page(NULL) {}
 	ButtonImpl *button;
-	WidgetImpl *page;
+	TabPage *page;
 };
 
 Tab::Tab()
@@ -103,13 +95,13 @@ Tab *Tab::setLabel(const std::string &label)
 
 Widget *Tab::add(Widget *widget)
 {
-	wz_tab_page_add(impl->page, widget->getImpl());
+	impl->page->add(widget->getImpl());
 	return widget;
 }
 
 void Tab::remove(Widget *widget)
 {
-	wz_tab_page_remove(impl->page, widget->getImpl());
+	impl->page->remove(widget->getImpl());
 }
 
 /*
@@ -169,7 +161,7 @@ Size TabbedImpl::measure()
 	return renderer->measureTabbed(this);
 }
 
-void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
+void TabbedImpl::addTab(struct ButtonImpl **tab, struct TabPage **page)
 {
 	WZ_ASSERT(tab);
 	WZ_ASSERT(page);
@@ -178,7 +170,7 @@ void TabbedImpl::addTab(struct ButtonImpl **tab, struct WidgetImpl **page)
 	*tab = tabBar->createTab();
 
 	// Add the page widget.
-	*page = wz_tab_page_create();
+	*page = new TabPage();
 	(*page)->setVisible(tabBar->getSelectedTab() == *tab);
 	addChildWidget(*page);
 

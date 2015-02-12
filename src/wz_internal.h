@@ -749,10 +749,17 @@ struct TabBarImpl : public WidgetImpl
 	std::vector<EventCallback> tab_changed_callbacks;
 };
 
+struct TabPage : public WidgetImpl
+{
+	TabPage();
+	void add(struct WidgetImpl *widget);
+	void remove(struct WidgetImpl *widget);
+};
+
 typedef struct
 {
 	struct ButtonImpl *tab;
-	struct WidgetImpl *page;
+	struct TabPage *page;
 }
 TabbedPage;
 
@@ -762,7 +769,7 @@ struct TabbedImpl : public WidgetImpl
 	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	void addTab(struct ButtonImpl **tab, struct WidgetImpl **page);
+	void addTab(struct ButtonImpl **tab, struct TabPage **page);
 
 	struct TabBarImpl *tabBar;
 	std::vector<TabbedPage> pages;
