@@ -21,18 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
 static void wz_combo_list_item_selected(Event *e)
 {
-	struct ComboImpl *combo;
+	Combo *combo;
 
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
-	combo = (struct ComboImpl *)e->base.widget->parent;
+	combo = (Combo *)e->base.widget->parent;
 
 	// Unlock input.
 	combo->mainWindow->popLockInputWidget(combo);
@@ -43,29 +43,36 @@ static void wz_combo_list_item_selected(Event *e)
 	combo->isOpen_ = false;
 }
 
-ComboImpl::ComboImpl(uint8_t *itemData, int itemStride, int nItems)
+Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_COMBO;
 	isOpen_ = false;
 
-	list = new ListImpl(itemData, itemStride, nItems);
+	list = new List(itemData, itemStride, nItems);
 	addChildWidget(list);
 	list->setVisible(false);
 	list->setClipInputToParent(false);
 	list->addCallbackItemSelected(wz_combo_list_item_selected);
 }
 
-void ComboImpl::onFontChanged(const char *fontFace, float fontSize)
+void Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
+{
+	list->setItemData(itemData);
+	list->setItemStride(itemStride);
+	list->setNumItems(nItems);
+}
+
+void Combo::onFontChanged(const char *fontFace, float fontSize)
 {
 	list->setFont(fontFace, fontSize);
 }
 
-void ComboImpl::onRectChanged()
+void Combo::onRectChanged()
 {
 	updateListRect();
 }
 
-void ComboImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -98,38 +105,38 @@ void ComboImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-Rect ComboImpl::getChildrenClipRect() const
+Rect Combo::getChildrenClipRect() const
 {
 	// Don't clip children.
 	return Rect();
 }
 
-void ComboImpl::draw(Rect clip)
+void Combo::draw(Rect clip)
 {
 	renderer->drawCombo(this, clip);
 }
 
-Size ComboImpl::measure()
+Size Combo::measure()
 {
 	return renderer->measureCombo(this);
 }
 
-struct ListImpl *ComboImpl::getList()
+List *Combo::getList()
 {
 	return list;
 }
 
-const struct ListImpl *ComboImpl::getList() const
+const List *Combo::getList() const
 {
 	return list;
 }
 
-bool ComboImpl::isOpen() const
+bool Combo::isOpen() const
 {
 	return isOpen_;
 }
 
-void ComboImpl::updateListRect()
+void Combo::updateListRect()
 {
 	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
 	if (!mainWindow)
@@ -150,42 +157,6 @@ void ComboImpl::updateListRect()
 	}
 
 	list->setRectInternal(listRect);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Combo::Combo()
-{
-	impl.reset(new ComboImpl(NULL, 0, 0));
-}
-
-Combo::~Combo()
-{
-}
-
-Combo *Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
-{
-	ListImpl *list = getImpl()->getList();
-	list->setItemData(itemData);
-	list->setItemStride(itemStride);
-	list->setNumItems(nItems);
-	return this;
-}
-
-ComboImpl *Combo::getImpl()
-{
-	return (ComboImpl *)impl.get();
-}
-
-const ComboImpl *Combo::getImpl() const
-{
-	return (const ComboImpl *)impl.get();
 }
 
 } // namespace wz

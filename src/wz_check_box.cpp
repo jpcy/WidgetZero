@@ -21,88 +21,39 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
-CheckBoxImpl::CheckBoxImpl(const std::string &label) : ButtonImpl(label)
+CheckBox::CheckBox(const std::string &label) : Button(label)
 {
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
-void CheckBoxImpl::draw(Rect clip)
+void CheckBox::draw(Rect clip)
 {
 	renderer->drawCheckBox(this, clip);
 }
 
-Size CheckBoxImpl::measure()
+Size CheckBox::measure()
 {
 	return renderer->measureCheckBox(this);
 }
 
-bool CheckBoxImpl::isChecked() const
+bool CheckBox::isChecked() const
 {
 	return isSet();
 }
 
-void CheckBoxImpl::check(bool value)
+void CheckBox::check(bool value)
 {
 	set(value);
 }
 
-void CheckBoxImpl::addCallbackChecked(EventCallback callback)
+void CheckBox::addCallbackChecked(EventCallback callback)
 {
 	addCallbackClicked(callback);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-CheckBox::CheckBox()
-{
-	impl.reset(new CheckBoxImpl());
-}
-
-CheckBox::CheckBox(const std::string &label)
-{
-	impl.reset(new CheckBoxImpl(label.c_str()));
-}
-
-CheckBox::~CheckBox()
-{
-}
-
-const char *CheckBox::getLabel() const
-{
-	return ((const CheckBoxImpl *)impl.get())->getLabel();
-}
-
-CheckBox *CheckBox::setLabel(const std::string &label)
-{
-	getImpl()->setLabel(label.c_str());
-	return this;
-}
-
-CheckBox *CheckBox::bindValue(bool *value)
-{
-	getImpl()->bindValue(value);
-	return this;
-}
-
-CheckBoxImpl *CheckBox::getImpl()
-{
-	return (CheckBoxImpl *)impl.get();
-}
-
-const CheckBoxImpl *CheckBox::getImpl() const
-{
-	return (const CheckBoxImpl *)impl.get();
 }
 
 } // namespace wz

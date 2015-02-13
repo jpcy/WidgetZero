@@ -21,15 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
-static void wz_text_edit_update_scroll_index(struct TextEditImpl *textEdit);
-static void wz_text_edit_delete_selection(struct TextEditImpl *textEdit);
+static void wz_text_edit_update_scroll_index(TextEdit *textEdit);
+static void wz_text_edit_delete_selection(TextEdit *textEdit);
 
-static int wz_calculate_num_lines(struct TextEditImpl *textEdit, int lineWidth)
+static int wz_calculate_num_lines(TextEdit *textEdit, int lineWidth)
 {
 	LineBreakResult line;
 	int nLines = 0;
@@ -62,7 +62,7 @@ SCROLLER
 ================================================================================
 */
 
-static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
+static void wz_text_edit_update_scroller(TextEdit *textEdit)
 {
 	Rect textEditRect, rect;
 	int lineHeight, nLines, max, maxHeight;
@@ -109,10 +109,10 @@ static void wz_text_edit_update_scroller(struct TextEditImpl *textEdit)
 
 static void wz_text_edit_scroller_value_changed(Event *e)
 {
-	struct TextEditImpl *textEdit;
+	TextEdit *textEdit;
 	
 	WZ_ASSERT(e);
-	textEdit = (struct TextEditImpl *)e->base.widget->parent;
+	textEdit = (TextEdit *)e->base.widget->parent;
 	WZ_ASSERT(textEdit->multiline);
 	textEdit->scrollValue = e->scroller.value;
 }
@@ -125,7 +125,7 @@ INSERTING / DELETING TEXT
 ================================================================================
 */
 
-static void wz_text_edit_insert_text(struct TextEditImpl *textEdit, int index, const char *text, int n)
+static void wz_text_edit_insert_text(TextEdit *textEdit, int index, const char *text, int n)
 {
 	WZ_ASSERT(textEdit);
 	WZ_ASSERT(text);
@@ -135,7 +135,7 @@ static void wz_text_edit_insert_text(struct TextEditImpl *textEdit, int index, c
 	wz_text_edit_update_scroller(textEdit);
 }
 
-static void wz_text_edit_enter_text(struct TextEditImpl *textEdit, const char *text)
+static void wz_text_edit_enter_text(TextEdit *textEdit, const char *text)
 {
 	int n;
 
@@ -157,7 +157,7 @@ static void wz_text_edit_enter_text(struct TextEditImpl *textEdit, const char *t
 	wz_text_edit_update_scroll_index(textEdit);
 }
 
-static void wz_text_edit_delete_text(struct TextEditImpl *textEdit, int index, int n)
+static void wz_text_edit_delete_text(TextEdit *textEdit, int index, int n)
 {
 	WZ_ASSERT(textEdit);
 
@@ -170,7 +170,7 @@ static void wz_text_edit_delete_text(struct TextEditImpl *textEdit, int index, i
 	wz_text_edit_update_scroller(textEdit);
 }
 
-static void wz_text_edit_delete_selection(struct TextEditImpl *textEdit)
+static void wz_text_edit_delete_selection(TextEdit *textEdit)
 {
 	int start, end;
 
@@ -200,7 +200,7 @@ PRIVATE UTILITY FUNCTIONS
 */
 
 // Returns -1 if an index could not be calculated. e.g. if the position is outside the widget.
-static int wz_text_edit_index_from_relative_position(const struct TextEditImpl *textEdit, Position pos)
+static int wz_text_edit_index_from_relative_position(const TextEdit *textEdit, Position pos)
 {
 	Rect rect;
 	int i, previousWidth, result;
@@ -335,7 +335,7 @@ static int wz_text_edit_index_from_relative_position(const struct TextEditImpl *
 }
 
 // Calculate the text index at the given absolute position.
-static int wz_text_edit_index_from_position(const struct TextEditImpl *textEdit, int x, int y)
+static int wz_text_edit_index_from_position(const TextEdit *textEdit, int x, int y)
 {
 	Rect rect;
 	Position pos;
@@ -349,7 +349,7 @@ static int wz_text_edit_index_from_position(const struct TextEditImpl *textEdit,
 }
 
 // Update the scroll value so the cursor is visible.
-static void wz_text_edit_update_scroll_index(struct TextEditImpl *textEdit)
+static void wz_text_edit_update_scroll_index(TextEdit *textEdit)
 {
 	WZ_ASSERT(textEdit);
 
@@ -406,7 +406,7 @@ EVENT HANDLING
 */
 
 // Helper function for moving the cursor while the selection (shift) key is held.
-static void wz_text_edit_move_cursor_and_selection(struct TextEditImpl *textEdit, int newCursorIndex)
+static void wz_text_edit_move_cursor_and_selection(TextEdit *textEdit, int newCursorIndex)
 {
 	WZ_ASSERT(textEdit);
 
@@ -425,7 +425,7 @@ static void wz_text_edit_move_cursor_and_selection(struct TextEditImpl *textEdit
 	}
 }
 
-TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
+TextEdit::TextEdit(bool multiline, const std::string &text)
 {
 	type = WZ_TYPE_TEXT_EDIT;
 	validate_text = NULL;
@@ -435,27 +435,27 @@ TextEditImpl::TextEditImpl(bool multiline, int maximumTextLength)
 
 	if (multiline)
 	{
-		scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+		scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		addChildWidget(scroller);
 		wz_text_edit_update_scroller(this);
 		scroller->addCallbackValueChanged(wz_text_edit_scroller_value_changed);
 	}
 
 	this->multiline = multiline;
-	this->maximumTextLength = maximumTextLength;
+	this->text = text;
 }
 
-void TextEditImpl::onRendererChanged()
+void TextEdit::onRendererChanged()
 {
 	border.left = border.top = border.right = border.bottom = 4;
 }
 
-void TextEditImpl::onRectChanged()
+void TextEdit::onRectChanged()
 {
 	wz_text_edit_update_scroller(this);
 }
 
-void TextEditImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -502,7 +502,7 @@ void TextEditImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void TextEditImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void TextEdit::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -511,7 +511,7 @@ void TextEditImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void TextEditImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	if (!(hover && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
 		return;
@@ -534,7 +534,7 @@ void TextEditImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mous
 	}
 }
 
-void TextEditImpl::onMouseWheelMove(int /*x*/, int y)
+void TextEdit::onMouseWheelMove(int /*x*/, int y)
 {
 	if (multiline && scroller->getVisible())
 	{
@@ -542,7 +542,7 @@ void TextEditImpl::onMouseWheelMove(int /*x*/, int y)
 	}
 }
 
-void TextEditImpl::onKeyDown(Key key)
+void TextEdit::onKeyDown(Key key)
 {
 	if (key == WZ_KEY_LEFT)
 	{
@@ -720,7 +720,7 @@ void TextEditImpl::onKeyDown(Key key)
 	wz_text_edit_update_scroll_index(this);
 }
 
-void TextEditImpl::onTextInput(const char *text)
+void TextEdit::onTextInput(const char *text)
 {
 	if (validate_text && !validate_text(text))
 		return;
@@ -728,37 +728,37 @@ void TextEditImpl::onTextInput(const char *text)
 	wz_text_edit_enter_text(this, text);
 }
 
-void TextEditImpl::draw(Rect clip)
+void TextEdit::draw(Rect clip)
 {
 	renderer->drawTextEdit(this, clip);
 }
 
-Size TextEditImpl::measure()
+Size TextEdit::measure()
 {
 	return renderer->measureTextEdit(this);
 }
 
-void TextEditImpl::setValidateTextCallback(TextEditValidateTextCallback callback)
+void TextEdit::setValidateTextCallback(TextEditValidateTextCallback callback)
 {
 	validate_text = callback;
 }
 
-bool TextEditImpl::isMultiline() const
+bool TextEdit::isMultiline() const
 {
 	return multiline;
 }
 
-Border TextEditImpl::getBorder() const
+Border TextEdit::getBorder() const
 {
 	return border;
 }
 
-void TextEditImpl::setBorder(Border border)
+void TextEdit::setBorder(Border border)
 {
 	this->border = border;
 }
 
-Rect TextEditImpl::getTextRect() const
+Rect TextEdit::getTextRect() const
 {
 	Rect textRect;
 	textRect = getAbsoluteRect();
@@ -775,23 +775,23 @@ Rect TextEditImpl::getTextRect() const
 	return textRect;
 }
 
-const char *TextEditImpl::getText() const
+const char *TextEdit::getText() const
 {
 	return text.c_str();
 }
 
-void TextEditImpl::setText(const char *text)
+void TextEdit::setText(const char *text)
 {
 	this->text = text;
 	resizeToMeasured();
 }
 
-int TextEditImpl::getScrollValue() const
+int TextEdit::getScrollValue() const
 {
 	return scrollValue;
 }
 
-const char *TextEditImpl::getVisibleText() const
+const char *TextEdit::getVisibleText() const
 {
 	if (multiline)
 	{
@@ -821,37 +821,37 @@ const char *TextEditImpl::getVisibleText() const
 	}
 }
 
-Position TextEditImpl::getCursorPosition() const
+Position TextEdit::getCursorPosition() const
 {
 	return positionFromIndex(cursorIndex);
 }
 
-bool TextEditImpl::hasSelection() const
+bool TextEdit::hasSelection() const
 {
 	return selectionStartIndex != selectionEndIndex;
 }
 
-int TextEditImpl::getSelectionStartIndex() const
+int TextEdit::getSelectionStartIndex() const
 {
 	return WZ_MIN(selectionStartIndex, selectionEndIndex);
 }
 
-Position TextEditImpl::getSelectionStartPosition() const
+Position TextEdit::getSelectionStartPosition() const
 {
 	return positionFromIndex(WZ_MIN(selectionStartIndex, selectionEndIndex));
 }
 
-int TextEditImpl::getSelectionEndIndex() const
+int TextEdit::getSelectionEndIndex() const
 {
 	return WZ_MAX(selectionStartIndex, selectionEndIndex);
 }
 
-Position TextEditImpl::getSelectionEndPosition() const
+Position TextEdit::getSelectionEndPosition() const
 {
 	return positionFromIndex(WZ_MAX(selectionStartIndex, selectionEndIndex));
 }
 
-Position TextEditImpl::positionFromIndex(int index) const
+Position TextEdit::positionFromIndex(int index) const
 {
 	// Get the line height.
 	const int lineHeight = getLineHeight();
@@ -920,45 +920,6 @@ Position TextEditImpl::positionFromIndex(int index) const
 	}
 
 	return position;
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-TextEdit::TextEdit(bool multiline)
-{
-	impl.reset(new TextEditImpl(multiline, 256));
-}
-
-TextEdit::TextEdit(const std::string &text, bool multiline)
-{
-	impl.reset(new TextEditImpl(multiline, 256));
-	setText(text);
-}
-
-TextEdit::~TextEdit()
-{
-}
-
-TextEdit *TextEdit::setText(const std::string &text)
-{
-	getImpl()->setText(text.c_str());
-	return this;
-}
-
-TextEditImpl *TextEdit::getImpl()
-{
-	return (TextEditImpl *)impl.get();
-}
-
-const TextEditImpl *TextEdit::getImpl() const
-{
-	return (const TextEditImpl *)impl.get();
 }
 
 } // namespace wz

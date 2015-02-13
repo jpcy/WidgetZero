@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
@@ -39,7 +39,7 @@ TabPage::TabPage()
 	type = WZ_TYPE_TAB_PAGE;
 }
 
-void TabPage::add(struct WidgetImpl *widget)
+void TabPage::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -49,7 +49,7 @@ void TabPage::add(struct WidgetImpl *widget)
 	addChildWidget(widget);
 }
 
-void TabPage::remove(struct WidgetImpl *widget)
+void TabPage::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	removeChildWidget(widget);
@@ -58,22 +58,13 @@ void TabPage::remove(struct WidgetImpl *widget)
 /*
 ================================================================================
 
-TAB PUBLIC INTERFACE
+TAB
 
 ================================================================================
 */
 
-// Wraps tab button and page.
-struct TabImpl
+Tab::Tab() : button(NULL), page(NULL)
 {
-	TabImpl() : button(NULL), page(NULL) {}
-	TabButtonImpl *button;
-	TabPage *page;
-};
-
-Tab::Tab()
-{
-	impl.reset(new TabImpl());
 }
 
 Tab::~Tab()
@@ -82,19 +73,19 @@ Tab::~Tab()
 
 Tab *Tab::setLabel(const std::string &label)
 {
-	impl->button->setLabel(label.c_str());
+	button->setLabel(label.c_str());
 	return this;
 }
 
 Widget *Tab::add(Widget *widget)
 {
-	impl->page->add(widget->getImpl());
+	page->add(widget);
 	return widget;
 }
 
 void Tab::remove(Widget *widget)
 {
-	impl->page->remove(widget->getImpl());
+	page->remove(widget);
 }
 
 /*
@@ -107,10 +98,10 @@ TABBED WIDGET
 
 static void wz_tabbed_tab_bar_tab_changed(Event *e)
 {
-	struct TabbedImpl *tabbed;
+	Tabbed *tabbed;
 
 	WZ_ASSERT(e);
-	tabbed = (struct TabbedImpl *)e->base.widget->parent;
+	tabbed = (Tabbed *)e->base.widget->parent;
 
 	// Set the corresponding page to visible, hide all the others.
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
@@ -119,16 +110,16 @@ static void wz_tabbed_tab_bar_tab_changed(Event *e)
 	}
 }
 
-TabbedImpl::TabbedImpl()
+Tabbed::Tabbed()
 {
 	type = WZ_TYPE_TABBED;
 
-	tabBar = new TabBarImpl;
+	tabBar = new TabBar;
 	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
 	addChildWidget(tabBar);
 }
 
-void TabbedImpl::onRectChanged()
+void Tabbed::onRectChanged()
 {
 	// Set the tab bar width to match.
 	tabBar->setWidthInternal(rect.w);
@@ -144,17 +135,22 @@ void TabbedImpl::onRectChanged()
 	}
 }
 
-void TabbedImpl::draw(Rect clip)
+void Tabbed::draw(Rect clip)
 {
 	renderer->drawTabbed(this, clip);
 }
 
-Size TabbedImpl::measure()
+Size Tabbed::measure()
 {
 	return renderer->measureTabbed(this);
 }
 
-void TabbedImpl::addTab(struct TabButtonImpl **tab, struct TabPage **page)
+void Tabbed::addTab(Tab *tab)
+{
+	addTab(&tab->button, &tab->page);
+}
+
+void Tabbed::addTab(TabButton **tab, TabPage **page)
 {
 	WZ_ASSERT(tab);
 	WZ_ASSERT(page);
@@ -176,39 +172,6 @@ void TabbedImpl::addTab(struct TabButtonImpl **tab, struct TabPage **page)
 	newPage.tab = *tab;
 	newPage.page = *page;
 	pages.push_back(newPage);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Tabbed::Tabbed()
-{
-	impl.reset(new TabbedImpl);
-}
-
-Tabbed::~Tabbed()
-{
-}
-
-Tab *Tabbed::addTab(Tab *tab)
-{
-	getImpl()->addTab(&tab->impl->button, &tab->impl->page);
-	return tab;
-}
-
-TabbedImpl *Tabbed::getImpl()
-{
-	return (TabbedImpl *)impl.get();
-}
-
-const TabbedImpl *Tabbed::getImpl() const
-{
-	return (const TabbedImpl *)impl.get();
 }
 
 } // namespace wz

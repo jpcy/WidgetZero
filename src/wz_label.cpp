@@ -21,12 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
-LabelImpl::LabelImpl(const std::string &text) : text_(text)
+Label::Label(const std::string &text) : text_(text)
 {
 	type = WZ_TYPE_LABEL;
 	multiline_ = false;
@@ -34,71 +35,33 @@ LabelImpl::LabelImpl(const std::string &text) : text_(text)
 	isTextColorUserSet_ = false;
 }
 
-void LabelImpl::draw(Rect clip)
+void Label::draw(Rect clip)
 {
 	renderer->drawLabel(this, clip);
 }
 
-Size LabelImpl::measure()
+Size Label::measure()
 {
 	return renderer->measureLabel(this);
 }
 
-void LabelImpl::setMultiline(bool multiline)
+void Label::setMultiline(bool multiline)
 {
 	multiline_ = multiline;
 }
 
-bool LabelImpl::getMultiline() const
+bool Label::getMultiline() const
 {
 	return multiline_;
 }
 
-void LabelImpl::setText(const char *text)
+void Label::setText(const char *text)
 {
 	text_ = text;
 	resizeToMeasured();
 }
 
-const char *LabelImpl::getText() const
-{
-	return text_.c_str();
-}
-
-void LabelImpl::setTextColor(NVGcolor color)
-{
-	textColor_ = color;
-	isTextColorUserSet_ = true;
-}
-
-NVGcolor LabelImpl::getTextColor() const
-{
-	return textColor_;
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Label::Label()
-{
-	impl.reset(new LabelImpl);
-}
-
-Label::Label(const std::string &text)
-{
-	impl.reset(new LabelImpl(text));
-}
-
-Label::~Label()
-{
-}
-
-Label *Label::setText(const char *format, ...)
+void Label::setTextf(const char *format, ...)
 {
 	static char buffer[1024];
 
@@ -106,36 +69,30 @@ Label *Label::setText(const char *format, ...)
 	va_start(args, format);
 	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
-	
-	getImpl()->setText(buffer);
-	return this;
+
+	setText(buffer);
 }
 
-Label *Label::setTextColor(float r, float g, float b, float a)
+const char *Label::getText() const
 {
-	NVGcolor color;
-	color.r = r;
-	color.g = g;
-	color.b = b;
-	color.a = a;
-	getImpl()->setTextColor(color);
-	return this;
+	return text_.c_str();
 }
 
-Label *Label::setMultiline(bool multiline)
+void Label::setTextColor(NVGcolor color)
 {
-	getImpl()->setMultiline(multiline);
-	return this;
+	textColor_ = color;
+	isTextColorUserSet_ = true;
 }
 
-LabelImpl *Label::getImpl()
+void Label::setTextColor(float r, float g, float b)
 {
-	return (LabelImpl *)impl.get();
+	textColor_ = nvgRGBf(r, g, b);
+	isTextColorUserSet_ = true;
 }
 
-const LabelImpl *Label::getImpl() const
+NVGcolor Label::getTextColor() const
 {
-	return (const LabelImpl *)impl.get();
+	return textColor_;
 }
 
 } // namespace wz

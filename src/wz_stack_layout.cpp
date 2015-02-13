@@ -21,19 +21,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
-StackLayoutImpl::StackLayoutImpl(StackLayoutDirection direction, int spacing)
+StackLayout::StackLayout(StackLayoutDirection direction, int spacing)
 {
 	type = WZ_TYPE_STACK_LAYOUT;
 	this->direction = direction;
 	this->spacing = spacing;
 }
 
-void StackLayoutImpl::onRectChanged()
+void StackLayout::onRectChanged()
 {
 	if (direction == WZ_STACK_LAYOUT_VERTICAL)
 	{
@@ -45,34 +45,24 @@ void StackLayoutImpl::onRectChanged()
 	}
 }
 
-void StackLayoutImpl::setDirection(StackLayoutDirection direction)
+void StackLayout::setDirection(StackLayoutDirection direction)
 {
 	this->direction = direction;
 	refreshRect();
 }
 
-void StackLayoutImpl::setSpacing(int spacing)
+void StackLayout::setSpacing(int spacing)
 {
 	this->spacing = spacing;
 	refreshRect();
 }
 
-int StackLayoutImpl::getSpacing() const
+int StackLayout::getSpacing() const
 {
 	return spacing;
 }
 
-void StackLayoutImpl::add(Widget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
-		return;
-
-	addChildWidget(widget);
-}
-
-void StackLayoutImpl::add(struct WidgetImpl *widget)
+void StackLayout::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -82,19 +72,13 @@ void StackLayoutImpl::add(struct WidgetImpl *widget)
 	addChildWidget(widget);
 }
 
-void StackLayoutImpl::remove(Widget *widget)
+void StackLayout::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	removeChildWidget(widget);
 }
 
-void StackLayoutImpl::remove(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	removeChildWidget(widget);
-}
-
-void StackLayoutImpl::layoutVertical()
+void StackLayout::layoutVertical()
 {
 	int availableHeight = rect.h;
 
@@ -129,7 +113,7 @@ void StackLayoutImpl::layoutVertical()
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
-		struct WidgetImpl *child = children[i];
+		Widget *child = children[i];
 
 		if (i != 0)
 		{
@@ -179,7 +163,7 @@ void StackLayoutImpl::layoutVertical()
 	}
 }
 
-void StackLayoutImpl::layoutHorizontal()
+void StackLayout::layoutHorizontal()
 {
 	int availableWidth = rect.w;
 
@@ -214,7 +198,7 @@ void StackLayoutImpl::layoutHorizontal()
 
 	for (size_t i = 0; i < children.size(); i++)
 	{
-		struct WidgetImpl *child = children[i];
+		Widget *child = children[i];
 
 		if (i != 0)
 		{
@@ -262,66 +246,6 @@ void StackLayoutImpl::layoutHorizontal()
 		child->setRectInternal(childRect);
 		x += childRect.w + child->margin.right;
 	}
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-StackLayout::StackLayout()
-{
-	impl.reset(new StackLayoutImpl(WZ_STACK_LAYOUT_VERTICAL, 0));
-}
-
-StackLayout::StackLayout(StackLayoutDirection direction)
-{
-	impl.reset(new StackLayoutImpl(direction, 0));
-}
-
-StackLayout::~StackLayout()
-{
-}
-
-StackLayout *StackLayout::setDirection(StackLayoutDirection direction)
-{
-	getImpl()->setDirection(direction);
-	return this;
-}
-
-StackLayout *StackLayout::setSpacing(int spacing)
-{
-	getImpl()->setSpacing(spacing);
-	return this;
-}
-
-int StackLayout::getSpacing() const
-{
-	return getImpl()->getSpacing();
-}
-
-Widget *StackLayout::add(Widget *widget)
-{
-	getImpl()->add(widget);
-	return widget;
-}
-
-void StackLayout::remove(Widget *widget)
-{
-	getImpl()->remove(widget);
-}
-
-StackLayoutImpl *StackLayout::getImpl()
-{
-	return (StackLayoutImpl *)impl.get();
-}
-
-const StackLayoutImpl *StackLayout::getImpl() const
-{
-	return (const StackLayoutImpl *)impl.get();
 }
 
 } // namespace wz

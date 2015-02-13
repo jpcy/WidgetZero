@@ -21,27 +21,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
-FrameImpl::FrameImpl()
+Frame::Frame()
 {
 	type = WZ_TYPE_FRAME;
+	setSize(200, 200);
 }
 
-void FrameImpl::add(Widget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
-		return;
-
-	addChildWidget(widget);
-}
-
-void FrameImpl::add(struct WidgetImpl *widget)
+void Frame::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -51,55 +42,10 @@ void FrameImpl::add(struct WidgetImpl *widget)
 	addChildWidget(widget);
 }
 
-void FrameImpl::remove(Widget *widget)
-{
-	WZ_ASSERT(widget);
-	removeChildWidget(widget);
-}
-
-void FrameImpl::remove(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	removeChildWidget(widget);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Frame::Frame()
-{
-	impl.reset(new FrameImpl);
-	impl->setSize(200, 200);
-}
-
-Frame::~Frame()
-{
-}
-
-Widget *Frame::add(Widget *widget)
-{
-	getImpl()->add(widget);
-	return widget;
-}
-
 void Frame::remove(Widget *widget)
 {
-	getImpl()->remove(widget);
-}
-
-FrameImpl *Frame::getImpl()
-{
-	return (FrameImpl *)impl.get();
-}
-
-const FrameImpl *Frame::getImpl() const
-{
-	return (const FrameImpl *)impl.get();
+	WZ_ASSERT(widget);
+	removeChildWidget(widget);
 }
 
 } // namespace wz

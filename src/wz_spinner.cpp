@@ -21,8 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -39,11 +40,11 @@ static bool wz_spinner_validate_text(const char *text)
 	return true;
 }
 
-static void wz_spinner_draw_button(struct WidgetImpl *widget, Rect clip, bool decrement)
+static void wz_spinner_draw_button(Widget *widget, Rect clip, bool decrement)
 {
-	const struct ButtonImpl *button = (struct ButtonImpl *)widget;
+	const Button *button = (Button *)widget;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
+	NVGcontext *vg = r->getContext();
 	const Rect rect = widget->getAbsoluteRect();
 	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
 	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
@@ -71,7 +72,7 @@ static void wz_spinner_draw_button(struct WidgetImpl *widget, Rect clip, bool de
 	nvgRestore(vg);
 }
 
-static void wz_spinner_decrement_button_draw(struct WidgetImpl *widget, Rect clip)
+static void wz_spinner_decrement_button_draw(Widget *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_spinner_draw_button(widget, clip, true);
@@ -79,16 +80,16 @@ static void wz_spinner_decrement_button_draw(struct WidgetImpl *widget, Rect cli
 
 static void wz_spinner_decrement_button_clicked(Event *e)
 {
-	struct SpinnerImpl *spinner;
+	Spinner *spinner;
 
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	spinner = (struct SpinnerImpl *)e->base.widget->parent;
+	spinner = (Spinner *)e->base.widget->parent;
 	spinner->setValue(spinner->getValue() - 1);
 }
 
-static void wz_spinner_increment_button_draw(struct WidgetImpl *widget, Rect clip)
+static void wz_spinner_increment_button_draw(Widget *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_spinner_draw_button(widget, clip, false);
@@ -96,25 +97,25 @@ static void wz_spinner_increment_button_draw(struct WidgetImpl *widget, Rect cli
 
 static void wz_spinner_increment_button_clicked(Event *e)
 {
-	struct SpinnerImpl *spinner;
+	Spinner *spinner;
 
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	spinner = (struct SpinnerImpl *)e->base.widget->parent;
+	spinner = (Spinner *)e->base.widget->parent;
 	spinner->setValue(spinner->getValue() + 1);
 }
 
-SpinnerImpl::SpinnerImpl()
+Spinner::Spinner()
 {
 	type = WZ_TYPE_SPINNER;
 
-	textEdit = new TextEditImpl(false, 256);
+	textEdit = new TextEdit(false);
 	textEdit->setStretch(WZ_STRETCH);
 	textEdit->setValidateTextCallback(wz_spinner_validate_text);
 	addChildWidget(textEdit);
 
-	decrementButton = new ButtonImpl();
+	decrementButton = new Button();
 	decrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	decrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	decrementButton->setStretchScale(1, 0.5f);
@@ -124,7 +125,7 @@ SpinnerImpl::SpinnerImpl()
 	decrementButton->setOverlap(true);
 	addChildWidget(decrementButton);
 
-	incrementButton = new ButtonImpl();
+	incrementButton = new Button();
 	incrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	incrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	incrementButton->setStretchScale(1, 0.5f);
@@ -135,7 +136,7 @@ SpinnerImpl::SpinnerImpl()
 	addChildWidget(incrementButton);
 }
 
-void SpinnerImpl::onRendererChanged()
+void Spinner::onRendererChanged()
 {
 	// Shrink the text edit border to exclude the increment and decrement buttons.
 	Border textEditBorder = textEdit->getBorder();
@@ -143,72 +144,34 @@ void SpinnerImpl::onRendererChanged()
 	textEdit->setBorder(textEditBorder);
 }
 
-void SpinnerImpl::onFontChanged(const char *fontFace, float fontSize)
+void Spinner::onFontChanged(const char *fontFace, float fontSize)
 {
 	// Set the text edit font to match.
 	textEdit->setFont(fontFace, fontSize);
 }
 
-void SpinnerImpl::draw(Rect clip)
+void Spinner::draw(Rect clip)
 {
 	renderer->drawSpinner(this, clip);
 }
 
-Size SpinnerImpl::measure()
+Size Spinner::measure()
 {
 	return renderer->measureSpinner(this);
 }
 
-int SpinnerImpl::getValue() const
+int Spinner::getValue() const
 {
 	int value = 0;
 	sscanf(textEdit->getText(), "%d", &value);
 	return value;
 }
 
-void SpinnerImpl::setValue(int value)
+void Spinner::setValue(int value)
 {
 	char buffer[32];
 	sprintf(buffer, "%d", value);
 	textEdit->setText(buffer);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Spinner::Spinner()
-{
-	impl.reset(new SpinnerImpl);
-}
-
-Spinner::~Spinner()
-{
-}
-
-Spinner *Spinner::setValue(int value)
-{
-	getImpl()->setValue(value);
-	return this;
-}
-
-int Spinner::getValue() const
-{
-	return getImpl()->getValue();
-}
-
-SpinnerImpl *Spinner::getImpl()
-{
-	return (SpinnerImpl *)impl.get();
-}
-
-const SpinnerImpl *Spinner::getImpl() const
-{
-	return (const SpinnerImpl *)impl.get();
 }
 
 } // namespace wz

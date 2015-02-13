@@ -21,12 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
-ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
+Button::Button(const std::string &label, const std::string &icon)
 {
 	type = WZ_TYPE_BUTTON;
 	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
@@ -39,7 +39,7 @@ ButtonImpl::ButtonImpl(const std::string &label, const std::string &icon)
 	this->icon = icon;
 }
 
-void ButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -59,7 +59,7 @@ void ButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1 && isPressed_)
 	{
@@ -73,45 +73,45 @@ void ButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ButtonImpl::draw(Rect clip)
+void Button::draw(Rect clip)
 {
 	renderer->drawButton(this, clip);
 }
 
-Size ButtonImpl::measure()
+Size Button::measure()
 {
 	return renderer->measureButton(this);
 }
 
-void ButtonImpl::setLabel(const char *label)
+void Button::setLabel(const char *label)
 {
 	this->label = label;
 	resizeToMeasured();
 }
 
-const char *ButtonImpl::getLabel() const
+const char *Button::getLabel() const
 {
 	return label.c_str();
 }
 
-void ButtonImpl::setIcon(const char *icon)
+void Button::setIcon(const char *icon)
 {
 	this->icon = icon;
 	resizeToMeasured();
 }
 
-const char *ButtonImpl::getIcon() const
+const char *Button::getIcon() const
 {
 	return icon.c_str();
 }
 
-void ButtonImpl::setPadding(Border padding)
+void Button::setPadding(Border padding)
 {
 	this->padding = padding;
 	resizeToMeasured();
 }
 
-void ButtonImpl::setPadding(int top, int right, int bottom, int left)
+void Button::setPadding(int top, int right, int bottom, int left)
 {
 	padding.top = top;
 	padding.right = right;
@@ -120,22 +120,22 @@ void ButtonImpl::setPadding(int top, int right, int bottom, int left)
 	resizeToMeasured();
 }
 
-Border ButtonImpl::getPadding() const
+Border Button::getPadding() const
 {
 	return padding;
 }
 
-bool ButtonImpl::isPressed() const
+bool Button::isPressed() const
 {
 	return isPressed_;
 }
 
-bool ButtonImpl::isSet() const
+bool Button::isSet() const
 {
 	return isSet_;
 }
 
-void ButtonImpl::set(bool value)
+void Button::set(bool value)
 {
 	// No such thing as setting a button if using the default behavior.
 	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
@@ -165,7 +165,7 @@ void ButtonImpl::set(bool value)
 	}
 }
 
-void ButtonImpl::bindValue(bool *value)
+void Button::bindValue(bool *value)
 {
 	boundValue = value;
 
@@ -175,27 +175,27 @@ void ButtonImpl::bindValue(bool *value)
 	}
 }
 
-void ButtonImpl::addCallbackPressed(EventCallback callback)
+void Button::addCallbackPressed(EventCallback callback)
 {
 	pressed_callbacks.push_back(callback);
 }
 
-void ButtonImpl::addCallbackClicked(EventCallback callback)
+void Button::addCallbackClicked(EventCallback callback)
 {
 	clicked_callbacks.push_back(callback);
 }
 
-void ButtonImpl::setClickBehavior(ButtonClickBehavior clickBehavior)
+void Button::setClickBehavior(ButtonClickBehavior clickBehavior)
 {
 	this->clickBehavior = clickBehavior;
 }
 
-void ButtonImpl::setSetBehavior(ButtonSetBehavior setBehavior)
+void Button::setSetBehavior(ButtonSetBehavior setBehavior)
 {
 	this->setBehavior = setBehavior;
 }
 
-void ButtonImpl::click()
+void Button::click()
 {
 	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
 	{
@@ -226,145 +226,14 @@ void ButtonImpl::click()
 /*
 ================================================================================
 
-PUBLIC INTERFACE
+TOGGLE BUTTON
 
 ================================================================================
 */
 
-Button::Button()
+ToggleButton::ToggleButton(const std::string &label, const std::string &icon) : Button(label, icon)
 {
-	impl.reset(new ButtonImpl);
-}
-
-Button::Button(const std::string &label, const std::string &icon)
-{
-	impl.reset(new ButtonImpl(label, icon));
-}
-
-Button::~Button()
-{
-}
-
-Border Button::getPadding() const
-{
-	return getImpl()->getPadding();
-}
-
-Button *Button::setPadding(Border padding)
-{
-	getImpl()->setPadding(padding);
-	return this;
-}
-
-Button *Button::setPadding(int top, int right, int bottom, int left)
-{
-	getImpl()->setPadding(top, right, bottom, left);
-	return this;
-}
-
-const char *Button::getIcon() const
-{
-	return getImpl()->getIcon();
-}
-
-Button *Button::setIcon(const std::string &icon)
-{
-	getImpl()->setIcon(icon.c_str());
-	return this;
-}
-
-const char *Button::getLabel() const
-{
-	return getImpl()->getLabel();
-}
-
-Button *Button::setLabel(const std::string &label)
-{
-	getImpl()->setLabel(label.c_str());
-	return this;
-}
-
-ButtonImpl *Button::getImpl()
-{
-	return (ButtonImpl *)impl.get();
-}
-
-const ButtonImpl *Button::getImpl() const
-{
-	return (const ButtonImpl *)impl.get();
-}
-
-/*
-================================================================================
-
-TOGGLE BUTTON PUBLIC INTERFACE
-
-================================================================================
-*/
-
-ToggleButton::ToggleButton()
-{
-	impl.reset(new ButtonImpl);
-	getImpl()->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-}
-
-ToggleButton::ToggleButton(const std::string &label, const std::string &icon)
-{
-	impl.reset(new ButtonImpl(label.c_str(), icon.c_str()));
-	getImpl()->setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
-}
-
-ToggleButton::~ToggleButton()
-{
-}
-
-Border ToggleButton::getPadding() const
-{
-	return getImpl()->getPadding();
-}
-
-ToggleButton *ToggleButton::setPadding(Border padding)
-{
-	getImpl()->setPadding(padding);
-	return this;
-}
-
-ToggleButton *ToggleButton::setPadding(int top, int right, int bottom, int left)
-{
-	getImpl()->setPadding(top, right, bottom, left);
-	return this;
-}
-
-const char *ToggleButton::getIcon() const
-{
-	return getImpl()->getIcon();
-}
-
-ToggleButton *ToggleButton::setIcon(const std::string &icon)
-{
-	getImpl()->setIcon(icon.c_str());
-	return this;
-}
-
-const char *ToggleButton::getLabel() const
-{
-	return getImpl()->getLabel();
-}
-
-ToggleButton *ToggleButton::setLabel(const std::string &label)
-{
-	getImpl()->setLabel(label.c_str());
-	return this;
-}
-
-ButtonImpl *ToggleButton::getImpl()
-{
-	return (ButtonImpl *)impl.get();
-}
-
-const ButtonImpl *ToggleButton::getImpl() const
-{
-	return (const ButtonImpl *)impl.get();
+	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
 } // namespace wz

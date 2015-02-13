@@ -21,37 +21,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
-GroupBoxImpl::GroupBoxImpl(const std::string &label) : label(label)
+GroupBox::GroupBox(const std::string &label) : label(label)
 {
 	type = WZ_TYPE_GROUP_BOX;
 
 	// Create content widget.
-	content = new WidgetImpl;
+	content = new Widget;
 	content->stretch = WZ_STRETCH;
 	addChildWidget(content);
+
+	setSize(200, 200);
 }
 
-void GroupBoxImpl::onRendererChanged()
+void GroupBox::onRendererChanged()
 {
 	refreshMargin();
 }
 
-void GroupBoxImpl::draw(Rect clip)
+void GroupBox::draw(Rect clip)
 {
 	renderer->drawGroupBox(this, clip);
 }
 
-Size GroupBoxImpl::measure()
+Size GroupBox::measure()
 {
 	return renderer->measureGroupBox(this);
 }
 
-void GroupBoxImpl::setLabel(const char *label)
+void GroupBox::setLabel(const char *label)
 {
 	this->label = label;
 
@@ -62,22 +65,12 @@ void GroupBoxImpl::setLabel(const char *label)
 	}
 }
 
-const char *GroupBoxImpl::getLabel() const
+const char *GroupBox::getLabel() const
 {
 	return label.c_str();
 }
 
-void GroupBoxImpl::add(Widget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
-		return;
-
-	content->addChildWidget(widget);
-}
-
-void GroupBoxImpl::add(struct WidgetImpl *widget)
+void GroupBox::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -87,19 +80,13 @@ void GroupBoxImpl::add(struct WidgetImpl *widget)
 	content->addChildWidget(widget);
 }
 
-void GroupBoxImpl::remove(Widget *widget)
+void GroupBox::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	content->removeChildWidget(widget);
 }
 
-void GroupBoxImpl::remove(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	content->removeChildWidget(widget);
-}
-
-void GroupBoxImpl::refreshMargin()
+void GroupBox::refreshMargin()
 {
 	Border margin;
 	margin.top = margin.bottom = margin.left = margin.right = WZ_SKIN_GROUP_BOX_MARGIN;
@@ -110,62 +97,6 @@ void GroupBoxImpl::refreshMargin()
 	}
 
 	content->setMargin(margin);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-GroupBox::GroupBox()
-{
-	impl.reset(new GroupBoxImpl);
-	impl->setSize(200, 200);
-}
-
-GroupBox::GroupBox(const std::string &label)
-{
-	impl.reset(new GroupBoxImpl(label));
-	impl->setSize(200, 200);
-}
-
-GroupBox::~GroupBox()
-{
-}
-
-const char *GroupBox::getLabel() const
-{
-	return getImpl()->getLabel();
-}
-
-GroupBox *GroupBox::setLabel(const std::string &label)
-{
-	getImpl()->setLabel(label.c_str());
-	return this;
-}
-
-Widget *GroupBox::add(Widget *widget)
-{
-	getImpl()->add(widget);
-	return widget;
-}
-
-void GroupBox::remove(Widget *widget)
-{
-	getImpl()->remove(widget);
-}
-
-GroupBoxImpl *GroupBox::getImpl()
-{
-	return (GroupBoxImpl *)impl.get();
-}
-
-const GroupBoxImpl *GroupBox::getImpl() const
-{
-	return (const GroupBoxImpl *)impl.get();
 }
 
 } // namespace wz

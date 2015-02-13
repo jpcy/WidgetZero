@@ -24,6 +24,7 @@ SOFTWARE.
 #pragma once
 
 #include "wz.h"
+#include "wz_skin.h"
 
 namespace wz {
 
@@ -42,8 +43,8 @@ enum
 	WZ_CORNER_ALL = WZ_CORNER_TL | WZ_CORNER_TR | WZ_CORNER_BR | WZ_CORNER_BL
 };
 
-typedef struct NVGcontext *(*wzNanoVgGlCreate)(int flags);
-typedef void (*wzNanoVgGlDestroy)(struct NVGcontext* ctx);
+typedef NVGcontext *(*wzNanoVgGlCreate)(int flags);
+typedef void (*wzNanoVgGlDestroy)(NVGcontext* ctx);
 
 struct NVGRendererImpl;
 
@@ -59,49 +60,49 @@ public:
 	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
 	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
-	virtual void drawButton(ButtonImpl *button, Rect clip);
-	virtual Size measureButton(ButtonImpl *button);
-	virtual void drawCheckBox(CheckBoxImpl *checkBox, Rect clip);
-	virtual Size measureCheckBox(CheckBoxImpl *checkBox);
-	virtual void drawCombo(ComboImpl *combo, Rect clip);
-	virtual Size measureCombo(ComboImpl *combo);
-	virtual void drawGroupBox(GroupBoxImpl *groupBox, Rect clip);
-	virtual Size measureGroupBox(GroupBoxImpl *groupBox);
-	virtual void drawLabel(LabelImpl *label, Rect clip);
-	virtual Size measureLabel(LabelImpl *label);
-	virtual void drawList(ListImpl *list, Rect clip);
-	virtual Size measureList(ListImpl *list);
-	virtual void drawMenuBarButton(MenuBarButtonImpl *button, Rect clip);
-	virtual Size measureMenuBarButton(MenuBarButtonImpl *button);
-	virtual void drawMenuBar(MenuBarImpl *menuBar, Rect clip);
-	virtual Size measureMenuBar(MenuBarImpl *menuBar);
-	virtual void drawRadioButton(RadioButtonImpl *button, Rect clip);
-	virtual Size measureRadioButton(RadioButtonImpl *button);
-	virtual void drawScroller(ScrollerImpl *scroller, Rect clip);
-	virtual Size measureScroller(ScrollerImpl *scroller);
-	virtual void drawSpinner(SpinnerImpl *spinner, Rect clip);
-	virtual Size measureSpinner(SpinnerImpl *spinner);
-	virtual void drawTabButton(TabButtonImpl *button, Rect clip);
-	virtual void drawTabBar(TabBarImpl *tabBar, Rect clip);
-	virtual Size measureTabBar(TabBarImpl *tabBar);
-	virtual void drawTabbed(TabbedImpl *tabbed, Rect clip);
-	virtual Size measureTabbed(TabbedImpl *tabbed);
-	virtual void drawTextEdit(TextEditImpl *textEdit, Rect clip);
-	virtual Size measureTextEdit(TextEditImpl *textEdit);
-	virtual void drawWindow(WindowImpl *window, Rect clip);
-	virtual Size measureWindow(WindowImpl *window);
+	virtual void drawButton(Button *button, Rect clip);
+	virtual Size measureButton(Button *button);
+	virtual void drawCheckBox(CheckBox *checkBox, Rect clip);
+	virtual Size measureCheckBox(CheckBox *checkBox);
+	virtual void drawCombo(Combo *combo, Rect clip);
+	virtual Size measureCombo(Combo *combo);
+	virtual void drawGroupBox(GroupBox *groupBox, Rect clip);
+	virtual Size measureGroupBox(GroupBox *groupBox);
+	virtual void drawLabel(Label *label, Rect clip);
+	virtual Size measureLabel(Label *label);
+	virtual void drawList(List *list, Rect clip);
+	virtual Size measureList(List *list);
+	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip);
+	virtual Size measureMenuBarButton(MenuBarButton *button);
+	virtual void drawMenuBar(MenuBar *menuBar, Rect clip);
+	virtual Size measureMenuBar(MenuBar *menuBar);
+	virtual void drawRadioButton(RadioButton *button, Rect clip);
+	virtual Size measureRadioButton(RadioButton *button);
+	virtual void drawScroller(Scroller *scroller, Rect clip);
+	virtual Size measureScroller(Scroller *scroller);
+	virtual void drawSpinner(Spinner *spinner, Rect clip);
+	virtual Size measureSpinner(Spinner *spinner);
+	virtual void drawTabButton(TabButton *button, Rect clip);
+	virtual void drawTabBar(TabBar *tabBar, Rect clip);
+	virtual Size measureTabBar(TabBar *tabBar);
+	virtual void drawTabbed(Tabbed *tabbed, Rect clip);
+	virtual Size measureTabbed(Tabbed *tabbed);
+	virtual void drawTextEdit(TextEdit *textEdit, Rect clip);
+	virtual Size measureTextEdit(TextEdit *textEdit);
+	virtual void drawWindow(Window *window, Rect clip);
+	virtual Size measureWindow(Window *window);
 
-	struct NVGcontext *getContext();
+	NVGcontext *getContext();
 	float getDefaultFontSize() const;
 	int createImage(const char *filename, int *width, int *height);
 	void setFontFace(const char *face);
-	void printBox(Rect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
-	void print(int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength);
+	void printBox(Rect rect, const char *fontFace, float fontSize, NVGcolor color, const char *text, size_t textLength);
+	void print(int x, int y, int align, const char *fontFace, float fontSize, NVGcolor color, const char *text, size_t textLength);
 	void clipToRect(Rect rect);
 	bool clipToRectIntersection(Rect rect1, Rect rect2);
-	void drawFilledRect(Rect rect, struct NVGcolor color);
-	void drawRect(Rect rect, struct NVGcolor color);
-	void drawLine(int x1, int y1, int x2, int y2, struct NVGcolor color);
+	void drawFilledRect(Rect rect, NVGcolor color);
+	void drawRect(Rect rect, NVGcolor color);
+	void drawLine(int x1, int y1, int x2, int y2, NVGcolor color);
 	void drawImage(Rect rect, int image);
 	void createRectPath(Rect rect, float r, int sides, int roundedCorners);
 

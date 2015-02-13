@@ -21,8 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -34,14 +35,14 @@ MENU BAR BUTTON
 ================================================================================
 */
 
-MenuBarButtonImpl::MenuBarButtonImpl()
+MenuBarButton::MenuBarButton()
 {
 	type = WZ_TYPE_BUTTON;
 	isPressed_ = isSet = false;
 	menuBar = NULL;
 }
 
-void MenuBarButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -52,7 +53,7 @@ void MenuBarButtonImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouse
 	}
 }
 
-void MenuBarButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void MenuBarButton::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1 && isPressed_)
 	{
@@ -61,13 +62,13 @@ void MenuBarButtonImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void MenuBarButtonImpl::onMouseHoverOn()
+void MenuBarButton::onMouseHoverOn()
 {
 	// See if any of the other buttons in the menubar are pressed.
 	// If one is pressed, unpress it and press this one instead.
 	for (size_t i = 0; i < menuBar->children[0]->children.size(); i++)
 	{
-		struct MenuBarButtonImpl *otherButton = (struct MenuBarButtonImpl *)menuBar->children[0]->children[i];
+		MenuBarButton *otherButton = (MenuBarButton *)menuBar->children[0]->children[i];
 
 		if (otherButton == this || !otherButton->isPressed_)
 			continue;
@@ -78,35 +79,35 @@ void MenuBarButtonImpl::onMouseHoverOn()
 	}
 }
 
-void MenuBarButtonImpl::draw(Rect clip)
+void MenuBarButton::draw(Rect clip)
 {
 	renderer->drawMenuBarButton(this, clip);
 }
 
-Size MenuBarButtonImpl::measure()
+Size MenuBarButton::measure()
 {
 	return renderer->measureMenuBarButton(this);
 }
 
-void MenuBarButtonImpl::setLabel(const char *label)
+void MenuBarButton::setLabel(const char *label)
 {
 	this->label = label;
 	resizeToMeasured();
 }
 
-const char *MenuBarButtonImpl::getLabel() const
+const char *MenuBarButton::getLabel() const
 {
 	return label.c_str();
 }
 
-bool MenuBarButtonImpl::isPressed() const
+bool MenuBarButton::isPressed() const
 {
 	return isPressed_;
 }
 
-static struct MenuBarButtonImpl *wz_menu_bar_button_create(struct MenuBarImpl *menuBar)
+static MenuBarButton *wz_menu_bar_button_create(MenuBar *menuBar)
 {
-	struct MenuBarButtonImpl *button = new struct MenuBarButtonImpl;
+	MenuBarButton *button = new MenuBarButton;
 	button->menuBar = menuBar;
 	return button;
 }
@@ -119,33 +120,33 @@ MENU BAR
 ================================================================================
 */
 
-MenuBarImpl::MenuBarImpl()
+MenuBar::MenuBar()
 {
 	type = WZ_TYPE_MENU_BAR;
 
-	layout = new StackLayoutImpl(WZ_STACK_LAYOUT_HORIZONTAL, 0);
+	layout = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
 	addChildWidget(layout);
 }
 
-void MenuBarImpl::onRendererChanged()
+void MenuBar::onRendererChanged()
 {
 	setHeight(getLineHeight() + WZ_SKIN_MENU_BAR_PADDING);
 }
 
-void MenuBarImpl::draw(Rect clip)
+void MenuBar::draw(Rect clip)
 {
 	renderer->drawMenuBar(this, clip);
 }
 
-Size MenuBarImpl::measure()
+Size MenuBar::measure()
 {
 	return renderer->measureMenuBar(this);
 }
 
-struct MenuBarButtonImpl *MenuBarImpl::createButton()
+MenuBarButton *MenuBar::createButton()
 {
-	struct MenuBarButtonImpl *button = wz_menu_bar_button_create(this);
+	MenuBarButton *button = wz_menu_bar_button_create(this);
 	button->setStretch(WZ_STRETCH_HEIGHT);
 	layout->add(button);
 	return button;

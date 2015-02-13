@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 #define WZ_WINDOW_UNDOCK_DISTANCE 16
@@ -29,7 +29,7 @@ SOFTWARE.
 namespace wz {
 
 // rects parameter size should be WZ_NUM_COMPASS_POINTS
-static void wz_window_calculate_border_rects(struct WindowImpl *window, Rect *rects)
+static void wz_window_calculate_border_rects(Window *window, Rect *rects)
 {
 	WZ_ASSERT(window);
 	WZ_ASSERT(rects);
@@ -78,7 +78,7 @@ static void wz_window_calculate_border_rects(struct WindowImpl *window, Rect *re
 }
 
 // borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
-static void wz_window_calculate_mouse_over_border_rects(struct WindowImpl *window, int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects)
+static void wz_window_calculate_mouse_over_border_rects(Window *window, int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects)
 {
 	DockPosition dockPosition;
 
@@ -96,7 +96,7 @@ static void wz_window_calculate_mouse_over_border_rects(struct WindowImpl *windo
 	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && dockPosition == WZ_DOCK_POSITION_NONE);
 }
 
-WindowImpl::WindowImpl(const std::string &title)
+Window::Window(const std::string &title)
 {
 	type = WZ_TYPE_WINDOW;
 	drawPriority = 0;
@@ -106,23 +106,23 @@ WindowImpl::WindowImpl(const std::string &title)
 
 	this->title = title;
 
-	content = new struct WidgetImpl;
+	content = new Widget;
 	addChildWidget(content);
 }
 
-void WindowImpl::onRendererChanged()
+void Window::onRendererChanged()
 {
 	refreshHeaderHeight();
 	refreshRect();
 }
 
-void WindowImpl::onFontChanged(const char *fontFace, float fontSize)
+void Window::onFontChanged(const char *fontFace, float fontSize)
 {
 	refreshHeaderHeight();
 	refreshRect();
 }
 
-void WindowImpl::onRectChanged()
+void Window::onRectChanged()
 {
 	Rect contentRect;
 	contentRect.x = borderSize;
@@ -132,7 +132,7 @@ void WindowImpl::onRectChanged()
 	content->setRectInternal(contentRect);
 }
 
-void WindowImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -178,7 +178,7 @@ void WindowImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void WindowImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void Window::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
@@ -192,7 +192,7 @@ void WindowImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void WindowImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	// Set the mouse cursor.
 	Rect borderRects[WZ_NUM_COMPASS_POINTS];
@@ -324,7 +324,7 @@ void WindowImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseD
 		}
 		break;
 	default:
-		return; // Not dragging, don't call MainWindowImpl::updateContentRect.
+		return; // Not dragging, don't call MainWindow::updateContentRect.
 	}
 
 	setRectInternal(newRect);
@@ -340,33 +340,33 @@ void WindowImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseD
 	}
 }
 
-Rect WindowImpl::getChildrenClipRect() const
+Rect Window::getChildrenClipRect() const
 {
 	// Use the content rect.
 	return content->getAbsoluteRect();
 }
 
-void WindowImpl::draw(Rect clip)
+void Window::draw(Rect clip)
 {
 	renderer->drawWindow(this, clip);
 }
 
-Size WindowImpl::measure()
+Size Window::measure()
 {
 	return renderer->measureWindow(this);
 }
 
-int WindowImpl::getHeaderHeight() const
+int Window::getHeaderHeight() const
 {
 	return headerHeight;
 }
 
-int WindowImpl::getBorderSize() const
+int Window::getBorderSize() const
 {
 	return borderSize;
 }
 
-Rect WindowImpl::getHeaderRect() const
+Rect Window::getHeaderRect() const
 {
 	Rect rect;
 	rect.x = this->rect.x + borderSize;
@@ -376,49 +376,39 @@ Rect WindowImpl::getHeaderRect() const
 	return rect;
 }
 
-void WindowImpl::setTitle(const char *title)
+void Window::setTitle(const char *title)
 {
 	this->title = title;
 }
 
-const char *WindowImpl::getTitle() const
+const char *Window::getTitle() const
 {
 	return title.c_str();
 }
 
-struct WidgetImpl *WindowImpl::getContentWidget()
+Widget *Window::getContentWidget()
 {
 	return content;
 }
 
-int WindowImpl::getDrawPriority() const
+int Window::getDrawPriority() const
 {
 	return drawPriority;
 }
 
-void WindowImpl::setDrawPriority(int drawPriority)
+void Window::setDrawPriority(int drawPriority)
 {
 	this->drawPriority = drawPriority;
 }
 
-void WindowImpl::dock()
+void Window::dock()
 {
 	// Save the window size before docking so it can be restored if the window is undocked later.
 	sizeBeforeDocking.w = rect.w;
 	sizeBeforeDocking.h = rect.h;
 }
 
-void WindowImpl::add(Widget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->getImpl()->getType() == WZ_TYPE_MAIN_WINDOW || widget->getImpl()->getType() == WZ_TYPE_WINDOW)
-		return;
-
-	content->addChildWidget(widget);
-}
-
-void WindowImpl::add(struct WidgetImpl *widget)
+void Window::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
@@ -428,75 +418,15 @@ void WindowImpl::add(struct WidgetImpl *widget)
 	content->addChildWidget(widget);
 }
 
-void WindowImpl::remove(Widget *widget)
-{
-	WZ_ASSERT(widget);
-	content->removeChildWidget(widget);
-}
-
-void WindowImpl::remove(struct WidgetImpl *widget)
-{
-	WZ_ASSERT(widget);
-	content->removeChildWidget(widget);
-}
-
-void WindowImpl::refreshHeaderHeight()
-{
-	headerHeight = getLineHeight() + 6; // Padding.
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Window::Window()
-{
-	impl.reset(new WindowImpl(NULL));
-}
-
-Window::Window(const std::string &title)
-{
-	impl.reset(new WindowImpl(title));
-}
-
-Window::~Window()
-{
-}
-
-const char *Window::getTitle() const
-{
-	return getImpl()->getTitle();
-}
-
-Window *Window::setTitle(const std::string &title)
-{
-	getImpl()->setTitle(title.c_str());
-	return this;
-}
-
-Widget *Window::add(Widget *widget)
-{
-	getImpl()->add(widget);
-	return widget;
-}
-
 void Window::remove(Widget *widget)
 {
-	getImpl()->remove(widget);
+	WZ_ASSERT(widget);
+	content->removeChildWidget(widget);
 }
 
-WindowImpl *Window::getImpl()
+void Window::refreshHeaderHeight()
 {
-	return (WindowImpl *)impl.get();
-}
-
-const WindowImpl *Window::getImpl() const
-{
-	return (const WindowImpl *)impl.get();
+	headerHeight = getLineHeight() + 6; // Padding.
 }
 
 } // namespace wz

@@ -21,8 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 #define WZ_NANOVG_MAX_PATH 256
 #define WZ_NANOVG_MAX_IMAGES 1024
@@ -47,14 +48,14 @@ struct NVGRendererImpl
 
 	char errorMessage[WZ_NANOVG_MAX_ERROR_MESSAGE];
 	wzNanoVgGlDestroy destroy;
-	struct NVGcontext *vg;
+	NVGcontext *vg;
 	Image images[WZ_NANOVG_MAX_IMAGES];
 	int nImages;
 	char fontDirectory[WZ_NANOVG_MAX_PATH];
 	float defaultFontSize;
 };
 
-static int wz_nanovg_create_font(struct NVGRendererImpl *renderer, const char *face)
+static int wz_nanovg_create_font(NVGRendererImpl *renderer, const char *face)
 {
 	char fontPath[WZ_NANOVG_MAX_PATH];
 	int id;
@@ -150,7 +151,7 @@ void NVGRenderer::measureText(const char *fontFace, float fontSize, const char *
 
 LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
 {
-	struct NVGtextRow row;
+	NVGtextRow row;
 	LineBreakResult result;
 
 	if (text && nvgTextBreakLines(impl->vg, text, n == 0 ? NULL : &text[n], (float)lineWidth, &row, 1) > 0)
@@ -169,9 +170,9 @@ LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize,
 	return result;
 }
 
-void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
+void NVGRenderer::drawButton(Button *button, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	nvgSave(vg);
 	const Rect rect = button->getAbsoluteRect();
 
@@ -265,7 +266,7 @@ void NVGRenderer::drawButton(ButtonImpl *button, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureButton(ButtonImpl *button)
+Size NVGRenderer::measureButton(Button *button)
 {
 	Size size;
 	button->measureText(button->getLabel(), 0, &size.w, &size.h);
@@ -288,9 +289,9 @@ Size NVGRenderer::measureButton(ButtonImpl *button)
 	return size;
 }
 
-void NVGRenderer::drawCheckBox(CheckBoxImpl *checkBox, Rect clip)
+void NVGRenderer::drawCheckBox(CheckBox *checkBox, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 
 	nvgSave(vg);
 	clipToRect(clip);
@@ -332,7 +333,7 @@ void NVGRenderer::drawCheckBox(CheckBoxImpl *checkBox, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureCheckBox(CheckBoxImpl *checkBox)
+Size NVGRenderer::measureCheckBox(CheckBox *checkBox)
 {
 	Size size;
 	checkBox->measureText(checkBox->getLabel(), 0, &size.w, &size.h);
@@ -340,9 +341,9 @@ Size NVGRenderer::measureCheckBox(CheckBoxImpl *checkBox)
 	return size;
 }
 
-void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
+void NVGRenderer::drawCombo(Combo *combo, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = combo->getAbsoluteRect();
 	const uint8_t *itemData = combo->list->getItemData();
 	const int itemStride = combo->list->getItemStride();
@@ -397,7 +398,7 @@ void NVGRenderer::drawCombo(ComboImpl *combo, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureCombo(ComboImpl *combo)
+Size NVGRenderer::measureCombo(Combo *combo)
 {
 	const uint8_t *itemData = combo->list->getItemData();
 	const int itemStride = combo->list->getItemStride();
@@ -417,7 +418,7 @@ Size NVGRenderer::measureCombo(ComboImpl *combo)
 	size.h = combo->getLineHeight();
 
 	// Add scroller width or button width, whichever is largest.
-	struct ScrollerImpl *scroller = combo->getList()->getScroller();
+	Scroller *scroller = combo->getList()->getScroller();
 	Size scrollerSize = scroller->measure();
 	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
@@ -427,9 +428,9 @@ Size NVGRenderer::measureCombo(ComboImpl *combo)
 	return size;
 }
 
-void NVGRenderer::drawGroupBox(GroupBoxImpl *groupBox, Rect clip)
+void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 
 	nvgSave(vg);
 	clipToRect(clip);
@@ -470,14 +471,14 @@ void NVGRenderer::drawGroupBox(GroupBoxImpl *groupBox, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureGroupBox(GroupBoxImpl *groupBox)
+Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
 {
 	return Size();
 }
 
-void NVGRenderer::drawLabel(LabelImpl *label, Rect clip)
+void NVGRenderer::drawLabel(Label *label, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = label->getAbsoluteRect();
 
 	nvgSave(vg);
@@ -495,9 +496,9 @@ void NVGRenderer::drawLabel(LabelImpl *label, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureLabel(LabelImpl *label)
+Size NVGRenderer::measureLabel(Label *label)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = label->getAbsoluteRect();
 	Size size;
 
@@ -520,9 +521,9 @@ Size NVGRenderer::measureLabel(LabelImpl *label)
 	return size;
 }
 
-void NVGRenderer::drawList(ListImpl *list, Rect clip)
+void NVGRenderer::drawList(List *list, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = list->getAbsoluteRect();
 	const Rect itemsRect = list->getAbsoluteItemsRect();
 
@@ -583,14 +584,14 @@ void NVGRenderer::drawList(ListImpl *list, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureList(ListImpl *list)
+Size NVGRenderer::measureList(List *list)
 {
 	return Size();
 }
 
-void NVGRenderer::drawMenuBarButton(MenuBarButtonImpl *button, Rect clip)
+void NVGRenderer::drawMenuBarButton(MenuBarButton *button, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = button->getAbsoluteRect();
 
 	nvgSave(vg);
@@ -611,7 +612,7 @@ void NVGRenderer::drawMenuBarButton(MenuBarButtonImpl *button, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureMenuBarButton(MenuBarButtonImpl *button)
+Size NVGRenderer::measureMenuBarButton(MenuBarButton *button)
 {
 	Size size;
 	button->measureText(button->getLabel(), 0, &size.w, &size.h);
@@ -619,7 +620,7 @@ Size NVGRenderer::measureMenuBarButton(MenuBarButtonImpl *button)
 	return size;
 }
 
-void NVGRenderer::drawMenuBar(MenuBarImpl *menuBar, Rect clip)
+void NVGRenderer::drawMenuBar(MenuBar *menuBar, Rect clip)
 {
 	nvgSave(impl->vg);
 	clipToRect(clip);
@@ -627,14 +628,14 @@ void NVGRenderer::drawMenuBar(MenuBarImpl *menuBar, Rect clip)
 	nvgRestore(impl->vg);
 }
 
-Size NVGRenderer::measureMenuBar(MenuBarImpl * /*menuBar*/)
+Size NVGRenderer::measureMenuBar(MenuBar * /*menuBar*/)
 {
 	return Size();
 }
 
-void NVGRenderer::drawRadioButton(RadioButtonImpl *button, Rect clip)
+void NVGRenderer::drawRadioButton(RadioButton *button, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = button->getAbsoluteRect();
 
 	nvgSave(vg);
@@ -663,7 +664,7 @@ void NVGRenderer::drawRadioButton(RadioButtonImpl *button, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureRadioButton(RadioButtonImpl *button)
+Size NVGRenderer::measureRadioButton(RadioButton *button)
 {
 	Size size;
 	button->measureText(button->getLabel(), 0, &size.w, &size.h);
@@ -672,9 +673,9 @@ Size NVGRenderer::measureRadioButton(RadioButtonImpl *button)
 	return size;
 }
 
-void NVGRenderer::drawScroller(ScrollerImpl *scroller, Rect clip)
+void NVGRenderer::drawScroller(Scroller *scroller, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	
 	nvgSave(vg);
 	clipToRect(clip);
@@ -743,16 +744,16 @@ void NVGRenderer::drawScroller(ScrollerImpl *scroller, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureScroller(ScrollerImpl *scroller)
+Size NVGRenderer::measureScroller(Scroller *scroller)
 {
 	return scroller->getType() == WZ_SCROLLER_VERTICAL ? Size(WZ_SKIN_SCROLLER_DEFAULT_SIZE, 0) : Size(0, WZ_SKIN_SCROLLER_DEFAULT_SIZE);
 }
 
-void NVGRenderer::drawSpinner(SpinnerImpl *spinner, Rect clip)
+void NVGRenderer::drawSpinner(Spinner *spinner, Rect clip)
 {
 }
 
-Size NVGRenderer::measureSpinner(SpinnerImpl *spinner)
+Size NVGRenderer::measureSpinner(Spinner *spinner)
 {
 	const Border border = spinner->textEdit->getBorder();
 	Size size;
@@ -761,9 +762,9 @@ Size NVGRenderer::measureSpinner(SpinnerImpl *spinner)
 	return size;
 }
 
-void NVGRenderer::drawTabButton(TabButtonImpl *button, Rect clip)
+void NVGRenderer::drawTabButton(TabButton *button, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 
 	nvgSave(vg);
 	clipToRect(clip);
@@ -782,20 +783,20 @@ void NVGRenderer::drawTabButton(TabButtonImpl *button, Rect clip)
 	nvgRestore(vg);
 }
 
-void NVGRenderer::drawTabBar(TabBarImpl *tabBar, Rect clip)
+void NVGRenderer::drawTabBar(TabBar *tabBar, Rect clip)
 {
 }
 
-Size NVGRenderer::measureTabBar(TabBarImpl *tabBar)
+Size NVGRenderer::measureTabBar(TabBar *tabBar)
 {
 	// Padding.
 	return Size(0, tabBar->getLineHeight() + 8);
 }
 
-void NVGRenderer::drawTabbed(TabbedImpl *tabbed, Rect clip)
+void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
-	const struct ButtonImpl *selectedTab = tabbed->tabBar->getSelectedTab();
+	NVGcontext *vg = impl->vg;
+	const Button *selectedTab = tabbed->tabBar->getSelectedTab();
 
 	// Use the page rect.
 	const int tabBarHeight = tabbed->tabBar->getHeight();
@@ -848,7 +849,7 @@ void NVGRenderer::drawTabbed(TabbedImpl *tabbed, Rect clip)
 	// Draw an outline around the non-selected tabs.
 	for (size_t i = 0; i < tabbed->pages.size(); i++)
 	{
-		const struct ButtonImpl *tab = tabbed->pages[i].tab;
+		const Button *tab = tabbed->pages[i].tab;
 
 		if (tab == selectedTab || !tab->getVisible())
 			continue;
@@ -882,14 +883,14 @@ void NVGRenderer::drawTabbed(TabbedImpl *tabbed, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureTabbed(TabbedImpl *tabbed)
+Size NVGRenderer::measureTabbed(Tabbed *tabbed)
 {
 	return Size();
 }
 
-void NVGRenderer::drawTextEdit(TextEditImpl *textEdit, Rect clip)
+void NVGRenderer::drawTextEdit(TextEdit *textEdit, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = textEdit->getAbsoluteRect();
 	const Rect textRect = textEdit->getTextRect();
 	const int lineHeight = textEdit->getLineHeight();
@@ -1016,7 +1017,7 @@ void NVGRenderer::drawTextEdit(TextEditImpl *textEdit, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureTextEdit(TextEditImpl *textEdit)
+Size NVGRenderer::measureTextEdit(TextEdit *textEdit)
 {
 	if (textEdit->multiline)
 	{
@@ -1028,9 +1029,9 @@ Size NVGRenderer::measureTextEdit(TextEditImpl *textEdit)
 	}
 }
 
-void NVGRenderer::drawWindow(WindowImpl *window, Rect clip)
+void NVGRenderer::drawWindow(Window *window, Rect clip)
 {
-	struct NVGcontext *vg = impl->vg;
+	NVGcontext *vg = impl->vg;
 	const Rect rect = window->getAbsoluteRect();
 	const Rect contentRect = window->content->getAbsoluteRect();
 	const Rect headerRect = window->getHeaderRect();
@@ -1069,12 +1070,12 @@ void NVGRenderer::drawWindow(WindowImpl *window, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureWindow(WindowImpl *window)
+Size NVGRenderer::measureWindow(Window *window)
 {
 	return Size();
 }
 
-struct NVGcontext *NVGRenderer::getContext()
+NVGcontext *NVGRenderer::getContext()
 {
 	return impl->vg;
 }
@@ -1126,7 +1127,7 @@ void NVGRenderer::setFontFace(const char *face)
 	nvgFontFaceId(impl->vg, id);
 }
 
-void NVGRenderer::printBox(Rect rect, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength)
+void NVGRenderer::printBox(Rect rect, const char *fontFace, float fontSize, NVGcolor color, const char *text, size_t textLength)
 {
 	nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
 	setFontFace(fontFace);
@@ -1137,7 +1138,7 @@ void NVGRenderer::printBox(Rect rect, const char *fontFace, float fontSize, stru
 	nvgTextBox(impl->vg, (float)rect.x, (float)rect.y, (float)rect.w, text, textLength == 0 ? NULL : &text[textLength]);
 }
 
-void NVGRenderer::print(int x, int y, int align, const char *fontFace, float fontSize, struct NVGcolor color, const char *text, size_t textLength)
+void NVGRenderer::print(int x, int y, int align, const char *fontFace, float fontSize, NVGcolor color, const char *text, size_t textLength)
 {
 	nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
 	setFontFace(fontFace);
@@ -1165,7 +1166,7 @@ bool NVGRenderer::clipToRectIntersection(Rect rect1, Rect rect2)
 	return true;
 }
 
-void NVGRenderer::drawFilledRect(Rect rect, struct NVGcolor color)
+void NVGRenderer::drawFilledRect(Rect rect, NVGcolor color)
 {
 	nvgBeginPath(impl->vg);
 	nvgRect(impl->vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
@@ -1173,7 +1174,7 @@ void NVGRenderer::drawFilledRect(Rect rect, struct NVGcolor color)
 	nvgFill(impl->vg);
 }
 
-void NVGRenderer::drawRect(Rect rect, struct NVGcolor color)
+void NVGRenderer::drawRect(Rect rect, NVGcolor color)
 {
 	nvgBeginPath(impl->vg);
 	nvgRect(impl->vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
@@ -1181,7 +1182,7 @@ void NVGRenderer::drawRect(Rect rect, struct NVGcolor color)
 	nvgStroke(impl->vg);
 }
 
-void NVGRenderer::drawLine(int x1, int y1, int x2, int y2, struct NVGcolor color)
+void NVGRenderer::drawLine(int x1, int y1, int x2, int y2, NVGcolor color)
 {
 	nvgBeginPath(impl->vg);
 	nvgMoveTo(impl->vg, (float)x1, (float)y1);
@@ -1193,7 +1194,7 @@ void NVGRenderer::drawLine(int x1, int y1, int x2, int y2, struct NVGcolor color
 void NVGRenderer::drawImage(Rect rect, int image)
 {
 	int w, h;
-	struct NVGpaint paint;
+	NVGpaint paint;
 
 	nvgImageSize(impl->vg, image, &w, &h);
 	paint = nvgImagePattern(impl->vg, (float)rect.x, (float)rect.y, (float)w, (float)h, 0, image, 1);

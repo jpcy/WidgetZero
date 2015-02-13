@@ -21,14 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
 static void wz_radio_button_clicked(Event *e)
 {
-	struct WidgetImpl *parent = e->base.widget->parent;
+	Widget *parent = e->base.widget->parent;
 
 	WZ_ASSERT(parent);
 
@@ -37,19 +37,19 @@ static void wz_radio_button_clicked(Event *e)
 	{
 		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != e->base.widget)
 		{
-			((struct ButtonImpl *)parent->children[i])->set(false);
+			((Button *)parent->children[i])->set(false);
 		}
 	}
 }
 
-RadioButtonImpl::RadioButtonImpl(const std::string &label) : ButtonImpl(label)
+RadioButton::RadioButton(const std::string &label) : Button(label)
 {
 	type = WZ_TYPE_RADIO_BUTTON;
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
 	addCallbackClicked(wz_radio_button_clicked);
 }
 
-void RadioButtonImpl::onParented(struct WidgetImpl *parent)
+void RadioButton::onParented(Widget *parent)
 {
 	// If this is the only radio button child, set it.
 	// This means that the first radio button will be selected.
@@ -62,57 +62,14 @@ void RadioButtonImpl::onParented(struct WidgetImpl *parent)
 	set(true);
 }
 
-void RadioButtonImpl::draw(Rect clip)
+void RadioButton::draw(Rect clip)
 {
 	renderer->drawRadioButton(this, clip);
 }
 
-Size RadioButtonImpl::measure()
+Size RadioButton::measure()
 {
 	return renderer->measureRadioButton(this);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-RadioButton::RadioButton()
-{
-	impl.reset(new RadioButtonImpl);
-}
-
-RadioButton::RadioButton(const std::string &label)
-{
-	impl.reset(new RadioButtonImpl(label));
-}
-
-RadioButton::~RadioButton()
-{
-}
-
-const char *RadioButton::getLabel() const
-{
-	return getImpl()->getLabel();
-}
-
-RadioButton *RadioButton::setLabel(const std::string &label)
-{
-	getImpl()->setLabel(label.c_str());
-	return this;
-}
-
-RadioButtonImpl *RadioButton::getImpl()
-{
-	return (RadioButtonImpl *)impl.get();
-}
-
-const RadioButtonImpl *RadioButton::getImpl() const
-{
-	return (const RadioButtonImpl *)impl.get();
 }
 
 } // namespace wz

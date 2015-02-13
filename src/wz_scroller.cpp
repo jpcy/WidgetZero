@@ -21,8 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
+#include "wz_renderer_nanovg.h"
 
 #define WZ_MINIMUM_NUB_SIZE 8
 #define WZ_DEFAULT_NUB_SIZE 16
@@ -37,14 +38,15 @@ NUB CONTAINER
 ================================================================================
 */
 
-struct ScrollerNubContainer : public WidgetImpl
+class ScrollerNubContainer : public Widget
 {
+public:
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	{
 		if (mouseButton != 1)
 			return;
 
-		struct ScrollerImpl *scroller = (struct ScrollerImpl *)parent->parent;
+		Scroller *scroller = (Scroller *)parent->parent;
 		Rect nubRect = scroller->nub->getAbsoluteRect();
 
 		if ((scroller->scrollerType == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->scrollerType == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
@@ -66,7 +68,7 @@ SCROLLER NUB WIDGET
 ================================================================================
 */
 
-ScrollerNub::ScrollerNub(struct ScrollerImpl *scroller)
+ScrollerNub::ScrollerNub(Scroller *scroller)
 {
 	this->scroller = scroller;
 	isPressed = false;
@@ -193,14 +195,14 @@ DECREMENT AND INCREMENT BUTTONS
 ================================================================================
 */
 
-static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool decrement)
+static void wz_scroller_button_draw(Widget *widget, Rect clip, bool decrement)
 {
 	NVGcolor bgColor1, bgColor2;
 	int sides, roundedCorners;
-	struct ButtonImpl *button = (struct ButtonImpl *)widget;
-	struct ScrollerImpl *scroller = (struct ScrollerImpl *)widget->parent;
+	Button *button = (Button *)widget;
+	Scroller *scroller = (Scroller *)widget->parent;
 	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	struct NVGcontext *vg = r->getContext();
+	NVGcontext *vg = r->getContext();
 	const Rect rect = widget->getAbsoluteRect();
 
 	nvgSave(vg);
@@ -296,13 +298,13 @@ static void wz_scroller_button_draw(struct WidgetImpl *widget, Rect clip, bool d
 	nvgRestore(vg);
 }
 
-static void wz_scroller_decrement_button_draw(struct WidgetImpl *widget, Rect clip)
+static void wz_scroller_decrement_button_draw(Widget *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_scroller_button_draw(widget, clip, true);
 }
 
-static void wz_scroller_increment_button_draw(struct WidgetImpl *widget, Rect clip)
+static void wz_scroller_increment_button_draw(Widget *widget, Rect clip)
 {
 	WZ_ASSERT(widget);
 	wz_scroller_button_draw(widget, clip, false);
@@ -321,7 +323,7 @@ static void wz_scroller_decrement_button_clicked(Event *e)
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	((struct ScrollerImpl *)e->base.widget->parent->parent)->decrementValue();
+	((Scroller *)e->base.widget->parent->parent)->decrementValue();
 }
 
 static void wz_scroller_increment_button_clicked(Event *e)
@@ -329,10 +331,10 @@ static void wz_scroller_increment_button_clicked(Event *e)
 	WZ_ASSERT(e);
 	WZ_ASSERT(e->base.widget);
 	WZ_ASSERT(e->base.widget->parent);
-	((struct ScrollerImpl *)e->base.widget->parent->parent)->incrementValue();
+	((Scroller *)e->base.widget->parent->parent)->incrementValue();
 }
 
-ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, int maxValue)
+Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	type = WZ_TYPE_SCROLLER;
 	nubScale = 0;
@@ -341,24 +343,24 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	this->maxValue = WZ_MAX(0, maxValue);
 	this->value = WZ_CLAMPED(0, value, maxValue);
 
-	struct StackLayoutImpl *layout = new StackLayoutImpl(scrollerType == WZ_SCROLLER_VERTICAL ? WZ_STACK_LAYOUT_VERTICAL : WZ_STACK_LAYOUT_HORIZONTAL, 0);
+	StackLayout *layout = new StackLayout(scrollerType == WZ_SCROLLER_VERTICAL ? WZ_STACK_LAYOUT_VERTICAL : WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout->setStretch(WZ_STRETCH);
 	addChildWidget(layout);
 
-	struct ButtonImpl *decrementButton = new ButtonImpl();
+	Button *decrementButton = new Button();
 	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	decrementButton->setDrawCallback(wz_scroller_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_scroller_decrement_button_clicked);
 	layout->add(decrementButton);
 
-	struct ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
+	ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
 	nubContainer->setStretch(WZ_STRETCH);
 	layout->add(nubContainer);
 
 	nub = new ScrollerNub(this);
 	nubContainer->addChildWidget(nub);
 
-	struct ButtonImpl *incrementButton = new ButtonImpl();
+	Button *incrementButton = new Button();
 	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
 	incrementButton->setDrawCallback(wz_scroller_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
@@ -367,38 +369,38 @@ ScrollerImpl::ScrollerImpl(ScrollerType scrollerType, int value, int stepValue, 
 	nub->updateRect();
 }
 
-void ScrollerImpl::onRectChanged()
+void Scroller::onRectChanged()
 {
 	nub->updateRect();
 }
 
-void ScrollerImpl::onMouseWheelMove(int /*x*/, int y)
+void Scroller::onMouseWheelMove(int /*x*/, int y)
 {
 	setValue(value - y * stepValue);
 }
 
-void ScrollerImpl::draw(Rect clip)
+void Scroller::draw(Rect clip)
 {
 	renderer->drawScroller(this, clip);
 }
 
-Size ScrollerImpl::measure()
+Size Scroller::measure()
 {
 	return renderer->measureScroller(this);
 }
 
-ScrollerType ScrollerImpl::getType() const
+ScrollerType Scroller::getType() const
 {
 	return scrollerType;
 }
 
-int ScrollerImpl::getValue() const
+int Scroller::getValue() const
 {
 	return value;
 }
 
-// This is the only place ScrollerImpl value should be set.
-void ScrollerImpl::setValue(int value)
+// This is the only place Scroller value should be set.
+void Scroller::setValue(int value)
 {
 	int oldValue = this->value;
 	this->value = WZ_CLAMPED(0, value, maxValue);
@@ -417,27 +419,27 @@ void ScrollerImpl::setValue(int value)
 	nub->updateRect();
 }
 
-void ScrollerImpl::decrementValue()
+void Scroller::decrementValue()
 {
 	setValue(value - stepValue);
 }
 
-void ScrollerImpl::incrementValue()
+void Scroller::incrementValue()
 {
 	setValue(value + stepValue);
 }
 
-void ScrollerImpl::setStepValue(int stepValue)
+void Scroller::setStepValue(int stepValue)
 {
 	this->stepValue = WZ_MAX(1, stepValue);
 }
 
-int ScrollerImpl::getStepValue()
+int Scroller::getStepValue()
 {
 	return stepValue;
 }
 
-void ScrollerImpl::setMaxValue(int maxValue)
+void Scroller::setMaxValue(int maxValue)
 {
 	this->maxValue = WZ_MAX(0, maxValue);
 
@@ -446,13 +448,13 @@ void ScrollerImpl::setMaxValue(int maxValue)
 	setValue(value);
 }
 
-void ScrollerImpl::setNubScale(float nubScale)
+void Scroller::setNubScale(float nubScale)
 {
 	this->nubScale = nubScale;
 	nub->updateRect();
 }
 
-void ScrollerImpl::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const
+void Scroller::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const
 {
 	if (containerRect)
 		*containerRect = nub->parent->getAbsoluteRect();
@@ -467,59 +469,9 @@ void ScrollerImpl::getNubState(Rect *containerRect, Rect *rect, bool *hover, boo
 		*pressed = nub->isPressed;
 }
 
-void ScrollerImpl::addCallbackValueChanged(EventCallback callback)
+void Scroller::addCallbackValueChanged(EventCallback callback)
 {
 	value_changed_callbacks.push_back(callback);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-Scroller::Scroller(ScrollerType type)
-{
-	impl.reset(new ScrollerImpl(type, 0, 1, 0));
-}
-
-Scroller::~Scroller()
-{
-}
-
-Scroller *Scroller::setValue(int value)
-{
-	getImpl()->setValue(value);
-	return this;
-}
-
-Scroller *Scroller::setStepValue(int stepValue)
-{
-	getImpl()->setStepValue(stepValue);
-	return this;
-}
-
-Scroller *Scroller::setMaxValue(int maxValue)
-{
-	getImpl()->setMaxValue(maxValue);
-	return this;
-}
-
-int Scroller::getValue() const
-{
-	return getImpl()->getValue();
-}
-
-ScrollerImpl *Scroller::getImpl()
-{
-	return (ScrollerImpl *)impl.get();
-}
-
-const ScrollerImpl *Scroller::getImpl() const
-{
-	return (const ScrollerImpl *)impl.get();
 }
 
 } // namespace wz

@@ -21,21 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#include "wz_internal.h"
+#include "wz.h"
 #pragma hdrstop
 
 namespace wz {
 
 static void wz_list_scroller_value_changed(Event *e)
 {
-	struct ListImpl *list;
+	List *list;
 	
 	WZ_ASSERT(e);
-	list = (struct ListImpl *)e->base.widget->parent;
+	list = (List *)e->base.widget->parent;
 	list->firstItem = e->scroller.value / list->itemHeight;
 }
 
-ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
+List::List(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_LIST;
 	draw_item = NULL;
@@ -50,18 +50,18 @@ ListImpl::ListImpl(uint8_t *itemData, int itemStride, int nItems)
 	this->itemStride = itemStride;
 	this->nItems = nItems;
 
-	scroller = new ScrollerImpl(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+	scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	addChildWidget(scroller);
 	updateScroller();
 	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
 }
 
-void ListImpl::onRendererChanged()
+void List::onRendererChanged()
 {
 	refreshItemHeight();
 }
 
-void ListImpl::onFontChanged(const char *fontFace, float fontSize)
+void List::onFontChanged(const char *fontFace, float fontSize)
 {
 	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
 	if (renderer)
@@ -70,7 +70,7 @@ void ListImpl::onFontChanged(const char *fontFace, float fontSize)
 	}
 }
 
-void ListImpl::onVisibilityChanged()
+void List::onVisibilityChanged()
 {
 	// Clear some additional state when hidden.
 	if (!getVisible())
@@ -79,12 +79,12 @@ void ListImpl::onVisibilityChanged()
 	}
 }
 
-void ListImpl::onRectChanged()
+void List::onRectChanged()
 {
 	updateScroller();
 }
 
-void ListImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1 && hoveredItem != -1)
 	{
@@ -94,7 +94,7 @@ void ListImpl::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ListImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	bool selectedItemAssignedTo = false;
 
@@ -124,7 +124,7 @@ void ListImpl::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ListImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	lastMousePosition.x = mouseX;
 	lastMousePosition.y = mouseY;
@@ -141,7 +141,7 @@ void ListImpl::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDel
 	}
 }
 
-void ListImpl::onMouseWheelMove(int x, int y)
+void List::onMouseWheelMove(int x, int y)
 {
 	if (scroller->getVisible())
 	{
@@ -155,28 +155,28 @@ void ListImpl::onMouseWheelMove(int x, int y)
 	}
 }
 
-void ListImpl::onMouseHoverOff()
+void List::onMouseHoverOff()
 {
 	hoveredItem = -1;
 	mouseOverItem = -1;
 }
 
-void ListImpl::draw(Rect clip)
+void List::draw(Rect clip)
 {
 	renderer->drawList(this, clip);
 }
 
-Size ListImpl::measure()
+Size List::measure()
 {
 	return renderer->measureList(this);
 }
 
-Border ListImpl::getItemsBorder() const
+Border List::getItemsBorder() const
 {
 	return itemsBorder;
 }
 
-Rect ListImpl::getItemsRect() const
+Rect List::getItemsRect() const
 {
 	Rect rect;
 	rect.x = itemsBorder.left;
@@ -194,7 +194,7 @@ Rect ListImpl::getItemsRect() const
 	return rect;
 }
 
-Rect ListImpl::getAbsoluteItemsRect() const
+Rect List::getAbsoluteItemsRect() const
 {
 	Rect rect = getItemsRect();
 	const Position offset = getAbsolutePosition();
@@ -202,64 +202,71 @@ Rect ListImpl::getAbsoluteItemsRect() const
 	rect.y += offset.y;
 	return rect;
 }
-void ListImpl::setDrawItemCallback(DrawListItemCallback callback)
+void List::setDrawItemCallback(DrawListItemCallback callback)
 {
 	this->draw_item = callback;
 }
 
-DrawListItemCallback ListImpl::getDrawItemCallback() const
+DrawListItemCallback List::getDrawItemCallback() const
 {
 	return draw_item;
 }
 
-void ListImpl::setItemData(uint8_t *itemData)
+void List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
+{
+	setItemData(itemData);
+	setItemStride(itemStride);
+	setNumItems(nItems);
+}
+
+void List::setItemData(uint8_t *itemData)
 {
 	this->itemData = itemData;
 }
 
-uint8_t *ListImpl::getItemData() const
+uint8_t *List::getItemData() const
 {
 	return itemData;
 }
 
-void ListImpl::setItemStride(int itemStride)
+void List::setItemStride(int itemStride)
 {
 	this->itemStride = itemStride;
 }
 
-int ListImpl::getItemStride() const
+int List::getItemStride() const
 {
 	return itemStride;
 }
 
-void ListImpl::setItemHeight(int itemHeight)
+void List::setItemHeight(int itemHeight)
 {
 	isItemHeightUserSet = true;
 	setItemHeightInternal(itemHeight);
 }
 
-int ListImpl::getItemHeight() const
+int List::getItemHeight() const
 {
 	return itemHeight;
 }
 
-void ListImpl::setNumItems(int nItems)
+void List::setNumItems(int nItems)
 {
 	this->nItems = WZ_MAX(0, nItems);
 	updateScroller();
 }
 
-int ListImpl::getNumItems() const
+int List::getNumItems() const
 {
 	return nItems;
 }
 
-int ListImpl::getFirstItem() const
+int List::getFirstItem() const
 {
 	return firstItem;
 }
 
-void ListImpl::setSelectedItem(int selectedItem)
+void List::setSelectedItem(int selectedItem)
 {
 	this->selectedItem = selectedItem;
 	
@@ -270,49 +277,49 @@ void ListImpl::setSelectedItem(int selectedItem)
 	wz_invoke_event(&e, item_selected_callbacks);
 }
 
-int ListImpl::getSelectedItem() const
+int List::getSelectedItem() const
 {
 	return selectedItem;
 }
 
-int ListImpl::getPressedItem() const
+int List::getPressedItem() const
 {
 	return pressedItem;
 }
 
-int ListImpl::getHoveredItem() const
+int List::getHoveredItem() const
 {
 	return hoveredItem;
 }
 
-int ListImpl::getScrollValue() const
+int List::getScrollValue() const
 {
 	return scroller->getValue();
 }
 
-struct ScrollerImpl *ListImpl::getScroller()
+Scroller *List::getScroller()
 {
 	return scroller;
 }
 
-const struct ScrollerImpl *ListImpl::getScroller() const
+const Scroller *List::getScroller() const
 {
 	return scroller;
 }
 
-void ListImpl::addCallbackItemSelected(EventCallback callback)
+void List::addCallbackItemSelected(EventCallback callback)
 {
 	item_selected_callbacks.push_back(callback);
 }
 
-void ListImpl::setItemHeightInternal(int itemHeight)
+void List::setItemHeightInternal(int itemHeight)
 {
 	this->itemHeight = itemHeight;
 	scroller->setStepValue(itemHeight);
 	updateScroller();
 }
 
-void ListImpl::refreshItemHeight()
+void List::refreshItemHeight()
 {
 	// Don't stomp on user set value.
 	if (isItemHeightUserSet)
@@ -322,7 +329,7 @@ void ListImpl::refreshItemHeight()
 	setItemHeightInternal(getLineHeight() + 2);
 }
 
-void ListImpl::updateMouseOverItem(int mouseX, int mouseY)
+void List::updateMouseOverItem(int mouseX, int mouseY)
 {
 	mouseOverItem = -1;
 
@@ -353,7 +360,7 @@ void ListImpl::updateMouseOverItem(int mouseX, int mouseY)
 	}
 }
 
-void ListImpl::updateScroller()
+void List::updateScroller()
 {
 	// Update max value.
 	const int maxHeight = nItems * itemHeight;
@@ -373,59 +380,6 @@ void ListImpl::updateScroller()
 
 	// Hide/show scroller depending on if it's needed.
 	scroller->setVisible(max > 0);
-}
-
-/*
-================================================================================
-
-PUBLIC INTERFACE
-
-================================================================================
-*/
-
-List::List()
-{
-	impl.reset(new ListImpl(NULL, 0, 0));
-}
-
-List::~List()
-{
-}
-
-List *List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
-{
-	getImpl()->setItemData(itemData);
-	getImpl()->setItemStride(itemStride);
-	getImpl()->setNumItems(nItems);
-	return this;
-}
-
-List *List::setSelectedItem(int index)
-{
-	getImpl()->setSelectedItem(index);
-	return this;
-}
-
-List *List::setItemHeight(int height)
-{
-	getImpl()->setItemHeight(height);
-	return this;
-}
-
-List *List::setDrawItemCallback(DrawListItemCallback callback)
-{
-	getImpl()->setDrawItemCallback(callback);
-	return this;
-}
-
-ListImpl *List::getImpl()
-{
-	return (ListImpl *)impl.get();
-}
-
-const ListImpl *List::getImpl() const
-{
-	return (const ListImpl *)impl.get();
 }
 
 } // namespace wz
