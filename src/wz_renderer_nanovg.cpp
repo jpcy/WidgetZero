@@ -695,6 +695,118 @@ Size NVGRenderer::measureRadioButton(RadioButton *button)
 	return size;
 }
 
+void NVGRenderer::drawScrollerButton(Button *button, Rect clip, bool decrement)
+{
+	NVGcontext *vg = impl->vg;
+	
+	nvgSave(vg);
+	clipToRect(clip);
+
+	// Background color.
+	NVGcolor bgColor1, bgColor2;
+
+	if (button->isPressed() && button->getHover())
+	{
+		bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
+		bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
+	}
+	else
+	{
+		bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
+		bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
+	}
+
+	nvgBeginPath(vg);
+	Scroller *scroller = (Scroller *)button->parent;
+	int sides, roundedCorners;
+
+	if (scroller->getType() == WZ_SCROLLER_VERTICAL)
+	{
+		if (decrement)
+		{
+			sides = WZ_SIDE_LEFT | WZ_SIDE_TOP | WZ_SIDE_RIGHT;
+			roundedCorners = WZ_CORNER_TL | WZ_CORNER_TR;
+		}
+		else
+		{
+			sides = WZ_SIDE_LEFT | WZ_SIDE_BOTTOM | WZ_SIDE_RIGHT;
+			roundedCorners = WZ_CORNER_BL | WZ_CORNER_BR;
+		}
+	}
+	else
+	{
+		if (decrement)
+		{
+			sides = WZ_SIDE_TOP | WZ_SIDE_LEFT | WZ_SIDE_BOTTOM;
+			roundedCorners = WZ_CORNER_TL | WZ_CORNER_BL;
+		}
+		else
+		{
+			sides = WZ_SIDE_TOP | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM;
+			roundedCorners = WZ_CORNER_TR | WZ_CORNER_BR;
+		}
+	}
+
+	// Background.
+	const Rect rect = button->getAbsoluteRect();
+	createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, WZ_SIDE_ALL, roundedCorners);
+	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
+	nvgFill(vg);
+
+	// Border.
+	createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, sides, roundedCorners);
+	nvgStrokeColor(vg, button->getHover() ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
+	nvgStroke(vg);
+
+	// Icon.
+	nvgBeginPath(vg);
+
+	if (scroller->getType() == WZ_SCROLLER_VERTICAL)
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.25f); // top
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // left
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // right
+		}
+		else
+		{
+			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.75f); // bottom
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // right
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // left
+		}
+	}
+	else
+	{
+		if (decrement)
+		{
+			nvgMoveTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.5f); // left
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // bottom
+			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // top
+		}
+		else
+		{
+			nvgMoveTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.5f); // right
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // top
+			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // bottom
+		}
+	}
+
+	nvgFillColor(vg, button->getHover() ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
+void NVGRenderer::drawScrollerDecrementButton(Button *button, Rect clip)
+{
+	drawScrollerButton(button, clip, true);
+}
+
+void NVGRenderer::drawScrollerIncrementButton(Button *button, Rect clip)
+{
+	drawScrollerButton(button, clip, false);
+}
+
 void NVGRenderer::drawScroller(Scroller *scroller, Rect clip)
 {
 	NVGcontext *vg = impl->vg;

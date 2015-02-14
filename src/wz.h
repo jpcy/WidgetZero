@@ -338,6 +338,8 @@ public:
 	virtual Size measureMenuBar(MenuBar *menuBar) = 0;
 	virtual void drawRadioButton(RadioButton *button, Rect clip) = 0;
 	virtual Size measureRadioButton(RadioButton *button) = 0;
+	virtual void drawScrollerDecrementButton(Button *button, Rect clip) = 0;
+	virtual void drawScrollerIncrementButton(Button *button, Rect clip) = 0;
 	virtual void drawScroller(Scroller *scroller, Rect clip) = 0;
 	virtual Size measureScroller(Scroller *scroller) = 0;
 	virtual void drawSpinner(Spinner *spinner, Rect clip) = 0;

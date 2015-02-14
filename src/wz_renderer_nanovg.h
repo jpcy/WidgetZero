@@ -80,6 +80,13 @@ public:
 	virtual Size measureMenuBar(MenuBar *menuBar);
 	virtual void drawRadioButton(RadioButton *button, Rect clip);
 	virtual Size measureRadioButton(RadioButton *button);
+
+private:
+	void drawScrollerButton(Button *button, Rect clip, bool decrement);
+
+public:
+	virtual void drawScrollerDecrementButton(Button *button, Rect clip);
+	virtual void drawScrollerIncrementButton(Button *button, Rect clip);
 	virtual void drawScroller(Scroller *scroller, Rect clip);
 	virtual Size measureScroller(Scroller *scroller);
 	virtual void drawSpinner(Spinner *spinner, Rect clip);

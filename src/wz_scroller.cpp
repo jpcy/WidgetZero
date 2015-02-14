@@ -30,6 +30,24 @@ SOFTWARE.
 
 namespace wz { 
 
+class ScrollerDecrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer->drawScrollerDecrementButton(this, clip);
+	}
+};
+
+class ScrollerIncrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer->drawScrollerIncrementButton(this, clip);
+	}
+};
+
 /*
 ================================================================================
 
@@ -190,129 +208,6 @@ void ScrollerNub::updateRect()
 /*
 ================================================================================
 
-DECREMENT AND INCREMENT BUTTONS
-
-================================================================================
-*/
-
-static void wz_scroller_button_draw(Widget *widget, Rect clip, bool decrement)
-{
-	NVGcolor bgColor1, bgColor2;
-	int sides, roundedCorners;
-	Button *button = (Button *)widget;
-	Scroller *scroller = (Scroller *)widget->parent;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	
-	// Background color.
-	if (button->isPressed() && widget->hover)
-	{
-		bgColor1 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR1;
-		bgColor2 = WZ_SKIN_SCROLLER_BG_PRESSED_COLOR2;
-	}
-	else
-	{
-		bgColor1 = WZ_SKIN_SCROLLER_BG_COLOR1;
-		bgColor2 = WZ_SKIN_SCROLLER_BG_COLOR2;
-	}
-
-	nvgBeginPath(vg);
-
-	if (scroller->getType() == WZ_SCROLLER_VERTICAL)
-	{
-		if (decrement)
-		{
-			sides = WZ_SIDE_LEFT | WZ_SIDE_TOP | WZ_SIDE_RIGHT;
-			roundedCorners = WZ_CORNER_TL | WZ_CORNER_TR;
-		}
-		else
-		{
-			sides = WZ_SIDE_LEFT | WZ_SIDE_BOTTOM | WZ_SIDE_RIGHT;
-			roundedCorners = WZ_CORNER_BL | WZ_CORNER_BR;
-		}
-	}
-	else
-	{
-		if (decrement)
-		{
-			sides = WZ_SIDE_TOP | WZ_SIDE_LEFT | WZ_SIDE_BOTTOM;
-			roundedCorners = WZ_CORNER_TL | WZ_CORNER_BL;
-		}
-		else
-		{
-			sides = WZ_SIDE_TOP | WZ_SIDE_RIGHT | WZ_SIDE_BOTTOM;
-			roundedCorners = WZ_CORNER_TR | WZ_CORNER_BR;
-		}
-	}
-
-	// Background.
-	r->createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, WZ_SIDE_ALL, roundedCorners);
-	nvgFillPaint(vg, nvgLinearGradient(vg, (float)rect.x, (float)rect.y, (float)rect.x, (float)rect.y + rect.h, bgColor1, bgColor2));
-	nvgFill(vg);
-
-	// Border.
-	r->createRectPath(rect, WZ_SKIN_SCROLLER_CORNER_RADIUS, sides, roundedCorners);
-	nvgStrokeColor(vg, widget->hover ? WZ_SKIN_SCROLLER_BORDER_HOVER_COLOR : WZ_SKIN_SCROLLER_BORDER_COLOR);
-	nvgStroke(vg);
-
-	// Icon.
-	nvgBeginPath(vg);
-
-	if (scroller->getType() == WZ_SCROLLER_VERTICAL)
-	{
-		if (decrement)
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.25f); // top
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // left
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // right
-		}
-		else
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.75f); // bottom
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // right
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // left
-		}
-	}
-	else
-	{
-		if (decrement)
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.5f); // left
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // bottom
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // top
-		}
-		else
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.5f); // right
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // top
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // bottom
-		}
-	}
-
-	nvgFillColor(vg, widget->hover ? WZ_SKIN_SCROLLER_ICON_HOVER_COLOR : WZ_SKIN_SCROLLER_ICON_COLOR);
-	nvgFill(vg);
-	nvgRestore(vg);
-}
-
-static void wz_scroller_decrement_button_draw(Widget *widget, Rect clip)
-{
-	WZ_ASSERT(widget);
-	wz_scroller_button_draw(widget, clip, true);
-}
-
-static void wz_scroller_increment_button_draw(Widget *widget, Rect clip)
-{
-	WZ_ASSERT(widget);
-	wz_scroller_button_draw(widget, clip, false);
-}
-
-/*
-================================================================================
-
 SCROLLER WIDGET
 
 ================================================================================
@@ -347,9 +242,8 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 	layout->setStretch(WZ_STRETCH);
 	addChildWidget(layout);
 
-	Button *decrementButton = new Button();
+	ScrollerDecrementButton *decrementButton = new ScrollerDecrementButton();
 	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	decrementButton->setDrawCallback(wz_scroller_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_scroller_decrement_button_clicked);
 	layout->add(decrementButton);
 
@@ -360,9 +254,8 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 	nub = new ScrollerNub(this);
 	nubContainer->addChildWidget(nub);
 
-	Button *incrementButton = new Button();
+	ScrollerIncrementButton *incrementButton = new ScrollerIncrementButton();
 	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	incrementButton->setDrawCallback(wz_scroller_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
 	layout->add(incrementButton);
 
