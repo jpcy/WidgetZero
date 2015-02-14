@@ -27,6 +27,24 @@ SOFTWARE.
 
 namespace wz {
 
+class SpinnerDecrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer->drawSpinnerDecrementButton(this, clip);
+	}
+};
+
+class SpinnerIncrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer->drawSpinnerIncrementButton(this, clip);
+	}
+};
+
 static bool wz_spinner_validate_text(const char *text)
 {
 	size_t i;
@@ -40,44 +58,6 @@ static bool wz_spinner_validate_text(const char *text)
 	return true;
 }
 
-static void wz_spinner_draw_button(Widget *widget, Rect clip, bool decrement)
-{
-	const Button *button = (Button *)widget;
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getAbsoluteRect();
-	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
-	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
-	const float buttonCenterY = rect.y + rect.h * 0.5f;
-
-	nvgSave(vg);
-	r->clipToRect(clip);
-	nvgBeginPath(vg);
-
-	if (decrement)
-	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // bottom
-		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
-		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
-	}
-	else
-	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // top
-		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
-		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
-	}
-
-	nvgFillColor(vg, widget->hover ? WZ_SKIN_SPINNER_ICON_HOVER_COLOR : WZ_SKIN_SPINNER_ICON_COLOR);
-	nvgFill(vg);
-	nvgRestore(vg);
-}
-
-static void wz_spinner_decrement_button_draw(Widget *widget, Rect clip)
-{
-	WZ_ASSERT(widget);
-	wz_spinner_draw_button(widget, clip, true);
-}
-
 static void wz_spinner_decrement_button_clicked(Event *e)
 {
 	Spinner *spinner;
@@ -87,12 +67,6 @@ static void wz_spinner_decrement_button_clicked(Event *e)
 	WZ_ASSERT(e->base.widget->parent);
 	spinner = (Spinner *)e->base.widget->parent;
 	spinner->setValue(spinner->getValue() - 1);
-}
-
-static void wz_spinner_increment_button_draw(Widget *widget, Rect clip)
-{
-	WZ_ASSERT(widget);
-	wz_spinner_draw_button(widget, clip, false);
 }
 
 static void wz_spinner_increment_button_clicked(Event *e)
@@ -115,22 +89,20 @@ Spinner::Spinner()
 	textEdit->setValidateTextCallback(wz_spinner_validate_text);
 	addChildWidget(textEdit);
 
-	decrementButton = new Button();
+	decrementButton = new SpinnerDecrementButton();
 	decrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	decrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	decrementButton->setStretchScale(1, 0.5f);
 	decrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	decrementButton->setDrawCallback(wz_spinner_decrement_button_draw);
 	decrementButton->addCallbackClicked(wz_spinner_decrement_button_clicked);
 	decrementButton->setOverlap(true);
 	addChildWidget(decrementButton);
 
-	incrementButton = new Button();
+	incrementButton = new SpinnerIncrementButton();
 	incrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	incrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	incrementButton->setStretchScale(1, 0.5f);
 	incrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	incrementButton->setDrawCallback(wz_spinner_increment_button_draw);
 	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
 	incrementButton->setOverlap(true);
 	addChildWidget(incrementButton);

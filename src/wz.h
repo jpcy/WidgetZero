@@ -342,6 +342,8 @@ public:
 	virtual void drawScrollerIncrementButton(Button *button, Rect clip) = 0;
 	virtual void drawScroller(Scroller *scroller, Rect clip) = 0;
 	virtual Size measureScroller(Scroller *scroller) = 0;
+	virtual void drawSpinnerDecrementButton(Button *button, Rect clip) = 0;
+	virtual void drawSpinnerIncrementButton(Button *button, Rect clip) = 0;
 	virtual void drawSpinner(Spinner *spinner, Rect clip) = 0;
 	virtual Size measureSpinner(Spinner *spinner) = 0;
 	virtual void drawTabButton(TabButton *button, Rect clip) = 0;
@@ -1005,6 +1007,9 @@ public:
 	std::vector<EventCallback> value_changed_callbacks;
 };
 
+class SpinnerDecrementButton;
+class SpinnerIncrementButton;
+
 class Spinner : public Widget
 {
 public:
@@ -1017,8 +1022,8 @@ public:
 	void setValue(int value);
 
 	TextEdit *textEdit;
-	Button *decrementButton;
-	Button *incrementButton;
+	SpinnerDecrementButton *decrementButton;
+	SpinnerIncrementButton *incrementButton;
 };
 
 enum StackLayoutDirection

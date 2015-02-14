@@ -89,7 +89,15 @@ public:
 	virtual void drawScrollerIncrementButton(Button *button, Rect clip);
 	virtual void drawScroller(Scroller *scroller, Rect clip);
 	virtual Size measureScroller(Scroller *scroller);
+
+private:
+	void drawSpinnerButton(Button *button, Rect clip, bool decrement);
+
+public:
+	virtual void drawSpinnerDecrementButton(Button *button, Rect clip);
+	virtual void drawSpinnerIncrementButton(Button *button, Rect clip);
 	virtual void drawSpinner(Spinner *spinner, Rect clip);
+
 	virtual Size measureSpinner(Spinner *spinner);
 	virtual void drawTabButton(TabButton *button, Rect clip);
 	virtual void drawTabBar(TabBar *tabBar, Rect clip);

@@ -883,6 +883,46 @@ Size NVGRenderer::measureScroller(Scroller *scroller)
 	return scroller->getType() == WZ_SCROLLER_VERTICAL ? Size(WZ_SKIN_SCROLLER_DEFAULT_SIZE, 0) : Size(0, WZ_SKIN_SCROLLER_DEFAULT_SIZE);
 }
 
+void NVGRenderer::drawSpinnerButton(Button *button, Rect clip, bool decrement)
+{
+	NVGcontext *vg = impl->vg;
+	const Rect rect = button->getAbsoluteRect();
+	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
+	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
+	const float buttonCenterY = rect.y + rect.h * 0.5f;
+
+	nvgSave(vg);
+	clipToRect(clip);
+	nvgBeginPath(vg);
+
+	if (decrement)
+	{
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // bottom
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
+	}
+	else
+	{
+		nvgMoveTo(vg, buttonCenterX, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // top
+		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
+		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
+	}
+
+	nvgFillColor(vg, button->getHover() ? WZ_SKIN_SPINNER_ICON_HOVER_COLOR : WZ_SKIN_SPINNER_ICON_COLOR);
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
+void NVGRenderer::drawSpinnerDecrementButton(Button *button, Rect clip)
+{
+	drawSpinnerButton(button, clip, true);
+}
+
+void NVGRenderer::drawSpinnerIncrementButton(Button *button, Rect clip)
+{
+	drawSpinnerButton(button, clip, false);
+}
+
 void NVGRenderer::drawSpinner(Spinner *spinner, Rect clip)
 {
 }
