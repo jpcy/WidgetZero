@@ -307,7 +307,7 @@ void Scroller::setValue(int value)
 	e.scroller.scroller = this;
 	e.scroller.oldValue = oldValue;
 	e.scroller.value = this->value;
-	wz_invoke_event(&e, value_changed_callbacks);
+	invokeEvent(&e, value_changed_callbacks);
 
 	nub->updateRect();
 }

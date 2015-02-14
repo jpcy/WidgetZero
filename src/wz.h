@@ -549,6 +549,9 @@ public:
 
 	std::vector<IEventHandler *> eventHandlers;
 
+	void invokeEvent(Event *e);
+	void invokeEvent(Event *e, const std::vector<EventCallback> &callbacks);
+
 private:
 	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
 	Rect calculateAlignedStretchedRect(Rect rect) const;
@@ -1258,8 +1261,5 @@ public:
 private:
 	void refreshHeaderHeight();
 };
-
-void wz_invoke_event(Event *e);
-void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks);
 
 } // namespace wz

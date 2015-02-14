@@ -603,6 +603,37 @@ LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) co
 	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
 }
 
+void Widget::invokeEvent(Event *e)
+{
+	WZ_ASSERT(e);
+
+	// Call method pointer event handlers.
+	for (size_t i = 0; i < eventHandlers.size(); i++)
+	{
+		if (eventHandlers[i]->eventType == e->base.type)
+		{
+			eventHandlers[i]->call(e);
+		}
+	}
+
+	// Call the centralized event handler.
+	if (mainWindow && mainWindow->handle_event)
+	{
+		mainWindow->handle_event(e);
+	}
+}
+
+void Widget::invokeEvent(Event *e, const std::vector<EventCallback> &callbacks)
+{
+	WZ_ASSERT(e);
+	invokeEvent(e);
+
+	for (size_t i = 0; i < callbacks.size(); i++)
+	{
+		callbacks[i](e);
+	}
+}
+
 Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 {
 	// Can't align or stretch to parent rect if there is no parent.

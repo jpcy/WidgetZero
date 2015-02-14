@@ -50,7 +50,7 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = this;
 		e.button.isSet = isSet_;
-		wz_invoke_event(&e, pressed_callbacks);
+		invokeEvent(&e, pressed_callbacks);
 
 		if (clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
 		{
@@ -161,7 +161,7 @@ void Button::set(bool value)
 		e.button.type = WZ_EVENT_BUTTON_CLICKED;
 		e.button.button = this;
 		e.button.isSet = isSet_;
-		wz_invoke_event(&e, clicked_callbacks);
+		invokeEvent(&e, clicked_callbacks);
 	}
 }
 
@@ -220,7 +220,7 @@ void Button::click()
 	e.button.type = WZ_EVENT_BUTTON_CLICKED;
 	e.button.button = this;
 	e.button.isSet = isSet_;
-	wz_invoke_event(&e, clicked_callbacks);
+	invokeEvent(&e, clicked_callbacks);
 }
 
 /*

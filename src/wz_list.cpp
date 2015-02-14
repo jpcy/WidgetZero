@@ -120,7 +120,7 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 		e.list.list = this;
 		e.list.selectedItem = selectedItem;
-		wz_invoke_event(&e, item_selected_callbacks);
+		invokeEvent(&e, item_selected_callbacks);
 	}
 }
 
@@ -274,7 +274,7 @@ void List::setSelectedItem(int selectedItem)
 	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 	e.list.list = this;
 	e.list.selectedItem = selectedItem;
-	wz_invoke_event(&e, item_selected_callbacks);
+	invokeEvent(&e, item_selected_callbacks);
 }
 
 int List::getSelectedItem() const

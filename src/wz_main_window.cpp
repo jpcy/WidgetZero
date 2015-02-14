@@ -945,35 +945,6 @@ void MainWindow::setMovingWindow(Window *window)
 	}
 }
 
-void wz_invoke_event(Event *e)
-{
-	WZ_ASSERT(e);
-
-	for (size_t i = 0; i < e->base.widget->eventHandlers.size(); i++)
-	{
-		if (e->base.widget->eventHandlers[i]->eventType == e->base.type)
-		{
-			e->base.widget->eventHandlers[i]->call(e);
-		}
-	}
-
-	if (e->base.widget->mainWindow && e->base.widget->mainWindow->handle_event)
-	{
-		e->base.widget->mainWindow->handle_event(e);
-	}
-}
-
-void wz_invoke_event(Event *e, const std::vector<EventCallback> &callbacks)
-{
-	WZ_ASSERT(e);
-	wz_invoke_event(e);
-
-	for (size_t i = 0; i < callbacks.size(); i++)
-	{
-		callbacks[i](e);
-	}
-}
-
 void MainWindow::updateContentRect()
 {
 	Rect rect = this->rect;

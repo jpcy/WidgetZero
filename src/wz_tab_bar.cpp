@@ -161,7 +161,7 @@ static void wz_tab_bar_invoke_tab_changed(TabBar *tabBar)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->selectedTab;
-	wz_invoke_event(&e, tabBar->tab_changed_callbacks);
+	tabBar->invokeEvent(&e, tabBar->tab_changed_callbacks);
 }
 
 // Sets the tab bar (the button's parent) selected tab.
@@ -274,7 +274,7 @@ TabButton *TabBar::createTab()
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tab;
-	wz_invoke_event(&e);
+	invokeEvent(&e);
 
 	return tab;
 }
@@ -301,7 +301,7 @@ void TabBar::destroyTab(TabButton *tab)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tabs[deleteIndex];
-	wz_invoke_event(&e);
+	invokeEvent(&e);
 
 	// Delete the tab.
 	tabs.erase(tabs.begin() + deleteIndex);
@@ -317,7 +317,7 @@ void TabBar::clearTabs()
 		e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 		e.tabBar.tabBar = this;
 		e.tabBar.tab = tabs[i];
-		wz_invoke_event(&e);
+		invokeEvent(&e);
 
 		// Destroy the tab.
 		destroyChildWidget(tabs[i]);
