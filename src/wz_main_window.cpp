@@ -27,6 +27,21 @@ SOFTWARE.
 
 namespace wz {
 
+DockIcon::DockIcon()
+{
+	setSizeInternal(48, 48);
+}
+
+void DockIcon::draw(Rect clip)
+{
+	renderer->drawDockIcon(this, clip);
+}
+
+void DockPreview::draw(Rect clip)
+{
+	renderer->drawDockPreview(this, clip);
+}
+
 // Used by all dock tab bars.
 static void wz_main_window_dock_tab_bar_tab_changed(Event *e)
 {
@@ -71,32 +86,6 @@ static void wz_main_window_dock_tab_bar_tab_changed(Event *e)
 
 		mainWindow->dockedWindows[dockPosition][i]->setVisible(false);
 	}
-}
-
-static void wz_main_window_draw_dock_icon(Widget *widget, Rect clip)
-{
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	NVGcontext *vg = r->getContext();
-	const Rect rect = widget->getRect();
-	clip = clip; // Never clipped, so just ignore that parameter.
-
-	nvgSave(vg);
-	nvgBeginPath(vg);
-	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, 3);
-	nvgFillColor(vg, nvgRGBA(64, 64, 64, 128));
-	nvgFill(vg);
-	nvgRestore(vg);
-}
-
-static void wz_main_window_draw_dock_preview(Widget *widget, Rect clip)
-{
-	NVGRenderer *r = (NVGRenderer *)widget->renderer;
-	NVGcontext *vg = r->getContext();
-	clip = clip; // Never clipped, so just ignore that parameter.
-
-	nvgSave(vg);
-	r->drawFilledRect(widget->getRect(), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
-	nvgRestore(vg);
 }
 
 /*
@@ -224,15 +213,7 @@ static void wz_widget_draw_if_visible(Widget *widget)
 	{
 		Rect clip;
 		clip.x = clip.y = clip.w = clip.h = 0;
-
-		if (widget->vtable.draw)
-		{
-			widget->vtable.draw(widget, clip);
-		}
-		else
-		{
-			widget->draw(clip);
-		}
+		widget->draw(clip);
 	}
 }
 
@@ -261,24 +242,19 @@ MainWindow::MainWindow(IRenderer *renderer)
 	// Create dock icon widgets.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		dockIcons[i] = new Widget;
-		Widget *widget = dockIcons[i];
-		widget->setDrawCallback(wz_main_window_draw_dock_icon);
-		dockIcons[i]->setSizeInternal(48, 48);
-		widget->setVisible(false);
-		widget->setDrawManually(true);
-		addChildWidget(widget);
+		dockIcons[i] = new DockIcon;
+		dockIcons[i]->setVisible(false);
+		dockIcons[i]->setDrawManually(true);
+		addChildWidget(dockIcons[i]);
 	}
 
 	updateDockIconPositions();
 
 	// Create dock preview widget.
-	dockPreview = new Widget;
-	Widget *widget = dockPreview;
-	widget->setDrawManually(true);
-	widget->setDrawCallback(wz_main_window_draw_dock_preview);
-	widget->setVisible(false);
-	addChildWidget(widget);
+	dockPreview = new DockPreview;
+	dockPreview->setDrawManually(true);
+	dockPreview->setVisible(false);
+	addChildWidget(dockPreview);
 
 	// Create dock tab bars.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)

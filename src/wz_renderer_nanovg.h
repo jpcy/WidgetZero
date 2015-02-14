@@ -66,6 +66,8 @@ public:
 	virtual Size measureCheckBox(CheckBox *checkBox);
 	virtual void drawCombo(Combo *combo, Rect clip);
 	virtual Size measureCombo(Combo *combo);
+	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip);
+	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip);
 	virtual void drawGroupBox(GroupBox *groupBox, Rect clip);
 	virtual Size measureGroupBox(GroupBox *groupBox);
 	virtual void drawLabel(Label *label, Rect clip);

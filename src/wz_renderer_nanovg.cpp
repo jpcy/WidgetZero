@@ -428,6 +428,28 @@ Size NVGRenderer::measureCombo(Combo *combo)
 	return size;
 }
 
+void NVGRenderer::drawDockIcon(DockIcon *dockIcon, Rect /*clip*/)
+{
+	NVGcontext *vg = impl->vg;
+	const Rect rect = dockIcon->getAbsoluteRect();
+
+	// Never clipped.
+	nvgSave(vg);
+	nvgBeginPath(vg);
+	nvgRoundedRect(vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h, 3);
+	nvgFillColor(vg, nvgRGBA(64, 64, 64, 128));
+	nvgFill(vg);
+	nvgRestore(vg);
+}
+
+void NVGRenderer::drawDockPreview(DockPreview *dockPreview, Rect /*clip*/)
+{
+	// Never clipped.
+	nvgSave(impl->vg);
+	drawFilledRect(dockPreview->getAbsoluteRect(), WZ_SKIN_MAIN_WINDOW_DOCK_PREVIEW_COLOR);
+	nvgRestore(impl->vg);
+}
+
 void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 {
 	NVGcontext *vg = impl->vg;

@@ -51,6 +51,8 @@ namespace wz {
 class Button;
 class CheckBox;
 class Combo;
+class DockIcon;
+class DockPreview;
 class GroupBox;
 class Label;
 class List;
@@ -322,6 +324,8 @@ public:
 	virtual Size measureCheckBox(CheckBox *checkBox) = 0;
 	virtual void drawCombo(Combo *combo, Rect clip) = 0;
 	virtual Size measureCombo(Combo *combo) = 0;
+	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip) = 0;
+	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip) = 0;
 	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) = 0;
 	virtual Size measureGroupBox(GroupBox *groupBox) = 0;
 	virtual void drawLabel(Label *label, Rect clip) = 0;
@@ -655,6 +659,19 @@ private:
 	void updateListRect();
 };
 
+class DockIcon : public Widget
+{
+public:
+	DockIcon();
+	virtual void draw(Rect clip);
+};
+
+class DockPreview : public Widget
+{
+public:
+	virtual void draw(Rect clip);
+};
+
 class Frame : public Widget
 {
 public:
@@ -854,8 +871,8 @@ public:
 	Window *movingWindow;
 
 	// Hidden from the consumer.
-	Widget *dockIcons[WZ_NUM_DOCK_POSITIONS];
-	Widget *dockPreview;
+	DockIcon *dockIcons[WZ_NUM_DOCK_POSITIONS];
+	DockPreview *dockPreview;
 
 	std::vector<Window *> dockedWindows[WZ_NUM_DOCK_POSITIONS];
 
