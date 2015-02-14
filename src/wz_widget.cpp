@@ -49,7 +49,6 @@ Widget::Widget()
 	mainWindow = NULL;
 	window = NULL;
 	parent = NULL;
-	memset(&vtable, 0, sizeof(vtable));
 }
 
 Widget::~Widget()
@@ -309,11 +308,6 @@ void Widget::setMetadata(void *metadata)
 void *Widget::getMetadata()
 {
 	return metadata;
-}
-
-void Widget::setDrawCallback(WidgetDrawCallback draw)
-{
-	vtable.draw = draw;
 }
 
 void Widget::resizeToMeasured()

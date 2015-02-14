@@ -133,14 +133,7 @@ static void wz_widget_draw_recursive(Widget *widget, Rect clip, WidgetPredicate 
 
 	if (draw_predicate(widget) && !widget->drawManually)
 	{
-		if (widget->vtable.draw)
-		{
-			widget->vtable.draw(widget, clip);
-		}
-		else
-		{
-			widget->draw(clip);
-		}
+		widget->draw(clip);
 	}
 
 	// Update clip rect.
@@ -656,7 +649,7 @@ void MainWindow::textInput(const char *text)
 
 void MainWindow::draw()
 {
-	// Draw the main window (not really, vtable.draw is NULL) and ancestors. Don't recurse into windows or combos.
+	// Draw the main window (not really) and ancestors. Don't recurse into windows or combos.
 	wz_widget_draw(this, wz_widget_true, wz_widget_is_not_window_or_combo);
 
 	// Get a list of windows (excluding top).
@@ -683,15 +676,7 @@ void MainWindow::draw()
 		if (!widget->getVisible())
 			continue;
 
-		if (widget->vtable.draw)
-		{
-			widget->vtable.draw(widget, rect);
-		}
-		else
-		{
-			widget->draw(rect);
-		}
-
+		widget->draw(rect);
 		wz_widget_draw(widget, wz_widget_true, wz_widget_is_not_combo);
 	}
 

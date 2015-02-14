@@ -357,14 +357,6 @@ public:
 	virtual Size measureWindow(Window *window) = 0;
 };
 
-typedef void(*WidgetDrawCallback)(Widget *widget, Rect clip);
-typedef Size(*WidgetMeasureCallback)(Widget *widget);
-
-struct WidgetVtable
-{
-	WidgetDrawCallback draw;
-};
-
 enum
 {
 	WZ_WIDGET_FLAG_DRAW_LAST = 1 << 0,
@@ -457,7 +449,6 @@ public:
 	bool hasKeyboardFocus() const;
 	void setMetadata(void *metadata);
 	void *getMetadata();
-	void setDrawCallback(WidgetDrawCallback draw);
 
 	// Resize the widget to the result of calling the widget "measure" callback.
 	void resizeToMeasured();
@@ -545,8 +536,6 @@ public:
 
 	char fontFace[256];
 	float fontSize;
-
-	WidgetVtable vtable;
 
 	IRenderer *renderer;
 
