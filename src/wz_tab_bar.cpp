@@ -161,7 +161,7 @@ static void wz_tab_bar_invoke_tab_changed(TabBar *tabBar)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
 	e.tabBar.tabBar = tabBar;
 	e.tabBar.tab = tabBar->selectedTab;
-	tabBar->invokeEvent(&e, tabBar->tab_changed_callbacks);
+	tabBar->invokeEvent(e, tabBar->tab_changed_callbacks);
 }
 
 TabBar::TabBar()
@@ -245,7 +245,7 @@ TabButton *TabBar::createTab()
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tab;
-	invokeEvent(&e);
+	invokeEvent(e);
 
 	return tab;
 }
@@ -272,7 +272,7 @@ void TabBar::destroyTab(TabButton *tab)
 	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tabs[deleteIndex];
-	invokeEvent(&e);
+	invokeEvent(e);
 
 	// Delete the tab.
 	tabs.erase(tabs.begin() + deleteIndex);
@@ -288,7 +288,7 @@ void TabBar::clearTabs()
 		e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
 		e.tabBar.tabBar = this;
 		e.tabBar.tab = tabs[i];
-		invokeEvent(&e);
+		invokeEvent(e);
 
 		// Destroy the tab.
 		destroyChildWidget(tabs[i]);
@@ -348,17 +348,17 @@ int TabBar::getScrollValue() const
 	return scrollValue;
 }
 
-void TabBar::onTabButtonPressed(Event *e)
+void TabBar::onTabButtonPressed(Event e)
 {
-	selectTab((TabButton *)e->base.widget);
+	selectTab((TabButton *)e.base.widget);
 }
 
-void TabBar::onDecrementButtonClicked(Event *e)
+void TabBar::onDecrementButtonClicked(Event e)
 {
 	wz_tab_bar_set_scroll_value(this, scrollValue - 1);
 }
 
-void TabBar::onIncrementButtonClicked(Event *e)
+void TabBar::onIncrementButtonClicked(Event e)
 {
 	wz_tab_bar_set_scroll_value(this, scrollValue + 1);
 }

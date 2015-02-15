@@ -603,14 +603,12 @@ LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) co
 	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
 }
 
-void Widget::invokeEvent(Event *e)
+void Widget::invokeEvent(Event e)
 {
-	WZ_ASSERT(e);
-
 	// Call method pointer event handlers.
 	for (size_t i = 0; i < eventHandlers.size(); i++)
 	{
-		if (eventHandlers[i]->eventType == e->base.type)
+		if (eventHandlers[i]->eventType == e.base.type)
 		{
 			eventHandlers[i]->call(e);
 		}
@@ -623,9 +621,8 @@ void Widget::invokeEvent(Event *e)
 	}
 }
 
-void Widget::invokeEvent(Event *e, const std::vector<EventCallback> &callbacks)
+void Widget::invokeEvent(Event e, const std::vector<EventCallback> &callbacks)
 {
-	WZ_ASSERT(e);
 	invokeEvent(e);
 
 	for (size_t i = 0; i < callbacks.size(); i++)

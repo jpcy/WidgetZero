@@ -978,7 +978,7 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 	return result;
 }
 
-void MainWindow::onDockTabBarTabChanged(Event *e)
+void MainWindow::onDockTabBarTabChanged(Event e)
 {
 	if (ignoreDockTabBarChangedEvent)
 		return;
@@ -988,7 +988,7 @@ void MainWindow::onDockTabBarTabChanged(Event *e)
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		if (dockTabBars[i] == e->tabBar.tabBar)
+		if (dockTabBars[i] == e.tabBar.tabBar)
 		{
 			dockPosition = (DockPosition)i;
 			break;
@@ -998,7 +998,7 @@ void MainWindow::onDockTabBarTabChanged(Event *e)
 	WZ_ASSERT(dockPosition != WZ_DOCK_POSITION_NONE);
 
 	// Get the window corresponding to the tab.
-	Window *window = (Window *)e->tabBar.tab->getInternalMetadata();
+	Window *window = (Window *)e.tabBar.tab->getInternalMetadata();
 
 	// Internal metadata won't be set yet when first adding a tab.
 	if (window == NULL)

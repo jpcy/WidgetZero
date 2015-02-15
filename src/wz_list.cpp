@@ -111,7 +111,7 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 		e.list.list = this;
 		e.list.selectedItem = selectedItem;
-		invokeEvent(&e, item_selected_callbacks);
+		invokeEvent(e, item_selected_callbacks);
 	}
 }
 
@@ -265,7 +265,7 @@ void List::setSelectedItem(int selectedItem)
 	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 	e.list.list = this;
 	e.list.selectedItem = selectedItem;
-	invokeEvent(&e, item_selected_callbacks);
+	invokeEvent(e, item_selected_callbacks);
 }
 
 int List::getSelectedItem() const
@@ -303,9 +303,9 @@ void List::addCallbackItemSelected(EventCallback callback)
 	item_selected_callbacks.push_back(callback);
 }
 
-void List::onScrollerValueChanged(Event *e)
+void List::onScrollerValueChanged(Event e)
 {
-	firstItem = e->scroller.value / itemHeight;
+	firstItem = e.scroller.value / itemHeight;
 }
 
 void List::setItemHeightInternal(int itemHeight)

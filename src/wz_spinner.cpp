@@ -124,12 +124,12 @@ void Spinner::setValue(int value)
 	textEdit->setText(buffer);
 }
 
-void Spinner::onDecrementButtonClicked(Event *e)
+void Spinner::onDecrementButtonClicked(Event e)
 {
 	setValue(getValue() - 1);
 }
 
-void Spinner::onIncrementButtonClicked(Event *e)
+void Spinner::onIncrementButtonClicked(Event e)
 {
 	setValue(getValue() + 1);
 }

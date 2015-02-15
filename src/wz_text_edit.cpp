@@ -912,9 +912,9 @@ Position TextEdit::positionFromIndex(int index) const
 	return position;
 }
 
-void TextEdit::onScrollerValueChanged(Event *e)
+void TextEdit::onScrollerValueChanged(Event e)
 {
-	scrollValue = e->scroller.value;
+	scrollValue = e.scroller.value;
 }
 
 } // namespace wz

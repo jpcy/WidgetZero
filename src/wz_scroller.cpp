@@ -291,7 +291,7 @@ void Scroller::setValue(int value)
 	e.scroller.scroller = this;
 	e.scroller.oldValue = oldValue;
 	e.scroller.value = this->value;
-	invokeEvent(&e, value_changed_callbacks);
+	invokeEvent(e, value_changed_callbacks);
 
 	nub->updateRect();
 }
@@ -351,12 +351,12 @@ void Scroller::addCallbackValueChanged(EventCallback callback)
 	value_changed_callbacks.push_back(callback);
 }
 
-void Scroller::onDecrementButtonClicked(Event *e)
+void Scroller::onDecrementButtonClicked(Event e)
 {
 	decrementValue();
 }
 
-void Scroller::onIncrementButtonClicked(Event *e)
+void Scroller::onIncrementButtonClicked(Event e)
 {
 	incrementValue();
 }

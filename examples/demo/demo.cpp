@@ -597,19 +597,19 @@ private:
 		secondTab->add(new wz::Button("Button Button Button"))->setPosition(10, 10);
 	}
 
-	void showWindow1Toggled(wz::Event *e)
+	void showWindow1Toggled(wz::Event e)
 	{
-		window1->setVisible(e->button.isSet);
+		window1->setVisible(e.button.isSet);
 	}
 
-	void showWindow2Toggled(wz::Event *e)
+	void showWindow2Toggled(wz::Event e)
 	{
-		window2->setVisible(e->button.isSet);
+		window2->setVisible(e.button.isSet);
 	}
 
-	void widgetCategoryChanged(wz::Event *e)
+	void widgetCategoryChanged(wz::Event e)
 	{
-		setFrame(e->list.selectedItem);
+		setFrame(e.list.selectedItem);
 	}
 
 	void setFrame(int index)

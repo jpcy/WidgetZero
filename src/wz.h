@@ -223,7 +223,7 @@ union Event
 	TabBarEvent tabBar;
 };
 
-typedef void (*EventCallback)(Event *e);
+typedef void (*EventCallback)(Event e);
 
 enum Cursor
 {
@@ -281,7 +281,7 @@ enum Key
 struct IEventHandler
 {
 	virtual ~IEventHandler() {}
-	virtual void call(Event *e) = 0;
+	virtual void call(Event e) = 0;
 
 	WidgetEventType eventType;
 };
@@ -289,9 +289,9 @@ struct IEventHandler
 template<class Object>
 struct EventHandler : public IEventHandler
 {
-	typedef void (Object::*Method)(Event *);
+	typedef void (Object::*Method)(Event);
 
-	virtual void call(Event *e)
+	virtual void call(Event e)
 	{
 		WZCPP_CALL_OBJECT_METHOD(object, method)(e);
 	}
@@ -370,7 +370,7 @@ public:
 	Widget *addEventHandler(IEventHandler *eventHandler);
 
 	template<class Object>
-	Widget *addEventHandler(WidgetEventType eventType, Object *object, void (Object::*method)(Event *))
+	Widget *addEventHandler(WidgetEventType eventType, Object *object, void (Object::*method)(Event))
 	{
 		EventHandler<Object> *eventHandler = new EventHandler<Object>();
 		eventHandler->eventType = eventType;
@@ -549,8 +549,8 @@ public:
 
 	std::vector<IEventHandler *> eventHandlers;
 
-	void invokeEvent(Event *e);
-	void invokeEvent(Event *e, const std::vector<EventCallback> &callbacks);
+	void invokeEvent(Event e);
+	void invokeEvent(Event e, const std::vector<EventCallback> &callbacks);
 
 private:
 	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
@@ -652,7 +652,7 @@ public:
 	List *list;
 
 protected:
-	void onListItemSelected(Event *e);
+	void onListItemSelected(Event e);
 	void updateListRect();
 };
 
@@ -785,7 +785,7 @@ public:
 	Position lastMousePosition;
 
 protected:
-	void onScrollerValueChanged(Event *e);
+	void onScrollerValueChanged(Event e);
 	void setItemHeightInternal(int itemHeight);
 	void refreshItemHeight();
 	void updateMouseOverItem(int mouseX, int mouseY);
@@ -889,7 +889,7 @@ private:
 	Window *getHoverWindow(int mouseX, int mouseY);
 
 	// Used by all dock tab bars.
-	void onDockTabBarTabChanged(Event *e);
+	void onDockTabBarTabChanged(Event e);
 
 	void refreshDockTabBar(DockPosition dockPosition);
 
@@ -952,7 +952,7 @@ public:
 	virtual Size measure();
 
 protected:
-	void onClicked(Event *e);
+	void onClicked(Event e);
 };
 
 class ScrollerNub : public Widget
@@ -1007,8 +1007,8 @@ public:
 	std::vector<EventCallback> value_changed_callbacks;
 
 protected:
-	void onDecrementButtonClicked(Event *e);
-	void onIncrementButtonClicked(Event *e);
+	void onDecrementButtonClicked(Event e);
+	void onIncrementButtonClicked(Event e);
 };
 
 class SpinnerDecrementButton;
@@ -1030,8 +1030,8 @@ public:
 	SpinnerIncrementButton *incrementButton;
 
 protected:
-	void onDecrementButtonClicked(Event *e);
-	void onIncrementButtonClicked(Event *e);
+	void onDecrementButtonClicked(Event e);
+	void onIncrementButtonClicked(Event e);
 };
 
 enum StackLayoutDirection
@@ -1095,9 +1095,9 @@ public:
 	std::vector<EventCallback> tab_changed_callbacks;
 
 protected:
-	void onTabButtonPressed(Event *e);
-	void onDecrementButtonClicked(Event *e);
-	void onIncrementButtonClicked(Event *e);
+	void onTabButtonPressed(Event e);
+	void onDecrementButtonClicked(Event e);
+	void onIncrementButtonClicked(Event e);
 };
 
 class TabPage : public Widget
@@ -1142,7 +1142,7 @@ public:
 	std::vector<TabbedPage> pages;
 
 protected:
-	void onTabChanged(Event *e);
+	void onTabChanged(Event e);
 };
 
 typedef bool(*TextEditValidateTextCallback)(const char *text);
@@ -1203,7 +1203,7 @@ public:
 	std::string text;
 
 protected:
-	void onScrollerValueChanged(Event *e);
+	void onScrollerValueChanged(Event e);
 };
 
 class ToggleButton : public Button

@@ -119,7 +119,7 @@ bool Combo::isOpen() const
 	return isOpen_;
 }
 
-void Combo::onListItemSelected(Event *e)
+void Combo::onListItemSelected(Event e)
 {
 	// Unlock input.
 	mainWindow->popLockInputWidget(this);
