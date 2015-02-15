@@ -96,26 +96,12 @@ TABBED WIDGET
 ================================================================================
 */
 
-static void wz_tabbed_tab_bar_tab_changed(Event *e)
-{
-	Tabbed *tabbed;
-
-	WZ_ASSERT(e);
-	tabbed = (Tabbed *)e->base.widget->parent;
-
-	// Set the corresponding page to visible, hide all the others.
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		tabbed->pages[i].page->setVisible(tabbed->pages[i].tab == e->tabBar.tab);
-	}
-}
-
 Tabbed::Tabbed()
 {
 	type = WZ_TYPE_TABBED;
 
 	tabBar = new TabBar;
-	tabBar->addCallbackTabChanged(wz_tabbed_tab_bar_tab_changed);
+	tabBar->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &Tabbed::onTabChanged);
 	addChildWidget(tabBar);
 }
 
@@ -172,6 +158,20 @@ void Tabbed::addTab(TabButton **tab, TabPage **page)
 	newPage.tab = *tab;
 	newPage.page = *page;
 	pages.push_back(newPage);
+}
+
+void Tabbed::onTabChanged(Event *e)
+{
+	Tabbed *tabbed;
+
+	WZ_ASSERT(e);
+	tabbed = (Tabbed *)e->base.widget->parent;
+
+	// Set the corresponding page to visible, hide all the others.
+	for (size_t i = 0; i < tabbed->pages.size(); i++)
+	{
+		tabbed->pages[i].page->setVisible(tabbed->pages[i].tab == e->tabBar.tab);
+	}
 }
 
 } // namespace wz

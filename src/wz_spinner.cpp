@@ -58,28 +58,6 @@ static bool wz_spinner_validate_text(const char *text)
 	return true;
 }
 
-static void wz_spinner_decrement_button_clicked(Event *e)
-{
-	Spinner *spinner;
-
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	spinner = (Spinner *)e->base.widget->parent;
-	spinner->setValue(spinner->getValue() - 1);
-}
-
-static void wz_spinner_increment_button_clicked(Event *e)
-{
-	Spinner *spinner;
-
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	spinner = (Spinner *)e->base.widget->parent;
-	spinner->setValue(spinner->getValue() + 1);
-}
-
 Spinner::Spinner()
 {
 	type = WZ_TYPE_SPINNER;
@@ -94,7 +72,7 @@ Spinner::Spinner()
 	decrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	decrementButton->setStretchScale(1, 0.5f);
 	decrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	decrementButton->addCallbackClicked(wz_spinner_decrement_button_clicked);
+	decrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onDecrementButtonClicked);
 	decrementButton->setOverlap(true);
 	addChildWidget(decrementButton);
 
@@ -103,7 +81,7 @@ Spinner::Spinner()
 	incrementButton->setStretch(WZ_STRETCH_HEIGHT);
 	incrementButton->setStretchScale(1, 0.5f);
 	incrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	incrementButton->addCallbackClicked(wz_spinner_increment_button_clicked);
+	incrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onIncrementButtonClicked);
 	incrementButton->setOverlap(true);
 	addChildWidget(incrementButton);
 }
@@ -144,6 +122,16 @@ void Spinner::setValue(int value)
 	char buffer[32];
 	sprintf(buffer, "%d", value);
 	textEdit->setText(buffer);
+}
+
+void Spinner::onDecrementButtonClicked(Event *e)
+{
+	setValue(getValue() - 1);
+}
+
+void Spinner::onIncrementButtonClicked(Event *e)
+{
+	setValue(getValue() + 1);
 }
 
 } // namespace wz

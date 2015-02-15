@@ -42,52 +42,6 @@ void DockPreview::draw(Rect clip)
 	renderer->drawDockPreview(this, clip);
 }
 
-// Used by all dock tab bars.
-static void wz_main_window_dock_tab_bar_tab_changed(Event *e)
-{
-	MainWindow *mainWindow;
-	DockPosition dockPosition;
-	Window *window;
-
-	WZ_ASSERT(e);
-	mainWindow = e->base.widget->mainWindow;
-
-	if (mainWindow->ignoreDockTabBarChangedEvent)
-		return;
-
-	// Figure out which dock position this tab bar is at.
-	dockPosition = WZ_DOCK_POSITION_NONE;
-
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
-	{
-		if (mainWindow->dockTabBars[i] == e->tabBar.tabBar)
-		{
-			dockPosition = (DockPosition)i;
-			break;
-		}
-	}
-
-	WZ_ASSERT(dockPosition != WZ_DOCK_POSITION_NONE);
-
-	// Get the window corresponding to the tab.
-	window = (Window *)e->tabBar.tab->getInternalMetadata();
-
-	// Internal metadata won't be set yet when first adding a tab.
-	if (window == NULL)
-		return;
-
-	// Set the window to visible, hide all the other windows at this dock position.
-	window->setVisible(true);
-
-	for (size_t i = 0; i < mainWindow->dockedWindows[dockPosition].size(); i++)
-	{
-		if (mainWindow->dockedWindows[dockPosition][i] == window)
-			continue;
-
-		mainWindow->dockedWindows[dockPosition][i]->setVisible(false);
-	}
-}
-
 /*
 ================================================================================
 
@@ -255,7 +209,7 @@ MainWindow::MainWindow(IRenderer *renderer)
 		dockTabBars[i] = new TabBar;
 		dockTabBars[i]->setVisible(false);
 		addChildWidget(dockTabBars[i]);
-		dockTabBars[i]->addCallbackTabChanged(wz_main_window_dock_tab_bar_tab_changed);
+		dockTabBars[i]->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &MainWindow::onDockTabBarTabChanged);
 	}
 
 	// Create menu bar.
@@ -1022,6 +976,44 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 	}
 
 	return result;
+}
+
+void MainWindow::onDockTabBarTabChanged(Event *e)
+{
+	if (ignoreDockTabBarChangedEvent)
+		return;
+
+	// Figure out which dock position this tab bar is at.
+	DockPosition dockPosition = WZ_DOCK_POSITION_NONE;
+
+	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	{
+		if (dockTabBars[i] == e->tabBar.tabBar)
+		{
+			dockPosition = (DockPosition)i;
+			break;
+		}
+	}
+
+	WZ_ASSERT(dockPosition != WZ_DOCK_POSITION_NONE);
+
+	// Get the window corresponding to the tab.
+	Window *window = (Window *)e->tabBar.tab->getInternalMetadata();
+
+	// Internal metadata won't be set yet when first adding a tab.
+	if (window == NULL)
+		return;
+
+	// Set the window to visible, hide all the other windows at this dock position.
+	window->setVisible(true);
+
+	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	{
+		if (dockedWindows[dockPosition][i] == window)
+			continue;
+
+		dockedWindows[dockPosition][i]->setVisible(false);
+	}
 }
 
 void MainWindow::refreshDockTabBar(DockPosition dockPosition)

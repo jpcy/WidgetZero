@@ -26,15 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_list_scroller_value_changed(Event *e)
-{
-	List *list;
-	
-	WZ_ASSERT(e);
-	list = (List *)e->base.widget->parent;
-	list->firstItem = e->scroller.value / list->itemHeight;
-}
-
 List::List(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_LIST;
@@ -53,7 +44,7 @@ List::List(uint8_t *itemData, int itemStride, int nItems)
 	scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	addChildWidget(scroller);
 	updateScroller();
-	scroller->addCallbackValueChanged(wz_list_scroller_value_changed);
+	scroller->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &List::onScrollerValueChanged);
 }
 
 void List::onRendererChanged()
@@ -310,6 +301,11 @@ const Scroller *List::getScroller() const
 void List::addCallbackItemSelected(EventCallback callback)
 {
 	item_selected_callbacks.push_back(callback);
+}
+
+void List::onScrollerValueChanged(Event *e)
+{
+	firstItem = e->scroller.value / itemHeight;
 }
 
 void List::setItemHeightInternal(int itemHeight)

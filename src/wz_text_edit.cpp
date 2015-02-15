@@ -107,16 +107,6 @@ static void wz_text_edit_update_scroller(TextEdit *textEdit)
 	textEdit->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 }
 
-static void wz_text_edit_scroller_value_changed(Event *e)
-{
-	TextEdit *textEdit;
-	
-	WZ_ASSERT(e);
-	textEdit = (TextEdit *)e->base.widget->parent;
-	WZ_ASSERT(textEdit->multiline);
-	textEdit->scrollValue = e->scroller.value;
-}
-
 /*
 ================================================================================
 
@@ -438,7 +428,7 @@ TextEdit::TextEdit(bool multiline, const std::string &text)
 		scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		addChildWidget(scroller);
 		wz_text_edit_update_scroller(this);
-		scroller->addCallbackValueChanged(wz_text_edit_scroller_value_changed);
+		scroller->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &TextEdit::onScrollerValueChanged);
 	}
 
 	this->multiline = multiline;
@@ -920,6 +910,11 @@ Position TextEdit::positionFromIndex(int index) const
 	}
 
 	return position;
+}
+
+void TextEdit::onScrollerValueChanged(Event *e)
+{
+	scrollValue = e->scroller.value;
 }
 
 } // namespace wz

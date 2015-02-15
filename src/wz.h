@@ -651,7 +651,8 @@ public:
 	bool isOpen_;
 	List *list;
 
-private:
+protected:
+	void onListItemSelected(Event *e);
 	void updateListRect();
 };
 
@@ -783,7 +784,8 @@ public:
 	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
 	Position lastMousePosition;
 
-private:
+protected:
+	void onScrollerValueChanged(Event *e);
 	void setItemHeightInternal(int itemHeight);
 	void refreshItemHeight();
 	void updateMouseOverItem(int mouseX, int mouseY);
@@ -886,6 +888,9 @@ private:
 	// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
 	Window *getHoverWindow(int mouseX, int mouseY);
 
+	// Used by all dock tab bars.
+	void onDockTabBarTabChanged(Event *e);
+
 	void refreshDockTabBar(DockPosition dockPosition);
 
 public: // FIXME
@@ -945,6 +950,9 @@ public:
 	virtual void onParented(Widget *parent);
 	virtual void draw(Rect clip);
 	virtual Size measure();
+
+protected:
+	void onClicked(Event *e);
 };
 
 class ScrollerNub : public Widget
@@ -997,6 +1005,10 @@ public:
 	float nubScale;
 	ScrollerNub *nub;
 	std::vector<EventCallback> value_changed_callbacks;
+
+protected:
+	void onDecrementButtonClicked(Event *e);
+	void onIncrementButtonClicked(Event *e);
 };
 
 class SpinnerDecrementButton;
@@ -1016,6 +1028,10 @@ public:
 	TextEdit *textEdit;
 	SpinnerDecrementButton *decrementButton;
 	SpinnerIncrementButton *incrementButton;
+
+protected:
+	void onDecrementButtonClicked(Event *e);
+	void onIncrementButtonClicked(Event *e);
 };
 
 enum StackLayoutDirection
@@ -1077,6 +1093,11 @@ public:
 	Button *incrementButton;
 
 	std::vector<EventCallback> tab_changed_callbacks;
+
+protected:
+	void onTabButtonPressed(Event *e);
+	void onDecrementButtonClicked(Event *e);
+	void onIncrementButtonClicked(Event *e);
 };
 
 class TabPage : public Widget
@@ -1119,6 +1140,9 @@ public:
 
 	TabBar *tabBar;
 	std::vector<TabbedPage> pages;
+
+protected:
+	void onTabChanged(Event *e);
 };
 
 typedef bool(*TextEditValidateTextCallback)(const char *text);
@@ -1177,6 +1201,9 @@ public:
 	int selectionStartIndex;
 	int selectionEndIndex;
 	std::string text;
+
+protected:
+	void onScrollerValueChanged(Event *e);
 };
 
 class ToggleButton : public Button

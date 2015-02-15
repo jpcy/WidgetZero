@@ -26,23 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_combo_list_item_selected(Event *e)
-{
-	Combo *combo;
-
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	combo = (Combo *)e->base.widget->parent;
-
-	// Unlock input.
-	combo->mainWindow->popLockInputWidget(combo);
-
-	// Hide dropdown list.
-	combo->list->setVisible(false);
-
-	combo->isOpen_ = false;
-}
-
 Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_COMBO;
@@ -52,7 +35,7 @@ Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 	addChildWidget(list);
 	list->setVisible(false);
 	list->setClipInputToParent(false);
-	list->addCallbackItemSelected(wz_combo_list_item_selected);
+	list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &Combo::onListItemSelected);
 }
 
 void Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
@@ -134,6 +117,17 @@ const List *Combo::getList() const
 bool Combo::isOpen() const
 {
 	return isOpen_;
+}
+
+void Combo::onListItemSelected(Event *e)
+{
+	// Unlock input.
+	mainWindow->popLockInputWidget(this);
+
+	// Hide dropdown list.
+	list->setVisible(false);
+
+	isOpen_ = false;
 }
 
 void Combo::updateListRect()

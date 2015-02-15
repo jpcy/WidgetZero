@@ -213,22 +213,6 @@ SCROLLER WIDGET
 ================================================================================
 */
 
-static void wz_scroller_decrement_button_clicked(Event *e)
-{
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	((Scroller *)e->base.widget->parent->parent)->decrementValue();
-}
-
-static void wz_scroller_increment_button_clicked(Event *e)
-{
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	((Scroller *)e->base.widget->parent->parent)->incrementValue();
-}
-
 Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
 	type = WZ_TYPE_SCROLLER;
@@ -244,7 +228,7 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 
 	ScrollerDecrementButton *decrementButton = new ScrollerDecrementButton();
 	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	decrementButton->addCallbackClicked(wz_scroller_decrement_button_clicked);
+	decrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Scroller::onDecrementButtonClicked);
 	layout->add(decrementButton);
 
 	ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
@@ -256,7 +240,7 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 
 	ScrollerIncrementButton *incrementButton = new ScrollerIncrementButton();
 	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	incrementButton->addCallbackClicked(wz_scroller_increment_button_clicked);
+	incrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Scroller::onIncrementButtonClicked);
 	layout->add(incrementButton);
 
 	nub->updateRect();
@@ -365,6 +349,16 @@ void Scroller::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *p
 void Scroller::addCallbackValueChanged(EventCallback callback)
 {
 	value_changed_callbacks.push_back(callback);
+}
+
+void Scroller::onDecrementButtonClicked(Event *e)
+{
+	decrementValue();
+}
+
+void Scroller::onIncrementButtonClicked(Event *e)
+{
+	incrementValue();
 }
 
 } // namespace wz

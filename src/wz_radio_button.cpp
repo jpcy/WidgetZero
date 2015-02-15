@@ -26,27 +26,11 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_radio_button_clicked(Event *e)
-{
-	Widget *parent = e->base.widget->parent;
-
-	WZ_ASSERT(parent);
-
-	// Unset all the other radio button siblings.
-	for (size_t i = 0; i < parent->children.size(); i++)
-	{
-		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != e->base.widget)
-		{
-			((Button *)parent->children[i])->set(false);
-		}
-	}
-}
-
 RadioButton::RadioButton(const std::string &label) : Button(label)
 {
 	type = WZ_TYPE_RADIO_BUTTON;
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	addCallbackClicked(wz_radio_button_clicked);
+	addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &RadioButton::onClicked);
 }
 
 void RadioButton::onParented(Widget *parent)
@@ -70,6 +54,18 @@ void RadioButton::draw(Rect clip)
 Size RadioButton::measure()
 {
 	return renderer->measureRadioButton(this);
+}
+
+void RadioButton::onClicked(Event *e)
+{
+	// Unset all the other radio button siblings.
+	for (size_t i = 0; i < parent->children.size(); i++)
+	{
+		if (parent->children[i]->type == WZ_TYPE_RADIO_BUTTON && parent->children[i] != this)
+		{
+			((RadioButton *)parent->children[i])->set(false);
+		}
+	}
 }
 
 } // namespace wz

@@ -164,35 +164,6 @@ static void wz_tab_bar_invoke_tab_changed(TabBar *tabBar)
 	tabBar->invokeEvent(&e, tabBar->tab_changed_callbacks);
 }
 
-// Sets the tab bar (the button's parent) selected tab.
-static void wz_tab_bar_button_pressed(Event *e)
-{
-	WZ_ASSERT(e);
-	((TabBar *)e->base.widget->parent)->selectTab((TabButton *)e->base.widget);
-}
-
-static void wz_tab_bar_decrement_button_clicked(Event *e)
-{
-	TabBar *tabBar;
-
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	tabBar = (TabBar *)e->base.widget->parent;
-	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue - 1);
-}
-
-static void wz_tab_bar_increment_button_clicked(Event *e)
-{
-	TabBar *tabBar;
-
-	WZ_ASSERT(e);
-	WZ_ASSERT(e->base.widget);
-	WZ_ASSERT(e->base.widget->parent);
-	tabBar = (TabBar *)e->base.widget->parent;
-	wz_tab_bar_set_scroll_value(tabBar, tabBar->scrollValue + 1);
-}
-
 TabBar::TabBar()
 {
 	type = WZ_TYPE_TAB_BAR;
@@ -201,7 +172,7 @@ TabBar::TabBar()
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton = new Button("<");
-	decrementButton->addCallbackClicked(wz_tab_bar_decrement_button_clicked);
+	decrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &TabBar::onDecrementButtonClicked);
 	addChildWidget(decrementButton);
 	decrementButton->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	decrementButton->setVisible(false);
@@ -209,7 +180,7 @@ TabBar::TabBar()
 	decrementButton->setOverlap(true);
 
 	incrementButton = new Button(">");
-	incrementButton->addCallbackClicked(wz_tab_bar_increment_button_clicked);
+	incrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &TabBar::onIncrementButtonClicked);
 	addChildWidget(incrementButton);
 	incrementButton->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	incrementButton->setVisible(false);
@@ -242,7 +213,7 @@ Size TabBar::measure()
 TabButton *TabBar::createTab()
 {
 	TabButton *tab = new TabButton();
-	tab->addCallbackPressed(wz_tab_bar_button_pressed);
+	tab->addEventHandler(WZ_EVENT_BUTTON_PRESSED, this, &TabBar::onTabButtonPressed);
 	addChildWidget(tab);
 	tabs.push_back(tab);
 
@@ -375,6 +346,21 @@ void TabBar::addCallbackTabChanged(EventCallback callback)
 int TabBar::getScrollValue() const
 {
 	return scrollValue;
+}
+
+void TabBar::onTabButtonPressed(Event *e)
+{
+	selectTab((TabButton *)e->base.widget);
+}
+
+void TabBar::onDecrementButtonClicked(Event *e)
+{
+	wz_tab_bar_set_scroll_value(this, scrollValue - 1);
+}
+
+void TabBar::onIncrementButtonClicked(Event *e)
+{
+	wz_tab_bar_set_scroll_value(this, scrollValue + 1);
 }
 
 } // namespace wz
