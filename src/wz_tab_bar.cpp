@@ -64,106 +64,6 @@ static void wz_tab_set_rect(Widget *widget, Rect rect)
 }
 #endif
 
-// Show the scroll buttons if they're required, hides them if they're not.
-static void wz_tab_bar_update_scroll_buttons(TabBar *tabBar)
-{
-	int totalTabWidth;
-	bool wereScrollButtonsVisible, showScrollButtons;
-	Rect rect;
-
-	WZ_ASSERT(tabBar);
-
-	// Total tab widths.
-	totalTabWidth = 0;
-
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
-	{
-		Size size = tabBar->tabs[i]->getSize();
-		totalTabWidth += size.w;
-	}
-
-	// Show/hide the scroll buttons and set their rects.
-	wereScrollButtonsVisible = tabBar->decrementButton->getVisible();
-	showScrollButtons = totalTabWidth > tabBar->rect.w;
-
-	rect.w = tabBar->decrementButton->getWidth();
-	rect.x = tabBar->rect.w - rect.w * 2;
-	rect.y = 0;
-	rect.h = tabBar->rect.h;
-	tabBar->decrementButton->setRectInternal(rect);
-	tabBar->decrementButton->setVisible(showScrollButtons);
-
-	rect.w = tabBar->incrementButton->getWidth();
-	rect.x = tabBar->rect.w - rect.w;
-	rect.y = 0;
-	rect.h = tabBar->rect.h;
-	tabBar->incrementButton->setRectInternal(rect);
-	tabBar->incrementButton->setVisible(showScrollButtons);
-
-	if (wereScrollButtonsVisible && showScrollButtons)
-	{
-		tabBar->scrollValue = 0;
-	}
-}
-
-static void wz_tab_bar_update_tabs(TabBar *tabBar)
-{
-	int x;
-
-	WZ_ASSERT(tabBar);
-
-	// Start at the left edge of the tab bar.
-	x = 0;
-
-	for (size_t i = 0; i < tabBar->tabs.size(); i++)
-	{
-		Widget *widget = tabBar->tabs[i];
-
-		if ((int)i < tabBar->scrollValue)
-		{
-			// Scrolled out of view, hide it.
-			widget->setVisible(false);
-			continue;
-		}
-		else
-		{
-			// Reposition and show.
-			Rect rect;
-			rect.x = x;
-			rect.y = 0;
-			rect.w = widget->rect.w;
-			rect.h = tabBar->rect.h;
-			widget->setRectInternal(rect);
-			widget->setVisible(true);
-			x += rect.w;
-		}
-	}
-}
-
-// Sets the scroll value, and repositions and shows/hides the tabs accordingly.
-static void wz_tab_bar_set_scroll_value(TabBar *tabBar, int value)
-{
-	int oldValue = tabBar->scrollValue;
-	tabBar->scrollValue = WZ_CLAMPED(0, value, WZ_MAX(0, (int)tabBar->tabs.size() - 1));
-
-	if (oldValue != tabBar->scrollValue)
-	{
-		// Value has changed.
-		wz_tab_bar_update_tabs(tabBar);
-	}
-}
-
-static void wz_tab_bar_invoke_tab_changed(TabBar *tabBar)
-{
-	Event e;
-
-	WZ_ASSERT(tabBar);
-	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
-	e.tabBar.tabBar = tabBar;
-	e.tabBar.tab = tabBar->selectedTab;
-	tabBar->invokeEvent(e, tabBar->tab_changed_callbacks);
-}
-
 TabBar::TabBar()
 {
 	type = WZ_TYPE_TAB_BAR;
@@ -196,8 +96,8 @@ void TabBar::onRectChanged()
 		children[i]->setHeightInternal(rect.h);
 	}
 
-	wz_tab_bar_update_tabs(this);
-	wz_tab_bar_update_scroll_buttons(this);
+	updateTabs();
+	updateScrollButtons();
 }
 
 void TabBar::draw(Rect clip)
@@ -235,10 +135,10 @@ TabButton *TabBar::createTab()
 	{
 		tab->set(true);
 		selectedTab = tab;
-		wz_tab_bar_invoke_tab_changed(this);
+		invokeTabChanged();
 	}
 
-	wz_tab_bar_update_scroll_buttons(this);
+	updateScrollButtons();
 
 	// Invoke the tab added event.
 	Event e;
@@ -335,7 +235,7 @@ void TabBar::selectTab(TabButton *tab)
 		}
 	}
 	
-	wz_tab_bar_invoke_tab_changed(this);
+	invokeTabChanged();
 }
 
 void TabBar::addCallbackTabChanged(EventCallback callback)
@@ -353,14 +253,99 @@ void TabBar::onTabButtonPressed(Event e)
 	selectTab((TabButton *)e.base.widget);
 }
 
+void TabBar::setScrollValue(int value)
+{
+	const int oldValue = scrollValue;
+	scrollValue = WZ_CLAMPED(0, value, WZ_MAX(0, (int)tabs.size() - 1));
+
+	if (oldValue != scrollValue)
+	{
+		// Value has changed.
+		updateTabs();
+	}
+}
+
+void TabBar::invokeTabChanged()
+{
+	Event e;
+	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
+	e.tabBar.tabBar = this;
+	e.tabBar.tab = selectedTab;
+	invokeEvent(e, tab_changed_callbacks);
+}
+
 void TabBar::onDecrementButtonClicked(Event e)
 {
-	wz_tab_bar_set_scroll_value(this, scrollValue - 1);
+	setScrollValue(scrollValue - 1);
 }
 
 void TabBar::onIncrementButtonClicked(Event e)
 {
-	wz_tab_bar_set_scroll_value(this, scrollValue + 1);
+	setScrollValue(scrollValue + 1);
+}
+
+void TabBar::updateScrollButtons()
+{
+	// Total tab widths.
+	int totalTabWidth = 0;
+
+	for (size_t i = 0; i < tabs.size(); i++)
+	{
+		Size size = tabs[i]->getSize();
+		totalTabWidth += size.w;
+	}
+
+	// Show/hide the scroll buttons and set their rects.
+	bool wereScrollButtonsVisible = decrementButton->getVisible();
+	bool showScrollButtons = totalTabWidth > rect.w;
+
+	Rect buttonRect;
+	buttonRect.w = decrementButton->getWidth();
+	buttonRect.x = rect.w - buttonRect.w * 2;
+	buttonRect.y = 0;
+	buttonRect.h = rect.h;
+	decrementButton->setRectInternal(buttonRect);
+	decrementButton->setVisible(showScrollButtons);
+
+	buttonRect.w = incrementButton->getWidth();
+	buttonRect.x = rect.w - buttonRect.w;
+	buttonRect.y = 0;
+	buttonRect.h = rect.h;
+	incrementButton->setRectInternal(buttonRect);
+	incrementButton->setVisible(showScrollButtons);
+
+	if (wereScrollButtonsVisible && showScrollButtons)
+	{
+		scrollValue = 0;
+	}
+}
+
+void TabBar::updateTabs()
+{
+	// Start at the left edge of the tab bar.
+	int x = 0;
+
+	for (size_t i = 0; i < tabs.size(); i++)
+	{
+		if ((int)i < scrollValue)
+		{
+			// Scrolled out of view, hide it.
+			tabs[i]->setVisible(false);
+			continue;
+		}
+		else
+		{
+			// Reposition and show.
+			Rect tabRect;
+			tabRect.x = x;
+			tabRect.y = 0;
+			tabRect.w = tabs[i]->rect.w;
+			tabRect.h = rect.h;
+			tabs[i]->setRectInternal(tabRect);
+			tabs[i]->setVisible(true);
+			x += tabRect.w;
+		}
+	}
 }
 
 } // namespace wz

@@ -490,6 +490,9 @@ public:
 	// Shortcut for IRenderer::lineBreakText, using the widget's renderer, font face and font size.
 	LineBreakResult lineBreakText(const char *text, int n, int lineWidth) const;
 
+	// Draw without clipping if visible.
+	void drawIfVisible();
+
 	WidgetType type;
 
 	// Explicitly set by the user.
@@ -792,6 +795,8 @@ protected:
 	void updateScroller();
 };
 
+typedef bool(*WidgetPredicate)(const Widget *);
+
 class MainWindow : public Widget
 {
 public:
@@ -809,11 +814,6 @@ public:
 	void mouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	void mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	void mouseWheelMove(int x, int y);
-
-private:
-	void keyDelta(Key key, bool down);
-
-public:
 	void keyDown(Key key);
 	void keyUp(Key key);
 	void textInput(const char *text);
@@ -885,6 +885,24 @@ public:
 	MenuBar *menuBar;
 
 private:
+	void mouseButtonDownRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
+	void mouseButtonUpRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
+
+	// Clear widget hover on everything but ignoreWindow and it's children.
+	void clearHoverRecursive(Window *ignoreWindow, Widget *widget);
+
+	// Sets Widget.ignore
+	void ignoreOverlappingChildren(Widget *widget, int mouseX, int mouseY);
+
+	// If window is not NULL, only call onMouseMove in widgets that are children of the window and the window itself.
+	void mouseMoveRecursive(Window *window, Widget *widget, int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+
+	void mouseWheelMoveRecursive(Widget *widget, int x, int y);
+
+	void keyDelta(Key key, bool down);
+	void drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate drawPredicate, WidgetPredicate recursePredicate);
+	void drawWidget(Widget *widget, WidgetPredicate drawPredicate, WidgetPredicate recursePredicate);
+
 	// Returns the window that the mouse cursor is hovering over. NULL if there isn't one.
 	Window *getHoverWindow(int mouseX, int mouseY);
 
@@ -1095,9 +1113,19 @@ public:
 	std::vector<EventCallback> tab_changed_callbacks;
 
 protected:
+	// Sets the scroll value, and repositions and shows/hides the tabs accordingly.
+	void setScrollValue(int value);
+
+	void invokeTabChanged();
+
 	void onTabButtonPressed(Event e);
 	void onDecrementButtonClicked(Event e);
 	void onIncrementButtonClicked(Event e);
+
+	// Show the scroll buttons if they're required, hides them if they're not.
+	void updateScrollButtons();
+
+	void updateTabs();
 };
 
 class TabPage : public Widget
@@ -1287,6 +1315,12 @@ public:
 
 private:
 	void refreshHeaderHeight();
+
+	// rects parameter size should be WZ_NUM_COMPASS_POINTS
+	void calculateBorderRects(Rect *rects);
+
+	// borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
+	void calculateMouseOverBorderRects(int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects);
 };
 
 } // namespace wz

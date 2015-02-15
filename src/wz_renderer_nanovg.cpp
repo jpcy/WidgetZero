@@ -55,35 +55,6 @@ struct NVGRendererImpl
 	float defaultFontSize;
 };
 
-static int wz_nanovg_create_font(NVGRendererImpl *renderer, const char *face)
-{
-	char fontPath[WZ_NANOVG_MAX_PATH];
-	int id;
-
-	// Empty face: return the first font.
-	if (!face || !face[0])
-		return 0;
-
-	// Try to find it.
-	id = nvgFindFont(renderer->vg, face);
-
-	if (id != -1)
-		return id;
-
-	// Not found, create it.
-	strcpy(fontPath, renderer->fontDirectory);
-	strcat(fontPath, "/");
-	strcat(fontPath, face);
-	strcat(fontPath, ".ttf");
-	id = nvgCreateFont(renderer->vg, face, fontPath);
-
-	if (id != -1)
-		return id;
-
-	// Failed to create it, return the first font.
-	return 0;
-}
-
 NVGRenderer::NVGRenderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
 {
 	WZ_ASSERT(create);
@@ -105,7 +76,7 @@ NVGRenderer::NVGRenderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int
 	// Load the default font.
 	strncpy(impl->fontDirectory, fontDirectory, WZ_NANOVG_MAX_PATH);
 
-	if (wz_nanovg_create_font(impl.get(), defaultFontFace) == -1)
+	if (createFont(defaultFontFace) == -1)
 	{
 		sprintf(impl->errorMessage, "Error loading font %s", defaultFontFace);
 		return;
@@ -1259,6 +1230,33 @@ float NVGRenderer::getDefaultFontSize() const
 	return impl->defaultFontSize;
 }
 
+int NVGRenderer::createFont(const char *face)
+{
+	// Empty face: return the first font.
+	if (!face || !face[0])
+		return 0;
+
+	// Try to find it.
+	int id = nvgFindFont(impl->vg, face);
+
+	if (id != -1)
+		return id;
+
+	// Not found, create it.
+	char fontPath[WZ_NANOVG_MAX_PATH];
+	strcpy(fontPath, impl->fontDirectory);
+	strcat(fontPath, "/");
+	strcat(fontPath, face);
+	strcat(fontPath, ".ttf");
+	id = nvgCreateFont(impl->vg, face, fontPath);
+
+	if (id != -1)
+		return id;
+
+	// Failed to create it, return the first font.
+	return 0;
+}
+
 int NVGRenderer::createImage(const char *filename, int *width, int *height)
 {
 	int handle, i;
@@ -1290,9 +1288,7 @@ int NVGRenderer::createImage(const char *filename, int *width, int *height)
 
 void NVGRenderer::setFontFace(const char *face)
 {
-	int id;
-	
-	id = wz_nanovg_create_font(impl.get(), face);
+	int id = createFont(face);
 
 	// Use the first font if creating failed.
 	if (id == -1)

@@ -111,6 +111,7 @@ public:
 
 	NVGcontext *getContext();
 	float getDefaultFontSize() const;
+	int createFont(const char *face);
 	int createImage(const char *filename, int *width, int *height);
 	void setFontFace(const char *face);
 	void printBox(Rect rect, const char *fontFace, float fontSize, NVGcolor color, const char *text, size_t textLength);

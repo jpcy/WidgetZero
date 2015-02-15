@@ -603,6 +603,16 @@ LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) co
 	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
 }
 
+void Widget::drawIfVisible()
+{
+	if (getVisible())
+	{
+		Rect clip;
+		clip.x = clip.y = clip.w = clip.h = 0;
+		draw(clip);
+	}
+}
+
 void Widget::invokeEvent(Event e)
 {
 	// Call method pointer event handlers.
