@@ -26,395 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-static void wz_text_edit_update_scroll_index(TextEdit *textEdit);
-static void wz_text_edit_delete_selection(TextEdit *textEdit);
-
-static int wz_calculate_num_lines(TextEdit *textEdit, int lineWidth)
-{
-	LineBreakResult line;
-	int nLines = 0;
-
-	WZ_ASSERT(textEdit);
-
-	if (!textEdit->multiline)
-		return 0;
-
-	line.next = textEdit->text.c_str();
-
-	for (;;)
-	{
-		line = textEdit->lineBreakText(line.next, 0, lineWidth);
-
-		if (!line.next || !line.next[0])
-			break;
-
-		nLines++;
-	}
-
-	return nLines;
-}
-
-/*
-================================================================================
-
-SCROLLER
-
-================================================================================
-*/
-
-static void wz_text_edit_update_scroller(TextEdit *textEdit)
-{
-	Rect textEditRect, rect;
-	int lineHeight, nLines, max, maxHeight;
-
-	WZ_ASSERT(textEdit);
-
-	if (!textEdit->multiline)
-		return;
-
-	if (!textEdit->mainWindow)
-		return; // Not added yet
-
-	// Hide/show scroller depending on if it's needed.
-	lineHeight = textEdit->getLineHeight();
-	nLines = wz_calculate_num_lines(textEdit, textEdit->rect.w - (textEdit->border.left + textEdit->border.right));
-
-	if (lineHeight * nLines > textEdit->rect.h - (textEdit->border.top + textEdit->border.bottom))
-	{
-		textEdit->scroller->setVisible(true);
-	}
-	else
-	{
-		textEdit->scroller->setVisible(false);
-		return;
-	}
-
-	// Update max value.
-	nLines = wz_calculate_num_lines(textEdit, textEdit->getTextRect().w);
-	max = nLines - (textEdit->getTextRect().h / lineHeight);
-	textEdit->scroller->setMaxValue(max);
-
-	// Fit to the right of the rect. Width doesn't change.
-	textEditRect = textEdit->getRect();
-	rect.w = (textEdit->scroller)->rect.w;
-	rect.x = textEditRect.w - textEdit->border.right - rect.w;
-	rect.y = textEdit->border.top;
-	rect.h = textEditRect.h - (textEdit->border.top + textEdit->border.bottom);
-	textEdit->scroller->setRectInternal(rect);
-
-	// Now that the height has been calculated, update the nub scale.
-	maxHeight = nLines * lineHeight;
-	textEdit->scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
-}
-
-/*
-================================================================================
-
-INSERTING / DELETING TEXT
-
-================================================================================
-*/
-
-static void wz_text_edit_insert_text(TextEdit *textEdit, int index, const char *text, int n)
-{
-	WZ_ASSERT(textEdit);
-	WZ_ASSERT(text);
-	textEdit->text.insert(index, text, n);
-
-	// Update the scroller.
-	wz_text_edit_update_scroller(textEdit);
-}
-
-static void wz_text_edit_enter_text(TextEdit *textEdit, const char *text)
-{
-	int n;
-
-	WZ_ASSERT(textEdit);
-	WZ_ASSERT(text);
-	n = (int)strlen(text);
-
-	if (n == 0)
-		return;
-
-	// The text replaces the selection.
-	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-	{
-		wz_text_edit_delete_selection(textEdit);
-	}
-
-	wz_text_edit_insert_text(textEdit, textEdit->cursorIndex, text, n);
-	textEdit->cursorIndex += n;
-	wz_text_edit_update_scroll_index(textEdit);
-}
-
-static void wz_text_edit_delete_text(TextEdit *textEdit, int index, int n)
-{
-	WZ_ASSERT(textEdit);
-
-	if (index < 0 || index >= (int)textEdit->text.length())
-		return;
-
-	textEdit->text.erase(index, n);
-
-	// Update the scroller.
-	wz_text_edit_update_scroller(textEdit);
-}
-
-static void wz_text_edit_delete_selection(TextEdit *textEdit)
-{
-	int start, end;
-
-	WZ_ASSERT(textEdit);
-
-	// No selection.
-	if (textEdit->selectionStartIndex == textEdit->selectionEndIndex)
-		return;
-
-	start = WZ_MIN(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	end = WZ_MAX(textEdit->selectionStartIndex, textEdit->selectionEndIndex);
-	wz_text_edit_delete_text(textEdit, start, end - start);
-
-	// Move the cursor to the start (smallest of start and end, not the real selection start).
-	textEdit->cursorIndex = start;
-
-	// Clear the selection.
-	textEdit->selectionStartIndex = textEdit->selectionEndIndex = 0;
-}
-
-/*
-================================================================================
-
-PRIVATE UTILITY FUNCTIONS
-
-================================================================================
-*/
-
-// Returns -1 if an index could not be calculated. e.g. if the position is outside the widget.
-static int wz_text_edit_index_from_relative_position(const TextEdit *textEdit, Position pos)
-{
-	Rect rect;
-	int i, previousWidth, result;
-
-	WZ_ASSERT(textEdit);
-
-	// Calculate relative position.
-	rect = textEdit->getAbsoluteRect();
-
-	if (textEdit->multiline)
-	{
-		int lineHeight, lineY;
-		LineBreakResult line;
-
-		// Get line height.
-		lineHeight = textEdit->getLineHeight();
-
-		// Set line starting position. May be outside the widget.
-		lineY = lineHeight * -textEdit->scrollValue;
-
-		// Iterate through lines.
-		result = 0;
-		line.next = textEdit->text.c_str();
-
-		for (;;)
-		{
-			line = textEdit->lineBreakText(line.next, 0, textEdit->getTextRect().w);
-
-			result = line.start - textEdit->text.c_str();
-
-			if (pos.y >= lineY && pos.y < lineY + lineHeight)
-				break; // On this line.
-
-			if (!line.next || !line.next[0])
-				return -1;
-
-			lineY += lineHeight;
-		}
-
-		// Walk through the text until we find two glyphs that the x coordinate straddles.
-		previousWidth = 0;
-
-		for (i = 1; i <= (int)line.length; i++)
-		{
-			int width, deltaWidth;
-
-			// Calculate the width of the text up to the current character.
-			textEdit->measureText(line.start, i, &width, NULL);
-
-			// Calculate the change in text width since the last iteration.
-			deltaWidth = width - previousWidth;
-
-			// Check the intersection between the position and the change in text width since the last iteration.
-			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
-			{
-				// Left side of glyph.
-				result += i - 1;
-				break;
-			}
-			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
-			{
-				// Right side of glyph.
-				result += i;
-				break;
-			}
-
-			// Made it to the end of text string.
-			if (i == line.length)
-			{
-				result += i;
-				break;
-			}
-
-			// Store this text width for the next iteration.
-			previousWidth = width;
-		}
-	}
-	else
-	{
-		// Outside widget.
-		if (pos.x < 0 || pos.x > rect.w || pos.y < 0 || pos.y > rect.h)
-			return textEdit->scrollValue;
-
-		// Walk through the text until we find two glyphs that the x coordinate straddles.
-		previousWidth = 0;
-		result = textEdit->scrollValue;
-
-		for (i = 1; i <= (int)textEdit->text.length(); i++)
-		{
-			int width, deltaWidth;
-
-			// Calculate the width of the text up to the current character.
-			textEdit->measureText(&textEdit->text[textEdit->scrollValue], i, &width, NULL);
-
-			// Check if we've gone beyond the width of the widget.
-			if (width > textEdit->getTextRect().w)
-			{
-				result = textEdit->scrollValue + i - 1;
-				break;
-			}
-
-			// Calculate the change in text width since the last iteration.
-			deltaWidth = width - previousWidth;
-
-			// Check the intersection between the position and the change in text width since the last iteration.
-			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
-			{
-				// Left side of glyph.
-				result = textEdit->scrollValue + i - 1;
-				break;
-			}
-			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
-			{
-				// Right side of glyph.
-				result = textEdit->scrollValue + i;
-				break;
-			}
-
-			// Made it to the end of text string.
-			if (i == textEdit->text.length())
-			{
-				result = i;
-				break;
-			}
-
-			// Store this text width for the next iteration.
-			previousWidth = width;
-		}
-	}
-
-	return WZ_CLAMPED(0, result, (int)textEdit->text.length());
-}
-
-// Calculate the text index at the given absolute position.
-static int wz_text_edit_index_from_position(const TextEdit *textEdit, int x, int y)
-{
-	Rect rect;
-	Position pos;
-
-	// Make position relative.
-	rect = textEdit->getAbsoluteRect();
-	pos.x = x - rect.x;
-	pos.y = y - rect.y;
-
-	return wz_text_edit_index_from_relative_position(textEdit, pos);
-}
-
-// Update the scroll value so the cursor is visible.
-static void wz_text_edit_update_scroll_index(TextEdit *textEdit)
-{
-	WZ_ASSERT(textEdit);
-
-	if (textEdit->multiline)
-	{
-		for (;;)
-		{
-			int cursorY = textEdit->positionFromIndex(textEdit->cursorIndex).y;
-
-			if (cursorY > textEdit->rect.h - (textEdit->border.top + textEdit->border.bottom))
-			{
-				textEdit->scrollValue++;
-				textEdit->scroller->setValue(textEdit->scrollValue);
-			}
-			else if (cursorY < 0)
-			{
-				textEdit->scrollValue--;
-				textEdit->scroller->setValue(textEdit->scrollValue);
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-	else
-	{
-		for (;;)
-		{
-			int cursorX = textEdit->positionFromIndex(textEdit->cursorIndex).x;
-
-			if (cursorX > textEdit->getTextRect().w)
-			{
-				textEdit->scrollValue++;
-			}
-			else if (cursorX < 0)
-			{
-				textEdit->scrollValue--;
-			}
-			else
-			{
-				break;
-			}
-		}
-	}
-}
-
-/*
-================================================================================
-
-EVENT HANDLING
-
-================================================================================
-*/
-
-// Helper function for moving the cursor while the selection (shift) key is held.
-static void wz_text_edit_move_cursor_and_selection(TextEdit *textEdit, int newCursorIndex)
-{
-	WZ_ASSERT(textEdit);
-
-	if (textEdit->selectionStartIndex != textEdit->selectionEndIndex)
-	{
-		// If there's already a selection, move the cursor, and the selection end to match.
-		textEdit->cursorIndex = newCursorIndex;
-		textEdit->selectionEndIndex = textEdit->cursorIndex;
-	}
-	else
-	{
-		// No selection, start a new one and move the cursor.
-		textEdit->selectionStartIndex = textEdit->cursorIndex;
-		textEdit->cursorIndex = newCursorIndex;
-		textEdit->selectionEndIndex = textEdit->cursorIndex;
-	}
-}
-
 TextEdit::TextEdit(bool multiline, const std::string &text)
 {
 	type = WZ_TYPE_TEXT_EDIT;
@@ -427,7 +38,7 @@ TextEdit::TextEdit(bool multiline, const std::string &text)
 	{
 		scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		addChildWidget(scroller);
-		wz_text_edit_update_scroller(this);
+		updateScroller();
 		scroller->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &TextEdit::onScrollerValueChanged);
 	}
 
@@ -442,7 +53,7 @@ void TextEdit::onRendererChanged()
 
 void TextEdit::onRectChanged()
 {
-	wz_text_edit_update_scroller(this);
+	updateScroller();
 }
 
 void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -460,7 +71,7 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 
 		// Move the cursor to the mouse position.
 		int oldCursorIndex = cursorIndex;
-		cursorIndex = wz_text_edit_index_from_position(this, mouseX, mouseY);
+		cursorIndex = indexFromPosition(mouseX, mouseY);
 
 		if (cursorIndex == -1)
 		{
@@ -469,7 +80,7 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 			return;
 		}
 
-		wz_text_edit_update_scroll_index(this);
+		updateScrollIndex();
 		pressed = true;
 
 		// Handle selecting.
@@ -511,13 +122,13 @@ void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDel
 	if (pressed)
 	{
 		// Move the cursor to the mouse position.
-		int index = wz_text_edit_index_from_position(this, mouseX, mouseY);
+		int index = indexFromPosition(mouseX, mouseY);
 
 		if (index == -1)
 			return;
 
 		cursorIndex = index;
-		wz_text_edit_update_scroll_index(this);
+		updateScrollIndex();
 
 		// Set the selection end to the new cursor index.
 		selectionEndIndex = cursorIndex;
@@ -555,7 +166,7 @@ void TextEdit::onKeyDown(Key key)
 	}
 	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && cursorIndex > 0)
 	{
-		wz_text_edit_move_cursor_and_selection(this, cursorIndex - 1);
+		moveCursorAndSelection(cursorIndex - 1);
 	}
 	else if (key == WZ_KEY_RIGHT)
 	{
@@ -578,7 +189,7 @@ void TextEdit::onKeyDown(Key key)
 	}
 	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && cursorIndex < (int)text.length())
 	{
-		wz_text_edit_move_cursor_and_selection(this, cursorIndex + 1);
+		moveCursorAndSelection(cursorIndex + 1);
 	}
 	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
 	{
@@ -593,7 +204,7 @@ void TextEdit::onKeyDown(Key key)
 
 		// Move the cursor up/down.
 		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
-		newCursorIndex = wz_text_edit_index_from_relative_position(this, cursorPosition);
+		newCursorIndex = indexFromRelativePosition(cursorPosition);
 
 		if (newCursorIndex == -1)
 			return; // Couldn't move cursor.
@@ -601,7 +212,7 @@ void TextEdit::onKeyDown(Key key)
 		// Apply the new cursor index.
 		if ((key & WZ_KEY_SHIFT_BIT) != 0)
 		{
-			wz_text_edit_move_cursor_and_selection(this, newCursorIndex);
+			moveCursorAndSelection(newCursorIndex);
 		}
 		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
 		{
@@ -665,7 +276,7 @@ void TextEdit::onKeyDown(Key key)
 
 		if (key & WZ_KEY_SHIFT_BIT)
 		{
-			wz_text_edit_move_cursor_and_selection(this, newCursorIndex);
+			moveCursorAndSelection(newCursorIndex);
 		}
 		else
 		{
@@ -677,28 +288,28 @@ void TextEdit::onKeyDown(Key key)
 	}
 	else if (multiline && key == WZ_KEY_ENTER)
 	{
-		wz_text_edit_enter_text(this, "\r");
+		enterText("\r");
 	}
 	else if (key == WZ_KEY_DELETE)
 	{
 		if (selectionStartIndex != selectionEndIndex)
 		{
-			wz_text_edit_delete_selection(this);
+			deleteSelectedText();
 		}
 		else
 		{
-			wz_text_edit_delete_text(this, cursorIndex, 1);
+			deleteText(cursorIndex, 1);
 		}
 	}
 	else if (key == WZ_KEY_BACKSPACE && cursorIndex > 0)
 	{
 		if (selectionStartIndex != selectionEndIndex)
 		{
-			wz_text_edit_delete_selection(this);
+			deleteSelectedText();
 		}
 		else
 		{
-			wz_text_edit_delete_text(this, cursorIndex - 1, 1);
+			deleteText(cursorIndex - 1, 1);
 			cursorIndex--;
 		}
 	}
@@ -707,7 +318,7 @@ void TextEdit::onKeyDown(Key key)
 		return;
 	}
 
-	wz_text_edit_update_scroll_index(this);
+	updateScrollIndex();
 }
 
 void TextEdit::onTextInput(const char *text)
@@ -715,7 +326,7 @@ void TextEdit::onTextInput(const char *text)
 	if (validate_text && !validate_text(text))
 		return;
 
-	wz_text_edit_enter_text(this, text);
+	enterText(text);
 }
 
 void TextEdit::draw(Rect clip)
@@ -915,6 +526,323 @@ Position TextEdit::positionFromIndex(int index) const
 void TextEdit::onScrollerValueChanged(Event e)
 {
 	scrollValue = e.scroller.value;
+}
+
+int TextEdit::calculateNumLines(int lineWidth)
+{
+	if (!multiline)
+		return 0;
+
+	LineBreakResult line;
+	line.next = text.c_str();
+	int nLines = 0;
+
+	for (;;)
+	{
+		line = lineBreakText(line.next, 0, lineWidth);
+
+		if (!line.next || !line.next[0])
+			break;
+
+		nLines++;
+	}
+
+	return nLines;
+}
+
+void TextEdit::updateScroller()
+{
+	if (!multiline)
+		return;
+
+	if (!mainWindow)
+		return; // Not added yet
+
+	// Hide/show scroller depending on if it's needed.
+	const int lineHeight = getLineHeight();
+	int nLines = calculateNumLines(rect.w - (border.left + border.right));
+
+	if (lineHeight * nLines > rect.h - (border.top + border.bottom))
+	{
+		scroller->setVisible(true);
+	}
+	else
+	{
+		scroller->setVisible(false);
+		return;
+	}
+
+	// Update max value.
+	nLines = calculateNumLines(getTextRect().w);
+	int max = nLines - (getTextRect().h / lineHeight);
+	scroller->setMaxValue(max);
+
+	// Fit to the right of the rect. Width doesn't change.
+	Rect scrollerRect;
+	scrollerRect.w = scroller->rect.w;
+	scrollerRect.x = rect.w - border.right - scrollerRect.w;
+	scrollerRect.y = border.top;
+	scrollerRect.h = rect.h - (border.top + border.bottom);
+	scroller->setRectInternal(scrollerRect);
+
+	// Now that the height has been calculated, update the nub scale.
+	const int maxHeight = nLines * lineHeight;
+	scroller->setNubScale(1.0f - ((maxHeight - scrollerRect.h) / (float)maxHeight));
+}
+
+void TextEdit::insertText(int index, const char *text, int n)
+{
+	WZ_ASSERT(text);
+	this->text.insert(index, text, n);
+
+	// Update the scroller.
+	updateScroller();
+}
+
+void TextEdit::enterText(const char *text)
+{
+	WZ_ASSERT(text);
+	const int n = (int)strlen(text);
+
+	if (n == 0)
+		return;
+
+	// The text replaces the selection.
+	if (selectionStartIndex != selectionEndIndex)
+	{
+		deleteSelectedText();
+	}
+
+	insertText(cursorIndex, text, n);
+	cursorIndex += n;
+	updateScrollIndex();
+}
+
+void TextEdit::deleteText(int index, int n)
+{
+	if (index < 0 || index >= (int)text.length())
+		return;
+
+	text.erase(index, n);
+
+	// Update the scroller.
+	updateScroller();
+}
+
+void TextEdit::deleteSelectedText()
+{
+	// No selection.
+	if (selectionStartIndex == selectionEndIndex)
+		return;
+
+	const int start = WZ_MIN(selectionStartIndex, selectionEndIndex);
+	const int end = WZ_MAX(selectionStartIndex, selectionEndIndex);
+	deleteText(start, end - start);
+
+	// Move the cursor to the start (smallest of start and end, not the real selection start).
+	cursorIndex = start;
+
+	// Clear the selection.
+	selectionStartIndex = selectionEndIndex = 0;
+}
+
+int TextEdit::indexFromRelativePosition(Position pos) const
+{
+	int result = 0;
+
+	// Calculate relative position.
+	const Rect absRect = getAbsoluteRect();
+
+	if (multiline)
+	{
+		// Get line height.
+		int lineHeight = getLineHeight();
+
+		// Set line starting position. May be outside the widget.
+		int lineY = lineHeight * -scrollValue;
+
+		// Iterate through lines.
+		LineBreakResult line;
+		line.next = text.c_str();
+
+		for (;;)
+		{
+			line = lineBreakText(line.next, 0, getTextRect().w);
+			result = line.start - text.c_str();
+
+			if (pos.y >= lineY && pos.y < lineY + lineHeight)
+				break; // On this line.
+
+			if (!line.next || !line.next[0])
+				return -1;
+
+			lineY += lineHeight;
+		}
+
+		// Walk through the text until we find two glyphs that the x coordinate straddles.
+		int previousWidth = 0;
+
+		for (int i = 1; i <= (int)line.length; i++)
+		{
+			int width, deltaWidth;
+
+			// Calculate the width of the text up to the current character.
+			measureText(line.start, i, &width, NULL);
+
+			// Calculate the change in text width since the last iteration.
+			deltaWidth = width - previousWidth;
+
+			// Check the intersection between the position and the change in text width since the last iteration.
+			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+			{
+				// Left side of glyph.
+				result += i - 1;
+				break;
+			}
+			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
+			{
+				// Right side of glyph.
+				result += i;
+				break;
+			}
+
+			// Made it to the end of text string.
+			if (i == line.length)
+			{
+				result += i;
+				break;
+			}
+
+			// Store this text width for the next iteration.
+			previousWidth = width;
+		}
+	}
+	else
+	{
+		// Outside widget.
+		if (pos.x < 0 || pos.x > absRect.w || pos.y < 0 || pos.y > absRect.h)
+			return scrollValue;
+
+		// Walk through the text until we find two glyphs that the x coordinate straddles.
+		int previousWidth = 0;
+		result = scrollValue;
+
+		for (int i = 1; i <= (int)text.length(); i++)
+		{
+			// Calculate the width of the text up to the current character.
+			int width;
+			measureText(&text[scrollValue], i, &width, NULL);
+
+			// Check if we've gone beyond the width of the widget.
+			if (width > getTextRect().w)
+			{
+				result = scrollValue + i - 1;
+				break;
+			}
+
+			// Calculate the change in text width since the last iteration.
+			const int deltaWidth = width - previousWidth;
+
+			// Check the intersection between the position and the change in text width since the last iteration.
+			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
+			{
+				// Left side of glyph.
+				result = scrollValue + i - 1;
+				break;
+			}
+			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
+			{
+				// Right side of glyph.
+				result = scrollValue + i;
+				break;
+			}
+
+			// Made it to the end of text string.
+			if (i == text.length())
+			{
+				result = i;
+				break;
+			}
+
+			// Store this text width for the next iteration.
+			previousWidth = width;
+		}
+	}
+
+	return WZ_CLAMPED(0, result, (int)text.length());
+}
+
+int TextEdit::indexFromPosition(int x, int y)
+{
+	// Make position relative.f
+	const Rect absRect = getAbsoluteRect();
+	const Position pos(x - absRect.x, y - absRect.y);
+
+	return indexFromRelativePosition(pos);
+}
+
+// Update the scroll value so the cursor is visible.
+void TextEdit::updateScrollIndex()
+{
+	if (multiline)
+	{
+		for (;;)
+		{
+			const int cursorY = positionFromIndex(cursorIndex).y;
+
+			if (cursorY > rect.h - (border.top + border.bottom))
+			{
+				scrollValue++;
+				scroller->setValue(scrollValue);
+			}
+			else if (cursorY < 0)
+			{
+				scrollValue--;
+				scroller->setValue(scrollValue);
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		for (;;)
+		{
+			const int cursorX = positionFromIndex(cursorIndex).x;
+
+			if (cursorX > getTextRect().w)
+			{
+				scrollValue++;
+			}
+			else if (cursorX < 0)
+			{
+				scrollValue--;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+}
+
+void TextEdit::moveCursorAndSelection(int newCursorIndex)
+{
+	if (selectionStartIndex != selectionEndIndex)
+	{
+		// If there's already a selection, move the cursor, and the selection end to match.
+		cursorIndex = newCursorIndex;
+		selectionEndIndex = cursorIndex;
+	}
+	else
+	{
+		// No selection, start a new one and move the cursor.
+		selectionStartIndex = cursorIndex;
+		cursorIndex = newCursorIndex;
+		selectionEndIndex = cursorIndex;
+	}
 }
 
 } // namespace wz

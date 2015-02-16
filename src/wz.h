@@ -1232,6 +1232,24 @@ public:
 
 protected:
 	void onScrollerValueChanged(Event e);
+	int calculateNumLines(int lineWidth);
+	void updateScroller();
+	void insertText(int index, const char *text, int n);
+	void enterText(const char *text);
+	void deleteText(int index, int n);
+	void deleteSelectedText();
+
+	// Returns -1 if an index could not be calculated. e.g. if the position is outside the widget.
+	int indexFromRelativePosition(Position pos) const;
+
+	// Calculate the text index at the given absolute position.
+	int indexFromPosition(int x, int y);
+
+	// Update the scroll value so the cursor is visible.
+	void updateScrollIndex();
+
+	// Helper function for moving the cursor while the selection (shift) key is held.
+	void moveCursorAndSelection(int newCursorIndex);
 };
 
 class ToggleButton : public Button
