@@ -316,10 +316,10 @@ void NVGRenderer::drawCombo(Combo *combo, Rect clip)
 {
 	NVGcontext *vg = impl->vg;
 	const Rect rect = combo->getAbsoluteRect();
-	const uint8_t *itemData = combo->list->getItemData();
-	const int itemStride = combo->list->getItemStride();
-	const int nItems = combo->list->getNumItems();
-	const int selectedItemIndex = combo->list->getSelectedItem();
+	const uint8_t *itemData = combo->getList()->getItemData();
+	const int itemStride = combo->getList()->getItemStride();
+	const int nItems = combo->getList()->getNumItems();
+	const int selectedItemIndex = combo->getList()->getSelectedItem();
 
 	nvgSave(vg);
 	clipToRect(clip);
@@ -371,14 +371,14 @@ void NVGRenderer::drawCombo(Combo *combo, Rect clip)
 
 Size NVGRenderer::measureCombo(Combo *combo)
 {
-	const uint8_t *itemData = combo->list->getItemData();
-	const int itemStride = combo->list->getItemStride();
+	const uint8_t *itemData = combo->getList()->getItemData();
+	const int itemStride = combo->getList()->getItemStride();
 
 	// Use the widest item text.
 	Size size;
 	size.w = 0;
 
-	for (int i = 0; i < combo->list->getNumItems(); i++)
+	for (int i = 0; i < combo->getList()->getNumItems(); i++)
 	{
 		int w;
 		combo->measureText(*((const char **)&itemData[i * itemStride]), 0, &w, NULL);

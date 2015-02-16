@@ -31,23 +31,23 @@ Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 	type = WZ_TYPE_COMBO;
 	isOpen_ = false;
 
-	list = new List(itemData, itemStride, nItems);
-	addChildWidget(list);
-	list->setVisible(false);
-	list->setClipInputToParent(false);
-	list->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &Combo::onListItemSelected);
+	list_ = new List(itemData, itemStride, nItems);
+	addChildWidget(list_);
+	list_->setVisible(false);
+	list_->setClipInputToParent(false);
+	list_->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &Combo::onListItemSelected);
 }
 
 void Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 {
-	list->setItemData(itemData);
-	list->setItemStride(itemStride);
-	list->setNumItems(nItems);
+	list_->setItemData(itemData);
+	list_->setItemStride(itemStride);
+	list_->setNumItems(nItems);
 }
 
 void Combo::onFontChanged(const char *fontFace, float fontSize)
 {
-	list->setFont(fontFace, fontSize);
+	list_->setFont(fontFace, fontSize);
 }
 
 void Combo::onRectChanged()
@@ -59,7 +59,7 @@ void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
-		const Rect listRect = list->getAbsoluteRect();
+		const Rect listRect = list_->getAbsoluteRect();
 
 		// Open dropdown.
 		if (!isOpen_)
@@ -68,7 +68,7 @@ void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 			mainWindow->pushLockInputWidget(this);
 
 			// Show dropdown list and set it to draw last.
-			list->setVisible(true);
+			list_->setVisible(true);
 			updateListRect();
 
 			isOpen_ = true;
@@ -81,7 +81,7 @@ void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 			mainWindow->popLockInputWidget(this);
 
 			// Hide dropdown list.
-			list->setVisible(false);
+			list_->setVisible(false);
 
 			isOpen_ = false;
 		}
@@ -106,12 +106,12 @@ Size Combo::measure()
 
 List *Combo::getList()
 {
-	return list;
+	return list_;
 }
 
 const List *Combo::getList() const
 {
-	return list;
+	return list_;
 }
 
 bool Combo::isOpen() const
@@ -125,7 +125,7 @@ void Combo::onListItemSelected(Event e)
 	mainWindow->popLockInputWidget(this);
 
 	// Hide dropdown list.
-	list->setVisible(false);
+	list_->setVisible(false);
 
 	isOpen_ = false;
 }
@@ -137,8 +137,8 @@ void Combo::updateListRect()
 		return;
 
 	// Make the height large enough to avoid scrolling.
-	Border listItemsBorder = list->getItemsBorder();
-	Rect listRect(0, rect.h, rect.w, listItemsBorder.top + list->getItemHeight() * list->getNumItems() + listItemsBorder.bottom);
+	Border listItemsBorder = list_->getItemsBorder();
+	Rect listRect(0, rect.h, rect.w, listItemsBorder.top + list_->getItemHeight() * list_->getNumItems() + listItemsBorder.bottom);
 
 	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
@@ -150,7 +150,7 @@ void Combo::updateListRect()
 		listRect.h -= over;
 	}
 
-	list->setRectInternal(listRect);
+	list_->setRectInternal(listRect);
 }
 
 } // namespace wz

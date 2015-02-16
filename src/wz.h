@@ -651,12 +651,12 @@ public:
 	const List *getList() const;
 	bool isOpen() const;
 
-	bool isOpen_;
-	List *list;
-
 protected:
 	void onListItemSelected(Event e);
 	void updateListRect();
+
+	bool isOpen_;
+	List *list_;
 };
 
 class DockIcon : public Widget
