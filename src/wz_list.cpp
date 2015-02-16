@@ -29,22 +29,22 @@ namespace wz {
 List::List(uint8_t *itemData, int itemStride, int nItems)
 {
 	type = WZ_TYPE_LIST;
-	draw_item = NULL;
-	itemHeight = 0;
-	isItemHeightUserSet = false;
-	firstItem = 0;
-	selectedItem = pressedItem = hoveredItem = mouseOverItem = -1;
-	scroller = NULL;
-	itemsBorder.top = itemsBorder.right = itemsBorder.bottom = itemsBorder.left = 2;
+	drawItem_ = NULL;
+	itemHeight_ = 0;
+	isItemHeightUserSet_ = false;
+	firstItem_ = 0;
+	selectedItem_ = pressedItem_ = hoveredItem_ = mouseOverItem_ = -1;
+	scroller_ = NULL;
+	itemsBorder_.top = itemsBorder_.right = itemsBorder_.bottom = itemsBorder_.left = 2;
 
-	this->itemData = itemData;
-	this->itemStride = itemStride;
-	this->nItems = nItems;
+	itemData_ = itemData;
+	itemStride_ = itemStride;
+	nItems_ = nItems;
 
-	scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-	addChildWidget(scroller);
+	scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+	addChildWidget(scroller_);
 	updateScroller();
-	scroller->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &List::onScrollerValueChanged);
+	scroller_->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &List::onScrollerValueChanged);
 }
 
 void List::onRendererChanged()
@@ -66,7 +66,7 @@ void List::onVisibilityChanged()
 	// Clear some additional state when hidden.
 	if (!getVisible())
 	{
-		hoveredItem = -1;
+		hoveredItem_ = -1;
 	}
 }
 
@@ -77,10 +77,10 @@ void List::onRectChanged()
 
 void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
-	if (mouseButton == 1 && hoveredItem != -1)
+	if (mouseButton == 1 && hoveredItem_ != -1)
 	{
-		pressedItem = hoveredItem;
-		hoveredItem = -1;
+		pressedItem_ = hoveredItem_;
+		hoveredItem_ = -1;
 		mainWindow->pushLockInputWidget(this);
 	}
 }
@@ -91,16 +91,16 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 
 	if (mouseButton == 1)
 	{
-		if (pressedItem != -1)
+		if (pressedItem_ != -1)
 		{
-			selectedItem = pressedItem;
+			selectedItem_ = pressedItem_;
 			selectedItemAssignedTo = true;
-			pressedItem = -1;
+			pressedItem_ = -1;
 		}
 
 		// Refresh hovered item.
 		updateMouseOverItem(mouseX, mouseY);
-		hoveredItem = mouseOverItem;
+		hoveredItem_ = mouseOverItem_;
 
 		mainWindow->popLockInputWidget(this);
 	}
@@ -110,46 +110,44 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		Event e;
 		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 		e.list.list = this;
-		e.list.selectedItem = selectedItem;
-		invokeEvent(e, item_selected_callbacks);
+		e.list.selectedItem = selectedItem_;
+		invokeEvent(e, itemSelectedCallbacks_);
 	}
 }
 
 void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	lastMousePosition.x = mouseX;
-	lastMousePosition.y = mouseY;
+	lastMousePosition_.x = mouseX;
+	lastMousePosition_.y = mouseY;
 	updateMouseOverItem(mouseX, mouseY);
 	
-	if (pressedItem != -1)
+	if (pressedItem_ != -1)
 	{
-		if (mouseOverItem != -1)
-			pressedItem = mouseOverItem;
+		if (mouseOverItem_ != -1)
+			pressedItem_ = mouseOverItem_;
 	}
 	else
 	{
-		hoveredItem = mouseOverItem;
+		hoveredItem_ = mouseOverItem_;
 	}
 }
 
 void List::onMouseWheelMove(int x, int y)
 {
-	if (scroller->getVisible())
+	if (scroller_->getVisible())
 	{
-		int value = scroller->getValue();
-		int stepValue = scroller->getStepValue();
-		scroller->setValue(value - y * stepValue);
+		scroller_->setValue(scroller_->getValue() - y * scroller_->getStepValue());
 
 		// Refresh hovered item.
-		updateMouseOverItem(lastMousePosition.x, lastMousePosition.y);
-		hoveredItem = mouseOverItem;
+		updateMouseOverItem(lastMousePosition_.x, lastMousePosition_.y);
+		hoveredItem_ = mouseOverItem_;
 	}
 }
 
 void List::onMouseHoverOff()
 {
-	hoveredItem = -1;
-	mouseOverItem = -1;
+	hoveredItem_ = -1;
+	mouseOverItem_ = -1;
 }
 
 void List::draw(Rect clip)
@@ -164,22 +162,22 @@ Size List::measure()
 
 Border List::getItemsBorder() const
 {
-	return itemsBorder;
+	return itemsBorder_;
 }
 
 Rect List::getItemsRect() const
 {
 	Rect rect;
-	rect.x = itemsBorder.left;
-	rect.y = itemsBorder.top;
+	rect.x = itemsBorder_.left;
+	rect.y = itemsBorder_.top;
 	const Rect listRect = getRect();
-	rect.w = listRect.w - (itemsBorder.left + itemsBorder.right);
-	rect.h = listRect.h - (itemsBorder.top + itemsBorder.bottom);
+	rect.w = listRect.w - (itemsBorder_.left + itemsBorder_.right);
+	rect.h = listRect.h - (itemsBorder_.top + itemsBorder_.bottom);
 
 	// Subtract the scroller width.
-	if (scroller->getVisible())
+	if (scroller_->getVisible())
 	{
-		rect.w -= scroller->getWidth();
+		rect.w -= scroller_->getWidth();
 	}
 
 	return rect;
@@ -195,12 +193,12 @@ Rect List::getAbsoluteItemsRect() const
 }
 void List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	this->draw_item = callback;
+	this->drawItem_ = callback;
 }
 
 DrawListItemCallback List::getDrawItemCallback() const
 {
-	return draw_item;
+	return drawItem_;
 }
 
 void List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
@@ -212,113 +210,113 @@ void List::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 
 void List::setItemData(uint8_t *itemData)
 {
-	this->itemData = itemData;
+	itemData_ = itemData;
 }
 
 uint8_t *List::getItemData() const
 {
-	return itemData;
+	return itemData_;
 }
 
 void List::setItemStride(int itemStride)
 {
-	this->itemStride = itemStride;
+	itemStride_ = itemStride;
 }
 
 int List::getItemStride() const
 {
-	return itemStride;
+	return itemStride_;
 }
 
 void List::setItemHeight(int itemHeight)
 {
-	isItemHeightUserSet = true;
+	isItemHeightUserSet_ = true;
 	setItemHeightInternal(itemHeight);
 }
 
 int List::getItemHeight() const
 {
-	return itemHeight;
+	return itemHeight_;
 }
 
 void List::setNumItems(int nItems)
 {
-	this->nItems = WZ_MAX(0, nItems);
+	nItems_ = WZ_MAX(0, nItems);
 	updateScroller();
 }
 
 int List::getNumItems() const
 {
-	return nItems;
+	return nItems_;
 }
 
 int List::getFirstItem() const
 {
-	return firstItem;
+	return firstItem_;
 }
 
 void List::setSelectedItem(int selectedItem)
 {
-	this->selectedItem = selectedItem;
+	selectedItem_ = selectedItem;
 	
 	Event e;
 	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
 	e.list.list = this;
 	e.list.selectedItem = selectedItem;
-	invokeEvent(e, item_selected_callbacks);
+	invokeEvent(e, itemSelectedCallbacks_);
 }
 
 int List::getSelectedItem() const
 {
-	return selectedItem;
+	return selectedItem_;
 }
 
 int List::getPressedItem() const
 {
-	return pressedItem;
+	return pressedItem_;
 }
 
 int List::getHoveredItem() const
 {
-	return hoveredItem;
+	return hoveredItem_;
 }
 
 int List::getScrollValue() const
 {
-	return scroller->getValue();
+	return scroller_->getValue();
 }
 
 Scroller *List::getScroller()
 {
-	return scroller;
+	return scroller_;
 }
 
 const Scroller *List::getScroller() const
 {
-	return scroller;
+	return scroller_;
 }
 
 void List::addCallbackItemSelected(EventCallback callback)
 {
-	item_selected_callbacks.push_back(callback);
+	itemSelectedCallbacks_.push_back(callback);
 }
 
 void List::onScrollerValueChanged(Event e)
 {
-	firstItem = e.scroller.value / itemHeight;
+	firstItem_ = e.scroller.value / itemHeight_;
 }
 
 void List::setItemHeightInternal(int itemHeight)
 {
-	this->itemHeight = itemHeight;
-	scroller->setStepValue(itemHeight);
+	itemHeight_ = itemHeight;
+	scroller_->setStepValue(itemHeight);
 	updateScroller();
 }
 
 void List::refreshItemHeight()
 {
 	// Don't stomp on user set value.
-	if (isItemHeightUserSet)
+	if (isItemHeightUserSet_)
 		return;
 
 	// Add a little padding.
@@ -327,7 +325,7 @@ void List::refreshItemHeight()
 
 void List::updateMouseOverItem(int mouseX, int mouseY)
 {
-	mouseOverItem = -1;
+	mouseOverItem_ = -1;
 
 	if (!hover)
 		return;
@@ -336,11 +334,11 @@ void List::updateMouseOverItem(int mouseX, int mouseY)
 
 	Rect currentItemRect;
 	currentItemRect.x = itemsRect.x;
-	currentItemRect.y = itemsRect.y - (scroller->getValue() % itemHeight);
+	currentItemRect.y = itemsRect.y - (scroller_->getValue() % itemHeight_);
 	currentItemRect.w = itemsRect.w;
-	currentItemRect.h = itemHeight;
+	currentItemRect.h = itemHeight_;
 
-	for (int i = firstItem; i < nItems; i++)
+	for (int i = firstItem_; i < nItems_; i++)
 	{
 		// Outside widget?
 		if (currentItemRect.y > itemsRect.y + itemsRect.h)
@@ -348,34 +346,34 @@ void List::updateMouseOverItem(int mouseX, int mouseY)
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, currentItemRect))
 		{
-			mouseOverItem = i;
+			mouseOverItem_ = i;
 			break;
 		}
 
-		currentItemRect.y += itemHeight;
+		currentItemRect.y += itemHeight_;
 	}
 }
 
 void List::updateScroller()
 {
 	// Update max value.
-	const int maxHeight = nItems * itemHeight;
+	const int maxHeight = nItems_ * itemHeight_;
 	const int max = maxHeight - getItemsRect().h;
-	scroller->setMaxValue(max);
+	scroller_->setMaxValue(max);
 
 	// Fit to the right of items rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller->rect.w;
-	scrollerRect.x = rect.w - itemsBorder.right - scrollerRect.w;
-	scrollerRect.y = itemsBorder.top;
-	scrollerRect.h = rect.h - (itemsBorder.top + itemsBorder.bottom);
-	scroller->setRectInternal(scrollerRect);
+	scrollerRect.w = scroller_->rect.w;
+	scrollerRect.x = rect.w - itemsBorder_.right - scrollerRect.w;
+	scrollerRect.y = itemsBorder_.top;
+	scrollerRect.h = rect.h - (itemsBorder_.top + itemsBorder_.bottom);
+	scroller_->setRectInternal(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
-	scroller->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
+	scroller_->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
 
 	// Hide/show scroller depending on if it's needed.
-	scroller->setVisible(max > 0);
+	scroller_->setVisible(max > 0);
 }
 
 } // namespace wz

@@ -536,9 +536,9 @@ void NVGRenderer::drawList(List *list, Rect clip)
 	if (!clipToRectIntersection(clip, itemsRect))
 		return;
 
-	int y = itemsRect.y - (list->getScroller()->getValue() % list->itemHeight);
+	int y = itemsRect.y - (list->getScroller()->getValue() % list->getItemHeight());
 
-	for (int i = list->getFirstItem(); i < list->nItems; i++)
+	for (int i = list->getFirstItem(); i < list->getNumItems(); i++)
 	{
 		Rect itemRect;
 		const uint8_t *itemData;
@@ -550,28 +550,28 @@ void NVGRenderer::drawList(List *list, Rect clip)
 		itemRect.x = itemsRect.x;
 		itemRect.y = y;
 		itemRect.w = itemsRect.w;
-		itemRect.h = list->itemHeight;
-		itemData = *((uint8_t **)&list->getItemData()[i * list->itemStride]);
+		itemRect.h = list->getItemHeight();
+		itemData = *((uint8_t **)&list->getItemData()[i * list->getItemStride()]);
 
-		if (i == list->selectedItem)
+		if (i == list->getSelectedItem())
 		{
 			drawFilledRect(itemRect, WZ_SKIN_LIST_SET_COLOR);
 		}
-		else if (i == list->pressedItem || i == list->hoveredItem)
+		else if (i == list->getPressedItem() || i == list->getHoveredItem())
 		{
 			drawFilledRect(itemRect, WZ_SKIN_LIST_HOVER_COLOR);
 		}
 
-		if (list->draw_item)
+		if (list->getDrawItemCallback())
 		{
-			list->draw_item(this, itemRect, list, list->getFontFace(), list->getFontSize(), i, itemData);
+			list->getDrawItemCallback()(this, itemRect, list, list->getFontFace(), list->getFontSize(), i, itemData);
 		}
 		else
 		{
-			print(itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->itemHeight / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, list->getFontFace(), list->getFontSize(), WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
+			print(itemsRect.x + WZ_SKIN_LIST_ITEM_LEFT_PADDING, y + list->getItemHeight() / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, list->getFontFace(), list->getFontSize(), WZ_SKIN_LIST_TEXT_COLOR, (const char *)itemData, 0);
 		}
 
-		y += list->itemHeight;
+		y += list->getItemHeight();
 	}
 
 	nvgRestore(vg);

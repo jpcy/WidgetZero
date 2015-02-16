@@ -714,7 +714,7 @@ public:
 	void setTextColor(float r, float g, float b);
 	NVGcolor getTextColor() const;
 
-private:
+protected:
 	std::string text_;
 	bool multiline_;
 	NVGcolor textColor_;
@@ -765,34 +765,34 @@ public:
 	const Scroller *getScroller() const;
 	void addCallbackItemSelected(EventCallback callback);
 
-	Border itemsBorder;
-	DrawListItemCallback draw_item;
-	uint8_t *itemData;
-	int itemStride;
-	int itemHeight;
-	bool isItemHeightUserSet;
-	int nItems;
-	int firstItem;
-	int selectedItem;
-	int pressedItem;
-	int hoveredItem;
-
-	// The same as hoveredItem, except when pressedItem != -1.
-	int mouseOverItem;
-
-	Scroller *scroller;
-
-	std::vector<EventCallback> item_selected_callbacks;
-
-	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
-	Position lastMousePosition;
-
 protected:
 	void onScrollerValueChanged(Event e);
 	void setItemHeightInternal(int itemHeight);
 	void refreshItemHeight();
 	void updateMouseOverItem(int mouseX, int mouseY);
 	void updateScroller();
+
+	Border itemsBorder_;
+	DrawListItemCallback drawItem_;
+	uint8_t *itemData_;
+	int itemStride_;
+	int itemHeight_;
+	bool isItemHeightUserSet_;
+	int nItems_;
+	int firstItem_;
+	int selectedItem_;
+	int pressedItem_;
+	int hoveredItem_;
+
+	// The same as hoveredItem, except when pressedItem != -1.
+	int mouseOverItem_;
+
+	Scroller *scroller_;
+
+	std::vector<EventCallback> itemSelectedCallbacks_;
+
+	// Set when the mouse moves. Used to refresh the hovered item when scrolling via the mouse wheel.
+	Position lastMousePosition_;
 };
 
 typedef bool(*WidgetPredicate)(const Widget *);
