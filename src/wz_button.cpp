@@ -29,14 +29,14 @@ namespace wz {
 Button::Button(const std::string &label, const std::string &icon)
 {
 	type = WZ_TYPE_BUTTON;
-	clickBehavior = WZ_BUTTON_CLICK_BEHAVIOR_UP;
-	setBehavior = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
+	clickBehavior_ = WZ_BUTTON_CLICK_BEHAVIOR_UP;
+	setBehavior_ = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
 	isPressed_ = isSet_ = false;
-	boundValue = NULL;
-	padding.left = padding.right = 8;
-	padding.top = padding.bottom = 4;
-	this->label = label;
-	this->icon = icon;
+	boundValue_ = NULL;
+	padding_.left = padding_.right = 8;
+	padding_.top = padding_.bottom = 4;
+	label_ = label;
+	icon_ = icon;
 }
 
 void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -50,9 +50,9 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
 		e.button.button = this;
 		e.button.isSet = isSet_;
-		invokeEvent(e, pressed_callbacks);
+		invokeEvent(e, pressedCallbacks_);
 
-		if (clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
+		if (clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
 		{
 			click();
 		}
@@ -66,7 +66,7 @@ void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		isPressed_ = false;
 		mainWindow->popLockInputWidget(this);
 
-		if (hover && clickBehavior == WZ_BUTTON_CLICK_BEHAVIOR_UP)
+		if (hover && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
 		{
 			click();
 		}
@@ -85,44 +85,44 @@ Size Button::measure()
 
 void Button::setLabel(const char *label)
 {
-	this->label = label;
+	label_ = label;
 	resizeToMeasured();
 }
 
 const char *Button::getLabel() const
 {
-	return label.c_str();
+	return label_.c_str();
 }
 
 void Button::setIcon(const char *icon)
 {
-	this->icon = icon;
+	icon_ = icon;
 	resizeToMeasured();
 }
 
 const char *Button::getIcon() const
 {
-	return icon.c_str();
+	return icon_.c_str();
 }
 
 void Button::setPadding(Border padding)
 {
-	this->padding = padding;
+	padding_ = padding;
 	resizeToMeasured();
 }
 
 void Button::setPadding(int top, int right, int bottom, int left)
 {
-	padding.top = top;
-	padding.right = right;
-	padding.bottom = bottom;
-	padding.left = left;
+	padding_.top = top;
+	padding_.right = right;
+	padding_.bottom = bottom;
+	padding_.left = left;
 	resizeToMeasured();
 }
 
 Border Button::getPadding() const
 {
-	return padding;
+	return padding_;
 }
 
 bool Button::isPressed() const
@@ -138,7 +138,7 @@ bool Button::isSet() const
 void Button::set(bool value)
 {
 	// No such thing as setting a button if using the default behavior.
-	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
+	if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
 		return;
 
 	if (value && isSet_)
@@ -150,9 +150,9 @@ void Button::set(bool value)
 	isSet_ = value;
 
 	// isSet assigned to, update the bound value.
-	if (boundValue)
+	if (boundValue_)
 	{
-		*boundValue = isSet_;
+		*boundValue_ = isSet_;
 	}
 
 	if (isSet_)
@@ -161,13 +161,13 @@ void Button::set(bool value)
 		e.button.type = WZ_EVENT_BUTTON_CLICKED;
 		e.button.button = this;
 		e.button.isSet = isSet_;
-		invokeEvent(e, clicked_callbacks);
+		invokeEvent(e, clickedCallbacks_);
 	}
 }
 
 void Button::bindValue(bool *value)
 {
-	boundValue = value;
+	boundValue_ = value;
 
 	if (value)
 	{
@@ -177,31 +177,31 @@ void Button::bindValue(bool *value)
 
 void Button::addCallbackPressed(EventCallback callback)
 {
-	pressed_callbacks.push_back(callback);
+	pressedCallbacks_.push_back(callback);
 }
 
 void Button::addCallbackClicked(EventCallback callback)
 {
-	clicked_callbacks.push_back(callback);
+	clickedCallbacks_.push_back(callback);
 }
 
 void Button::setClickBehavior(ButtonClickBehavior clickBehavior)
 {
-	this->clickBehavior = clickBehavior;
+	clickBehavior_ = clickBehavior;
 }
 
 void Button::setSetBehavior(ButtonSetBehavior setBehavior)
 {
-	this->setBehavior = setBehavior;
+	setBehavior_ = setBehavior;
 }
 
 void Button::click()
 {
-	if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
+	if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
 	{
 		isSet_ = !isSet_;
 	}
-	else if (setBehavior == WZ_BUTTON_SET_BEHAVIOR_STICKY)
+	else if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_STICKY)
 	{
 		// Don't invoke the clicked event if already set.
 		if (isSet_)
@@ -211,16 +211,16 @@ void Button::click()
 	}
 
 	// isSet assigned to, update the bound value.
-	if (boundValue)
+	if (boundValue_)
 	{
-		*boundValue = isSet_;
+		*boundValue_ = isSet_;
 	}
 
 	Event e;
 	e.button.type = WZ_EVENT_BUTTON_CLICKED;
 	e.button.button = this;
 	e.button.isSet = isSet_;
-	invokeEvent(e, clicked_callbacks);
+	invokeEvent(e, clickedCallbacks_);
 }
 
 /*

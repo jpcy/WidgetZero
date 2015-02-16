@@ -610,19 +610,19 @@ public:
 	void setClickBehavior(ButtonClickBehavior clickBehavior);
 	void setSetBehavior(ButtonSetBehavior setBehavior);
 
-	ButtonClickBehavior clickBehavior;
-	ButtonSetBehavior setBehavior;
-	Border padding;
-	std::string label;
-	std::string icon;
+protected:
+	void click();
+
+	ButtonClickBehavior clickBehavior_;
+	ButtonSetBehavior setBehavior_;
+	Border padding_;
+	std::string label_;
+	std::string icon_;
 	bool isPressed_;
 	bool isSet_;
-	bool *boundValue;
-	std::vector<EventCallback> pressed_callbacks;
-	std::vector<EventCallback> clicked_callbacks;
-
-private:
-	void click();
+	bool *boundValue_;
+	std::vector<EventCallback> pressedCallbacks_;
+	std::vector<EventCallback> clickedCallbacks_;
 };
 
 class CheckBox : public Button
