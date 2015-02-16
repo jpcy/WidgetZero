@@ -35,16 +35,6 @@ Label::Label(const std::string &text) : text_(text)
 	isTextColorUserSet_ = false;
 }
 
-void Label::draw(Rect clip)
-{
-	renderer->drawLabel(this, clip);
-}
-
-Size Label::measure()
-{
-	return renderer->measureLabel(this);
-}
-
 void Label::setMultiline(bool multiline)
 {
 	multiline_ = multiline;
@@ -93,6 +83,16 @@ void Label::setTextColor(float r, float g, float b)
 NVGcolor Label::getTextColor() const
 {
 	return textColor_;
+}
+
+void Label::draw(Rect clip)
+{
+	renderer->drawLabel(this, clip);
+}
+
+Size Label::measure()
+{
+	return renderer->measureLabel(this);
 }
 
 } // namespace wz

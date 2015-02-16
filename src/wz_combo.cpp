@@ -45,6 +45,21 @@ void Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)
 	list_->setNumItems(nItems);
 }
 
+List *Combo::getList()
+{
+	return list_;
+}
+
+const List *Combo::getList() const
+{
+	return list_;
+}
+
+bool Combo::isOpen() const
+{
+	return isOpen_;
+}
+
 void Combo::onFontChanged(const char *fontFace, float fontSize)
 {
 	list_->setFont(fontFace, fontSize);
@@ -102,21 +117,6 @@ void Combo::draw(Rect clip)
 Size Combo::measure()
 {
 	return renderer->measureCombo(this);
-}
-
-List *Combo::getList()
-{
-	return list_;
-}
-
-const List *Combo::getList() const
-{
-	return list_;
-}
-
-bool Combo::isOpen() const
-{
-	return isOpen_;
 }
 
 void Combo::onListItemSelected(Event e)

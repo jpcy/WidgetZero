@@ -39,50 +39,6 @@ Button::Button(const std::string &label, const std::string &icon)
 	icon_ = icon;
 }
 
-void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
-{
-	if (mouseButton == 1)
-	{
-		isPressed_ = true;
-		mainWindow->pushLockInputWidget(this);
-
-		Event e;
-		e.button.type = WZ_EVENT_BUTTON_PRESSED;
-		e.button.button = this;
-		e.button.isSet = isSet_;
-		invokeEvent(e, pressedCallbacks_);
-
-		if (clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
-		{
-			click();
-		}
-	}
-}
-
-void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
-{
-	if (mouseButton == 1 && isPressed_)
-	{
-		isPressed_ = false;
-		mainWindow->popLockInputWidget(this);
-
-		if (hover && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
-		{
-			click();
-		}
-	}
-}
-
-void Button::draw(Rect clip)
-{
-	renderer->drawButton(this, clip);
-}
-
-Size Button::measure()
-{
-	return renderer->measureButton(this);
-}
-
 void Button::setLabel(const char *label)
 {
 	label_ = label;
@@ -183,6 +139,50 @@ void Button::addCallbackPressed(EventCallback callback)
 void Button::addCallbackClicked(EventCallback callback)
 {
 	clickedCallbacks_.push_back(callback);
+}
+
+void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1)
+	{
+		isPressed_ = true;
+		mainWindow->pushLockInputWidget(this);
+
+		Event e;
+		e.button.type = WZ_EVENT_BUTTON_PRESSED;
+		e.button.button = this;
+		e.button.isSet = isSet_;
+		invokeEvent(e, pressedCallbacks_);
+
+		if (clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
+		{
+			click();
+		}
+	}
+}
+
+void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1 && isPressed_)
+	{
+		isPressed_ = false;
+		mainWindow->popLockInputWidget(this);
+
+		if (hover && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
+		{
+			click();
+		}
+	}
+}
+
+void Button::draw(Rect clip)
+{
+	renderer->drawButton(this, clip);
+}
+
+Size Button::measure()
+{
+	return renderer->measureButton(this);
 }
 
 void Button::setClickBehavior(ButtonClickBehavior clickBehavior)

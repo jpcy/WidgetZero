@@ -39,21 +39,6 @@ GroupBox::GroupBox(const std::string &label) : label_(label)
 	setSize(200, 200);
 }
 
-void GroupBox::onRendererChanged()
-{
-	refreshMargin();
-}
-
-void GroupBox::draw(Rect clip)
-{
-	renderer->drawGroupBox(this, clip);
-}
-
-Size GroupBox::measure()
-{
-	return renderer->measureGroupBox(this);
-}
-
 void GroupBox::setLabel(const char *label)
 {
 	label_ = label;
@@ -84,6 +69,21 @@ void GroupBox::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	content_->removeChildWidget(widget);
+}
+
+void GroupBox::onRendererChanged()
+{
+	refreshMargin();
+}
+
+void GroupBox::draw(Rect clip)
+{
+	renderer->drawGroupBox(this, clip);
+}
+
+Size GroupBox::measure()
+{
+	return renderer->measureGroupBox(this);
 }
 
 void GroupBox::refreshMargin()

@@ -47,119 +47,6 @@ List::List(uint8_t *itemData, int itemStride, int nItems)
 	scroller_->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &List::onScrollerValueChanged);
 }
 
-void List::onRendererChanged()
-{
-	refreshItemHeight();
-}
-
-void List::onFontChanged(const char *fontFace, float fontSize)
-{
-	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
-	if (renderer)
-	{
-		refreshItemHeight();
-	}
-}
-
-void List::onVisibilityChanged()
-{
-	// Clear some additional state when hidden.
-	if (!getVisible())
-	{
-		hoveredItem_ = -1;
-	}
-}
-
-void List::onRectChanged()
-{
-	updateScroller();
-}
-
-void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
-{
-	if (mouseButton == 1 && hoveredItem_ != -1)
-	{
-		pressedItem_ = hoveredItem_;
-		hoveredItem_ = -1;
-		mainWindow->pushLockInputWidget(this);
-	}
-}
-
-void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
-{
-	bool selectedItemAssignedTo = false;
-
-	if (mouseButton == 1)
-	{
-		if (pressedItem_ != -1)
-		{
-			selectedItem_ = pressedItem_;
-			selectedItemAssignedTo = true;
-			pressedItem_ = -1;
-		}
-
-		// Refresh hovered item.
-		updateMouseOverItem(mouseX, mouseY);
-		hoveredItem_ = mouseOverItem_;
-
-		mainWindow->popLockInputWidget(this);
-	}
-
-	if (selectedItemAssignedTo)
-	{
-		Event e;
-		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
-		e.list.list = this;
-		e.list.selectedItem = selectedItem_;
-		invokeEvent(e, itemSelectedCallbacks_);
-	}
-}
-
-void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
-{
-	lastMousePosition_.x = mouseX;
-	lastMousePosition_.y = mouseY;
-	updateMouseOverItem(mouseX, mouseY);
-	
-	if (pressedItem_ != -1)
-	{
-		if (mouseOverItem_ != -1)
-			pressedItem_ = mouseOverItem_;
-	}
-	else
-	{
-		hoveredItem_ = mouseOverItem_;
-	}
-}
-
-void List::onMouseWheelMove(int x, int y)
-{
-	if (scroller_->getVisible())
-	{
-		scroller_->setValue(scroller_->getValue() - y * scroller_->getStepValue());
-
-		// Refresh hovered item.
-		updateMouseOverItem(lastMousePosition_.x, lastMousePosition_.y);
-		hoveredItem_ = mouseOverItem_;
-	}
-}
-
-void List::onMouseHoverOff()
-{
-	hoveredItem_ = -1;
-	mouseOverItem_ = -1;
-}
-
-void List::draw(Rect clip)
-{
-	renderer->drawList(this, clip);
-}
-
-Size List::measure()
-{
-	return renderer->measureList(this);
-}
-
 Border List::getItemsBorder() const
 {
 	return itemsBorder_;
@@ -299,6 +186,119 @@ const Scroller *List::getScroller() const
 void List::addCallbackItemSelected(EventCallback callback)
 {
 	itemSelectedCallbacks_.push_back(callback);
+}
+
+void List::onRendererChanged()
+{
+	refreshItemHeight();
+}
+
+void List::onFontChanged(const char *fontFace, float fontSize)
+{
+	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
+	if (renderer)
+	{
+		refreshItemHeight();
+	}
+}
+
+void List::onVisibilityChanged()
+{
+	// Clear some additional state when hidden.
+	if (!getVisible())
+	{
+		hoveredItem_ = -1;
+	}
+}
+
+void List::onRectChanged()
+{
+	updateScroller();
+}
+
+void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+{
+	if (mouseButton == 1 && hoveredItem_ != -1)
+	{
+		pressedItem_ = hoveredItem_;
+		hoveredItem_ = -1;
+		mainWindow->pushLockInputWidget(this);
+	}
+}
+
+void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+{
+	bool selectedItemAssignedTo = false;
+
+	if (mouseButton == 1)
+	{
+		if (pressedItem_ != -1)
+		{
+			selectedItem_ = pressedItem_;
+			selectedItemAssignedTo = true;
+			pressedItem_ = -1;
+		}
+
+		// Refresh hovered item.
+		updateMouseOverItem(mouseX, mouseY);
+		hoveredItem_ = mouseOverItem_;
+
+		mainWindow->popLockInputWidget(this);
+	}
+
+	if (selectedItemAssignedTo)
+	{
+		Event e;
+		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+		e.list.list = this;
+		e.list.selectedItem = selectedItem_;
+		invokeEvent(e, itemSelectedCallbacks_);
+	}
+}
+
+void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+{
+	lastMousePosition_.x = mouseX;
+	lastMousePosition_.y = mouseY;
+	updateMouseOverItem(mouseX, mouseY);
+
+	if (pressedItem_ != -1)
+	{
+		if (mouseOverItem_ != -1)
+			pressedItem_ = mouseOverItem_;
+	}
+	else
+	{
+		hoveredItem_ = mouseOverItem_;
+	}
+}
+
+void List::onMouseWheelMove(int x, int y)
+{
+	if (scroller_->getVisible())
+	{
+		scroller_->setValue(scroller_->getValue() - y * scroller_->getStepValue());
+
+		// Refresh hovered item.
+		updateMouseOverItem(lastMousePosition_.x, lastMousePosition_.y);
+		hoveredItem_ = mouseOverItem_;
+	}
+}
+
+void List::onMouseHoverOff()
+{
+	hoveredItem_ = -1;
+	mouseOverItem_ = -1;
+}
+
+void List::draw(Rect clip)
+{
+	renderer->drawList(this, clip);
+}
+
+Size List::measure()
+{
+	return renderer->measureList(this);
 }
 
 void List::onScrollerValueChanged(Event e)

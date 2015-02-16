@@ -31,16 +31,6 @@ CheckBox::CheckBox(const std::string &label) : Button(label)
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
 }
 
-void CheckBox::draw(Rect clip)
-{
-	renderer->drawCheckBox(this, clip);
-}
-
-Size CheckBox::measure()
-{
-	return renderer->measureCheckBox(this);
-}
-
 bool CheckBox::isChecked() const
 {
 	return isSet();
@@ -54,6 +44,16 @@ void CheckBox::check(bool value)
 void CheckBox::addCallbackChecked(EventCallback callback)
 {
 	addCallbackClicked(callback);
+}
+
+void CheckBox::draw(Rect clip)
+{
+	renderer->drawCheckBox(this, clip);
+}
+
+Size CheckBox::measure()
+{
+	return renderer->measureCheckBox(this);
 }
 
 } // namespace wz

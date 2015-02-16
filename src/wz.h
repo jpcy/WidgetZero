@@ -590,10 +590,6 @@ class Button : public Widget
 {
 public:
 	Button(const std::string &label = std::string(), const std::string &icon = std::string());
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
 	void setIcon(const char *icon);
@@ -607,10 +603,14 @@ public:
 	void bindValue(bool *value);
 	void addCallbackPressed(EventCallback callback);
 	void addCallbackClicked(EventCallback callback);
-	void setClickBehavior(ButtonClickBehavior clickBehavior);
-	void setSetBehavior(ButtonSetBehavior setBehavior);
 
 protected:
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void draw(Rect clip);
+	virtual Size measure();
+	void setClickBehavior(ButtonClickBehavior clickBehavior);
+	void setSetBehavior(ButtonSetBehavior setBehavior);
 	void click();
 
 	ButtonClickBehavior clickBehavior_;
@@ -629,11 +629,13 @@ class CheckBox : public Button
 {
 public:
 	CheckBox(const std::string &label = std::string());
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	bool isChecked() const;
 	void check(bool value);
 	void addCallbackChecked(EventCallback callback);
+
+protected:
+	virtual void draw(Rect clip);
+	virtual Size measure();
 };
 
 class Combo : public Widget
@@ -641,17 +643,17 @@ class Combo : public Widget
 public:
 	Combo(uint8_t *itemData = NULL, int itemStride = 0, int nItems = 0);
 	void setItems(uint8_t *itemData, size_t itemStride, int nItems);
+	List *getList();
+	const List *getList() const;
+	bool isOpen() const;
+
+protected:
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void onRectChanged();
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual Rect getChildrenClipRect() const;
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	List *getList();
-	const List *getList() const;
-	bool isOpen() const;
-
-protected:
 	void onListItemSelected(Event e);
 	void updateListRect();
 
@@ -663,12 +665,14 @@ class DockIcon : public Widget
 {
 public:
 	DockIcon();
+
+protected:
 	virtual void draw(Rect clip);
 };
 
 class DockPreview : public Widget
 {
-public:
+protected:
 	virtual void draw(Rect clip);
 };
 
@@ -684,15 +688,15 @@ class GroupBox : public Widget
 {
 public:
 	GroupBox(const std::string &label = std::string());
-	virtual void onRendererChanged();
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	void setLabel(const char *label);
 	const char *getLabel() const;
 	void add(Widget *widget);
 	void remove(Widget *widget);
 
 protected:
+	virtual void onRendererChanged();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void refreshMargin();
 
 	Widget *content_;
@@ -703,8 +707,6 @@ class Label : public Widget
 {
 public:
 	Label(const std::string &text = std::string());
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	void setMultiline(bool multiline);
 	bool getMultiline() const;
 	void setText(const char *text);
@@ -715,6 +717,9 @@ public:
 	NVGcolor getTextColor() const;
 
 protected:
+	virtual void draw(Rect clip);
+	virtual Size measure();
+
 	std::string text_;
 	bool multiline_;
 	NVGcolor textColor_;
@@ -727,17 +732,6 @@ class List : public Widget
 {
 public:
 	List(uint8_t *itemData = NULL, int itemStride = 0, int nItems = 0);
-	virtual void onRendererChanged();
-	virtual void onFontChanged(const char *fontFace, float fontSize);
-	virtual void onVisibilityChanged();
-	virtual void onRectChanged();
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	virtual void onMouseWheelMove(int x, int y);
-	virtual void onMouseHoverOff();
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	Border getItemsBorder() const;
 	Rect getItemsRect() const;
 
@@ -766,6 +760,17 @@ public:
 	void addCallbackItemSelected(EventCallback callback);
 
 protected:
+	virtual void onRendererChanged();
+	virtual void onFontChanged(const char *fontFace, float fontSize);
+	virtual void onVisibilityChanged();
+	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void onMouseHoverOff();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void onScrollerValueChanged(Event e);
 	void setItemHeightInternal(int itemHeight);
 	void refreshItemHeight();
