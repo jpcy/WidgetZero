@@ -458,7 +458,7 @@ void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 		nvgStroke(vg);
 
 		// Label.
-		print(rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, groupBox->getFontFace(), groupBox->getFontSize(), WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->label.c_str(), 0);
+		print(rect.x + WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN, rect.y, NVG_ALIGN_LEFT | NVG_ALIGN_TOP, groupBox->getFontFace(), groupBox->getFontSize(), WZ_SKIN_GROUP_BOX_TEXT_COLOR, groupBox->getLabel(), 0);
 	}
 
 	nvgRestore(vg);

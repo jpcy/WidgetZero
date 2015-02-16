@@ -692,11 +692,11 @@ public:
 	void add(Widget *widget);
 	void remove(Widget *widget);
 
-	Widget *content;
-	std::string label;
-
-private:
+protected:
 	void refreshMargin();
+
+	Widget *content_;
+	std::string label_;
 };
 
 class Label : public Widget
