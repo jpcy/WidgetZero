@@ -380,11 +380,11 @@ private:
 		frame->add(frameLayout);
 
 		wz::CheckBox *showWindow1 = new wz::CheckBox("Show Window 1");
-		showWindow1->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow1Toggled);
+		showWindow1->addEventHandler(wz::EventType::ButtonClicked, this, &GUI::showWindow1Toggled);
 		frameLayout->add(showWindow1);
 
 		wz::CheckBox *showWindow2 = new wz::CheckBox("Show Window 2");
-		showWindow2->addEventHandler(wz::WZ_EVENT_BUTTON_CLICKED, this, &GUI::showWindow2Toggled);
+		showWindow2->addEventHandler(wz::EventType::ButtonClicked, this, &GUI::showWindow2Toggled);
 		frameLayout->add(showWindow2);
 	}
 
@@ -527,7 +527,7 @@ private:
 		list->setStretch(wz::WZ_STRETCH);
 		list->setFontSize(18);
 		list->setSelectedItem(0);
-		list->addEventHandler(wz::WZ_EVENT_LIST_ITEM_SELECTED, this, &GUI::widgetCategoryChanged);
+		list->addEventHandler(wz::EventType::ListItemSelected, this, &GUI::widgetCategoryChanged);
 		window->add(list);
 	}
 

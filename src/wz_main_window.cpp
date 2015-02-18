@@ -86,7 +86,7 @@ MainWindow::MainWindow(IRenderer *renderer)
 		dockTabBars_[i] = new TabBar;
 		dockTabBars_[i]->setVisible(false);
 		addChildWidget(dockTabBars_[i]);
-		dockTabBars_[i]->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &MainWindow::onDockTabBarTabChanged);
+		dockTabBars_[i]->addEventHandler(EventType::TabBarTabChanged, this, &MainWindow::onDockTabBarTabChanged);
 	}
 
 	// Create menu bar.

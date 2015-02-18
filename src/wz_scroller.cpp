@@ -233,7 +233,7 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 
 	ScrollerDecrementButton *decrementButton = new ScrollerDecrementButton();
 	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	decrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Scroller::onDecrementButtonClicked);
+	decrementButton->addEventHandler(EventType::ButtonClicked, this, &Scroller::onDecrementButtonClicked);
 	layout->add(decrementButton);
 
 	ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
@@ -245,7 +245,7 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 
 	ScrollerIncrementButton *incrementButton = new ScrollerIncrementButton();
 	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	incrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Scroller::onIncrementButtonClicked);
+	incrementButton->addEventHandler(EventType::ButtonClicked, this, &Scroller::onIncrementButtonClicked);
 	layout->add(incrementButton);
 
 	nub_->updateRect();
@@ -272,7 +272,7 @@ void Scroller::setValue(int value)
 		return;
 
 	Event e;
-	e.scroller.type = WZ_EVENT_SCROLLER_VALUE_CHANGED;
+	e.scroller.type = EventType::ScrollerValueChanged;
 	e.scroller.scroller = this;
 	e.scroller.oldValue = oldValue;
 	e.scroller.value = value_;

@@ -152,27 +152,30 @@ enum
 	WZ_ALIGN_BOTTOM = 32
 };
 
-enum WidgetEventType
+struct EventType
 {
-	WZ_EVENT_UNKNOWN,
-	WZ_EVENT_BUTTON_PRESSED,
-	WZ_EVENT_BUTTON_CLICKED,
-	WZ_EVENT_LIST_ITEM_SELECTED,
-	WZ_EVENT_SCROLLER_VALUE_CHANGED,
-	WZ_EVENT_TAB_BAR_TAB_CHANGED,
-	WZ_EVENT_TAB_BAR_TAB_ADDED,
-	WZ_EVENT_TAB_BAR_TAB_REMOVED
+	enum Enum
+	{
+		Unknown,
+		ButtonPressed,
+		ButtonClicked,
+		ListItemSelected,
+		ScrollerValueChanged,
+		TabBarTabChanged,
+		TabBarTabAdded,
+		TabBarTabRemoved
+	};
 };
 
 struct EventBase
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	Widget *widget;
 };
 
 struct CreateWidgetEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	Widget *parent;
 	Widget *widget; 
 	Widget *extra;
@@ -180,28 +183,28 @@ struct CreateWidgetEvent
 
 struct DestroyWidgetEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	Widget *parent;
 	Widget *widget;
 };
 
 struct ButtonEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	Button *button;
 	bool isSet;
 };
 
 struct ListEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	List *list;
 	int selectedItem;
 };
 
 struct ScrollerEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	Scroller *scroller;
 	int oldValue;
 	int value;
@@ -209,7 +212,7 @@ struct ScrollerEvent
 
 struct TabBarEvent
 {
-	WidgetEventType type;
+	EventType::Enum type;
 	TabBar *tabBar;
 	TabButton *tab;
 };
@@ -285,7 +288,7 @@ struct IEventHandler
 	virtual ~IEventHandler() {}
 	virtual void call(Event e) = 0;
 
-	WidgetEventType eventType;
+	EventType::Enum eventType;
 };
 
 template<class Object>
@@ -374,7 +377,7 @@ public:
 	Widget *addEventHandler(IEventHandler *eventHandler);
 
 	template<class Object>
-	Widget *addEventHandler(WidgetEventType eventType, Object *object, void (Object::*method)(Event))
+	Widget *addEventHandler(EventType::Enum eventType, Object *object, void (Object::*method)(Event))
 	{
 		EventHandler<Object> *eventHandler = new EventHandler<Object>();
 		eventHandler->eventType = eventType;

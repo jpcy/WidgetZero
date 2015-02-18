@@ -30,7 +30,7 @@ RadioButton::RadioButton(const std::string &label) : Button(label)
 {
 	type_ = WidgetType::RadioButton;
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
-	addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &RadioButton::onClicked);
+	addEventHandler(EventType::ButtonClicked, this, &RadioButton::onClicked);
 }
 
 void RadioButton::onParented(Widget *parent)

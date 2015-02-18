@@ -72,7 +72,7 @@ Spinner::Spinner()
 	decrementButton_->setStretch(WZ_STRETCH_HEIGHT);
 	decrementButton_->setStretchScale(1, 0.5f);
 	decrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	decrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onDecrementButtonClicked);
+	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &Spinner::onDecrementButtonClicked);
 	decrementButton_->setOverlap(true);
 	addChildWidget(decrementButton_);
 
@@ -81,7 +81,7 @@ Spinner::Spinner()
 	incrementButton_->setStretch(WZ_STRETCH_HEIGHT);
 	incrementButton_->setStretchScale(1, 0.5f);
 	incrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	incrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onIncrementButtonClicked);
+	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &Spinner::onIncrementButtonClicked);
 	incrementButton_->setOverlap(true);
 	addChildWidget(incrementButton_);
 }

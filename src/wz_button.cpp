@@ -114,7 +114,7 @@ void Button::set(bool value)
 	if (isSet_)
 	{
 		Event e;
-		e.button.type = WZ_EVENT_BUTTON_CLICKED;
+		e.button.type = EventType::ButtonClicked;
 		e.button.button = this;
 		e.button.isSet = isSet_;
 		invokeEvent(e, clickedCallbacks_);
@@ -149,7 +149,7 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		mainWindow_->pushLockInputWidget(this);
 
 		Event e;
-		e.button.type = WZ_EVENT_BUTTON_PRESSED;
+		e.button.type = EventType::ButtonPressed;
 		e.button.button = this;
 		e.button.isSet = isSet_;
 		invokeEvent(e, pressedCallbacks_);
@@ -217,7 +217,7 @@ void Button::click()
 	}
 
 	Event e;
-	e.button.type = WZ_EVENT_BUTTON_CLICKED;
+	e.button.type = EventType::ButtonClicked;
 	e.button.button = this;
 	e.button.isSet = isSet_;
 	invokeEvent(e, clickedCallbacks_);

@@ -101,7 +101,7 @@ Tabbed::Tabbed()
 	type_ = WidgetType::Tabbed;
 
 	tabBar = new TabBar;
-	tabBar->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &Tabbed::onTabChanged);
+	tabBar->addEventHandler(EventType::TabBarTabChanged, this, &Tabbed::onTabChanged);
 	addChildWidget(tabBar);
 }
 

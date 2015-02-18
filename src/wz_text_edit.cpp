@@ -39,7 +39,7 @@ TextEdit::TextEdit(bool multiline, const std::string &text)
 		scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 		addChildWidget(scroller_);
 		updateScroller();
-		scroller_->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &TextEdit::onScrollerValueChanged);
+		scroller_->addEventHandler(EventType::ScrollerValueChanged, this, &TextEdit::onScrollerValueChanged);
 	}
 
 	multiline_ = multiline;

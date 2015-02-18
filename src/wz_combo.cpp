@@ -35,7 +35,7 @@ Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 	addChildWidget(list_);
 	list_->setVisible(false);
 	list_->setClipInputToParent(false);
-	list_->addEventHandler(WZ_EVENT_LIST_ITEM_SELECTED, this, &Combo::onListItemSelected);
+	list_->addEventHandler(EventType::ListItemSelected, this, &Combo::onListItemSelected);
 }
 
 void Combo::setItems(uint8_t *itemData, size_t itemStride, int nItems)

@@ -72,7 +72,7 @@ TabBar::TabBar()
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton_ = new Button("<");
-	decrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &TabBar::onDecrementButtonClicked);
+	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onDecrementButtonClicked);
 	addChildWidget(decrementButton_);
 	decrementButton_->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	decrementButton_->setVisible(false);
@@ -80,7 +80,7 @@ TabBar::TabBar()
 	decrementButton_->setOverlap(true);
 
 	incrementButton_ = new Button(">");
-	incrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &TabBar::onIncrementButtonClicked);
+	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onIncrementButtonClicked);
 	addChildWidget(incrementButton_);
 	incrementButton_->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	incrementButton_->setVisible(false);
@@ -91,7 +91,7 @@ TabBar::TabBar()
 TabButton *TabBar::createTab()
 {
 	TabButton *tab = new TabButton();
-	tab->addEventHandler(WZ_EVENT_BUTTON_PRESSED, this, &TabBar::onTabButtonPressed);
+	tab->addEventHandler(EventType::ButtonPressed, this, &TabBar::onTabButtonPressed);
 	addChildWidget(tab);
 	tabs_.push_back(tab);
 
@@ -120,7 +120,7 @@ TabButton *TabBar::createTab()
 
 	// Invoke the tab added event.
 	Event e;
-	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_ADDED;
+	e.tabBar.type = EventType::TabBarTabAdded;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tab;
 	invokeEvent(e);
@@ -147,7 +147,7 @@ void TabBar::destroyTab(TabButton *tab)
 
 	// Invoke the tab removed event.
 	Event e;
-	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
+	e.tabBar.type = EventType::TabBarTabRemoved;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tabs_[deleteIndex];
 	invokeEvent(e);
@@ -163,7 +163,7 @@ void TabBar::clearTabs()
 	{
 		// Invoke the tab removed event.
 		Event e;
-		e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_REMOVED;
+		e.tabBar.type = EventType::TabBarTabRemoved;
 		e.tabBar.tabBar = this;
 		e.tabBar.tab = tabs_[i];
 		invokeEvent(e);
@@ -268,7 +268,7 @@ void TabBar::setScrollValue(int value)
 void TabBar::invokeTabChanged()
 {
 	Event e;
-	e.tabBar.type = WZ_EVENT_TAB_BAR_TAB_CHANGED;
+	e.tabBar.type = EventType::TabBarTabChanged;
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = selectedTab_;
 	invokeEvent(e, tabChangedCallbacks_);

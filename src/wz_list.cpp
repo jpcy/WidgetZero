@@ -44,7 +44,7 @@ List::List(uint8_t *itemData, int itemStride, int nItems)
 	scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
 	addChildWidget(scroller_);
 	updateScroller();
-	scroller_->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &List::onScrollerValueChanged);
+	scroller_->addEventHandler(EventType::ScrollerValueChanged, this, &List::onScrollerValueChanged);
 }
 
 Border List::getItemsBorder() const
@@ -147,7 +147,7 @@ void List::setSelectedItem(int selectedItem)
 	selectedItem_ = selectedItem;
 	
 	Event e;
-	e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+	e.list.type = EventType::ListItemSelected;
 	e.list.list = this;
 	e.list.selectedItem = selectedItem;
 	invokeEvent(e, itemSelectedCallbacks_);
@@ -249,7 +249,7 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (selectedItemAssignedTo)
 	{
 		Event e;
-		e.list.type = WZ_EVENT_LIST_ITEM_SELECTED;
+		e.list.type = EventType::ListItemSelected;
 		e.list.list = this;
 		e.list.selectedItem = selectedItem_;
 		invokeEvent(e, itemSelectedCallbacks_);
