@@ -389,8 +389,7 @@ Size NVGRenderer::measureCombo(Combo *combo)
 	size.h = combo->getLineHeight();
 
 	// Add scroller width or button width, whichever is largest.
-	Scroller *scroller = combo->getList()->getScroller();
-	Size scrollerSize = scroller->measure();
+	Size scrollerSize = measureScroller(combo->getList()->getScroller());
 	size.w += WZ_MAX(scrollerSize.w, WZ_SKIN_COMBO_BUTTON_WIDTH);
 
 	// Padding.
@@ -900,7 +899,7 @@ void NVGRenderer::drawSpinner(Spinner *spinner, Rect clip)
 
 Size NVGRenderer::measureSpinner(Spinner *spinner)
 {
-	const Border border = spinner->textEdit->getBorder();
+	const Border border = spinner->getTextEdit()->getBorder();
 	Size size;
 	size.w = 100;
 	size.h = spinner->getLineHeight() + border.top + border.bottom;
@@ -1059,7 +1058,7 @@ void NVGRenderer::drawTextEdit(TextEdit *textEdit, Rect clip)
 		return;
 
 	// Text.
-	if (textEdit->multiline)
+	if (textEdit->isMultiline())
 	{
 		int lineY = 0;
 		int selectionStartIndex = textEdit->getSelectionStartIndex();
@@ -1164,13 +1163,13 @@ void NVGRenderer::drawTextEdit(TextEdit *textEdit, Rect clip)
 
 Size NVGRenderer::measureTextEdit(TextEdit *textEdit)
 {
-	if (textEdit->multiline)
+	if (textEdit->isMultiline())
 	{
 		return Size(100, 100);
 	}
 	else
 	{
-		return Size(100, textEdit->getLineHeight() + textEdit->border.top + textEdit->border.bottom);
+		return Size(100, textEdit->getLineHeight() + textEdit->getBorder().top + textEdit->getBorder().bottom);
 	}
 }
 
@@ -1178,7 +1177,7 @@ void NVGRenderer::drawWindow(Window *window, Rect clip)
 {
 	NVGcontext *vg = impl->vg;
 	const Rect rect = window->getAbsoluteRect();
-	const Rect contentRect = window->content->getAbsoluteRect();
+	const Rect contentRect = window->getContentWidget()->getAbsoluteRect();
 	const Rect headerRect = window->getHeaderRect();
 
 	nvgSave(vg);

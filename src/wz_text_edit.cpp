@@ -29,26 +29,210 @@ namespace wz {
 TextEdit::TextEdit(bool multiline, const std::string &text)
 {
 	type = WZ_TYPE_TEXT_EDIT;
-	validate_text = NULL;
-	pressed = false;
-	cursorIndex = scrollValue = 0;
-	selectionStartIndex = selectionEndIndex = 0;
+	validateText_ = NULL;
+	pressed_ = false;
+	cursorIndex_ = scrollValue_ = 0;
+	selectionStartIndex_ = selectionEndIndex_ = 0;
 
 	if (multiline)
 	{
-		scroller = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
-		addChildWidget(scroller);
+		scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+		addChildWidget(scroller_);
 		updateScroller();
-		scroller->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &TextEdit::onScrollerValueChanged);
+		scroller_->addEventHandler(WZ_EVENT_SCROLLER_VALUE_CHANGED, this, &TextEdit::onScrollerValueChanged);
 	}
 
-	this->multiline = multiline;
-	this->text = text;
+	multiline_ = multiline;
+	text_ = text;
+}
+
+void TextEdit::setValidateTextCallback(TextEditValidateTextCallback callback)
+{
+	validateText_ = callback;
+}
+
+bool TextEdit::isMultiline() const
+{
+	return multiline_;
+}
+
+Border TextEdit::getBorder() const
+{
+	return border_;
+}
+
+void TextEdit::setBorder(Border border)
+{
+	border_ = border;
+}
+
+Rect TextEdit::getTextRect() const
+{
+	Rect textRect;
+	textRect = getAbsoluteRect();
+	textRect.x += border_.left;
+	textRect.y += border_.top;
+	textRect.w -= border_.left + border_.right;
+	textRect.h -= border_.top + border_.bottom;
+
+	if (multiline_ && scroller_->getVisible())
+	{
+		textRect.w -= scroller_->getWidth();
+	}
+
+	return textRect;
+}
+
+const char *TextEdit::getText() const
+{
+	return text_.c_str();
+}
+
+void TextEdit::setText(const char *text)
+{
+	text_ = text;
+	resizeToMeasured();
+}
+
+int TextEdit::getScrollValue() const
+{
+	return scrollValue_;
+}
+
+const char *TextEdit::getVisibleText() const
+{
+	if (multiline_)
+	{
+		LineBreakResult line;
+		int lineIndex = 0;
+
+		line.next = text_.c_str();
+
+		for (;;)
+		{
+			line = lineBreakText(line.next, 0, getTextRect().w);
+
+			if (lineIndex == scrollValue_)
+				return line.start;
+
+			if (!line.next || !line.next[0])
+				break;
+
+			lineIndex++;
+		}
+
+		return text_.c_str();
+	}
+	else
+	{
+		return &text_[scrollValue_];
+	}
+}
+
+Position TextEdit::getCursorPosition() const
+{
+	return positionFromIndex(cursorIndex_);
+}
+
+bool TextEdit::hasSelection() const
+{
+	return selectionStartIndex_ != selectionEndIndex_;
+}
+
+int TextEdit::getSelectionStartIndex() const
+{
+	return WZ_MIN(selectionStartIndex_, selectionEndIndex_);
+}
+
+Position TextEdit::getSelectionStartPosition() const
+{
+	return positionFromIndex(WZ_MIN(selectionStartIndex_, selectionEndIndex_));
+}
+
+int TextEdit::getSelectionEndIndex() const
+{
+	return WZ_MAX(selectionStartIndex_, selectionEndIndex_);
+}
+
+Position TextEdit::getSelectionEndPosition() const
+{
+	return positionFromIndex(WZ_MAX(selectionStartIndex_, selectionEndIndex_));
+}
+
+Position TextEdit::positionFromIndex(int index) const
+{
+	// Get the line height.
+	const int lineHeight = getLineHeight();
+	Position position;
+
+	if (text_.length() == 0)
+	{
+		// Text is empty.
+		position.x = 0;
+		position.y = lineHeight / 2;
+	}
+	else if (multiline_)
+	{
+		LineBreakResult line;
+		int lineNo = 0;
+
+		// Iterate through lines.
+		line.next = text_.c_str();
+
+		for (;;)
+		{
+			int lineStartIndex;
+
+			line = lineBreakText(line.next, 0, getTextRect().w);
+			WZ_ASSERT(line.start);
+			WZ_ASSERT(line.next);
+			lineStartIndex = line.start - text_.c_str();
+
+			// Is the index on this line?
+			if ((index >= lineStartIndex && index <= lineStartIndex + (int)line.length) || !line.next || !line.next[0])
+			{
+				int width = 0;
+
+				if (index - lineStartIndex > 0)
+				{
+					measureText(line.start, index - lineStartIndex, &width, NULL);
+				}
+
+				position.x = width;
+				position.y = (lineNo - scrollValue_) * lineHeight + lineHeight / 2;
+				break;
+			}
+
+			lineNo++;
+		}
+	}
+	else
+	{
+		int width = 0;
+		int delta = index - scrollValue_;
+
+		if (delta > 0)
+		{
+			// Text width from the scroll index to the requested index.
+			measureText(&text_[scrollValue_], delta, &width, NULL);
+		}
+		else if (delta < 0)
+		{
+			// Text width from the requested index to the scroll index.
+			measureText(&text_[cursorIndex_], -delta, &width, NULL);
+			width = -width;
+		}
+	
+		position.x = width;
+		position.y = lineHeight / 2;
+	}
+
+	return position;
 }
 
 void TextEdit::onRendererChanged()
 {
-	border.left = border.top = border.right = border.bottom = 4;
+	border_.left = border_.top = border_.right = border_.bottom = 4;
 }
 
 void TextEdit::onRectChanged()
@@ -70,35 +254,35 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		mainWindow->pushLockInputWidget(this);
 
 		// Move the cursor to the mouse position.
-		int oldCursorIndex = cursorIndex;
-		cursorIndex = indexFromPosition(mouseX, mouseY);
+		int oldCursorIndex = cursorIndex_;
+		cursorIndex_ = indexFromPosition(mouseX, mouseY);
 
-		if (cursorIndex == -1)
+		if (cursorIndex_ == -1)
 		{
 			// Couldn't get a valid index.
-			cursorIndex = oldCursorIndex;
+			cursorIndex_ = oldCursorIndex;
 			return;
 		}
 
 		updateScrollIndex();
-		pressed = true;
+		pressed_ = true;
 
 		// Handle selecting.
 		if (mainWindow->isShiftKeyDown())
 		{
 			// Start a new selection if there isn't one.
-			if (selectionStartIndex == selectionEndIndex)
+			if (selectionStartIndex_ == selectionEndIndex_)
 			{
 				// Use the old cursor index as the selection start.
-				selectionStartIndex = oldCursorIndex;
+				selectionStartIndex_ = oldCursorIndex;
 			}
 
-			selectionEndIndex = cursorIndex;
+			selectionEndIndex_ = cursorIndex_;
 		}
 		else
 		{
-			selectionStartIndex = cursorIndex;
-			selectionEndIndex = cursorIndex;
+			selectionStartIndex_ = cursorIndex_;
+			selectionEndIndex_ = cursorIndex_;
 		}
 	}
 }
@@ -108,7 +292,7 @@ void TextEdit::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1)
 	{
 		mainWindow->popLockInputWidget(this);
-		pressed = false;
+		pressed_ = false;
 	}
 }
 
@@ -116,10 +300,10 @@ void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDel
 {
 	if (!(hover && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
 		return;
-	
+
 	mainWindow->setCursor(WZ_CURSOR_IBEAM);
 
-	if (pressed)
+	if (pressed_)
 	{
 		// Move the cursor to the mouse position.
 		int index = indexFromPosition(mouseX, mouseY);
@@ -127,19 +311,19 @@ void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDel
 		if (index == -1)
 			return;
 
-		cursorIndex = index;
+		cursorIndex_ = index;
 		updateScrollIndex();
 
 		// Set the selection end to the new cursor index.
-		selectionEndIndex = cursorIndex;
+		selectionEndIndex_ = cursorIndex_;
 	}
 }
 
 void TextEdit::onMouseWheelMove(int /*x*/, int y)
 {
-	if (multiline && scroller->getVisible())
+	if (multiline_ && scroller_->getVisible())
 	{
-		scroller->setValue(scroller->getValue() - y);
+		scroller_->setValue(scroller_->getValue() - y);
 	}
 }
 
@@ -147,49 +331,49 @@ void TextEdit::onKeyDown(Key key)
 {
 	if (key == WZ_KEY_LEFT)
 	{
-		if (selectionStartIndex != selectionEndIndex)
+		if (selectionStartIndex_ != selectionEndIndex_)
 		{
 			// If the cursor is to the right of the selection start, move the cursor to the start of the selection.
-			if (cursorIndex > selectionStartIndex)
+			if (cursorIndex_ > selectionStartIndex_)
 			{
-				cursorIndex = selectionStartIndex;
+				cursorIndex_ = selectionStartIndex_;
 			}
 
 			// Clear the selection.
-			selectionStartIndex = selectionEndIndex = 0;
+			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 		// Move the cursor to the left, if there's room.
-		else if (cursorIndex > 0)
+		else if (cursorIndex_ > 0)
 		{
-			cursorIndex--;
+			cursorIndex_--;
 		}
 	}
-	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && cursorIndex > 0)
+	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && cursorIndex_ > 0)
 	{
-		moveCursorAndSelection(cursorIndex - 1);
+		moveCursorAndSelection(cursorIndex_ - 1);
 	}
 	else if (key == WZ_KEY_RIGHT)
 	{
-		if (selectionStartIndex != selectionEndIndex)
+		if (selectionStartIndex_ != selectionEndIndex_)
 		{
 			// If the cursor is to the left of the selection start, move the cursor to the start of the selection.
-			if (cursorIndex < selectionStartIndex)
+			if (cursorIndex_ < selectionStartIndex_)
 			{
-				cursorIndex = selectionStartIndex;
+				cursorIndex_ = selectionStartIndex_;
 			}
 
 			// Clear the selection.
-			selectionStartIndex = selectionEndIndex = 0;
+			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 		// Move the cursor to the right, if there's room.
-		else if (cursorIndex < (int)text.length())
+		else if (cursorIndex_ < (int)text_.length())
 		{
-			cursorIndex++;
+			cursorIndex_++;
 		}
 	}
-	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && cursorIndex < (int)text.length())
+	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && cursorIndex_ < (int)text_.length())
 	{
-		moveCursorAndSelection(cursorIndex + 1);
+		moveCursorAndSelection(cursorIndex_ + 1);
 	}
 	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
 	{
@@ -197,7 +381,7 @@ void TextEdit::onKeyDown(Key key)
 		int lineHeight, newCursorIndex;
 
 		// Get the cursor position.
-		cursorPosition = positionFromIndex(cursorIndex);
+		cursorPosition = positionFromIndex(cursorIndex_);
 
 		// Get line height.
 		lineHeight = getLineHeight();
@@ -216,10 +400,10 @@ void TextEdit::onKeyDown(Key key)
 		}
 		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
 		{
-			cursorIndex = newCursorIndex;
+			cursorIndex_ = newCursorIndex;
 
 			// Clear the selection.
-			selectionStartIndex = selectionEndIndex = 0;
+			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 	}
 	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME || WZ_KEY_MOD_OFF(key) == WZ_KEY_END)
@@ -227,7 +411,7 @@ void TextEdit::onKeyDown(Key key)
 		int newCursorIndex;
 
 		// Go to text start/end.
-		if (!multiline || (multiline && (key & WZ_KEY_CONTROL_BIT)))
+		if (!multiline_ || (multiline_ && (key & WZ_KEY_CONTROL_BIT)))
 		{
 			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
 			{
@@ -235,7 +419,7 @@ void TextEdit::onKeyDown(Key key)
 			}
 			else
 			{
-				newCursorIndex = text.length();
+				newCursorIndex = text_.length();
 			}
 		}
 		// Go to line start/end.
@@ -245,7 +429,7 @@ void TextEdit::onKeyDown(Key key)
 			LineBreakResult line;
 			int lineStartIndex, lineEndIndex;
 
-			line.next = text.c_str();
+			line.next = text_.c_str();
 
 			for (;;)
 			{
@@ -253,11 +437,11 @@ void TextEdit::onKeyDown(Key key)
 				WZ_ASSERT(line.start);
 				WZ_ASSERT(line.next);
 
-				lineStartIndex = line.start - text.c_str();
+				lineStartIndex = line.start - text_.c_str();
 				lineEndIndex = lineStartIndex + line.length;
 
 				// Is the cursor index on this line?
-				if (cursorIndex >= lineStartIndex && cursorIndex <= lineEndIndex)
+				if (cursorIndex_ >= lineStartIndex && cursorIndex_ <= lineEndIndex)
 					break;
 
 				if (!line.next || !line.next[0])
@@ -280,37 +464,37 @@ void TextEdit::onKeyDown(Key key)
 		}
 		else
 		{
-			cursorIndex = newCursorIndex;
+			cursorIndex_ = newCursorIndex;
 
 			// Clear the selection.
-			selectionStartIndex = selectionEndIndex = 0;
+			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 	}
-	else if (multiline && key == WZ_KEY_ENTER)
+	else if (multiline_ && key == WZ_KEY_ENTER)
 	{
 		enterText("\r");
 	}
 	else if (key == WZ_KEY_DELETE)
 	{
-		if (selectionStartIndex != selectionEndIndex)
+		if (selectionStartIndex_ != selectionEndIndex_)
 		{
 			deleteSelectedText();
 		}
 		else
 		{
-			deleteText(cursorIndex, 1);
+			deleteText(cursorIndex_, 1);
 		}
 	}
-	else if (key == WZ_KEY_BACKSPACE && cursorIndex > 0)
+	else if (key == WZ_KEY_BACKSPACE && cursorIndex_ > 0)
 	{
-		if (selectionStartIndex != selectionEndIndex)
+		if (selectionStartIndex_ != selectionEndIndex_)
 		{
 			deleteSelectedText();
 		}
 		else
 		{
-			deleteText(cursorIndex - 1, 1);
-			cursorIndex--;
+			deleteText(cursorIndex_ - 1, 1);
+			cursorIndex_--;
 		}
 	}
 	else
@@ -323,7 +507,7 @@ void TextEdit::onKeyDown(Key key)
 
 void TextEdit::onTextInput(const char *text)
 {
-	if (validate_text && !validate_text(text))
+	if (validateText_ && !validateText_(text))
 		return;
 
 	enterText(text);
@@ -339,202 +523,18 @@ Size TextEdit::measure()
 	return renderer->measureTextEdit(this);
 }
 
-void TextEdit::setValidateTextCallback(TextEditValidateTextCallback callback)
-{
-	validate_text = callback;
-}
-
-bool TextEdit::isMultiline() const
-{
-	return multiline;
-}
-
-Border TextEdit::getBorder() const
-{
-	return border;
-}
-
-void TextEdit::setBorder(Border border)
-{
-	this->border = border;
-}
-
-Rect TextEdit::getTextRect() const
-{
-	Rect textRect;
-	textRect = getAbsoluteRect();
-	textRect.x += border.left;
-	textRect.y += border.top;
-	textRect.w -= border.left + border.right;
-	textRect.h -= border.top + border.bottom;
-
-	if (multiline && scroller->getVisible())
-	{
-		textRect.w -= scroller->getWidth();
-	}
-
-	return textRect;
-}
-
-const char *TextEdit::getText() const
-{
-	return text.c_str();
-}
-
-void TextEdit::setText(const char *text)
-{
-	this->text = text;
-	resizeToMeasured();
-}
-
-int TextEdit::getScrollValue() const
-{
-	return scrollValue;
-}
-
-const char *TextEdit::getVisibleText() const
-{
-	if (multiline)
-	{
-		LineBreakResult line;
-		int lineIndex = 0;
-
-		line.next = text.c_str();
-
-		for (;;)
-		{
-			line = lineBreakText(line.next, 0, getTextRect().w);
-
-			if (lineIndex == scrollValue)
-				return line.start;
-
-			if (!line.next || !line.next[0])
-				break;
-
-			lineIndex++;
-		}
-
-		return text.c_str();
-	}
-	else
-	{
-		return &text[scrollValue];
-	}
-}
-
-Position TextEdit::getCursorPosition() const
-{
-	return positionFromIndex(cursorIndex);
-}
-
-bool TextEdit::hasSelection() const
-{
-	return selectionStartIndex != selectionEndIndex;
-}
-
-int TextEdit::getSelectionStartIndex() const
-{
-	return WZ_MIN(selectionStartIndex, selectionEndIndex);
-}
-
-Position TextEdit::getSelectionStartPosition() const
-{
-	return positionFromIndex(WZ_MIN(selectionStartIndex, selectionEndIndex));
-}
-
-int TextEdit::getSelectionEndIndex() const
-{
-	return WZ_MAX(selectionStartIndex, selectionEndIndex);
-}
-
-Position TextEdit::getSelectionEndPosition() const
-{
-	return positionFromIndex(WZ_MAX(selectionStartIndex, selectionEndIndex));
-}
-
-Position TextEdit::positionFromIndex(int index) const
-{
-	// Get the line height.
-	const int lineHeight = getLineHeight();
-	Position position;
-
-	if (text.length() == 0)
-	{
-		// Text is empty.
-		position.x = 0;
-		position.y = lineHeight / 2;
-	}
-	else if (multiline)
-	{
-		LineBreakResult line;
-		int lineNo = 0;
-
-		// Iterate through lines.
-		line.next = text.c_str();
-
-		for (;;)
-		{
-			int lineStartIndex;
-
-			line = lineBreakText(line.next, 0, getTextRect().w);
-			WZ_ASSERT(line.start);
-			WZ_ASSERT(line.next);
-			lineStartIndex = line.start - text.c_str();
-
-			// Is the index on this line?
-			if ((index >= lineStartIndex && index <= lineStartIndex + (int)line.length) || !line.next || !line.next[0])
-			{
-				int width = 0;
-
-				if (index - lineStartIndex > 0)
-				{
-					measureText(line.start, index - lineStartIndex, &width, NULL);
-				}
-
-				position.x = width;
-				position.y = (lineNo - scrollValue) * lineHeight + lineHeight / 2;
-				break;
-			}
-
-			lineNo++;
-		}
-	}
-	else
-	{
-		int width = 0;
-		int delta = index - scrollValue;
-
-		if (delta > 0)
-		{
-			// Text width from the scroll index to the requested index.
-			measureText(&text[scrollValue], delta, &width, NULL);
-		}
-		else if (delta < 0)
-		{
-			// Text width from the requested index to the scroll index.
-			measureText(&text[cursorIndex], -delta, &width, NULL);
-			width = -width;
-		}
-	
-		position.x = width;
-		position.y = lineHeight / 2;
-	}
-
-	return position;
-}
-
 void TextEdit::onScrollerValueChanged(Event e)
 {
-	scrollValue = e.scroller.value;
+	scrollValue_ = e.scroller.value;
 }
 
 int TextEdit::calculateNumLines(int lineWidth)
 {
-	if (!multiline)
+	if (!multiline_)
 		return 0;
 
 	LineBreakResult line;
-	line.next = text.c_str();
+	line.next = text_.c_str();
 	int nLines = 0;
 
 	for (;;)
@@ -552,7 +552,7 @@ int TextEdit::calculateNumLines(int lineWidth)
 
 void TextEdit::updateScroller()
 {
-	if (!multiline)
+	if (!multiline_)
 		return;
 
 	if (!mainWindow)
@@ -560,40 +560,40 @@ void TextEdit::updateScroller()
 
 	// Hide/show scroller depending on if it's needed.
 	const int lineHeight = getLineHeight();
-	int nLines = calculateNumLines(rect.w - (border.left + border.right));
+	int nLines = calculateNumLines(rect.w - (border_.left + border_.right));
 
-	if (lineHeight * nLines > rect.h - (border.top + border.bottom))
+	if (lineHeight * nLines > rect.h - (border_.top + border_.bottom))
 	{
-		scroller->setVisible(true);
+		scroller_->setVisible(true);
 	}
 	else
 	{
-		scroller->setVisible(false);
+		scroller_->setVisible(false);
 		return;
 	}
 
 	// Update max value.
 	nLines = calculateNumLines(getTextRect().w);
 	int max = nLines - (getTextRect().h / lineHeight);
-	scroller->setMaxValue(max);
+	scroller_->setMaxValue(max);
 
 	// Fit to the right of the rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller->rect.w;
-	scrollerRect.x = rect.w - border.right - scrollerRect.w;
-	scrollerRect.y = border.top;
-	scrollerRect.h = rect.h - (border.top + border.bottom);
-	scroller->setRectInternal(scrollerRect);
+	scrollerRect.w = scroller_->rect.w;
+	scrollerRect.x = rect.w - border_.right - scrollerRect.w;
+	scrollerRect.y = border_.top;
+	scrollerRect.h = rect.h - (border_.top + border_.bottom);
+	scroller_->setRectInternal(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
 	const int maxHeight = nLines * lineHeight;
-	scroller->setNubScale(1.0f - ((maxHeight - scrollerRect.h) / (float)maxHeight));
+	scroller_->setNubScale(1.0f - ((maxHeight - scrollerRect.h) / (float)maxHeight));
 }
 
 void TextEdit::insertText(int index, const char *text, int n)
 {
 	WZ_ASSERT(text);
-	this->text.insert(index, text, n);
+	text_.insert(index, text, n);
 
 	// Update the scroller.
 	updateScroller();
@@ -608,22 +608,22 @@ void TextEdit::enterText(const char *text)
 		return;
 
 	// The text replaces the selection.
-	if (selectionStartIndex != selectionEndIndex)
+	if (selectionStartIndex_ != selectionEndIndex_)
 	{
 		deleteSelectedText();
 	}
 
-	insertText(cursorIndex, text, n);
-	cursorIndex += n;
+	insertText(cursorIndex_, text, n);
+	cursorIndex_ += n;
 	updateScrollIndex();
 }
 
 void TextEdit::deleteText(int index, int n)
 {
-	if (index < 0 || index >= (int)text.length())
+	if (index < 0 || index >= (int)text_.length())
 		return;
 
-	text.erase(index, n);
+	text_.erase(index, n);
 
 	// Update the scroller.
 	updateScroller();
@@ -632,18 +632,18 @@ void TextEdit::deleteText(int index, int n)
 void TextEdit::deleteSelectedText()
 {
 	// No selection.
-	if (selectionStartIndex == selectionEndIndex)
+	if (selectionStartIndex_ == selectionEndIndex_)
 		return;
 
-	const int start = WZ_MIN(selectionStartIndex, selectionEndIndex);
-	const int end = WZ_MAX(selectionStartIndex, selectionEndIndex);
+	const int start = WZ_MIN(selectionStartIndex_, selectionEndIndex_);
+	const int end = WZ_MAX(selectionStartIndex_, selectionEndIndex_);
 	deleteText(start, end - start);
 
 	// Move the cursor to the start (smallest of start and end, not the real selection start).
-	cursorIndex = start;
+	cursorIndex_ = start;
 
 	// Clear the selection.
-	selectionStartIndex = selectionEndIndex = 0;
+	selectionStartIndex_ = selectionEndIndex_ = 0;
 }
 
 int TextEdit::indexFromRelativePosition(Position pos) const
@@ -653,22 +653,22 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 	// Calculate relative position.
 	const Rect absRect = getAbsoluteRect();
 
-	if (multiline)
+	if (multiline_)
 	{
 		// Get line height.
 		int lineHeight = getLineHeight();
 
 		// Set line starting position. May be outside the widget.
-		int lineY = lineHeight * -scrollValue;
+		int lineY = lineHeight * -scrollValue_;
 
 		// Iterate through lines.
 		LineBreakResult line;
-		line.next = text.c_str();
+		line.next = text_.c_str();
 
 		for (;;)
 		{
 			line = lineBreakText(line.next, 0, getTextRect().w);
-			result = line.start - text.c_str();
+			result = line.start - text_.c_str();
 
 			if (pos.y >= lineY && pos.y < lineY + lineHeight)
 				break; // On this line.
@@ -721,22 +721,22 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 	{
 		// Outside widget.
 		if (pos.x < 0 || pos.x > absRect.w || pos.y < 0 || pos.y > absRect.h)
-			return scrollValue;
+			return scrollValue_;
 
 		// Walk through the text until we find two glyphs that the x coordinate straddles.
 		int previousWidth = 0;
-		result = scrollValue;
+		result = scrollValue_;
 
-		for (int i = 1; i <= (int)text.length(); i++)
+		for (int i = 1; i <= (int)text_.length(); i++)
 		{
 			// Calculate the width of the text up to the current character.
 			int width;
-			measureText(&text[scrollValue], i, &width, NULL);
+			measureText(&text_[scrollValue_], i, &width, NULL);
 
 			// Check if we've gone beyond the width of the widget.
 			if (width > getTextRect().w)
 			{
-				result = scrollValue + i - 1;
+				result = scrollValue_ + i - 1;
 				break;
 			}
 
@@ -747,18 +747,18 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 			if (pos.x >= previousWidth && pos.x <= previousWidth + deltaWidth / 2)
 			{
 				// Left side of glyph.
-				result = scrollValue + i - 1;
+				result = scrollValue_ + i - 1;
 				break;
 			}
 			else if (pos.x >= previousWidth + deltaWidth / 2 && pos.x <= width)
 			{
 				// Right side of glyph.
-				result = scrollValue + i;
+				result = scrollValue_ + i;
 				break;
 			}
 
 			// Made it to the end of text string.
-			if (i == text.length())
+			if (i == text_.length())
 			{
 				result = i;
 				break;
@@ -769,7 +769,7 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 		}
 	}
 
-	return WZ_CLAMPED(0, result, (int)text.length());
+	return WZ_CLAMPED(0, result, (int)text_.length());
 }
 
 int TextEdit::indexFromPosition(int x, int y)
@@ -784,21 +784,21 @@ int TextEdit::indexFromPosition(int x, int y)
 // Update the scroll value so the cursor is visible.
 void TextEdit::updateScrollIndex()
 {
-	if (multiline)
+	if (multiline_)
 	{
 		for (;;)
 		{
-			const int cursorY = positionFromIndex(cursorIndex).y;
+			const int cursorY = positionFromIndex(cursorIndex_).y;
 
-			if (cursorY > rect.h - (border.top + border.bottom))
+			if (cursorY > rect.h - (border_.top + border_.bottom))
 			{
-				scrollValue++;
-				scroller->setValue(scrollValue);
+				scrollValue_++;
+				scroller_->setValue(scrollValue_);
 			}
 			else if (cursorY < 0)
 			{
-				scrollValue--;
-				scroller->setValue(scrollValue);
+				scrollValue_--;
+				scroller_->setValue(scrollValue_);
 			}
 			else
 			{
@@ -810,15 +810,15 @@ void TextEdit::updateScrollIndex()
 	{
 		for (;;)
 		{
-			const int cursorX = positionFromIndex(cursorIndex).x;
+			const int cursorX = positionFromIndex(cursorIndex_).x;
 
 			if (cursorX > getTextRect().w)
 			{
-				scrollValue++;
+				scrollValue_++;
 			}
 			else if (cursorX < 0)
 			{
-				scrollValue--;
+				scrollValue_--;
 			}
 			else
 			{
@@ -830,18 +830,18 @@ void TextEdit::updateScrollIndex()
 
 void TextEdit::moveCursorAndSelection(int newCursorIndex)
 {
-	if (selectionStartIndex != selectionEndIndex)
+	if (selectionStartIndex_ != selectionEndIndex_)
 	{
 		// If there's already a selection, move the cursor, and the selection end to match.
-		cursorIndex = newCursorIndex;
-		selectionEndIndex = cursorIndex;
+		cursorIndex_ = newCursorIndex;
+		selectionEndIndex_ = cursorIndex_;
 	}
 	else
 	{
 		// No selection, start a new one and move the cursor.
-		selectionStartIndex = cursorIndex;
-		cursorIndex = newCursorIndex;
-		selectionEndIndex = cursorIndex;
+		selectionStartIndex_ = cursorIndex_;
+		cursorIndex_ = newCursorIndex;
+		selectionEndIndex_ = cursorIndex_;
 	}
 }
 

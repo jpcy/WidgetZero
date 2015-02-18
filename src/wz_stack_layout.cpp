@@ -29,37 +29,25 @@ namespace wz {
 StackLayout::StackLayout(StackLayoutDirection direction, int spacing)
 {
 	type = WZ_TYPE_STACK_LAYOUT;
-	this->direction = direction;
-	this->spacing = spacing;
-}
-
-void StackLayout::onRectChanged()
-{
-	if (direction == WZ_STACK_LAYOUT_VERTICAL)
-	{
-		layoutVertical();
-	}
-	else
-	{
-		layoutHorizontal();
-	}
+	direction_ = direction;
+	spacing_ = spacing;
 }
 
 void StackLayout::setDirection(StackLayoutDirection direction)
 {
-	this->direction = direction;
+	direction_ = direction;
 	refreshRect();
 }
 
 void StackLayout::setSpacing(int spacing)
 {
-	this->spacing = spacing;
+	spacing_ = spacing;
 	refreshRect();
 }
 
 int StackLayout::getSpacing() const
 {
-	return spacing;
+	return spacing_;
 }
 
 void StackLayout::add(Widget *widget)
@@ -78,6 +66,18 @@ void StackLayout::remove(Widget *widget)
 	removeChildWidget(widget);
 }
 
+void StackLayout::onRectChanged()
+{
+	if (direction_ == WZ_STACK_LAYOUT_VERTICAL)
+	{
+		layoutVertical();
+	}
+	else
+	{
+		layoutHorizontal();
+	}
+}
+
 void StackLayout::layoutVertical()
 {
 	int availableHeight = rect.h;
@@ -93,7 +93,7 @@ void StackLayout::layoutVertical()
 		// Subtract layout spacing too, except for the first child (because spacing is applied to the top).
 		if (i != 0)
 		{
-			availableHeight -= spacing;
+			availableHeight -= spacing_;
 		}
 
 		if ((children[i]->stretch & WZ_STRETCH_HEIGHT) != 0)
@@ -117,7 +117,7 @@ void StackLayout::layoutVertical()
 
 		if (i != 0)
 		{
-			y += spacing;
+			y += spacing_;
 		}
 
 		y += child->margin.top;
@@ -178,7 +178,7 @@ void StackLayout::layoutHorizontal()
 		// Subtract layout spacing too, except for the first child (because spacing is applied to the left).
 		if (i != 0)
 		{
-			availableWidth -= spacing;
+			availableWidth -= spacing_;
 		}
 
 		if ((children[i]->stretch & WZ_STRETCH_WIDTH) != 0)
@@ -202,7 +202,7 @@ void StackLayout::layoutHorizontal()
 
 		if (i != 0)
 		{
-			x += spacing;
+			x += spacing_;
 		}
 
 		x += child->margin.left;

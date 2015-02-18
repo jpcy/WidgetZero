@@ -623,12 +623,6 @@ void Widget::invokeEvent(Event e)
 			eventHandlers[i]->call(e);
 		}
 	}
-
-	// Call the centralized event handler.
-	if (mainWindow && mainWindow->handle_event)
-	{
-		mainWindow->handle_event(e);
-	}
 }
 
 void Widget::invokeEvent(Event e, const std::vector<EventCallback> &callbacks)

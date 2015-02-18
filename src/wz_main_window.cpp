@@ -45,73 +45,59 @@ void DockPreview::draw(Rect clip)
 MainWindow::MainWindow(IRenderer *renderer)
 {
 	type = WZ_TYPE_MAIN_WINDOW;
-	handle_event = NULL;
-	cursor = WZ_CURSOR_DEFAULT;
+	cursor_ = WZ_CURSOR_DEFAULT;
 	isShiftKeyDown_ = isControlKeyDown_ = false;
-	lockInputWindow = NULL;
-	keyboardFocusWidget = NULL;
-	movingWindow = NULL;
-	windowDockPosition = WZ_DOCK_POSITION_NONE;
-	ignoreDockTabBarChangedEvent = false;
-	menuBar = NULL;
+	lockInputWindow_ = NULL;
+	keyboardFocusWidget_ = NULL;
+	movingWindow_ = NULL;
+	windowDockPosition_ = WZ_DOCK_POSITION_NONE;
+	ignoreDockTabBarChangedEvent_ = false;
+	menuBar_ = NULL;
 
 	this->renderer = renderer;
 	mainWindow = this;
 	isTextCursorVisible_ = true;
 
 	// Create content widget.
-	content = new Widget;
-	content->mainWindow = this;
-	addChildWidget(content);
+	content_ = new Widget;
+	content_->mainWindow = this;
+	addChildWidget(content_);
 
 	// Create dock icon widgets.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		dockIcons[i] = new DockIcon;
-		dockIcons[i]->setVisible(false);
-		dockIcons[i]->setDrawManually(true);
-		addChildWidget(dockIcons[i]);
+		dockIcons_[i] = new DockIcon;
+		dockIcons_[i]->setVisible(false);
+		dockIcons_[i]->setDrawManually(true);
+		addChildWidget(dockIcons_[i]);
 	}
 
 	updateDockIconPositions();
 
 	// Create dock preview widget.
-	dockPreview = new DockPreview;
-	dockPreview->setDrawManually(true);
-	dockPreview->setVisible(false);
-	addChildWidget(dockPreview);
+	dockPreview_ = new DockPreview;
+	dockPreview_->setDrawManually(true);
+	dockPreview_->setVisible(false);
+	addChildWidget(dockPreview_);
 
 	// Create dock tab bars.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		dockTabBars[i] = new TabBar;
-		dockTabBars[i]->setVisible(false);
-		addChildWidget(dockTabBars[i]);
-		dockTabBars[i]->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &MainWindow::onDockTabBarTabChanged);
+		dockTabBars_[i] = new TabBar;
+		dockTabBars_[i]->setVisible(false);
+		addChildWidget(dockTabBars_[i]);
+		dockTabBars_[i]->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &MainWindow::onDockTabBarTabChanged);
 	}
 
 	// Create menu bar.
-	menuBar = new MenuBar;
-	setMenuBar(menuBar);
+	menuBar_ = new MenuBar;
+	setMenuBar(menuBar_);
 }
 
 void MainWindow::createMenuButton(const std::string &label)
 {
-	MenuBarButton *button = menuBar->createButton();
+	MenuBarButton *button = menuBar_->createButton();
 	button->setLabel(label.c_str());
-}
-
-void MainWindow::onRectChanged()
-{
-	// Match the menu bar width to the main window width.
-	if (menuBar)
-	{
-		menuBar->setWidth(rect.w);
-	}
-
-	updateDockIconPositions();
-	updateDockingRects();
-	updateContentRect();
 }
 
 bool MainWindow::isShiftKeyDown() const
@@ -124,28 +110,23 @@ bool MainWindow::isControlKeyDown() const
 	return isControlKeyDown_;
 }
 
-void MainWindow::setEventCallback(EventCallback callback)
-{
-	handle_event = callback;
-}
-
 void MainWindow::mouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
 	// Clear keyboard focus widget.
-	keyboardFocusWidget = NULL;
+	keyboardFocusWidget_ = NULL;
 
-	lockInputWindow = getHoverWindow(mouseX, mouseY);
+	lockInputWindow_ = getHoverWindow(mouseX, mouseY);
 	Widget *widget = this;
 
-	if (!mainWindow->lockInputWidgetStack.empty())
+	if (!lockInputWidgetStack_.empty())
 	{
 		// Lock input to the top/last item on the stack.
-		widget = lockInputWidgetStack.back();
+		widget = lockInputWidgetStack_.back();
 	}
-	else if (mainWindow->lockInputWindow)
+	else if (lockInputWindow_)
 	{
-		updateWindowDrawPriorities(lockInputWindow);
-		widget = lockInputWindow;
+		updateWindowDrawPriorities(lockInputWindow_);
+		widget = lockInputWindow_;
 	}
 
 	mouseButtonDownRecursive(widget, mouseButton, mouseX, mouseY);
@@ -157,28 +138,28 @@ void MainWindow::mouseButtonDown(int mouseButton, int mouseX, int mouseY)
 void MainWindow::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	// Need a special case for dock icons.
-	if (movingWindow)
+	if (movingWindow_)
 	{
 		// If the dock preview is visible, movingWindow can be docked.
-		if (dockPreview->getVisible())
+		if (dockPreview_->getVisible())
 		{
-			dockWindow(movingWindow, windowDockPosition);
+			dockWindow(movingWindow_, windowDockPosition_);
 		}
 
-		dockPreview->setVisible(false);
-		movingWindow = NULL;
+		dockPreview_->setVisible(false);
+		movingWindow_ = NULL;
 	}
 
 	Widget *widget = this;
 
-	if (!lockInputWidgetStack.empty())
+	if (!lockInputWidgetStack_.empty())
 	{
 		// Lock input to the top/last item on the stack.
-		widget = lockInputWidgetStack.back();
+		widget = lockInputWidgetStack_.back();
 	}
-	else if (lockInputWindow)
+	else if (lockInputWindow_)
 	{
-		widget = lockInputWindow;
+		widget = lockInputWindow_;
 	}
 
 	mouseButtonUpRecursive(widget, mouseButton, mouseX, mouseY);
@@ -187,38 +168,38 @@ void MainWindow::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 void MainWindow::mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	// Reset the mouse cursor to default.
-	cursor = WZ_CURSOR_DEFAULT;
+	cursor_ = WZ_CURSOR_DEFAULT;
 
 	// Need a special case for dock icons.
 	updateDockPreviewVisible(mouseX, mouseY);
 
-	if (!lockInputWidgetStack.empty())
+	if (!lockInputWidgetStack_.empty())
 	{
 		// Lock input to the top/last item on the stack.
-		mouseMoveRecursive(NULL, lockInputWidgetStack.back(), mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		mouseMoveRecursive(NULL, lockInputWidgetStack_.back(), mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 		return;
 	}
 
-	lockInputWindow = getHoverWindow(mouseX, mouseY);
+	lockInputWindow_ = getHoverWindow(mouseX, mouseY);
 
 	// Clear hover on everything but the lockInputWindow and it's children.
-	clearHoverRecursive(lockInputWindow, this);
+	clearHoverRecursive(lockInputWindow_, this);
 
-	mouseMoveRecursive(lockInputWindow, this, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	mouseMoveRecursive(lockInputWindow_, this, mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 }
 
 void MainWindow::mouseWheelMove(int x, int y)
 {
 	Widget *widget = this;
 
-	if (!lockInputWidgetStack.empty())
+	if (!lockInputWidgetStack_.empty())
 	{
 		// Lock input to the top/last item on the stack.
-		widget = lockInputWidgetStack.back();
+		widget = lockInputWidgetStack_.back();
 	}
-	else if (lockInputWindow)
+	else if (lockInputWindow_)
 	{
-		widget = lockInputWindow;
+		widget = lockInputWindow_;
 	}
 
 	mouseWheelMoveRecursive(widget, x, y);
@@ -226,7 +207,7 @@ void MainWindow::mouseWheelMove(int x, int y)
 
 void MainWindow::keyDelta(Key key, bool down)
 {
-	Widget *widget = keyboardFocusWidget;
+	Widget *widget = keyboardFocusWidget_;
 
 	if (!widget || !widget->getVisible())
 		return;
@@ -277,7 +258,7 @@ void MainWindow::keyUp(Key key)
 
 void MainWindow::textInput(const char *text)
 {
-	Widget *widget = keyboardFocusWidget;
+	Widget *widget = keyboardFocusWidget_;
 
 	if (!widget || !widget->getVisible())
 		return;
@@ -364,12 +345,12 @@ void MainWindow::draw()
 	drawWidget(this, IsWidgetComboAncestor, IsWidgetTrue);
 
 	// Draw dock preview.
-	dockPreview->drawIfVisible();
+	dockPreview_->drawIfVisible();
 
 	// Draw dock icons.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		dockIcons[i]->drawIfVisible();
+		dockIcons_[i]->drawIfVisible();
 	}
 }
 
@@ -384,8 +365,8 @@ void MainWindow::drawFrame()
 
 void MainWindow::setMenuBar(MenuBar *menuBar)
 {
-	this->menuBar = menuBar;
-	menuBar->setWidth(mainWindow->rect.w);
+	menuBar_ = menuBar;
+	menuBar->setWidth(rect.w);
 	addChildWidget(menuBar);
 }
 
@@ -403,7 +384,7 @@ void MainWindow::add(Widget *widget)
 	}
 	else
 	{
-		content->addChildWidget(widget);
+		content_->addChildWidget(widget);
 	}
 }
 
@@ -418,7 +399,7 @@ void MainWindow::remove(Widget *widget)
 	}
 	else
 	{
-		content->removeChildWidget(widget);
+		content_->removeChildWidget(widget);
 	}
 }
 
@@ -434,22 +415,22 @@ void MainWindow::toggleTextCursor()
 
 void MainWindow::setCursor(Cursor cursor)
 {
-	this->cursor = cursor;
+	cursor_ = cursor;
 }
 
 Cursor MainWindow::getCursor() const
 {
-	return cursor;
+	return cursor_;
 }
 
 const Widget *MainWindow::getKeyboardFocusWidget() const
 {
-	return keyboardFocusWidget;
+	return keyboardFocusWidget_;
 }
 
 void MainWindow::setKeyboardFocusWidget(Widget *widget)
 {
-	keyboardFocusWidget = widget;
+	keyboardFocusWidget_ = widget;
 }
 
 DockPosition MainWindow::getWindowDockPosition(const Window *window) const
@@ -458,9 +439,9 @@ DockPosition MainWindow::getWindowDockPosition(const Window *window) const
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		for (size_t j = 0; j < dockedWindows[i].size(); j++)
+		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
-			if (dockedWindows[i][j] == window)
+			if (dockedWindows_[i][j] == window)
 			{
 				return (DockPosition)i;
 			}
@@ -479,16 +460,16 @@ void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 		return;
 
 	// Don't do anything if this window is already docked at this position.
-	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	for (size_t i = 0; i < dockedWindows_[dockPosition].size(); i++)
 	{
-		if (dockedWindows[dockPosition][i] == window)
+		if (dockedWindows_[dockPosition][i] == window)
 			return;
 	}
 
 	// Hide any other windows docked at the same position.
-	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	for (size_t i = 0; i < dockedWindows_[dockPosition].size(); i++)
 	{
-		dockedWindows[dockPosition][i]->setVisible(false);
+		dockedWindows_[dockPosition][i]->setVisible(false);
 	}
 
 	// Inform the window it is being docked.
@@ -498,17 +479,17 @@ void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
 	window->setRectInternal(calculateDockWindowRect(dockPosition, window->getSize()));
 
 	// Dock the window.
-	dockedWindows[dockPosition].push_back(window);
+	dockedWindows_[dockPosition].push_back(window);
 
 	// Resize the other windows docked at this position to match.
 	updateDockedWindowRect(window);
 
 	// Refresh the tab bar for this dock position.
-	ignoreDockTabBarChangedEvent = true;
+	ignoreDockTabBarChangedEvent_ = true;
 	refreshDockTabBar(dockPosition);
-	ignoreDockTabBarChangedEvent = false;
+	ignoreDockTabBarChangedEvent_ = false;
 
-	// Docked windows affect the mainWindow content rect, so update it.
+	// Docked windows affect the main window content rect, so update it.
 	updateContentRect();
 }
 
@@ -522,9 +503,9 @@ void MainWindow::undockWindow(Window *window)
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		for (size_t j = 0; j < dockedWindows[i].size(); j++)
+		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
-			if (dockedWindows[i][j] == window)
+			if (dockedWindows_[i][j] == window)
 			{
 				dockPosition = (DockPosition)i;
 				windowIndex = j;
@@ -539,24 +520,24 @@ void MainWindow::undockWindow(Window *window)
 	if (windowIndex == -1)
 		return;
 
-	dockedWindows[dockPosition].erase(dockedWindows[dockPosition].begin() + windowIndex);
-	int nDockedWindows = dockedWindows[dockPosition].size();
+	dockedWindows_[dockPosition].erase(dockedWindows_[dockPosition].begin() + windowIndex);
+	int nDockedWindows = dockedWindows_[dockPosition].size();
 
 	// If there are other windows docked at this position, make sure one is visible after removing this window.
 	if (window->getVisible() && nDockedWindows > 0)
 	{
-		dockedWindows[dockPosition][0]->setVisible(true);
+		dockedWindows_[dockPosition][0]->setVisible(true);
 	}
 
 	// Refresh the tab bar for this dock position.
 	refreshDockTabBar(dockPosition);
 
 	// If the dock tab bar is hidden, resize the windows at this dock position to reclaim the space it used.
-	if (!dockTabBars[dockPosition]->getVisible())
+	if (!dockTabBars_[dockPosition]->getVisible())
 	{
-		for (size_t j = 0; j < dockedWindows[dockPosition].size(); j++)
+		for (size_t j = 0; j < dockedWindows_[dockPosition].size(); j++)
 		{
-			Widget *widget = dockedWindows[dockPosition][j];
+			Widget *widget = dockedWindows_[dockPosition][j];
 
 			if (dockPosition == WZ_DOCK_POSITION_SOUTH)
 			{
@@ -577,20 +558,20 @@ void MainWindow::updateDockedWindowRect(Window *window)
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		for (size_t j = 0; j < dockedWindows[i].size(); j++)
+		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
-			if (dockedWindows[i][j] == window)
+			if (dockedWindows_[i][j] == window)
 			{
-				for (size_t k = 0; k < dockedWindows[i].size(); k++)
+				for (size_t k = 0; k < dockedWindows_[i].size(); k++)
 				{
 					if (j == k)
 						continue;
 
-					dockedWindows[i][k]->setRectInternal(rect);
+					dockedWindows_[i][k]->setRectInternal(rect);
 				}
 
 				// Update the tab bar too.
-				dockTabBars[i]->setRectInternal(rect.x, rect.y + rect.h, rect.w, dockTabBars[i]->getHeight());
+				dockTabBars_[i]->setRectInternal(rect.x, rect.y + rect.h, rect.w, dockTabBars_[i]->getHeight());
 				return;
 			}
 		}
@@ -599,29 +580,29 @@ void MainWindow::updateDockedWindowRect(Window *window)
 
 void MainWindow::pushLockInputWidget(Widget *widget)
 {
-	lockInputWidgetStack.push_back(widget);
+	lockInputWidgetStack_.push_back(widget);
 }
 
 void MainWindow::popLockInputWidget(Widget *widget)
 {
 	// Only pop if the widget is on the top of the stack.
-	if (lockInputWidgetStack.empty())
+	if (lockInputWidgetStack_.empty())
 		return;
 
-	if (widget == lockInputWidgetStack.back())
+	if (widget == lockInputWidgetStack_.back())
 	{	
-		lockInputWidgetStack.pop_back();
+		lockInputWidgetStack_.pop_back();
 	}
 }
 
 void MainWindow::setMovingWindow(Window *window)
 {
-	movingWindow = window;
+	movingWindow_ = window;
 
 	// Show the dock icons if movingWindow is not NULL.
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		dockIcons[i]->setVisible(movingWindow != NULL);
+		dockIcons_[i]->setVisible(movingWindow_ != NULL);
 	}
 }
 
@@ -630,9 +611,9 @@ void MainWindow::updateContentRect()
 	Rect rect = this->rect;
 
 	// Adjust the content rect based on the menu bar height.
-	if (menuBar)
+	if (menuBar_)
 	{
-		const int h = menuBar->getHeight();
+		const int h = menuBar_->getHeight();
 		rect.y += h;
 		rect.h -= h;
 	}
@@ -642,10 +623,10 @@ void MainWindow::updateContentRect()
 	{
 		Rect windowRect;
 
-		if (dockedWindows[i].empty())
+		if (dockedWindows_[i].empty())
 			continue;
 
-		windowRect = dockedWindows[i][0]->getRect();
+		windowRect = dockedWindows_[i][0]->getRect();
 
 		switch ((DockPosition)i)
 		{
@@ -666,7 +647,20 @@ void MainWindow::updateContentRect()
 		}
 	}
 
-	content->setRectInternal(rect);
+	content_->setRectInternal(rect);
+}
+
+void MainWindow::onRectChanged()
+{
+	// Match the menu bar width to the main window width.
+	if (menuBar_)
+	{
+		menuBar_->setWidth(rect.w);
+	}
+
+	updateDockIconPositions();
+	updateDockingRects();
+	updateContentRect();
 }
 
 void MainWindow::mouseButtonDownRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY)
@@ -801,7 +795,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent.
-	if (!widget->inputNotClippedToParent && widget->parent && widget->parent != widget->mainWindow && widget->parent != widget->window)
+	if (!widget->inputNotClippedToParent && widget->parent && widget->parent != this && widget->parent != widget->window)
 	{
 		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, widget->parent->getAbsoluteRect());
 	}
@@ -829,7 +823,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 	}
 
 	// Run mouse move if the mouse is hovering over the widget, or if input is locked to the widget.
-	if (widget->hover || (widgetIsChildOfWindow && !widget->mainWindow->lockInputWidgetStack.empty() && widget == widget->mainWindow->lockInputWidgetStack.back()))
+	if (widget->hover || (widgetIsChildOfWindow && !lockInputWidgetStack_.empty() && widget == lockInputWidgetStack_.back()))
 	{
 		widget->onMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
@@ -880,8 +874,8 @@ void MainWindow::drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate 
 	// Update clip rect.
 	if (!Rect::intersect(clip, widget->getChildrenClipRect(), &clip))
 	{
-		// Reset to mainWindow clip rect.
-		clip = widget->mainWindow->getRect();
+		// Reset to main window clip rect.
+		clip = rect;
 	}
 
 	if (!recursePredicate(widget))
@@ -956,7 +950,7 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 
 void MainWindow::onDockTabBarTabChanged(Event e)
 {
-	if (ignoreDockTabBarChangedEvent)
+	if (ignoreDockTabBarChangedEvent_)
 		return;
 
 	// Figure out which dock position this tab bar is at.
@@ -964,7 +958,7 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		if (dockTabBars[i] == e.tabBar.tabBar)
+		if (dockTabBars_[i] == e.tabBar.tabBar)
 		{
 			dockPosition = (DockPosition)i;
 			break;
@@ -983,20 +977,20 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 	// Set the window to visible, hide all the other windows at this dock position.
 	window->setVisible(true);
 
-	for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+	for (size_t i = 0; i < dockedWindows_[dockPosition].size(); i++)
 	{
-		if (dockedWindows[dockPosition][i] == window)
+		if (dockedWindows_[dockPosition][i] == window)
 			continue;
 
-		dockedWindows[dockPosition][i]->setVisible(false);
+		dockedWindows_[dockPosition][i]->setVisible(false);
 	}
 }
 
 void MainWindow::refreshDockTabBar(DockPosition dockPosition)
 {
-	TabBar *tabBar = dockTabBars[dockPosition];
+	TabBar *tabBar = dockTabBars_[dockPosition];
 
-	if (dockedWindows[dockPosition].size() < 2)
+	if (dockedWindows_[dockPosition].size() < 2)
 	{
 		// Hide the tab bar.
 		tabBar->setVisible(false);
@@ -1010,16 +1004,16 @@ void MainWindow::refreshDockTabBar(DockPosition dockPosition)
 		tabBar->clearTabs();
 
 		// Resize the tab bar to match the window(s) at this dock position. Just use the first window, doesn't matter which.
-		windowRect = dockedWindows[dockPosition][0]->getRect();
+		windowRect = dockedWindows_[dockPosition][0]->getRect();
 		tabBarHeight = tabBar->getHeight();
 
 		// Assume space has already been made for the tab bar below the window.
 		tabBar->setRectInternal(windowRect.x, windowRect.y + windowRect.h, windowRect.w, tabBarHeight);
 
 		// Add one tab for each window.
-		for (size_t i = 0; i < dockedWindows[dockPosition].size(); i++)
+		for (size_t i = 0; i < dockedWindows_[dockPosition].size(); i++)
 		{
-			Window *window = dockedWindows[dockPosition][i];
+			Window *window = dockedWindows_[dockPosition][i];
 
 			// Create a new tab.
 			TabButton *tab = tabBar->createTab();
@@ -1045,14 +1039,14 @@ void MainWindow::updateDockingRects()
 {
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		int nWindows = dockedWindows[i].size();
+		int nWindows = dockedWindows_[i].size();
 
 		if (nWindows == 0)
 			continue;
 
 		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
-		Rect windowRect = dockedWindows[i][0]->getRect();
-		int menuBarHeight = menuBar ? menuBar->getHeight() : 0;
+		Rect windowRect = dockedWindows_[i][0]->getRect();
+		int menuBarHeight = menuBar_ ? menuBar_->getHeight() : 0;
 
 		switch (i)
 		{
@@ -1075,7 +1069,7 @@ void MainWindow::updateDockingRects()
 		// Update tab bar rect. Adjust window rect to make space for the tab bar.
 		if (nWindows > 1)
 		{
-			Rect tabBarRect = dockTabBars[i]->getRect();
+			Rect tabBarRect = dockTabBars_[i]->getRect();
 
 			switch (i)
 			{
@@ -1098,13 +1092,13 @@ void MainWindow::updateDockingRects()
 				break;
 			}
 
-			dockTabBars[i]->setRectInternal(tabBarRect);
+			dockTabBars_[i]->setRectInternal(tabBarRect);
 		}
 
 		// Set window rects.
-		for (size_t j = 0; j < dockedWindows[i].size(); j++)
+		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
-			dockedWindows[i][j]->setRectInternal(windowRect);
+			dockedWindows_[i][j]->setRectInternal(windowRect);
 		}
 	}
 }
@@ -1114,20 +1108,20 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 	// e.g. north dock max height is main window height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
-	int menuBarHeight = menuBar ? menuBar->getHeight() : 0;
+	int menuBarHeight = menuBar_ ? menuBar_->getHeight() : 0;
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
-	int nDockedWindows = dockedWindows[dockPosition].size();
+	int nDockedWindows = dockedWindows_[dockPosition].size();
 	Rect rect;
 
 	if (nDockedWindows > 0)
 	{
-		rect = dockedWindows[dockPosition][0]->getRect();
+		rect = dockedWindows_[dockPosition][0]->getRect();
 
 		// If there's exactly one window already docked at this position, leave room for the dock tab bar.
 		if (nDockedWindows == 1)
 		{
-			rect.h -= dockTabBars[dockPosition]->getHeight();
+			rect.h -= dockTabBars_[dockPosition]->getHeight();
 		}
 	}
 	else
@@ -1170,49 +1164,49 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 
 void MainWindow::updateDockIconPositions()
 {
-	// Push icons out this percent/100 from mainWindow edges.
+	// Push icons out this percent/100 from main window edges.
 	const float percent = 0.04f;
 
 	Size ds = getSize();
-	Size dis = dockIcons[WZ_DOCK_POSITION_NORTH]->getSize();
+	Size dis = dockIcons_[WZ_DOCK_POSITION_NORTH]->getSize();
 	int centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
 	int centerH = (int)(ds.h / 2.0f - dis.h / 2.0f);
 
-	dockIcons[WZ_DOCK_POSITION_NORTH]->setPositionInternal(centerW, (int)(ds.h * percent));
-	dockIcons[WZ_DOCK_POSITION_SOUTH]->setPositionInternal(centerW, (int)(ds.h * (1.0f - percent) - dis.h));
-	dockIcons[WZ_DOCK_POSITION_EAST]->setPositionInternal((int)(ds.w * (1.0f - percent) - dis.h), centerH);
-	dockIcons[WZ_DOCK_POSITION_WEST]->setPositionInternal((int)(ds.w * percent), centerH);
+	dockIcons_[WZ_DOCK_POSITION_NORTH]->setPositionInternal(centerW, (int)(ds.h * percent));
+	dockIcons_[WZ_DOCK_POSITION_SOUTH]->setPositionInternal(centerW, (int)(ds.h * (1.0f - percent) - dis.h));
+	dockIcons_[WZ_DOCK_POSITION_EAST]->setPositionInternal((int)(ds.w * (1.0f - percent) - dis.h), centerH);
+	dockIcons_[WZ_DOCK_POSITION_WEST]->setPositionInternal((int)(ds.w * percent), centerH);
 }
 
 void MainWindow::updateDockPreviewRect(DockPosition dockPosition)
 {
-	WZ_ASSERT(movingWindow);
-	const Size windowSize = movingWindow->getSize();
+	WZ_ASSERT(movingWindow_);
+	const Size windowSize = movingWindow_->getSize();
 	const Rect rect = calculateDockWindowRect(dockPosition, windowSize);
-	dockPreview->setRectInternal(rect);
+	dockPreview_->setRectInternal(rect);
 }
 
 void MainWindow::updateDockPreviewVisible(int mouseX, int mouseY)
 {
-	if (!movingWindow)
+	if (!movingWindow_)
 		return;
 
 	bool showDockPreview = false;
 
 	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
 	{
-		const Rect rect = dockIcons[i]->getRect();
+		const Rect rect = dockIcons_[i]->getRect();
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
-			windowDockPosition = (DockPosition)i;
+			windowDockPosition_ = (DockPosition)i;
 			updateDockPreviewRect((DockPosition)i);
 			showDockPreview = true;
 			break;
 		}
 	}
 
-	dockPreview->setVisible(showDockPreview);
+	dockPreview_->setVisible(showDockPreview);
 }
 
 static int CompareWindowDrawPriorities(const void *a, const void *b)

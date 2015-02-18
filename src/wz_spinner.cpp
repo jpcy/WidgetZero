@@ -62,42 +62,66 @@ Spinner::Spinner()
 {
 	type = WZ_TYPE_SPINNER;
 
-	textEdit = new TextEdit(false);
-	textEdit->setStretch(WZ_STRETCH);
-	textEdit->setValidateTextCallback(wz_spinner_validate_text);
-	addChildWidget(textEdit);
+	textEdit_ = new TextEdit(false);
+	textEdit_->setStretch(WZ_STRETCH);
+	textEdit_->setValidateTextCallback(wz_spinner_validate_text);
+	addChildWidget(textEdit_);
 
-	decrementButton = new SpinnerDecrementButton();
-	decrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	decrementButton->setStretch(WZ_STRETCH_HEIGHT);
-	decrementButton->setStretchScale(1, 0.5f);
-	decrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
-	decrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onDecrementButtonClicked);
-	decrementButton->setOverlap(true);
-	addChildWidget(decrementButton);
+	decrementButton_ = new SpinnerDecrementButton();
+	decrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	decrementButton_->setStretch(WZ_STRETCH_HEIGHT);
+	decrementButton_->setStretchScale(1, 0.5f);
+	decrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
+	decrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onDecrementButtonClicked);
+	decrementButton_->setOverlap(true);
+	addChildWidget(decrementButton_);
 
-	incrementButton = new SpinnerIncrementButton();
-	incrementButton->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	incrementButton->setStretch(WZ_STRETCH_HEIGHT);
-	incrementButton->setStretchScale(1, 0.5f);
-	incrementButton->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
-	incrementButton->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onIncrementButtonClicked);
-	incrementButton->setOverlap(true);
-	addChildWidget(incrementButton);
+	incrementButton_ = new SpinnerIncrementButton();
+	incrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
+	incrementButton_->setStretch(WZ_STRETCH_HEIGHT);
+	incrementButton_->setStretchScale(1, 0.5f);
+	incrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
+	incrementButton_->addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &Spinner::onIncrementButtonClicked);
+	incrementButton_->setOverlap(true);
+	addChildWidget(incrementButton_);
+}
+
+int Spinner::getValue() const
+{
+	int value = 0;
+	sscanf(textEdit_->getText(), "%d", &value);
+	return value;
+}
+
+void Spinner::setValue(int value)
+{
+	char buffer[32];
+	sprintf(buffer, "%d", value);
+	textEdit_->setText(buffer);
+}
+
+TextEdit *Spinner::getTextEdit()
+{
+	return textEdit_;
+}
+
+const TextEdit *Spinner::getTextEdit() const
+{
+	return textEdit_;
 }
 
 void Spinner::onRendererChanged()
 {
 	// Shrink the text edit border to exclude the increment and decrement buttons.
-	Border textEditBorder = textEdit->getBorder();
+	Border textEditBorder = textEdit_->getBorder();
 	textEditBorder.right += 16;
-	textEdit->setBorder(textEditBorder);
+	textEdit_->setBorder(textEditBorder);
 }
 
 void Spinner::onFontChanged(const char *fontFace, float fontSize)
 {
 	// Set the text edit font to match.
-	textEdit->setFont(fontFace, fontSize);
+	textEdit_->setFont(fontFace, fontSize);
 }
 
 void Spinner::draw(Rect clip)
@@ -108,20 +132,6 @@ void Spinner::draw(Rect clip)
 Size Spinner::measure()
 {
 	return renderer->measureSpinner(this);
-}
-
-int Spinner::getValue() const
-{
-	int value = 0;
-	sscanf(textEdit->getText(), "%d", &value);
-	return value;
-}
-
-void Spinner::setValue(int value)
-{
-	char buffer[32];
-	sprintf(buffer, "%d", value);
-	textEdit->setText(buffer);
 }
 
 void Spinner::onDecrementButtonClicked(Event e)

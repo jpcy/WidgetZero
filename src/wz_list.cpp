@@ -80,7 +80,7 @@ Rect List::getAbsoluteItemsRect() const
 }
 void List::setDrawItemCallback(DrawListItemCallback callback)
 {
-	this->drawItem_ = callback;
+	drawItem_ = callback;
 }
 
 DrawListItemCallback List::getDrawItemCallback() const

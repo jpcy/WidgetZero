@@ -105,32 +105,6 @@ Tabbed::Tabbed()
 	addChildWidget(tabBar);
 }
 
-void Tabbed::onRectChanged()
-{
-	// Set the tab bar width to match.
-	tabBar->setWidthInternal(rect.w);
-
-	// Resize the pages to take up the remaining space.
-	Size pageSize;
-	pageSize.w = rect.w;
-	pageSize.h = rect.h - tabBar->getHeight();
-
-	for (size_t i = 0; i < pages.size(); i++)
-	{
-		pages[i].page->setSizeInternal(pageSize);
-	}
-}
-
-void Tabbed::draw(Rect clip)
-{
-	renderer->drawTabbed(this, clip);
-}
-
-Size Tabbed::measure()
-{
-	return renderer->measureTabbed(this);
-}
-
 void Tabbed::addTab(Tab *tab)
 {
 	addTab(&tab->button, &tab->page);
@@ -158,6 +132,32 @@ void Tabbed::addTab(TabButton **tab, TabPage **page)
 	newPage.tab = *tab;
 	newPage.page = *page;
 	pages.push_back(newPage);
+}
+
+void Tabbed::onRectChanged()
+{
+	// Set the tab bar width to match.
+	tabBar->setWidthInternal(rect.w);
+
+	// Resize the pages to take up the remaining space.
+	Size pageSize;
+	pageSize.w = rect.w;
+	pageSize.h = rect.h - tabBar->getHeight();
+
+	for (size_t i = 0; i < pages.size(); i++)
+	{
+		pages[i].page->setSizeInternal(pageSize);
+	}
+}
+
+void Tabbed::draw(Rect clip)
+{
+	renderer->drawTabbed(this, clip);
+}
+
+Size Tabbed::measure()
+{
+	return renderer->measureTabbed(this);
 }
 
 void Tabbed::onTabChanged(Event e)

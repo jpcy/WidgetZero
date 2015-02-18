@@ -464,7 +464,7 @@ public:
 	void setSizeInternal(int w, int h);
 	void setSizeInternal(Size size);
 
-private:
+protected:
 	void setRectInternalRecursive(Rect rect);
 
 public:
@@ -555,7 +555,7 @@ public:
 	void invokeEvent(Event e);
 	void invokeEvent(Event e, const std::vector<EventCallback> &callbacks);
 
-private:
+protected:
 	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
 	Rect calculateAlignedStretchedRect(Rect rect) const;
 
@@ -807,14 +807,8 @@ class MainWindow : public Widget
 public:
 	MainWindow(IRenderer *renderer);
 	void createMenuButton(const std::string &label);
-	virtual void onRectChanged();
-
 	bool isShiftKeyDown() const;
 	bool isControlKeyDown() const;
-
-	// Set the centralized event handler. All events invoked by the ancestor widgets of this mainWindow will call the callback function.
-	void setEventCallback(EventCallback callback);
-
 	void mouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	void mouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	void mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -831,6 +825,7 @@ public:
 	void toggleTextCursor();
 	void setCursor(Cursor cursor);
 	Cursor getCursor() const;
+
 	const Widget *getKeyboardFocusWidget() const;
 
 	// Set keyboard focus to this widget.
@@ -852,44 +847,9 @@ public:
 	void setMovingWindow(Window *window);
 	void updateContentRect();
 
-	Widget *content;
+protected:
+	virtual void onRectChanged();
 
-	// Centralized event handler.
-	EventCallback handle_event;
-
-	bool isTextCursorVisible_;
-
-	Cursor cursor;
-
-	bool isShiftKeyDown_, isControlKeyDown_;
-
-	std::vector<Widget *> lockInputWidgetStack;
-
-	// Lock input to this window, i.e. don't call onMouseMove, onMouseButtonDown or onMouseButtonUp on any widget that isn't this window or it's descendants.
-	Window *lockInputWindow;
-
-	Widget *keyboardFocusWidget;
-
-	// This window is currently being moved and may be docked.
-	Window *movingWindow;
-
-	// Hidden from the consumer.
-	DockIcon *dockIcons[WZ_NUM_DOCK_POSITIONS];
-	DockPreview *dockPreview;
-
-	std::vector<Window *> dockedWindows[WZ_NUM_DOCK_POSITIONS];
-
-	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
-	DockPosition windowDockPosition;
-
-	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
-	TabBar *dockTabBars[WZ_NUM_DOCK_POSITIONS];
-
-	bool ignoreDockTabBarChangedEvent;
-
-	MenuBar *menuBar;
-
-private:
 	void mouseButtonDownRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
 	void mouseButtonUpRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
 
@@ -916,65 +876,99 @@ private:
 
 	void refreshDockTabBar(DockPosition dockPosition);
 
-public: // FIXME
 	void updateDockingRects();
 
-private:
 	Rect calculateDockWindowRect(DockPosition dockPosition, Size windowSize);
 
-public: // FIXME
 	void updateDockIconPositions();
 
-private:
 	void updateDockPreviewRect(DockPosition dockPosition);
 	void updateDockPreviewVisible(int mouseX, int mouseY);
 
 	// top can be NULL
 	void updateWindowDrawPriorities(Window *top);
+
+	Widget *content_;
+
+	bool isTextCursorVisible_;
+
+	Cursor cursor_;
+
+	bool isShiftKeyDown_, isControlKeyDown_;
+
+	std::vector<Widget *> lockInputWidgetStack_;
+
+	// Lock input to this window, i.e. don't call onMouseMove, onMouseButtonDown or onMouseButtonUp on any widget that isn't this window or it's descendants.
+	Window *lockInputWindow_;
+
+	Widget *keyboardFocusWidget_;
+
+	// This window is currently being moved and may be docked.
+	Window *movingWindow_;
+
+	// Hidden from the consumer.
+	DockIcon *dockIcons_[WZ_NUM_DOCK_POSITIONS];
+	DockPreview *dockPreview_;
+
+	std::vector<Window *> dockedWindows_[WZ_NUM_DOCK_POSITIONS];
+
+	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
+	DockPosition windowDockPosition_;
+
+	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
+	TabBar *dockTabBars_[WZ_NUM_DOCK_POSITIONS];
+
+	bool ignoreDockTabBarChangedEvent_;
+
+	MenuBar *menuBar_;
 };
 
 class MenuBarButton : public Widget
 {
 public:
-	MenuBarButton();
+	MenuBarButton(MenuBar *menuBar);
+	void setLabel(const char *label);
+	const char *getLabel() const;
+	bool isPressed() const;
+
+protected:
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseHoverOn();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	void setLabel(const char *label);
-	const char *getLabel() const;
-	bool isPressed() const;
 
-	Border padding;
-	std::string label;
+	Border padding_;
+	std::string label_;
 	bool isPressed_;
-	bool isSet;
-	std::vector<EventCallback> pressed_callbacks;
-	MenuBar *menuBar;
+	bool isSet_;
+	std::vector<EventCallback> pressedCallbacks_;
+	MenuBar *menuBar_;
 };
 
 class MenuBar : public Widget
 {
 public:
 	MenuBar();
+	MenuBarButton *createButton();
+
+protected:
 	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	MenuBarButton *createButton();
 
-	StackLayout *layout;
+	StackLayout *layout_;
 };
 
 class RadioButton : public Button
 {
 public:
 	RadioButton(const std::string &label = std::string());
+
+protected:
 	virtual void onParented(Widget *parent);
 	virtual void draw(Rect clip);
 	virtual Size measure();
-
-protected:
 	void onClicked(Event e);
 };
 
@@ -982,19 +976,22 @@ class ScrollerNub : public Widget
 {
 public:
 	ScrollerNub(Scroller *scroller);
+	bool isPressed() const;
+	void updateRect();
+
+protected:
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	void updateRect();
 
-	Scroller *scroller;
-	bool isPressed;
+	Scroller *scroller_;
+	bool isPressed_;
 
 	// The position of the nub when the it was pressed.
-	Position pressPosition;
+	Position pressPosition_;
 
 	// The position of the mouse when the nub was pressed.
-	Position pressMousePosition;
+	Position pressMousePosition_;
 };
 
 enum ScrollerType
@@ -1007,10 +1004,6 @@ class Scroller : public Widget
 {
 public:
 	Scroller(ScrollerType scrollerType, int value = 0, int stepValue = 1, int maxValue = 0);
-	virtual void onRectChanged();
-	virtual void onMouseWheelMove(int x, int y);
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	ScrollerType getType() const;
 	int getValue() const;
 	void setValue(int value);
@@ -1019,19 +1012,27 @@ public:
 	void setStepValue(int stepValue);
 	int getStepValue();
 	void setMaxValue(int maxValue);
+	int getMaxValue() const;
 	void setNubScale(float nubScale);
+	float getNubScale() const;
+	ScrollerNub *getNub();
+	const ScrollerNub *getNub() const;
 	void getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const;
 	void addCallbackValueChanged(EventCallback callback);
 
-	ScrollerType scrollerType;
-	int value, stepValue, maxValue;
-	float nubScale;
-	ScrollerNub *nub;
-	std::vector<EventCallback> value_changed_callbacks;
-
 protected:
+	virtual void onRectChanged();
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void onDecrementButtonClicked(Event e);
 	void onIncrementButtonClicked(Event e);
+
+	ScrollerType scrollerType_;
+	int value_, stepValue_, maxValue_;
+	float nubScale_;
+	ScrollerNub *nub_;
+	std::vector<EventCallback> valueChangedCallbacks_;
 };
 
 class SpinnerDecrementButton;
@@ -1041,20 +1042,22 @@ class Spinner : public Widget
 {
 public:
 	Spinner();
+	int getValue() const;
+	void setValue(int value);
+	TextEdit *getTextEdit();
+	const TextEdit *getTextEdit() const;
+
+protected:
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	int getValue() const;
-	void setValue(int value);
-
-	TextEdit *textEdit;
-	SpinnerDecrementButton *decrementButton;
-	SpinnerIncrementButton *incrementButton;
-
-protected:
 	void onDecrementButtonClicked(Event e);
 	void onIncrementButtonClicked(Event e);
+
+	TextEdit *textEdit_;
+	SpinnerDecrementButton *decrementButton_;
+	SpinnerIncrementButton *incrementButton_;
 };
 
 enum StackLayoutDirection
@@ -1067,27 +1070,29 @@ class StackLayout : public Widget
 {
 public:
 	StackLayout(StackLayoutDirection direction, int spacing = 0);
-	virtual void onRectChanged();
 	void setDirection(StackLayoutDirection direction);
 	void setSpacing(int spacing);
 	int getSpacing() const;
 	void add(Widget *widget);
 	void remove(Widget *widget);
 
-	StackLayoutDirection direction;
-
-	// Spacing between child widgets. Applied to the top/left of children.
-	int spacing;
-
-private:
+protected:
+	virtual void onRectChanged();
 	void layoutVertical();
 	void layoutHorizontal();
+
+	StackLayoutDirection direction_;
+
+	// Spacing between child widgets. Applied to the top/left of children.
+	int spacing_;
 };
 
 class TabButton : public Button
 {
 public:
 	TabButton(const std::string &label = std::string());
+
+protected:
 	virtual void draw(Rect clip);
 };
 
@@ -1095,9 +1100,6 @@ class TabBar : public Widget
 {
 public:
 	TabBar();
-	virtual void onRectChanged();
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	TabButton *createTab();
 	void destroyTab(TabButton *tab);
 	void clearTabs();
@@ -1108,16 +1110,11 @@ public:
 	void addCallbackTabChanged(EventCallback callback);
 	int getScrollValue() const;
 
-	TabButton *selectedTab;
-	std::vector<TabButton *> tabs;
-
-	int scrollValue;
-	Button *decrementButton;
-	Button *incrementButton;
-
-	std::vector<EventCallback> tab_changed_callbacks;
-
 protected:
+	virtual void onRectChanged();
+	virtual void draw(Rect clip);
+	virtual Size measure();
+
 	// Sets the scroll value, and repositions and shows/hides the tabs accordingly.
 	void setScrollValue(int value);
 
@@ -1131,6 +1128,15 @@ protected:
 	void updateScrollButtons();
 
 	void updateTabs();
+
+	TabButton *selectedTab_;
+	std::vector<TabButton *> tabs_;
+
+	int scrollValue_;
+	Button *decrementButton_;
+	Button *incrementButton_;
+
+	std::vector<EventCallback> tabChangedCallbacks_;
 };
 
 class TabPage : public Widget
@@ -1165,9 +1171,6 @@ class Tabbed : public Widget
 {
 public:
 	Tabbed();
-	virtual void onRectChanged();
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	void addTab(Tab *tab);
 	void addTab(TabButton **tab, TabPage **page);
 
@@ -1175,6 +1178,9 @@ public:
 	std::vector<TabbedPage> pages;
 
 protected:
+	virtual void onRectChanged();
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void onTabChanged(Event e);
 };
 
@@ -1184,16 +1190,6 @@ class TextEdit : public Widget
 {
 public:
 	TextEdit(bool multiline, const std::string &text = std::string());
-	virtual void onRendererChanged();
-	virtual void onRectChanged();
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	virtual void onMouseWheelMove(int x, int y);
-	virtual void onKeyDown(Key key);
-	virtual void onTextInput(const char *text);
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	void setValidateTextCallback(TextEditValidateTextCallback callback);
 	bool isMultiline() const;
 	Border getBorder() const;
@@ -1224,18 +1220,17 @@ public:
 	// Calculate the position of the index - relative to text rect - based on the cursor index and scroll index. 
 	Position positionFromIndex(int index) const;
 
-	Scroller *scroller;
-	bool multiline;
-	TextEditValidateTextCallback validate_text;
-	Border border;
-	bool pressed;
-	int cursorIndex;
-	int scrollValue;
-	int selectionStartIndex;
-	int selectionEndIndex;
-	std::string text;
-
 protected:
+	virtual void onRendererChanged();
+	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void onKeyDown(Key key);
+	virtual void onTextInput(const char *text);
+	virtual void draw(Rect clip);
+	virtual Size measure();
 	void onScrollerValueChanged(Event e);
 	int calculateNumLines(int lineWidth);
 	void updateScroller();
@@ -1255,6 +1250,17 @@ protected:
 
 	// Helper function for moving the cursor while the selection (shift) key is held.
 	void moveCursorAndSelection(int newCursorIndex);
+
+	Scroller *scroller_;
+	bool multiline_;
+	TextEditValidateTextCallback validateText_;
+	Border border_;
+	bool pressed_;
+	int cursorIndex_;
+	int scrollValue_;
+	int selectionStartIndex_;
+	int selectionEndIndex_;
+	std::string text_;
 };
 
 class ToggleButton : public Button
@@ -1294,15 +1300,6 @@ class Window : public Widget
 {
 public:
 	Window(const std::string &title);
-	virtual void onRendererChanged();
-	virtual void onFontChanged(const char *fontFace, float fontSize);
-	virtual void onRectChanged();
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	virtual Rect getChildrenClipRect() const;
-	virtual void draw(Rect clip);
-	virtual Size measure();
 	int getHeaderHeight() const;
 	int getBorderSize() const;
 	Rect getHeaderRect() const;
@@ -1318,25 +1315,17 @@ public:
 	void add(Widget *widget);
 	void remove(Widget *widget);
 
-	int drawPriority;
-	int headerHeight;
-	int borderSize;
-	std::string title;
+protected:
+	virtual void onRendererChanged();
+	virtual void onFontChanged(const char *fontFace, float fontSize);
+	virtual void onRectChanged();
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual Rect getChildrenClipRect() const;
+	virtual void draw(Rect clip);
+	virtual Size measure();
 
-	Widget *content;
-
-	WindowDrag drag;
-
-	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
-	Position undockStartPosition;
-
-	Position resizeStartPosition;
-	Rect resizeStartRect;
-
-	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
-	Size sizeBeforeDocking;
-
-private:
 	void refreshHeaderHeight();
 
 	// rects parameter size should be WZ_NUM_COMPASS_POINTS
@@ -1344,6 +1333,22 @@ private:
 
 	// borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
 	void calculateMouseOverBorderRects(int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects);
+
+	int drawPriority_;
+	int headerHeight_;
+	int borderSize_;
+	std::string title_;
+	Widget *content_;
+	WindowDrag drag_;
+
+	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
+	Position undockStartPosition_;
+
+	Position resizeStartPosition_;
+	Rect resizeStartRect_;
+
+	// Remember the window size when it is docked, so when the window is undocked the size can be restored.
+	Size sizeBeforeDocking_;
 };
 
 } // namespace wz

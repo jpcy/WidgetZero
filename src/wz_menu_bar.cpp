@@ -35,11 +35,27 @@ MENU BAR BUTTON
 ================================================================================
 */
 
-MenuBarButton::MenuBarButton()
+MenuBarButton::MenuBarButton(MenuBar *menuBar)
 {
 	type = WZ_TYPE_BUTTON;
-	isPressed_ = isSet = false;
-	menuBar = NULL;
+	isPressed_ = isSet_ = false;
+	menuBar_ = menuBar;
+}
+
+void MenuBarButton::setLabel(const char *label)
+{
+	label_ = label;
+	resizeToMeasured();
+}
+
+const char *MenuBarButton::getLabel() const
+{
+	return label_.c_str();
+}
+
+bool MenuBarButton::isPressed() const
+{
+	return isPressed_;
 }
 
 void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -49,7 +65,7 @@ void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		isPressed_ = true;
 
 		// Lock input to the menu bar, not this button.
-		mainWindow->pushLockInputWidget(menuBar);
+		mainWindow->pushLockInputWidget(menuBar_);
 	}
 }
 
@@ -66,9 +82,9 @@ void MenuBarButton::onMouseHoverOn()
 {
 	// See if any of the other buttons in the menubar are pressed.
 	// If one is pressed, unpress it and press this one instead.
-	for (size_t i = 0; i < menuBar->children[0]->children.size(); i++)
+	for (size_t i = 0; i < menuBar_->children[0]->children.size(); i++)
 	{
-		MenuBarButton *otherButton = (MenuBarButton *)menuBar->children[0]->children[i];
+		MenuBarButton *otherButton = (MenuBarButton *)menuBar_->children[0]->children[i];
 
 		if (otherButton == this || !otherButton->isPressed_)
 			continue;
@@ -89,29 +105,6 @@ Size MenuBarButton::measure()
 	return renderer->measureMenuBarButton(this);
 }
 
-void MenuBarButton::setLabel(const char *label)
-{
-	this->label = label;
-	resizeToMeasured();
-}
-
-const char *MenuBarButton::getLabel() const
-{
-	return label.c_str();
-}
-
-bool MenuBarButton::isPressed() const
-{
-	return isPressed_;
-}
-
-static MenuBarButton *wz_menu_bar_button_create(MenuBar *menuBar)
-{
-	MenuBarButton *button = new MenuBarButton;
-	button->menuBar = menuBar;
-	return button;
-}
-
 /*
 ================================================================================
 
@@ -124,9 +117,17 @@ MenuBar::MenuBar()
 {
 	type = WZ_TYPE_MENU_BAR;
 
-	layout = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	layout->setStretch(WZ_STRETCH);
-	addChildWidget(layout);
+	layout_ = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
+	layout_->setStretch(WZ_STRETCH);
+	addChildWidget(layout_);
+}
+
+MenuBarButton *MenuBar::createButton()
+{
+	MenuBarButton *button = new MenuBarButton(this);
+	button->setStretch(WZ_STRETCH_HEIGHT);
+	layout_->add(button);
+	return button;
 }
 
 void MenuBar::onRendererChanged()
@@ -142,14 +143,6 @@ void MenuBar::draw(Rect clip)
 Size MenuBar::measure()
 {
 	return renderer->measureMenuBar(this);
-}
-
-MenuBarButton *MenuBar::createButton()
-{
-	MenuBarButton *button = wz_menu_bar_button_create(this);
-	button->setStretch(WZ_STRETCH_HEIGHT);
-	layout->add(button);
-	return button;
 }
 
 } // namespace wz

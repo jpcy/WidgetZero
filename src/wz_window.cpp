@@ -31,15 +31,82 @@ namespace wz {
 Window::Window(const std::string &title)
 {
 	type = WZ_TYPE_WINDOW;
-	drawPriority = 0;
-	headerHeight = 0;
-	borderSize = 4;
-	drag = WZ_DRAG_NONE;
+	drawPriority_ = 0;
+	headerHeight_ = 0;
+	borderSize_ = 4;
+	drag_ = WZ_DRAG_NONE;
+	title_ = title;
 
-	this->title = title;
+	content_ = new Widget;
+	addChildWidget(content_);
+}
 
-	content = new Widget;
-	addChildWidget(content);
+int Window::getHeaderHeight() const
+{
+	return headerHeight_;
+}
+
+int Window::getBorderSize() const
+{
+	return borderSize_;
+}
+
+Rect Window::getHeaderRect() const
+{
+	Rect rect;
+	rect.x = this->rect.x + borderSize_;
+	rect.y = this->rect.y + borderSize_;
+	rect.w = this->rect.w - borderSize_ * 2;
+	rect.h = headerHeight_;
+	return rect;
+}
+
+void Window::setTitle(const char *title)
+{
+	title_ = title;
+}
+
+const char *Window::getTitle() const
+{
+	return title_.c_str();
+}
+
+Widget *Window::getContentWidget()
+{
+	return content_;
+}
+
+int Window::getDrawPriority() const
+{
+	return drawPriority_;
+}
+
+void Window::setDrawPriority(int drawPriority)
+{
+	drawPriority_ = drawPriority;
+}
+
+void Window::dock()
+{
+	// Save the window size before docking so it can be restored if the window is undocked later.
+	sizeBeforeDocking_.w = rect.w;
+	sizeBeforeDocking_.h = rect.h;
+}
+
+void Window::add(Widget *widget)
+{
+	WZ_ASSERT(widget);
+
+	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+		return;
+
+	content_->addChildWidget(widget);
+}
+
+void Window::remove(Widget *widget)
+{
+	WZ_ASSERT(widget);
+	content_->removeChildWidget(widget);
 }
 
 void Window::onRendererChanged()
@@ -57,11 +124,11 @@ void Window::onFontChanged(const char *fontFace, float fontSize)
 void Window::onRectChanged()
 {
 	Rect contentRect;
-	contentRect.x = borderSize;
-	contentRect.y = borderSize + headerHeight;
-	contentRect.w = rect.w - borderSize * 2;
-	contentRect.h = rect.h - (headerHeight + borderSize * 2);
-	content->setRectInternal(contentRect);
+	contentRect.x = borderSize_;
+	contentRect.y = borderSize_ + headerHeight_;
+	contentRect.w = rect.w - borderSize_ * 2;
+	contentRect.h = rect.h - (headerHeight_ + borderSize_ * 2);
+	content_->setRectInternal(contentRect);
 }
 
 void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -71,7 +138,7 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		// Drag the header.
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, getHeaderRect()))
 		{
-			drag = WZ_DRAG_HEADER;
+			drag_ = WZ_DRAG_HEADER;
 			mainWindow->pushLockInputWidget(this);
 
 			// Don't actually move the window yet if it's docked.
@@ -81,8 +148,8 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 			}
 			else
 			{
-				undockStartPosition.x = mouseX;
-				undockStartPosition.y = mouseY;
+				undockStartPosition_.x = mouseX;
+				undockStartPosition_.y = mouseY;
 			}
 
 			return;
@@ -99,10 +166,10 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		{
 			if (mouseOverBorderRects[i])
 			{
-				drag = (WindowDrag)(WZ_DRAG_RESIZE_N + i);
-				resizeStartPosition.x = mouseX;
-				resizeStartPosition.y = mouseY;
-				resizeStartRect = rect;
+				drag_ = (WindowDrag)(WZ_DRAG_RESIZE_N + i);
+				resizeStartPosition_.x = mouseX;
+				resizeStartPosition_.y = mouseY;
+				resizeStartRect_ = rect;
 				mainWindow->pushLockInputWidget(this);
 				return;
 			}
@@ -114,12 +181,12 @@ void Window::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
-		if (drag == WZ_DRAG_HEADER)
+		if (drag_ == WZ_DRAG_HEADER)
 		{
 			mainWindow->setMovingWindow(NULL);
 		}
 
-		drag = WZ_DRAG_NONE;
+		drag_ = WZ_DRAG_NONE;
 		mainWindow->popLockInputWidget(this);
 	}
 }
@@ -133,19 +200,19 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 	calculateBorderRects(borderRects);
 	calculateMouseOverBorderRects(mouseX, mouseY, borderRects, mouseOverBorderRects);
 
-	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || drag == WZ_DRAG_RESIZE_N || drag == WZ_DRAG_RESIZE_S)
+	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || drag_ == WZ_DRAG_RESIZE_N || drag_ == WZ_DRAG_RESIZE_S)
 	{
 		mainWindow->setCursor(WZ_CURSOR_RESIZE_N_S);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || drag == WZ_DRAG_RESIZE_E || drag == WZ_DRAG_RESIZE_W)
+	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || drag_ == WZ_DRAG_RESIZE_E || drag_ == WZ_DRAG_RESIZE_W)
 	{
 		mainWindow->setCursor(WZ_CURSOR_RESIZE_E_W);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || drag == WZ_DRAG_RESIZE_NE || drag == WZ_DRAG_RESIZE_SW)
+	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || drag_ == WZ_DRAG_RESIZE_NE || drag_ == WZ_DRAG_RESIZE_SW)
 	{
 		mainWindow->setCursor(WZ_CURSOR_RESIZE_NE_SW);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || drag == WZ_DRAG_RESIZE_NW || drag == WZ_DRAG_RESIZE_SE)
+	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || drag_ == WZ_DRAG_RESIZE_NW || drag_ == WZ_DRAG_RESIZE_SE)
 	{
 		mainWindow->setCursor(WZ_CURSOR_RESIZE_NW_SE);
 	}
@@ -153,12 +220,12 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 	// Don't actually move the window yet if it's docked.
 	const DockPosition dockPosition = mainWindow->getWindowDockPosition(this);
 
-	if (drag == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
+	if (drag_ == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
 	{
 		Position delta;
 
-		delta.x = mouseX - undockStartPosition.x;
-		delta.y = mouseY - undockStartPosition.y;
+		delta.x = mouseX - undockStartPosition_.x;
+		delta.y = mouseY - undockStartPosition_.y;
 
 		// Undock and start moving if the mouse has moved far enough.
 		if ((int)sqrtf((float)(delta.x * delta.x + delta.y * delta.y)) < WZ_WINDOW_UNDOCK_DISTANCE)
@@ -171,11 +238,11 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 		Rect newRect = rect;
 		newRect.x += delta.x;
 		newRect.y += delta.y;
-		newRect.w = WZ_MAX(200, sizeBeforeDocking.w);
-		newRect.h = WZ_MAX(200, sizeBeforeDocking.h);
+		newRect.w = WZ_MAX(200, sizeBeforeDocking_.w);
+		newRect.h = WZ_MAX(200, sizeBeforeDocking_.h);
 
 		// If the mouse cursor would be outside the window, center the window on the mouse cursor.
-		if (mouseX < newRect.x + borderSize || mouseX > newRect.x + newRect.w - borderSize)
+		if (mouseX < newRect.x + borderSize_ || mouseX > newRect.x + newRect.w - borderSize_)
 		{
 			newRect.x = mouseX - newRect.w / 2;
 		}
@@ -185,76 +252,76 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 	}
 
 	// Calculate the minimum allowed window size.
-	const Size minimumWindowSize(borderSize * 2, headerHeight + borderSize * 2);
+	const Size minimumWindowSize(borderSize_ * 2, headerHeight_ + borderSize_ * 2);
 
 	// Calculate mouse deltas for dragging. Deltas are relative to the dragging start position (mouseDeltaX and mouseDeltaY are relative to the last mouse position).
 	Position resizeDelta;
 
-	if (drag >= WZ_DRAG_RESIZE_N)
+	if (drag_ >= WZ_DRAG_RESIZE_N)
 	{
-		resizeDelta.x = mouseX - resizeStartPosition.x;
-		resizeDelta.y = mouseY - resizeStartPosition.y;
+		resizeDelta.x = mouseX - resizeStartPosition_.x;
+		resizeDelta.y = mouseY - resizeStartPosition_.y;
 	}
 
 	Rect newRect = rect;
 
-	switch (drag)
+	switch (drag_)
 	{
 	case WZ_DRAG_HEADER:
 		newRect.x += mouseDeltaX;
 		newRect.y += mouseDeltaY;
 		break;
 	case WZ_DRAG_RESIZE_N:
-		{
-			int delta = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
-			newRect.y = resizeStartRect.y + delta;
-			newRect.h = resizeStartRect.h - delta;
-		}
-		break;
+	{
+		int delta = WZ_MIN(resizeDelta.y, resizeStartRect_.h - minimumWindowSize.h);
+		newRect.y = resizeStartRect_.y + delta;
+		newRect.h = resizeStartRect_.h - delta;
+	}
+	break;
 	case WZ_DRAG_RESIZE_NE:
-		{
-			int delta = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
-			newRect.y = resizeStartRect.y + delta;
-			newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
-			newRect.h = resizeStartRect.h - delta;
-		}
-		break;
+	{
+		int delta = WZ_MIN(resizeDelta.y, resizeStartRect_.h - minimumWindowSize.h);
+		newRect.y = resizeStartRect_.y + delta;
+		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect_.w + resizeDelta.x);
+		newRect.h = resizeStartRect_.h - delta;
+	}
+	break;
 	case WZ_DRAG_RESIZE_E:
-		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
+		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect_.w + resizeDelta.x);
 		break;
 	case WZ_DRAG_RESIZE_SE:
-		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect.w + resizeDelta.x);
-		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
+		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect_.w + resizeDelta.x);
+		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_S:
-		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
+		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
 		break;
 	case WZ_DRAG_RESIZE_SW:
-		{
-			int delta = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
-			newRect.x = resizeStartRect.x + delta;
-			newRect.w = resizeStartRect.w - delta;
-			newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect.h + resizeDelta.y);
-		}
-		break;
+	{
+		int delta = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
+		newRect.x = resizeStartRect_.x + delta;
+		newRect.w = resizeStartRect_.w - delta;
+		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
+	}
+	break;
 	case WZ_DRAG_RESIZE_W:
-		{
-			int delta = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
-			newRect.x = resizeStartRect.x + delta;
-			newRect.w = resizeStartRect.w - delta;
-		}
-		break;
+	{
+		int delta = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
+		newRect.x = resizeStartRect_.x + delta;
+		newRect.w = resizeStartRect_.w - delta;
+	}
+	break;
 	case WZ_DRAG_RESIZE_NW:
-		{
-			int deltaX, deltaY;
-			deltaX = WZ_MIN(resizeDelta.x, resizeStartRect.w - minimumWindowSize.w);
-			deltaY = WZ_MIN(resizeDelta.y, resizeStartRect.h - minimumWindowSize.h);
-			newRect.x = resizeStartRect.x + deltaX;
-			newRect.y = resizeStartRect.y + deltaY;
-			newRect.w = resizeStartRect.w - deltaX;
-			newRect.h = resizeStartRect.h - deltaY;
-		}
-		break;
+	{
+		int deltaX, deltaY;
+		deltaX = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
+		deltaY = WZ_MIN(resizeDelta.y, resizeStartRect_.h - minimumWindowSize.h);
+		newRect.x = resizeStartRect_.x + deltaX;
+		newRect.y = resizeStartRect_.y + deltaY;
+		newRect.w = resizeStartRect_.w - deltaX;
+		newRect.h = resizeStartRect_.h - deltaY;
+	}
+	break;
 	default:
 		return; // Not dragging, don't call MainWindow::updateContentRect.
 	}
@@ -275,7 +342,7 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 Rect Window::getChildrenClipRect() const
 {
 	// Use the content rect.
-	return content->getAbsoluteRect();
+	return content_->getAbsoluteRect();
 }
 
 void Window::draw(Rect clip)
@@ -288,77 +355,9 @@ Size Window::measure()
 	return renderer->measureWindow(this);
 }
 
-int Window::getHeaderHeight() const
-{
-	return headerHeight;
-}
-
-int Window::getBorderSize() const
-{
-	return borderSize;
-}
-
-Rect Window::getHeaderRect() const
-{
-	Rect rect;
-	rect.x = this->rect.x + borderSize;
-	rect.y = this->rect.y + borderSize;
-	rect.w = this->rect.w - borderSize * 2;
-	rect.h = headerHeight;
-	return rect;
-}
-
-void Window::setTitle(const char *title)
-{
-	this->title = title;
-}
-
-const char *Window::getTitle() const
-{
-	return title.c_str();
-}
-
-Widget *Window::getContentWidget()
-{
-	return content;
-}
-
-int Window::getDrawPriority() const
-{
-	return drawPriority;
-}
-
-void Window::setDrawPriority(int drawPriority)
-{
-	this->drawPriority = drawPriority;
-}
-
-void Window::dock()
-{
-	// Save the window size before docking so it can be restored if the window is undocked later.
-	sizeBeforeDocking.w = rect.w;
-	sizeBeforeDocking.h = rect.h;
-}
-
-void Window::add(Widget *widget)
-{
-	WZ_ASSERT(widget);
-
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
-		return;
-
-	content->addChildWidget(widget);
-}
-
-void Window::remove(Widget *widget)
-{
-	WZ_ASSERT(widget);
-	content->removeChildWidget(widget);
-}
-
 void Window::refreshHeaderHeight()
 {
-	headerHeight = getLineHeight() + 6; // Padding.
+	headerHeight_ = getLineHeight() + 6; // Padding.
 }
 
 void Window::calculateBorderRects(Rect *rects)
@@ -366,46 +365,46 @@ void Window::calculateBorderRects(Rect *rects)
 	WZ_ASSERT(rects);
 
 	rects[WZ_COMPASS_N] = rect;
-	rects[WZ_COMPASS_N].x += borderSize;
-	rects[WZ_COMPASS_N].w -= borderSize * 2;
-	rects[WZ_COMPASS_N].h = borderSize;
+	rects[WZ_COMPASS_N].x += borderSize_;
+	rects[WZ_COMPASS_N].w -= borderSize_ * 2;
+	rects[WZ_COMPASS_N].h = borderSize_;
 
 	rects[WZ_COMPASS_NE] = rect;
-	rects[WZ_COMPASS_NE].x += rects[WZ_COMPASS_NE].w - borderSize;
-	rects[WZ_COMPASS_NE].w = borderSize;
-	rects[WZ_COMPASS_NE].h = borderSize;
+	rects[WZ_COMPASS_NE].x += rects[WZ_COMPASS_NE].w - borderSize_;
+	rects[WZ_COMPASS_NE].w = borderSize_;
+	rects[WZ_COMPASS_NE].h = borderSize_;
 
 	rects[WZ_COMPASS_E] = rect;
-	rects[WZ_COMPASS_E].x += rects[WZ_COMPASS_E].w - borderSize;
-	rects[WZ_COMPASS_E].y += borderSize;
-	rects[WZ_COMPASS_E].w = borderSize;
-	rects[WZ_COMPASS_E].h -= borderSize * 2;
+	rects[WZ_COMPASS_E].x += rects[WZ_COMPASS_E].w - borderSize_;
+	rects[WZ_COMPASS_E].y += borderSize_;
+	rects[WZ_COMPASS_E].w = borderSize_;
+	rects[WZ_COMPASS_E].h -= borderSize_ * 2;
 
 	rects[WZ_COMPASS_SE] = rect;
-	rects[WZ_COMPASS_SE].x += rects[WZ_COMPASS_SE].w - borderSize;
-	rects[WZ_COMPASS_SE].y += rects[WZ_COMPASS_SE].h - borderSize;
-	rects[WZ_COMPASS_SE].w = borderSize;
-	rects[WZ_COMPASS_SE].h = borderSize;
+	rects[WZ_COMPASS_SE].x += rects[WZ_COMPASS_SE].w - borderSize_;
+	rects[WZ_COMPASS_SE].y += rects[WZ_COMPASS_SE].h - borderSize_;
+	rects[WZ_COMPASS_SE].w = borderSize_;
+	rects[WZ_COMPASS_SE].h = borderSize_;
 
 	rects[WZ_COMPASS_S] = rect;
-	rects[WZ_COMPASS_S].x += borderSize;
-	rects[WZ_COMPASS_S].y += rects[WZ_COMPASS_S].h - borderSize;
-	rects[WZ_COMPASS_S].w -= borderSize * 2;
-	rects[WZ_COMPASS_S].h = borderSize;
+	rects[WZ_COMPASS_S].x += borderSize_;
+	rects[WZ_COMPASS_S].y += rects[WZ_COMPASS_S].h - borderSize_;
+	rects[WZ_COMPASS_S].w -= borderSize_ * 2;
+	rects[WZ_COMPASS_S].h = borderSize_;
 
 	rects[WZ_COMPASS_SW] = rect;
-	rects[WZ_COMPASS_SW].y += rects[WZ_COMPASS_SW].h - borderSize;
-	rects[WZ_COMPASS_SW].w = borderSize;
-	rects[WZ_COMPASS_SW].h = borderSize;
+	rects[WZ_COMPASS_SW].y += rects[WZ_COMPASS_SW].h - borderSize_;
+	rects[WZ_COMPASS_SW].w = borderSize_;
+	rects[WZ_COMPASS_SW].h = borderSize_;
 
 	rects[WZ_COMPASS_W] = rect;
-	rects[WZ_COMPASS_W].y += borderSize;
-	rects[WZ_COMPASS_W].w = borderSize;
-	rects[WZ_COMPASS_W].h -= borderSize * 2;
+	rects[WZ_COMPASS_W].y += borderSize_;
+	rects[WZ_COMPASS_W].w = borderSize_;
+	rects[WZ_COMPASS_W].h -= borderSize_ * 2;
 
 	rects[WZ_COMPASS_NW] = rect;
-	rects[WZ_COMPASS_NW].w = borderSize;
-	rects[WZ_COMPASS_NW].h = borderSize;
+	rects[WZ_COMPASS_NW].w = borderSize_;
+	rects[WZ_COMPASS_NW].h = borderSize_;
 }
 
 void Window::calculateMouseOverBorderRects(int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects)
