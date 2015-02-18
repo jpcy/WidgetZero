@@ -28,7 +28,7 @@ namespace wz {
 
 TextEdit::TextEdit(bool multiline, const std::string &text)
 {
-	type_ = WZ_TYPE_TEXT_EDIT;
+	type_ = WidgetType::TextEdit;
 	validateText_ = NULL;
 	pressed_ = false;
 	cursorIndex_ = scrollValue_ = 0;

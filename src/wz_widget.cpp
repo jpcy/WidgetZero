@@ -29,7 +29,7 @@ namespace wz {
 
 Widget::Widget()
 {
-	type_ = WZ_TYPE_WIDGET;
+	type_ = WidgetType::Widget;
 	stretch_ = 0;
 	stretchWidthScale_ = 0;
 	stretchHeightScale_ = 0;
@@ -66,14 +66,14 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 	return this;
 }
 
-WidgetType Widget::getType() const
+WidgetType::Enum Widget::getType() const
 {
 	return type_;
 }
 
 bool Widget::isLayout() const
 {
-	return type_ == WZ_TYPE_STACK_LAYOUT;
+	return type_ == WidgetType::StackLayout;
 }
 
 const MainWindow *Widget::getMainWindow() const
@@ -379,10 +379,10 @@ void Widget::addChildWidget(Widget *child)
 	}
 
 	// Set window to the closest ancestor window.
-	child->window_ = (Window *)findClosestAncestor(WZ_TYPE_WINDOW);
+	child->window_ = (Window *)findClosestAncestor(WidgetType::Window);
 
 	// Set children mainWindow, window and renderer.
-	child->setMainWindowAndWindowRecursive(child->mainWindow_, child->type_ == WZ_TYPE_WINDOW ? (Window *)child : child->window_);
+	child->setMainWindowAndWindowRecursive(child->mainWindow_, child->type_ == WidgetType::Window ? (Window *)child : child->window_);
 
 	// Resize the widget and children to their measured sizes.
 	child->resizeToMeasuredRecursive();
@@ -520,7 +520,7 @@ void Widget::refreshRect()
 	setRectInternal(getRect());
 }
 
-const Widget *Widget::findClosestAncestor(WidgetType type) const
+const Widget *Widget::findClosestAncestor(WidgetType::Enum type) const
 {
 	const Widget *temp = this;
 
@@ -540,7 +540,7 @@ const Widget *Widget::findClosestAncestor(WidgetType type) const
 	return NULL;
 }
 
-Widget *Widget::findClosestAncestor(WidgetType type)
+Widget *Widget::findClosestAncestor(WidgetType::Enum type)
 {
 	Widget *temp = this;
 
@@ -729,7 +729,7 @@ MainWindow *Widget::findMainWindow()
 		if (!widget)
 			break;
 
-		if (widget->type_ == WZ_TYPE_MAIN_WINDOW)
+		if (widget->type_ == WidgetType::MainWindow)
 			return (MainWindow *)widget;
 
 		widget = widget->parent_;

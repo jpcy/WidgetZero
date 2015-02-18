@@ -44,7 +44,7 @@ void DockPreview::draw(Rect clip)
 
 MainWindow::MainWindow(IRenderer *renderer)
 {
-	type_ = WZ_TYPE_MAIN_WINDOW;
+	type_ = WidgetType::MainWindow;
 	cursor_ = WZ_CURSOR_DEFAULT;
 	isShiftKeyDown_ = isControlKeyDown_ = false;
 	lockInputWindow_ = NULL;
@@ -295,17 +295,17 @@ static bool IsWidgetTrue(const Widget * /*widget*/)
 
 static bool IsWidgetComboAncestor(const Widget *widget)
 {
-	return widget->getType() != WZ_TYPE_COMBO && widget->findClosestAncestor(WZ_TYPE_COMBO) != NULL;
+	return widget->getType() != WidgetType::Combo && widget->findClosestAncestor(WidgetType::Combo) != NULL;
 }
 
 static bool IsWidgetNotCombo(const Widget *widget)
 {
-	return widget->getType() != WZ_TYPE_COMBO;
+	return widget->getType() != WidgetType::Combo;
 }
 
 static bool IsWidgetNotWindowOrCombo(const Widget *widget)
 {
-	return widget->getType() != WZ_TYPE_WINDOW && widget->getType() != WZ_TYPE_COMBO;
+	return widget->getType() != WidgetType::Window && widget->getType() != WidgetType::Combo;
 }
 
 void MainWindow::draw()
@@ -319,7 +319,7 @@ void MainWindow::draw()
 
 	for (size_t i = 0; i < children_.size(); i++)
 	{
-		if (children_[i]->getType() == WZ_TYPE_WINDOW)
+		if (children_[i]->getType() == WidgetType::Window)
 		{
 			windows[nWindows] = (Window *)children_[i];
 			nWindows++;
@@ -374,11 +374,11 @@ void MainWindow::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow)
 		return;
 
 	// Special case for windows: add directly, not to the content widget.
-	if (widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::Window)
 	{
 		addChildWidget(widget);
 	}
@@ -393,7 +393,7 @@ void MainWindow::remove(Widget *widget)
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
-	if (widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::Window)
 	{
 		removeChildWidget(widget);
 	}
@@ -785,7 +785,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 
 	// Determine whether the mouse is hovering over the widget's parent window.
 	// Special case for combo dropdown list poking outside the window.
-	if (widget->window_ && !(widget->parent_ && widget->parent_->getType() == WZ_TYPE_COMBO))
+	if (widget->window_ && !(widget->parent_ && widget->parent_->getType() == WidgetType::Combo))
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, widget->window_->getContentWidget()->getAbsoluteRect());
 	}
@@ -927,7 +927,7 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 
 		widget = children_[i];
 
-		if (widget->getType() != WZ_TYPE_WINDOW)
+		if (widget->getType() != WidgetType::Window)
 			continue;
 
 		if (!widget->getVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->getRect()))
@@ -1222,7 +1222,7 @@ void MainWindow::updateWindowDrawPriorities(Window *top)
 
 	for (size_t i = 0; i < (int)children_.size(); i++)
 	{
-		if (children_[i]->getType() == WZ_TYPE_WINDOW && children_[i] != top)
+		if (children_[i]->getType() == WidgetType::Window && children_[i] != top)
 		{
 			windows[nWindows] = (Window *)children_[i];
 			nWindows++;

@@ -30,7 +30,7 @@ namespace wz {
 
 Window::Window(const std::string &title)
 {
-	type_ = WZ_TYPE_WINDOW;
+	type_ = WidgetType::Window;
 	drawPriority_ = 0;
 	headerHeight_ = 0;
 	borderSize_ = 4;
@@ -97,7 +97,7 @@ void Window::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
 	content_->addChildWidget(widget);

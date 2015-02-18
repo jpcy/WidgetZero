@@ -28,7 +28,7 @@ namespace wz {
 
 Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 {
-	type_ = WZ_TYPE_COMBO;
+	type_ = WidgetType::Combo;
 	isOpen_ = false;
 
 	list_ = new List(itemData, itemStride, nItems);

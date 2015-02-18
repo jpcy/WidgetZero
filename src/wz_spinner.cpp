@@ -60,7 +60,7 @@ static bool wz_spinner_validate_text(const char *text)
 
 Spinner::Spinner()
 {
-	type_ = WZ_TYPE_SPINNER;
+	type_ = WidgetType::Spinner;
 
 	textEdit_ = new TextEdit(false);
 	textEdit_->setStretch(WZ_STRETCH);

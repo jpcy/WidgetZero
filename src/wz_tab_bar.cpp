@@ -66,7 +66,7 @@ static void wz_tab_set_rect(Widget *widget, Rect rect)
 
 TabBar::TabBar()
 {
-	type_ = WZ_TYPE_TAB_BAR;
+	type_ = WidgetType::TabBar;
 	selectedTab_ = NULL;
 	scrollValue_ = 0;
 

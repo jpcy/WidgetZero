@@ -70,28 +70,30 @@ class TextEdit;
 class Widget;
 class Window;
 
-enum WidgetType
+struct WidgetType
 {
-	WZ_TYPE_WIDGET,
-	WZ_TYPE_MAIN_WINDOW,
-	WZ_TYPE_WINDOW,
-	WZ_TYPE_BUTTON,
-	WZ_TYPE_COMBO,
-	WZ_TYPE_FRAME,
-	WZ_TYPE_GROUP_BOX,
-	WZ_TYPE_LABEL,
-	WZ_TYPE_LIST,
-	WZ_TYPE_MENU_BAR,
-	WZ_TYPE_MENU_BAR_BUTTON,
-	WZ_TYPE_RADIO_BUTTON,
-	WZ_TYPE_SCROLLER,
-	WZ_TYPE_SPINNER,
-	WZ_TYPE_STACK_LAYOUT,
-	WZ_TYPE_TAB_BAR,
-	WZ_TYPE_TAB_PAGE,
-	WZ_TYPE_TABBED,
-	WZ_TYPE_TEXT_EDIT,
-	WZ_MAX_WIDGET_TYPES = 64
+	enum Enum
+	{
+		Widget,
+		MainWindow,
+		Window,
+		Button,
+		Combo,
+		Frame,
+		GroupBox,
+		Label,
+		List,
+		MenuBar,
+		MenuBarButton,
+		RadioButton,
+		Scroller,
+		Spinner,
+		StackLayout,
+		TabBar,
+		TabPage,
+		Tabbed,
+		TextEdit,
+	};
 };
 
 struct Position
@@ -411,7 +413,7 @@ public:
 	virtual void draw(Rect clip) {}
 	virtual Size measure() { return Size(); }
 
-	WidgetType getType() const;
+	WidgetType::Enum getType() const;
 	bool isLayout() const;
 	const MainWindow *getMainWindow() const;
 	MainWindow *getMainWindow();
@@ -477,8 +479,8 @@ public:
 	void setRectInternal(int x, int y, int w, int h);
 	void setRectInternal(Rect rect);
 	void refreshRect();
-	const Widget *findClosestAncestor(WidgetType type) const;
-	Widget *findClosestAncestor(WidgetType type);
+	const Widget *findClosestAncestor(WidgetType::Enum type) const;
+	Widget *findClosestAncestor(WidgetType::Enum type);
 	void setDrawManually(bool value);
 	void setDrawLast(bool value);
 	bool getDrawLast() const;
@@ -512,7 +514,7 @@ protected:
 	void setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window);
 	void resizeToMeasuredRecursive();
 
-	WidgetType type_;
+	WidgetType::Enum type_;
 
 	// Explicitly set by the user.
 	Rect userRect_;

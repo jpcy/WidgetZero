@@ -37,7 +37,7 @@ MENU BAR BUTTON
 
 MenuBarButton::MenuBarButton(MenuBar *menuBar)
 {
-	type_ = WZ_TYPE_BUTTON;
+	type_ = WidgetType::Button;
 	isPressed_ = isSet_ = false;
 	menuBar_ = menuBar;
 }
@@ -115,7 +115,7 @@ MENU BAR
 
 MenuBar::MenuBar()
 {
-	type_ = WZ_TYPE_MENU_BAR;
+	type_ = WidgetType::MenuBar;
 
 	layout_ = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout_->setStretch(WZ_STRETCH);

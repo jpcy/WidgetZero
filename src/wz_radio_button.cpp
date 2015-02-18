@@ -28,7 +28,7 @@ namespace wz {
 
 RadioButton::RadioButton(const std::string &label) : Button(label)
 {
-	type_ = WZ_TYPE_RADIO_BUTTON;
+	type_ = WidgetType::RadioButton;
 	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
 	addEventHandler(WZ_EVENT_BUTTON_CLICKED, this, &RadioButton::onClicked);
 }
@@ -39,7 +39,7 @@ void RadioButton::onParented(Widget *parent)
 	// This means that the first radio button will be selected.
 	for (size_t i = 0; i < parent->getChildren().size(); i++)
 	{
-		if (parent->getChildren()[i]->getType() == WZ_TYPE_RADIO_BUTTON && parent->getChildren()[i] != this)
+		if (parent->getChildren()[i]->getType() == WidgetType::RadioButton && parent->getChildren()[i] != this)
 			return;
 	}
 
@@ -63,7 +63,7 @@ void RadioButton::onClicked(Event e)
 	{
 		Widget *sibling = parent_->getChildren()[i];
 
-		if (sibling->getType() == WZ_TYPE_RADIO_BUTTON && sibling != this)
+		if (sibling->getType() == WidgetType::RadioButton && sibling != this)
 		{
 			((RadioButton *)sibling)->set(false);
 		}

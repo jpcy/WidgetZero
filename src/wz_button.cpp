@@ -28,7 +28,7 @@ namespace wz {
 
 Button::Button(const std::string &label, const std::string &icon)
 {
-	type_ = WZ_TYPE_BUTTON;
+	type_ = WidgetType::Button;
 	clickBehavior_ = WZ_BUTTON_CLICK_BEHAVIOR_UP;
 	setBehavior_ = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
 	isPressed_ = isSet_ = false;

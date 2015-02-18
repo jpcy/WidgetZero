@@ -28,7 +28,7 @@ namespace wz {
 
 List::List(uint8_t *itemData, int itemStride, int nItems)
 {
-	type_ = WZ_TYPE_LIST;
+	type_ = WidgetType::List;
 	drawItem_ = NULL;
 	itemHeight_ = 0;
 	isItemHeightUserSet_ = false;

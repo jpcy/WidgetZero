@@ -29,7 +29,7 @@ namespace wz {
 
 GroupBox::GroupBox(const std::string &label) : label_(label)
 {
-	type_ = WZ_TYPE_GROUP_BOX;
+	type_ = WidgetType::GroupBox;
 
 	// Create content widget.
 	content_ = new Widget;
@@ -59,7 +59,7 @@ void GroupBox::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
 	content_->addChildWidget(widget);

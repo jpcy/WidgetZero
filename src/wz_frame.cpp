@@ -28,7 +28,7 @@ namespace wz {
 
 Frame::Frame()
 {
-	type_ = WZ_TYPE_FRAME;
+	type_ = WidgetType::Frame;
 	setSize(200, 200);
 }
 
@@ -36,7 +36,7 @@ void Frame::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
 	addChildWidget(widget);

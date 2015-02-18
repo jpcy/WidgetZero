@@ -28,7 +28,7 @@ namespace wz {
 
 StackLayout::StackLayout(StackLayoutDirection direction, int spacing)
 {
-	type_ = WZ_TYPE_STACK_LAYOUT;
+	type_ = WidgetType::StackLayout;
 	direction_ = direction;
 	spacing_ = spacing;
 }
@@ -54,7 +54,7 @@ void StackLayout::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
 	addChildWidget(widget);

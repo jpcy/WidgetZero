@@ -36,14 +36,14 @@ TAB PAGE WIDGET
 
 TabPage::TabPage()
 {
-	type_ = WZ_TYPE_TAB_PAGE;
+	type_ = WidgetType::TabPage;
 }
 
 void TabPage::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
+	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
 	addChildWidget(widget);
@@ -98,7 +98,7 @@ TABBED WIDGET
 
 Tabbed::Tabbed()
 {
-	type_ = WZ_TYPE_TABBED;
+	type_ = WidgetType::Tabbed;
 
 	tabBar = new TabBar;
 	tabBar->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &Tabbed::onTabChanged);

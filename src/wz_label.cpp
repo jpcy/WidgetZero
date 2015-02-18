@@ -29,7 +29,7 @@ namespace wz {
 
 Label::Label(const std::string &text) : text_(text)
 {
-	type_ = WZ_TYPE_LABEL;
+	type_ = WidgetType::Label;
 	multiline_ = false;
 	textColor_ = WZ_SKIN_LABEL_TEXT_COLOR;
 	isTextColorUserSet_ = false;

@@ -220,7 +220,7 @@ SCROLLER WIDGET
 
 Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
-	type_ = WZ_TYPE_SCROLLER;
+	type_ = WidgetType::Scroller;
 	nubScale_ = 0;
 	scrollerType_ = scrollerType;
 	stepValue_ = WZ_MAX(1, stepValue);
