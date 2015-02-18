@@ -29,56 +29,61 @@ namespace wz {
 
 Widget::Widget()
 {
-	type = WZ_TYPE_WIDGET;
-	stretch = 0;
-	stretchWidthScale = 0;
-	stretchHeightScale = 0;
-	align = 0;
-	internalMetadata = NULL;
-	metadata = NULL;
-	flags = 0;
-	hover = false;
-	hidden = false;
-	ignore = false;
-	overlap = false;
-	drawManually = false;
-	inputNotClippedToParent = false;
-	fontSize = 0;
-	fontFace[0] = NULL;
-	renderer = NULL;
-	mainWindow = NULL;
-	window = NULL;
-	parent = NULL;
+	type_ = WZ_TYPE_WIDGET;
+	stretch_ = 0;
+	stretchWidthScale_ = 0;
+	stretchHeightScale_ = 0;
+	align_ = 0;
+	internalMetadata_ = NULL;
+	metadata_ = NULL;
+	flags_ = 0;
+	hover_ = false;
+	hidden_ = false;
+	ignore_ = false;
+	overlap_ = false;
+	drawManually_ = false;
+	inputNotClippedToParent_ = false;
+	fontSize_ = 0;
+	fontFace_[0] = NULL;
+	renderer_ = NULL;
+	mainWindow_ = NULL;
+	window_ = NULL;
+	parent_ = NULL;
 }
 
 Widget::~Widget()
 {
 	// Delete event handlers.
-	for (size_t i = 0; i < eventHandlers.size(); i++)
+	for (size_t i = 0; i < eventHandlers_.size(); i++)
 	{
-		delete eventHandlers[i];
+		delete eventHandlers_[i];
 	}
 }
 
 Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 {
-	eventHandlers.push_back(eventHandler);
+	eventHandlers_.push_back(eventHandler);
 	return this;
 }
 
 WidgetType Widget::getType() const
 {
-	return type;
+	return type_;
 }
 
 bool Widget::isLayout() const
 {
-	return type == WZ_TYPE_STACK_LAYOUT;
+	return type_ == WZ_TYPE_STACK_LAYOUT;
+}
+
+const MainWindow *Widget::getMainWindow() const
+{
+	return mainWindow_;
 }
 
 MainWindow *Widget::getMainWindow()
 {
-	return mainWindow;
+	return mainWindow_;
 }
 
 void Widget::setPosition(int x, int y)
@@ -88,7 +93,7 @@ void Widget::setPosition(int x, int y)
 
 void Widget::setPosition(Position position)
 {
-	Rect rect = userRect;
+	Rect rect = userRect_;
 	rect.x = position.x;
 	rect.y = position.y;
 	setRect(rect);
@@ -108,14 +113,14 @@ Position Widget::getAbsolutePosition() const
 
 void Widget::setWidth(int w)
 {
-	Rect rect = userRect;
+	Rect rect = userRect_;
 	rect.w = w;
 	setRect(rect);
 }
 
 void Widget::setHeight(int h)
 {
-	Rect rect = userRect;
+	Rect rect = userRect_;
 	rect.h = h;
 	setRect(rect);
 }
@@ -127,7 +132,7 @@ void Widget::setSize(int w, int h)
 
 void Widget::setSize(Size size)
 {
-	Rect rect = userRect;
+	Rect rect = userRect_;
 	rect.w = size.w;
 	rect.h = size.h;
 	setRect(rect);
@@ -135,17 +140,17 @@ void Widget::setSize(Size size)
 
 int Widget::getWidth() const
 {
-	return rect.w;
+	return rect_.w;
 }
 
 int Widget::getHeight() const
 {
-	return rect.h;
+	return rect_.h;
 }
 
 Size Widget::getSize() const
 {
-	return Size(rect.w, rect.h);
+	return Size(rect_.w, rect_.h);
 }
 
 void Widget::setRect(int x, int y, int w, int h)
@@ -155,22 +160,22 @@ void Widget::setRect(int x, int y, int w, int h)
 
 void Widget::setRect(Rect rect)
 {
-	userRect = rect;
+	userRect_ = rect;
 	setRectInternal(rect);
 }
 
 Rect Widget::getRect() const
 {
-	return rect;
+	return rect_;
 }
 
 Rect Widget::getAbsoluteRect() const
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 
-	if (parent)
+	if (parent_)
 	{
-		const Position parentPosition = parent->getAbsolutePosition();
+		const Position parentPosition = parent_->getAbsolutePosition();
 		rect.x += parentPosition.x;
 		rect.y += parentPosition.y;
 	}
@@ -180,7 +185,7 @@ Rect Widget::getAbsoluteRect() const
 
 void Widget::setMargin(Border margin)
 {
-	this->margin = margin;
+	margin_ = margin;
 	refreshRect();
 }
 
@@ -196,136 +201,151 @@ void Widget::setUniformMargin(int value)
 
 Border Widget::getMargin() const
 {
-	return margin;
+	return margin_;
 }
 
 void Widget::setStretch(int stretch)
 {
-	this->stretch = stretch;
+	stretch_ = stretch;
 
 	// If the parent is a layout widget, refresh it.
-	if (parent && parent->isLayout())
+	if (parent_ && parent_->isLayout())
 	{
-		parent->refreshRect();
+		parent_->refreshRect();
 	}
 }
 
 int Widget::getStretch() const
 {
-	return stretch;
+	return stretch_;
 }
 
 void Widget::setStretchScale(float width, float height)
 {
-	stretchWidthScale = width;
-	stretchHeightScale = height;
+	stretchWidthScale_ = width;
+	stretchHeightScale_ = height;
 }
 
 float Widget::getStretchWidthScale() const
 {
-	return stretchWidthScale;
+	return stretchWidthScale_;
 }
 
 float Widget::getStretchHeightScale() const
 {
-	return stretchHeightScale;
+	return stretchHeightScale_;
 }
 
 void Widget::setAlign(int align)
 {
-	this->align = align;
+	align_ = align;
 
 	// If the parent is a layout widget, refresh it.
-	if (parent && parent->isLayout())
+	if (parent_ && parent_->isLayout())
 	{
-		parent->refreshRect();
+		parent_->refreshRect();
 	}
 }
 
 int Widget::getAlign() const
 {
-	return align;
+	return align_;
 }
 
 void Widget::setFontFace(const char *fontFace)
 {
-	strcpy(this->fontFace, fontFace);
+	strcpy(fontFace_, fontFace);
 	resizeToMeasured();
-	onFontChanged(fontFace, fontSize);
+	onFontChanged(fontFace_, fontSize_);
 }
 
 const char *Widget::getFontFace() const
 {
-	return fontFace;
+	return fontFace_;
 }
 
 void Widget::setFontSize(float fontSize)
 {
-	this->fontSize = fontSize;
+	fontSize_ = fontSize;
 	resizeToMeasured();
-	onFontChanged(fontFace, fontSize);
+	onFontChanged(fontFace_, fontSize_);
 }
 
 float Widget::getFontSize() const
 {
-	return fontSize;
+	return fontSize_;
 }
 
 void Widget::setFont(const char *fontFace, float fontSize)
 {
-	strcpy(this->fontFace, fontFace);
-	this->fontSize = fontSize;
+	strcpy(fontFace_, fontFace);
+	fontSize_ = fontSize;
 	resizeToMeasured();
-	onFontChanged(fontFace, fontSize);
+	onFontChanged(fontFace_, fontSize_);
 }
 
 bool Widget::getHover() const
 {
-	return hover;
+	return hover_;
 }
 
 void Widget::setVisible(bool visible)
 {
-	hidden = !visible;
+	hidden_ = !visible;
 	onVisibilityChanged();
 }
 
 bool Widget::getVisible() const
 {
-	return !hidden;
+	return !hidden_;
 }
 
 bool Widget::hasKeyboardFocus() const
 {
-	return mainWindow->getKeyboardFocusWidget() == this;
+	return mainWindow_->getKeyboardFocusWidget() == this;
+}
+
+const Widget *Widget::getParent() const
+{
+	return parent_;
+}
+
+Widget *Widget::getParent()
+{
+	return parent_;
+}
+
+const std::vector<Widget *> &Widget::getChildren() const
+{
+	return children_;
 }
 
 void Widget::setMetadata(void *metadata)
 {
-	this->metadata = metadata;
+	metadata_ = metadata;
 }
 
 void *Widget::getMetadata()
 {
-	return metadata;
+	return metadata_;
 }
 
 void Widget::resizeToMeasured()
 {
-	if (!renderer)
+	if (!renderer_)
 		return;
 
 	Size size = measure();
 
 	// The explicitly set size overrides the measured size.
-	if (userRect.w != 0)
+	if (userRect_.w != 0)
 	{
-		size.w = userRect.w;
+		size.w = userRect_.w;
 	}
 
-	if (userRect.h != 0)
+	if (userRect_.h != 0)
 	{
-		size.h = userRect.h;
+		size.h = userRect_.h;
 	}
 
 	// Keep the current size if 0.
@@ -346,23 +366,23 @@ void Widget::resizeToMeasured()
 void Widget::addChildWidget(Widget *child)
 {
 	WZ_ASSERT(child);
-	children.push_back(child);
-	child->parent = this;
+	children_.push_back(child);
+	child->parent_ = this;
 
 	// Set the main window to the ancestor main window.
-	child->mainWindow = findMainWindow();
+	child->mainWindow_ = findMainWindow();
 
 	// Set the renderer.
-	if (child->mainWindow)
+	if (child->mainWindow_)
 	{
-		child->setRenderer(child->mainWindow->renderer);
+		child->setRenderer(child->mainWindow_->renderer_);
 	}
 
 	// Set window to the closest ancestor window.
-	child->window = (Window *)findClosestAncestor(WZ_TYPE_WINDOW);
+	child->window_ = (Window *)findClosestAncestor(WZ_TYPE_WINDOW);
 
 	// Set children mainWindow, window and renderer.
-	child->setMainWindowAndWindowRecursive(child->mainWindow, child->type == WZ_TYPE_WINDOW ? (Window *)child : child->window);
+	child->setMainWindowAndWindowRecursive(child->mainWindow_, child->type_ == WZ_TYPE_WINDOW ? (Window *)child : child->window_);
 
 	// Resize the widget and children to their measured sizes.
 	child->resizeToMeasuredRecursive();
@@ -379,9 +399,9 @@ void Widget::removeChildWidget(Widget *child)
 	// Remove from children.
 	int removeIndex = -1;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		if (children[i] == child)
+		if (children_[i] == child)
 		{
 			removeIndex = (int)i;
 			break;
@@ -390,22 +410,22 @@ void Widget::removeChildWidget(Widget *child)
 
 	if (removeIndex != -1)
 	{
-		children.erase(children.begin() + removeIndex);
+		children_.erase(children_.begin() + removeIndex);
 	}
 
 	// The child is no longer connected to the widget hierarchy, so reset some state.
-	child->mainWindow = NULL;
-	child->parent = NULL;
-	child->window = NULL;
+	child->mainWindow_ = NULL;
+	child->parent_ = NULL;
+	child->window_ = NULL;
 }
 
 void Widget::destroyChildWidget(Widget *child)
 {
-	const size_t n = children.size();
+	const size_t n = children_.size();
 	removeChildWidget(child);
 
 	// Don't destroy if the child wasn't removed. Happens if it is not really a child, see remove_child_widget.
-	if (n == children.size())
+	if (n == children_.size())
 		return;
 
 	delete child;
@@ -421,7 +441,7 @@ void Widget::setPositionInternal(int x, int y)
 
 void Widget::setPositionInternal(Position position)
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 	rect.x = position.x;
 	rect.y = position.y;
 	setRectInternal(rect);
@@ -429,14 +449,14 @@ void Widget::setPositionInternal(Position position)
 
 void Widget::setWidthInternal(int w)
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 	rect.w = w;
 	setRectInternal(rect);
 }
 
 void Widget::setHeightInternal(int h)
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 	rect.h = h;
 	setRectInternal(rect);
 }
@@ -448,7 +468,7 @@ void Widget::setSizeInternal(int w, int h)
 
 void Widget::setSizeInternal(Size size)
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 	rect.w = size.w;
 	rect.h = size.h;
 	setRectInternal(rect);
@@ -461,36 +481,36 @@ void Widget::setRectInternal(int x, int y, int w, int h)
 
 void Widget::setRectInternalRecursive(Rect rect)
 {
-	Rect oldRect = this->rect;
+	Rect oldRect = rect_;
 
 	// Apply alignment and stretching.
 	rect = calculateAlignedStretchedRect(rect);
 
-	this->rect = rect;
+	rect_ = rect;
 	onRectChanged();
 
 	// Don't recurse if the rect hasn't changed.
 	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
 	{
-		for (size_t i = 0; i < children.size(); i++)
+		for (size_t i = 0; i < children_.size(); i++)
 		{
-			children[i]->setRectInternalRecursive(children[i]->rect);
+			children_[i]->setRectInternalRecursive(children_[i]->rect_);
 		}
 	}
 }
 
 void Widget::setRectInternal(Rect rect)
 {
-	Rect oldRect = this->rect;
+	Rect oldRect = rect_;
 	setRectInternalRecursive(rect);	
 
 	// If the parent is a layout widget, it may need refreshing.
-	if (parent && parent->isLayout())
+	if (parent_ && parent_->isLayout())
 	{
 		// Refresh if the width or height has changed.
-		if (this->rect.w != oldRect.w || this->rect.h != oldRect.h)
+		if (rect_.w != oldRect.w || rect_.h != oldRect.h)
 		{
-			parent->refreshRect();
+			parent_->refreshRect();
 		}
 	}
 }
@@ -509,12 +529,12 @@ const Widget *Widget::findClosestAncestor(WidgetType type) const
 		if (temp == NULL)
 			break;
 
-		if (temp->type == type)
+		if (temp->type_ == type)
 		{
 			return temp;
 		}
 
-		temp = temp->parent;
+		temp = temp->parent_;
 	}
 
 	return NULL;
@@ -529,12 +549,12 @@ Widget *Widget::findClosestAncestor(WidgetType type)
 		if (temp == NULL)
 			break;
 
-		if (temp->type == type)
+		if (temp->type_ == type)
 		{
 			return temp;
 		}
 
-		temp = temp->parent;
+		temp = temp->parent_;
 	}
 
 	return NULL;
@@ -542,65 +562,70 @@ Widget *Widget::findClosestAncestor(WidgetType type)
 
 void Widget::setDrawManually(bool value)
 {
-	drawManually = value;
+	drawManually_ = value;
 }
 
 void Widget::setDrawLast(bool value)
 {
 	if (value)
 	{
-		flags |= WZ_WIDGET_FLAG_DRAW_LAST;
+		flags_ |= WZ_WIDGET_FLAG_DRAW_LAST;
 	}
 	else
 	{
-		flags &= ~WZ_WIDGET_FLAG_DRAW_LAST;
+		flags_ &= ~WZ_WIDGET_FLAG_DRAW_LAST;
 	}
+}
+
+bool Widget::getDrawLast() const
+{
+	return (flags_ & WZ_WIDGET_FLAG_DRAW_LAST) == WZ_WIDGET_FLAG_DRAW_LAST;
 }
 
 void Widget::setOverlap(bool value)
 {
-	overlap = value;
+	overlap_ = value;
 }
 
 bool Widget::overlapsParentWindow() const
 {
-	if (!window)
+	if (!window_)
 		return true;
 
-	return WZ_RECTS_OVERLAP(window->getAbsoluteRect(), getAbsoluteRect());
+	return WZ_RECTS_OVERLAP(window_->getAbsoluteRect(), getAbsoluteRect());
 }
 
 void Widget::setClipInputToParent(bool value)
 {
-	inputNotClippedToParent = !value;
+	inputNotClippedToParent_ = !value;
 }
 
 void Widget::setInternalMetadata(void *metadata)
 {
-	internalMetadata = metadata;
+	internalMetadata_ = metadata;
 }
 
 void *Widget::getInternalMetadata()
 {
-	return internalMetadata;
+	return internalMetadata_;
 }
 
 int Widget::getLineHeight() const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer;
-	return r->getLineHeight(fontFace, fontSize);
+	NVGRenderer *r = (NVGRenderer *)renderer_;
+	return r->getLineHeight(fontFace_, fontSize_);
 }
 
 void Widget::measureText(const char *text, int n, int *width, int *height) const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer;
-	return r->measureText(fontFace, fontSize, text, n, width, height);
+	NVGRenderer *r = (NVGRenderer *)renderer_;
+	return r->measureText(fontFace_, fontSize_, text, n, width, height);
 }
 
 LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer;
-	return r->lineBreakText(fontFace, fontSize, text, n, lineWidth);
+	NVGRenderer *r = (NVGRenderer *)renderer_;
+	return r->lineBreakText(fontFace_, fontSize_, text, n, lineWidth);
 }
 
 void Widget::drawIfVisible()
@@ -616,11 +641,11 @@ void Widget::drawIfVisible()
 void Widget::invokeEvent(Event e)
 {
 	// Call method pointer event handlers.
-	for (size_t i = 0; i < eventHandlers.size(); i++)
+	for (size_t i = 0; i < eventHandlers_.size(); i++)
 	{
-		if (eventHandlers[i]->eventType == e.base.type)
+		if (eventHandlers_[i]->eventType == e.base.type)
 		{
-			eventHandlers[i]->call(e);
+			eventHandlers_[i]->call(e);
 		}
 	}
 }
@@ -638,58 +663,58 @@ void Widget::invokeEvent(Event e, const std::vector<EventCallback> &callbacks)
 Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 {
 	// Can't align or stretch to parent rect if there is no parent.
-	if (!parent)
+	if (!parent_)
 		return rect;
 
 	// Don't align or stretch if this widget is a child of a layout. The layout will handle the logic in that case.
-	if (parent && parent->isLayout())
+	if (parent_ && parent_->isLayout())
 		return rect;
 
-	Rect parentRect = parent->getRect();
+	Rect parentRect = parent_->getRect();
 
 	// Handle stretching.
-	if ((stretch & WZ_STRETCH_WIDTH) != 0)
+	if ((stretch_ & WZ_STRETCH_WIDTH) != 0)
 	{
-		const float scale = (stretchWidthScale < 0.01f) ? 1 : stretchWidthScale;
+		const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
 
-		rect.x = margin.left;
-		rect.w = (int)(parentRect.w * scale) - (margin.left + margin.right);
+		rect.x = margin_.left;
+		rect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right);
 	}
 
-	if ((stretch & WZ_STRETCH_HEIGHT) != 0)
+	if ((stretch_ & WZ_STRETCH_HEIGHT) != 0)
 	{
-		const float scale = (stretchHeightScale < 0.01f) ? 1 : stretchHeightScale;
+		const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
 
-		rect.y = margin.top;
-		rect.h = (int)(parentRect.h * scale) - (margin.top + margin.bottom);
+		rect.y = margin_.top;
+		rect.h = (int)(parentRect.h * scale) - (margin_.top + margin_.bottom);
 	}
 
 	// Handle horizontal alignment.
-	if ((align & WZ_ALIGN_LEFT) != 0)
+	if ((align_ & WZ_ALIGN_LEFT) != 0)
 	{
-		rect.x = margin.left;
+		rect.x = margin_.left;
 	}
-	else if ((align & WZ_ALIGN_CENTER) != 0)
+	else if ((align_ & WZ_ALIGN_CENTER) != 0)
 	{
-		rect.x = margin.left + (int)((parentRect.w - margin.right) / 2.0f - rect.w / 2.0f);
+		rect.x = margin_.left + (int)((parentRect.w - margin_.right) / 2.0f - rect.w / 2.0f);
 	}
-	else if ((align & WZ_ALIGN_RIGHT) != 0)
+	else if ((align_ & WZ_ALIGN_RIGHT) != 0)
 	{
-		rect.x = parentRect.w - margin.right - rect.w;
+		rect.x = parentRect.w - margin_.right - rect.w;
 	}
 
 	// Handle vertical alignment.
-	if ((align & WZ_ALIGN_TOP) != 0)
+	if ((align_ & WZ_ALIGN_TOP) != 0)
 	{
-		rect.y = margin.top;
+		rect.y = margin_.top;
 	}
-	else if ((align & WZ_ALIGN_MIDDLE) != 0)
+	else if ((align_ & WZ_ALIGN_MIDDLE) != 0)
 	{
-		rect.y = margin.top + (int)((parentRect.h - margin.bottom) / 2.0f - rect.h / 2.0f);
+		rect.y = margin_.top + (int)((parentRect.h - margin_.bottom) / 2.0f - rect.h / 2.0f);
 	}
-	else if ((align & WZ_ALIGN_BOTTOM) != 0)
+	else if ((align_ & WZ_ALIGN_BOTTOM) != 0)
 	{
-		rect.y = parentRect.h - margin.bottom - rect.h;
+		rect.y = parentRect.h - margin_.bottom - rect.h;
 	}
 
 	return rect;
@@ -704,10 +729,10 @@ MainWindow *Widget::findMainWindow()
 		if (!widget)
 			break;
 
-		if (widget->type == WZ_TYPE_MAIN_WINDOW)
+		if (widget->type_ == WZ_TYPE_MAIN_WINDOW)
 			return (MainWindow *)widget;
 
-		widget = widget->parent;
+		widget = widget->parent_;
 	}
 
 	return NULL;
@@ -715,10 +740,10 @@ MainWindow *Widget::findMainWindow()
 
 void Widget::setRenderer(IRenderer *renderer)
 {
-	IRenderer *oldRenderer = this->renderer;
-	this->renderer = renderer;
+	IRenderer *oldRenderer = renderer_;
+	renderer_ = renderer;
 
-	if (oldRenderer != this->renderer)
+	if (oldRenderer != renderer_)
 	{
 		onRendererChanged();
 	}
@@ -728,16 +753,16 @@ void Widget::setRenderer(IRenderer *renderer)
 // Example: scroller does this with it's button children.
 void Widget::setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window)
 {
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		Widget *child = children[i];
-		child->mainWindow = mainWindow;
-		child->window = window;
+		Widget *child = children_[i];
+		child->mainWindow_ = mainWindow;
+		child->window_ = window;
 
 		// Set the renderer too.
 		if (mainWindow)
 		{
-			child->setRenderer(mainWindow->renderer);
+			child->setRenderer(mainWindow->renderer_);
 		}
 
 		child->setMainWindowAndWindowRecursive(mainWindow, window);
@@ -748,9 +773,9 @@ void Widget::resizeToMeasuredRecursive()
 {
 	resizeToMeasured();
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		children[i]->resizeToMeasuredRecursive();
+		children_[i]->resizeToMeasuredRecursive();
 	}
 }
 

@@ -28,7 +28,7 @@ namespace wz {
 
 TextEdit::TextEdit(bool multiline, const std::string &text)
 {
-	type = WZ_TYPE_TEXT_EDIT;
+	type_ = WZ_TYPE_TEXT_EDIT;
 	validateText_ = NULL;
 	pressed_ = false;
 	cursorIndex_ = scrollValue_ = 0;
@@ -245,13 +245,13 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1)
 	{
 		// Set keyboard focus to this widget.
-		mainWindow->setKeyboardFocusWidget(this);
+		mainWindow_->setKeyboardFocusWidget(this);
 	}
 
 	if (mouseButton == 1 && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect()))
 	{
 		// Lock input to this widget.
-		mainWindow->pushLockInputWidget(this);
+		mainWindow_->pushLockInputWidget(this);
 
 		// Move the cursor to the mouse position.
 		int oldCursorIndex = cursorIndex_;
@@ -268,7 +268,7 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		pressed_ = true;
 
 		// Handle selecting.
-		if (mainWindow->isShiftKeyDown())
+		if (mainWindow_->isShiftKeyDown())
 		{
 			// Start a new selection if there isn't one.
 			if (selectionStartIndex_ == selectionEndIndex_)
@@ -291,17 +291,17 @@ void TextEdit::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
-		mainWindow->popLockInputWidget(this);
+		mainWindow_->popLockInputWidget(this);
 		pressed_ = false;
 	}
 }
 
 void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
-	if (!(hover && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
+	if (!(hover_ && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
 		return;
 
-	mainWindow->setCursor(WZ_CURSOR_IBEAM);
+	mainWindow_->setCursor(WZ_CURSOR_IBEAM);
 
 	if (pressed_)
 	{
@@ -515,12 +515,12 @@ void TextEdit::onTextInput(const char *text)
 
 void TextEdit::draw(Rect clip)
 {
-	renderer->drawTextEdit(this, clip);
+	renderer_->drawTextEdit(this, clip);
 }
 
 Size TextEdit::measure()
 {
-	return renderer->measureTextEdit(this);
+	return renderer_->measureTextEdit(this);
 }
 
 void TextEdit::onScrollerValueChanged(Event e)
@@ -555,14 +555,14 @@ void TextEdit::updateScroller()
 	if (!multiline_)
 		return;
 
-	if (!mainWindow)
+	if (!mainWindow_)
 		return; // Not added yet
 
 	// Hide/show scroller depending on if it's needed.
 	const int lineHeight = getLineHeight();
-	int nLines = calculateNumLines(rect.w - (border_.left + border_.right));
+	int nLines = calculateNumLines(rect_.w - (border_.left + border_.right));
 
-	if (lineHeight * nLines > rect.h - (border_.top + border_.bottom))
+	if (lineHeight * nLines > rect_.h - (border_.top + border_.bottom))
 	{
 		scroller_->setVisible(true);
 	}
@@ -579,10 +579,10 @@ void TextEdit::updateScroller()
 
 	// Fit to the right of the rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller_->rect.w;
-	scrollerRect.x = rect.w - border_.right - scrollerRect.w;
+	scrollerRect.w = scroller_->getWidth();
+	scrollerRect.x = rect_.w - border_.right - scrollerRect.w;
 	scrollerRect.y = border_.top;
-	scrollerRect.h = rect.h - (border_.top + border_.bottom);
+	scrollerRect.h = rect_.h - (border_.top + border_.bottom);
 	scroller_->setRectInternal(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
@@ -790,7 +790,7 @@ void TextEdit::updateScrollIndex()
 		{
 			const int cursorY = positionFromIndex(cursorIndex_).y;
 
-			if (cursorY > rect.h - (border_.top + border_.bottom))
+			if (cursorY > rect_.h - (border_.top + border_.bottom))
 			{
 				scrollValue_++;
 				scroller_->setValue(scrollValue_);

@@ -32,7 +32,7 @@ class SpinnerDecrementButton : public Button
 public:
 	virtual void draw(Rect clip)
 	{
-		renderer->drawSpinnerDecrementButton(this, clip);
+		renderer_->drawSpinnerDecrementButton(this, clip);
 	}
 };
 
@@ -41,7 +41,7 @@ class SpinnerIncrementButton : public Button
 public:
 	virtual void draw(Rect clip)
 	{
-		renderer->drawSpinnerIncrementButton(this, clip);
+		renderer_->drawSpinnerIncrementButton(this, clip);
 	}
 };
 
@@ -60,7 +60,7 @@ static bool wz_spinner_validate_text(const char *text)
 
 Spinner::Spinner()
 {
-	type = WZ_TYPE_SPINNER;
+	type_ = WZ_TYPE_SPINNER;
 
 	textEdit_ = new TextEdit(false);
 	textEdit_->setStretch(WZ_STRETCH);
@@ -126,12 +126,12 @@ void Spinner::onFontChanged(const char *fontFace, float fontSize)
 
 void Spinner::draw(Rect clip)
 {
-	renderer->drawSpinner(this, clip);
+	renderer_->drawSpinner(this, clip);
 }
 
 Size Spinner::measure()
 {
-	return renderer->measureSpinner(this);
+	return renderer_->measureSpinner(this);
 }
 
 void Spinner::onDecrementButtonClicked(Event e)

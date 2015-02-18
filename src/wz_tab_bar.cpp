@@ -43,7 +43,7 @@ TabButton::TabButton(const std::string &label) : Button(label)
 
 void TabButton::draw(Rect clip)
 {
-	renderer->drawTabButton(this, clip);
+	renderer_->drawTabButton(this, clip);
 }
 
 /*
@@ -66,7 +66,7 @@ static void wz_tab_set_rect(Widget *widget, Rect rect)
 
 TabBar::TabBar()
 {
-	type = WZ_TYPE_TAB_BAR;
+	type_ = WZ_TYPE_TAB_BAR;
 	selectedTab_ = NULL;
 	scrollValue_ = 0;
 
@@ -99,7 +99,7 @@ TabButton *TabBar::createTab()
 	Rect rect;
 	rect.x = rect.y = 0;
 	rect.w = 50; // Default width.
-	rect.h = this->rect.h;
+	rect.h = rect_.h;
 
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
@@ -234,9 +234,9 @@ void TabBar::onTabButtonPressed(Event e)
 void TabBar::onRectChanged()
 {
 	// Set button heights to match.
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		children[i]->setHeightInternal(rect.h);
+		children_[i]->setHeightInternal(rect_.h);
 	}
 
 	updateTabs();
@@ -245,12 +245,12 @@ void TabBar::onRectChanged()
 
 void TabBar::draw(Rect clip)
 {
-	renderer->drawTabBar(this, clip);
+	renderer_->drawTabBar(this, clip);
 }
 
 Size TabBar::measure()
 {
-	return renderer->measureTabBar(this);
+	return renderer_->measureTabBar(this);
 }
 
 void TabBar::setScrollValue(int value)
@@ -297,20 +297,20 @@ void TabBar::updateScrollButtons()
 
 	// Show/hide the scroll buttons and set their rects.
 	bool wereScrollButtonsVisible = decrementButton_->getVisible();
-	bool showScrollButtons = totalTabWidth > rect.w;
+	bool showScrollButtons = totalTabWidth > rect_.w;
 
 	Rect buttonRect;
 	buttonRect.w = decrementButton_->getWidth();
-	buttonRect.x = rect.w - buttonRect.w * 2;
+	buttonRect.x = rect_.w - buttonRect.w * 2;
 	buttonRect.y = 0;
-	buttonRect.h = rect.h;
+	buttonRect.h = rect_.h;
 	decrementButton_->setRectInternal(buttonRect);
 	decrementButton_->setVisible(showScrollButtons);
 
 	buttonRect.w = incrementButton_->getWidth();
-	buttonRect.x = rect.w - buttonRect.w;
+	buttonRect.x = rect_.w - buttonRect.w;
 	buttonRect.y = 0;
-	buttonRect.h = rect.h;
+	buttonRect.h = rect_.h;
 	incrementButton_->setRectInternal(buttonRect);
 	incrementButton_->setVisible(showScrollButtons);
 
@@ -339,8 +339,8 @@ void TabBar::updateTabs()
 			Rect tabRect;
 			tabRect.x = x;
 			tabRect.y = 0;
-			tabRect.w = tabs_[i]->rect.w;
-			tabRect.h = rect.h;
+			tabRect.w = tabs_[i]->getWidth();
+			tabRect.h = rect_.h;
 			tabs_[i]->setRectInternal(tabRect);
 			tabs_[i]->setVisible(true);
 			x += tabRect.w;

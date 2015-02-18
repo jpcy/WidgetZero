@@ -35,7 +35,7 @@ class ScrollerDecrementButton : public Button
 public:
 	virtual void draw(Rect clip)
 	{
-		renderer->drawScrollerDecrementButton(this, clip);
+		renderer_->drawScrollerDecrementButton(this, clip);
 	}
 };
 
@@ -44,7 +44,7 @@ class ScrollerIncrementButton : public Button
 public:
 	virtual void draw(Rect clip)
 	{
-		renderer->drawScrollerIncrementButton(this, clip);
+		renderer_->drawScrollerIncrementButton(this, clip);
 	}
 };
 
@@ -64,7 +64,7 @@ public:
 		if (mouseButton != 1)
 			return;
 
-		Scroller *scroller = (Scroller *)parent->parent;
+		Scroller *scroller = (Scroller *)parent_->getParent();
 		Rect nubRect = scroller->getNub()->getAbsoluteRect();
 
 		if ((scroller->getType() == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->getType() == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
@@ -99,7 +99,7 @@ bool ScrollerNub::isPressed() const
 
 void ScrollerNub::updateRect()
 {
-	const Size containerSize = parent->getSize();
+	const Size containerSize = parent_->getSize();
 	Rect rect;
 
 	if (scroller_->getType() == WZ_SCROLLER_VERTICAL)
@@ -164,7 +164,7 @@ void ScrollerNub::updateRect()
 
 void ScrollerNub::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 {
-	if (mouseButton == 1 && hover)
+	if (mouseButton == 1 && hover_)
 	{
 		const Rect rect = getAbsoluteRect();
 		isPressed_ = true;
@@ -172,7 +172,7 @@ void ScrollerNub::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		pressPosition_.y = rect.y;
 		pressMousePosition_.x = mouseX;
 		pressMousePosition_.y = mouseY;
-		mainWindow->pushLockInputWidget(this);
+		mainWindow_->pushLockInputWidget(this);
 	}
 }
 
@@ -181,7 +181,7 @@ void ScrollerNub::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1)
 	{
 		isPressed_ = false;
-		mainWindow->popLockInputWidget(this);
+		mainWindow_->popLockInputWidget(this);
 	}
 }
 
@@ -190,19 +190,19 @@ void ScrollerNub::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouse
 	// Handle dragging.
 	if (isPressed_)
 	{
-		const Rect containerRect = parent->getAbsoluteRect();
+		const Rect containerRect = parent_->getAbsoluteRect();
 		int minPos, maxPos, newPos;
 
 		if (scroller_->getType() == WZ_SCROLLER_VERTICAL)
 		{
 			minPos = containerRect.y;
-			maxPos = containerRect.y + containerRect.h - rect.h;
+			maxPos = containerRect.y + containerRect.h - rect_.h;
 			newPos = pressPosition_.y + (mouseY - pressMousePosition_.y);
 		}
 		else
 		{
 			minPos = containerRect.x;
-			maxPos = containerRect.x + containerRect.w - rect.w;
+			maxPos = containerRect.x + containerRect.w - rect_.w;
 			newPos = pressPosition_.x + (mouseX - pressMousePosition_.x);
 		}
 
@@ -220,7 +220,7 @@ SCROLLER WIDGET
 
 Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxValue)
 {
-	type = WZ_TYPE_SCROLLER;
+	type_ = WZ_TYPE_SCROLLER;
 	nubScale_ = 0;
 	scrollerType_ = scrollerType;
 	stepValue_ = WZ_MAX(1, stepValue);
@@ -339,7 +339,7 @@ const ScrollerNub *Scroller::getNub() const
 void Scroller::getNubState(Rect *containerRect, Rect *rect, bool *hover, bool *pressed) const
 {
 	if (containerRect)
-		*containerRect = nub_->parent->getAbsoluteRect();
+		*containerRect = nub_->getParent()->getAbsoluteRect();
 
 	if (rect)
 		*rect = nub_->getAbsoluteRect();
@@ -368,12 +368,12 @@ void Scroller::onMouseWheelMove(int /*x*/, int y)
 
 void Scroller::draw(Rect clip)
 {
-	renderer->drawScroller(this, clip);
+	renderer_->drawScroller(this, clip);
 }
 
 Size Scroller::measure()
 {
-	return renderer->measureScroller(this);
+	return renderer_->measureScroller(this);
 }
 
 void Scroller::onDecrementButtonClicked(Event e)

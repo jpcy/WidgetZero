@@ -29,7 +29,7 @@ namespace wz {
 
 Label::Label(const std::string &text) : text_(text)
 {
-	type = WZ_TYPE_LABEL;
+	type_ = WZ_TYPE_LABEL;
 	multiline_ = false;
 	textColor_ = WZ_SKIN_LABEL_TEXT_COLOR;
 	isTextColorUserSet_ = false;
@@ -87,12 +87,12 @@ NVGcolor Label::getTextColor() const
 
 void Label::draw(Rect clip)
 {
-	renderer->drawLabel(this, clip);
+	renderer_->drawLabel(this, clip);
 }
 
 Size Label::measure()
 {
-	return renderer->measureLabel(this);
+	return renderer_->measureLabel(this);
 }
 
 } // namespace wz

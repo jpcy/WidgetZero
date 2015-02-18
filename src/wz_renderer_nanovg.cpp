@@ -687,7 +687,7 @@ void NVGRenderer::drawScrollerButton(Button *button, Rect clip, bool decrement)
 	}
 
 	nvgBeginPath(vg);
-	Scroller *scroller = (Scroller *)button->parent;
+	Scroller *scroller = (Scroller *)button->getParent();
 	int sides, roundedCorners;
 
 	if (scroller->getType() == WZ_SCROLLER_VERTICAL)

@@ -28,7 +28,7 @@ namespace wz {
 
 List::List(uint8_t *itemData, int itemStride, int nItems)
 {
-	type = WZ_TYPE_LIST;
+	type_ = WZ_TYPE_LIST;
 	drawItem_ = NULL;
 	itemHeight_ = 0;
 	isItemHeightUserSet_ = false;
@@ -196,7 +196,7 @@ void List::onRendererChanged()
 void List::onFontChanged(const char *fontFace, float fontSize)
 {
 	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
-	if (renderer)
+	if (renderer_)
 	{
 		refreshItemHeight();
 	}
@@ -222,7 +222,7 @@ void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	{
 		pressedItem_ = hoveredItem_;
 		hoveredItem_ = -1;
-		mainWindow->pushLockInputWidget(this);
+		mainWindow_->pushLockInputWidget(this);
 	}
 }
 
@@ -243,7 +243,7 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		updateMouseOverItem(mouseX, mouseY);
 		hoveredItem_ = mouseOverItem_;
 
-		mainWindow->popLockInputWidget(this);
+		mainWindow_->popLockInputWidget(this);
 	}
 
 	if (selectedItemAssignedTo)
@@ -293,12 +293,12 @@ void List::onMouseHoverOff()
 
 void List::draw(Rect clip)
 {
-	renderer->drawList(this, clip);
+	renderer_->drawList(this, clip);
 }
 
 Size List::measure()
 {
-	return renderer->measureList(this);
+	return renderer_->measureList(this);
 }
 
 void List::onScrollerValueChanged(Event e)
@@ -327,7 +327,7 @@ void List::updateMouseOverItem(int mouseX, int mouseY)
 {
 	mouseOverItem_ = -1;
 
-	if (!hover)
+	if (!hover_)
 		return;
 
 	const Rect itemsRect = getAbsoluteItemsRect();
@@ -363,14 +363,14 @@ void List::updateScroller()
 
 	// Fit to the right of items rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller_->rect.w;
-	scrollerRect.x = rect.w - itemsBorder_.right - scrollerRect.w;
+	scrollerRect.w = scroller_->getWidth();
+	scrollerRect.x = rect_.w - itemsBorder_.right - scrollerRect.w;
 	scrollerRect.y = itemsBorder_.top;
-	scrollerRect.h = rect.h - (itemsBorder_.top + itemsBorder_.bottom);
+	scrollerRect.h = rect_.h - (itemsBorder_.top + itemsBorder_.bottom);
 	scroller_->setRectInternal(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
-	scroller_->setNubScale(1.0f - ((maxHeight - rect.h) / (float)maxHeight));
+	scroller_->setNubScale(1.0f - ((maxHeight - rect_.h) / (float)maxHeight));
 
 	// Hide/show scroller depending on if it's needed.
 	scroller_->setVisible(max > 0);

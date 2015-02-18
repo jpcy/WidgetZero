@@ -34,17 +34,17 @@ DockIcon::DockIcon()
 
 void DockIcon::draw(Rect clip)
 {
-	renderer->drawDockIcon(this, clip);
+	renderer_->drawDockIcon(this, clip);
 }
 
 void DockPreview::draw(Rect clip)
 {
-	renderer->drawDockPreview(this, clip);
+	renderer_->drawDockPreview(this, clip);
 }
 
 MainWindow::MainWindow(IRenderer *renderer)
 {
-	type = WZ_TYPE_MAIN_WINDOW;
+	type_ = WZ_TYPE_MAIN_WINDOW;
 	cursor_ = WZ_CURSOR_DEFAULT;
 	isShiftKeyDown_ = isControlKeyDown_ = false;
 	lockInputWindow_ = NULL;
@@ -54,13 +54,13 @@ MainWindow::MainWindow(IRenderer *renderer)
 	ignoreDockTabBarChangedEvent_ = false;
 	menuBar_ = NULL;
 
-	this->renderer = renderer;
-	mainWindow = this;
+	renderer_ = renderer;
+	mainWindow_ = this;
 	isTextCursorVisible_ = true;
 
 	// Create content widget.
 	content_ = new Widget;
-	content_->mainWindow = this;
+	content_->mainWindow_ = this;
 	addChildWidget(content_);
 
 	// Create dock icon widgets.
@@ -273,8 +273,8 @@ static int compare_window_draw_priorities_docked(const void *a, const void *b)
 
 	window1 = *((const Window **)a);
 	window2 = *((const Window **)b);
-	window1Docked = window1->mainWindow->getWindowDockPosition(window1) != WZ_DOCK_POSITION_NONE;
-	window2Docked = window2->mainWindow->getWindowDockPosition(window2) != WZ_DOCK_POSITION_NONE;
+	window1Docked = window1->getMainWindow()->getWindowDockPosition(window1) != WZ_DOCK_POSITION_NONE;
+	window2Docked = window2->getMainWindow()->getWindowDockPosition(window2) != WZ_DOCK_POSITION_NONE;
 
 	if (window1Docked && !window2Docked)
 	{
@@ -295,17 +295,17 @@ static bool IsWidgetTrue(const Widget * /*widget*/)
 
 static bool IsWidgetComboAncestor(const Widget *widget)
 {
-	return widget->type != WZ_TYPE_COMBO && widget->findClosestAncestor(WZ_TYPE_COMBO) != NULL;
+	return widget->getType() != WZ_TYPE_COMBO && widget->findClosestAncestor(WZ_TYPE_COMBO) != NULL;
 }
 
 static bool IsWidgetNotCombo(const Widget *widget)
 {
-	return widget->type != WZ_TYPE_COMBO;
+	return widget->getType() != WZ_TYPE_COMBO;
 }
 
 static bool IsWidgetNotWindowOrCombo(const Widget *widget)
 {
-	return widget->type != WZ_TYPE_WINDOW && widget->type != WZ_TYPE_COMBO;
+	return widget->getType() != WZ_TYPE_WINDOW && widget->getType() != WZ_TYPE_COMBO;
 }
 
 void MainWindow::draw()
@@ -317,11 +317,11 @@ void MainWindow::draw()
 	Window *windows[WZ_MAX_WINDOWS];
 	int nWindows = 0;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		if (children[i]->type == WZ_TYPE_WINDOW)
+		if (children_[i]->getType() == WZ_TYPE_WINDOW)
 		{
-			windows[nWindows] = (Window *)children[i];
+			windows[nWindows] = (Window *)children_[i];
 			nWindows++;
 		}
 	}
@@ -337,7 +337,7 @@ void MainWindow::draw()
 		if (!widget->getVisible())
 			continue;
 
-		widget->draw(rect);
+		widget->draw(rect_);
 		drawWidget(widget, IsWidgetTrue, IsWidgetNotCombo);
 	}
 
@@ -356,9 +356,9 @@ void MainWindow::draw()
 
 void MainWindow::drawFrame()
 {
-	NVGRenderer *r = (NVGRenderer *)renderer;
+	NVGRenderer *r = (NVGRenderer *)renderer_;
 	NVGcontext *vg = r->getContext();
-	nvgBeginFrame(vg, rect.w, rect.h, 1);
+	nvgBeginFrame(vg, rect_.w, rect_.h, 1);
 	draw();
 	nvgEndFrame(vg);
 }
@@ -366,7 +366,7 @@ void MainWindow::drawFrame()
 void MainWindow::setMenuBar(MenuBar *menuBar)
 {
 	menuBar_ = menuBar;
-	menuBar->setWidth(rect.w);
+	menuBar->setWidth(rect_.w);
 	addChildWidget(menuBar);
 }
 
@@ -374,11 +374,11 @@ void MainWindow::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->type == WZ_TYPE_MAIN_WINDOW)
+	if (widget->getType() == WZ_TYPE_MAIN_WINDOW)
 		return;
 
 	// Special case for windows: add directly, not to the content widget.
-	if (widget->type == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_WINDOW)
 	{
 		addChildWidget(widget);
 	}
@@ -393,7 +393,7 @@ void MainWindow::remove(Widget *widget)
 	WZ_ASSERT(widget);
 
 	// Special case for windows: remove directly, not from the content widget.
-	if (widget->type == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_WINDOW)
 	{
 		removeChildWidget(widget);
 	}
@@ -541,11 +541,11 @@ void MainWindow::undockWindow(Window *window)
 
 			if (dockPosition == WZ_DOCK_POSITION_SOUTH)
 			{
-				widget->setHeightInternal(widget->rect.h + (rect.h - (widget->rect.y + widget->rect.h)));
+				widget->setHeightInternal(widget->getHeight() + (rect_.h - (widget->getPosition().y + widget->getHeight())));
 			}
 			else if (dockPosition == WZ_DOCK_POSITION_EAST || dockPosition == WZ_DOCK_POSITION_WEST)
 			{
-				widget->setHeightInternal(rect.h);
+				widget->setHeightInternal(rect_.h);
 			}
 		}
 	}
@@ -608,7 +608,7 @@ void MainWindow::setMovingWindow(Window *window)
 
 void MainWindow::updateContentRect()
 {
-	Rect rect = this->rect;
+	Rect rect = rect_;
 
 	// Adjust the content rect based on the menu bar height.
 	if (menuBar_)
@@ -655,7 +655,7 @@ void MainWindow::onRectChanged()
 	// Match the menu bar width to the main window width.
 	if (menuBar_)
 	{
-		menuBar_->setWidth(rect.w);
+		menuBar_->setWidth(rect_.w);
 	}
 
 	updateDockIconPositions();
@@ -672,11 +672,11 @@ void MainWindow::mouseButtonDownRecursive(Widget *widget, int mouseButton, int m
 
 	widget->onMouseButtonDown(mouseButton, mouseX, mouseY);
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		if (widget->children[i]->hover)
+		if (widget->children_[i]->getHover())
 		{
-			mouseButtonDownRecursive(widget->children[i], mouseButton, mouseX, mouseY);
+			mouseButtonDownRecursive(widget->children_[i], mouseButton, mouseX, mouseY);
 		}
 	}
 }
@@ -690,9 +690,9 @@ void MainWindow::mouseButtonUpRecursive(Widget *widget, int mouseButton, int mou
 
 	widget->onMouseButtonUp(mouseButton, mouseX, mouseY);
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		mouseButtonUpRecursive(widget->children[i], mouseButton, mouseX, mouseY);
+		mouseButtonUpRecursive(widget->children_[i], mouseButton, mouseX, mouseY);
 	}
 }
 
@@ -703,16 +703,16 @@ void MainWindow::clearHoverRecursive(Window *ignoreWindow, Widget *widget)
 	if (widget == ignoreWindow)
 		return;
 
-	if (widget->hover)
+	if (widget->getHover())
 	{
 		// Stop hovering.
-		widget->hover = false;
+		widget->hover_ = false;
 		widget->onMouseHoverOff();
 	}
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		clearHoverRecursive(ignoreWindow, widget->children[i]);
+		clearHoverRecursive(ignoreWindow, widget->children_[i]);
 	}
 }
 
@@ -720,37 +720,37 @@ void MainWindow::ignoreOverlappingChildren(Widget *widget, int mouseX, int mouse
 {
 	WZ_ASSERT(widget);
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		widget->children[i]->ignore = false;
+		widget->children_[i]->ignore_ = false;
 	}
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		for (size_t j = 0; j < widget->children.size(); j++)
+		for (size_t j = 0; j < widget->children_.size(); j++)
 		{
 			Rect rect1, rect2, intersection;
 
 			if (i == j)
 				continue;
 
-			if (!widget->children[j]->getVisible())
+			if (!widget->children_[j]->getVisible())
 				continue;
 
 			// If the mouse cursor is in the intersection of the two widget rects.
-			rect1 = widget->children[i]->getAbsoluteRect();
-			rect2 = widget->children[j]->getAbsoluteRect();
+			rect1 = widget->children_[i]->getAbsoluteRect();
+			rect2 = widget->children_[j]->getAbsoluteRect();
 
 			if (Rect::intersect(rect1, rect2, &intersection) && WZ_POINT_IN_RECT(mouseX, mouseY, intersection))
 			{
 				// Ignore the one that isn't set to overlap.
-				if (widget->children[i]->overlap)
+				if (widget->children_[i]->overlap_)
 				{
-					widget->children[j]->ignore = true;
+					widget->children_[j]->ignore_ = true;
 				}
-				else if (widget->children[j]->overlap)
+				else if (widget->children_[j]->overlap_)
 				{
-					widget->children[i]->ignore = true;
+					widget->children_[i]->ignore_ = true;
 				}
 			}
 		}
@@ -771,12 +771,12 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 		return;
 
 	// Don't process mouse move if the widget is ignored.
-	if (widget->ignore)
+	if (widget->ignore_)
 	{
-		if (widget->hover)
+		if (widget->getHover())
 		{
 			// Stop hovering.
-			widget->hover = false;
+			widget->hover_ = false;
 			widget->onMouseHoverOff();
 		}
 
@@ -785,9 +785,9 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 
 	// Determine whether the mouse is hovering over the widget's parent window.
 	// Special case for combo dropdown list poking outside the window.
-	if (widget->window && !(widget->parent && widget->parent->type == WZ_TYPE_COMBO))
+	if (widget->window_ && !(widget->parent_ && widget->parent_->getType() == WZ_TYPE_COMBO))
 	{
-		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, widget->window->getContentWidget()->getAbsoluteRect());
+		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, widget->window_->getContentWidget()->getAbsoluteRect());
 	}
 	else
 	{
@@ -795,9 +795,9 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent.
-	if (!widget->inputNotClippedToParent && widget->parent && widget->parent != this && widget->parent != widget->window)
+	if (!widget->inputNotClippedToParent_ && widget->parent_ && widget->parent_ != this && widget->parent_ != widget->window_)
 	{
-		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, widget->parent->getAbsoluteRect());
+		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, widget->parent_->getAbsoluteRect());
 	}
 	else
 	{
@@ -805,34 +805,34 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 	}
 
 	// Or the window itself.
-	widgetIsChildOfWindow = !window || (window && (widget->window == window || widget == window));
+	widgetIsChildOfWindow = !window || (window && (widget->window_ == window || widget == window));
 
 	// Set widget hover.
-	oldHover = widget->hover;
+	oldHover = widget->getHover();
 	rect = widget->getAbsoluteRect();
-	widget->hover = widgetIsChildOfWindow && hoverWindow && hoverParent && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
+	widget->hover_ = widgetIsChildOfWindow && hoverWindow && hoverParent && WZ_POINT_IN_RECT(mouseX, mouseY, rect);
 
 	// Run callbacks if hover has changed.
-	if (!oldHover && widget->hover)
+	if (!oldHover && widget->getHover())
 	{
 		widget->onMouseHoverOn();
 	}
-	else if (oldHover && !widget->hover)
+	else if (oldHover && !widget->getHover())
 	{
 		widget->onMouseHoverOff();
 	}
 
 	// Run mouse move if the mouse is hovering over the widget, or if input is locked to the widget.
-	if (widget->hover || (widgetIsChildOfWindow && !lockInputWidgetStack_.empty() && widget == lockInputWidgetStack_.back()))
+	if (widget->getHover() || (widgetIsChildOfWindow && !lockInputWidgetStack_.empty() && widget == lockInputWidgetStack_.back()))
 	{
 		widget->onMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 
 	ignoreOverlappingChildren(widget, mouseX, mouseY);
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		mouseMoveRecursive(window, widget->children[i], mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+		mouseMoveRecursive(window, widget->children_[i], mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 }
 
@@ -845,11 +845,11 @@ void MainWindow::mouseWheelMoveRecursive(Widget *widget, int x, int y)
 
 	widget->onMouseWheelMove(x, y);
 
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		if (widget->children[i]->hover)
+		if (widget->children_[i]->getHover())
 		{
-			mouseWheelMoveRecursive(widget->children[i], x, y);
+			mouseWheelMoveRecursive(widget->children_[i], x, y);
 		}
 	}
 }
@@ -866,7 +866,7 @@ void MainWindow::drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate 
 	if (!widget->overlapsParentWindow() && !IsWidgetComboAncestor(widget))
 		return;
 
-	if (drawPredicate(widget) && !widget->drawManually)
+	if (drawPredicate(widget) && !widget->drawManually_)
 	{
 		widget->draw(clip);
 	}
@@ -875,33 +875,33 @@ void MainWindow::drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate 
 	if (!Rect::intersect(clip, widget->getChildrenClipRect(), &clip))
 	{
 		// Reset to main window clip rect.
-		clip = rect;
+		clip = rect_;
 	}
 
 	if (!recursePredicate(widget))
 		return;
 
 	// Recurse into children, skip children that are flagged to draw last.
-	for (size_t i = 0; i < widget->children.size(); i++)
+	for (size_t i = 0; i < widget->children_.size(); i++)
 	{
-		if (widget->children[i]->flags & WZ_WIDGET_FLAG_DRAW_LAST)
+		if (widget->children_[i]->getDrawLast())
 		{
 			drawLastFound = true;
 		}
 		else
 		{
-			drawWidgetRecursive(widget->children[i], clip, drawPredicate, recursePredicate);
+			drawWidgetRecursive(widget->children_[i], clip, drawPredicate, recursePredicate);
 		}
 	}
 
 	// Recurse into children that are flagged to draw last.
 	if (drawLastFound)
 	{
-		for (size_t i = 0; i < widget->children.size(); i++)
+		for (size_t i = 0; i < widget->children_.size(); i++)
 		{
-			if (widget->children[i]->flags & WZ_WIDGET_FLAG_DRAW_LAST)
+			if (widget->children_[i]->getDrawLast())
 			{
-				drawWidgetRecursive(widget->children[i], clip, drawPredicate, recursePredicate);
+				drawWidgetRecursive(widget->children_[i], clip, drawPredicate, recursePredicate);
 			}
 		}
 	}
@@ -919,18 +919,18 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 	bool resultIsDocked = false;
 	int drawPriority = -1;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
 		Widget *widget;
 		Window *window;
 		bool docked;
 
-		widget = children[i];
+		widget = children_[i];
 
-		if (widget->type != WZ_TYPE_WINDOW)
+		if (widget->getType() != WZ_TYPE_WINDOW)
 			continue;
 
-		if (!widget->getVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->rect))
+		if (!widget->getVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->getRect()))
 			continue;
 
 		window = (Window *)widget;
@@ -1051,18 +1051,18 @@ void MainWindow::updateDockingRects()
 		switch (i)
 		{
 		case WZ_DOCK_POSITION_NORTH:
-			windowRect.w = rect.w;
+			windowRect.w = rect_.w;
 			break;
 		case WZ_DOCK_POSITION_SOUTH:
-			windowRect.y = rect.h - windowRect.h;
-			windowRect.w = rect.w;
+			windowRect.y = rect_.h - windowRect.h;
+			windowRect.w = rect_.w;
 			break;
 		case WZ_DOCK_POSITION_EAST:
-			windowRect.x = rect.w - windowRect.w;
-			windowRect.h = rect.h - menuBarHeight;
+			windowRect.x = rect_.w - windowRect.w;
+			windowRect.h = rect_.h - menuBarHeight;
 			break;
 		case WZ_DOCK_POSITION_WEST:
-			windowRect.h = rect.h - menuBarHeight;
+			windowRect.h = rect_.h - menuBarHeight;
 			break;
 		}
 
@@ -1074,20 +1074,20 @@ void MainWindow::updateDockingRects()
 			switch (i)
 			{
 			case WZ_DOCK_POSITION_NORTH:
-				tabBarRect.w = rect.w;
+				tabBarRect.w = rect_.w;
 				break;
 			case WZ_DOCK_POSITION_SOUTH:
-				tabBarRect.y = rect.h - tabBarRect.h;
-				tabBarRect.w = rect.w;
+				tabBarRect.y = rect_.h - tabBarRect.h;
+				tabBarRect.w = rect_.w;
 				windowRect.h -= tabBarRect.h;
 				break;
 			case WZ_DOCK_POSITION_EAST:
-				tabBarRect.x = rect.w - windowRect.w;
-				tabBarRect.y = rect.h - tabBarRect.h;
+				tabBarRect.x = rect_.w - windowRect.w;
+				tabBarRect.y = rect_.h - tabBarRect.h;
 				windowRect.h -= tabBarRect.h;
 				break;
 			case WZ_DOCK_POSITION_WEST:
-				tabBarRect.y = rect.h - tabBarRect.h;
+				tabBarRect.y = rect_.h - tabBarRect.h;
 				windowRect.h -= tabBarRect.h;
 				break;
 			}
@@ -1131,31 +1131,31 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 		{
 			rect.x = 0;
 			rect.y = menuBarHeight;
-			rect.w = this->rect.w;
-			rect.h = WZ_MIN(windowSize.h, (int)(this->rect.h * maxPreviewSizeMultiplier)) - menuBarHeight;
+			rect.w = rect_.w;
+			rect.h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier)) - menuBarHeight;
 		}
 		else if (dockPosition == WZ_DOCK_POSITION_SOUTH)
 		{
-			const int h = WZ_MIN(windowSize.h, (int)(this->rect.h * maxPreviewSizeMultiplier));
+			const int h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier));
 			rect.x = 0;
-			rect.y = this->rect.h - h;
-			rect.w = this->rect.w;
+			rect.y = rect_.h - h;
+			rect.w = rect_.w;
 			rect.h = h;
 		}
 		else if (dockPosition == WZ_DOCK_POSITION_EAST)
 		{
-			const int w = WZ_MIN(windowSize.w, (int)(this->rect.w * maxPreviewSizeMultiplier));
-			rect.x = this->rect.w - w;
+			const int w = WZ_MIN(windowSize.w, (int)(rect_.w * maxPreviewSizeMultiplier));
+			rect.x = rect_.w - w;
 			rect.y = menuBarHeight;
 			rect.w = w;
-			rect.h = this->rect.h - menuBarHeight;
+			rect.h = rect_.h - menuBarHeight;
 		}
 		else if (dockPosition == WZ_DOCK_POSITION_WEST)
 		{
 			rect.x = 0;
 			rect.y = menuBarHeight;
-			rect.w = WZ_MIN(windowSize.w, (int)(this->rect.w * maxPreviewSizeMultiplier));
-			rect.h = this->rect.h - menuBarHeight;
+			rect.w = WZ_MIN(windowSize.w, (int)(rect_.w * maxPreviewSizeMultiplier));
+			rect.h = rect_.h - menuBarHeight;
 		}
 	}
 
@@ -1220,11 +1220,11 @@ void MainWindow::updateWindowDrawPriorities(Window *top)
 	int nWindows = 0;
 	Window *windows[WZ_MAX_WINDOWS];
 
-	for (size_t i = 0; i < (int)children.size(); i++)
+	for (size_t i = 0; i < (int)children_.size(); i++)
 	{
-		if (children[i]->type == WZ_TYPE_WINDOW && children[i] != top)
+		if (children_[i]->getType() == WZ_TYPE_WINDOW && children_[i] != top)
 		{
-			windows[nWindows] = (Window *)children[i];
+			windows[nWindows] = (Window *)children_[i];
 			nWindows++;
 		}
 	}

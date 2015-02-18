@@ -29,11 +29,11 @@ namespace wz {
 
 GroupBox::GroupBox(const std::string &label) : label_(label)
 {
-	type = WZ_TYPE_GROUP_BOX;
+	type_ = WZ_TYPE_GROUP_BOX;
 
 	// Create content widget.
 	content_ = new Widget;
-	content_->stretch = WZ_STRETCH;
+	content_->setStretch(WZ_STRETCH);
 	addChildWidget(content_);
 
 	setSize(200, 200);
@@ -44,7 +44,7 @@ void GroupBox::setLabel(const char *label)
 	label_ = label;
 
 	// Update the margin.
-	if (renderer)
+	if (renderer_)
 	{
 		refreshMargin();
 	}
@@ -59,7 +59,7 @@ void GroupBox::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	content_->addChildWidget(widget);
@@ -78,12 +78,12 @@ void GroupBox::onRendererChanged()
 
 void GroupBox::draw(Rect clip)
 {
-	renderer->drawGroupBox(this, clip);
+	renderer_->drawGroupBox(this, clip);
 }
 
 Size GroupBox::measure()
 {
-	return renderer->measureGroupBox(this);
+	return renderer_->measureGroupBox(this);
 }
 
 void GroupBox::refreshMargin()

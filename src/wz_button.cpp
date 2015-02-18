@@ -28,7 +28,7 @@ namespace wz {
 
 Button::Button(const std::string &label, const std::string &icon)
 {
-	type = WZ_TYPE_BUTTON;
+	type_ = WZ_TYPE_BUTTON;
 	clickBehavior_ = WZ_BUTTON_CLICK_BEHAVIOR_UP;
 	setBehavior_ = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
 	isPressed_ = isSet_ = false;
@@ -146,7 +146,7 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1)
 	{
 		isPressed_ = true;
-		mainWindow->pushLockInputWidget(this);
+		mainWindow_->pushLockInputWidget(this);
 
 		Event e;
 		e.button.type = WZ_EVENT_BUTTON_PRESSED;
@@ -166,9 +166,9 @@ void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1 && isPressed_)
 	{
 		isPressed_ = false;
-		mainWindow->popLockInputWidget(this);
+		mainWindow_->popLockInputWidget(this);
 
-		if (hover && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
+		if (hover_ && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
 		{
 			click();
 		}
@@ -177,12 +177,12 @@ void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 
 void Button::draw(Rect clip)
 {
-	renderer->drawButton(this, clip);
+	renderer_->drawButton(this, clip);
 }
 
 Size Button::measure()
 {
-	return renderer->measureButton(this);
+	return renderer_->measureButton(this);
 }
 
 void Button::setClickBehavior(ButtonClickBehavior clickBehavior)

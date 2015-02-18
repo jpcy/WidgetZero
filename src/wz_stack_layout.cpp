@@ -28,7 +28,7 @@ namespace wz {
 
 StackLayout::StackLayout(StackLayoutDirection direction, int spacing)
 {
-	type = WZ_TYPE_STACK_LAYOUT;
+	type_ = WZ_TYPE_STACK_LAYOUT;
 	direction_ = direction;
 	spacing_ = spacing;
 }
@@ -54,7 +54,7 @@ void StackLayout::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	addChildWidget(widget);
@@ -80,15 +80,15 @@ void StackLayout::onRectChanged()
 
 void StackLayout::layoutVertical()
 {
-	int availableHeight = rect.h;
+	int availableHeight = rect_.h;
 
 	// The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int nStretchingWidgets = 0;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
 		// Subtract all child widget top and bottom margins from the available height.
-		availableHeight -= children[i]->margin.top + children[i]->margin.bottom;
+		availableHeight -= children_[i]->getMargin().top + children_[i]->getMargin().bottom;
 
 		// Subtract layout spacing too, except for the first child (because spacing is applied to the top).
 		if (i != 0)
@@ -96,7 +96,7 @@ void StackLayout::layoutVertical()
 			availableHeight -= spacing_;
 		}
 
-		if ((children[i]->stretch & WZ_STRETCH_HEIGHT) != 0)
+		if ((children_[i]->getStretch() & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// Count the number of widgets that stretch in the same direction as the the layout, so available space can be divided evenly between them.
 			nStretchingWidgets++;
@@ -104,50 +104,50 @@ void StackLayout::layoutVertical()
 		else
 		{
 			// Subtract the heights of child widgets that aren't being stretched in the same direction as the the layout.
-			availableHeight -= children[i]->rect.h;
+			availableHeight -= children_[i]->getHeight();
 		}
 	}
 
 	// Layout the children.
 	int y = 0;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		Widget *child = children[i];
+		Widget *child = children_[i];
 
 		if (i != 0)
 		{
 			y += spacing_;
 		}
 
-		y += child->margin.top;
+		y += child->getMargin().top;
 
 		Rect childRect;
-		childRect.x = child->margin.left;
+		childRect.x = child->getMargin().left;
 		childRect.y = y;
 
-		if ((child->stretch & WZ_STRETCH_WIDTH) != 0)
+		if ((child->getStretch() & WZ_STRETCH_WIDTH) != 0)
 		{
 			// Fit the width of the layout.
-			childRect.w = rect.w - (child->margin.left + child->margin.right);
+			childRect.w = rect_.w - (child->getMargin().left + child->getMargin().right);
 		}
 		else
 		{
 			// Don't change the width.
-			childRect.w = child->rect.w;
+			childRect.w = child->getWidth();
 
 			// Handle horizontal alignment.
-			if ((child->align & WZ_ALIGN_CENTER) != 0)
+			if ((child->getAlign() & WZ_ALIGN_CENTER) != 0)
 			{
-				childRect.x = child->margin.left + (int)((rect.w - child->margin.right) / 2.0f - childRect.w / 2.0f);
+				childRect.x = child->getMargin().left + (int)((rect_.w - child->getMargin().right) / 2.0f - childRect.w / 2.0f);
 			}
-			else if ((child->align & WZ_ALIGN_RIGHT) != 0)
+			else if ((child->getAlign() & WZ_ALIGN_RIGHT) != 0)
 			{
-				childRect.x = rect.w - child->margin.right - childRect.w;
+				childRect.x = rect_.w - child->getMargin().right - childRect.w;
 			}
 		}
 
-		if ((child->stretch & WZ_STRETCH_HEIGHT) != 0)
+		if ((child->getStretch() & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// The available height is evenly divided between children that stretch vertically.
 			childRect.h = (int)(availableHeight / (float)nStretchingWidgets);
@@ -155,25 +155,25 @@ void StackLayout::layoutVertical()
 		else
 		{
 			// Don't change the height.
-			childRect.h = child->rect.h;
+			childRect.h = child->getHeight();
 		}
 
 		child->setRectInternal(childRect);
-		y += childRect.h + child->margin.bottom;
+		y += childRect.h + child->getMargin().bottom;
 	}
 }
 
 void StackLayout::layoutHorizontal()
 {
-	int availableWidth = rect.w;
+	int availableWidth = rect_.w;
 
 	// The number of widgets that stretch in the same direction as the the layout. Available space is divided evenly between them.
 	int nStretchingWidgets = 0;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
 		// Subtract all child widget left and right margins from the available width.
-		availableWidth -= children[i]->margin.left + children[i]->margin.right;
+		availableWidth -= children_[i]->getMargin().left + children_[i]->getMargin().right;
 
 		// Subtract layout spacing too, except for the first child (because spacing is applied to the left).
 		if (i != 0)
@@ -181,7 +181,7 @@ void StackLayout::layoutHorizontal()
 			availableWidth -= spacing_;
 		}
 
-		if ((children[i]->stretch & WZ_STRETCH_WIDTH) != 0)
+		if ((children_[i]->getStretch() & WZ_STRETCH_WIDTH) != 0)
 		{
 			// Count the number of widgets that stretch in the same direction as the the layout, so available space can be divided evenly between them.
 			nStretchingWidgets++;
@@ -189,29 +189,29 @@ void StackLayout::layoutHorizontal()
 		else
 		{
 			// Subtract the widths of child widgets that aren't being stretched in the same direction as the the layout.
-			availableWidth -= children[i]->rect.w;
+			availableWidth -= children_[i]->getWidth();
 		}
 	}
 
 	// Layout the children.
 	int x = 0;
 
-	for (size_t i = 0; i < children.size(); i++)
+	for (size_t i = 0; i < children_.size(); i++)
 	{
-		Widget *child = children[i];
+		Widget *child = children_[i];
 
 		if (i != 0)
 		{
 			x += spacing_;
 		}
 
-		x += child->margin.left;
+		x += child->getMargin().left;
 
 		Rect childRect;
 		childRect.x = x;
-		childRect.y = child->margin.top;
+		childRect.y = child->getMargin().top;
 
-		if ((child->stretch & WZ_STRETCH_WIDTH) != 0)
+		if ((child->getStretch() & WZ_STRETCH_WIDTH) != 0)
 		{
 			// The available width is evenly divided between children that stretch horizontally.
 			childRect.w = (int)(availableWidth / (float)nStretchingWidgets);
@@ -219,32 +219,32 @@ void StackLayout::layoutHorizontal()
 		else
 		{
 			// Don't change the width.
-			childRect.w = child->rect.w;
+			childRect.w = child->getWidth();
 		}
 
-		if ((child->stretch & WZ_STRETCH_HEIGHT) != 0)
+		if ((child->getStretch() & WZ_STRETCH_HEIGHT) != 0)
 		{
 			// Fit the height of the layout.
-			childRect.h = rect.h - (child->margin.top + child->margin.bottom);
+			childRect.h = rect_.h - (child->getMargin().top + child->getMargin().bottom);
 		}
 		else
 		{
 			// Don't change the height.
-			childRect.h = child->rect.h;
+			childRect.h = child->getHeight();
 
 			// Handle vertical alignment.
-			if ((child->align & WZ_ALIGN_MIDDLE) != 0)
+			if ((child->getAlign() & WZ_ALIGN_MIDDLE) != 0)
 			{
-				childRect.y = child->margin.top + (int)((rect.h - child->margin.bottom) / 2.0f - childRect.h / 2.0f);
+				childRect.y = child->getMargin().top + (int)((rect_.h - child->getMargin().bottom) / 2.0f - childRect.h / 2.0f);
 			}
-			else if ((child->align & WZ_ALIGN_BOTTOM) != 0)
+			else if ((child->getAlign() & WZ_ALIGN_BOTTOM) != 0)
 			{
-				childRect.y = rect.h - child->margin.bottom - childRect.h;
+				childRect.y = rect_.h - child->getMargin().bottom - childRect.h;
 			}
 		}
 
 		child->setRectInternal(childRect);
-		x += childRect.w + child->margin.right;
+		x += childRect.w + child->getMargin().right;
 	}
 }
 

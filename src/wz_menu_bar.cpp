@@ -37,7 +37,7 @@ MENU BAR BUTTON
 
 MenuBarButton::MenuBarButton(MenuBar *menuBar)
 {
-	type = WZ_TYPE_BUTTON;
+	type_ = WZ_TYPE_BUTTON;
 	isPressed_ = isSet_ = false;
 	menuBar_ = menuBar;
 }
@@ -65,7 +65,7 @@ void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		isPressed_ = true;
 
 		// Lock input to the menu bar, not this button.
-		mainWindow->pushLockInputWidget(menuBar_);
+		mainWindow_->pushLockInputWidget(menuBar_);
 	}
 }
 
@@ -74,7 +74,7 @@ void MenuBarButton::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (mouseButton == 1 && isPressed_)
 	{
 		isPressed_ = false;
-		mainWindow->popLockInputWidget(parent->parent);
+		mainWindow_->popLockInputWidget(parent_->getParent());
 	}
 }
 
@@ -82,9 +82,9 @@ void MenuBarButton::onMouseHoverOn()
 {
 	// See if any of the other buttons in the menubar are pressed.
 	// If one is pressed, unpress it and press this one instead.
-	for (size_t i = 0; i < menuBar_->children[0]->children.size(); i++)
+	for (size_t i = 0; i < menuBar_->getChildren()[0]->getChildren().size(); i++)
 	{
-		MenuBarButton *otherButton = (MenuBarButton *)menuBar_->children[0]->children[i];
+		MenuBarButton *otherButton = (MenuBarButton *)menuBar_->getChildren()[0]->getChildren()[i];
 
 		if (otherButton == this || !otherButton->isPressed_)
 			continue;
@@ -97,12 +97,12 @@ void MenuBarButton::onMouseHoverOn()
 
 void MenuBarButton::draw(Rect clip)
 {
-	renderer->drawMenuBarButton(this, clip);
+	renderer_->drawMenuBarButton(this, clip);
 }
 
 Size MenuBarButton::measure()
 {
-	return renderer->measureMenuBarButton(this);
+	return renderer_->measureMenuBarButton(this);
 }
 
 /*
@@ -115,7 +115,7 @@ MENU BAR
 
 MenuBar::MenuBar()
 {
-	type = WZ_TYPE_MENU_BAR;
+	type_ = WZ_TYPE_MENU_BAR;
 
 	layout_ = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
 	layout_->setStretch(WZ_STRETCH);
@@ -137,12 +137,12 @@ void MenuBar::onRendererChanged()
 
 void MenuBar::draw(Rect clip)
 {
-	renderer->drawMenuBar(this, clip);
+	renderer_->drawMenuBar(this, clip);
 }
 
 Size MenuBar::measure()
 {
-	return renderer->measureMenuBar(this);
+	return renderer_->measureMenuBar(this);
 }
 
 } // namespace wz

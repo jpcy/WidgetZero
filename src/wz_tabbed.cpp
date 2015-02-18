@@ -36,14 +36,14 @@ TAB PAGE WIDGET
 
 TabPage::TabPage()
 {
-	type = WZ_TYPE_TAB_PAGE;
+	type_ = WZ_TYPE_TAB_PAGE;
 }
 
 void TabPage::add(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
-	if (widget->type == WZ_TYPE_MAIN_WINDOW || widget->type == WZ_TYPE_WINDOW)
+	if (widget->getType() == WZ_TYPE_MAIN_WINDOW || widget->getType() == WZ_TYPE_WINDOW)
 		return;
 
 	addChildWidget(widget);
@@ -98,7 +98,7 @@ TABBED WIDGET
 
 Tabbed::Tabbed()
 {
-	type = WZ_TYPE_TABBED;
+	type_ = WZ_TYPE_TABBED;
 
 	tabBar = new TabBar;
 	tabBar->addEventHandler(WZ_EVENT_TAB_BAR_TAB_CHANGED, this, &Tabbed::onTabChanged);
@@ -125,7 +125,7 @@ void Tabbed::addTab(TabButton **tab, TabPage **page)
 
 	// Set the page widget rect.
 	int tabBarHeight = tabBar->getHeight();
-	(*page)->setRectInternal(0, tabBarHeight, rect.w, rect.h - tabBarHeight);
+	(*page)->setRectInternal(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
 
 	// Add the tabbed page.
 	TabbedPage newPage;
@@ -137,12 +137,12 @@ void Tabbed::addTab(TabButton **tab, TabPage **page)
 void Tabbed::onRectChanged()
 {
 	// Set the tab bar width to match.
-	tabBar->setWidthInternal(rect.w);
+	tabBar->setWidthInternal(rect_.w);
 
 	// Resize the pages to take up the remaining space.
 	Size pageSize;
-	pageSize.w = rect.w;
-	pageSize.h = rect.h - tabBar->getHeight();
+	pageSize.w = rect_.w;
+	pageSize.h = rect_.h - tabBar->getHeight();
 
 	for (size_t i = 0; i < pages.size(); i++)
 	{
@@ -152,12 +152,12 @@ void Tabbed::onRectChanged()
 
 void Tabbed::draw(Rect clip)
 {
-	renderer->drawTabbed(this, clip);
+	renderer_->drawTabbed(this, clip);
 }
 
 Size Tabbed::measure()
 {
-	return renderer->measureTabbed(this);
+	return renderer_->measureTabbed(this);
 }
 
 void Tabbed::onTabChanged(Event e)

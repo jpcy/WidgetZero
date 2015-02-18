@@ -28,7 +28,7 @@ namespace wz {
 
 Combo::Combo(uint8_t *itemData, int itemStride, int nItems)
 {
-	type = WZ_TYPE_COMBO;
+	type_ = WZ_TYPE_COMBO;
 	isOpen_ = false;
 
 	list_ = new List(itemData, itemStride, nItems);
@@ -80,7 +80,7 @@ void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		if (!isOpen_)
 		{
 			// Lock input.
-			mainWindow->pushLockInputWidget(this);
+			mainWindow_->pushLockInputWidget(this);
 
 			// Show dropdown list and set it to draw last.
 			list_->setVisible(true);
@@ -93,7 +93,7 @@ void Combo::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		else if (!WZ_POINT_IN_RECT(mouseX, mouseY, listRect))
 		{
 			// Unlock input.
-			mainWindow->popLockInputWidget(this);
+			mainWindow_->popLockInputWidget(this);
 
 			// Hide dropdown list.
 			list_->setVisible(false);
@@ -111,18 +111,18 @@ Rect Combo::getChildrenClipRect() const
 
 void Combo::draw(Rect clip)
 {
-	renderer->drawCombo(this, clip);
+	renderer_->drawCombo(this, clip);
 }
 
 Size Combo::measure()
 {
-	return renderer->measureCombo(this);
+	return renderer_->measureCombo(this);
 }
 
 void Combo::onListItemSelected(Event e)
 {
 	// Unlock input.
-	mainWindow->popLockInputWidget(this);
+	mainWindow_->popLockInputWidget(this);
 
 	// Hide dropdown list.
 	list_->setVisible(false);
@@ -133,17 +133,17 @@ void Combo::onListItemSelected(Event e)
 void Combo::updateListRect()
 {
 	// Don't do anything if the mainWindow is NULL (widget hasn't been added yet).
-	if (!mainWindow)
+	if (!mainWindow_)
 		return;
 
 	// Make the height large enough to avoid scrolling.
 	Border listItemsBorder = list_->getItemsBorder();
-	Rect listRect(0, rect.h, rect.w, listItemsBorder.top + list_->getItemHeight() * list_->getNumItems() + listItemsBorder.bottom);
+	Rect listRect(0, rect_.h, rect_.w, listItemsBorder.top + list_->getItemHeight() * list_->getNumItems() + listItemsBorder.bottom);
 
 	// Clip the height to the mainWindow.
 	// Need to use absolute widget rect y coord to take into account parent window position.
 	const Rect absRect = getAbsoluteRect();
-	int over = absRect.y + rect.h + listRect.h - mainWindow->getHeight();
+	int over = absRect.y + rect_.h + listRect.h - mainWindow_->getHeight();
 	
 	if (over > 0)
 	{

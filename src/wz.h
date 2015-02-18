@@ -364,6 +364,8 @@ enum
 
 class Widget
 {
+	friend class MainWindow;
+
 public:
 	Widget();
 	virtual ~Widget();
@@ -411,6 +413,7 @@ public:
 
 	WidgetType getType() const;
 	bool isLayout() const;
+	const MainWindow *getMainWindow() const;
 	MainWindow *getMainWindow();
 	void setPosition(int x, int y);
 	void setPosition(Position position);
@@ -447,6 +450,9 @@ public:
 	void setVisible(bool visible);
 	bool getVisible() const;
 	bool hasKeyboardFocus() const;
+	const Widget *getParent() const;
+	Widget *getParent();
+	const std::vector<Widget *> &getChildren() const;
 	void setMetadata(void *metadata);
 	void *getMetadata();
 
@@ -475,6 +481,7 @@ public:
 	Widget *findClosestAncestor(WidgetType type);
 	void setDrawManually(bool value);
 	void setDrawLast(bool value);
+	bool getDrawLast() const;
 	void setOverlap(bool value);
 	bool overlapsParentWindow() const;
 	void setClipInputToParent(bool value);
@@ -493,69 +500,10 @@ public:
 	// Draw without clipping if visible.
 	void drawIfVisible();
 
-	WidgetType type;
-
-	// Explicitly set by the user.
-	Rect userRect;
-
-	Rect rect;
-
-	// Only used if the widget is the child of a layout.
-	int stretch;
-
-	float stretchWidthScale;
-	float stretchHeightScale;
-
-	// Only used if the widget is the child of a layout.
-	int align;
-
-	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
-	Border margin;
-
-	// Like metadata, but used internally.
-	void *internalMetadata;
-
-	// User-set metadata.
-	void *metadata;
-
-	int flags;
-
-	bool hover;
-
-	// Don't draw this widget.
-	bool hidden;
-
-	// Used internally to ignore siblings that overlap at the mouse cursor.
-	bool ignore;
-
-	// This widget should overlap other widgets when doing mouse cursor logic. e.g. tab bar scroll buttons.
-	bool overlap;
-
-	// Don't draw automatically when MainWindow::draw walks through the widget hierarchy.
-	bool drawManually;
-
-	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
-	bool inputNotClippedToParent;
-
-	char fontFace[256];
-	float fontSize;
-
-	IRenderer *renderer;
-
-	MainWindow *mainWindow;
-
-	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in Widget::addChildWidget.
-	Window *window;
-
-	Widget *parent;
-	std::vector<Widget *> children;
-
-	std::vector<IEventHandler *> eventHandlers;
-
+protected:
 	void invokeEvent(Event e);
 	void invokeEvent(Event e, const std::vector<EventCallback> &callbacks);
 
-protected:
 	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
 	Rect calculateAlignedStretchedRect(Rect rect) const;
 
@@ -563,6 +511,65 @@ protected:
 	void setRenderer(IRenderer *renderer);
 	void setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window);
 	void resizeToMeasuredRecursive();
+
+	WidgetType type_;
+
+	// Explicitly set by the user.
+	Rect userRect_;
+
+	Rect rect_;
+
+	// Only used if the widget is the child of a layout.
+	int stretch_;
+
+	float stretchWidthScale_;
+	float stretchHeightScale_;
+
+	// Only used if the widget is the child of a layout.
+	int align_;
+
+	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
+	Border margin_;
+
+	// Like metadata, but used internally.
+	void *internalMetadata_;
+
+	// User-set metadata.
+	void *metadata_;
+
+	int flags_;
+
+	bool hover_;
+
+	// Don't draw this widget.
+	bool hidden_;
+
+	// Used internally to ignore siblings that overlap at the mouse cursor.
+	bool ignore_;
+
+	// This widget should overlap other widgets when doing mouse cursor logic. e.g. tab bar scroll buttons.
+	bool overlap_;
+
+	// Don't draw automatically when MainWindow::draw walks through the widget hierarchy.
+	bool drawManually_;
+
+	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
+	bool inputNotClippedToParent_;
+
+	char fontFace_[256];
+	float fontSize_;
+
+	IRenderer *renderer_;
+
+	MainWindow *mainWindow_;
+
+	// The closest ancestor window. NULL if the widget is the descendant of a mainWindow. Set in Widget::addChildWidget.
+	Window *window_;
+
+	Widget *parent_;
+	std::vector<Widget *> children_;
+
+	std::vector<IEventHandler *> eventHandlers_;
 };
 
 enum ButtonClickBehavior

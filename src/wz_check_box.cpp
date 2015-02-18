@@ -48,12 +48,12 @@ void CheckBox::addCallbackChecked(EventCallback callback)
 
 void CheckBox::draw(Rect clip)
 {
-	renderer->drawCheckBox(this, clip);
+	renderer_->drawCheckBox(this, clip);
 }
 
 Size CheckBox::measure()
 {
-	return renderer->measureCheckBox(this);
+	return renderer_->measureCheckBox(this);
 }
 
 } // namespace wz
