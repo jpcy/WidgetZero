@@ -34,7 +34,7 @@ Window::Window(const std::string &title)
 	drawPriority_ = 0;
 	headerHeight_ = 0;
 	borderSize_ = 4;
-	drag_ = WZ_DRAG_NONE;
+	drag_ = WindowDrag::None;
 	title_ = title;
 
 	content_ = new Widget;
@@ -138,11 +138,11 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		// Drag the header.
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, getHeaderRect()))
 		{
-			drag_ = WZ_DRAG_HEADER;
+			drag_ = WindowDrag::Header;
 			mainWindow_->pushLockInputWidget(this);
 
 			// Don't actually move the window yet if it's docked.
-			if (mainWindow_->getWindowDockPosition(this) == WZ_DOCK_POSITION_NONE)
+			if (mainWindow_->getWindowDockPosition(this) == DockPosition::None)
 			{
 				mainWindow_->setMovingWindow(this);
 			}
@@ -156,17 +156,17 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		}
 
 		// Resize by dragging the border.
-		Rect borderRects[WZ_NUM_COMPASS_POINTS];
-		bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+		Rect borderRects[Compass::NumPoints];
+		bool mouseOverBorderRects[Compass::NumPoints];
 
 		calculateBorderRects(borderRects);
 		calculateMouseOverBorderRects(mouseX, mouseY, borderRects, mouseOverBorderRects);
 
-		for (int i = 0; i < WZ_NUM_COMPASS_POINTS; i++)
+		for (int i = 0; i < Compass::NumPoints; i++)
 		{
 			if (mouseOverBorderRects[i])
 			{
-				drag_ = (WindowDrag)(WZ_DRAG_RESIZE_N + i);
+				drag_ = (WindowDrag::Enum)(WindowDrag::Resize_N + i);
 				resizeStartPosition_.x = mouseX;
 				resizeStartPosition_.y = mouseY;
 				resizeStartRect_ = rect_;
@@ -181,12 +181,12 @@ void Window::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	if (mouseButton == 1)
 	{
-		if (drag_ == WZ_DRAG_HEADER)
+		if (drag_ == WindowDrag::Header)
 		{
 			mainWindow_->setMovingWindow(NULL);
 		}
 
-		drag_ = WZ_DRAG_NONE;
+		drag_ = WindowDrag::None;
 		mainWindow_->popLockInputWidget(this);
 	}
 }
@@ -194,33 +194,33 @@ void Window::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	// Set the mouse cursor.
-	Rect borderRects[WZ_NUM_COMPASS_POINTS];
-	bool mouseOverBorderRects[WZ_NUM_COMPASS_POINTS];
+	Rect borderRects[Compass::NumPoints];
+	bool mouseOverBorderRects[Compass::NumPoints];
 
 	calculateBorderRects(borderRects);
 	calculateMouseOverBorderRects(mouseX, mouseY, borderRects, mouseOverBorderRects);
 
-	if (mouseOverBorderRects[WZ_COMPASS_N] || mouseOverBorderRects[WZ_COMPASS_S] || drag_ == WZ_DRAG_RESIZE_N || drag_ == WZ_DRAG_RESIZE_S)
+	if (mouseOverBorderRects[Compass::N] || mouseOverBorderRects[Compass::S] || drag_ == WindowDrag::Resize_N || drag_ == WindowDrag::Resize_S)
 	{
-		mainWindow_->setCursor(WZ_CURSOR_RESIZE_N_S);
+		mainWindow_->setCursor(Cursor::Resize_N_S);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_E] || mouseOverBorderRects[WZ_COMPASS_W] || drag_ == WZ_DRAG_RESIZE_E || drag_ == WZ_DRAG_RESIZE_W)
+	else if (mouseOverBorderRects[Compass::E] || mouseOverBorderRects[Compass::W] || drag_ == WindowDrag::Resize_E || drag_ == WindowDrag::Resize_W)
 	{
-		mainWindow_->setCursor(WZ_CURSOR_RESIZE_E_W);
+		mainWindow_->setCursor(Cursor::Resize_E_W);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NE] || mouseOverBorderRects[WZ_COMPASS_SW] || drag_ == WZ_DRAG_RESIZE_NE || drag_ == WZ_DRAG_RESIZE_SW)
+	else if (mouseOverBorderRects[Compass::NE] || mouseOverBorderRects[Compass::SW] || drag_ == WindowDrag::Resize_NE || drag_ == WindowDrag::Resize_SW)
 	{
-		mainWindow_->setCursor(WZ_CURSOR_RESIZE_NE_SW);
+		mainWindow_->setCursor(Cursor::Resize_NE_SW);
 	}
-	else if (mouseOverBorderRects[WZ_COMPASS_NW] || mouseOverBorderRects[WZ_COMPASS_SE] || drag_ == WZ_DRAG_RESIZE_NW || drag_ == WZ_DRAG_RESIZE_SE)
+	else if (mouseOverBorderRects[Compass::NW] || mouseOverBorderRects[Compass::SE] || drag_ == WindowDrag::Resize_NW || drag_ == WindowDrag::Resize_SE)
 	{
-		mainWindow_->setCursor(WZ_CURSOR_RESIZE_NW_SE);
+		mainWindow_->setCursor(Cursor::Resize_NW_SE);
 	}
 
 	// Don't actually move the window yet if it's docked.
-	const DockPosition dockPosition = mainWindow_->getWindowDockPosition(this);
+	const DockPosition::Enum dockPosition = mainWindow_->getWindowDockPosition(this);
 
-	if (drag_ == WZ_DRAG_HEADER && dockPosition != WZ_DOCK_POSITION_NONE)
+	if (drag_ == WindowDrag::Header && dockPosition != DockPosition::None)
 	{
 		Position delta;
 
@@ -257,7 +257,7 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 	// Calculate mouse deltas for dragging. Deltas are relative to the dragging start position (mouseDeltaX and mouseDeltaY are relative to the last mouse position).
 	Position resizeDelta;
 
-	if (drag_ >= WZ_DRAG_RESIZE_N)
+	if (drag_ >= WindowDrag::Resize_N)
 	{
 		resizeDelta.x = mouseX - resizeStartPosition_.x;
 		resizeDelta.y = mouseY - resizeStartPosition_.y;
@@ -267,18 +267,18 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 
 	switch (drag_)
 	{
-	case WZ_DRAG_HEADER:
+	case WindowDrag::Header:
 		newRect.x += mouseDeltaX;
 		newRect.y += mouseDeltaY;
 		break;
-	case WZ_DRAG_RESIZE_N:
+	case WindowDrag::Resize_N:
 	{
 		int delta = WZ_MIN(resizeDelta.y, resizeStartRect_.h - minimumWindowSize.h);
 		newRect.y = resizeStartRect_.y + delta;
 		newRect.h = resizeStartRect_.h - delta;
 	}
 	break;
-	case WZ_DRAG_RESIZE_NE:
+	case WindowDrag::Resize_NE:
 	{
 		int delta = WZ_MIN(resizeDelta.y, resizeStartRect_.h - minimumWindowSize.h);
 		newRect.y = resizeStartRect_.y + delta;
@@ -286,17 +286,17 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 		newRect.h = resizeStartRect_.h - delta;
 	}
 	break;
-	case WZ_DRAG_RESIZE_E:
+	case WindowDrag::Resize_E:
 		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect_.w + resizeDelta.x);
 		break;
-	case WZ_DRAG_RESIZE_SE:
+	case WindowDrag::Resize_SE:
 		newRect.w = WZ_MAX(minimumWindowSize.w, resizeStartRect_.w + resizeDelta.x);
 		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
 		break;
-	case WZ_DRAG_RESIZE_S:
+	case WindowDrag::Resize_S:
 		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
 		break;
-	case WZ_DRAG_RESIZE_SW:
+	case WindowDrag::Resize_SW:
 	{
 		int delta = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
 		newRect.x = resizeStartRect_.x + delta;
@@ -304,14 +304,14 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 		newRect.h = WZ_MAX(minimumWindowSize.h, resizeStartRect_.h + resizeDelta.y);
 	}
 	break;
-	case WZ_DRAG_RESIZE_W:
+	case WindowDrag::Resize_W:
 	{
 		int delta = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
 		newRect.x = resizeStartRect_.x + delta;
 		newRect.w = resizeStartRect_.w - delta;
 	}
 	break;
-	case WZ_DRAG_RESIZE_NW:
+	case WindowDrag::Resize_NW:
 	{
 		int deltaX, deltaY;
 		deltaX = WZ_MIN(resizeDelta.x, resizeStartRect_.w - minimumWindowSize.w);
@@ -329,7 +329,7 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 	setRectInternal(newRect);
 
 	// Resizing a docked window: 
-	if (mainWindow_->getWindowDockPosition(this) != WZ_DOCK_POSITION_NONE)
+	if (mainWindow_->getWindowDockPosition(this) != DockPosition::None)
 	{
 		// Tell the mainWindow so it can resize other windows docked at the same position too.
 		mainWindow_->updateDockedWindowRect(this);
@@ -364,62 +364,62 @@ void Window::calculateBorderRects(Rect *rects)
 {
 	WZ_ASSERT(rects);
 
-	rects[WZ_COMPASS_N] = rect_;
-	rects[WZ_COMPASS_N].x += borderSize_;
-	rects[WZ_COMPASS_N].w -= borderSize_ * 2;
-	rects[WZ_COMPASS_N].h = borderSize_;
+	rects[Compass::N] = rect_;
+	rects[Compass::N].x += borderSize_;
+	rects[Compass::N].w -= borderSize_ * 2;
+	rects[Compass::N].h = borderSize_;
 
-	rects[WZ_COMPASS_NE] = rect_;
-	rects[WZ_COMPASS_NE].x += rects[WZ_COMPASS_NE].w - borderSize_;
-	rects[WZ_COMPASS_NE].w = borderSize_;
-	rects[WZ_COMPASS_NE].h = borderSize_;
+	rects[Compass::NE] = rect_;
+	rects[Compass::NE].x += rects[Compass::NE].w - borderSize_;
+	rects[Compass::NE].w = borderSize_;
+	rects[Compass::NE].h = borderSize_;
 
-	rects[WZ_COMPASS_E] = rect_;
-	rects[WZ_COMPASS_E].x += rects[WZ_COMPASS_E].w - borderSize_;
-	rects[WZ_COMPASS_E].y += borderSize_;
-	rects[WZ_COMPASS_E].w = borderSize_;
-	rects[WZ_COMPASS_E].h -= borderSize_ * 2;
+	rects[Compass::E] = rect_;
+	rects[Compass::E].x += rects[Compass::E].w - borderSize_;
+	rects[Compass::E].y += borderSize_;
+	rects[Compass::E].w = borderSize_;
+	rects[Compass::E].h -= borderSize_ * 2;
 
-	rects[WZ_COMPASS_SE] = rect_;
-	rects[WZ_COMPASS_SE].x += rects[WZ_COMPASS_SE].w - borderSize_;
-	rects[WZ_COMPASS_SE].y += rects[WZ_COMPASS_SE].h - borderSize_;
-	rects[WZ_COMPASS_SE].w = borderSize_;
-	rects[WZ_COMPASS_SE].h = borderSize_;
+	rects[Compass::SE] = rect_;
+	rects[Compass::SE].x += rects[Compass::SE].w - borderSize_;
+	rects[Compass::SE].y += rects[Compass::SE].h - borderSize_;
+	rects[Compass::SE].w = borderSize_;
+	rects[Compass::SE].h = borderSize_;
 
-	rects[WZ_COMPASS_S] = rect_;
-	rects[WZ_COMPASS_S].x += borderSize_;
-	rects[WZ_COMPASS_S].y += rects[WZ_COMPASS_S].h - borderSize_;
-	rects[WZ_COMPASS_S].w -= borderSize_ * 2;
-	rects[WZ_COMPASS_S].h = borderSize_;
+	rects[Compass::S] = rect_;
+	rects[Compass::S].x += borderSize_;
+	rects[Compass::S].y += rects[Compass::S].h - borderSize_;
+	rects[Compass::S].w -= borderSize_ * 2;
+	rects[Compass::S].h = borderSize_;
 
-	rects[WZ_COMPASS_SW] = rect_;
-	rects[WZ_COMPASS_SW].y += rects[WZ_COMPASS_SW].h - borderSize_;
-	rects[WZ_COMPASS_SW].w = borderSize_;
-	rects[WZ_COMPASS_SW].h = borderSize_;
+	rects[Compass::SW] = rect_;
+	rects[Compass::SW].y += rects[Compass::SW].h - borderSize_;
+	rects[Compass::SW].w = borderSize_;
+	rects[Compass::SW].h = borderSize_;
 
-	rects[WZ_COMPASS_W] = rect_;
-	rects[WZ_COMPASS_W].y += borderSize_;
-	rects[WZ_COMPASS_W].w = borderSize_;
-	rects[WZ_COMPASS_W].h -= borderSize_ * 2;
+	rects[Compass::W] = rect_;
+	rects[Compass::W].y += borderSize_;
+	rects[Compass::W].w = borderSize_;
+	rects[Compass::W].h -= borderSize_ * 2;
 
-	rects[WZ_COMPASS_NW] = rect_;
-	rects[WZ_COMPASS_NW].w = borderSize_;
-	rects[WZ_COMPASS_NW].h = borderSize_;
+	rects[Compass::NW] = rect_;
+	rects[Compass::NW].w = borderSize_;
+	rects[Compass::NW].h = borderSize_;
 }
 
 void Window::calculateMouseOverBorderRects(int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects)
 {
-	DockPosition dockPosition = mainWindow_->getWindowDockPosition(this);
+	DockPosition::Enum dockPosition = mainWindow_->getWindowDockPosition(this);
 
 	// Take into account dockPositioning, e.g. north dockPositioned window can only be resized south.
-	mouseOverBorderRects[WZ_COMPASS_N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_N]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_SOUTH));
-	mouseOverBorderRects[WZ_COMPASS_NE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NE]) && dockPosition == WZ_DOCK_POSITION_NONE);
-	mouseOverBorderRects[WZ_COMPASS_E] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_E]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_WEST));
-	mouseOverBorderRects[WZ_COMPASS_SE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SE]) && dockPosition == WZ_DOCK_POSITION_NONE);
-	mouseOverBorderRects[WZ_COMPASS_S] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_S]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_NORTH));
-	mouseOverBorderRects[WZ_COMPASS_SW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_SW]) && dockPosition == WZ_DOCK_POSITION_NONE);
-	mouseOverBorderRects[WZ_COMPASS_W] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_W]) && (dockPosition == WZ_DOCK_POSITION_NONE || dockPosition == WZ_DOCK_POSITION_EAST));
-	mouseOverBorderRects[WZ_COMPASS_NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[WZ_COMPASS_NW]) && dockPosition == WZ_DOCK_POSITION_NONE);
+	mouseOverBorderRects[Compass::N] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::N]) && (dockPosition == DockPosition::None || dockPosition == DockPosition::South));
+	mouseOverBorderRects[Compass::NE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::NE]) && dockPosition == DockPosition::None);
+	mouseOverBorderRects[Compass::E] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::E]) && (dockPosition == DockPosition::None || dockPosition == DockPosition::West));
+	mouseOverBorderRects[Compass::SE] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::SE]) && dockPosition == DockPosition::None);
+	mouseOverBorderRects[Compass::S] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::S]) && (dockPosition == DockPosition::None || dockPosition == DockPosition::North));
+	mouseOverBorderRects[Compass::SW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::SW]) && dockPosition == DockPosition::None);
+	mouseOverBorderRects[Compass::W] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::W]) && (dockPosition == DockPosition::None || dockPosition == DockPosition::East));
+	mouseOverBorderRects[Compass::NW] = (WZ_POINT_IN_RECT(mouseX, mouseY, borderRects[Compass::NW]) && dockPosition == DockPosition::None);
 }
 
 } // namespace wz

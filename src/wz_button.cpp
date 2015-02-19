@@ -29,8 +29,8 @@ namespace wz {
 Button::Button(const std::string &label, const std::string &icon)
 {
 	type_ = WidgetType::Button;
-	clickBehavior_ = WZ_BUTTON_CLICK_BEHAVIOR_UP;
-	setBehavior_ = WZ_BUTTON_SET_BEHAVIOR_DEFAULT;
+	clickBehavior_ = ButtonClickBehavior::Up;
+	setBehavior_ = ButtonSetBehavior::Default;
 	isPressed_ = isSet_ = false;
 	boundValue_ = NULL;
 	padding_.left = padding_.right = 8;
@@ -94,7 +94,7 @@ bool Button::isSet() const
 void Button::set(bool value)
 {
 	// No such thing as setting a button if using the default behavior.
-	if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_DEFAULT)
+	if (setBehavior_ == ButtonSetBehavior::Default)
 		return;
 
 	if (value && isSet_)
@@ -154,7 +154,7 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 		e.button.isSet = isSet_;
 		invokeEvent(e, pressedCallbacks_);
 
-		if (clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_DOWN)
+		if (clickBehavior_ == ButtonClickBehavior::Down)
 		{
 			click();
 		}
@@ -168,7 +168,7 @@ void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 		isPressed_ = false;
 		mainWindow_->popLockInputWidget(this);
 
-		if (hover_ && clickBehavior_ == WZ_BUTTON_CLICK_BEHAVIOR_UP)
+		if (hover_ && clickBehavior_ == ButtonClickBehavior::Up)
 		{
 			click();
 		}
@@ -185,23 +185,23 @@ Size Button::measure()
 	return renderer_->measureButton(this);
 }
 
-void Button::setClickBehavior(ButtonClickBehavior clickBehavior)
+void Button::setClickBehavior(ButtonClickBehavior::Enum clickBehavior)
 {
 	clickBehavior_ = clickBehavior;
 }
 
-void Button::setSetBehavior(ButtonSetBehavior setBehavior)
+void Button::setSetBehavior(ButtonSetBehavior::Enum setBehavior)
 {
 	setBehavior_ = setBehavior;
 }
 
 void Button::click()
 {
-	if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_TOGGLE)
+	if (setBehavior_ == ButtonSetBehavior::Toggle)
 	{
 		isSet_ = !isSet_;
 	}
-	else if (setBehavior_ == WZ_BUTTON_SET_BEHAVIOR_STICKY)
+	else if (setBehavior_ == ButtonSetBehavior::Sticky)
 	{
 		// Don't invoke the clicked event if already set.
 		if (isSet_)
@@ -233,7 +233,7 @@ TOGGLE BUTTON
 
 ToggleButton::ToggleButton(const std::string &label, const std::string &icon) : Button(label, icon)
 {
-	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	setSetBehavior(ButtonSetBehavior::Toggle);
 }
 
 } // namespace wz

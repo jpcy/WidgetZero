@@ -129,27 +129,33 @@ struct Border
 
 extern const Border Border_zero;
 
-enum
+struct Stretch
 {
-	WZ_STRETCH_NONE,
-	WZ_STRETCH_WIDTH = 1,
-	WZ_STRETCH_HEIGHT = 2,
-	WZ_STRETCH = WZ_STRETCH_WIDTH | WZ_STRETCH_HEIGHT
+	enum
+	{
+		None,
+		Width = 1,
+		Height = 2,
+		All = Width | Height
+	};
 };
 
-enum
+struct Align
 {
-	WZ_ALIGN_NONE,
+	enum
+	{
+		None,
 
-	// Horizontal.
-	WZ_ALIGN_LEFT = 1,
-	WZ_ALIGN_CENTER = 2,
-	WZ_ALIGN_RIGHT = 4,
+		// Horizontal.
+		Left = 1,
+		Center = 2,
+		Right = 4,
 
-	// Vertical.
-	WZ_ALIGN_TOP = 8,
-	WZ_ALIGN_MIDDLE = 16,
-	WZ_ALIGN_BOTTOM = 32
+		// Vertical.
+		Top = 8,
+		Middle = 16,
+		Bottom = 32
+	};
 };
 
 struct EventType
@@ -230,25 +236,31 @@ union Event
 
 typedef void (*EventCallback)(Event e);
 
-enum Cursor
+struct Cursor
 {
-	WZ_CURSOR_DEFAULT,
-	WZ_CURSOR_IBEAM,
-	WZ_CURSOR_RESIZE_N_S,
-	WZ_CURSOR_RESIZE_E_W,
-	WZ_CURSOR_RESIZE_NE_SW,
-	WZ_CURSOR_RESIZE_NW_SE,
-	WZ_NUM_CURSORS
+	enum Enum
+	{
+		Default,
+		Ibeam,
+		Resize_N_S,
+		Resize_E_W,
+		Resize_NE_SW,
+		Resize_NW_SE,
+		NumCursors
+	};
 };
 
-enum DockPosition
+struct DockPosition
 {
-	WZ_DOCK_POSITION_NONE = -1,
-	WZ_DOCK_POSITION_NORTH,
-	WZ_DOCK_POSITION_SOUTH,
-	WZ_DOCK_POSITION_EAST,
-	WZ_DOCK_POSITION_WEST,
-	WZ_NUM_DOCK_POSITIONS
+	enum Enum
+	{
+		None = -1,
+		North,
+		South,
+		East,
+		West,
+		NumDockPositions
+	};
 };
 
 #define WZ_MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -259,29 +271,32 @@ enum DockPosition
 #define WZ_POINT_IN_RECT(px, py, rect) ((px) >= rect.x && (px) < rect.x + rect.w && (py) >= rect.y && (py) < rect.y + rect.h)
 #define WZ_RECTS_OVERLAP(rect1, rect2) (rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x && rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y) 
 
-enum Key
+struct Key
 {
-	WZ_KEY_UNKNOWN,
-	WZ_KEY_LEFT,
-	WZ_KEY_RIGHT,
-	WZ_KEY_UP,
-	WZ_KEY_DOWN, 
-	WZ_KEY_HOME,
-	WZ_KEY_END,
-	WZ_KEY_ENTER,
-	WZ_KEY_DELETE,
-	WZ_KEY_BACKSPACE,
-	WZ_KEY_LSHIFT,
-	WZ_KEY_RSHIFT,
-	WZ_KEY_LCONTROL,
-	WZ_KEY_RCONTROL,
-	WZ_NUM_KEYS,
+	enum Enum
+	{
+		Unknown,
+		LeftArrow,
+		RightArrow,
+		UpArrow,
+		DownArrow,
+		Home,
+		End,
+		Enter,
+		Delete,
+		Backspace,
+		LeftShift,
+		RightShift,
+		LeftControl,
+		RightControl,
+		NumKeys,
 
-	WZ_KEY_SHIFT_BIT = (1<<10),
-	WZ_KEY_CONTROL_BIT = (1<<11)
+		ShiftBit = (1 << 10),
+		ControlBit = (1 << 11)
+	};
 };
 
-#define WZ_KEY_MOD_OFF(key) ((key) & ~(WZ_KEY_SHIFT_BIT | WZ_KEY_CONTROL_BIT))
+#define WZ_KEY_MOD_OFF(key) ((key) & ~(Key::ShiftBit | Key::ControlBit))
 
 struct IEventHandler
 {
@@ -362,9 +377,12 @@ public:
 	virtual Size measureWindow(Window *window) = 0;
 };
 
-enum
+struct WidgetFlags
 {
-	WZ_WIDGET_FLAG_DRAW_LAST = 1 << 0,
+	enum
+	{
+		DrawLast = 1 << 0,
+	};
 };
 
 class Widget
@@ -406,8 +424,8 @@ public:
 	virtual void onMouseWheelMove(int x, int y) {}
 	virtual void onMouseHoverOn() {}
 	virtual void onMouseHoverOff() {}
-	virtual void onKeyDown(Key key) {}
-	virtual void onKeyUp(Key key) {}
+	virtual void onKeyDown(Key::Enum key) {}
+	virtual void onKeyUp(Key::Enum key) {}
 	virtual void onTextInput(const char *text) {}
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
@@ -577,25 +595,31 @@ protected:
 	std::vector<IEventHandler *> eventHandlers_;
 };
 
-enum ButtonClickBehavior
+struct ButtonClickBehavior
 {
-	// Click the button on mouse up (default).
-	WZ_BUTTON_CLICK_BEHAVIOR_UP,
+	enum Enum
+	{
+		// Click the button on mouse up (default).
+		Up,
 
-	// Click the button on mouse down
-	WZ_BUTTON_CLICK_BEHAVIOR_DOWN
+		// Click the button on mouse down
+		Down
+	};
 };
 
-enum ButtonSetBehavior
+struct ButtonSetBehavior
 {
-	// Button is never set.
-	WZ_BUTTON_SET_BEHAVIOR_DEFAULT,
+	enum Enum
+	{
+		// Button is never set.
+		Default,
 
-	// Click to toggle whether the button is set.
-	WZ_BUTTON_SET_BEHAVIOR_TOGGLE,
+		// Click to toggle whether the button is set.
+		Toggle,
 
-	// Click to set the button. Clicking again does nothing.
-	WZ_BUTTON_SET_BEHAVIOR_STICKY
+		// Click to set the button. Clicking again does nothing.
+		Sticky
+	};
 };
 
 class Button : public Widget
@@ -621,12 +645,12 @@ protected:
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	void setClickBehavior(ButtonClickBehavior clickBehavior);
-	void setSetBehavior(ButtonSetBehavior setBehavior);
+	void setClickBehavior(ButtonClickBehavior::Enum clickBehavior);
+	void setSetBehavior(ButtonSetBehavior::Enum setBehavior);
 	void click();
 
-	ButtonClickBehavior clickBehavior_;
-	ButtonSetBehavior setBehavior_;
+	ButtonClickBehavior::Enum clickBehavior_;
+	ButtonSetBehavior::Enum setBehavior_;
 	Border padding_;
 	std::string label_;
 	std::string icon_;
@@ -825,8 +849,8 @@ public:
 	void mouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	void mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	void mouseWheelMove(int x, int y);
-	void keyDown(Key key);
-	void keyUp(Key key);
+	void keyDown(Key::Enum key);
+	void keyUp(Key::Enum key);
 	void textInput(const char *text);
 	void draw();
 	void drawFrame();
@@ -835,16 +859,16 @@ public:
 	void remove(Widget *widget);
 	bool isTextCursorVisible() const;
 	void toggleTextCursor();
-	void setCursor(Cursor cursor);
-	Cursor getCursor() const;
+	void setCursor(Cursor::Enum cursor);
+	Cursor::Enum getCursor() const;
 
 	const Widget *getKeyboardFocusWidget() const;
 
 	// Set keyboard focus to this widget.
 	void setKeyboardFocusWidget(Widget *widget);
 
-	DockPosition getWindowDockPosition(const Window *window) const;
-	void dockWindow(Window *window, DockPosition dockPosition);
+	DockPosition::Enum getWindowDockPosition(const Window *window) const;
+	void dockWindow(Window *window, DockPosition::Enum dockPosition);
 	void undockWindow(Window *window);
 
 	// The docked window has been resized, update the rects of other windows docked at the same position.
@@ -876,7 +900,7 @@ protected:
 
 	void mouseWheelMoveRecursive(Widget *widget, int x, int y);
 
-	void keyDelta(Key key, bool down);
+	void keyDelta(Key::Enum key, bool down);
 	void drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate drawPredicate, WidgetPredicate recursePredicate);
 	void drawWidget(Widget *widget, WidgetPredicate drawPredicate, WidgetPredicate recursePredicate);
 
@@ -886,15 +910,15 @@ protected:
 	// Used by all dock tab bars.
 	void onDockTabBarTabChanged(Event e);
 
-	void refreshDockTabBar(DockPosition dockPosition);
+	void refreshDockTabBar(DockPosition::Enum dockPosition);
 
 	void updateDockingRects();
 
-	Rect calculateDockWindowRect(DockPosition dockPosition, Size windowSize);
+	Rect calculateDockWindowRect(DockPosition::Enum dockPosition, Size windowSize);
 
 	void updateDockIconPositions();
 
-	void updateDockPreviewRect(DockPosition dockPosition);
+	void updateDockPreviewRect(DockPosition::Enum dockPosition);
 	void updateDockPreviewVisible(int mouseX, int mouseY);
 
 	// top can be NULL
@@ -904,7 +928,7 @@ protected:
 
 	bool isTextCursorVisible_;
 
-	Cursor cursor_;
+	Cursor::Enum cursor_;
 
 	bool isShiftKeyDown_, isControlKeyDown_;
 
@@ -919,16 +943,16 @@ protected:
 	Window *movingWindow_;
 
 	// Hidden from the consumer.
-	DockIcon *dockIcons_[WZ_NUM_DOCK_POSITIONS];
+	DockIcon *dockIcons_[DockPosition::NumDockPositions];
 	DockPreview *dockPreview_;
 
-	std::vector<Window *> dockedWindows_[WZ_NUM_DOCK_POSITIONS];
+	std::vector<Window *> dockedWindows_[DockPosition::NumDockPositions];
 
 	// A window being dragged will be docked to this position on mouse up. Set when the cursor hovers over a dock icon.
-	DockPosition windowDockPosition_;
+	DockPosition::Enum windowDockPosition_;
 
 	// Each dock position has a tab bar which is visible when multiple windows are docked at the same position.
-	TabBar *dockTabBars_[WZ_NUM_DOCK_POSITIONS];
+	TabBar *dockTabBars_[DockPosition::NumDockPositions];
 
 	bool ignoreDockTabBarChangedEvent_;
 
@@ -1006,17 +1030,20 @@ protected:
 	Position pressMousePosition_;
 };
 
-enum ScrollerType
+struct ScrollerDirection
 {
-	WZ_SCROLLER_VERTICAL,
-	WZ_SCROLLER_HORIZONTAL
+	enum Enum
+	{
+		Vertical,
+		Horizontal
+	};
 };
 
 class Scroller : public Widget
 {
 public:
-	Scroller(ScrollerType scrollerType, int value = 0, int stepValue = 1, int maxValue = 0);
-	ScrollerType getType() const;
+	Scroller(ScrollerDirection::Enum direction, int value = 0, int stepValue = 1, int maxValue = 0);
+	ScrollerDirection::Enum getDirection() const;
 	int getValue() const;
 	void setValue(int value);
 	void decrementValue();
@@ -1040,7 +1067,7 @@ protected:
 	void onDecrementButtonClicked(Event e);
 	void onIncrementButtonClicked(Event e);
 
-	ScrollerType scrollerType_;
+	ScrollerDirection::Enum direction_;
 	int value_, stepValue_, maxValue_;
 	float nubScale_;
 	ScrollerNub *nub_;
@@ -1072,17 +1099,20 @@ protected:
 	SpinnerIncrementButton *incrementButton_;
 };
 
-enum StackLayoutDirection
+struct StackLayoutDirection
 {
-	WZ_STACK_LAYOUT_VERTICAL,
-	WZ_STACK_LAYOUT_HORIZONTAL,
+	enum Enum
+	{
+		Vertical,
+		Horizontal
+	};
 };
 
 class StackLayout : public Widget
 {
 public:
-	StackLayout(StackLayoutDirection direction, int spacing = 0);
-	void setDirection(StackLayoutDirection direction);
+	StackLayout(StackLayoutDirection::Enum direction, int spacing = 0);
+	void setDirection(StackLayoutDirection::Enum direction);
 	void setSpacing(int spacing);
 	int getSpacing() const;
 	void add(Widget *widget);
@@ -1093,7 +1123,7 @@ protected:
 	void layoutVertical();
 	void layoutHorizontal();
 
-	StackLayoutDirection direction_;
+	StackLayoutDirection::Enum direction_;
 
 	// Spacing between child widgets. Applied to the top/left of children.
 	int spacing_;
@@ -1239,7 +1269,7 @@ protected:
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
 	virtual void onMouseWheelMove(int x, int y);
-	virtual void onKeyDown(Key key);
+	virtual void onKeyDown(Key::Enum key);
 	virtual void onTextInput(const char *text);
 	virtual void draw(Rect clip);
 	virtual Size measure();
@@ -1281,31 +1311,37 @@ public:
 	ToggleButton(const std::string &label = std::string(), const std::string &icon = std::string());
 };
 
-enum WindowDrag
+struct WindowDrag
 {
-	WZ_DRAG_NONE,
-	WZ_DRAG_HEADER,
-	WZ_DRAG_RESIZE_N,
-	WZ_DRAG_RESIZE_NE,
-	WZ_DRAG_RESIZE_E,
-	WZ_DRAG_RESIZE_SE,
-	WZ_DRAG_RESIZE_S,
-	WZ_DRAG_RESIZE_SW,
-	WZ_DRAG_RESIZE_W,
-	WZ_DRAG_RESIZE_NW,
+	enum Enum
+	{
+		None,
+		Header,
+		Resize_N,
+		Resize_NE,
+		Resize_E,
+		Resize_SE,
+		Resize_S,
+		Resize_SW,
+		Resize_W,
+		Resize_NW
+	};
 };
 
-enum
+struct Compass
 {
-	WZ_COMPASS_N,
-	WZ_COMPASS_NE,
-	WZ_COMPASS_E,
-	WZ_COMPASS_SE,
-	WZ_COMPASS_S,
-	WZ_COMPASS_SW,
-	WZ_COMPASS_W,
-	WZ_COMPASS_NW,
-	WZ_NUM_COMPASS_POINTS
+	enum
+	{
+		N,
+		NE,
+		E,
+		SE,
+		S,
+		SW,
+		W,
+		NW,
+		NumPoints
+	};
 };
 
 class Window : public Widget
@@ -1340,10 +1376,10 @@ protected:
 
 	void refreshHeaderHeight();
 
-	// rects parameter size should be WZ_NUM_COMPASS_POINTS
+	// rects parameter size should be Compass::NumPoints
 	void calculateBorderRects(Rect *rects);
 
-	// borderRects and mouseOverBorderRects parameter sizes should be WZ_NUM_COMPASS_POINTS
+	// borderRects and mouseOverBorderRects parameter sizes should be Compass::NumPoints
 	void calculateMouseOverBorderRects(int mouseX, int mouseY, Rect *borderRects, bool *mouseOverBorderRects);
 
 	int drawPriority_;
@@ -1351,7 +1387,7 @@ protected:
 	int borderSize_;
 	std::string title_;
 	Widget *content_;
-	WindowDrag drag_;
+	WindowDrag::Enum drag_;
 
 	// Dragging a docked window header doesn't undock the window until the mouse has moved WZ_WINDOW_UNDOCK_DISTANCE.
 	Position undockStartPosition_;

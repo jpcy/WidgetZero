@@ -45,12 +45,12 @@ void DockPreview::draw(Rect clip)
 MainWindow::MainWindow(IRenderer *renderer)
 {
 	type_ = WidgetType::MainWindow;
-	cursor_ = WZ_CURSOR_DEFAULT;
+	cursor_ = Cursor::Default;
 	isShiftKeyDown_ = isControlKeyDown_ = false;
 	lockInputWindow_ = NULL;
 	keyboardFocusWidget_ = NULL;
 	movingWindow_ = NULL;
-	windowDockPosition_ = WZ_DOCK_POSITION_NONE;
+	windowDockPosition_ = DockPosition::None;
 	ignoreDockTabBarChangedEvent_ = false;
 	menuBar_ = NULL;
 
@@ -64,7 +64,7 @@ MainWindow::MainWindow(IRenderer *renderer)
 	addChildWidget(content_);
 
 	// Create dock icon widgets.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		dockIcons_[i] = new DockIcon;
 		dockIcons_[i]->setVisible(false);
@@ -81,7 +81,7 @@ MainWindow::MainWindow(IRenderer *renderer)
 	addChildWidget(dockPreview_);
 
 	// Create dock tab bars.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		dockTabBars_[i] = new TabBar;
 		dockTabBars_[i]->setVisible(false);
@@ -168,7 +168,7 @@ void MainWindow::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 void MainWindow::mouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 {
 	// Reset the mouse cursor to default.
-	cursor_ = WZ_CURSOR_DEFAULT;
+	cursor_ = Cursor::Default;
 
 	// Need a special case for dock icons.
 	updateDockPreviewVisible(mouseX, mouseY);
@@ -205,7 +205,7 @@ void MainWindow::mouseWheelMove(int x, int y)
 	mouseWheelMoveRecursive(widget, x, y);
 }
 
-void MainWindow::keyDelta(Key key, bool down)
+void MainWindow::keyDelta(Key::Enum key, bool down)
 {
 	Widget *widget = keyboardFocusWidget_;
 
@@ -222,16 +222,16 @@ void MainWindow::keyDelta(Key key, bool down)
 	}
 }
 
-void MainWindow::keyDown(Key key)
+void MainWindow::keyDown(Key::Enum key)
 {
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
+	if (WZ_KEY_MOD_OFF(key) == Key::Unknown)
 		return;
 
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	if (WZ_KEY_MOD_OFF(key) == Key::LeftShift || WZ_KEY_MOD_OFF(key) == Key::RightShift)
 	{
 		isShiftKeyDown_ = true;
 	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	else if (WZ_KEY_MOD_OFF(key) == Key::LeftControl || WZ_KEY_MOD_OFF(key) == Key::RightControl)
 	{
 		isControlKeyDown_ = true;
 	}
@@ -239,16 +239,16 @@ void MainWindow::keyDown(Key key)
 	keyDelta(key, true);
 }
 
-void MainWindow::keyUp(Key key)
+void MainWindow::keyUp(Key::Enum key)
 {
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UNKNOWN)
+	if (WZ_KEY_MOD_OFF(key) == Key::Unknown)
 		return;
 
-	if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LSHIFT || WZ_KEY_MOD_OFF(key) == WZ_KEY_RSHIFT)
+	if (WZ_KEY_MOD_OFF(key) == Key::LeftShift || WZ_KEY_MOD_OFF(key) == Key::RightShift)
 	{
 		isShiftKeyDown_ = false;
 	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_LCONTROL || WZ_KEY_MOD_OFF(key) == WZ_KEY_RCONTROL)
+	else if (WZ_KEY_MOD_OFF(key) == Key::LeftControl || WZ_KEY_MOD_OFF(key) == Key::RightControl)
 	{
 		isControlKeyDown_ = false;
 	}
@@ -273,8 +273,8 @@ static int compare_window_draw_priorities_docked(const void *a, const void *b)
 
 	window1 = *((const Window **)a);
 	window2 = *((const Window **)b);
-	window1Docked = window1->getMainWindow()->getWindowDockPosition(window1) != WZ_DOCK_POSITION_NONE;
-	window2Docked = window2->getMainWindow()->getWindowDockPosition(window2) != WZ_DOCK_POSITION_NONE;
+	window1Docked = window1->getMainWindow()->getWindowDockPosition(window1) != DockPosition::None;
+	window2Docked = window2->getMainWindow()->getWindowDockPosition(window2) != DockPosition::None;
 
 	if (window1Docked && !window2Docked)
 	{
@@ -348,7 +348,7 @@ void MainWindow::draw()
 	dockPreview_->drawIfVisible();
 
 	// Draw dock icons.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		dockIcons_[i]->drawIfVisible();
 	}
@@ -413,12 +413,12 @@ void MainWindow::toggleTextCursor()
 	isTextCursorVisible_ = !isTextCursorVisible_;
 }
 
-void MainWindow::setCursor(Cursor cursor)
+void MainWindow::setCursor(Cursor::Enum cursor)
 {
 	cursor_ = cursor;
 }
 
-Cursor MainWindow::getCursor() const
+Cursor::Enum MainWindow::getCursor() const
 {
 	return cursor_;
 }
@@ -433,30 +433,30 @@ void MainWindow::setKeyboardFocusWidget(Widget *widget)
 	keyboardFocusWidget_ = widget;
 }
 
-DockPosition MainWindow::getWindowDockPosition(const Window *window) const
+DockPosition::Enum MainWindow::getWindowDockPosition(const Window *window) const
 {
 	WZ_ASSERT(window);
 
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
 			if (dockedWindows_[i][j] == window)
 			{
-				return (DockPosition)i;
+				return (DockPosition::Enum)i;
 			}
 		}
 	}
 
-	return WZ_DOCK_POSITION_NONE;
+	return DockPosition::None;
 }
 
-void MainWindow::dockWindow(Window *window, DockPosition dockPosition)
+void MainWindow::dockWindow(Window *window, DockPosition::Enum dockPosition)
 {
 	WZ_ASSERT(window);
 
 	// Not valid, use undockWindow to undock.
-	if (dockPosition == WZ_DOCK_POSITION_NONE)
+	if (dockPosition == DockPosition::None)
 		return;
 
 	// Don't do anything if this window is already docked at this position.
@@ -498,22 +498,22 @@ void MainWindow::undockWindow(Window *window)
 	WZ_ASSERT(window);
 
 	// Find the dock position for the window, and the window index.
-	DockPosition dockPosition = WZ_DOCK_POSITION_NONE;
+	DockPosition::Enum dockPosition = DockPosition::None;
 	int windowIndex = -1;
 
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
 			if (dockedWindows_[i][j] == window)
 			{
-				dockPosition = (DockPosition)i;
+				dockPosition = (DockPosition::Enum)i;
 				windowIndex = j;
 				break;
 			}
 		}
 
-		if (dockPosition != WZ_DOCK_POSITION_NONE)
+		if (dockPosition != DockPosition::None)
 			break;
 	}
 
@@ -539,11 +539,11 @@ void MainWindow::undockWindow(Window *window)
 		{
 			Widget *widget = dockedWindows_[dockPosition][j];
 
-			if (dockPosition == WZ_DOCK_POSITION_SOUTH)
+			if (dockPosition == DockPosition::South)
 			{
 				widget->setHeightInternal(widget->getHeight() + (rect_.h - (widget->getPosition().y + widget->getHeight())));
 			}
-			else if (dockPosition == WZ_DOCK_POSITION_EAST || dockPosition == WZ_DOCK_POSITION_WEST)
+			else if (dockPosition == DockPosition::East || dockPosition == DockPosition::West)
 			{
 				widget->setHeightInternal(rect_.h);
 			}
@@ -556,7 +556,7 @@ void MainWindow::updateDockedWindowRect(Window *window)
 	WZ_ASSERT(window);
 	Rect rect = window->getRect();
 
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		for (size_t j = 0; j < dockedWindows_[i].size(); j++)
 		{
@@ -600,7 +600,7 @@ void MainWindow::setMovingWindow(Window *window)
 	movingWindow_ = window;
 
 	// Show the dock icons if movingWindow is not NULL.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		dockIcons_[i]->setVisible(movingWindow_ != NULL);
 	}
@@ -619,7 +619,7 @@ void MainWindow::updateContentRect()
 	}
 
 	// Adjust the content rect based on docked windows.
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		Rect windowRect;
 
@@ -628,19 +628,19 @@ void MainWindow::updateContentRect()
 
 		windowRect = dockedWindows_[i][0]->getRect();
 
-		switch ((DockPosition)i)
+		switch ((DockPosition::Enum)i)
 		{
-		case WZ_DOCK_POSITION_NORTH:
+		case DockPosition::North:
 			rect.y += windowRect.h;
 			rect.h -= windowRect.h;
 			break;
-		case WZ_DOCK_POSITION_SOUTH:
+		case DockPosition::South:
 			rect.h -= windowRect.h;
 			break;
-		case WZ_DOCK_POSITION_EAST:
+		case DockPosition::East:
 			rect.w -= windowRect.w;
 			break;
-		case WZ_DOCK_POSITION_WEST:
+		case DockPosition::West:
 			rect.x += windowRect.w;
 			rect.w -= windowRect.w;
 			break;
@@ -934,7 +934,7 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 			continue;
 
 		window = (Window *)widget;
-		docked = getWindowDockPosition(window) != WZ_DOCK_POSITION_NONE;
+		docked = getWindowDockPosition(window) != DockPosition::None;
 
 		// Undocked always takes priority over docked.
 		if (window->getDrawPriority() >= drawPriority || (resultIsDocked && !docked))
@@ -954,18 +954,18 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 		return;
 
 	// Figure out which dock position this tab bar is at.
-	DockPosition dockPosition = WZ_DOCK_POSITION_NONE;
+	DockPosition::Enum dockPosition = DockPosition::None;
 
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		if (dockTabBars_[i] == e.tabBar.tabBar)
 		{
-			dockPosition = (DockPosition)i;
+			dockPosition = (DockPosition::Enum)i;
 			break;
 		}
 	}
 
-	WZ_ASSERT(dockPosition != WZ_DOCK_POSITION_NONE);
+	WZ_ASSERT(dockPosition != DockPosition::None);
 
 	// Get the window corresponding to the tab.
 	Window *window = (Window *)e.tabBar.tab->getInternalMetadata();
@@ -986,7 +986,7 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 	}
 }
 
-void MainWindow::refreshDockTabBar(DockPosition dockPosition)
+void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 {
 	TabBar *tabBar = dockTabBars_[dockPosition];
 
@@ -1037,7 +1037,7 @@ void MainWindow::refreshDockTabBar(DockPosition dockPosition)
 // Update the rects of docked windows and dock tab bars.
 void MainWindow::updateDockingRects()
 {
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		int nWindows = dockedWindows_[i].size();
 
@@ -1050,18 +1050,18 @@ void MainWindow::updateDockingRects()
 
 		switch (i)
 		{
-		case WZ_DOCK_POSITION_NORTH:
+		case DockPosition::North:
 			windowRect.w = rect_.w;
 			break;
-		case WZ_DOCK_POSITION_SOUTH:
+		case DockPosition::South:
 			windowRect.y = rect_.h - windowRect.h;
 			windowRect.w = rect_.w;
 			break;
-		case WZ_DOCK_POSITION_EAST:
+		case DockPosition::East:
 			windowRect.x = rect_.w - windowRect.w;
 			windowRect.h = rect_.h - menuBarHeight;
 			break;
-		case WZ_DOCK_POSITION_WEST:
+		case DockPosition::West:
 			windowRect.h = rect_.h - menuBarHeight;
 			break;
 		}
@@ -1073,20 +1073,20 @@ void MainWindow::updateDockingRects()
 
 			switch (i)
 			{
-			case WZ_DOCK_POSITION_NORTH:
+			case DockPosition::North:
 				tabBarRect.w = rect_.w;
 				break;
-			case WZ_DOCK_POSITION_SOUTH:
+			case DockPosition::South:
 				tabBarRect.y = rect_.h - tabBarRect.h;
 				tabBarRect.w = rect_.w;
 				windowRect.h -= tabBarRect.h;
 				break;
-			case WZ_DOCK_POSITION_EAST:
+			case DockPosition::East:
 				tabBarRect.x = rect_.w - windowRect.w;
 				tabBarRect.y = rect_.h - tabBarRect.h;
 				windowRect.h -= tabBarRect.h;
 				break;
-			case WZ_DOCK_POSITION_WEST:
+			case DockPosition::West:
 				tabBarRect.y = rect_.h - tabBarRect.h;
 				windowRect.h -= tabBarRect.h;
 				break;
@@ -1103,7 +1103,7 @@ void MainWindow::updateDockingRects()
 	}
 }
 
-Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowSize)
+Rect MainWindow::calculateDockWindowRect(DockPosition::Enum dockPosition, Size windowSize)
 {
 	// e.g. north dock max height is main window height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
@@ -1127,14 +1127,14 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 	else
 	{
 		// Use the window width for east/west or height for north/south, but don't go over half of the main window width/height.
-		if (dockPosition == WZ_DOCK_POSITION_NORTH)
+		if (dockPosition == DockPosition::North)
 		{
 			rect.x = 0;
 			rect.y = menuBarHeight;
 			rect.w = rect_.w;
 			rect.h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier)) - menuBarHeight;
 		}
-		else if (dockPosition == WZ_DOCK_POSITION_SOUTH)
+		else if (dockPosition == DockPosition::South)
 		{
 			const int h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier));
 			rect.x = 0;
@@ -1142,7 +1142,7 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 			rect.w = rect_.w;
 			rect.h = h;
 		}
-		else if (dockPosition == WZ_DOCK_POSITION_EAST)
+		else if (dockPosition == DockPosition::East)
 		{
 			const int w = WZ_MIN(windowSize.w, (int)(rect_.w * maxPreviewSizeMultiplier));
 			rect.x = rect_.w - w;
@@ -1150,7 +1150,7 @@ Rect MainWindow::calculateDockWindowRect(DockPosition dockPosition, Size windowS
 			rect.w = w;
 			rect.h = rect_.h - menuBarHeight;
 		}
-		else if (dockPosition == WZ_DOCK_POSITION_WEST)
+		else if (dockPosition == DockPosition::West)
 		{
 			rect.x = 0;
 			rect.y = menuBarHeight;
@@ -1168,17 +1168,17 @@ void MainWindow::updateDockIconPositions()
 	const float percent = 0.04f;
 
 	Size ds = getSize();
-	Size dis = dockIcons_[WZ_DOCK_POSITION_NORTH]->getSize();
+	Size dis = dockIcons_[DockPosition::North]->getSize();
 	int centerW = (int)(ds.w / 2.0f - dis.w / 2.0f);
 	int centerH = (int)(ds.h / 2.0f - dis.h / 2.0f);
 
-	dockIcons_[WZ_DOCK_POSITION_NORTH]->setPositionInternal(centerW, (int)(ds.h * percent));
-	dockIcons_[WZ_DOCK_POSITION_SOUTH]->setPositionInternal(centerW, (int)(ds.h * (1.0f - percent) - dis.h));
-	dockIcons_[WZ_DOCK_POSITION_EAST]->setPositionInternal((int)(ds.w * (1.0f - percent) - dis.h), centerH);
-	dockIcons_[WZ_DOCK_POSITION_WEST]->setPositionInternal((int)(ds.w * percent), centerH);
+	dockIcons_[DockPosition::North]->setPositionInternal(centerW, (int)(ds.h * percent));
+	dockIcons_[DockPosition::South]->setPositionInternal(centerW, (int)(ds.h * (1.0f - percent) - dis.h));
+	dockIcons_[DockPosition::East]->setPositionInternal((int)(ds.w * (1.0f - percent) - dis.h), centerH);
+	dockIcons_[DockPosition::West]->setPositionInternal((int)(ds.w * percent), centerH);
 }
 
-void MainWindow::updateDockPreviewRect(DockPosition dockPosition)
+void MainWindow::updateDockPreviewRect(DockPosition::Enum dockPosition)
 {
 	WZ_ASSERT(movingWindow_);
 	const Size windowSize = movingWindow_->getSize();
@@ -1193,14 +1193,14 @@ void MainWindow::updateDockPreviewVisible(int mouseX, int mouseY)
 
 	bool showDockPreview = false;
 
-	for (int i = 0; i < WZ_NUM_DOCK_POSITIONS; i++)
+	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		const Rect rect = dockIcons_[i]->getRect();
 
 		if (WZ_POINT_IN_RECT(mouseX, mouseY, rect))
 		{
-			windowDockPosition_ = (DockPosition)i;
-			updateDockPreviewRect((DockPosition)i);
+			windowDockPosition_ = (DockPosition::Enum)i;
+			updateDockPreviewRect((DockPosition::Enum)i);
 			showDockPreview = true;
 			break;
 		}

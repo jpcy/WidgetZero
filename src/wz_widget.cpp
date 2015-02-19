@@ -569,17 +569,17 @@ void Widget::setDrawLast(bool value)
 {
 	if (value)
 	{
-		flags_ |= WZ_WIDGET_FLAG_DRAW_LAST;
+		flags_ |= WidgetFlags::DrawLast;
 	}
 	else
 	{
-		flags_ &= ~WZ_WIDGET_FLAG_DRAW_LAST;
+		flags_ &= ~WidgetFlags::DrawLast;
 	}
 }
 
 bool Widget::getDrawLast() const
 {
-	return (flags_ & WZ_WIDGET_FLAG_DRAW_LAST) == WZ_WIDGET_FLAG_DRAW_LAST;
+	return (flags_ & WidgetFlags::DrawLast) == WidgetFlags::DrawLast;
 }
 
 void Widget::setOverlap(bool value)
@@ -673,7 +673,7 @@ Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 	Rect parentRect = parent_->getRect();
 
 	// Handle stretching.
-	if ((stretch_ & WZ_STRETCH_WIDTH) != 0)
+	if ((stretch_ & Stretch::Width) != 0)
 	{
 		const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
 
@@ -681,7 +681,7 @@ Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 		rect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right);
 	}
 
-	if ((stretch_ & WZ_STRETCH_HEIGHT) != 0)
+	if ((stretch_ & Stretch::Height) != 0)
 	{
 		const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
 
@@ -690,29 +690,29 @@ Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 	}
 
 	// Handle horizontal alignment.
-	if ((align_ & WZ_ALIGN_LEFT) != 0)
+	if ((align_ & Align::Left) != 0)
 	{
 		rect.x = margin_.left;
 	}
-	else if ((align_ & WZ_ALIGN_CENTER) != 0)
+	else if ((align_ & Align::Center) != 0)
 	{
 		rect.x = margin_.left + (int)((parentRect.w - margin_.right) / 2.0f - rect.w / 2.0f);
 	}
-	else if ((align_ & WZ_ALIGN_RIGHT) != 0)
+	else if ((align_ & Align::Right) != 0)
 	{
 		rect.x = parentRect.w - margin_.right - rect.w;
 	}
 
 	// Handle vertical alignment.
-	if ((align_ & WZ_ALIGN_TOP) != 0)
+	if ((align_ & Align::Top) != 0)
 	{
 		rect.y = margin_.top;
 	}
-	else if ((align_ & WZ_ALIGN_MIDDLE) != 0)
+	else if ((align_ & Align::Middle) != 0)
 	{
 		rect.y = margin_.top + (int)((parentRect.h - margin_.bottom) / 2.0f - rect.h / 2.0f);
 	}
-	else if ((align_ & WZ_ALIGN_BOTTOM) != 0)
+	else if ((align_ & Align::Bottom) != 0)
 	{
 		rect.y = parentRect.h - margin_.bottom - rect.h;
 	}

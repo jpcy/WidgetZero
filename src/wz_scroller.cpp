@@ -67,11 +67,11 @@ public:
 		Scroller *scroller = (Scroller *)parent_->getParent();
 		Rect nubRect = scroller->getNub()->getAbsoluteRect();
 
-		if ((scroller->getType() == WZ_SCROLLER_VERTICAL && mouseY < nubRect.y) || (scroller->getType() == WZ_SCROLLER_HORIZONTAL && mouseX < nubRect.x))
+		if ((scroller->getType() == ScrollerDirection::Vertical && mouseY < nubRect.y) || (scroller->getType() == ScrollerDirection::Horizontal && mouseX < nubRect.x))
 		{
 			scroller->setValue(scroller->getValue() - scroller->getStepValue() * 3);
 		}
-		else if ((scroller->getType() == WZ_SCROLLER_VERTICAL && mouseY > nubRect.y + nubRect.h) || (scroller->getType() == WZ_SCROLLER_HORIZONTAL && mouseX > nubRect.x + nubRect.w))
+		else if ((scroller->getType() == ScrollerDirection::Vertical && mouseY > nubRect.y + nubRect.h) || (scroller->getType() == ScrollerDirection::Horizontal && mouseX > nubRect.x + nubRect.w))
 		{
 			scroller->setValue(scroller->getValue() + scroller->getStepValue() * 3);
 		}
@@ -102,7 +102,7 @@ void ScrollerNub::updateRect()
 	const Size containerSize = parent_->getSize();
 	Rect rect;
 
-	if (scroller_->getType() == WZ_SCROLLER_VERTICAL)
+	if (scroller_->getType() == ScrollerDirection::Vertical)
 	{
 		int availableSpace = containerSize.h;
 
@@ -193,7 +193,7 @@ void ScrollerNub::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouse
 		const Rect containerRect = parent_->getAbsoluteRect();
 		int minPos, maxPos, newPos;
 
-		if (scroller_->getType() == WZ_SCROLLER_VERTICAL)
+		if (scroller_->getType() == ScrollerDirection::Vertical)
 		{
 			minPos = containerRect.y;
 			maxPos = containerRect.y + containerRect.h - rect_.h;
@@ -218,17 +218,17 @@ SCROLLER WIDGET
 ================================================================================
 */
 
-Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxValue)
+Scroller::Scroller(ScrollerDirection::Enum direction, int value, int stepValue, int maxValue)
 {
 	type_ = WidgetType::Scroller;
 	nubScale_ = 0;
-	scrollerType_ = scrollerType;
+	direction_ = direction;
 	stepValue_ = WZ_MAX(1, stepValue);
 	maxValue_ = WZ_MAX(0, maxValue);
 	value_ = WZ_CLAMPED(0, value, maxValue_);
 
-	StackLayout *layout = new StackLayout(scrollerType_ == WZ_SCROLLER_VERTICAL ? WZ_STACK_LAYOUT_VERTICAL : WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	layout->setStretch(WZ_STRETCH);
+	StackLayout *layout = new StackLayout(direction_ == ScrollerDirection::Vertical ? StackLayoutDirection::Vertical : StackLayoutDirection::Horizontal, 0);
+	layout->setStretch(Stretch::All);
 	addChildWidget(layout);
 
 	ScrollerDecrementButton *decrementButton = new ScrollerDecrementButton();
@@ -237,7 +237,7 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 	layout->add(decrementButton);
 
 	ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
-	nubContainer->setStretch(WZ_STRETCH);
+	nubContainer->setStretch(Stretch::All);
 	layout->add(nubContainer);
 
 	nub_ = new ScrollerNub(this);
@@ -251,9 +251,9 @@ Scroller::Scroller(ScrollerType scrollerType, int value, int stepValue, int maxV
 	nub_->updateRect();
 }
 
-ScrollerType Scroller::getType() const
+ScrollerDirection::Enum Scroller::getDirection() const
 {
-	return scrollerType_;
+	return direction_;
 }
 
 int Scroller::getValue() const

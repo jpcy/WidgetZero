@@ -117,15 +117,15 @@ MenuBar::MenuBar()
 {
 	type_ = WidgetType::MenuBar;
 
-	layout_ = new StackLayout(WZ_STACK_LAYOUT_HORIZONTAL, 0);
-	layout_->setStretch(WZ_STRETCH);
+	layout_ = new StackLayout(StackLayoutDirection::Horizontal, 0);
+	layout_->setStretch(Stretch::All);
 	addChildWidget(layout_);
 }
 
 MenuBarButton *MenuBar::createButton()
 {
 	MenuBarButton *button = new MenuBarButton(this);
-	button->setStretch(WZ_STRETCH_HEIGHT);
+	button->setStretch(Stretch::Height);
 	layout_->add(button);
 	return button;
 }

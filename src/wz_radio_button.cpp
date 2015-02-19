@@ -29,7 +29,7 @@ namespace wz {
 RadioButton::RadioButton(const std::string &label) : Button(label)
 {
 	type_ = WidgetType::RadioButton;
-	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	setSetBehavior(ButtonSetBehavior::Sticky);
 	addEventHandler(EventType::ButtonClicked, this, &RadioButton::onClicked);
 }
 

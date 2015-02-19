@@ -36,7 +36,7 @@ TextEdit::TextEdit(bool multiline, const std::string &text)
 
 	if (multiline)
 	{
-		scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+		scroller_ = new Scroller(ScrollerDirection::Vertical, 0, 1, 0);
 		addChildWidget(scroller_);
 		updateScroller();
 		scroller_->addEventHandler(EventType::ScrollerValueChanged, this, &TextEdit::onScrollerValueChanged);
@@ -301,7 +301,7 @@ void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDel
 	if (!(hover_ && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
 		return;
 
-	mainWindow_->setCursor(WZ_CURSOR_IBEAM);
+	mainWindow_->setCursor(Cursor::Ibeam);
 
 	if (pressed_)
 	{
@@ -327,9 +327,9 @@ void TextEdit::onMouseWheelMove(int /*x*/, int y)
 	}
 }
 
-void TextEdit::onKeyDown(Key key)
+void TextEdit::onKeyDown(Key::Enum key)
 {
-	if (key == WZ_KEY_LEFT)
+	if (key == Key::LeftArrow)
 	{
 		if (selectionStartIndex_ != selectionEndIndex_)
 		{
@@ -348,11 +348,11 @@ void TextEdit::onKeyDown(Key key)
 			cursorIndex_--;
 		}
 	}
-	else if (key == (WZ_KEY_LEFT | WZ_KEY_SHIFT_BIT) && cursorIndex_ > 0)
+	else if (key == (Key::LeftArrow | Key::ShiftBit) && cursorIndex_ > 0)
 	{
 		moveCursorAndSelection(cursorIndex_ - 1);
 	}
-	else if (key == WZ_KEY_RIGHT)
+	else if (key == Key::RightArrow)
 	{
 		if (selectionStartIndex_ != selectionEndIndex_)
 		{
@@ -371,11 +371,11 @@ void TextEdit::onKeyDown(Key key)
 			cursorIndex_++;
 		}
 	}
-	else if (key == (WZ_KEY_RIGHT | WZ_KEY_SHIFT_BIT) && cursorIndex_ < (int)text_.length())
+	else if (key == (Key::RightArrow | Key::ShiftBit) && cursorIndex_ < (int)text_.length())
 	{
 		moveCursorAndSelection(cursorIndex_ + 1);
 	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP || WZ_KEY_MOD_OFF(key) == WZ_KEY_DOWN)
+	else if (WZ_KEY_MOD_OFF(key) == Key::UpArrow || WZ_KEY_MOD_OFF(key) == Key::DownArrow)
 	{
 		Position cursorPosition;
 		int lineHeight, newCursorIndex;
@@ -387,18 +387,18 @@ void TextEdit::onKeyDown(Key key)
 		lineHeight = getLineHeight();
 
 		// Move the cursor up/down.
-		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == WZ_KEY_UP ? -lineHeight : lineHeight);
+		cursorPosition.y += (WZ_KEY_MOD_OFF(key) == Key::UpArrow ? -lineHeight : lineHeight);
 		newCursorIndex = indexFromRelativePosition(cursorPosition);
 
 		if (newCursorIndex == -1)
 			return; // Couldn't move cursor.
 
 		// Apply the new cursor index.
-		if ((key & WZ_KEY_SHIFT_BIT) != 0)
+		if ((key & Key::ShiftBit) != 0)
 		{
 			moveCursorAndSelection(newCursorIndex);
 		}
-		else if (key == WZ_KEY_UP || key == WZ_KEY_DOWN)
+		else if (key == Key::UpArrow || key == Key::DownArrow)
 		{
 			cursorIndex_ = newCursorIndex;
 
@@ -406,14 +406,14 @@ void TextEdit::onKeyDown(Key key)
 			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 	}
-	else if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME || WZ_KEY_MOD_OFF(key) == WZ_KEY_END)
+	else if (WZ_KEY_MOD_OFF(key) == Key::Home || WZ_KEY_MOD_OFF(key) == Key::End)
 	{
 		int newCursorIndex;
 
 		// Go to text start/end.
-		if (!multiline_ || (multiline_ && (key & WZ_KEY_CONTROL_BIT)))
+		if (!multiline_ || (multiline_ && (key & Key::ControlBit)))
 		{
-			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			if (WZ_KEY_MOD_OFF(key) == Key::Home)
 			{
 				newCursorIndex = 0;
 			}
@@ -448,7 +448,7 @@ void TextEdit::onKeyDown(Key key)
 					return;
 			}
 
-			if (WZ_KEY_MOD_OFF(key) == WZ_KEY_HOME)
+			if (WZ_KEY_MOD_OFF(key) == Key::Home)
 			{
 				newCursorIndex = lineStartIndex;
 			}
@@ -458,7 +458,7 @@ void TextEdit::onKeyDown(Key key)
 			}
 		}
 
-		if (key & WZ_KEY_SHIFT_BIT)
+		if (key & Key::ShiftBit)
 		{
 			moveCursorAndSelection(newCursorIndex);
 		}
@@ -470,11 +470,11 @@ void TextEdit::onKeyDown(Key key)
 			selectionStartIndex_ = selectionEndIndex_ = 0;
 		}
 	}
-	else if (multiline_ && key == WZ_KEY_ENTER)
+	else if (multiline_ && key == Key::Enter)
 	{
 		enterText("\r");
 	}
-	else if (key == WZ_KEY_DELETE)
+	else if (key == Key::Delete)
 	{
 		if (selectionStartIndex_ != selectionEndIndex_)
 		{
@@ -485,7 +485,7 @@ void TextEdit::onKeyDown(Key key)
 			deleteText(cursorIndex_, 1);
 		}
 	}
-	else if (key == WZ_KEY_BACKSPACE && cursorIndex_ > 0)
+	else if (key == Key::Backspace && cursorIndex_ > 0)
 	{
 		if (selectionStartIndex_ != selectionEndIndex_)
 		{

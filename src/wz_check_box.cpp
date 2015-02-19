@@ -28,7 +28,7 @@ namespace wz {
 
 CheckBox::CheckBox(const std::string &label) : Button(label)
 {
-	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_TOGGLE);
+	setSetBehavior(ButtonSetBehavior::Toggle);
 }
 
 bool CheckBox::isChecked() const

@@ -63,24 +63,24 @@ Spinner::Spinner()
 	type_ = WidgetType::Spinner;
 
 	textEdit_ = new TextEdit(false);
-	textEdit_->setStretch(WZ_STRETCH);
+	textEdit_->setStretch(Stretch::All);
 	textEdit_->setValidateTextCallback(wz_spinner_validate_text);
 	addChildWidget(textEdit_);
 
 	decrementButton_ = new SpinnerDecrementButton();
 	decrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	decrementButton_->setStretch(WZ_STRETCH_HEIGHT);
+	decrementButton_->setStretch(Stretch::Height);
 	decrementButton_->setStretchScale(1, 0.5f);
-	decrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_BOTTOM);
+	decrementButton_->setAlign(Align::Right | Align::Bottom);
 	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &Spinner::onDecrementButtonClicked);
 	decrementButton_->setOverlap(true);
 	addChildWidget(decrementButton_);
 
 	incrementButton_ = new SpinnerIncrementButton();
 	incrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
-	incrementButton_->setStretch(WZ_STRETCH_HEIGHT);
+	incrementButton_->setStretch(Stretch::Height);
 	incrementButton_->setStretchScale(1, 0.5f);
-	incrementButton_->setAlign(WZ_ALIGN_RIGHT | WZ_ALIGN_TOP);
+	incrementButton_->setAlign(Align::Right | Align::Top);
 	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &Spinner::onIncrementButtonClicked);
 	incrementButton_->setOverlap(true);
 	addChildWidget(incrementButton_);

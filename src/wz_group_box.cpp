@@ -33,7 +33,7 @@ GroupBox::GroupBox(const std::string &label) : label_(label)
 
 	// Create content widget.
 	content_ = new Widget;
-	content_->setStretch(WZ_STRETCH);
+	content_->setStretch(Stretch::All);
 	addChildWidget(content_);
 
 	setSize(200, 200);

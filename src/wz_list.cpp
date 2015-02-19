@@ -41,7 +41,7 @@ List::List(uint8_t *itemData, int itemStride, int nItems)
 	itemStride_ = itemStride;
 	nItems_ = nItems;
 
-	scroller_ = new Scroller(WZ_SCROLLER_VERTICAL, 0, 1, 0);
+	scroller_ = new Scroller(ScrollerDirection::Vertical, 0, 1, 0);
 	addChildWidget(scroller_);
 	updateScroller();
 	scroller_->addEventHandler(EventType::ScrollerValueChanged, this, &List::onScrollerValueChanged);

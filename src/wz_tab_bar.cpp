@@ -37,8 +37,8 @@ TAB BUTTON
 
 TabButton::TabButton(const std::string &label) : Button(label)
 {
-	setClickBehavior(WZ_BUTTON_CLICK_BEHAVIOR_DOWN);
-	setSetBehavior(WZ_BUTTON_SET_BEHAVIOR_STICKY);
+	setClickBehavior(ButtonClickBehavior::Down);
+	setSetBehavior(ButtonSetBehavior::Sticky);
 }
 
 void TabButton::draw(Rect clip)
