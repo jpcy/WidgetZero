@@ -37,8 +37,6 @@ SOFTWARE.
 #endif
 #endif
 
-#include <nanovg.h>
-
 #ifdef WZ_USE_PCH
 #include <ctype.h>
 #include <math.h>

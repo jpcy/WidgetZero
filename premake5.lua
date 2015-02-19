@@ -13,7 +13,7 @@ end
 solution "WidgetZero"
 	language "C++"
 	location "build"
-	startproject "Example_demo"
+	startproject "Example 1 - Demo"
 	
 	configurations { "Debug", "Release" }
 	platforms { "native", "x64", "x32" }
@@ -59,8 +59,8 @@ project "NanoVG"
 		
 -----------------------------------------------------------------------------
 
-function createExampleProject(_name)
-	project("Example_" .. _name)
+function createExampleProject(_title, _name)
+	project(_title)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
 		files { "examples/" .. _name .. "/*.*", "examples/gl/*.*" }
@@ -85,7 +85,20 @@ function createExampleProject(_name)
 			linkoptions { "/SAFESEH:NO" }
 end
 
+createExampleProject("Example 1 - Demo", "demo")
+createExampleProject("Example 2 - Simple", "simple")
+
 -----------------------------------------------------------------------------
 
-createExampleProject("demo")
-createExampleProject("simple")
+project "Example 3 - Custom Renderer"
+	kind "WindowedApp"
+	targetname "example_custom_renderer"
+	files { "examples/custom_renderer/*.*", "examples/tigr/*.*" }
+	includedirs { "src", "examples/tigr" }
+	links { "WidgetZero" }
+	
+	configuration "vs*"
+		links { "d3d9" }
+	
+	configuration "vs2012"
+		linkoptions { "/SAFESEH:NO" }
