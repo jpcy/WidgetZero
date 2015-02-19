@@ -460,7 +460,6 @@ public:
 	Rect getAbsoluteRect() const;
 	void setMargin(Border margin);
 	void setMargin(int top, int right, int bottom, int left);
-	void setUniformMargin(int value);
 	Border getMargin() const;
 	void setStretch(int stretch);
 	int getStretch() const;

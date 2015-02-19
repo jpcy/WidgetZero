@@ -193,11 +193,6 @@ void Widget::setMargin(int top, int right, int bottom, int left)
 	setMargin(Border(top, right, bottom, left));
 }
 
-void Widget::setUniformMargin(int value)
-{
-	setMargin(Border(value, value, value, value));
-}
-
 Border Widget::getMargin() const
 {
 	return margin_;

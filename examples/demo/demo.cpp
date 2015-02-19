@@ -147,7 +147,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -169,7 +169,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -183,7 +183,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -202,7 +202,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -220,7 +220,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -244,7 +244,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Horizontal);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -270,7 +270,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -285,7 +285,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -310,7 +310,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -328,7 +328,7 @@ private:
 		wz::Frame *frame = createFrame("Tabbed");
 
 		wz::Tabbed *tabbed = new wz::Tabbed();
-		tabbed->setUniformMargin(8);
+		tabbed->setMargin(8);
 		tabbed->setStretch(wz::Stretch::All);
 		frame->add(tabbed);
 
@@ -351,7 +351,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		frame->add(layout);
 
@@ -375,7 +375,7 @@ private:
 
 		wz::StackLayout *frameLayout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		frameLayout->setSpacing(8);
-		frameLayout->setUniformMargin(8);
+		frameLayout->setMargin(8);
 		frameLayout->setStretch(wz::Stretch::All);
 		frame->add(frameLayout);
 
@@ -394,7 +394,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		rootFrame->add(layout);
 
@@ -441,7 +441,7 @@ private:
 
 		wz::StackLayout *frameLayout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		frameLayout->setSpacing(8);
-		frameLayout->setUniformMargin(8);
+		frameLayout->setMargin(8);
 		frameLayout->setStretch(wz::Stretch::All);
 		frame->add(frameLayout);
 
@@ -523,7 +523,7 @@ private:
 		mainWindow.dockWindow(window, wz::DockPosition::West);
 
 		wz::List *list = new wz::List((uint8_t *)&widgetCategories[0], sizeof(WidgetCategoryListItem), widgetCategories.size());
-		list->setUniformMargin(8);
+		list->setMargin(8);
 		list->setStretch(wz::Stretch::All);
 		list->setFontSize(18);
 		list->setSelectedItem(0);
@@ -540,7 +540,7 @@ private:
 
 		wz::StackLayout *layout = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
 		layout->setSpacing(8);
-		layout->setUniformMargin(8);
+		layout->setMargin(8);
 		layout->setStretch(wz::Stretch::All);
 		window1->add(layout);
 
@@ -574,7 +574,7 @@ private:
 		mainWindow.add(window2);
 
 		wz::Tabbed *tabbed = new wz::Tabbed();
-		tabbed->setUniformMargin(8);
+		tabbed->setMargin(8);
 		tabbed->setStretch(wz::Stretch::All);
 		window2->add(tabbed);
 
