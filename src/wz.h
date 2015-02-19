@@ -28,8 +28,13 @@ SOFTWARE.
 #include <string>
 
 #ifndef WZ_ASSERT
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#define WZ_ASSERT _ASSERTE
+#else
 #include <assert.h>
 #define WZ_ASSERT assert
+#endif
 #endif
 
 #include <nanovg.h>
@@ -41,6 +46,9 @@ SOFTWARE.
 #include <string.h>
 #include <stdlib.h>
 #endif
+
+#define WZ_NOT_IMPLEMENTED { WZ_ASSERT("not implemented" && false); }
+#define WZ_NOT_IMPLEMENTED_RETURN(type) { WZ_ASSERT("not implemented" && false); return type(); }
 
 #define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
@@ -346,58 +354,58 @@ struct LineBreakResult
 class IRenderer
 {
 public:
-	~IRenderer() {};
-	virtual void beginFrame(int windowWidth, int windowHeight) = 0;
-	virtual void endFrame() = 0;
-	virtual void drawButton(Button *button, Rect clip) = 0;
-	virtual Size measureButton(Button *button) = 0;
-	virtual void drawCheckBox(CheckBox *checkBox, Rect clip) = 0;
-	virtual Size measureCheckBox(CheckBox *checkBox) = 0;
-	virtual void drawCombo(Combo *combo, Rect clip) = 0;
-	virtual Size measureCombo(Combo *combo) = 0;
-	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip) = 0;
-	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip) = 0;
-	virtual Border getGroupBoxMargin(GroupBox *groupBox) = 0;
-	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) = 0;
-	virtual Size measureGroupBox(GroupBox *groupBox) = 0;
-	virtual Color getLabelTextColor(Label *label) = 0;
-	virtual void drawLabel(Label *label, Rect clip) = 0;
-	virtual Size measureLabel(Label *label) = 0;
-	virtual void drawList(List *list, Rect clip) = 0;
-	virtual Size measureList(List *list) = 0;
-	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip) = 0;
-	virtual Size measureMenuBarButton(MenuBarButton *button) = 0;
-	virtual int getMenuBarPadding(MenuBar *menuBar) = 0;
-	virtual void drawMenuBar(MenuBar *menuBar, Rect clip) = 0;
-	virtual Size measureMenuBar(MenuBar *menuBar) = 0;
-	virtual void drawRadioButton(RadioButton *button, Rect clip) = 0;
-	virtual Size measureRadioButton(RadioButton *button) = 0;
-	virtual void drawScrollerDecrementButton(Button *button, Rect clip) = 0;
-	virtual void drawScrollerIncrementButton(Button *button, Rect clip) = 0;
-	virtual void drawScroller(Scroller *scroller, Rect clip) = 0;
-	virtual Size measureScroller(Scroller *scroller) = 0;
-	virtual int getSpinnerButtonWidth(Spinner *spinner) = 0;
-	virtual void drawSpinnerDecrementButton(Button *button, Rect clip) = 0;
-	virtual void drawSpinnerIncrementButton(Button *button, Rect clip) = 0;
-	virtual void drawSpinner(Spinner *spinner, Rect clip) = 0;
-	virtual Size measureSpinner(Spinner *spinner) = 0;
-	virtual void drawTabButton(TabButton *button, Rect clip) = 0;
-	virtual int getTabBarScrollButtonWidth(TabBar *tabBar) = 0;
-	virtual void drawTabBar(TabBar *tabBar, Rect clip) = 0;
-	virtual Size measureTabBar(TabBar *tabBar) = 0;
-	virtual void drawTabbed(Tabbed *tabbed, Rect clip) = 0;
-	virtual Size measureTabbed(Tabbed *tabbed) = 0;
-	virtual void drawTextEdit(TextEdit *textEdit, Rect clip) = 0;
-	virtual Size measureTextEdit(TextEdit *textEdit) = 0;
-	virtual void drawWindow(Window *window, Rect clip) = 0;
-	virtual Size measureWindow(Window *window) = 0;
+	~IRenderer() {}
+	virtual void beginFrame(int windowWidth, int windowHeight) {}
+	virtual void endFrame() {}
+	virtual void drawButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureButton(Button *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawCheckBox(CheckBox *checkBox, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureCheckBox(CheckBox *checkBox) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawCombo(Combo *combo, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureCombo(Combo *combo) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Border getGroupBoxMargin(GroupBox *groupBox) WZ_NOT_IMPLEMENTED_RETURN(Border)
+	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureGroupBox(GroupBox *groupBox) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual Color getLabelTextColor(Label *label) WZ_NOT_IMPLEMENTED_RETURN(Color)
+	virtual void drawLabel(Label *label, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureLabel(Label *label) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawList(List *list, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureList(List *list) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureMenuBarButton(MenuBarButton *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual int getMenuBarPadding(MenuBar *menuBar) WZ_NOT_IMPLEMENTED_RETURN(int)
+	virtual void drawMenuBar(MenuBar *menuBar, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureMenuBar(MenuBar *menuBar) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawRadioButton(RadioButton *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureRadioButton(RadioButton *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawScrollerDecrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual void drawScrollerIncrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual void drawScroller(Scroller *scroller, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureScroller(Scroller *scroller) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual int getSpinnerButtonWidth(Spinner *spinner) WZ_NOT_IMPLEMENTED_RETURN(int)
+	virtual void drawSpinnerDecrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual void drawSpinnerIncrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual void drawSpinner(Spinner *spinner, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureSpinner(Spinner *spinner) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawTabButton(TabButton *button, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual int getTabBarScrollButtonWidth(TabBar *tabBar) WZ_NOT_IMPLEMENTED_RETURN(int)
+	virtual void drawTabBar(TabBar *tabBar, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureTabBar(TabBar *tabBar) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawTabbed(Tabbed *tabbed, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureTabbed(Tabbed *tabbed) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawTextEdit(TextEdit *textEdit, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureTextEdit(TextEdit *textEdit) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual void drawWindow(Window *window, Rect clip) WZ_NOT_IMPLEMENTED
+	virtual Size measureWindow(Window *window) WZ_NOT_IMPLEMENTED_RETURN(Size)
 
-	virtual int getLineHeight(const char *fontFace, float fontSize) = 0;
+	virtual int getLineHeight(const char *fontFace, float fontSize) WZ_NOT_IMPLEMENTED_RETURN(int)
 
 	// width or height can be NULL.
-	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) = 0;
+	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) WZ_NOT_IMPLEMENTED
 
-	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
+	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) WZ_NOT_IMPLEMENTED_RETURN(LineBreakResult)
 };
 
 struct WidgetFlags
