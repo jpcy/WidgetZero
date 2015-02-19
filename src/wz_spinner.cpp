@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -68,7 +67,6 @@ Spinner::Spinner()
 	addChildWidget(textEdit_);
 
 	decrementButton_ = new SpinnerDecrementButton();
-	decrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	decrementButton_->setStretch(Stretch::Height);
 	decrementButton_->setStretchScale(1, 0.5f);
 	decrementButton_->setAlign(Align::Right | Align::Bottom);
@@ -77,7 +75,6 @@ Spinner::Spinner()
 	addChildWidget(decrementButton_);
 
 	incrementButton_ = new SpinnerIncrementButton();
-	incrementButton_->setWidth(WZ_SKIN_SPINNER_BUTTON_WIDTH);
 	incrementButton_->setStretch(Stretch::Height);
 	incrementButton_->setStretchScale(1, 0.5f);
 	incrementButton_->setAlign(Align::Right | Align::Top);
@@ -112,9 +109,12 @@ const TextEdit *Spinner::getTextEdit() const
 
 void Spinner::onRendererChanged()
 {
+	decrementButton_->setWidth(renderer_->getSpinnerButtonWidth(this));
+	incrementButton_->setWidth(renderer_->getSpinnerButtonWidth(this));
+
 	// Shrink the text edit border to exclude the increment and decrement buttons.
 	Border textEditBorder = textEdit_->getBorder();
-	textEditBorder.right += 16;
+	textEditBorder.right += renderer_->getSpinnerButtonWidth(this);
 	textEdit_->setBorder(textEditBorder);
 }
 

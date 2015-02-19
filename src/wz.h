@@ -376,6 +376,7 @@ public:
 	virtual void drawScrollerIncrementButton(Button *button, Rect clip) = 0;
 	virtual void drawScroller(Scroller *scroller, Rect clip) = 0;
 	virtual Size measureScroller(Scroller *scroller) = 0;
+	virtual int getSpinnerButtonWidth(Spinner *spinner) = 0;
 	virtual void drawSpinnerDecrementButton(Button *button, Rect clip) = 0;
 	virtual void drawSpinnerIncrementButton(Button *button, Rect clip) = 0;
 	virtual void drawSpinner(Spinner *spinner, Rect clip) = 0;

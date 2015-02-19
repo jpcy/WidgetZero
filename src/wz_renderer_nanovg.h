@@ -203,6 +203,7 @@ public:
 	virtual void drawScrollerIncrementButton(Button *button, Rect clip);
 	virtual void drawScroller(Scroller *scroller, Rect clip);
 	virtual Size measureScroller(Scroller *scroller);
+	int getSpinnerButtonWidth(Spinner *spinner);
 
 private:
 	void drawSpinnerButton(Button *button, Rect clip, bool decrement);

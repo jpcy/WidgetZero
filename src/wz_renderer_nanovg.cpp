@@ -834,6 +834,11 @@ Size NVGRenderer::measureScroller(Scroller *scroller)
 	return scroller->getDirection() == ScrollerDirection::Vertical ? Size(WZ_SKIN_SCROLLER_THICKNESS, 0) : Size(0, WZ_SKIN_SCROLLER_THICKNESS);
 }
 
+int NVGRenderer::getSpinnerButtonWidth(Spinner *spinner)
+{
+	return WZ_SKIN_SPINNER_BUTTON_WIDTH;
+}
+
 void NVGRenderer::drawSpinnerButton(Button *button, Rect clip, bool decrement)
 {
 	NVGcontext *vg = impl->vg;
