@@ -913,6 +913,11 @@ void NVGRenderer::drawTabButton(TabButton *button, Rect clip)
 	nvgRestore(vg);
 }
 
+int NVGRenderer::getTabBarScrollButtonWidth(TabBar *tabBar)
+{
+	return WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH;
+}
+
 void NVGRenderer::drawTabBar(TabBar *tabBar, Rect clip)
 {
 }

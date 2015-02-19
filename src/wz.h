@@ -382,6 +382,7 @@ public:
 	virtual void drawSpinner(Spinner *spinner, Rect clip) = 0;
 	virtual Size measureSpinner(Spinner *spinner) = 0;
 	virtual void drawTabButton(TabButton *button, Rect clip) = 0;
+	virtual int getTabBarScrollButtonWidth(TabBar *tabBar) = 0;
 	virtual void drawTabBar(TabBar *tabBar, Rect clip) = 0;
 	virtual Size measureTabBar(TabBar *tabBar) = 0;
 	virtual void drawTabbed(Tabbed *tabbed, Rect clip) = 0;
@@ -1176,6 +1177,7 @@ public:
 	int getScrollValue() const;
 
 protected:
+	virtual void onRendererChanged();
 	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();

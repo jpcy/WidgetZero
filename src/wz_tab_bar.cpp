@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -74,7 +73,6 @@ TabBar::TabBar()
 	decrementButton_ = new Button("<");
 	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onDecrementButtonClicked);
 	addChildWidget(decrementButton_);
-	decrementButton_->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	decrementButton_->setVisible(false);
 	decrementButton_->setDrawLast(true);
 	decrementButton_->setOverlap(true);
@@ -82,7 +80,6 @@ TabBar::TabBar()
 	incrementButton_ = new Button(">");
 	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onIncrementButtonClicked);
 	addChildWidget(incrementButton_);
-	incrementButton_->setWidthInternal(WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH);
 	incrementButton_->setVisible(false);
 	incrementButton_->setDrawLast(true);
 	incrementButton_->setOverlap(true);
@@ -229,6 +226,12 @@ int TabBar::getScrollValue() const
 void TabBar::onTabButtonPressed(Event e)
 {
 	selectTab((TabButton *)e.base.widget);
+}
+
+void TabBar::onRendererChanged()
+{
+	decrementButton_->setWidthInternal(renderer_->getTabBarScrollButtonWidth(this));
+	incrementButton_->setWidthInternal(renderer_->getTabBarScrollButtonWidth(this));
 }
 
 void TabBar::onRectChanged()
