@@ -55,6 +55,11 @@ struct NVGRendererImpl
 	float defaultFontSize;
 };
 
+static NVGcolor ConvertColor(Color c)
+{
+	return nvgRGBAf(c.r, c.g, c.b, c.a);
+}
+
 NVGRenderer::NVGRenderer(wzNanoVgGlCreate create, wzNanoVgGlDestroy destroy, int flags, const char *fontDirectory, const char *defaultFontFace, float defaultFontSize)
 {
 	WZ_ASSERT(create);
@@ -433,6 +438,12 @@ Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
 	return Size();
 }
 
+Color NVGRenderer::getLabelTextColor(Label *label)
+{
+	NVGcolor c = WZ_SKIN_LABEL_TEXT_COLOR;
+	return Color(c.rgba);
+}
+
 void NVGRenderer::drawLabel(Label *label, Rect clip)
 {
 	NVGcontext *vg = impl->vg;
@@ -443,11 +454,11 @@ void NVGRenderer::drawLabel(Label *label, Rect clip)
 
 	if (label->getMultiline())
 	{
-		printBox(rect, label->getFontFace(), label->getFontSize(), label->getTextColor(), label->getText(), 0);
+		printBox(rect, label->getFontFace(), label->getFontSize(), ConvertColor(label->getTextColor()), label->getText(), 0);
 	}
 	else
 	{
-		print(rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, label->getFontFace(), label->getFontSize(), label->getTextColor(), label->getText(), 0);
+		print(rect.x, (int)(rect.y + rect.h * 0.5f), NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, label->getFontFace(), label->getFontSize(), ConvertColor(label->getTextColor()), label->getText(), 0);
 	}
 
 	nvgRestore(vg);

@@ -183,6 +183,7 @@ public:
 	virtual Border getGroupBoxMargin(GroupBox *groupBox);
 	virtual void drawGroupBox(GroupBox *groupBox, Rect clip);
 	virtual Size measureGroupBox(GroupBox *groupBox);
+	virtual Color getLabelTextColor(Label *label);
 	virtual void drawLabel(Label *label, Rect clip);
 	virtual Size measureLabel(Label *label);
 	virtual void drawList(List *list, Rect clip);

@@ -96,18 +96,36 @@ struct WidgetType
 	};
 };
 
+struct Border
+{
+	Border() : top(0), right(0), bottom(0), left(0) {}
+	Border(int top, int right, int bottom, int left) : top(top), right(right), bottom(bottom), left(left) {}
+	Border(int uniform) : top(uniform), right(uniform), bottom(uniform), left(uniform) {}
+	int top, right, bottom, left;
+};
+
+struct Color
+{
+	Color() : r(0), g(0), b(0), a(0) {}
+	Color(float r, float g, float b, float a = 1) : r(r), g(g), b(b), a(a) {}
+	Color(float *rgba) { r = rgba[0]; g = rgba[1]; b = rgba[2]; a = rgba[3]; }
+
+	union
+	{
+		float rgba[4];
+
+		struct
+		{
+			float r, g, b, a;
+		};
+	};
+};
+
 struct Position
 {
 	Position() : x(0), y(0) {}
 	Position(int x, int y) : x(x), y(y) {}
 	int x, y;
-};
-
-struct Size
-{
-	Size() : w(0), h(0) {}
-	Size(int w, int h) : w(w), h(h) {}
-	int w, h;
 };
 
 struct Rect
@@ -120,15 +138,12 @@ struct Rect
 	int x, y, w, h;
 };
 
-struct Border
+struct Size
 {
-	Border() : top(0), right(0), bottom(0), left(0) {}
-	Border(int top, int right, int bottom, int left) : top(top), right(right), bottom(bottom), left(left) {}
-	Border(int uniform) : top(uniform), right(uniform), bottom(uniform), left(uniform) {}
-	int top, right, bottom, left;
+	Size() : w(0), h(0) {}
+	Size(int w, int h) : w(w), h(h) {}
+	int w, h;
 };
-
-extern const Border Border_zero;
 
 struct Stretch
 {
@@ -345,6 +360,7 @@ public:
 	virtual Border getGroupBoxMargin(GroupBox *groupBox) = 0;
 	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) = 0;
 	virtual Size measureGroupBox(GroupBox *groupBox) = 0;
+	virtual Color getLabelTextColor(Label *label) = 0;
 	virtual void drawLabel(Label *label, Rect clip) = 0;
 	virtual Size measureLabel(Label *label) = 0;
 	virtual void drawList(List *list, Rect clip) = 0;
@@ -752,17 +768,18 @@ public:
 	void setText(const char *text);
 	void setTextf(const char *format, ...);
 	const char *getText() const;
-	void setTextColor(NVGcolor color);
+	void setTextColor(Color color);
 	void setTextColor(float r, float g, float b);
-	NVGcolor getTextColor() const;
+	Color getTextColor() const;
 
 protected:
+	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 
 	std::string text_;
 	bool multiline_;
-	NVGcolor textColor_;
+	Color textColor_;
 	bool isTextColorUserSet_;
 };
 

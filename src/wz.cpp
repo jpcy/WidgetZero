@@ -26,8 +26,6 @@ SOFTWARE.
 
 namespace wz {
 
-const Border Border_zero;
-
 /*
 SDL_IntersectRect
 

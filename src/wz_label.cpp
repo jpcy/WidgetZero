@@ -23,15 +23,13 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
-Label::Label(const std::string &text) : text_(text)
+Label::Label(const std::string &text) : text_(text), textColor_(1, 1, 1)
 {
 	type_ = WidgetType::Label;
 	multiline_ = false;
-	textColor_ = WZ_SKIN_LABEL_TEXT_COLOR;
 	isTextColorUserSet_ = false;
 }
 
@@ -68,7 +66,7 @@ const char *Label::getText() const
 	return text_.c_str();
 }
 
-void Label::setTextColor(NVGcolor color)
+void Label::setTextColor(Color color)
 {
 	textColor_ = color;
 	isTextColorUserSet_ = true;
@@ -76,13 +74,21 @@ void Label::setTextColor(NVGcolor color)
 
 void Label::setTextColor(float r, float g, float b)
 {
-	textColor_ = nvgRGBf(r, g, b);
+	textColor_ = Color(r, g, b);
 	isTextColorUserSet_ = true;
 }
 
-NVGcolor Label::getTextColor() const
+Color Label::getTextColor() const
 {
 	return textColor_;
+}
+
+void Label::onRendererChanged()
+{
+	if (!isTextColorUserSet_)
+	{
+		textColor_ = renderer_->getLabelTextColor(this);
+	}
 }
 
 void Label::draw(Rect clip)
