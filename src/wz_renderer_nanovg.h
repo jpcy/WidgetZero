@@ -109,8 +109,7 @@ SOFTWARE.
 #define WZ_SKIN_SCROLLER_NUB_ICON_MARGIN 4
 #define WZ_SKIN_SCROLLER_NUB_ICON_SPACING 4
 #define WZ_SKIN_SCROLLER_CORNER_RADIUS WZ_SKIN_CORNER_RADIUS
-#define WZ_SKIN_SCROLLER_DEFAULT_SIZE 16 // Width for vertical, height for horizontal.
-#define WZ_SKIN_SCROLLER_BUTTON_SIZE 16 // Height for vertical, width for horizontal.
+#define WZ_SKIN_SCROLLER_THICKNESS 16 // Height for vertical, width for horizontal.
 
 #define WZ_SKIN_SPINNER_ICON_COLOR WZ_SKIN_TEXT_COLOR
 #define WZ_SKIN_SPINNER_ICON_HOVER_COLOR WZ_SKIN_HOVER_COLOR

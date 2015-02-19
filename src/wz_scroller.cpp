@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 #define WZ_MINIMUM_NUB_SIZE 8
 #define WZ_DEFAULT_NUB_SIZE 16
@@ -67,11 +66,11 @@ public:
 		Scroller *scroller = (Scroller *)parent_->getParent();
 		Rect nubRect = scroller->getNub()->getAbsoluteRect();
 
-		if ((scroller->getType() == ScrollerDirection::Vertical && mouseY < nubRect.y) || (scroller->getType() == ScrollerDirection::Horizontal && mouseX < nubRect.x))
+		if ((scroller->getDirection() == ScrollerDirection::Vertical && mouseY < nubRect.y) || (scroller->getDirection() == ScrollerDirection::Horizontal && mouseX < nubRect.x))
 		{
 			scroller->setValue(scroller->getValue() - scroller->getStepValue() * 3);
 		}
-		else if ((scroller->getType() == ScrollerDirection::Vertical && mouseY > nubRect.y + nubRect.h) || (scroller->getType() == ScrollerDirection::Horizontal && mouseX > nubRect.x + nubRect.w))
+		else if ((scroller->getDirection() == ScrollerDirection::Vertical && mouseY > nubRect.y + nubRect.h) || (scroller->getDirection() == ScrollerDirection::Horizontal && mouseX > nubRect.x + nubRect.w))
 		{
 			scroller->setValue(scroller->getValue() + scroller->getStepValue() * 3);
 		}
@@ -102,7 +101,7 @@ void ScrollerNub::updateRect()
 	const Size containerSize = parent_->getSize();
 	Rect rect;
 
-	if (scroller_->getType() == ScrollerDirection::Vertical)
+	if (scroller_->getDirection() == ScrollerDirection::Vertical)
 	{
 		int availableSpace = containerSize.h;
 
@@ -193,7 +192,7 @@ void ScrollerNub::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouse
 		const Rect containerRect = parent_->getAbsoluteRect();
 		int minPos, maxPos, newPos;
 
-		if (scroller_->getType() == ScrollerDirection::Vertical)
+		if (scroller_->getDirection() == ScrollerDirection::Vertical)
 		{
 			minPos = containerRect.y;
 			maxPos = containerRect.y + containerRect.h - rect_.h;
@@ -227,14 +226,14 @@ Scroller::Scroller(ScrollerDirection::Enum direction, int value, int stepValue, 
 	maxValue_ = WZ_MAX(0, maxValue);
 	value_ = WZ_CLAMPED(0, value, maxValue_);
 
-	StackLayout *layout = new StackLayout(direction_ == ScrollerDirection::Vertical ? StackLayoutDirection::Vertical : StackLayoutDirection::Horizontal, 0);
+	StackLayout *layout = new StackLayout(direction_ == ScrollerDirection::Vertical ? StackLayoutDirection::Vertical : StackLayoutDirection::Horizontal);
 	layout->setStretch(Stretch::All);
 	addChildWidget(layout);
 
-	ScrollerDecrementButton *decrementButton = new ScrollerDecrementButton();
-	decrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	decrementButton->addEventHandler(EventType::ButtonClicked, this, &Scroller::onDecrementButtonClicked);
-	layout->add(decrementButton);
+	decrementButton_ = new ScrollerDecrementButton();
+	//decrementButton_->setSize(16, 16);
+	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &Scroller::onDecrementButtonClicked);
+	layout->add(decrementButton_);
 
 	ScrollerNubContainer *nubContainer = new ScrollerNubContainer();
 	nubContainer->setStretch(Stretch::All);
@@ -243,10 +242,10 @@ Scroller::Scroller(ScrollerDirection::Enum direction, int value, int stepValue, 
 	nub_ = new ScrollerNub(this);
 	nubContainer->addChildWidget(nub_);
 
-	ScrollerIncrementButton *incrementButton = new ScrollerIncrementButton();
-	incrementButton->setSize(WZ_SKIN_SCROLLER_BUTTON_SIZE, WZ_SKIN_SCROLLER_BUTTON_SIZE);
-	incrementButton->addEventHandler(EventType::ButtonClicked, this, &Scroller::onIncrementButtonClicked);
-	layout->add(incrementButton);
+	incrementButton_ = new ScrollerIncrementButton();
+	//incrementButton_->setSize(16, 16);
+	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &Scroller::onIncrementButtonClicked);
+	layout->add(incrementButton_);
 
 	nub_->updateRect();
 }
@@ -358,6 +357,11 @@ void Scroller::addCallbackValueChanged(EventCallback callback)
 
 void Scroller::onRectChanged()
 {
+	// Match the buttons to the scroller thickness, and keep square.
+	const int thickness = direction_ == ScrollerDirection::Vertical ? rect_.w : rect_.h;
+	decrementButton_->setSizeInternal(thickness, thickness);
+	incrementButton_->setSizeInternal(thickness, thickness);
+
 	nub_->updateRect();
 }
 

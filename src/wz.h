@@ -1091,6 +1091,7 @@ protected:
 	ScrollerDirection::Enum direction_;
 	int value_, stepValue_, maxValue_;
 	float nubScale_;
+	Button *decrementButton_, *incrementButton_;
 	ScrollerNub *nub_;
 	std::vector<EventCallback> valueChangedCallbacks_;
 };

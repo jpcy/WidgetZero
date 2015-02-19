@@ -671,7 +671,7 @@ void NVGRenderer::drawScrollerButton(Button *button, Rect clip, bool decrement)
 	Scroller *scroller = (Scroller *)button->getParent();
 	int sides, roundedCorners;
 
-	if (scroller->getType() == ScrollerDirection::Vertical)
+	if (scroller->getDirection() == ScrollerDirection::Vertical)
 	{
 		if (decrement)
 		{
@@ -712,7 +712,7 @@ void NVGRenderer::drawScrollerButton(Button *button, Rect clip, bool decrement)
 	// Icon.
 	nvgBeginPath(vg);
 
-	if (scroller->getType() == ScrollerDirection::Vertical)
+	if (scroller->getDirection() == ScrollerDirection::Vertical)
 	{
 		if (decrement)
 		{
@@ -806,7 +806,7 @@ void NVGRenderer::drawScroller(Scroller *scroller, Rect clip)
 		{
 			nvgBeginPath(vg);
 
-			if (scroller->getType() == StackLayoutDirection::Vertical)
+			if (scroller->getDirection() == StackLayoutDirection::Vertical)
 			{
 				const float y = (float)((int)(r.y + r.h * 0.5f) + WZ_SKIN_SCROLLER_NUB_ICON_SPACING * (i - 1));
 				nvgMoveTo(vg, (float)r.x + WZ_SKIN_SCROLLER_NUB_ICON_MARGIN, y);
@@ -831,7 +831,7 @@ void NVGRenderer::drawScroller(Scroller *scroller, Rect clip)
 
 Size NVGRenderer::measureScroller(Scroller *scroller)
 {
-	return scroller->getType() == ScrollerDirection::Vertical ? Size(WZ_SKIN_SCROLLER_DEFAULT_SIZE, 0) : Size(0, WZ_SKIN_SCROLLER_DEFAULT_SIZE);
+	return scroller->getDirection() == ScrollerDirection::Vertical ? Size(WZ_SKIN_SCROLLER_THICKNESS, 0) : Size(0, WZ_SKIN_SCROLLER_THICKNESS);
 }
 
 void NVGRenderer::drawSpinnerButton(Button *button, Rect clip, bool decrement)
