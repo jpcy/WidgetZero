@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -88,12 +87,11 @@ Size GroupBox::measure()
 
 void GroupBox::refreshMargin()
 {
-	Border margin;
-	margin.top = margin.bottom = margin.left = margin.right = WZ_SKIN_GROUP_BOX_MARGIN;
+	Border margin = renderer_->getGroupBoxMargin(this);
 
 	if (!label_.empty())
 	{
-		margin.top = getLineHeight() + WZ_SKIN_GROUP_BOX_MARGIN;
+		margin.top += getLineHeight();
 	}
 
 	content_->setMargin(margin);

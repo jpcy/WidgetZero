@@ -91,54 +91,14 @@ NVGRenderer::~NVGRenderer()
 	}
 }
 
-const char *NVGRenderer::getError()
+void NVGRenderer::beginFrame(int windowWidth, int windowHeight)
 {
-	return impl->errorMessage[0] == 0 ? NULL : impl->errorMessage;
+	nvgBeginFrame(impl->vg, windowWidth, windowHeight, 1);
 }
 
-int NVGRenderer::getLineHeight(const char *fontFace, float fontSize)
+void NVGRenderer::endFrame()
 {
-	nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
-	setFontFace(fontFace);
-	float lineHeight;
-	nvgTextMetrics(impl->vg, NULL, NULL, &lineHeight);
-	return (int)lineHeight;
-}
-
-void NVGRenderer::measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height)
-{
-	if (width)
-	{
-		nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
-		setFontFace(fontFace);
-		*width = (int)nvgTextBounds(impl->vg, 0, 0, text, n == 0 ? NULL : &text[n], NULL);
-	}
-
-	if (height)
-	{
-		*height = (int)(fontSize == 0 ? impl->defaultFontSize : fontSize);
-	}
-}
-
-LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
-{
-	NVGtextRow row;
-	LineBreakResult result;
-
-	if (text && nvgTextBreakLines(impl->vg, text, n == 0 ? NULL : &text[n], (float)lineWidth, &row, 1) > 0)
-	{
-		result.start = row.start;
-		result.length = row.end - row.start;
-		result.next = row.next;
-	}
-	else
-	{
-		result.start = NULL;
-		result.length = 0;
-		result.next = NULL;
-	}
-
-	return result;
+	nvgEndFrame(impl->vg);
 }
 
 void NVGRenderer::drawButton(Button *button, Rect clip)
@@ -420,6 +380,11 @@ void NVGRenderer::drawDockPreview(DockPreview *dockPreview, Rect /*clip*/)
 	nvgRestore(impl->vg);
 }
 
+Border NVGRenderer::getGroupBoxMargin(GroupBox *groupBox)
+{
+	return Border(WZ_SKIN_GROUP_BOX_MARGIN);
+}
+
 void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 {
 	NVGcontext *vg = impl->vg;
@@ -610,6 +575,11 @@ Size NVGRenderer::measureMenuBarButton(MenuBarButton *button)
 	button->measureText(button->getLabel(), 0, &size.w, &size.h);
 	size.w += 12;
 	return size;
+}
+
+int NVGRenderer::getMenuBarPadding(MenuBar *menuBar)
+{
+	return WZ_SKIN_MENU_BAR_PADDING;
 }
 
 void NVGRenderer::drawMenuBar(MenuBar *menuBar, Rect clip)
@@ -1217,6 +1187,56 @@ void NVGRenderer::drawWindow(Window *window, Rect clip)
 Size NVGRenderer::measureWindow(Window *window)
 {
 	return Size();
+}
+
+int NVGRenderer::getLineHeight(const char *fontFace, float fontSize)
+{
+	nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
+	setFontFace(fontFace);
+	float lineHeight;
+	nvgTextMetrics(impl->vg, NULL, NULL, &lineHeight);
+	return (int)lineHeight;
+}
+
+void NVGRenderer::measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height)
+{
+	if (width)
+	{
+		nvgFontSize(impl->vg, fontSize == 0 ? impl->defaultFontSize : fontSize);
+		setFontFace(fontFace);
+		*width = (int)nvgTextBounds(impl->vg, 0, 0, text, n == 0 ? NULL : &text[n], NULL);
+	}
+
+	if (height)
+	{
+		*height = (int)(fontSize == 0 ? impl->defaultFontSize : fontSize);
+	}
+}
+
+LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
+{
+	NVGtextRow row;
+	LineBreakResult result;
+
+	if (text && nvgTextBreakLines(impl->vg, text, n == 0 ? NULL : &text[n], (float)lineWidth, &row, 1) > 0)
+	{
+		result.start = row.start;
+		result.length = row.end - row.start;
+		result.next = row.next;
+	}
+	else
+	{
+		result.start = NULL;
+		result.length = 0;
+		result.next = NULL;
+	}
+
+	return result;
+}
+
+const char *NVGRenderer::getError()
+{
+	return impl->errorMessage[0] == 0 ? NULL : impl->errorMessage;
 }
 
 NVGcontext *NVGRenderer::getContext()

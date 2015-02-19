@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -132,7 +131,7 @@ MenuBarButton *MenuBar::createButton()
 
 void MenuBar::onRendererChanged()
 {
-	setHeight(getLineHeight() + WZ_SKIN_MENU_BAR_PADDING);
+	setHeight(getLineHeight() + renderer_->getMenuBarPadding(this));
 }
 
 void MenuBar::draw(Rect clip)

@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -356,11 +355,9 @@ void MainWindow::draw()
 
 void MainWindow::drawFrame()
 {
-	NVGRenderer *r = (NVGRenderer *)renderer_;
-	NVGcontext *vg = r->getContext();
-	nvgBeginFrame(vg, rect_.w, rect_.h, 1);
+	renderer_->beginFrame(rect_.w, rect_.h);
 	draw();
-	nvgEndFrame(vg);
+	renderer_->endFrame();
 }
 
 void MainWindow::setMenuBar(MenuBar *menuBar)

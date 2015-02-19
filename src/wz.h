@@ -124,6 +124,7 @@ struct Border
 {
 	Border() : top(0), right(0), bottom(0), left(0) {}
 	Border(int top, int right, int bottom, int left) : top(top), right(right), bottom(bottom), left(left) {}
+	Border(int uniform) : top(uniform), right(uniform), bottom(uniform), left(uniform) {}
 	int top, right, bottom, left;
 };
 
@@ -331,13 +332,8 @@ class IRenderer
 {
 public:
 	~IRenderer() {};
-	virtual const char *getError() = 0;
-	virtual int getLineHeight(const char *fontFace, float fontSize) = 0;
-
-	// width or height can be NULL.
-	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) = 0;
-
-	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
+	virtual void beginFrame(int windowWidth, int windowHeight) = 0;
+	virtual void endFrame() = 0;
 	virtual void drawButton(Button *button, Rect clip) = 0;
 	virtual Size measureButton(Button *button) = 0;
 	virtual void drawCheckBox(CheckBox *checkBox, Rect clip) = 0;
@@ -346,6 +342,7 @@ public:
 	virtual Size measureCombo(Combo *combo) = 0;
 	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip) = 0;
 	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip) = 0;
+	virtual Border getGroupBoxMargin(GroupBox *groupBox) = 0;
 	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) = 0;
 	virtual Size measureGroupBox(GroupBox *groupBox) = 0;
 	virtual void drawLabel(Label *label, Rect clip) = 0;
@@ -354,6 +351,7 @@ public:
 	virtual Size measureList(List *list) = 0;
 	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip) = 0;
 	virtual Size measureMenuBarButton(MenuBarButton *button) = 0;
+	virtual int getMenuBarPadding(MenuBar *menuBar) = 0;
 	virtual void drawMenuBar(MenuBar *menuBar, Rect clip) = 0;
 	virtual Size measureMenuBar(MenuBar *menuBar) = 0;
 	virtual void drawRadioButton(RadioButton *button, Rect clip) = 0;
@@ -375,6 +373,13 @@ public:
 	virtual Size measureTextEdit(TextEdit *textEdit) = 0;
 	virtual void drawWindow(Window *window, Rect clip) = 0;
 	virtual Size measureWindow(Window *window) = 0;
+
+	virtual int getLineHeight(const char *fontFace, float fontSize) = 0;
+
+	// width or height can be NULL.
+	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) = 0;
+
+	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) = 0;
 };
 
 struct WidgetFlags

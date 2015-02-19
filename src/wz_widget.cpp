@@ -23,7 +23,6 @@ SOFTWARE.
 */
 #include "wz.h"
 #pragma hdrstop
-#include "wz_renderer_nanovg.h"
 
 namespace wz {
 
@@ -612,20 +611,17 @@ void *Widget::getInternalMetadata()
 
 int Widget::getLineHeight() const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer_;
-	return r->getLineHeight(fontFace_, fontSize_);
+	return renderer_->getLineHeight(fontFace_, fontSize_);
 }
 
 void Widget::measureText(const char *text, int n, int *width, int *height) const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer_;
-	return r->measureText(fontFace_, fontSize_, text, n, width, height);
+	return renderer_->measureText(fontFace_, fontSize_, text, n, width, height);
 }
 
 LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) const
 {
-	NVGRenderer *r = (NVGRenderer *)renderer_;
-	return r->lineBreakText(fontFace_, fontSize_, text, n, lineWidth);
+	return renderer_->lineBreakText(fontFace_, fontSize_, text, n, lineWidth);
 }
 
 void Widget::drawIfVisible()
