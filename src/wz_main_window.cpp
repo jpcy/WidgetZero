@@ -41,7 +41,7 @@ void DockPreview::draw(Rect clip)
 	renderer_->drawDockPreview(this, clip);
 }
 
-MainWindow::MainWindow(IRenderer *renderer)
+MainWindow::MainWindow(IRenderer *renderer, MainWindowFlags::Enum flags)
 {
 	type_ = WidgetType::MainWindow;
 	cursor_ = Cursor::Default;
@@ -52,8 +52,8 @@ MainWindow::MainWindow(IRenderer *renderer)
 	windowDockPosition_ = DockPosition::None;
 	ignoreDockTabBarChangedEvent_ = false;
 	menuBar_ = NULL;
-
 	renderer_ = renderer;
+	flags_ = flags;
 	mainWindow_ = this;
 	isTextCursorVisible_ = true;
 
@@ -62,39 +62,61 @@ MainWindow::MainWindow(IRenderer *renderer)
 	content_->mainWindow_ = this;
 	addChildWidget(content_);
 
-	// Create dock icon widgets.
-	for (int i = 0; i < DockPosition::NumDockPositions; i++)
+	if (isDockingEnabled())
 	{
-		dockIcons_[i] = new DockIcon;
-		dockIcons_[i]->setVisible(false);
-		dockIcons_[i]->setDrawManually(true);
-		addChildWidget(dockIcons_[i]);
+		// Create dock icon widgets.
+		for (int i = 0; i < DockPosition::NumDockPositions; i++)
+		{
+			dockIcons_[i] = new DockIcon;
+			dockIcons_[i]->setVisible(false);
+			dockIcons_[i]->setDrawManually(true);
+			addChildWidget(dockIcons_[i]);
+		}
+
+		updateDockIconPositions();
+
+		// Create dock preview widget.
+		dockPreview_ = new DockPreview;
+		dockPreview_->setDrawManually(true);
+		dockPreview_->setVisible(false);
+		addChildWidget(dockPreview_);
+
+		// Create dock tab bars.
+		for (int i = 0; i < DockPosition::NumDockPositions; i++)
+		{
+			dockTabBars_[i] = new TabBar;
+			dockTabBars_[i]->setVisible(false);
+			addChildWidget(dockTabBars_[i]);
+			dockTabBars_[i]->addEventHandler(EventType::TabBarTabChanged, this, &MainWindow::onDockTabBarTabChanged);
+		}
 	}
 
-	updateDockIconPositions();
-
-	// Create dock preview widget.
-	dockPreview_ = new DockPreview;
-	dockPreview_->setDrawManually(true);
-	dockPreview_->setVisible(false);
-	addChildWidget(dockPreview_);
-
-	// Create dock tab bars.
-	for (int i = 0; i < DockPosition::NumDockPositions; i++)
+	if (isMenuEnabled())
 	{
-		dockTabBars_[i] = new TabBar;
-		dockTabBars_[i]->setVisible(false);
-		addChildWidget(dockTabBars_[i]);
-		dockTabBars_[i]->addEventHandler(EventType::TabBarTabChanged, this, &MainWindow::onDockTabBarTabChanged);
+		// Create menu bar.
+		menuBar_ = new MenuBar;
+		setMenuBar(menuBar_);
 	}
+}
 
-	// Create menu bar.
-	menuBar_ = new MenuBar;
-	setMenuBar(menuBar_);
+bool MainWindow::isDockingEnabled() const
+{
+	return (flags_ & MainWindowFlags::DockingEnabled) == MainWindowFlags::DockingEnabled;
+}
+
+bool MainWindow::isMenuEnabled() const
+{
+	return (flags_ & MainWindowFlags::MenuEnabled) == MainWindowFlags::MenuEnabled;
 }
 
 void MainWindow::createMenuButton(const std::string &label)
 {
+	if (!isMenuEnabled())
+	{
+		WZ_ASSERT("menu not enabled" && false);
+		return;
+	}
+
 	MenuBarButton *button = menuBar_->createButton();
 	button->setLabel(label.c_str());
 }
@@ -137,7 +159,7 @@ void MainWindow::mouseButtonDown(int mouseButton, int mouseX, int mouseY)
 void MainWindow::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 {
 	// Need a special case for dock icons.
-	if (movingWindow_)
+	if (isDockingEnabled() && movingWindow_)
 	{
 		// If the dock preview is visible, movingWindow can be docked.
 		if (dockPreview_->getVisible())
@@ -343,13 +365,16 @@ void MainWindow::draw()
 	// Draw combo box dropdown lists.
 	drawWidget(this, IsWidgetComboAncestor, IsWidgetTrue);
 
-	// Draw dock preview.
-	dockPreview_->drawIfVisible();
-
-	// Draw dock icons.
-	for (int i = 0; i < DockPosition::NumDockPositions; i++)
+	if (isDockingEnabled())
 	{
-		dockIcons_[i]->drawIfVisible();
+		// Draw dock preview.
+		dockPreview_->drawIfVisible();
+
+		// Draw dock icons.
+		for (int i = 0; i < DockPosition::NumDockPositions; i++)
+		{
+			dockIcons_[i]->drawIfVisible();
+		}
 	}
 }
 
@@ -362,6 +387,12 @@ void MainWindow::drawFrame()
 
 void MainWindow::setMenuBar(MenuBar *menuBar)
 {
+	if (!isMenuEnabled())
+	{
+		WZ_ASSERT("menu not enabled" && false);
+		return;
+	}
+
 	menuBar_ = menuBar;
 	menuBar->setWidth(rect_.w);
 	addChildWidget(menuBar);
@@ -433,6 +464,7 @@ void MainWindow::setKeyboardFocusWidget(Widget *widget)
 DockPosition::Enum MainWindow::getWindowDockPosition(const Window *window) const
 {
 	WZ_ASSERT(window);
+	WZ_ASSERT(isDockingEnabled());
 
 	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
@@ -451,6 +483,10 @@ DockPosition::Enum MainWindow::getWindowDockPosition(const Window *window) const
 void MainWindow::dockWindow(Window *window, DockPosition::Enum dockPosition)
 {
 	WZ_ASSERT(window);
+
+	// Don't do anything if docking is disabled.
+	if (!isDockingEnabled())
+		return;
 
 	// Not valid, use undockWindow to undock.
 	if (dockPosition == DockPosition::None)
@@ -493,6 +529,10 @@ void MainWindow::dockWindow(Window *window, DockPosition::Enum dockPosition)
 void MainWindow::undockWindow(Window *window)
 {
 	WZ_ASSERT(window);
+
+	// Don't do anything if docking is disabled.
+	if (!isDockingEnabled())
+		return;
 
 	// Find the dock position for the window, and the window index.
 	DockPosition::Enum dockPosition = DockPosition::None;
@@ -551,6 +591,11 @@ void MainWindow::undockWindow(Window *window)
 void MainWindow::updateDockedWindowRect(Window *window)
 {
 	WZ_ASSERT(window);
+
+	// Don't do anything if docking is disabled.
+	if (!isDockingEnabled())
+		return;
+
 	Rect rect = window->getRect();
 
 	for (int i = 0; i < DockPosition::NumDockPositions; i++)
@@ -596,10 +641,13 @@ void MainWindow::setMovingWindow(Window *window)
 {
 	movingWindow_ = window;
 
-	// Show the dock icons if movingWindow is not NULL.
-	for (int i = 0; i < DockPosition::NumDockPositions; i++)
+	if (isDockingEnabled())
 	{
-		dockIcons_[i]->setVisible(movingWindow_ != NULL);
+		// Show the dock icons if movingWindow is not NULL.
+		for (int i = 0; i < DockPosition::NumDockPositions; i++)
+		{
+			dockIcons_[i]->setVisible(movingWindow_ != NULL);
+		}
 	}
 }
 
@@ -608,7 +656,7 @@ void MainWindow::updateContentRect()
 	Rect rect = rect_;
 
 	// Adjust the content rect based on the menu bar height.
-	if (menuBar_)
+	if (isMenuEnabled())
 	{
 		const int h = menuBar_->getHeight();
 		rect.y += h;
@@ -650,7 +698,7 @@ void MainWindow::updateContentRect()
 void MainWindow::onRectChanged()
 {
 	// Match the menu bar width to the main window width.
-	if (menuBar_)
+	if (isMenuEnabled())
 	{
 		menuBar_->setWidth(rect_.w);
 	}
@@ -985,6 +1033,9 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 
 void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 {
+	if (!isDockingEnabled())
+		return;
+
 	TabBar *tabBar = dockTabBars_[dockPosition];
 
 	if (dockedWindows_[dockPosition].size() < 2)
@@ -1034,6 +1085,9 @@ void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 // Update the rects of docked windows and dock tab bars.
 void MainWindow::updateDockingRects()
 {
+	if (!isDockingEnabled())
+		return;
+
 	for (int i = 0; i < DockPosition::NumDockPositions; i++)
 	{
 		int nWindows = dockedWindows_[i].size();
@@ -1043,7 +1097,7 @@ void MainWindow::updateDockingRects()
 
 		// Calculate the window rect. All windows will have the same rect, so just use the first one as a basis.
 		Rect windowRect = dockedWindows_[i][0]->getRect();
-		int menuBarHeight = menuBar_ ? menuBar_->getHeight() : 0;
+		int menuBarHeight = isMenuEnabled() ? menuBar_->getHeight() : 0;
 
 		switch (i)
 		{
@@ -1105,7 +1159,7 @@ Rect MainWindow::calculateDockWindowRect(DockPosition::Enum dockPosition, Size w
 	// e.g. north dock max height is main window height * maxPreviewSizeMultiplier.
 	const float maxPreviewSizeMultiplier = 0.3f;
 
-	int menuBarHeight = menuBar_ ? menuBar_->getHeight() : 0;
+	int menuBarHeight = isMenuEnabled() ? menuBar_->getHeight() : 0;
 
 	// If there's already a window docked at this position, set the dock preview rect to that size.
 	int nDockedWindows = dockedWindows_[dockPosition].size();
@@ -1161,6 +1215,9 @@ Rect MainWindow::calculateDockWindowRect(DockPosition::Enum dockPosition, Size w
 
 void MainWindow::updateDockIconPositions()
 {
+	if (!isDockingEnabled())
+		return;
+
 	// Push icons out this percent/100 from main window edges.
 	const float percent = 0.04f;
 
@@ -1178,6 +1235,10 @@ void MainWindow::updateDockIconPositions()
 void MainWindow::updateDockPreviewRect(DockPosition::Enum dockPosition)
 {
 	WZ_ASSERT(movingWindow_);
+
+	if (!isDockingEnabled())
+		return;
+
 	const Size windowSize = movingWindow_->getSize();
 	const Rect rect = calculateDockWindowRect(dockPosition, windowSize);
 	dockPreview_->setRectInternal(rect);
@@ -1185,7 +1246,7 @@ void MainWindow::updateDockPreviewRect(DockPosition::Enum dockPosition)
 
 void MainWindow::updateDockPreviewVisible(int mouseX, int mouseY)
 {
-	if (!movingWindow_)
+	if (!isDockingEnabled() || !movingWindow_)
 		return;
 
 	bool showDockPreview = false;

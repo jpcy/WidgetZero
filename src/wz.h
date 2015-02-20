@@ -865,12 +865,27 @@ protected:
 	Position lastMousePosition_;
 };
 
-typedef bool(*WidgetPredicate)(const Widget *);
+struct MainWindowFlags
+{
+	enum Enum
+	{
+		None,
+		DockingEnabled = 1<<0,
+		MenuEnabled = 1<<1
+	};
+};
+
+inline MainWindowFlags::Enum operator|(MainWindowFlags::Enum f1, MainWindowFlags::Enum f2)
+{
+	return MainWindowFlags::Enum(int(f1) | int(f2));
+}
 
 class MainWindow : public Widget
 {
 public:
-	MainWindow(IRenderer *renderer);
+	MainWindow(IRenderer *renderer, MainWindowFlags::Enum flags = MainWindowFlags::None);
+	bool isDockingEnabled() const;
+	bool isMenuEnabled() const;
 	void createMenuButton(const std::string &label);
 	bool isShiftKeyDown() const;
 	bool isControlKeyDown() const;
@@ -913,6 +928,8 @@ public:
 	void updateContentRect();
 
 protected:
+	typedef bool(*WidgetPredicate)(const Widget *);
+
 	virtual void onRectChanged();
 
 	void mouseButtonDownRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
@@ -952,6 +969,8 @@ protected:
 
 	// top can be NULL
 	void updateWindowDrawPriorities(Window *top);
+
+	MainWindowFlags::Enum flags_;
 
 	Widget *content_;
 

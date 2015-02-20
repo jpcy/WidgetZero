@@ -96,7 +96,7 @@ static void CustomDrawListItemCallback(wz::IRenderer *renderer, wz::Rect clip, c
 class GUI
 {
 public:
-	GUI(int windowWidth, int windowHeight, wz::IRenderer *renderer) : mainWindow(renderer)
+	GUI(int windowWidth, int windowHeight, wz::IRenderer *renderer) : mainWindow(renderer, wz::MainWindowFlags::DockingEnabled | wz::MainWindowFlags::MenuEnabled)
 	{
 		mainWindow.setSize(windowWidth, windowHeight);
 		mainWindow.createMenuButton("File");
