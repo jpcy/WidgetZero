@@ -85,9 +85,8 @@ TabBar::TabBar()
 	incrementButton_->setOverlap(true);
 }
 
-TabButton *TabBar::createTab()
+void TabBar::addTab(TabButton *tab)
 {
-	TabButton *tab = new TabButton();
 	tab->addEventHandler(EventType::ButtonPressed, this, &TabBar::onTabButtonPressed);
 	addChildWidget(tab);
 	tabs_.push_back(tab);
@@ -95,7 +94,7 @@ TabButton *TabBar::createTab()
 	// Position to the right of the last tab.
 	Rect rect;
 	rect.x = rect.y = 0;
-	rect.w = 50; // Default width.
+	rect.w = tab->getWidth();
 	rect.h = rect_.h;
 
 	for (size_t i = 0; i < tabs_.size(); i++)
@@ -121,8 +120,6 @@ TabButton *TabBar::createTab()
 	e.tabBar.tabBar = this;
 	e.tabBar.tab = tab;
 	invokeEvent(e);
-
-	return tab;
 }
 
 void TabBar::destroyTab(TabButton *tab)
@@ -174,16 +171,6 @@ void TabBar::clearTabs()
 	scrollValue_ = 0;
 	decrementButton_->setVisible(false);
 	incrementButton_->setVisible(false);
-}
-
-Button *TabBar::getDecrementButton()
-{
-	return decrementButton_;
-}
-
-Button *TabBar::getIncrementButton()
-{
-	return incrementButton_;
 }
 
 TabButton *TabBar::getSelectedTab()

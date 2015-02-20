@@ -1064,8 +1064,8 @@ void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 			Window *window = dockedWindows_[dockPosition][i];
 
 			// Create a new tab.
-			TabButton *tab = tabBar->createTab();
-			tab->setLabel(window->getTitle());
+			TabButton *tab = new TabButton(window->getTitle());
+			tabBar->addTab(tab);
 
 			// Set the tab internal metadata to the window.
 			tab->setInternalMetadata(window);

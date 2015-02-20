@@ -333,17 +333,9 @@ private:
 		tabbed->setStretch(wz::Stretch::All);
 		frame->add(tabbed);
 
-		wz::Tab *firstTab = new wz::Tab();
-		tabbed->addTab(firstTab);
-		firstTab->setLabel("Tab 1");
-
-		wz::Tab *secondTab = new wz::Tab();
-		tabbed->addTab(secondTab);
-		secondTab->setLabel("Another Tab");
-
-		wz::Tab *thirdTab = new wz::Tab();
-		tabbed->addTab(thirdTab);
-		thirdTab->setLabel("TabTabTab");
+		tabbed->add(new wz::Tab("Tab 1"));
+		tabbed->add(new wz::Tab("Another Tab"));
+		tabbed->add(new wz::Tab("TabTabTab"));
 	}
 
 	void createTextEditFrame()
@@ -579,17 +571,13 @@ private:
 		tabbed->setStretch(wz::Stretch::All);
 		window2->add(tabbed);
 
-		wz::Tab *firstTab = new wz::Tab();
-		tabbed->addTab(firstTab);
-		firstTab->setLabel("Tab 1");
+		wz::Tab *firstTab = new wz::Tab("Tab 1");
+		tabbed->add(firstTab);
 
-		wz::Tab *secondTab = new wz::Tab();
-		tabbed->addTab(secondTab);
-		secondTab->setLabel("Another Tab");
+		wz::Tab *secondTab = new wz::Tab("Another Tab");
+		tabbed->add(secondTab);
 
-		wz::Tab *thirdTab = new wz::Tab();
-		tabbed->addTab(thirdTab);
-		thirdTab->setLabel("TabTabTab");
+		tabbed->add(new wz::Tab("TabTabTab"));
 
 		wz::Combo *combo = new wz::Combo((uint8_t *)listData, sizeof(const char *), 17);
 		combo->setPosition(10, 10);

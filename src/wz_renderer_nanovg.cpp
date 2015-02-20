@@ -930,89 +930,30 @@ Size NVGRenderer::measureTabBar(TabBar *tabBar)
 void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 {
 	NVGcontext *vg = impl->vg;
-	const Button *selectedTab = tabbed->tabBar->getSelectedTab();
-
-	// Use the page rect.
-	const int tabBarHeight = tabbed->tabBar->getHeight();
-	Rect rect = tabbed->getAbsoluteRect();
-	rect.y += tabBarHeight;
-	rect.h -= tabBarHeight;
 
 	nvgSave(vg);
 	clipToRectIntersection(clip, tabbed->getAbsoluteRect());
 
 	// Draw an outline around the selected tab and the tab page.
+	const Tab *selectedTab = tabbed->getSelectedTab();
 	nvgBeginPath(vg);
 
-	if (selectedTab->getVisible())
-	{
-		// Selected tab.
-		const Rect tr = selectedTab->getAbsoluteRect();
-		nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
-		nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
+	const Rect tr = selectedTab->getButton()->getAbsoluteRect();
+	nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
+	nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
+	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
 
-		// The tab page.
-		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + 0.5f); // tr
-		nvgLineTo(vg, rect.x + rect.w - 0.5f, rect.y + rect.h - 0.5f); // br
-		nvgLineTo(vg, rect.x + 0.5f, rect.y + rect.h - 0.5f); // bl
-		nvgLineTo(vg, rect.x + 0.5f, rect.y + 0.5f); // tl
-		nvgClosePath(vg);
-	}
-	else
-	{
-		nvgRect(vg, rect.x + 0.5f, rect.y + 0.5f, rect.w - 1.0f, rect.h - 1.0f);
-	}
+	// The tab page.
+	const Rect pr = selectedTab->getPage()->getAbsoluteRect();
+	nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + 0.5f); // tr
+	nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + pr.h - 0.5f); // br
+	nvgLineTo(vg, pr.x + 0.5f, pr.y + pr.h - 0.5f); // bl
+	nvgLineTo(vg, pr.x + 0.5f, pr.y + 0.5f); // tl
+	nvgClosePath(vg);
 	
 	nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
 	nvgStroke(vg);
-
-	// Get the selected tab index.
-	int selectedTabIndex = -1;
-
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		if (tabbed->pages[i].tab == selectedTab)
-		{
-			selectedTabIndex = (int)i;
-			break;
-		}
-	}
-
-	// Draw an outline around the non-selected tabs.
-	for (size_t i = 0; i < tabbed->pages.size(); i++)
-	{
-		const Button *tab = tabbed->pages[i].tab;
-
-		if (tab == selectedTab || !tab->getVisible())
-			continue;
-
-		const Rect tr = tab->getAbsoluteRect();
-		nvgBeginPath(vg);
-
-		// Only draw the left side if this is the leftmost tab.
-		if (i == (size_t)tabbed->tabBar->getScrollValue())
-		{
-			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
-			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		}
-		else
-		{
-			nvgMoveTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-		}
-
-		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-
-		// If the selected tab is next to this tab, on the right, don't draw the right side.
-		if (selectedTabIndex != int(i + 1))
-		{
-			nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h - 0.5f); // br
-		}
-
-		nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
-		nvgStroke(vg);
-	}
 
 	nvgRestore(vg);
 }

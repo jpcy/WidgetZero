@@ -1175,11 +1175,9 @@ class TabBar : public Widget
 {
 public:
 	TabBar();
-	TabButton *createTab();
+	void addTab(TabButton *tab);
 	void destroyTab(TabButton *tab);
 	void clearTabs();
-	Button *getDecrementButton();
-	Button *getIncrementButton();
 	TabButton *getSelectedTab();
 	void selectTab(TabButton *tab);
 	void addCallbackTabChanged(EventCallback callback);
@@ -1223,41 +1221,39 @@ public:
 	void remove(Widget *widget);
 };
 
-struct TabbedPage
-{
-	TabButton *tab;
-	TabPage *page;
-};
-
 // Wraps tab button and page.
 class Tab
 {
+	friend class Tabbed;
+
 public:
-	Tab();
+	Tab(const std::string &label = std::string());
 	~Tab();
-	Tab *setLabel(const std::string &label);
+	const TabButton *getButton() const;
+	const TabPage *getPage() const;
 	Widget *add(Widget *widget);
 	void remove(Widget *widget);
 
-	TabButton *button;
-	TabPage *page;
+protected:
+	TabButton *button_;
+	TabPage *page_;
 };
 
 class Tabbed : public Widget
 {
 public:
 	Tabbed();
-	void addTab(Tab *tab);
-	void addTab(TabButton **tab, TabPage **page);
-
-	TabBar *tabBar;
-	std::vector<TabbedPage> pages;
+	Tab *getSelectedTab();
+	void add(Tab *tab);
 
 protected:
 	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void onTabChanged(Event e);
+
+	TabBar *tabBar_;
+	std::vector<Tab *> tabs_;
 };
 
 typedef bool(*TextEditValidateTextCallback)(const char *text);

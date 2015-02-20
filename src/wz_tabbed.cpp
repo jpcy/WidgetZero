@@ -63,29 +63,35 @@ TAB
 ================================================================================
 */
 
-Tab::Tab() : button(NULL), page(NULL)
+Tab::Tab(const std::string &label)
 {
+	button_ = new TabButton(label);
+	page_ = new TabPage();
 }
 
 Tab::~Tab()
 {
 }
 
-Tab *Tab::setLabel(const std::string &label)
+const TabButton *Tab::getButton() const
 {
-	button->setLabel(label.c_str());
-	return this;
+	return button_;
+}
+
+const TabPage *Tab::getPage()  const
+{
+	return page_;
 }
 
 Widget *Tab::add(Widget *widget)
 {
-	page->add(widget);
+	page_->add(widget);
 	return widget;
 }
 
 void Tab::remove(Widget *widget)
 {
-	page->remove(widget);
+	page_->remove(widget);
 }
 
 /*
@@ -100,53 +106,56 @@ Tabbed::Tabbed()
 {
 	type_ = WidgetType::Tabbed;
 
-	tabBar = new TabBar;
-	tabBar->addEventHandler(EventType::TabBarTabChanged, this, &Tabbed::onTabChanged);
-	addChildWidget(tabBar);
+	tabBar_ = new TabBar;
+	tabBar_->addEventHandler(EventType::TabBarTabChanged, this, &Tabbed::onTabChanged);
+	addChildWidget(tabBar_);
 }
 
-void Tabbed::addTab(Tab *tab)
+Tab *Tabbed::getSelectedTab()
 {
-	addTab(&tab->button, &tab->page);
+	TabButton *selected = tabBar_->getSelectedTab();
+
+	for (size_t i = 0; i < tabs_.size(); i++)
+	{
+		if (tabs_[i]->button_ == selected)
+			return tabs_[i];
+	}
+
+	return NULL;
 }
 
-void Tabbed::addTab(TabButton **tab, TabPage **page)
+void Tabbed::add(Tab *tab)
 {
 	WZ_ASSERT(tab);
-	WZ_ASSERT(page);
 
-	// Add the tab.
-	*tab = tabBar->createTab();
+	// Add the tab button to the tab bar.
+	tabBar_->addTab(tab->button_);
 
 	// Add the page widget.
-	*page = new TabPage();
-	(*page)->setVisible(tabBar->getSelectedTab() == *tab);
-	addChildWidget(*page);
+	tab->page_->setVisible(tabBar_->getSelectedTab() == tab->button_);
+	addChildWidget(tab->page_);
 
 	// Set the page widget rect.
-	int tabBarHeight = tabBar->getHeight();
-	(*page)->setRectInternal(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
+	int tabBarHeight = tabBar_->getHeight();
+	tab->page_->setRectInternal(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
 
-	// Add the tabbed page.
-	TabbedPage newPage;
-	newPage.tab = *tab;
-	newPage.page = *page;
-	pages.push_back(newPage);
+	// Store this tab.
+	tabs_.push_back(tab);
 }
 
 void Tabbed::onRectChanged()
 {
 	// Set the tab bar width to match.
-	tabBar->setWidthInternal(rect_.w);
+	tabBar_->setWidthInternal(rect_.w);
 
 	// Resize the pages to take up the remaining space.
 	Size pageSize;
 	pageSize.w = rect_.w;
-	pageSize.h = rect_.h - tabBar->getHeight();
+	pageSize.h = rect_.h - tabBar_->getHeight();
 
-	for (size_t i = 0; i < pages.size(); i++)
+	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		pages[i].page->setSizeInternal(pageSize);
+		tabs_[i]->page_->setSizeInternal(pageSize);
 	}
 }
 
@@ -163,9 +172,9 @@ Size Tabbed::measure()
 void Tabbed::onTabChanged(Event e)
 {
 	// Set the corresponding page to visible, hide all the others.
-	for (size_t i = 0; i < pages.size(); i++)
+	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		pages[i].page->setVisible(pages[i].tab == e.tabBar.tab);
+		tabs_[i]->page_->setVisible(tabs_[i]->button_ == e.tabBar.tab);
 	}
 }
 
