@@ -934,27 +934,36 @@ void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 	nvgSave(vg);
 	clipToRectIntersection(clip, tabbed->getAbsoluteRect());
 
-	// Draw an outline around the selected tab and the tab page.
-	const Tab *selectedTab = tabbed->getSelectedTab();
+	// Draw an outline around the selected tab button and page.
 	nvgBeginPath(vg);
 
-	const Rect tr = selectedTab->getButton()->getAbsoluteRect();
-	nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
-	nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
-	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
-	nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
-
-	// The tab page.
+	const Tab *selectedTab = tabbed->getSelectedTab();
 	const Rect pr = selectedTab->getPage()->getAbsoluteRect();
-	nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + 0.5f); // tr
-	nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + pr.h - 0.5f); // br
-	nvgLineTo(vg, pr.x + 0.5f, pr.y + pr.h - 0.5f); // bl
-	nvgLineTo(vg, pr.x + 0.5f, pr.y + 0.5f); // tl
-	nvgClosePath(vg);
+
+	if (selectedTab->getButton()->getVisible())
+	{
+		// The tab button.
+		const Rect tr = selectedTab->getButton()->getAbsoluteRect();
+		nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h + 0.5f); // bl
+		nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
+		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
+		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h + 0.5f); // br
+
+		// The tab page.
+		nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + 0.5f); // tr
+		nvgLineTo(vg, pr.x + pr.w - 0.5f, pr.y + pr.h - 0.5f); // br
+		nvgLineTo(vg, pr.x + 0.5f, pr.y + pr.h - 0.5f); // bl
+		nvgLineTo(vg, pr.x + 0.5f, pr.y + 0.5f); // tl
+		nvgClosePath(vg);
+	}
+	else
+	{
+		// Selected tab is scrolled out of view, just draw an outline around the page.
+		nvgRect(vg, pr.x + 0.5f, pr.y + 0.5f, pr.w - 1.0f, pr.h - 1.0f);
+	}
 	
 	nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER_COLOR);
 	nvgStroke(vg);
-
 	nvgRestore(vg);
 }
 
