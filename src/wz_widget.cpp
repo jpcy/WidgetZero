@@ -279,7 +279,17 @@ bool Widget::getHover() const
 
 void Widget::setVisible(bool visible)
 {
+	if (hidden_ == !visible)
+		return;
+
 	hidden_ = !visible;
+
+	// If the parent is a layout widget, it may need refreshing.
+	if (parent_ && parent_->isLayout())
+	{
+		parent_->refreshRect();
+	}
+
 	onVisibilityChanged();
 }
 

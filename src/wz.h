@@ -1201,8 +1201,10 @@ protected:
 	// Show the scroll buttons if they're required, hides them if they're not.
 	void updateScrollButtons();
 
-	void updateTabs();
+	// Hide tabs that are scrolled out of view.
+	void updateTabVisibility();
 
+	StackLayout *layout_;
 	TabButton *selectedTab_;
 	std::vector<TabButton *> tabs_;
 

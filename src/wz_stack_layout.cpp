@@ -26,14 +26,14 @@ SOFTWARE.
 
 namespace wz {
 
-	StackLayout::StackLayout(StackLayoutDirection::Enum direction, int spacing)
+StackLayout::StackLayout(StackLayoutDirection::Enum direction, int spacing)
 {
 	type_ = WidgetType::StackLayout;
 	direction_ = direction;
 	spacing_ = spacing;
 }
 
-	void StackLayout::setDirection(StackLayoutDirection::Enum direction)
+void StackLayout::setDirection(StackLayoutDirection::Enum direction)
 {
 	direction_ = direction;
 	refreshRect();
@@ -87,6 +87,9 @@ void StackLayout::layoutVertical()
 
 	for (size_t i = 0; i < children_.size(); i++)
 	{
+		if (!children_[i]->getVisible())
+			continue;
+
 		// Subtract all child widget top and bottom margins from the available height.
 		availableHeight -= children_[i]->getMargin().top + children_[i]->getMargin().bottom;
 
@@ -114,6 +117,9 @@ void StackLayout::layoutVertical()
 	for (size_t i = 0; i < children_.size(); i++)
 	{
 		Widget *child = children_[i];
+
+		if (!child->getVisible())
+			continue;
 
 		if (i != 0)
 		{
@@ -172,6 +178,9 @@ void StackLayout::layoutHorizontal()
 
 	for (size_t i = 0; i < children_.size(); i++)
 	{
+		if (!children_[i]->getVisible())
+			continue;
+
 		// Subtract all child widget left and right margins from the available width.
 		availableWidth -= children_[i]->getMargin().left + children_[i]->getMargin().right;
 
@@ -199,6 +208,9 @@ void StackLayout::layoutHorizontal()
 	for (size_t i = 0; i < children_.size(); i++)
 	{
 		Widget *child = children_[i];
+
+		if (!child->getVisible())
+			continue;
 
 		if (i != 0)
 		{

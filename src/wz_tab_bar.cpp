@@ -38,6 +38,7 @@ TabButton::TabButton(const std::string &label) : Button(label)
 {
 	setClickBehavior(ButtonClickBehavior::Down);
 	setSetBehavior(ButtonSetBehavior::Sticky);
+	setStretch(Stretch::Height);
 }
 
 void TabButton::draw(Rect clip)
@@ -53,21 +54,15 @@ TAB BAR
 ================================================================================
 */
 
-#if 0
-// Ensure tab height stay the same as the tab bar.
-static void wz_tab_set_rect(Widget *widget, Rect rect)
-{
-	WZ_ASSERT(widget);
-	rect.h = ((TabBar *)widget->parent)->rect.h;
-	widget->rect = rect;
-}
-#endif
-
 TabBar::TabBar()
 {
 	type_ = WidgetType::TabBar;
 	selectedTab_ = NULL;
 	scrollValue_ = 0;
+
+	layout_ = new StackLayout(StackLayoutDirection::Horizontal);
+	layout_->setStretch(Stretch::All);
+	addChildWidget(layout_);
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
 	decrementButton_ = new Button("<");
@@ -88,21 +83,8 @@ TabBar::TabBar()
 void TabBar::addTab(TabButton *tab)
 {
 	tab->addEventHandler(EventType::ButtonPressed, this, &TabBar::onTabButtonPressed);
-	addChildWidget(tab);
+	layout_->add(tab);
 	tabs_.push_back(tab);
-
-	// Position to the right of the last tab.
-	Rect rect;
-	rect.x = rect.y = 0;
-	rect.w = tab->getWidth();
-	rect.h = rect_.h;
-
-	for (size_t i = 0; i < tabs_.size(); i++)
-	{
-		rect.x += tabs_[i]->getWidth();
-	}
-
-	tab->setRectInternal(rect);
 
 	// Select the first tab added.
 	if (!selectedTab_)
@@ -148,7 +130,8 @@ void TabBar::destroyTab(TabButton *tab)
 
 	// Delete the tab.
 	tabs_.erase(tabs_.begin() + deleteIndex);
-	destroyChildWidget(tab);
+	layout_->remove(tab);
+	delete tab;
 }
 
 void TabBar::clearTabs()
@@ -163,7 +146,8 @@ void TabBar::clearTabs()
 		invokeEvent(e);
 
 		// Destroy the tab.
-		destroyChildWidget(tabs_[i]);
+		layout_->remove(tabs_[i]);
+		delete tabs_[i];
 	}
 
 	tabs_.clear();
@@ -223,13 +207,6 @@ void TabBar::onRendererChanged()
 
 void TabBar::onRectChanged()
 {
-	// Set button heights to match.
-	for (size_t i = 0; i < children_.size(); i++)
-	{
-		children_[i]->setHeightInternal(rect_.h);
-	}
-
-	updateTabs();
 	updateScrollButtons();
 }
 
@@ -251,7 +228,7 @@ void TabBar::setScrollValue(int value)
 	if (oldValue != scrollValue_)
 	{
 		// Value has changed.
-		updateTabs();
+		updateTabVisibility();
 	}
 }
 
@@ -281,8 +258,7 @@ void TabBar::updateScrollButtons()
 
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		Size size = tabs_[i]->getSize();
-		totalTabWidth += size.w;
+		totalTabWidth += tabs_[i]->getWidth();
 	}
 
 	// Show/hide the scroll buttons and set their rects.
@@ -310,31 +286,11 @@ void TabBar::updateScrollButtons()
 	}
 }
 
-void TabBar::updateTabs()
+void TabBar::updateTabVisibility()
 {
-	// Start at the left edge of the tab bar.
-	int x = 0;
-
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		if ((int)i < scrollValue_)
-		{
-			// Scrolled out of view, hide it.
-			tabs_[i]->setVisible(false);
-			continue;
-		}
-		else
-		{
-			// Reposition and show.
-			Rect tabRect;
-			tabRect.x = x;
-			tabRect.y = 0;
-			tabRect.w = tabs_[i]->getWidth();
-			tabRect.h = rect_.h;
-			tabs_[i]->setRectInternal(tabRect);
-			tabs_[i]->setVisible(true);
-			x += tabRect.w;
-		}
+		tabs_[i]->setVisible((int)i >= scrollValue_);
 	}
 }
 
