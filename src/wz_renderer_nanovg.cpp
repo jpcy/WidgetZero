@@ -155,7 +155,7 @@ void NVGRenderer::drawButton(Button *button, Rect clip)
 
 	// Calculate icon and label sizes.
 	Size iconSize;
-	int iconHandle;
+	int iconHandle = 0;
 
 	if (button->getIcon() && button->getIcon()[0])
 	{
@@ -166,7 +166,7 @@ void NVGRenderer::drawButton(Button *button, Rect clip)
 	button->measureText(button->getLabel(), 0, &labelWidth, NULL);
 
 	// Position the icon and label centered.
-	int iconX, labelX;
+	int iconX = 0, labelX = 0;
 
 	if (button->getIcon() && button->getIcon()[0] && iconHandle && button->getLabel() && button->getLabel()[0])
 	{
@@ -283,7 +283,6 @@ void NVGRenderer::drawCombo(Combo *combo, Rect clip)
 	const Rect rect = combo->getAbsoluteRect();
 	const uint8_t *itemData = combo->getList()->getItemData();
 	const int itemStride = combo->getList()->getItemStride();
-	const int nItems = combo->getList()->getNumItems();
 	const int selectedItemIndex = combo->getList()->getSelectedItem();
 
 	nvgSave(vg);
@@ -385,7 +384,7 @@ void NVGRenderer::drawDockPreview(DockPreview *dockPreview, Rect /*clip*/)
 	nvgRestore(impl->vg);
 }
 
-Border NVGRenderer::getGroupBoxMargin(GroupBox *groupBox)
+Border NVGRenderer::getGroupBoxMargin(GroupBox * /*groupBox*/)
 {
 	return Border(WZ_SKIN_GROUP_BOX_MARGIN);
 }
@@ -433,12 +432,12 @@ void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
+Size NVGRenderer::measureGroupBox(GroupBox * /*groupBox*/)
 {
 	return Size();
 }
 
-Color NVGRenderer::getLabelTextColor(Label *label)
+Color NVGRenderer::getLabelTextColor(Label * /*label*/)
 {
 	NVGcolor c = WZ_SKIN_LABEL_TEXT_COLOR;
 	return Color(c.rgba);
@@ -552,7 +551,7 @@ void NVGRenderer::drawList(List *list, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureList(List *list)
+Size NVGRenderer::measureList(List * /*list*/)
 {
 	return Size();
 }
@@ -588,7 +587,7 @@ Size NVGRenderer::measureMenuBarButton(MenuBarButton *button)
 	return size;
 }
 
-int NVGRenderer::getMenuBarPadding(MenuBar *menuBar)
+int NVGRenderer::getMenuBarPadding(MenuBar * /*menuBar*/)
 {
 	return WZ_SKIN_MENU_BAR_PADDING;
 }
@@ -834,7 +833,7 @@ Size NVGRenderer::measureScroller(Scroller *scroller)
 	return scroller->getDirection() == ScrollerDirection::Vertical ? Size(WZ_SKIN_SCROLLER_THICKNESS, 0) : Size(0, WZ_SKIN_SCROLLER_THICKNESS);
 }
 
-int NVGRenderer::getSpinnerButtonWidth(Spinner *spinner)
+int NVGRenderer::getSpinnerButtonWidth(Spinner * /*spinner*/)
 {
 	return WZ_SKIN_SPINNER_BUTTON_WIDTH;
 }
@@ -879,7 +878,7 @@ void NVGRenderer::drawSpinnerIncrementButton(Button *button, Rect clip)
 	drawSpinnerButton(button, clip, false);
 }
 
-void NVGRenderer::drawSpinner(Spinner *spinner, Rect clip)
+void NVGRenderer::drawSpinner(Spinner * /*spinner*/, Rect /*clip*/)
 {
 }
 
@@ -913,12 +912,12 @@ void NVGRenderer::drawTabButton(TabButton *button, Rect clip)
 	nvgRestore(vg);
 }
 
-int NVGRenderer::getTabBarScrollButtonWidth(TabBar *tabBar)
+int NVGRenderer::getTabBarScrollButtonWidth(TabBar * /*tabBar*/)
 {
 	return WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH;
 }
 
-void NVGRenderer::drawTabBar(TabBar *tabBar, Rect clip)
+void NVGRenderer::drawTabBar(TabBar * /*tabBar*/, Rect /*clip*/)
 {
 }
 
@@ -993,7 +992,7 @@ void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 		nvgBeginPath(vg);
 
 		// Only draw the left side if this is the leftmost tab.
-		if (i == tabbed->tabBar->getScrollValue())
+		if (i == (size_t)tabbed->tabBar->getScrollValue())
 		{
 			nvgMoveTo(vg, tr.x + 0.5f, tr.y + tr.h - 0.5f); // bl
 			nvgLineTo(vg, tr.x + 0.5f, tr.y + 0.5f); // tl
@@ -1006,7 +1005,7 @@ void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 		nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + 0.5f); // tr
 
 		// If the selected tab is next to this tab, on the right, don't draw the right side.
-		if (selectedTabIndex != i + 1)
+		if (selectedTabIndex != int(i + 1))
 		{
 			nvgLineTo(vg, tr.x + tr.w - 0.5f, tr.y + tr.h - 0.5f); // br
 		}
@@ -1018,7 +1017,7 @@ void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureTabbed(Tabbed *tabbed)
+Size NVGRenderer::measureTabbed(Tabbed * /*tabbed*/)
 {
 	return Size();
 }
@@ -1164,7 +1163,7 @@ Size NVGRenderer::measureTextEdit(TextEdit *textEdit)
 	}
 }
 
-void NVGRenderer::drawWindow(Window *window, Rect clip)
+void NVGRenderer::drawWindow(Window *window, Rect /*clip*/)
 {
 	NVGcontext *vg = impl->vg;
 	const Rect rect = window->getAbsoluteRect();
@@ -1205,7 +1204,7 @@ void NVGRenderer::drawWindow(Window *window, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureWindow(Window *window)
+Size NVGRenderer::measureWindow(Window * /*window*/)
 {
 	return Size();
 }
@@ -1234,7 +1233,7 @@ void NVGRenderer::measureText(const char *fontFace, float fontSize, const char *
 	}
 }
 
-LineBreakResult NVGRenderer::lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth)
+LineBreakResult NVGRenderer::lineBreakText(const char * /*fontFace*/, float /*fontSize*/, const char *text, int n, int lineWidth)
 {
 	NVGtextRow row;
 	LineBreakResult result;

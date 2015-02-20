@@ -119,7 +119,7 @@ Size Combo::measure()
 	return renderer_->measureCombo(this);
 }
 
-void Combo::onListItemSelected(Event e)
+void Combo::onListItemSelected(Event)
 {
 	// Unlock input.
 	mainWindow_->popLockInputWidget(this);

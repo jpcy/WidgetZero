@@ -193,7 +193,7 @@ void List::onRendererChanged()
 	refreshItemHeight();
 }
 
-void List::onFontChanged(const char *fontFace, float fontSize)
+void List::onFontChanged(const char * /*fontFace*/, float /*fontSize*/)
 {
 	// Doesn't matter if we can't call this yet (NULL renderer), since onRendererChanged will call it too.
 	if (renderer_)
@@ -216,7 +216,7 @@ void List::onRectChanged()
 	updateScroller();
 }
 
-void List::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void List::onMouseButtonDown(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1 && hoveredItem_ != -1)
 	{
@@ -256,7 +256,7 @@ void List::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void List::onMouseMove(int mouseX, int mouseY, int /*mouseDeltaX*/, int /*mouseDeltaY*/)
 {
 	lastMousePosition_.x = mouseX;
 	lastMousePosition_.y = mouseY;
@@ -273,7 +273,7 @@ void List::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
 	}
 }
 
-void List::onMouseWheelMove(int x, int y)
+void List::onMouseWheelMove(int /*x*/, int y)
 {
 	if (scroller_->getVisible())
 	{

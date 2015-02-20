@@ -175,7 +175,7 @@ void ScrollerNub::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ScrollerNub::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void ScrollerNub::onMouseButtonUp(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1)
 	{
@@ -184,7 +184,7 @@ void ScrollerNub::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void ScrollerNub::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void ScrollerNub::onMouseMove(int mouseX, int mouseY, int /*mouseDeltaX*/, int /*mouseDeltaY*/)
 {
 	// Handle dragging.
 	if (isPressed_)
@@ -380,12 +380,12 @@ Size Scroller::measure()
 	return renderer_->measureScroller(this);
 }
 
-void Scroller::onDecrementButtonClicked(Event e)
+void Scroller::onDecrementButtonClicked(Event)
 {
 	decrementValue();
 }
 
-void Scroller::onIncrementButtonClicked(Event e)
+void Scroller::onIncrementButtonClicked(Event)
 {
 	incrementValue();
 }

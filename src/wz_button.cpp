@@ -141,7 +141,7 @@ void Button::addCallbackClicked(EventCallback callback)
 	clickedCallbacks_.push_back(callback);
 }
 
-void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void Button::onMouseButtonDown(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1)
 	{
@@ -161,7 +161,7 @@ void Button::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void Button::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void Button::onMouseButtonUp(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1 && isPressed_)
 	{

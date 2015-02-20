@@ -24,7 +24,59 @@ SOFTWARE.
 #include "wz.h"
 #pragma hdrstop
 
+#define WZ_NOT_IMPLEMENTED { WZ_ASSERT("not implemented" && false); }
+#define WZ_NOT_IMPLEMENTED_RETURN(type) { WZ_ASSERT("not implemented" && false); return type(); }
+
 namespace wz {
+
+IRenderer::~IRenderer() {}
+void IRenderer::beginFrame(int, int) {}
+void IRenderer::endFrame() {}
+void IRenderer::drawButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureButton(Button *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawCheckBox(CheckBox *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureCheckBox(CheckBox *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawCombo(Combo *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureCombo(Combo *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawDockIcon(DockIcon *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawDockPreview(DockPreview *, Rect) { WZ_NOT_IMPLEMENTED }
+Border IRenderer::getGroupBoxMargin(GroupBox *) { WZ_NOT_IMPLEMENTED_RETURN(Border) }
+void IRenderer::drawGroupBox(GroupBox *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureGroupBox(GroupBox *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+Color IRenderer::getLabelTextColor(Label *) { WZ_NOT_IMPLEMENTED_RETURN(Color) }
+void IRenderer::drawLabel(Label *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureLabel(Label *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawList(List *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureList(List *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawMenuBarButton(MenuBarButton *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureMenuBarButton(MenuBarButton *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+int IRenderer::getMenuBarPadding(MenuBar *) { WZ_NOT_IMPLEMENTED_RETURN(int) }
+void IRenderer::drawMenuBar(MenuBar *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureMenuBar(MenuBar *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawRadioButton(RadioButton *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureRadioButton(RadioButton *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawScrollerDecrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawScrollerIncrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawScroller(Scroller *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureScroller(Scroller *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+int IRenderer::getSpinnerButtonWidth(Spinner *) { WZ_NOT_IMPLEMENTED_RETURN(int) }
+void IRenderer::drawSpinnerDecrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawSpinnerIncrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawSpinner(Spinner *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureSpinner(Spinner *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawTabButton(TabButton *, Rect) { WZ_NOT_IMPLEMENTED }
+int IRenderer::getTabBarScrollButtonWidth(TabBar *) { WZ_NOT_IMPLEMENTED_RETURN(int) }
+void IRenderer::drawTabBar(TabBar *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureTabBar(TabBar *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawTabbed(Tabbed *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureTabbed(Tabbed *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawTextEdit(TextEdit *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureTextEdit(TextEdit *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+void IRenderer::drawWindow(Window *, Rect) { WZ_NOT_IMPLEMENTED }
+Size IRenderer::measureWindow(Window *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
+int IRenderer::getLineHeight(const char *, float) { WZ_NOT_IMPLEMENTED_RETURN(int) }
+void IRenderer::measureText(const char *, float, const char *, int, int *, int *) { WZ_NOT_IMPLEMENTED }
+LineBreakResult IRenderer::lineBreakText(const char *, float, const char *, int, int) { WZ_NOT_IMPLEMENTED_RETURN(LineBreakResult) }
 
 /*
 SDL_IntersectRect

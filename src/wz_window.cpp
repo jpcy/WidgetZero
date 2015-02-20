@@ -115,7 +115,7 @@ void Window::onRendererChanged()
 	refreshRect();
 }
 
-void Window::onFontChanged(const char *fontFace, float fontSize)
+void Window::onFontChanged(const char * /*fontFace*/, float /*fontSize*/)
 {
 	refreshHeaderHeight();
 	refreshRect();
@@ -177,7 +177,7 @@ void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void Window::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void Window::onMouseButtonUp(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1)
 	{

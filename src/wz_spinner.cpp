@@ -134,12 +134,12 @@ Size Spinner::measure()
 	return renderer_->measureSpinner(this);
 }
 
-void Spinner::onDecrementButtonClicked(Event e)
+void Spinner::onDecrementButtonClicked(Event)
 {
 	setValue(getValue() - 1);
 }
 
-void Spinner::onIncrementButtonClicked(Event e)
+void Spinner::onIncrementButtonClicked(Event)
 {
 	setValue(getValue() + 1);
 }

@@ -45,9 +45,6 @@ SOFTWARE.
 #include <stdlib.h>
 #endif
 
-#define WZ_NOT_IMPLEMENTED { WZ_ASSERT("not implemented" && false); }
-#define WZ_NOT_IMPLEMENTED_RETURN(type) { WZ_ASSERT("not implemented" && false); return type(); }
-
 #define WZCPP_CALL_OBJECT_METHOD(object, method) ((object)->*(method)) 
 
 #define WZ_MAX_WINDOWS 256
@@ -115,16 +112,7 @@ struct Color
 	Color() : r(0), g(0), b(0), a(0) {}
 	Color(float r, float g, float b, float a = 1) : r(r), g(g), b(b), a(a) {}
 	Color(float *rgba) { r = rgba[0]; g = rgba[1]; b = rgba[2]; a = rgba[3]; }
-
-	union
-	{
-		float rgba[4];
-
-		struct
-		{
-			float r, g, b, a;
-		};
-	};
+	float r, g, b, a;
 };
 
 struct Position
@@ -352,58 +340,58 @@ struct LineBreakResult
 class IRenderer
 {
 public:
-	~IRenderer() {}
-	virtual void beginFrame(int windowWidth, int windowHeight) {}
-	virtual void endFrame() {}
-	virtual void drawButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureButton(Button *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawCheckBox(CheckBox *checkBox, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureCheckBox(CheckBox *checkBox) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawCombo(Combo *combo, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureCombo(Combo *combo) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Border getGroupBoxMargin(GroupBox *groupBox) WZ_NOT_IMPLEMENTED_RETURN(Border)
-	virtual void drawGroupBox(GroupBox *groupBox, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureGroupBox(GroupBox *groupBox) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual Color getLabelTextColor(Label *label) WZ_NOT_IMPLEMENTED_RETURN(Color)
-	virtual void drawLabel(Label *label, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureLabel(Label *label) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawList(List *list, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureList(List *list) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureMenuBarButton(MenuBarButton *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual int getMenuBarPadding(MenuBar *menuBar) WZ_NOT_IMPLEMENTED_RETURN(int)
-	virtual void drawMenuBar(MenuBar *menuBar, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureMenuBar(MenuBar *menuBar) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawRadioButton(RadioButton *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureRadioButton(RadioButton *button) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawScrollerDecrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual void drawScrollerIncrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual void drawScroller(Scroller *scroller, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureScroller(Scroller *scroller) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual int getSpinnerButtonWidth(Spinner *spinner) WZ_NOT_IMPLEMENTED_RETURN(int)
-	virtual void drawSpinnerDecrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual void drawSpinnerIncrementButton(Button *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual void drawSpinner(Spinner *spinner, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureSpinner(Spinner *spinner) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawTabButton(TabButton *button, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual int getTabBarScrollButtonWidth(TabBar *tabBar) WZ_NOT_IMPLEMENTED_RETURN(int)
-	virtual void drawTabBar(TabBar *tabBar, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureTabBar(TabBar *tabBar) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawTabbed(Tabbed *tabbed, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureTabbed(Tabbed *tabbed) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawTextEdit(TextEdit *textEdit, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureTextEdit(TextEdit *textEdit) WZ_NOT_IMPLEMENTED_RETURN(Size)
-	virtual void drawWindow(Window *window, Rect clip) WZ_NOT_IMPLEMENTED
-	virtual Size measureWindow(Window *window) WZ_NOT_IMPLEMENTED_RETURN(Size)
+	virtual ~IRenderer();
+	virtual void beginFrame(int windowWidth, int windowHeight);
+	virtual void endFrame();
+	virtual void drawButton(Button *button, Rect clip);
+	virtual Size measureButton(Button *button);
+	virtual void drawCheckBox(CheckBox *checkBox, Rect clip);
+	virtual Size measureCheckBox(CheckBox *checkBox);
+	virtual void drawCombo(Combo *combo, Rect clip);
+	virtual Size measureCombo(Combo *combo);
+	virtual void drawDockIcon(DockIcon *dockIcon, Rect clip);
+	virtual void drawDockPreview(DockPreview *dockPreview, Rect clip);
+	virtual Border getGroupBoxMargin(GroupBox *groupBox);
+	virtual void drawGroupBox(GroupBox *groupBox, Rect clip);
+	virtual Size measureGroupBox(GroupBox *groupBox);
+	virtual Color getLabelTextColor(Label *label);
+	virtual void drawLabel(Label *label, Rect clip);
+	virtual Size measureLabel(Label *label);
+	virtual void drawList(List *list, Rect clip);
+	virtual Size measureList(List *list);
+	virtual void drawMenuBarButton(MenuBarButton *button, Rect clip);
+	virtual Size measureMenuBarButton(MenuBarButton *button);
+	virtual int getMenuBarPadding(MenuBar *menuBar);
+	virtual void drawMenuBar(MenuBar *menuBar, Rect clip);
+	virtual Size measureMenuBar(MenuBar *menuBar);
+	virtual void drawRadioButton(RadioButton *button, Rect clip);
+	virtual Size measureRadioButton(RadioButton *button);
+	virtual void drawScrollerDecrementButton(Button *button, Rect clip);
+	virtual void drawScrollerIncrementButton(Button *button, Rect clip);
+	virtual void drawScroller(Scroller *scroller, Rect clip);
+	virtual Size measureScroller(Scroller *scroller);
+	virtual int getSpinnerButtonWidth(Spinner *spinner);
+	virtual void drawSpinnerDecrementButton(Button *button, Rect clip);
+	virtual void drawSpinnerIncrementButton(Button *button, Rect clip);
+	virtual void drawSpinner(Spinner *spinner, Rect clip);
+	virtual Size measureSpinner(Spinner *spinner);
+	virtual void drawTabButton(TabButton *button, Rect clip);
+	virtual int getTabBarScrollButtonWidth(TabBar *tabBar);
+	virtual void drawTabBar(TabBar *tabBar, Rect clip);
+	virtual Size measureTabBar(TabBar *tabBar);
+	virtual void drawTabbed(Tabbed *tabbed, Rect clip);
+	virtual Size measureTabbed(Tabbed *tabbed);
+	virtual void drawTextEdit(TextEdit *textEdit, Rect clip);
+	virtual Size measureTextEdit(TextEdit *textEdit);
+	virtual void drawWindow(Window *window, Rect clip);
+	virtual Size measureWindow(Window *window);
 
-	virtual int getLineHeight(const char *fontFace, float fontSize) WZ_NOT_IMPLEMENTED_RETURN(int)
+	virtual int getLineHeight(const char *fontFace, float fontSize);
 
 	// width or height can be NULL.
-	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height) WZ_NOT_IMPLEMENTED
+	virtual void measureText(const char *fontFace, float fontSize, const char *text, int n, int *width, int *height);
 
-	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth) WZ_NOT_IMPLEMENTED_RETURN(LineBreakResult)
+	virtual LineBreakResult lineBreakText(const char *fontFace, float fontSize, const char *text, int n, int lineWidth);
 };
 
 struct WidgetFlags
@@ -435,33 +423,33 @@ public:
 	}
 
 	// The widget was added to a parent widget (see Widget::addChildWidget).
-	virtual void onParented(Widget *parent) {}
+	virtual void onParented(Widget *parent);
 
 	// Widget::renderer has been changed.
-	virtual void onRendererChanged() {}
+	virtual void onRendererChanged();
 
-	virtual void onFontChanged(const char *fontFace, float fontSize) {}
+	virtual void onFontChanged(const char *fontFace, float fontSize);
 
 	// Some additional widget state may been to be cleared when a widget is hidden.
-	virtual void onVisibilityChanged() {}
+	virtual void onVisibilityChanged();
 
-	virtual void onRectChanged() {}
+	virtual void onRectChanged();
 
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY) {}
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY) {}
-	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY) {}
-	virtual void onMouseWheelMove(int x, int y) {}
-	virtual void onMouseHoverOn() {}
-	virtual void onMouseHoverOff() {}
-	virtual void onKeyDown(Key::Enum key) {}
-	virtual void onKeyUp(Key::Enum key) {}
-	virtual void onTextInput(const char *text) {}
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void onMouseHoverOn();
+	virtual void onMouseHoverOff();
+	virtual void onKeyDown(Key::Enum key);
+	virtual void onKeyUp(Key::Enum key);
+	virtual void onTextInput(const char *text);
 
 	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
-	virtual Rect getChildrenClipRect() const { return getAbsoluteRect(); }
+	virtual Rect getChildrenClipRect() const;
 
-	virtual void draw(Rect clip) {}
-	virtual Size measure() { return Size(); }
+	virtual void draw(Rect clip);
+	virtual Size measure();
 
 	WidgetType::Enum getType() const;
 	bool isLayout() const;

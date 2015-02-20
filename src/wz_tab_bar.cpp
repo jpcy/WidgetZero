@@ -277,12 +277,12 @@ void TabBar::invokeTabChanged()
 	invokeEvent(e, tabChangedCallbacks_);
 }
 
-void TabBar::onDecrementButtonClicked(Event e)
+void TabBar::onDecrementButtonClicked(Event)
 {
 	setScrollValue(scrollValue_ - 1);
 }
 
-void TabBar::onIncrementButtonClicked(Event e)
+void TabBar::onIncrementButtonClicked(Event)
 {
 	setScrollValue(scrollValue_ + 1);
 }

@@ -287,7 +287,7 @@ void TextEdit::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void TextEdit::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void TextEdit::onMouseButtonUp(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1)
 	{
@@ -296,7 +296,7 @@ void TextEdit::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void TextEdit::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY)
+void TextEdit::onMouseMove(int mouseX, int mouseY, int /*mouseDeltaX*/, int /*mouseDeltaY*/)
 {
 	if (!(hover_ && WZ_POINT_IN_RECT(mouseX, mouseY, getTextRect())))
 		return;
@@ -707,7 +707,7 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 			}
 
 			// Made it to the end of text string.
-			if (i == line.length)
+			if (i == (int)line.length)
 			{
 				result += i;
 				break;
@@ -758,7 +758,7 @@ int TextEdit::indexFromRelativePosition(Position pos) const
 			}
 
 			// Made it to the end of text string.
-			if (i == text_.length())
+			if (i == (int)text_.length())
 			{
 				result = i;
 				break;

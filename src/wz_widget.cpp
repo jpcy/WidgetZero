@@ -65,6 +65,46 @@ Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 	return this;
 }
 
+void Widget::onParented(Widget * /*parent*/) {}
+
+void Widget::onRendererChanged() {}
+
+void Widget::onFontChanged(const char * /*fontFace*/, float /*fontSize*/) {}
+
+void Widget::onVisibilityChanged() {}
+
+void Widget::onRectChanged() {}
+
+void Widget::onMouseButtonDown(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
+
+void Widget::onMouseButtonUp(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
+
+void Widget::onMouseMove(int /*mouseX*/, int /*mouseY*/, int /*mouseDeltaX*/, int /*mouseDeltaY*/) {}
+
+void Widget::onMouseWheelMove(int /*x*/, int /*y*/) {}
+
+void Widget::onMouseHoverOn() {}
+
+void Widget::onMouseHoverOff() {}
+
+void Widget::onKeyDown(Key::Enum /*key*/) {}
+
+void Widget::onKeyUp(Key::Enum /*key*/) {}
+
+void Widget::onTextInput(const char * /*text*/) {}
+
+Rect Widget::getChildrenClipRect() const
+{
+	return getAbsoluteRect();
+}
+
+void Widget::draw(Rect /*clip*/) {}
+
+Size Widget::measure()
+{
+	return Size();
+}
+
 WidgetType::Enum Widget::getType() const
 {
 	return type_;

@@ -32,7 +32,7 @@ class TigrRenderer : public wz::IRenderer
 public:
 	TigrRenderer(Tigr *screen) : screen(screen) {}
 
-	virtual void drawButton(wz::Button *button, wz::Rect clip)
+	virtual void drawButton(wz::Button *button, wz::Rect /*clip*/)
 	{
 		const wz::Rect rect = button->getAbsoluteRect();
 
@@ -68,7 +68,7 @@ private:
 	Tigr *screen;
 };
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
 	// Create the tigr window.
 	Tigr *screen = tigrWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "WidgetZero Example - Custom Renderer", 0);

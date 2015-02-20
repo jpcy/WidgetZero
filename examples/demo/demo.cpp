@@ -39,6 +39,7 @@ SOFTWARE.
 
 #ifdef _MSC_VER
 #pragma warning(push)
+#pragma warning(disable : 4201) // "nonstandard extension used : nameless struct/union"
 #pragma warning(disable : 4244) // "conversion from 'int' to 'float', possible loss of data"
 #endif
 
@@ -79,7 +80,7 @@ static const char *listData[17] =
 	"Ten"
 };
 
-static void CustomDrawListItemCallback(wz::IRenderer *renderer, wz::Rect clip, const wz::List *list, const char *fontFace, float fontSize, int itemIndex, const uint8_t *itemData)
+static void CustomDrawListItemCallback(wz::IRenderer *renderer, wz::Rect clip, const wz::List * /*list*/, const char * /*fontFace*/, float /*fontSize*/, int /*itemIndex*/, const uint8_t *itemData)
 {
 	int image, width, height;
 	wz::Rect rect;
@@ -616,7 +617,7 @@ private:
 	{
 		for (size_t i = 0; i < widgetCategories.size(); i++)
 		{
-			widgetCategories[i].frame->setVisible(i == index ? true : false);
+			widgetCategories[i].frame->setVisible((int)i == index);
 		}
 	}
 
@@ -696,7 +697,7 @@ static wz::Key::Enum ConvertKey(SDL_Keycode sym)
 	return wz::Key::Unknown;
 }
 
-int main(int argc, char **argv)
+int main(int, char **)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0)
 	{

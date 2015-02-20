@@ -13,8 +13,8 @@ end
 solution "WidgetZero"
 	language "C++"
 	location "build"
+	warnings "Extra"
 	startproject "Example 1 - Demo"
-	
 	configurations { "Debug", "Release" }
 	platforms { "native", "x64", "x32" }
 	
@@ -45,9 +45,6 @@ project "WidgetZero"
 	defines "WZ_USE_PCH"
 	files { "src/*.*" }
 	includedirs { "nanovg" }
-	configuration "vs*"
-		-- disable warning "new behavior: elements of array 'array' will be default initialized"
-		buildoptions { "/wd\"4351\"" }
 		
 -----------------------------------------------------------------------------
 

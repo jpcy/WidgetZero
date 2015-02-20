@@ -57,7 +57,7 @@ bool MenuBarButton::isPressed() const
 	return isPressed_;
 }
 
-void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+void MenuBarButton::onMouseButtonDown(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1)
 	{
@@ -68,7 +68,7 @@ void MenuBarButton::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	}
 }
 
-void MenuBarButton::onMouseButtonUp(int mouseButton, int mouseX, int mouseY)
+void MenuBarButton::onMouseButtonUp(int mouseButton, int /*mouseX*/, int /*mouseY*/)
 {
 	if (mouseButton == 1 && isPressed_)
 	{

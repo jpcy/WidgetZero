@@ -56,7 +56,7 @@ Size RadioButton::measure()
 	return renderer_->measureRadioButton(this);
 }
 
-void RadioButton::onClicked(Event e)
+void RadioButton::onClicked(Event)
 {
 	// Unset all the other radio button siblings.
 	for (size_t i = 0; i < parent_->getChildren().size(); i++)
