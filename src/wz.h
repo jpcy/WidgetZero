@@ -409,48 +409,6 @@ class Widget
 public:
 	Widget();
 	virtual ~Widget();
-	Widget *addEventHandler(IEventHandler *eventHandler);
-
-	template<class Object>
-	Widget *addEventHandler(EventType::Enum eventType, Object *object, void (Object::*method)(Event))
-	{
-		EventHandler<Object> *eventHandler = new EventHandler<Object>();
-		eventHandler->eventType = eventType;
-		eventHandler->object = object;
-		eventHandler->method = method;
-		addEventHandler(eventHandler);
-		return this;
-	}
-
-	// The widget was added to a parent widget (see Widget::addChildWidget).
-	virtual void onParented(Widget *parent);
-
-	// Widget::renderer has been changed.
-	virtual void onRendererChanged();
-
-	virtual void onFontChanged(const char *fontFace, float fontSize);
-
-	// Some additional widget state may been to be cleared when a widget is hidden.
-	virtual void onVisibilityChanged();
-
-	virtual void onRectChanged();
-
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
-	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
-	virtual void onMouseWheelMove(int x, int y);
-	virtual void onMouseHoverOn();
-	virtual void onMouseHoverOff();
-	virtual void onKeyDown(Key::Enum key);
-	virtual void onKeyUp(Key::Enum key);
-	virtual void onTextInput(const char *text);
-
-	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
-	virtual Rect getChildrenClipRect() const;
-
-	virtual void draw(Rect clip);
-	virtual Size measure();
-
 	WidgetType::Enum getType() const;
 	bool isLayout() const;
 	const MainWindow *getMainWindow() const;
@@ -494,11 +452,6 @@ public:
 	const std::vector<Widget *> &getChildren() const;
 	void setMetadata(void *metadata);
 	void *getMetadata();
-
-	// Resize the widget to the result of calling the widget "measure" callback.
-	void resizeToMeasured();
-
-public:
 	void addChildWidget(Widget *child);
 	void removeChildWidget(Widget *child);
 	void destroyChildWidget(Widget *child);
@@ -508,14 +461,8 @@ public:
 	void setHeightInternal(int h);
 	void setSizeInternal(int w, int h);
 	void setSizeInternal(Size size);
-
-protected:
-	void setRectInternalRecursive(Rect rect);
-
-public:
 	void setRectInternal(int x, int y, int w, int h);
 	void setRectInternal(Rect rect);
-	void refreshRect();
 	const Widget *findClosestAncestor(WidgetType::Enum type) const;
 	Widget *findClosestAncestor(WidgetType::Enum type);
 	void setDrawManually(bool value);
@@ -524,8 +471,19 @@ public:
 	void setOverlap(bool value);
 	bool overlapsParentWindow() const;
 	void setClipInputToParent(bool value);
-	void setInternalMetadata(void *metadata);
-	void *getInternalMetadata();
+
+	Widget *addEventHandler(IEventHandler *eventHandler);
+
+	template<class Object>
+	Widget *addEventHandler(EventType::Enum eventType, Object *object, void (Object::*method)(Event))
+	{
+		EventHandler<Object> *eventHandler = new EventHandler<Object>();
+		eventHandler->eventType = eventType;
+		eventHandler->object = object;
+		eventHandler->method = method;
+		addEventHandler(eventHandler);
+		return this;
+	}
 
 	// Shortcut for IRenderer::getLineHeight, using the widget's renderer, font face and font size.
 	int getLineHeight() const;
@@ -536,10 +494,42 @@ public:
 	// Shortcut for IRenderer::lineBreakText, using the widget's renderer, font face and font size.
 	LineBreakResult lineBreakText(const char *text, int n, int lineWidth) const;
 
+protected:
+	// The widget was added to a parent widget (see Widget::addChildWidget).
+	virtual void onParented(Widget *parent);
+
+	// Widget::renderer has been changed.
+	virtual void onRendererChanged();
+
+	virtual void onFontChanged(const char *fontFace, float fontSize);
+
+	// Some additional widget state may been to be cleared when a widget is hidden.
+	virtual void onVisibilityChanged();
+
+	virtual void onRectChanged();
+
+	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
+	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
+	virtual void onMouseWheelMove(int x, int y);
+	virtual void onMouseHoverOn();
+	virtual void onMouseHoverOff();
+	virtual void onKeyDown(Key::Enum key);
+	virtual void onKeyUp(Key::Enum key);
+	virtual void onTextInput(const char *text);
+
+	// Returns the rect to clip the children of this widget against. Return an empty rect to disable clipping of children.
+	virtual Rect getChildrenClipRect() const;
+
+	virtual void draw(Rect clip);
+	virtual Size measure();
+
+	void setInternalMetadata(void *metadata);
+	void *getInternalMetadata();
+
 	// Draw without clipping if visible.
 	void drawIfVisible();
 
-protected:
 	void invokeEvent(Event e);
 	void invokeEvent(Event e, const std::vector<EventCallback> &callbacks);
 
@@ -549,6 +539,12 @@ protected:
 	MainWindow *findMainWindow();
 	void setRenderer(IRenderer *renderer);
 	void setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window);
+	void setRectInternalRecursive(Rect rect);
+	void refreshRect();
+
+	// Resize the widget to the result of calling the widget "measure" callback.
+	void resizeToMeasured();
+
 	void resizeToMeasuredRecursive();
 
 	WidgetType::Enum type_;

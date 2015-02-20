@@ -59,52 +59,6 @@ Widget::~Widget()
 	}
 }
 
-Widget *Widget::addEventHandler(IEventHandler *eventHandler)
-{
-	eventHandlers_.push_back(eventHandler);
-	return this;
-}
-
-void Widget::onParented(Widget * /*parent*/) {}
-
-void Widget::onRendererChanged() {}
-
-void Widget::onFontChanged(const char * /*fontFace*/, float /*fontSize*/) {}
-
-void Widget::onVisibilityChanged() {}
-
-void Widget::onRectChanged() {}
-
-void Widget::onMouseButtonDown(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
-
-void Widget::onMouseButtonUp(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
-
-void Widget::onMouseMove(int /*mouseX*/, int /*mouseY*/, int /*mouseDeltaX*/, int /*mouseDeltaY*/) {}
-
-void Widget::onMouseWheelMove(int /*x*/, int /*y*/) {}
-
-void Widget::onMouseHoverOn() {}
-
-void Widget::onMouseHoverOff() {}
-
-void Widget::onKeyDown(Key::Enum /*key*/) {}
-
-void Widget::onKeyUp(Key::Enum /*key*/) {}
-
-void Widget::onTextInput(const char * /*text*/) {}
-
-Rect Widget::getChildrenClipRect() const
-{
-	return getAbsoluteRect();
-}
-
-void Widget::draw(Rect /*clip*/) {}
-
-Size Widget::measure()
-{
-	return Size();
-}
-
 WidgetType::Enum Widget::getType() const
 {
 	return type_;
@@ -364,39 +318,6 @@ void *Widget::getMetadata()
 	return metadata_;
 }
 
-void Widget::resizeToMeasured()
-{
-	if (!renderer_)
-		return;
-
-	Size size = measure();
-
-	// The explicitly set size overrides the measured size.
-	if (userRect_.w != 0)
-	{
-		size.w = userRect_.w;
-	}
-
-	if (userRect_.h != 0)
-	{
-		size.h = userRect_.h;
-	}
-
-	// Keep the current size if 0.
-	if (size.w == 0)
-	{
-		size.w = getWidth();
-	}
-
-	if (size.h == 0)
-	{
-		size.h = getHeight();
-	}
-		
-	// Set the size.
-	setSizeInternal(size);
-}
-
 void Widget::addChildWidget(Widget *child)
 {
 	WZ_ASSERT(child);
@@ -513,26 +434,6 @@ void Widget::setRectInternal(int x, int y, int w, int h)
 	setRectInternal(Rect(x, y, w, h));
 }
 
-void Widget::setRectInternalRecursive(Rect rect)
-{
-	Rect oldRect = rect_;
-
-	// Apply alignment and stretching.
-	rect = calculateAlignedStretchedRect(rect);
-
-	rect_ = rect;
-	onRectChanged();
-
-	// Don't recurse if the rect hasn't changed.
-	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
-	{
-		for (size_t i = 0; i < children_.size(); i++)
-		{
-			children_[i]->setRectInternalRecursive(children_[i]->rect_);
-		}
-	}
-}
-
 void Widget::setRectInternal(Rect rect)
 {
 	Rect oldRect = rect_;
@@ -547,11 +448,6 @@ void Widget::setRectInternal(Rect rect)
 			parent_->refreshRect();
 		}
 	}
-}
-
-void Widget::refreshRect()
-{
-	setRectInternal(getRect());
 }
 
 const Widget *Widget::findClosestAncestor(WidgetType::Enum type) const
@@ -634,14 +530,10 @@ void Widget::setClipInputToParent(bool value)
 	inputNotClippedToParent_ = !value;
 }
 
-void Widget::setInternalMetadata(void *metadata)
+Widget *Widget::addEventHandler(IEventHandler *eventHandler)
 {
-	internalMetadata_ = metadata;
-}
-
-void *Widget::getInternalMetadata()
-{
-	return internalMetadata_;
+	eventHandlers_.push_back(eventHandler);
+	return this;
 }
 
 int Widget::getLineHeight() const
@@ -657,6 +549,56 @@ void Widget::measureText(const char *text, int n, int *width, int *height) const
 LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) const
 {
 	return renderer_->lineBreakText(fontFace_, fontSize_, text, n, lineWidth);
+}
+
+void Widget::onParented(Widget * /*parent*/) {}
+
+void Widget::onRendererChanged() {}
+
+void Widget::onFontChanged(const char * /*fontFace*/, float /*fontSize*/) {}
+
+void Widget::onVisibilityChanged() {}
+
+void Widget::onRectChanged() {}
+
+void Widget::onMouseButtonDown(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
+
+void Widget::onMouseButtonUp(int /*mouseButton*/, int /*mouseX*/, int /*mouseY*/) {}
+
+void Widget::onMouseMove(int /*mouseX*/, int /*mouseY*/, int /*mouseDeltaX*/, int /*mouseDeltaY*/) {}
+
+void Widget::onMouseWheelMove(int /*x*/, int /*y*/) {}
+
+void Widget::onMouseHoverOn() {}
+
+void Widget::onMouseHoverOff() {}
+
+void Widget::onKeyDown(Key::Enum /*key*/) {}
+
+void Widget::onKeyUp(Key::Enum /*key*/) {}
+
+void Widget::onTextInput(const char * /*text*/) {}
+
+Rect Widget::getChildrenClipRect() const
+{
+	return getAbsoluteRect();
+}
+
+void Widget::draw(Rect /*clip*/) {}
+
+Size Widget::measure()
+{
+	return Size();
+}
+
+void Widget::setInternalMetadata(void *metadata)
+{
+	internalMetadata_ = metadata;
+}
+
+void *Widget::getInternalMetadata()
+{
+	return internalMetadata_;
 }
 
 void Widget::drawIfVisible()
@@ -798,6 +740,64 @@ void Widget::setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *win
 
 		child->setMainWindowAndWindowRecursive(mainWindow, window);
 	}
+}
+
+void Widget::setRectInternalRecursive(Rect rect)
+{
+	Rect oldRect = rect_;
+
+	// Apply alignment and stretching.
+	rect = calculateAlignedStretchedRect(rect);
+
+	rect_ = rect;
+	onRectChanged();
+
+	// Don't recurse if the rect hasn't changed.
+	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
+	{
+		for (size_t i = 0; i < children_.size(); i++)
+		{
+			children_[i]->setRectInternalRecursive(children_[i]->rect_);
+		}
+	}
+}
+
+void Widget::refreshRect()
+{
+	setRectInternal(getRect());
+}
+
+void Widget::resizeToMeasured()
+{
+	if (!renderer_)
+		return;
+
+	Size size = measure();
+
+	// The explicitly set size overrides the measured size.
+	if (userRect_.w != 0)
+	{
+		size.w = userRect_.w;
+	}
+
+	if (userRect_.h != 0)
+	{
+		size.h = userRect_.h;
+	}
+
+	// Keep the current size if 0.
+	if (size.w == 0)
+	{
+		size.w = getWidth();
+	}
+
+	if (size.h == 0)
+	{
+		size.h = getHeight();
+	}
+
+	// Set the size.
+	setSizeInternal(size);
 }
 
 void Widget::resizeToMeasuredRecursive()
