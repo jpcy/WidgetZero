@@ -145,59 +145,8 @@ void NVGRenderer::drawButton(Button *button, Rect clip)
 	nvgStrokeColor(vg, button->getHover() ? WZ_SKIN_BUTTON_BORDER_HOVER_COLOR : WZ_SKIN_BUTTON_BORDER_COLOR);
 	nvgStroke(vg);
 
-	// Calculate padded rect.
-	Rect paddedRect;
-	const Border padding = button->getPadding();
-	paddedRect.x = rect.x + padding.left;
-	paddedRect.y = rect.y + padding.top;
-	paddedRect.w = rect.w - (padding.left + padding.right);
-	paddedRect.h = rect.h - (padding.top + padding.bottom);
-
-	// Calculate icon and label sizes.
-	Size iconSize;
-	int iconHandle = 0;
-
-	if (button->getIcon() && button->getIcon()[0])
-	{
-		iconHandle = createImage(button->getIcon(), &iconSize.w, &iconSize.h);
-	}
-
-	int labelWidth;
-	button->measureText(button->getLabel(), 0, &labelWidth, NULL);
-
-	// Position the icon and label centered.
-	int iconX = 0, labelX = 0;
-
-	if (button->getIcon() && button->getIcon()[0] && iconHandle && button->getLabel() && button->getLabel()[0])
-	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - (iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING + labelWidth) / 2.0f);
-		labelX = iconX + iconSize.w + WZ_SKIN_BUTTON_ICON_SPACING;
-	}
-	else if (button->getIcon() && button->getIcon()[0] && iconHandle)
-	{
-		iconX = paddedRect.x + (int)(paddedRect.w / 2.0f - iconSize.w / 2.0f);
-	}
-	else if (button->getLabel() && button->getLabel()[0])
-	{
-		labelX = paddedRect.x + (int)(paddedRect.w / 2.0f - labelWidth / 2.0f);
-	}
-
-	// Draw the icon.
-	if (button->getIcon() && button->getIcon()[0] && iconHandle)
-	{
-		Rect iconRect;
-		iconRect.x = iconX;
-		iconRect.y = paddedRect.y + (int)(paddedRect.h / 2.0f - iconSize.h / 2.0f);
-		iconRect.w = iconSize.w;
-		iconRect.h = iconSize.h;
-		drawImage(iconRect, iconHandle);
-	}
-
-	// Draw the label.
-	if (button->getLabel() && button->getLabel()[0])
-	{
-		print(labelX, paddedRect.y + paddedRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), WZ_SKIN_BUTTON_TEXT_COLOR, button->getLabel(), 0);
-	}
+	// Draw icon and label.
+	drawCenteredIconAndLabel(rect - button->getPadding(), button->getLabel(), WZ_SKIN_BUTTON_TEXT_COLOR, button->getFontFace(), button->getFontSize(), button->getIcon(), WZ_SKIN_BUTTON_ICON_SPACING);
 
 	nvgRestore(vg);
 }
@@ -897,18 +846,7 @@ void NVGRenderer::drawTabButton(TabButton *button, Rect clip)
 
 	nvgSave(vg);
 	clipToRect(clip);
-
-	// Label.
-	const Rect rect = button->getAbsoluteRect();
-	const Border padding = button->getPadding();
-	Rect labelRect;
-
-	labelRect.x = rect.x + padding.left;
-	labelRect.y = rect.y + padding.top;
-	labelRect.w = rect.w - (padding.left + padding.right);
-	labelRect.h = rect.h - (padding.top + padding.bottom);
-	print(labelRect.x + labelRect.w / 2, labelRect.y + labelRect.h / 2, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE, button->getFontFace(), button->getFontSize(), button->getHover() ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getLabel(), 0);
-
+	drawCenteredIconAndLabel(button->getAbsoluteRect() - button->getPadding(), button->getLabel(), button->getHover() ? WZ_SKIN_TAB_BUTTON_TEXT_HOVER_COLOR : WZ_SKIN_TAB_BUTTON_TEXT_COLOR, button->getFontFace(), button->getFontSize(), button->getIcon(), WZ_SKIN_BUTTON_ICON_SPACING);
 	nvgRestore(vg);
 }
 
@@ -1361,6 +1299,55 @@ void NVGRenderer::drawImage(Rect rect, int image)
 	nvgRect(impl->vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
 	nvgFillPaint(impl->vg, paint);
 	nvgFill(impl->vg);
+}
+
+void NVGRenderer::drawCenteredIconAndLabel(Rect rect, const char *label, NVGcolor labelColor, const char *fontFace, float fontSize, const char *icon, int iconSpacing)
+{
+	// Calculate icon and label sizes.
+	Size iconSize;
+	int iconHandle = 0;
+
+	if (icon && icon[0])
+	{
+		iconHandle = createImage(icon, &iconSize.w, &iconSize.h);
+	}
+
+	int labelWidth;
+	measureText(fontFace, fontSize, label, 0, &labelWidth, NULL);
+
+	// Position the icon and label centered.
+	int iconX = 0, labelX = 0;
+
+	if (icon && icon[0] && iconHandle && label && label[0])
+	{
+		iconX = rect.x + (int)(rect.w / 2.0f - (iconSize.w + iconSpacing + labelWidth) / 2.0f);
+		labelX = iconX + iconSize.w + iconSpacing;
+	}
+	else if (icon && icon[0] && iconHandle)
+	{
+		iconX = rect.x + (int)(rect.w / 2.0f - iconSize.w / 2.0f);
+	}
+	else if (label && label[0])
+	{
+		labelX = rect.x + (int)(rect.w / 2.0f - labelWidth / 2.0f);
+	}
+
+	// Draw the icon.
+	if (icon && icon[0] && iconHandle)
+	{
+		Rect iconRect;
+		iconRect.x = iconX;
+		iconRect.y = rect.y + (int)(rect.h / 2.0f - iconSize.h / 2.0f);
+		iconRect.w = iconSize.w;
+		iconRect.h = iconSize.h;
+		drawImage(iconRect, iconHandle);
+	}
+
+	// Draw the label.
+	if (label && label[0])
+	{
+		print(labelX, rect.y + rect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, fontFace, fontSize, labelColor, label, 0);
+	}
 }
 
 void NVGRenderer::createRectPath(Rect rect, float r, int sides, int roundedCorners)

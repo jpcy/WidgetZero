@@ -127,6 +127,7 @@ struct Rect
 	Rect() : x(0), y(0), w(0), h(0) {}
 	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
 	bool isEmpty() const { return x == 0 && y == 0 && w == 0 && h == 0; }
+	Rect operator-(Border b) const { return Rect(x + b.left, y + b.top, w - (b.left + b.right), h - (b.top + b.bottom)); }
 	static bool intersect(const Rect A, const Rect B, Rect *result);
 
 	int x, y, w, h;
@@ -1181,7 +1182,7 @@ protected:
 class TabButton : public Button
 {
 public:
-	TabButton(const std::string &label = std::string());
+	TabButton(const std::string &label = std::string(), const std::string &icon = std::string());
 
 protected:
 	virtual void draw(Rect clip);
@@ -1245,7 +1246,7 @@ class Tab
 	friend class Tabbed;
 
 public:
-	Tab(const std::string &label = std::string());
+	Tab(const std::string &label = std::string(), const std::string &icon = std::string());
 	~Tab();
 	const TabButton *getButton() const;
 	const TabPage *getPage() const;

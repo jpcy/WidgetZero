@@ -334,8 +334,8 @@ private:
 		frame->add(tabbed);
 
 		tabbed->add(new wz::Tab("Tab 1"));
+		tabbed->add(new wz::Tab("With icon", "../examples/data/accept.png"));
 		tabbed->add(new wz::Tab("Another Tab"));
-		tabbed->add(new wz::Tab("TabTabTab"));
 	}
 
 	void createTextEditFrame()
@@ -577,7 +577,7 @@ private:
 		wz::Tab *secondTab = new wz::Tab("Another Tab");
 		tabbed->add(secondTab);
 
-		tabbed->add(new wz::Tab("TabTabTab"));
+		tabbed->add(new wz::Tab("With icon", "../examples/data/accept.png"));
 
 		wz::Combo *combo = new wz::Combo((uint8_t *)listData, sizeof(const char *), 17);
 		combo->setPosition(10, 10);

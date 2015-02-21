@@ -63,9 +63,9 @@ TAB
 ================================================================================
 */
 
-Tab::Tab(const std::string &label)
+Tab::Tab(const std::string &label, const std::string &icon)
 {
-	button_ = new TabButton(label);
+	button_ = new TabButton(label, icon);
 	page_ = new TabPage();
 }
 

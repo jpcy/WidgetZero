@@ -247,6 +247,7 @@ public:
 	void drawRect(Rect rect, NVGcolor color);
 	void drawLine(int x1, int y1, int x2, int y2, NVGcolor color);
 	void drawImage(Rect rect, int image);
+	void drawCenteredIconAndLabel(Rect rect, const char *label, NVGcolor labelColor, const char *fontFace, float fontSize, const char *icon, int iconSpacing);
 	void createRectPath(Rect rect, float r, int sides, int roundedCorners);
 
 private:

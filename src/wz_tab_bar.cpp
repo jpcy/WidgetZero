@@ -34,7 +34,7 @@ TAB BUTTON
 ================================================================================
 */
 
-TabButton::TabButton(const std::string &label) : Button(label)
+	TabButton::TabButton(const std::string &label, const std::string &icon) : Button(label, icon)
 {
 	setClickBehavior(ButtonClickBehavior::Down);
 	setSetBehavior(ButtonSetBehavior::Sticky);
