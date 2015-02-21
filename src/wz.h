@@ -141,7 +141,7 @@ struct Size
 
 struct Stretch
 {
-	enum
+	enum Enum
 	{
 		None,
 		Width = 1,
@@ -150,9 +150,14 @@ struct Stretch
 	};
 };
 
+inline Stretch::Enum operator|(Stretch::Enum a, Stretch::Enum b)
+{
+	return Stretch::Enum(int(a) | int(b));
+}
+
 struct Align
 {
-	enum
+	enum Enum
 	{
 		None,
 
@@ -167,6 +172,11 @@ struct Align
 		Bottom = 32
 	};
 };
+
+inline Align::Enum operator|(Align::Enum a, Align::Enum b)
+{
+	return Align::Enum(int(a) | int(b));
+}
 
 struct EventType
 {
@@ -396,11 +406,17 @@ public:
 
 struct WidgetFlags
 {
-	enum
+	enum Enum
 	{
+		None = 0,
 		DrawLast = 1 << 0,
 	};
 };
+
+inline WidgetFlags::Enum operator|(WidgetFlags::Enum a, WidgetFlags::Enum b)
+{
+	return WidgetFlags::Enum(int(a) | int(b));
+}
 
 class Widget
 {
@@ -431,12 +447,12 @@ public:
 	void setMargin(Border margin);
 	void setMargin(int top, int right, int bottom, int left);
 	Border getMargin() const;
-	void setStretch(int stretch);
+	void setStretch(Stretch::Enum stretch);
 	int getStretch() const;
 	void setStretchScale(float width, float height);
 	float getStretchWidthScale() const;
 	float getStretchHeightScale() const;
-	void setAlign(int align);
+	void setAlign(Align::Enum align);
 	int getAlign() const;
 	void setFontFace(const char *fontFace);
 	const char *getFontFace() const;
@@ -555,13 +571,13 @@ protected:
 	Rect rect_;
 
 	// Only used if the widget is the child of a layout.
-	int stretch_;
+	Stretch::Enum stretch_;
 
 	float stretchWidthScale_;
 	float stretchHeightScale_;
 
 	// Only used if the widget is the child of a layout.
-	int align_;
+	Align::Enum align_;
 
 	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
 	Border margin_;
@@ -572,7 +588,7 @@ protected:
 	// User-set metadata.
 	void *metadata_;
 
-	int flags_;
+	WidgetFlags::Enum flags_;
 
 	bool hover_;
 
@@ -859,9 +875,9 @@ struct MainWindowFlags
 	};
 };
 
-inline MainWindowFlags::Enum operator|(MainWindowFlags::Enum f1, MainWindowFlags::Enum f2)
+inline MainWindowFlags::Enum operator|(MainWindowFlags::Enum a, MainWindowFlags::Enum b)
 {
-	return MainWindowFlags::Enum(int(f1) | int(f2));
+	return MainWindowFlags::Enum(int(a) | int(b));
 }
 
 class MainWindow : public Widget
@@ -1362,7 +1378,7 @@ struct WindowDrag
 
 struct Compass
 {
-	enum
+	enum Enum
 	{
 		N,
 		NE,

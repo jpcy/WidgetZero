@@ -29,13 +29,13 @@ namespace wz {
 Widget::Widget()
 {
 	type_ = WidgetType::Widget;
-	stretch_ = 0;
+	stretch_ = Stretch::None;
 	stretchWidthScale_ = 0;
 	stretchHeightScale_ = 0;
-	align_ = 0;
+	align_ = Align::None;
 	internalMetadata_ = NULL;
 	metadata_ = NULL;
-	flags_ = 0;
+	flags_ = WidgetFlags::None;
 	hover_ = false;
 	hidden_ = false;
 	ignore_ = false;
@@ -192,7 +192,7 @@ Border Widget::getMargin() const
 	return margin_;
 }
 
-void Widget::setStretch(int stretch)
+void Widget::setStretch(Stretch::Enum stretch)
 {
 	stretch_ = stretch;
 
@@ -224,7 +224,7 @@ float Widget::getStretchHeightScale() const
 	return stretchHeightScale_;
 }
 
-void Widget::setAlign(int align)
+void Widget::setAlign(Align::Enum align)
 {
 	align_ = align;
 
@@ -509,11 +509,13 @@ void Widget::setDrawLast(bool value)
 {
 	if (value)
 	{
-		flags_ |= WidgetFlags::DrawLast;
+		flags_ = flags_ | WidgetFlags::DrawLast;
 	}
 	else
 	{
-		flags_ &= ~WidgetFlags::DrawLast;
+		//int f = flags_;
+		//f &= ~WidgetFlags::DrawLast;
+		flags_ = WidgetFlags::Enum(flags_ & ~WidgetFlags::DrawLast);
 	}
 }
 
