@@ -87,7 +87,7 @@ void StackLayout::layoutVertical()
 
 	for (size_t i = 0; i < children_.size(); i++)
 	{
-		if (!children_[i]->getVisible())
+		if (!children_[i]->isVisible())
 			continue;
 
 		// Subtract all child widget top and bottom margins from the available height.
@@ -118,7 +118,7 @@ void StackLayout::layoutVertical()
 	{
 		Widget *child = children_[i];
 
-		if (!child->getVisible())
+		if (!child->isVisible())
 			continue;
 
 		if (i != 0)
@@ -178,7 +178,7 @@ void StackLayout::layoutHorizontal()
 
 	for (size_t i = 0; i < children_.size(); i++)
 	{
-		if (!children_[i]->getVisible())
+		if (!children_[i]->isVisible())
 			continue;
 
 		// Subtract all child widget left and right margins from the available width.
@@ -209,7 +209,7 @@ void StackLayout::layoutHorizontal()
 	{
 		Widget *child = children_[i];
 
-		if (!child->getVisible())
+		if (!child->isVisible())
 			continue;
 
 		if (i != 0)

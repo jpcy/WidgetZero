@@ -461,7 +461,7 @@ public:
 	void setFont(const char *fontFace, float fontSize);
 	bool getHover() const;
 	void setVisible(bool visible);
-	bool getVisible() const;
+	bool isVisible() const;
 	bool hasKeyboardFocus() const;
 	const Widget *getParent() const;
 	Widget *getParent();
@@ -592,8 +592,8 @@ protected:
 
 	bool hover_;
 
-	// Don't draw this widget.
-	bool hidden_;
+	// Don't draw this widget if false.
+	bool visible_;
 
 	// Used internally to ignore siblings that overlap at the mouse cursor.
 	bool ignore_;
@@ -604,8 +604,8 @@ protected:
 	// Don't draw automatically when MainWindow::draw walks through the widget hierarchy.
 	bool drawManually_;
 
-	// True if not clipped to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list.
-	bool inputNotClippedToParent_;
+	// Clip to the parent widget rect in mouse move calculations. Used by the combo widget dropdown list (false).
+	bool inputClippedToParent_;
 
 	char fontFace_[256];
 	float fontSize_;

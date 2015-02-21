@@ -940,7 +940,7 @@ void NVGRenderer::drawTabbed(Tabbed *tabbed, Rect clip)
 	const Tab *selectedTab = tabbed->getSelectedTab();
 	const Rect pr = selectedTab->getPage()->getAbsoluteRect();
 
-	if (selectedTab->getButton()->getVisible())
+	if (selectedTab->getButton()->isVisible())
 	{
 		// The tab button.
 		const Rect tr = selectedTab->getButton()->getAbsoluteRect();

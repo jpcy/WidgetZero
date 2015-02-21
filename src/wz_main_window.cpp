@@ -162,7 +162,7 @@ void MainWindow::mouseButtonUp(int mouseButton, int mouseX, int mouseY)
 	if (isDockingEnabled() && movingWindow_)
 	{
 		// If the dock preview is visible, movingWindow can be docked.
-		if (dockPreview_->getVisible())
+		if (dockPreview_->isVisible())
 		{
 			dockWindow(movingWindow_, windowDockPosition_);
 		}
@@ -230,7 +230,7 @@ void MainWindow::keyDelta(Key::Enum key, bool down)
 {
 	Widget *widget = keyboardFocusWidget_;
 
-	if (!widget || !widget->getVisible())
+	if (!widget || !widget->isVisible())
 		return;
 
 	if (down)
@@ -281,7 +281,7 @@ void MainWindow::textInput(const char *text)
 {
 	Widget *widget = keyboardFocusWidget_;
 
-	if (!widget || !widget->getVisible())
+	if (!widget || !widget->isVisible())
 		return;
 
 	widget->onTextInput(text);
@@ -355,7 +355,7 @@ void MainWindow::draw()
 	{
 		Widget *widget = windows[i];
 
-		if (!widget->getVisible())
+		if (!widget->isVisible())
 			continue;
 
 		widget->draw(rect_);
@@ -561,7 +561,7 @@ void MainWindow::undockWindow(Window *window)
 	int nDockedWindows = dockedWindows_[dockPosition].size();
 
 	// If there are other windows docked at this position, make sure one is visible after removing this window.
-	if (window->getVisible() && nDockedWindows > 0)
+	if (window->isVisible() && nDockedWindows > 0)
 	{
 		dockedWindows_[dockPosition][0]->setVisible(true);
 	}
@@ -570,7 +570,7 @@ void MainWindow::undockWindow(Window *window)
 	refreshDockTabBar(dockPosition);
 
 	// If the dock tab bar is hidden, resize the windows at this dock position to reclaim the space it used.
-	if (!dockTabBars_[dockPosition]->getVisible())
+	if (!dockTabBars_[dockPosition]->isVisible())
 	{
 		for (size_t j = 0; j < dockedWindows_[dockPosition].size(); j++)
 		{
@@ -712,7 +712,7 @@ void MainWindow::mouseButtonDownRecursive(Widget *widget, int mouseButton, int m
 {
 	WZ_ASSERT(widget);
 
-	if (!widget->getVisible())
+	if (!widget->isVisible())
 		return;
 
 	widget->onMouseButtonDown(mouseButton, mouseX, mouseY);
@@ -730,7 +730,7 @@ void MainWindow::mouseButtonUpRecursive(Widget *widget, int mouseButton, int mou
 {
 	WZ_ASSERT(widget);
 
-	if (!widget->getVisible())
+	if (!widget->isVisible())
 		return;
 
 	widget->onMouseButtonUp(mouseButton, mouseX, mouseY);
@@ -779,7 +779,7 @@ void MainWindow::ignoreOverlappingChildren(Widget *widget, int mouseX, int mouse
 			if (i == j)
 				continue;
 
-			if (!widget->children_[j]->getVisible())
+			if (!widget->children_[j]->isVisible())
 				continue;
 
 			// If the mouse cursor is in the intersection of the two widget rects.
@@ -812,7 +812,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 
 	WZ_ASSERT(widget);
 
-	if (!widget->getVisible())
+	if (!widget->isVisible())
 		return;
 
 	// Don't process mouse move if the widget is ignored.
@@ -840,7 +840,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 	}
 
 	// Determine whether the mouse is hovering over the widget's parent.
-	if (!widget->inputNotClippedToParent_ && widget->parent_ && widget->parent_ != this && widget->parent_ != widget->window_)
+	if (widget->inputClippedToParent_ && widget->parent_ && widget->parent_ != this && widget->parent_ != widget->window_)
 	{
 		hoverParent = WZ_POINT_IN_RECT(mouseX, mouseY, widget->parent_->getAbsoluteRect());
 	}
@@ -885,7 +885,7 @@ void MainWindow::mouseWheelMoveRecursive(Widget *widget, int x, int y)
 {
 	WZ_ASSERT(widget);
 
-	if (!widget->getVisible())
+	if (!widget->isVisible())
 		return;
 
 	widget->onMouseWheelMove(x, y);
@@ -903,7 +903,7 @@ void MainWindow::drawWidgetRecursive(Widget *widget, Rect clip, WidgetPredicate 
 {
 	bool drawLastFound = false;
 
-	if (!widget->getVisible())
+	if (!widget->isVisible())
 		return;
 
 	// Don't render the widget if it's outside its parent window.
@@ -975,7 +975,7 @@ Window *MainWindow::getHoverWindow(int mouseX, int mouseY)
 		if (widget->getType() != WidgetType::Window)
 			continue;
 
-		if (!widget->getVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->getRect()))
+		if (!widget->isVisible() || !WZ_POINT_IN_RECT(mouseX, mouseY, widget->getRect()))
 			continue;
 
 		window = (Window *)widget;
@@ -1071,7 +1071,7 @@ void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 			tab->setInternalMetadata(window);
 
 			// If this window is selected (visible), select the corresponding tab.
-			if (window->getVisible())
+			if (window->isVisible())
 			{
 				tabBar->selectTab(tab);
 			}

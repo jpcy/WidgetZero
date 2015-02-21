@@ -262,7 +262,7 @@ void TabBar::updateScrollButtons()
 	}
 
 	// Show/hide the scroll buttons and set their rects.
-	bool wereScrollButtonsVisible = decrementButton_->getVisible();
+	bool wereScrollButtonsVisible = decrementButton_->isVisible();
 	bool showScrollButtons = totalTabWidth > rect_.w;
 
 	Rect buttonRect;

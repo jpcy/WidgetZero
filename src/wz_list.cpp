@@ -62,7 +62,7 @@ Rect List::getItemsRect() const
 	rect.h = listRect.h - (itemsBorder_.top + itemsBorder_.bottom);
 
 	// Subtract the scroller width.
-	if (scroller_->getVisible())
+	if (scroller_->isVisible())
 	{
 		rect.w -= scroller_->getWidth();
 	}
@@ -205,7 +205,7 @@ void List::onFontChanged(const char * /*fontFace*/, float /*fontSize*/)
 void List::onVisibilityChanged()
 {
 	// Clear some additional state when hidden.
-	if (!getVisible())
+	if (!isVisible())
 	{
 		hoveredItem_ = -1;
 	}
@@ -275,7 +275,7 @@ void List::onMouseMove(int mouseX, int mouseY, int /*mouseDeltaX*/, int /*mouseD
 
 void List::onMouseWheelMove(int /*x*/, int y)
 {
-	if (scroller_->getVisible())
+	if (scroller_->isVisible())
 	{
 		scroller_->setValue(scroller_->getValue() - y * scroller_->getStepValue());
 

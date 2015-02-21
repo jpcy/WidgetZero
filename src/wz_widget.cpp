@@ -37,11 +37,11 @@ Widget::Widget()
 	metadata_ = NULL;
 	flags_ = WidgetFlags::None;
 	hover_ = false;
-	hidden_ = false;
+	visible_ = true;
 	ignore_ = false;
 	overlap_ = false;
 	drawManually_ = false;
-	inputNotClippedToParent_ = false;
+	inputClippedToParent_ = true;
 	fontSize_ = 0;
 	fontFace_[0] = NULL;
 	renderer_ = NULL;
@@ -279,10 +279,10 @@ bool Widget::getHover() const
 
 void Widget::setVisible(bool visible)
 {
-	if (hidden_ == !visible)
+	if (visible_ == visible)
 		return;
 
-	hidden_ = !visible;
+	visible_ = visible;
 
 	// If the parent is a layout widget, it may need refreshing.
 	if (parent_ && parent_->isLayout())
@@ -293,9 +293,9 @@ void Widget::setVisible(bool visible)
 	onVisibilityChanged();
 }
 
-bool Widget::getVisible() const
+bool Widget::isVisible() const
 {
-	return !hidden_;
+	return visible_;
 }
 
 bool Widget::hasKeyboardFocus() const
@@ -539,7 +539,7 @@ bool Widget::overlapsParentWindow() const
 
 void Widget::setClipInputToParent(bool value)
 {
-	inputNotClippedToParent_ = !value;
+	inputClippedToParent_ = value;
 }
 
 Widget *Widget::addEventHandler(IEventHandler *eventHandler)
@@ -615,7 +615,7 @@ void *Widget::getInternalMetadata()
 
 void Widget::drawIfVisible()
 {
-	if (getVisible())
+	if (isVisible())
 	{
 		Rect clip;
 		clip.x = clip.y = clip.w = clip.h = 0;

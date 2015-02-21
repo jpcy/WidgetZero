@@ -75,7 +75,7 @@ Rect TextEdit::getTextRect() const
 	textRect.w -= border_.left + border_.right;
 	textRect.h -= border_.top + border_.bottom;
 
-	if (multiline_ && scroller_->getVisible())
+	if (multiline_ && scroller_->isVisible())
 	{
 		textRect.w -= scroller_->getWidth();
 	}
@@ -321,7 +321,7 @@ void TextEdit::onMouseMove(int mouseX, int mouseY, int /*mouseDeltaX*/, int /*mo
 
 void TextEdit::onMouseWheelMove(int /*x*/, int y)
 {
-	if (multiline_ && scroller_->getVisible())
+	if (multiline_ && scroller_->isVisible())
 	{
 		scroller_->setValue(scroller_->getValue() - y);
 	}
