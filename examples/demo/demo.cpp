@@ -722,8 +722,6 @@ int main(int, char **)
 	}
 #endif
 
-	glClearColor(0.2510f, 0.2510f, 0.2510f, 1);
-
 	int windowWidth, windowHeight;
 	SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 	glViewport(0, 0, windowWidth, windowHeight);
@@ -745,6 +743,9 @@ int main(int, char **)
 		ShowError(renderer->getError());
 		return 1;
 	}
+
+	const wz::Color clearColor = renderer->getClearColor();
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
 	GUI gui(windowWidth, windowHeight, renderer);
 	const SDL_TimerID textCursorTimer = SDL_AddTimer(textCursorBlinkInterval, TextCursorBlinkCallback, &gui.mainWindow);

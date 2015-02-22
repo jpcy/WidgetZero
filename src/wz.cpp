@@ -30,6 +30,7 @@ SOFTWARE.
 namespace wz {
 
 IRenderer::~IRenderer() {}
+Color IRenderer::getClearColor() { WZ_NOT_IMPLEMENTED_RETURN(Color) }
 void IRenderer::beginFrame(int, int) {}
 void IRenderer::endFrame() {}
 void IRenderer::drawButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }

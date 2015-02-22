@@ -100,7 +100,6 @@ int InitializeSDL()
 	}
 #endif
 
-	glClearColor(0, 0, 0, 1);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	return 0;
 }
@@ -121,6 +120,10 @@ int main(int, char **)
 		ShowError(renderer->getError());
 		return 1;
 	}
+
+	// Get the screen clear color from the renderer (optional).
+	const wz::Color clearColor = renderer->getClearColor();
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
 	// Create the main window.
 	wz::MainWindow *mainWindow = new wz::MainWindow(renderer);

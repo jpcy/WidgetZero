@@ -352,6 +352,7 @@ class IRenderer
 {
 public:
 	virtual ~IRenderer();
+	virtual Color getClearColor();
 	virtual void beginFrame(int windowWidth, int windowHeight);
 	virtual void endFrame();
 	virtual void drawButton(Button *button, Rect clip);
