@@ -26,6 +26,24 @@ SOFTWARE.
 
 namespace wz {
 
+class TabBarDecrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer_->drawTabBarDecrementButton(this, clip);
+	}
+};
+
+class TabBarIncrementButton : public Button
+{
+public:
+	virtual void draw(Rect clip)
+	{
+		renderer_->drawTabBarIncrementButton(this, clip);
+	}
+};
+
 /*
 ================================================================================
 
@@ -34,7 +52,7 @@ TAB BUTTON
 ================================================================================
 */
 
-	TabButton::TabButton(const std::string &label, const std::string &icon) : Button(label, icon)
+TabButton::TabButton(const std::string &label, const std::string &icon) : Button(label, icon)
 {
 	setClickBehavior(ButtonClickBehavior::Down);
 	setSetBehavior(ButtonSetBehavior::Sticky);
@@ -65,14 +83,14 @@ TabBar::TabBar()
 	addChildWidget(layout_);
 
 	// Set to draw last so the scroll buttons always overlap the tabs.
-	decrementButton_ = new Button("<");
+	decrementButton_ = new TabBarDecrementButton();
 	decrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onDecrementButtonClicked);
 	addChildWidget(decrementButton_);
 	decrementButton_->setVisible(false);
 	decrementButton_->setDrawLast(true);
 	decrementButton_->setOverlap(true);
 
-	incrementButton_ = new Button(">");
+	incrementButton_ = new TabBarIncrementButton();
 	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &TabBar::onIncrementButtonClicked);
 	addChildWidget(incrementButton_);
 	incrementButton_->setVisible(false);

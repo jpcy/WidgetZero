@@ -117,7 +117,10 @@ SOFTWARE.
 #define WZ_SKIN_TAB_BUTTON_BG_SET WZ_SKIN_BG_MEDIUM
 
 #define WZ_SKIN_TAB_BAR_BG WZ_SKIN_BG_DARK
+#define WZ_SKIN_TAB_BAR_SCROLL_ICON WZ_SKIN_TEXT
+#define WZ_SKIN_TAB_BAR_SCROLL_ICON_HOVER WZ_SKIN_BORDER_HOVER
 #define WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH 14
+#define WZ_SKIN_TAB_BAR_SCROLL_ICON_SIZE 8
 
 #define WZ_SKIN_TABBED_BORDER WZ_SKIN_BORDER
 #define WZ_SKIN_TABBED_BG WZ_SKIN_BG_MEDIUM
@@ -194,6 +197,13 @@ public:
 	virtual Size measureSpinner(Spinner *spinner);
 	virtual void drawTabButton(TabButton *button, Rect clip);
 	virtual int getTabBarScrollButtonWidth(TabBar *tabBar);
+
+private:
+	void drawTabBarScrollButton(Button *button, Rect clip, bool decrement);
+
+public:
+	virtual void drawTabBarDecrementButton(Button *button, Rect clip);
+	virtual void drawTabBarIncrementButton(Button *button, Rect clip);
 	virtual void drawTabBar(TabBar *tabBar, Rect clip);
 	virtual Size measureTabBar(TabBar *tabBar);
 	virtual void drawTabbed(Tabbed *tabbed, Rect clip);

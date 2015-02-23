@@ -389,6 +389,8 @@ public:
 	virtual Size measureSpinner(Spinner *spinner);
 	virtual void drawTabButton(TabButton *button, Rect clip);
 	virtual int getTabBarScrollButtonWidth(TabBar *tabBar);
+	virtual void drawTabBarDecrementButton(Button *button, Rect clip);
+	virtual void drawTabBarIncrementButton(Button *button, Rect clip);
 	virtual void drawTabBar(TabBar *tabBar, Rect clip);
 	virtual Size measureTabBar(TabBar *tabBar);
 	virtual void drawTabbed(Tabbed *tabbed, Rect clip);

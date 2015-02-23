@@ -67,6 +67,8 @@ void IRenderer::drawSpinner(Spinner *, Rect) { WZ_NOT_IMPLEMENTED }
 Size IRenderer::measureSpinner(Spinner *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
 void IRenderer::drawTabButton(TabButton *, Rect) { WZ_NOT_IMPLEMENTED }
 int IRenderer::getTabBarScrollButtonWidth(TabBar *) { WZ_NOT_IMPLEMENTED_RETURN(int) }
+void IRenderer::drawTabBarDecrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
+void IRenderer::drawTabBarIncrementButton(Button *, Rect) { WZ_NOT_IMPLEMENTED }
 void IRenderer::drawTabBar(TabBar *, Rect) { WZ_NOT_IMPLEMENTED }
 Size IRenderer::measureTabBar(TabBar *) { WZ_NOT_IMPLEMENTED_RETURN(Size) }
 void IRenderer::drawTabbed(Tabbed *, Rect) { WZ_NOT_IMPLEMENTED }

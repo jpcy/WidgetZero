@@ -730,6 +730,41 @@ int NVGRenderer::getTabBarScrollButtonWidth(TabBar * /*tabBar*/)
 	return WZ_SKIN_TAB_BAR_SCROLL_BUTTON_WIDTH;
 }
 
+void NVGRenderer::drawTabBarScrollButton(Button *button, Rect clip, bool decrement)
+{
+	NVGcontext *vg = impl->vg;
+	const Rect rect = button->getAbsoluteRect();
+
+	nvgSave(vg);
+	clipToRect(clip);
+
+	// Background.
+	drawFilledRect(rect, WZ_SKIN_BUTTON_BG);
+
+	// Icon.
+	nvgBeginPath(vg);
+	nvgTranslate(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f); // center
+	nvgRotate(vg, decrement ? 0 : NVG_PI);
+	const float hs = WZ_SKIN_TAB_BAR_SCROLL_ICON_SIZE / 2.0f;
+	nvgMoveTo(vg, -hs, 0); // left
+	nvgLineTo(vg, hs, -hs); // top
+	nvgLineTo(vg, hs, hs); // bottom
+	nvgFillColor(vg, button->getHover() ? WZ_SKIN_TAB_BAR_SCROLL_ICON_HOVER : WZ_SKIN_TAB_BAR_SCROLL_ICON);
+	nvgFill(vg);
+
+	nvgRestore(vg);
+}
+
+void NVGRenderer::drawTabBarDecrementButton(Button *button, Rect clip)
+{
+	drawTabBarScrollButton(button, clip, true);
+}
+
+void NVGRenderer::drawTabBarIncrementButton(Button *button, Rect clip)
+{
+	drawTabBarScrollButton(button, clip, false);
+}
+
 void NVGRenderer::drawTabBar(TabBar *tabBar, Rect /*clip*/)
 {
 	nvgSave(impl->vg);
