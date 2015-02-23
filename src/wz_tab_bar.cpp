@@ -247,6 +247,7 @@ void TabBar::setScrollValue(int value)
 	{
 		// Value has changed.
 		updateTabVisibility();
+		updateScrollButtons();
 	}
 }
 
@@ -280,8 +281,7 @@ void TabBar::updateScrollButtons()
 	}
 
 	// Show/hide the scroll buttons and set their rects.
-	bool wereScrollButtonsVisible = decrementButton_->isVisible();
-	bool showScrollButtons = totalTabWidth > rect_.w;
+	bool showScrollButtons = totalTabWidth > rect_.w || scrollValue_ != 0;
 
 	Rect buttonRect;
 	buttonRect.w = decrementButton_->getWidth();
@@ -297,11 +297,6 @@ void TabBar::updateScrollButtons()
 	buttonRect.h = rect_.h;
 	incrementButton_->setRectInternal(buttonRect);
 	incrementButton_->setVisible(showScrollButtons);
-
-	if (wereScrollButtonsVisible && showScrollButtons)
-	{
-		scrollValue_ = 0;
-	}
 }
 
 void TabBar::updateTabVisibility()
