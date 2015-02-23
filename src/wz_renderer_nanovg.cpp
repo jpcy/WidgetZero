@@ -710,11 +710,11 @@ void NVGRenderer::drawTabButton(TabButton *button, Rect clip)
 
 		nvgBeginPath(vg);
 
-		const float x = rect.x + 0.5f;
-		const float y = rect.y + 0.5f;
+		const float x = (float)rect.x;
+		const float y = (float)rect.y;
 		nvgMoveTo(vg, x, y + rect.h); // bl
 		nvgLineTo(vg, x, y); // tl
-		nvgLineTo(vg, x + rect.w, y); // rect
+		nvgLineTo(vg, x + rect.w, y); // tr
 		nvgLineTo(vg, x + rect.w, y + rect.h); // br
 
 		nvgStrokeColor(vg, WZ_SKIN_TABBED_BORDER);
@@ -932,7 +932,6 @@ void NVGRenderer::drawWindow(Window *window, Rect /*clip*/)
 
 	nvgSave(vg);
 	drawFilledRect(rect, WZ_SKIN_WINDOW_BG);
-	drawRect(rect, WZ_SKIN_WINDOW_BORDER);
 
 	// Header.
 	const Rect headerRect = window->getHeaderRect();
@@ -940,18 +939,17 @@ void NVGRenderer::drawWindow(Window *window, Rect /*clip*/)
 	if (headerRect.w > 0 && headerRect.h > 0)
 	{
 		// Draw the header bg a little larger than the header rect, since we're only drawing the window border as 1 pixel thick.
-		const int headerBottomY = headerRect.y + headerRect.h - 1;
-		Rect r = headerRect;
-		r.x = rect.x + 1;
-		r.y = rect.y + 1;
-		r.w = rect.w - 2;
-		r.h = headerBottomY - rect.y;
+		Rect r = rect;
+		r.h = (headerRect.y + headerRect.h - 1) - rect.y;
 		drawFilledRect(r, WZ_SKIN_WINDOW_HEADER_BG);
 
+		nvgSave(vg);
 		clipToRect(headerRect);
 		print(headerRect.x + 10, headerRect.y + headerRect.h / 2, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE, window->getFontFace(), window->getFontSize(), WZ_SKIN_WINDOW_TEXT, window->getTitle(), 0);
+		nvgRestore(vg);
 	}
 
+	drawRect(rect, WZ_SKIN_WINDOW_BORDER);
 	nvgRestore(vg);
 }
 
@@ -1110,7 +1108,7 @@ void NVGRenderer::print(int x, int y, int align, const char *fontFace, float fon
 
 void NVGRenderer::clipToRect(Rect rect)
 {
-	nvgScissor(impl->vg, (float)rect.x, (float)rect.y, (float)rect.w, (float)rect.h);
+	nvgScissor(impl->vg, (float)rect.x - 1.0f, (float)rect.y - 1.0f, (float)rect.w + 2.0f, (float)rect.h + 2.0f);
 }
 
 bool NVGRenderer::clipToRectIntersection(Rect rect1, Rect rect2)
@@ -1122,7 +1120,7 @@ bool NVGRenderer::clipToRectIntersection(Rect rect1, Rect rect2)
 		return false;
 	}
 
-	nvgScissor(impl->vg, (float)intersection.x, (float)intersection.y, (float)intersection.w, (float)intersection.h);
+	nvgScissor(impl->vg, (float)intersection.x - 1.0f, (float)intersection.y - 1.0f, (float)intersection.w + 2.0f, (float)intersection.h + 2.0f);
 	return true;
 }
 

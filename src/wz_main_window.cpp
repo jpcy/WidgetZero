@@ -1180,18 +1180,18 @@ Rect MainWindow::calculateDockWindowRect(DockPosition::Enum dockPosition, Size w
 		// Use the window width for east/west or height for north/south, but don't go over half of the main window width/height.
 		if (dockPosition == DockPosition::North)
 		{
-			rect.x = 0;
+			rect.x = 1;
 			rect.y = menuBarHeight;
-			rect.w = rect_.w;
+			rect.w = rect_.w - 1;
 			rect.h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier)) - menuBarHeight;
 		}
 		else if (dockPosition == DockPosition::South)
 		{
 			const int h = WZ_MIN(windowSize.h, (int)(rect_.h * maxPreviewSizeMultiplier));
-			rect.x = 0;
+			rect.x = 1;
 			rect.y = rect_.h - h;
-			rect.w = rect_.w;
-			rect.h = h;
+			rect.w = rect_.w - 1;
+			rect.h = h - 1;
 		}
 		else if (dockPosition == DockPosition::East)
 		{
@@ -1199,14 +1199,14 @@ Rect MainWindow::calculateDockWindowRect(DockPosition::Enum dockPosition, Size w
 			rect.x = rect_.w - w;
 			rect.y = menuBarHeight;
 			rect.w = w;
-			rect.h = rect_.h - menuBarHeight;
+			rect.h = rect_.h - menuBarHeight - 1;
 		}
 		else if (dockPosition == DockPosition::West)
 		{
-			rect.x = 0;
+			rect.x = 1;
 			rect.y = menuBarHeight;
 			rect.w = WZ_MIN(windowSize.w, (int)(rect_.w * maxPreviewSizeMultiplier));
-			rect.h = rect_.h - menuBarHeight;
+			rect.h = rect_.h - menuBarHeight - 1;
 		}
 	}
 
