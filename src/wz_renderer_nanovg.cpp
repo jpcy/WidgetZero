@@ -578,39 +578,20 @@ void NVGRenderer::drawScrollerButton(Button *button, Rect clip, bool decrement)
 
 	// Icon.
 	nvgBeginPath(vg);
-	Scroller *scroller = (Scroller *)button->getParent();
+	nvgTranslate(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f); // center
 
-	if (scroller->getDirection() == ScrollerDirection::Vertical)
+	if (((Scroller *)button->getParent())->getDirection() == ScrollerDirection::Vertical)
 	{
-		if (decrement)
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.25f); // top
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // left
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // right
-		}
-		else
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.5f, rect.y + rect.h * 0.75f); // bottom
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // right
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // left
-		}
+		nvgRotate(vg, decrement ? 0 : NVG_PI);
 	}
 	else
 	{
-		if (decrement)
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.5f); // left
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.75f); // bottom
-			nvgLineTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.25f); // top
-		}
-		else
-		{
-			nvgMoveTo(vg, rect.x + rect.w * 0.75f, rect.y + rect.h * 0.5f); // right
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.25f); // top
-			nvgLineTo(vg, rect.x + rect.w * 0.25f, rect.y + rect.h * 0.75f); // bottom
-		}
+		nvgRotate(vg, decrement ? NVG_PI * -0.5f : NVG_PI * 0.5f);
 	}
 
+	nvgMoveTo(vg, 0, rect.h * -0.25f); // top
+	nvgLineTo(vg, rect.w * -0.25f, rect.h * 0.25f); // left
+	nvgLineTo(vg, rect.w * 0.25f, rect.h * 0.25f); // right
 	nvgFillColor(vg, button->getHover() ? WZ_SKIN_SCROLLER_ICON_HOVER : WZ_SKIN_SCROLLER_ICON);
 	nvgFill(vg);
 	nvgRestore(vg);
@@ -678,26 +659,15 @@ void NVGRenderer::drawSpinnerButton(Button *button, Rect clip, bool decrement)
 	NVGcontext *vg = impl->vg;
 	const Rect rect = button->getAbsoluteRect();
 	const int buttonX = rect.x + rect.w - WZ_SKIN_SPINNER_BUTTON_WIDTH;
-	const float buttonCenterX = buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f;
-	const float buttonCenterY = rect.y + rect.h * 0.5f;
 
 	nvgSave(vg);
 	clipToRect(clip);
 	nvgBeginPath(vg);
-
-	if (decrement)
-	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // bottom
-		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
-		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
-	}
-	else
-	{
-		nvgMoveTo(vg, buttonCenterX, buttonCenterY - WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // top
-		nvgLineTo(vg, buttonCenterX - WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
-		nvgLineTo(vg, buttonCenterX + WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, buttonCenterY + WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
-	}
-
+	nvgTranslate(vg, buttonX + WZ_SKIN_SPINNER_BUTTON_WIDTH * 0.5f, rect.y + rect.h * 0.5f); // center
+	nvgRotate(vg, decrement ? NVG_PI : 0);
+	nvgMoveTo(vg, 0, WZ_SKIN_SPINNER_ICON_HEIGHT * -0.5f); // top
+	nvgLineTo(vg, WZ_SKIN_SPINNER_ICON_WIDTH * -0.5f, WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // left
+	nvgLineTo(vg, WZ_SKIN_SPINNER_ICON_WIDTH * 0.5f, WZ_SKIN_SPINNER_ICON_HEIGHT * 0.5f); // right
 	nvgFillColor(vg, button->getHover() ? WZ_SKIN_SPINNER_ICON_HOVER : WZ_SKIN_SPINNER_ICON);
 	nvgFill(vg);
 	nvgRestore(vg);
