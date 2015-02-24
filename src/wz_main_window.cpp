@@ -830,7 +830,7 @@ void MainWindow::mouseMoveRecursive(Window *window, Widget *widget, int mouseX, 
 
 	// Determine whether the mouse is hovering over the widget's parent window.
 	// Special case for combo dropdown list poking outside the window.
-	if (widget->window_ && !(widget->parent_ && widget->parent_->getType() == WidgetType::Combo))
+	if (widget->window_ && widget->findClosestAncestor(WidgetType::Combo) == NULL)
 	{
 		hoverWindow = WZ_POINT_IN_RECT(mouseX, mouseY, widget->window_->getContentWidget()->getAbsoluteRect());
 	}
