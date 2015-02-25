@@ -26,16 +26,30 @@ SOFTWARE.
 
 namespace wz {
 
+class GroupBoxContent : public Widget
+{
+public:
+	virtual Size measure()
+	{
+		Size s;
+
+		for (size_t i = 0; i < children_.size(); i++)
+		{
+			s += children_[i]->measure();
+		}
+
+		return s;
+	}
+};
+
 GroupBox::GroupBox(const std::string &label) : label_(label)
 {
 	type_ = WidgetType::GroupBox;
 
 	// Create content widget.
-	content_ = new Widget;
+	content_ = new GroupBoxContent;
 	content_->setStretch(Stretch::All);
 	addChildWidget(content_);
-
-	setSize(200, 200);
 }
 
 void GroupBox::setLabel(const char *label)
@@ -68,6 +82,18 @@ void GroupBox::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	content_->removeChildWidget(widget);
+}
+
+Size GroupBox::measureContent()
+{
+	// Content margin.
+	const Border m = content_->getMargin();
+	Size s(m.left + m.right, m.top + m.bottom);
+
+	// Content itself.
+	s += content_->measure();
+
+	return s;
 }
 
 void GroupBox::onRendererChanged()

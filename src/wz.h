@@ -137,6 +137,8 @@ struct Size
 {
 	Size() : w(0), h(0) {}
 	Size(int w, int h) : w(w), h(h) {}
+	Size operator+(Size s) { return Size(w + s.w, h + s.h); }
+	Size operator+=(Size s) { w += s.w; h += s.h; return *this; }
 	int w, h;
 };
 
@@ -542,8 +544,11 @@ protected:
 	virtual Rect getChildrenClipRect() const;
 
 	virtual void draw(Rect clip);
+
+public:
 	virtual Size measure();
 
+protected:
 	void setInternalMetadata(void *metadata);
 	void *getInternalMetadata();
 
@@ -760,6 +765,7 @@ public:
 	const char *getLabel() const;
 	void add(Widget *widget);
 	void remove(Widget *widget);
+	Size measureContent();
 
 protected:
 	virtual void onRendererChanged();

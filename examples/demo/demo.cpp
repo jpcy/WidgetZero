@@ -208,11 +208,12 @@ private:
 		frame->add(layout);
 
 		wz::GroupBox *groupBox1 = new wz::GroupBox("With a Label");
-		groupBox1->add(new wz::Label("Default margin"));
+		groupBox1->add(new wz::Label("Content gones here"));
 		layout->add(groupBox1);
 
-		wz::GroupBox *groupBox = new wz::GroupBox();
-		layout->add(groupBox);
+		wz::GroupBox *groupBox2 = new wz::GroupBox();
+		groupBox2->add(new wz::Label("Without a label"));
+		layout->add(groupBox2);
 	}
 
 	void createLabelFrame()

@@ -358,9 +358,20 @@ void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 	nvgRestore(vg);
 }
 
-Size NVGRenderer::measureGroupBox(GroupBox * /*groupBox*/)
+Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
 {
-	return Size();
+	Size s = groupBox->measureContent();
+
+	if (groupBox->getLabel() && groupBox->getLabel()[0])
+	{
+		int textWidth;
+		groupBox->measureText(groupBox->getLabel(), 0, &textWidth, NULL);
+
+		// Give as much margin on the right as the left.
+		s.w = WZ_MAX(WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN * 2 + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING + textWidth, s.w);
+	}
+
+	return s;
 }
 
 Color NVGRenderer::getLabelTextColor(Label * /*label*/)
