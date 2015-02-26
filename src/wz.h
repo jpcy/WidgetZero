@@ -768,7 +768,6 @@ public:
 	const char *getLabel() const;
 	void setContent(Widget *widget);
 	void removeContent(Widget *widget);
-	Size measureContent();
 
 protected:
 	virtual void onRendererChanged();

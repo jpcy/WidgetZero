@@ -360,7 +360,7 @@ void NVGRenderer::drawGroupBox(GroupBox *groupBox, Rect clip)
 
 Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
 {
-	Size s = groupBox->measureContent();
+	Size s;
 
 	if (groupBox->getLabel() && groupBox->getLabel()[0])
 	{
@@ -368,7 +368,7 @@ Size NVGRenderer::measureGroupBox(GroupBox *groupBox)
 		groupBox->measureText(groupBox->getLabel(), 0, &textWidth, NULL);
 
 		// Give as much margin on the right as the left.
-		s.w = WZ_MAX(WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN * 2 + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING + textWidth, s.w);
+		s.w = WZ_SKIN_GROUP_BOX_TEXT_LEFT_MARGIN * 2 + WZ_SKIN_GROUP_BOX_TEXT_BORDER_SPACING + textWidth;
 	}
 
 	return s;

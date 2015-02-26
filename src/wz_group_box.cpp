@@ -68,18 +68,6 @@ void GroupBox::removeContent(Widget *widget)
 	removeChildWidget(widget);
 }
 
-Size GroupBox::measureContent()
-{
-	Size s(padding_.left + padding_.right, padding_.top + padding_.bottom);
-
-	for (size_t i = 0; i < children_.size(); i++)
-	{
-		s += children_[i]->measure();
-	}
-
-	return s;
-}
-
 void GroupBox::onRendererChanged()
 {
 	refreshPadding();
@@ -92,7 +80,15 @@ void GroupBox::draw(Rect clip)
 
 Size GroupBox::measure()
 {
-	return renderer_->measureGroupBox(this);
+	Size content(padding_.left + padding_.right, padding_.top + padding_.bottom);
+
+	if (!children_.empty())
+	{
+		content += children_[0]->measure();
+	}
+
+	const Size measured = renderer_->measureGroupBox(this);
+	return Size(WZ_MAX(content.w, measured.w), WZ_MAX(content.h, measured.h));
 }
 
 void GroupBox::refreshPadding()
