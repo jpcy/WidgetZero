@@ -26,30 +26,9 @@ SOFTWARE.
 
 namespace wz {
 
-class GroupBoxContent : public Widget
-{
-public:
-	virtual Size measure()
-	{
-		Size s;
-
-		for (size_t i = 0; i < children_.size(); i++)
-		{
-			s += children_[i]->measure();
-		}
-
-		return s;
-	}
-};
-
 GroupBox::GroupBox(const std::string &label) : label_(label)
 {
 	type_ = WidgetType::GroupBox;
-
-	// Create content widget.
-	content_ = new GroupBoxContent;
-	content_->setStretch(Stretch::All);
-	addChildWidget(content_);
 }
 
 void GroupBox::setLabel(const char *label)
@@ -59,7 +38,7 @@ void GroupBox::setLabel(const char *label)
 	// Update the margin.
 	if (renderer_)
 	{
-		refreshMargin();
+		refreshPadding();
 	}
 }
 
@@ -75,30 +54,30 @@ void GroupBox::add(Widget *widget)
 	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
-	content_->addChildWidget(widget);
+	addChildWidget(widget);
 }
 
 void GroupBox::remove(Widget *widget)
 {
 	WZ_ASSERT(widget);
-	content_->removeChildWidget(widget);
+	removeChildWidget(widget);
 }
 
 Size GroupBox::measureContent()
 {
-	// Content margin.
-	const Border m = content_->getMargin();
-	Size s(m.left + m.right, m.top + m.bottom);
+	Size s(padding_.left + padding_.right, padding_.top + padding_.bottom);
 
-	// Content itself.
-	s += content_->measure();
+	for (size_t i = 0; i < children_.size(); i++)
+	{
+		s += children_[i]->measure();
+	}
 
 	return s;
 }
 
 void GroupBox::onRendererChanged()
 {
-	refreshMargin();
+	refreshPadding();
 }
 
 void GroupBox::draw(Rect clip)
@@ -111,7 +90,7 @@ Size GroupBox::measure()
 	return renderer_->measureGroupBox(this);
 }
 
-void GroupBox::refreshMargin()
+void GroupBox::refreshPadding()
 {
 	Border margin = renderer_->getGroupBoxMargin(this);
 
@@ -120,7 +99,7 @@ void GroupBox::refreshMargin()
 		margin.top += getLineHeight();
 	}
 
-	content_->setMargin(margin);
+	setPadding(margin);
 }
 
 } // namespace wz

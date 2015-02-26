@@ -104,6 +104,7 @@ struct Border
 	Border() : top(0), right(0), bottom(0), left(0) {}
 	Border(int top, int right, int bottom, int left) : top(top), right(right), bottom(bottom), left(left) {}
 	Border(int uniform) : top(uniform), right(uniform), bottom(uniform), left(uniform) {}
+	Border operator+(Border b) const { return Border(top + b.top, right + b.right, bottom + b.bottom, left + b.left); }
 	int top, right, bottom, left;
 };
 
@@ -453,6 +454,9 @@ public:
 	void setMargin(Border margin);
 	void setMargin(int top, int right, int bottom, int left);
 	Border getMargin() const;
+	void setPadding(Border padding);
+	void setPadding(int top, int right, int bottom, int left);
+	Border getPadding() const;
 	void setStretch(Stretch::Enum stretch);
 	int getStretch() const;
 	void setStretchScale(float width, float height);
@@ -591,6 +595,9 @@ protected:
 	// Only used when userSetSize w and/or h are set to WZ_AUTOSIZE, or the widget is the child of a layout.
 	Border margin_;
 
+	// Parent's padding is equivalent to this widget's margin.
+	Border padding_;
+
 	// Like metadata, but used internally.
 	void *internalMetadata_;
 
@@ -667,9 +674,6 @@ public:
 	const char *getLabel() const;
 	void setIcon(const char *icon);
 	const char *getIcon() const;
-	void setPadding(Border padding);
-	void setPadding(int top, int right, int bottom, int left);
-	Border getPadding() const;
 	bool isPressed() const;
 	bool isSet() const;
 	void set(bool value);
@@ -688,7 +692,6 @@ protected:
 
 	ButtonClickBehavior::Enum clickBehavior_;
 	ButtonSetBehavior::Enum setBehavior_;
-	Border padding_;
 	std::string label_;
 	std::string icon_;
 	bool isPressed_;
@@ -771,9 +774,8 @@ protected:
 	virtual void onRendererChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
-	void refreshMargin();
+	void refreshPadding();
 
-	Widget *content_;
 	std::string label_;
 };
 

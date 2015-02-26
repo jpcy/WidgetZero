@@ -169,8 +169,10 @@ Rect Widget::getAbsoluteRect() const
 	if (parent_)
 	{
 		const Position parentPosition = parent_->getAbsolutePosition();
-		rect.x += parentPosition.x;
-		rect.y += parentPosition.y;
+		const Border parentPadding = parent_->getPadding();
+
+		rect.x += parentPosition.x + parentPadding.left;
+		rect.y += parentPosition.y + parentPadding.top;
 	}
 
 	return rect;
@@ -190,6 +192,22 @@ void Widget::setMargin(int top, int right, int bottom, int left)
 Border Widget::getMargin() const
 {
 	return margin_;
+}
+
+void Widget::setPadding(Border padding)
+{
+	padding_ = padding;
+	refreshRect();
+}
+
+void Widget::setPadding(int top, int right, int bottom, int left)
+{
+	setPadding(Border(top, right, bottom, left));
+}
+
+Border Widget::getPadding() const
+{
+	return padding_;
 }
 
 void Widget::setStretch(Stretch::Enum stretch)
@@ -655,51 +673,52 @@ Rect Widget::calculateAlignedStretchedRect(Rect rect) const
 	if (parent_ && parent_->isLayout())
 		return rect;
 
-	Rect parentRect = parent_->getRect();
+	const Rect parentRect = parent_->getRect();
+	const Border margin = parent_ ? parent_->getPadding() + margin_ : margin_;
 
 	// Handle stretching.
 	if ((stretch_ & Stretch::Width) != 0)
 	{
 		const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
 
-		rect.x = margin_.left;
-		rect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right);
+		rect.x = margin.left;
+		rect.w = (int)(parentRect.w * scale) - (margin.left + margin.right);
 	}
 
 	if ((stretch_ & Stretch::Height) != 0)
 	{
 		const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
 
-		rect.y = margin_.top;
-		rect.h = (int)(parentRect.h * scale) - (margin_.top + margin_.bottom);
+		rect.y = margin.top;
+		rect.h = (int)(parentRect.h * scale) - (margin.top + margin.bottom);
 	}
 
 	// Handle horizontal alignment.
 	if ((align_ & Align::Left) != 0)
 	{
-		rect.x = margin_.left;
+		rect.x = margin.left;
 	}
 	else if ((align_ & Align::Center) != 0)
 	{
-		rect.x = margin_.left + (int)((parentRect.w - margin_.right) / 2.0f - rect.w / 2.0f);
+		rect.x = margin.left + (int)((parentRect.w - margin.right) / 2.0f - rect.w / 2.0f);
 	}
 	else if ((align_ & Align::Right) != 0)
 	{
-		rect.x = parentRect.w - margin_.right - rect.w;
+		rect.x = parentRect.w - margin.right - rect.w;
 	}
 
 	// Handle vertical alignment.
 	if ((align_ & Align::Top) != 0)
 	{
-		rect.y = margin_.top;
+		rect.y = margin.top;
 	}
 	else if ((align_ & Align::Middle) != 0)
 	{
-		rect.y = margin_.top + (int)((parentRect.h - margin_.bottom) / 2.0f - rect.h / 2.0f);
+		rect.y = margin.top + (int)((parentRect.h - margin.bottom) / 2.0f - rect.h / 2.0f);
 	}
 	else if ((align_ & Align::Bottom) != 0)
 	{
-		rect.y = parentRect.h - margin_.bottom - rect.h;
+		rect.y = parentRect.h - margin.bottom - rect.h;
 	}
 
 	return rect;

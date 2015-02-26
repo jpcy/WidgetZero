@@ -61,26 +61,6 @@ const char *Button::getIcon() const
 	return icon_.c_str();
 }
 
-void Button::setPadding(Border padding)
-{
-	padding_ = padding;
-	resizeToMeasured();
-}
-
-void Button::setPadding(int top, int right, int bottom, int left)
-{
-	padding_.top = top;
-	padding_.right = right;
-	padding_.bottom = bottom;
-	padding_.left = left;
-	resizeToMeasured();
-}
-
-Border Button::getPadding() const
-{
-	return padding_;
-}
-
 bool Button::isPressed() const
 {
 	return isPressed_;
