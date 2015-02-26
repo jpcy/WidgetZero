@@ -56,11 +56,11 @@ project "NanoVG"
 		
 -----------------------------------------------------------------------------
 
-function createExampleProject(_title, _name)
+function createExampleProject(_title, _name, _file)
 	project(_title)
 		kind "WindowedApp"
 		targetname("example_" .. _name)
-		files { "examples/" .. _name .. "/*.*", "examples/gl/*.*" }
+		files { "examples/" .. _file, "examples/gl/*.*" }
 		includedirs { "src", "nanovg", "examples/gl" }
 		
 		configuration "linux"
@@ -82,15 +82,15 @@ function createExampleProject(_title, _name)
 			linkoptions { "/SAFESEH:NO" }
 end
 
-createExampleProject("Example 1 - Demo", "demo")
-createExampleProject("Example 2 - Simple", "simple")
+createExampleProject("Example 1 - Demo", "demo", "Demo.cpp")
+createExampleProject("Example 2 - Simple", "simple", "Simple.cpp")
 
 -----------------------------------------------------------------------------
 
 project "Example 3 - Custom Renderer"
 	kind "WindowedApp"
 	targetname "example_custom_renderer"
-	files { "examples/custom_renderer/*.*", "examples/tigr/*.*" }
+	files { "examples/CustomRenderer.cpp", "examples/tigr/*.*" }
 	includedirs { "src", "examples/tigr" }
 	links { "WidgetZero" }
 	
