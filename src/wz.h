@@ -766,8 +766,8 @@ public:
 	GroupBox(const std::string &label = std::string());
 	void setLabel(const char *label);
 	const char *getLabel() const;
-	void add(Widget *widget);
-	void remove(Widget *widget);
+	void setContent(Widget *widget);
+	void removeContent(Widget *widget);
 	Size measureContent();
 
 protected:

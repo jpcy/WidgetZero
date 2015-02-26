@@ -47,17 +47,22 @@ const char *GroupBox::getLabel() const
 	return label_.c_str();
 }
 
-void GroupBox::add(Widget *widget)
+void GroupBox::setContent(Widget *widget)
 {
 	WZ_ASSERT(widget);
 
 	if (widget->getType() == WidgetType::MainWindow || widget->getType() == WidgetType::Window)
 		return;
 
+	if (!children_.empty())
+	{
+		removeChildWidget(children_[0]);
+	}
+
 	addChildWidget(widget);
 }
 
-void GroupBox::remove(Widget *widget)
+void GroupBox::removeContent(Widget *widget)
 {
 	WZ_ASSERT(widget);
 	removeChildWidget(widget);

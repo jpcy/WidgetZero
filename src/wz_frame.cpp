@@ -29,7 +29,6 @@ namespace wz {
 Frame::Frame()
 {
 	type_ = WidgetType::Frame;
-	setSize(200, 200);
 }
 
 void Frame::add(Widget *widget)
