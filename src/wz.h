@@ -549,10 +549,8 @@ protected:
 
 	virtual void draw(Rect clip);
 
-public:
 	virtual Size measure();
 
-protected:
 	void setInternalMetadata(void *metadata);
 	void *getInternalMetadata();
 
@@ -605,6 +603,9 @@ protected:
 	void *metadata_;
 
 	WidgetFlags::Enum flags_;
+
+	// Used by layouts and widgets that are sized based on their contents (groupbox).
+	bool refreshRectWhenChildRectChanges_;
 
 	bool hover_;
 
@@ -1179,6 +1180,7 @@ public:
 	void remove(Widget *widget);
 
 protected:
+	virtual Size measure();
 	virtual void onRectChanged();
 	void layoutVertical();
 	void layoutHorizontal();

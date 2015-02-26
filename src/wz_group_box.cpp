@@ -29,6 +29,7 @@ namespace wz {
 GroupBox::GroupBox(const std::string &label) : label_(label)
 {
 	type_ = WidgetType::GroupBox;
+	refreshRectWhenChildRectChanges_ = true;
 }
 
 void GroupBox::setLabel(const char *label)
@@ -84,7 +85,7 @@ Size GroupBox::measure()
 
 	if (!children_.empty())
 	{
-		content += children_[0]->measure();
+		content += children_[0]->getSize();
 	}
 
 	const Size measured = renderer_->measureGroupBox(this);

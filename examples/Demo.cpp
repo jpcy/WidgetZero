@@ -214,6 +214,19 @@ private:
 		wz::GroupBox *groupBox2 = new wz::GroupBox();
 		groupBox2->setContent(new wz::Label("Without a label"));
 		layout->add(groupBox2);
+
+		wz::GroupBox *groupBox3 = new wz::GroupBox("With some more content");
+
+		wz::StackLayout *layout2 = new wz::StackLayout(wz::StackLayoutDirection::Vertical);
+		layout2->setSpacing(8);
+		layout2->add(new wz::Label("A label"));
+		layout2->add(new wz::RadioButton("Option 1"));
+		layout2->add(new wz::RadioButton("Option 2"));
+		layout2->add(new wz::RadioButton("Option 3"));
+		layout2->add(new wz::Button("A button", "../examples/data/accept.png"));
+
+		groupBox3->setContent(layout2);
+		layout->add(groupBox3);
 	}
 
 	void createLabelFrame()

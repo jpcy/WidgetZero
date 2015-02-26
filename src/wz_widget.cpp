@@ -36,6 +36,7 @@ Widget::Widget()
 	internalMetadata_ = NULL;
 	metadata_ = NULL;
 	flags_ = WidgetFlags::None;
+	refreshRectWhenChildRectChanges_ = false;
 	hover_ = false;
 	visible_ = true;
 	ignore_ = false;
@@ -215,7 +216,7 @@ void Widget::setStretch(Stretch::Enum stretch)
 	stretch_ = stretch;
 
 	// If the parent is a layout widget, refresh it.
-	if (parent_ && parent_->isLayout())
+	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
 	{
 		parent_->refreshRect();
 	}
@@ -247,7 +248,7 @@ void Widget::setAlign(Align::Enum align)
 	align_ = align;
 
 	// If the parent is a layout widget, refresh it.
-	if (parent_ && parent_->isLayout())
+	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
 	{
 		parent_->refreshRect();
 	}
@@ -303,7 +304,7 @@ void Widget::setVisible(bool visible)
 	visible_ = visible;
 
 	// If the parent is a layout widget, it may need refreshing.
-	if (parent_ && parent_->isLayout())
+	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
 	{
 		parent_->refreshRect();
 	}
@@ -468,7 +469,7 @@ void Widget::setRectInternal(Rect rect)
 	setRectInternalRecursive(rect);	
 
 	// If the parent is a layout widget, it may need refreshing.
-	if (parent_ && parent_->isLayout())
+	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
 	{
 		// Refresh if the width or height has changed.
 		if (rect_.w != oldRect.w || rect_.h != oldRect.h)
@@ -838,6 +839,11 @@ void Widget::resizeToMeasuredRecursive()
 	for (size_t i = 0; i < children_.size(); i++)
 	{
 		children_[i]->resizeToMeasuredRecursive();
+	}
+
+	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
+	{
+		parent_->resizeToMeasured();
 	}
 }
 

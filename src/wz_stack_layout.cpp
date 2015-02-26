@@ -29,6 +29,7 @@ namespace wz {
 StackLayout::StackLayout(StackLayoutDirection::Enum direction, int spacing)
 {
 	type_ = WidgetType::StackLayout;
+	refreshRectWhenChildRectChanges_ = true;
 	direction_ = direction;
 	spacing_ = spacing;
 }
@@ -76,6 +77,34 @@ void StackLayout::onRectChanged()
 	{
 		layoutHorizontal();
 	}
+}
+
+Size StackLayout::measure()
+{
+	Size s;
+
+	for (size_t i = 0; i < children_.size(); i++)
+	{
+		Widget *child = children_[i];
+
+		if (!child->isVisible())
+			continue;
+
+		const Size childSize = child->getSize();
+
+		if (direction_ == StackLayoutDirection::Vertical)
+		{
+			s.w = WZ_MAX(s.w, childSize.w);
+			s.h += spacing_ + childSize.h;
+		}
+		else
+		{
+			s.w += spacing_ + childSize.w;
+			s.h = WZ_MAX(s.h, childSize.h);
+		}
+	}
+
+	return s + Size(margin_.left + margin_.right, margin_.top + margin_.bottom);
 }
 
 void StackLayout::layoutVertical()
