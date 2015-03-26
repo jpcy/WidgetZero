@@ -58,7 +58,12 @@ NUB CONTAINER
 class ScrollerNubContainer : public Widget
 {
 public:
-	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
+	void onRectChanged()
+	{
+		((ScrollerNub *)children_[0])->updateRect();
+	}
+
+	void onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
 	{
 		if (mouseButton != 1)
 			return;
@@ -158,7 +163,7 @@ void ScrollerNub::updateRect()
 		rect.h = containerSize.h;
 	}
 
-	setRectInternal(rect);
+	setRect(rect);
 }
 
 void ScrollerNub::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -246,8 +251,6 @@ Scroller::Scroller(ScrollerDirection::Enum direction, int value, int stepValue, 
 	//incrementButton_->setSize(16, 16);
 	incrementButton_->addEventHandler(EventType::ButtonClicked, this, &Scroller::onIncrementButtonClicked);
 	layout->add(incrementButton_);
-
-	nub_->updateRect();
 }
 
 ScrollerDirection::Enum Scroller::getDirection() const
@@ -359,10 +362,8 @@ void Scroller::onRectChanged()
 {
 	// Match the buttons to the scroller thickness, and keep square.
 	const int thickness = direction_ == ScrollerDirection::Vertical ? rect_.w : rect_.h;
-	decrementButton_->setSizeInternal(thickness, thickness);
-	incrementButton_->setSizeInternal(thickness, thickness);
-
-	nub_->updateRect();
+	decrementButton_->setSize(thickness, thickness);
+	incrementButton_->setSize(thickness, thickness);
 }
 
 void Scroller::onMouseWheelMove(int /*x*/, int y)

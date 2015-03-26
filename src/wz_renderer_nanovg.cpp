@@ -403,7 +403,6 @@ void NVGRenderer::drawLabel(Label *label, Rect clip)
 Size NVGRenderer::measureLabel(Label *label)
 {
 	NVGcontext *vg = impl->vg;
-	const Rect rect = label->getAbsoluteRect();
 	Size size;
 
 	if (label->getMultiline())
@@ -411,9 +410,9 @@ Size NVGRenderer::measureLabel(Label *label)
 		nvgFontSize(vg, label->getFontSize() == 0 ? getDefaultFontSize() : label->getFontSize());
 		setFontFace(label->getFontFace());
 		nvgTextAlign(vg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
-		nvgTextLineHeight(vg, 1.2f);
+		nvgTextLineHeight(vg, 1.0f);
 		float bounds[4];
-		nvgTextBoxBounds(vg, 0, 0, (float)rect.w, label->getText(), NULL, bounds);
+		nvgTextBoxBounds(vg, 0, 0, (float)label->getUserOrMeasuredSize().w, label->getText(), NULL, bounds);
 		size.w = (int)bounds[2];
 		size.h = (int)bounds[3];
 	}

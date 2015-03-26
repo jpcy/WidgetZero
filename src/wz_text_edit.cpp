@@ -91,7 +91,7 @@ const char *TextEdit::getText() const
 void TextEdit::setText(const char *text)
 {
 	text_ = text;
-	resizeToMeasured();
+	setMeasureDirty();
 }
 
 int TextEdit::getScrollValue() const
@@ -579,11 +579,11 @@ void TextEdit::updateScroller()
 
 	// Fit to the right of the rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller_->getWidth();
+	scrollerRect.w = scroller_->getMeasuredSize().w;
 	scrollerRect.x = rect_.w - border_.right - scrollerRect.w;
 	scrollerRect.y = border_.top;
 	scrollerRect.h = rect_.h - (border_.top + border_.bottom);
-	scroller_->setRectInternal(scrollerRect);
+	scroller_->setRect(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
 	const int maxHeight = nLines * lineHeight;

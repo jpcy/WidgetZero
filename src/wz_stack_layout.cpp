@@ -29,7 +29,6 @@ namespace wz {
 StackLayout::StackLayout(StackLayoutDirection::Enum direction, int spacing)
 {
 	type_ = WidgetType::StackLayout;
-	refreshRectWhenChildRectChanges_ = true;
 	direction_ = direction;
 	spacing_ = spacing;
 }
@@ -37,13 +36,13 @@ StackLayout::StackLayout(StackLayoutDirection::Enum direction, int spacing)
 void StackLayout::setDirection(StackLayoutDirection::Enum direction)
 {
 	direction_ = direction;
-	refreshRect();
+	setRectDirty();
 }
 
 void StackLayout::setSpacing(int spacing)
 {
 	spacing_ = spacing;
-	refreshRect();
+	setRectDirty();
 }
 
 int StackLayout::getSpacing() const
@@ -90,7 +89,7 @@ Size StackLayout::measure()
 		if (!child->isVisible())
 			continue;
 
-		const Size childSize = child->getSize();
+		const Size childSize = child->getMeasuredSize();
 
 		if (direction_ == StackLayoutDirection::Vertical)
 		{
@@ -135,8 +134,8 @@ void StackLayout::layoutVertical()
 		}
 		else
 		{
-			// Subtract the heights of child widgets that aren't being stretched in the same direction as the the layout.
-			availableHeight -= children_[i]->getHeight();
+			// Subtract the user or measured heights of child widgets that aren't being stretched in the same direction as the the layout.
+			availableHeight -= children_[i]->getUserOrMeasuredSize().h;
 		}
 	}
 
@@ -168,8 +167,8 @@ void StackLayout::layoutVertical()
 		}
 		else
 		{
-			// Don't change the width.
-			childRect.w = child->getWidth();
+			// Use the user or measured width.
+			childRect.w = child->getUserOrMeasuredSize().w;
 
 			// Handle horizontal alignment.
 			if ((child->getAlign() & Align::Center) != 0)
@@ -189,8 +188,8 @@ void StackLayout::layoutVertical()
 		}
 		else
 		{
-			// Don't change the height.
-			childRect.h = child->getHeight();
+			// Use the user or measured height.
+			childRect.h = child->getUserOrMeasuredSize().h;
 		}
 
 		child->setRectInternal(childRect);
@@ -226,8 +225,8 @@ void StackLayout::layoutHorizontal()
 		}
 		else
 		{
-			// Subtract the widths of child widgets that aren't being stretched in the same direction as the the layout.
-			availableWidth -= children_[i]->getWidth();
+			// Subtract the user or measured widths of child widgets that aren't being stretched in the same direction as the the layout.
+			availableWidth -= children_[i]->getUserOrMeasuredSize().w;
 		}
 	}
 
@@ -259,8 +258,8 @@ void StackLayout::layoutHorizontal()
 		}
 		else
 		{
-			// Don't change the width.
-			childRect.w = child->getWidth();
+			// Use the user or measured width.
+			childRect.w = child->getUserOrMeasuredSize().w;
 		}
 
 		if ((child->getStretch() & Stretch::Height) != 0)
@@ -270,8 +269,8 @@ void StackLayout::layoutHorizontal()
 		}
 		else
 		{
-			// Don't change the height.
-			childRect.h = child->getHeight();
+			// Use the user or measured height.
+			childRect.h = child->getUserOrMeasuredSize().h;
 
 			// Handle vertical alignment.
 			if ((child->getAlign() & Align::Middle) != 0)

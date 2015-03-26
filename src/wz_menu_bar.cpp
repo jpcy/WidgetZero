@@ -44,7 +44,7 @@ MenuBarButton::MenuBarButton(MenuBar *menuBar)
 void MenuBarButton::setLabel(const char *label)
 {
 	label_ = label;
-	resizeToMeasured();
+	setMeasureDirty();
 }
 
 const char *MenuBarButton::getLabel() const

@@ -42,7 +42,7 @@ Button::Button(const std::string &label, const std::string &icon)
 void Button::setLabel(const char *label)
 {
 	label_ = label;
-	resizeToMeasured();
+	setMeasureDirty();
 }
 
 const char *Button::getLabel() const
@@ -53,7 +53,7 @@ const char *Button::getLabel() const
 void Button::setIcon(const char *icon)
 {
 	icon_ = icon;
-	resizeToMeasured();
+	setMeasureDirty();
 }
 
 const char *Button::getIcon() const

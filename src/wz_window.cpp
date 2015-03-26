@@ -112,13 +112,12 @@ void Window::remove(Widget *widget)
 void Window::onRendererChanged()
 {
 	refreshHeaderHeight();
-	refreshRect();
 }
 
 void Window::onFontChanged(const char * /*fontFace*/, float /*fontSize*/)
 {
 	refreshHeaderHeight();
-	refreshRect();
+	setRectDirty();
 }
 
 void Window::onRectChanged()
@@ -128,7 +127,7 @@ void Window::onRectChanged()
 	contentRect.y = borderSize_ + headerHeight_;
 	contentRect.w = rect_.w - borderSize_ * 2;
 	contentRect.h = rect_.h - (headerHeight_ + borderSize_ * 2);
-	content_->setRectInternal(contentRect);
+	content_->setRect(contentRect);
 }
 
 void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -247,8 +246,9 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 			newRect.x = mouseX - newRect.w / 2;
 		}
 
-		setRectInternal(newRect);
+		setRect(newRect);
 		mainWindow_->updateContentRect();
+		return;
 	}
 
 	// Calculate the minimum allowed window size.
@@ -326,7 +326,7 @@ void Window::onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDelta
 		return; // Not dragging, don't call MainWindow::updateContentRect.
 	}
 
-	setRectInternal(newRect);
+	setRect(newRect);
 
 	// Resizing a docked window: 
 	if (mainWindow_->getWindowDockPosition(this) != DockPosition::None)

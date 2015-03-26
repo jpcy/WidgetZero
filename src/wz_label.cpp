@@ -46,7 +46,7 @@ bool Label::getMultiline() const
 void Label::setText(const char *text)
 {
 	text_ = text;
-	resizeToMeasured();
+	setMeasureDirty();
 }
 
 void Label::setTextf(const char *format, ...)

@@ -150,7 +150,7 @@ void Combo::updateListRect()
 		listRect.h -= over;
 	}
 
-	list_->setRectInternal(listRect);
+	list_->setRect(listRect);
 }
 
 } // namespace wz

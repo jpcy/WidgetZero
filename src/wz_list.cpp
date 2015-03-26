@@ -64,7 +64,7 @@ Rect List::getItemsRect() const
 	// Subtract the scroller width.
 	if (scroller_->isVisible())
 	{
-		rect.w -= scroller_->getWidth();
+		rect.w -= scroller_->getMeasuredSize().w;
 	}
 
 	return rect;
@@ -363,11 +363,11 @@ void List::updateScroller()
 
 	// Fit to the right of items rect. Width doesn't change.
 	Rect scrollerRect;
-	scrollerRect.w = scroller_->getWidth();
+	scrollerRect.w = scroller_->getMeasuredSize().w;
 	scrollerRect.x = rect_.w - itemsBorder_.right - scrollerRect.w;
 	scrollerRect.y = itemsBorder_.top;
 	scrollerRect.h = rect_.h - (itemsBorder_.top + itemsBorder_.bottom);
-	scroller_->setRectInternal(scrollerRect);
+	scroller_->setRect(scrollerRect);
 
 	// Now that the height has been calculated, update the nub scale.
 	scroller_->setNubScale(1.0f - ((maxHeight - rect_.h) / (float)maxHeight));

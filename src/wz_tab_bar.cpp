@@ -219,8 +219,8 @@ void TabBar::onTabButtonPressed(Event e)
 
 void TabBar::onRendererChanged()
 {
-	decrementButton_->setWidthInternal(renderer_->getTabBarScrollButtonWidth(this));
-	incrementButton_->setWidthInternal(renderer_->getTabBarScrollButtonWidth(this));
+	decrementButton_->setWidth(renderer_->getTabBarScrollButtonWidth(this));
+	incrementButton_->setWidth(renderer_->getTabBarScrollButtonWidth(this));
 }
 
 void TabBar::onRectChanged()
@@ -277,25 +277,25 @@ void TabBar::updateScrollButtons()
 
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		totalTabWidth += tabs_[i]->getWidth();
+		totalTabWidth += tabs_[i]->getUserOrMeasuredSize().w;
 	}
 
 	// Show/hide the scroll buttons and set their rects.
 	bool showScrollButtons = totalTabWidth > rect_.w || scrollValue_ != 0;
 
 	Rect buttonRect;
-	buttonRect.w = decrementButton_->getWidth();
+	buttonRect.w = decrementButton_->getUserOrMeasuredSize().w;
 	buttonRect.x = rect_.w - buttonRect.w * 2;
 	buttonRect.y = 0;
 	buttonRect.h = rect_.h;
-	decrementButton_->setRectInternal(buttonRect);
+	decrementButton_->setRect(buttonRect);
 	decrementButton_->setVisible(showScrollButtons);
 
-	buttonRect.w = incrementButton_->getWidth();
+	buttonRect.w = incrementButton_->getUserOrMeasuredSize().w;
 	buttonRect.x = rect_.w - buttonRect.w;
 	buttonRect.y = 0;
 	buttonRect.h = rect_.h;
-	incrementButton_->setRectInternal(buttonRect);
+	incrementButton_->setRect(buttonRect);
 	incrementButton_->setVisible(showScrollButtons);
 }
 

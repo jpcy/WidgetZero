@@ -35,8 +35,7 @@ Widget::Widget()
 	align_ = Align::None;
 	internalMetadata_ = NULL;
 	metadata_ = NULL;
-	flags_ = WidgetFlags::None;
-	refreshRectWhenChildRectChanges_ = false;
+	flags_ = WidgetFlags::MeasureDirty | WidgetFlags::RectDirty;
 	hover_ = false;
 	visible_ = true;
 	ignore_ = false;
@@ -65,7 +64,7 @@ WidgetType::Enum Widget::getType() const
 	return type_;
 }
 
-bool Widget::isLayout() const
+bool Widget::isLayoutWidget() const
 {
 	return type_ == WidgetType::StackLayout;
 }
@@ -154,8 +153,11 @@ void Widget::setRect(int x, int y, int w, int h)
 
 void Widget::setRect(Rect rect)
 {
-	userRect_ = rect;
-	setRectInternal(rect);
+	if (rect != userRect_)
+	{
+		userRect_ = rect;
+		setRectDirty();
+	}
 }
 
 Rect Widget::getRect() const
@@ -182,7 +184,7 @@ Rect Widget::getAbsoluteRect() const
 void Widget::setMargin(Border margin)
 {
 	margin_ = margin;
-	refreshRect();
+	setRectDirty();
 }
 
 void Widget::setMargin(int top, int right, int bottom, int left)
@@ -198,7 +200,6 @@ Border Widget::getMargin() const
 void Widget::setPadding(Border padding)
 {
 	padding_ = padding;
-	refreshRect();
 }
 
 void Widget::setPadding(int top, int right, int bottom, int left)
@@ -214,12 +215,7 @@ Border Widget::getPadding() const
 void Widget::setStretch(Stretch::Enum stretch)
 {
 	stretch_ = stretch;
-
-	// If the parent is a layout widget, refresh it.
-	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
-	{
-		parent_->refreshRect();
-	}
+	setRectDirty();
 }
 
 int Widget::getStretch() const
@@ -231,6 +227,7 @@ void Widget::setStretchScale(float width, float height)
 {
 	stretchWidthScale_ = width;
 	stretchHeightScale_ = height;
+	setRectDirty();
 }
 
 float Widget::getStretchWidthScale() const
@@ -246,12 +243,7 @@ float Widget::getStretchHeightScale() const
 void Widget::setAlign(Align::Enum align)
 {
 	align_ = align;
-
-	// If the parent is a layout widget, refresh it.
-	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
-	{
-		parent_->refreshRect();
-	}
+	setRectDirty();
 }
 
 int Widget::getAlign() const
@@ -262,7 +254,7 @@ int Widget::getAlign() const
 void Widget::setFontFace(const char *fontFace)
 {
 	strcpy(fontFace_, fontFace);
-	resizeToMeasured();
+	setMeasureDirty();
 	onFontChanged(fontFace_, fontSize_);
 }
 
@@ -274,7 +266,7 @@ const char *Widget::getFontFace() const
 void Widget::setFontSize(float fontSize)
 {
 	fontSize_ = fontSize;
-	resizeToMeasured();
+	setMeasureDirty();
 	onFontChanged(fontFace_, fontSize_);
 }
 
@@ -287,7 +279,7 @@ void Widget::setFont(const char *fontFace, float fontSize)
 {
 	strcpy(fontFace_, fontFace);
 	fontSize_ = fontSize;
-	resizeToMeasured();
+	setMeasureDirty();
 	onFontChanged(fontFace_, fontSize_);
 }
 
@@ -302,13 +294,7 @@ void Widget::setVisible(bool visible)
 		return;
 
 	visible_ = visible;
-
-	// If the parent is a layout widget, it may need refreshing.
-	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
-	{
-		parent_->refreshRect();
-	}
-
+	setRectDirty();
 	onVisibilityChanged();
 }
 
@@ -368,9 +354,19 @@ void Widget::addChildWidget(Widget *child)
 	// Set children mainWindow, window and renderer.
 	child->setMainWindowAndWindowRecursive(child->mainWindow_, child->type_ == WidgetType::Window ? (Window *)child : child->window_);
 
-	// Resize the widget and children to their measured sizes.
-	child->resizeToMeasuredRecursive();
-	child->refreshRect();
+	// If the widget is dirty, set the dirty flags on the main window.
+	if (child->mainWindow_)
+	{
+		if (child->isMeasureDirty())
+		{
+			child->mainWindow_->setAnyWidgetMeasureDirty();
+		}
+
+		if (child->isRectDirty())
+		{
+			child->mainWindow_->setAnyWidgetRectDirty();
+		}
+	}
 
 	// Inform the child it now has a parent.
 	child->onParented(this);
@@ -415,68 +411,37 @@ void Widget::destroyChildWidget(Widget *child)
 	delete child;
 }
 
-void Widget::setPositionInternal(int x, int y)
+bool Widget::isRectDirty() const
 {
-	Position position;
-	position.x = x;
-	position.y = y;
-	setPositionInternal(position);
+	return (flags_ & WidgetFlags::RectDirty) != 0;
 }
 
-void Widget::setPositionInternal(Position position)
+bool Widget::isMeasureDirty() const
 {
-	Rect rect = rect_;
-	rect.x = position.x;
-	rect.y = position.y;
-	setRectInternal(rect);
+	return (flags_ & WidgetFlags::MeasureDirty) != 0;
 }
 
-void Widget::setWidthInternal(int w)
+Rect Widget::getUserRect() const
 {
-	Rect rect = rect_;
-	rect.w = w;
-	setRectInternal(rect);
+	return userRect_;
 }
 
-void Widget::setHeightInternal(int h)
+Size Widget::getMeasuredSize() const
 {
-	Rect rect = rect_;
-	rect.h = h;
-	setRectInternal(rect);
+	return measuredSize_;
 }
 
-void Widget::setSizeInternal(int w, int h)
+Size Widget::getUserOrMeasuredSize() const
 {
-	setSizeInternal(Size(w, h));
-}
-
-void Widget::setSizeInternal(Size size)
-{
-	Rect rect = rect_;
-	rect.w = size.w;
-	rect.h = size.h;
-	setRectInternal(rect);
-}
-
-void Widget::setRectInternal(int x, int y, int w, int h)
-{
-	setRectInternal(Rect(x, y, w, h));
+	return Size(userRect_.w != 0 ? userRect_.w : measuredSize_.w, userRect_.h != 0 ? userRect_.h : measuredSize_.h);
 }
 
 void Widget::setRectInternal(Rect rect)
 {
-	Rect oldRect = rect_;
-	setRectInternalRecursive(rect);	
+	rect_ = rect;
 
-	// If the parent is a layout widget, it may need refreshing.
-	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
-	{
-		// Refresh if the width or height has changed.
-		if (rect_.w != oldRect.w || rect_.h != oldRect.h)
-		{
-			parent_->refreshRect();
-		}
-	}
+	// Still call this even if the rect hasn't actually changed.
+	onRectChanged();
 }
 
 const Widget *Widget::findClosestAncestor(WidgetType::Enum type) const
@@ -532,8 +497,6 @@ void Widget::setDrawLast(bool value)
 	}
 	else
 	{
-		//int f = flags_;
-		//f &= ~WidgetFlags::DrawLast;
 		flags_ = WidgetFlags::Enum(flags_ & ~WidgetFlags::DrawLast);
 	}
 }
@@ -622,6 +585,185 @@ Size Widget::measure()
 	return Size();
 }
 
+void Widget::setMeasureDirty(bool value)
+{
+	if (value)
+	{
+		flags_ = flags_ | WidgetFlags::MeasureDirty;
+
+		// A parent layout will need re-measuring too.
+		if (parent_ && parent_->isLayoutWidget())
+		{
+			parent_->setMeasureDirty();
+		}
+
+		// Let the main window know that one of the widgets in its heirarchy need re-measuring.
+		if (mainWindow_)
+		{
+			mainWindow_->setAnyWidgetMeasureDirty();
+		}
+
+		// If we need to re-measure, we also need to recalculate the rect.
+		setRectDirty();
+	}
+	else
+	{
+		flags_ = WidgetFlags::Enum(flags_ & ~WidgetFlags::MeasureDirty);
+	}
+}
+
+void Widget::setRectDirty(bool value)
+{
+	if (value)
+	{
+		flags_ = flags_ | WidgetFlags::RectDirty;
+
+		// A parent layout will need it's rect to be recalculated too.
+		if (parent_ && parent_->isLayoutWidget())
+		{
+			parent_->setRectDirty();
+		}
+
+		// Let the main window know that one of the widgets in its heirarchy needs its rect recalculated.
+		if (mainWindow_)
+		{
+			mainWindow_->setAnyWidgetRectDirty();
+		}
+	}
+	else
+	{
+		flags_ = WidgetFlags::Enum(flags_ & ~WidgetFlags::RectDirty);
+	}
+}
+
+void Widget::doMeasurePassRecursive(bool dirty)
+{
+	for (size_t i = 0; i < children_.size(); i++)
+	{
+		children_[i]->doMeasurePassRecursive(dirty || children_[i]->isMeasureDirty());
+	}
+
+	if (dirty)
+	{
+		measuredSize_ = measure();
+		setMeasureDirty(false);
+	}
+}
+
+void Widget::doLayoutPassRecursive(bool dirty)
+{
+	if (!visible_)
+		return;
+
+	if (dirty && (!parent_ || !parent_->isLayoutWidget()))
+	{
+		// Calculate new size.
+		const Rect parentRect = parent_ ? parent_->getRect() : Rect();
+		Rect newRect = rect_;
+
+		if (userRect_.w != 0)
+		{
+			// Width is user set.
+			newRect.w = userRect_.w;
+		}
+		else if (parent_ && (stretch_ & Stretch::Width) != 0)
+		{
+			// Width is stretched to parent rect.
+			const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
+			newRect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right);
+		}
+		else
+		{
+			// Width is measured (default).
+			newRect.w = measuredSize_.w;
+		}
+
+		if (userRect_.h != 0)
+		{
+			// Height is user set.
+			newRect.h = userRect_.h;
+		}
+		else if (parent_ && (stretch_ & Stretch::Height) != 0)
+		{
+			// Height is stretched to parent rect.
+			const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
+			newRect.h = (int)(parentRect.h * scale) - (margin_.top + margin_.bottom);
+		}
+		else
+		{
+			// Height is measured (default).
+			newRect.h = measuredSize_.h;
+		}
+
+		// Calculate new position.
+		if (userRect_.x != 0)
+		{
+			// x is user set.
+			newRect.x = userRect_.x;
+		}
+		else if (parent_ && ((align_ & (Align::Left | Align::Center | Align::Right)) != 0))
+		{
+			// Align to parent rect.
+			if ((align_ & Align::Left) != 0)
+			{
+				newRect.x = margin_.left;
+			}
+			else if ((align_ & Align::Center) != 0)
+			{
+				newRect.x = margin_.left + (int)((parentRect.w - margin_.right) / 2.0f - newRect.w / 2.0f);
+			}
+			else if ((align_ & Align::Right) != 0)
+			{
+				newRect.x = parentRect.w - margin_.right - newRect.w;
+			}
+		}
+		else
+		{
+			// x is set to the left margin (default).
+			newRect.x = margin_.left;
+		}
+
+		if (userRect_.y != 0)
+		{
+			// y is user set.
+			newRect.y = userRect_.y;
+		}
+		else if (parent_ && ((align_ & (Align::Top | Align::Middle | Align::Bottom)) != 0))
+		{
+			// Align to parent rect.
+			if ((align_ & Align::Top) != 0)
+			{
+				newRect.y = margin_.top;
+			}
+			else if ((align_ & Align::Middle) != 0)
+			{
+				newRect.y = margin_.top + (int)((parentRect.h - margin_.bottom) / 2.0f - newRect.h / 2.0f);
+			}
+			else if ((align_ & Align::Bottom) != 0)
+			{
+				newRect.y = parentRect.h - margin_.bottom - newRect.h;
+			}
+		}
+		else
+		{
+			// y is set to the left margin (default).
+			newRect.y = margin_.top;
+		}
+
+		// Apply the new rect.
+		setRectInternal(newRect);
+	}
+
+	// Done, rect is no longer dirty.
+	setRectDirty(false);
+
+	// Recurse into children.
+	for (size_t i = 0; i < children_.size(); i++)
+	{
+		children_[i]->doLayoutPassRecursive(dirty || children_[i]->isRectDirty());
+	}
+}
+
 void Widget::setInternalMetadata(void *metadata)
 {
 	internalMetadata_ = metadata;
@@ -662,67 +804,6 @@ void Widget::invokeEvent(Event e, const std::vector<EventCallback> &callbacks)
 	{
 		callbacks[i](e);
 	}
-}
-
-Rect Widget::calculateAlignedStretchedRect(Rect rect) const
-{
-	// Can't align or stretch to parent rect if there is no parent.
-	if (!parent_)
-		return rect;
-
-	// Don't align or stretch if this widget is a child of a layout. The layout will handle the logic in that case.
-	if (parent_ && parent_->isLayout())
-		return rect;
-
-	const Rect parentRect = parent_->getRect();
-	const Border margin = parent_ ? parent_->getPadding() + margin_ : margin_;
-
-	// Handle stretching.
-	if ((stretch_ & Stretch::Width) != 0)
-	{
-		const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
-
-		rect.x = margin.left;
-		rect.w = (int)(parentRect.w * scale) - (margin.left + margin.right);
-	}
-
-	if ((stretch_ & Stretch::Height) != 0)
-	{
-		const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
-
-		rect.y = margin.top;
-		rect.h = (int)(parentRect.h * scale) - (margin.top + margin.bottom);
-	}
-
-	// Handle horizontal alignment.
-	if ((align_ & Align::Left) != 0)
-	{
-		rect.x = margin.left;
-	}
-	else if ((align_ & Align::Center) != 0)
-	{
-		rect.x = margin.left + (int)((parentRect.w - margin.right) / 2.0f - rect.w / 2.0f);
-	}
-	else if ((align_ & Align::Right) != 0)
-	{
-		rect.x = parentRect.w - margin.right - rect.w;
-	}
-
-	// Handle vertical alignment.
-	if ((align_ & Align::Top) != 0)
-	{
-		rect.y = margin.top;
-	}
-	else if ((align_ & Align::Middle) != 0)
-	{
-		rect.y = margin.top + (int)((parentRect.h - margin.bottom) / 2.0f - rect.h / 2.0f);
-	}
-	else if ((align_ & Align::Bottom) != 0)
-	{
-		rect.y = parentRect.h - margin.bottom - rect.h;
-	}
-
-	return rect;
 }
 
 MainWindow *Widget::findMainWindow()
@@ -771,79 +852,6 @@ void Widget::setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *win
 		}
 
 		child->setMainWindowAndWindowRecursive(mainWindow, window);
-	}
-}
-
-void Widget::setRectInternalRecursive(Rect rect)
-{
-	Rect oldRect = rect_;
-
-	// Apply alignment and stretching.
-	rect = calculateAlignedStretchedRect(rect);
-
-	rect_ = rect;
-	onRectChanged();
-
-	// Don't recurse if the rect hasn't changed.
-	if (oldRect.x != rect.x || oldRect.y != rect.y || oldRect.w != rect.w || oldRect.h != rect.h)
-	{
-		for (size_t i = 0; i < children_.size(); i++)
-		{
-			children_[i]->setRectInternalRecursive(children_[i]->rect_);
-		}
-	}
-}
-
-void Widget::refreshRect()
-{
-	setRectInternal(getRect());
-}
-
-void Widget::resizeToMeasured()
-{
-	if (!renderer_)
-		return;
-
-	Size size = measure();
-
-	// The explicitly set size overrides the measured size.
-	if (userRect_.w != 0)
-	{
-		size.w = userRect_.w;
-	}
-
-	if (userRect_.h != 0)
-	{
-		size.h = userRect_.h;
-	}
-
-	// Keep the current size if 0.
-	if (size.w == 0)
-	{
-		size.w = getWidth();
-	}
-
-	if (size.h == 0)
-	{
-		size.h = getHeight();
-	}
-
-	// Set the size.
-	setSizeInternal(size);
-}
-
-void Widget::resizeToMeasuredRecursive()
-{
-	resizeToMeasured();
-
-	for (size_t i = 0; i < children_.size(); i++)
-	{
-		children_[i]->resizeToMeasuredRecursive();
-	}
-
-	if (parent_ && parent_->refreshRectWhenChildRectChanges_)
-	{
-		parent_->resizeToMeasured();
 	}
 }
 

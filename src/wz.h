@@ -129,6 +129,8 @@ struct Rect
 	Rect(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
 	bool isEmpty() const { return x == 0 && y == 0 && w == 0 && h == 0; }
 	Rect operator-(Border b) const { return Rect(x + b.left, y + b.top, w - (b.left + b.right), h - (b.top + b.bottom)); }
+	bool operator==(Rect r) const { return x == r.x && y == r.y && w == r.w && h == r.h; }
+	bool operator!=(Rect r) const { return x != r.x || y != r.y || w != r.w || h != r.h; }
 	static bool intersect(const Rect A, const Rect B, Rect *result);
 
 	int x, y, w, h;
@@ -417,6 +419,8 @@ struct WidgetFlags
 	{
 		None = 0,
 		DrawLast = 1 << 0,
+		MeasureDirty = 1 << 1,
+		RectDirty = 1 << 2
 	};
 };
 
@@ -433,7 +437,7 @@ public:
 	Widget();
 	virtual ~Widget();
 	WidgetType::Enum getType() const;
-	bool isLayout() const;
+	bool isLayoutWidget() const;
 	const MainWindow *getMainWindow() const;
 	MainWindow *getMainWindow();
 	void setPosition(int x, int y);
@@ -481,13 +485,14 @@ public:
 	void addChildWidget(Widget *child);
 	void removeChildWidget(Widget *child);
 	void destroyChildWidget(Widget *child);
-	void setPositionInternal(int x, int y);
-	void setPositionInternal(Position position);
-	void setWidthInternal(int w);
-	void setHeightInternal(int h);
-	void setSizeInternal(int w, int h);
-	void setSizeInternal(Size size);
-	void setRectInternal(int x, int y, int w, int h);
+	bool isRectDirty() const;
+	bool isMeasureDirty() const;
+	Rect getUserRect() const;
+	Size getMeasuredSize() const;
+
+	// Returns a measured dimension if the user dimension isn't set.
+	Size getUserOrMeasuredSize() const;
+
 	void setRectInternal(Rect rect);
 	const Widget *findClosestAncestor(WidgetType::Enum type) const;
 	Widget *findClosestAncestor(WidgetType::Enum type);
@@ -551,6 +556,11 @@ protected:
 
 	virtual Size measure();
 
+	void setMeasureDirty(bool value = true);
+	void setRectDirty(bool value = true);
+	void doMeasurePassRecursive(bool dirty);
+	void doLayoutPassRecursive(bool dirty);
+
 	void setInternalMetadata(void *metadata);
 	void *getInternalMetadata();
 
@@ -560,19 +570,9 @@ protected:
 	void invokeEvent(Event e);
 	void invokeEvent(Event e, const std::vector<EventCallback> &callbacks);
 
-	// Applies alignment and stretching to the provided rect, relative to the widget's parent rect.
-	Rect calculateAlignedStretchedRect(Rect rect) const;
-
 	MainWindow *findMainWindow();
 	void setRenderer(IRenderer *renderer);
 	void setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window);
-	void setRectInternalRecursive(Rect rect);
-	void refreshRect();
-
-	// Resize the widget to the result of calling the widget "measure" callback.
-	void resizeToMeasured();
-
-	void resizeToMeasuredRecursive();
 
 	WidgetType::Enum type_;
 
@@ -596,6 +596,8 @@ protected:
 	// Parent's padding is equivalent to this widget's margin.
 	Border padding_;
 
+	Size measuredSize_;
+
 	// Like metadata, but used internally.
 	void *internalMetadata_;
 
@@ -603,9 +605,6 @@ protected:
 	void *metadata_;
 
 	WidgetFlags::Enum flags_;
-
-	// Used by layouts and widgets that are sized based on their contents (groupbox).
-	bool refreshRectWhenChildRectChanges_;
 
 	bool hover_;
 
@@ -883,7 +882,13 @@ struct MainWindowFlags
 	{
 		None,
 		DockingEnabled = 1<<0,
-		MenuEnabled = 1<<1
+		MenuEnabled = 1<<1,
+
+		// Used to avoid traversing the entire widget hierarchy.
+		AnyWidgetMeasureDirty = 1<<2,
+
+		// Used to avoid traversing the entire widget hierarchy.
+		AnyWidgetRectDirty = 1 << 3
 	};
 };
 
@@ -939,10 +944,15 @@ public:
 	void setMovingWindow(Window *window);
 	void updateContentRect();
 
+	void setAnyWidgetMeasureDirty(bool value = true);
+	void setAnyWidgetRectDirty(bool value = true);
+
 protected:
 	typedef bool(*WidgetPredicate)(const Widget *);
 
 	virtual void onRectChanged();
+
+	void doMeasureAndLayoutPasses();
 
 	void mouseButtonDownRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);
 	void mouseButtonUpRecursive(Widget *widget, int mouseButton, int mouseX, int mouseY);

@@ -136,8 +136,8 @@ void Tabbed::add(Tab *tab)
 	addChildWidget(tab->page_);
 
 	// Set the page widget rect.
-	int tabBarHeight = tabBar_->getHeight();
-	tab->page_->setRectInternal(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
+	int tabBarHeight = tabBar_->getMeasuredSize().h;
+	tab->page_->setRect(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
 
 	// Store this tab.
 	tabs_.push_back(tab);
@@ -146,16 +146,17 @@ void Tabbed::add(Tab *tab)
 void Tabbed::onRectChanged()
 {
 	// Set the tab bar width to match.
-	tabBar_->setWidthInternal(rect_.w);
+	tabBar_->setWidth(rect_.w);
 
 	// Resize the pages to take up the remaining space.
-	Size pageSize;
-	pageSize.w = rect_.w;
-	pageSize.h = rect_.h - tabBar_->getHeight();
+	Rect pageRect;
+	pageRect.y = tabBar_->getMeasuredSize().h;
+	pageRect.w = rect_.w;
+	pageRect.h = rect_.h - tabBar_->getMeasuredSize().h;
 
 	for (size_t i = 0; i < tabs_.size(); i++)
 	{
-		tabs_[i]->page_->setSizeInternal(pageSize);
+		tabs_[i]->page_->setRect(pageRect);
 	}
 }
 
