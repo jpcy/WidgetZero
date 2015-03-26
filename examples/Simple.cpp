@@ -52,9 +52,6 @@ SOFTWARE.
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-#define BUTTON_WIDTH 200
-#define BUTTON_HEIGHT 100
-
 SDL_Window *sdlWindow;
 
 void ShowError(const char *message)
@@ -131,7 +128,8 @@ int main(int, char **)
 
 	// Create a button.
 	wz::Button *button = new wz::Button("Click me!");
-	button->setRect(WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
+	button->setSize(200, 100);
+	button->setAlign(wz::Align::Center | wz::Align::Middle);
 	button->setFontSize(24);
 	mainWindow->add(button);
 
