@@ -43,7 +43,6 @@ List::List(uint8_t *itemData, int itemStride, int nItems)
 
 	scroller_ = new Scroller(ScrollerDirection::Vertical, 0, 1, 0);
 	addChildWidget(scroller_);
-	updateScroller();
 	scroller_->addEventHandler(EventType::ScrollerValueChanged, this, &List::onScrollerValueChanged);
 }
 
@@ -356,6 +355,10 @@ void List::updateMouseOverItem(int mouseX, int mouseY)
 
 void List::updateScroller()
 {
+	// Size not set yet.
+	if (rect_.w == 0 && rect_.h == 0)
+		return;
+
 	// Update max value.
 	const int maxHeight = nItems_ * itemHeight_;
 	const int max = maxHeight - getItemsRect().h;

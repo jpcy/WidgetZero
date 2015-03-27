@@ -142,6 +142,7 @@ struct Size
 {
 	Size() : w(0), h(0) {}
 	Size(int w, int h) : w(w), h(h) {}
+	bool operator==(Size s) const { return w == s.w && h == s.h; }
 	Size operator+(Size s) { return Size(w + s.w, h + s.h); }
 	Size operator+=(Size s) { w += s.w; h += s.h; return *this; }
 	int w, h;

@@ -104,6 +104,11 @@ bool ScrollerNub::isPressed() const
 void ScrollerNub::updateRect()
 {
 	const Size containerSize = parent_->getSize();
+
+	// Container size isn't set yet.
+	if (containerSize == Size(0, 0))
+		return;
+
 	Rect rect;
 
 	if (scroller_->getDirection() == ScrollerDirection::Vertical)

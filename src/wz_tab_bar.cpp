@@ -272,6 +272,10 @@ void TabBar::onIncrementButtonClicked(Event)
 
 void TabBar::updateScrollButtons()
 {
+	// Size isn't set yet.
+	if (rect_.w == 0 && rect_.h == 0)
+		return;
+
 	// Total tab widths.
 	int totalTabWidth = 0;
 
