@@ -95,7 +95,7 @@ struct WidgetType
 		TabBar,
 		TabPage,
 		Tabbed,
-		TextEdit,
+		TextEdit
 	};
 };
 
@@ -574,6 +574,8 @@ protected:
 	void setRenderer(IRenderer *renderer);
 	void setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *window);
 
+	void debugPrintf(const char *format, ...) const;
+
 	WidgetType::Enum type_;
 
 	// Explicitly set by the user.
@@ -637,6 +639,11 @@ protected:
 	std::vector<Widget *> children_;
 
 	std::vector<IEventHandler *> eventHandlers_;
+
+private:
+#ifndef NDEBUG
+	void debugPrintWidgetDetailsRecursive() const;
+#endif
 };
 
 struct ButtonClickBehavior

@@ -24,6 +24,35 @@ SOFTWARE.
 #include "wz.h"
 #pragma hdrstop
 
+#if !defined(NDEBUG) && defined(_MSC_VER)
+#include <Windows.h>
+#endif
+
+#ifndef _NDEBUG
+static const char *widgetTypeNames[] =
+{
+	"Widget",
+	"MainWindow",
+	"Window",
+	"Button",
+	"Combo",
+	"Frame",
+	"GroupBox",
+	"Label",
+	"List",
+	"MenuBar",
+	"MenuBarButton",
+	"RadioButton",
+	"Scroller",
+	"Spinner",
+	"StackLayout",
+	"TabBar",
+	"TabPage",
+	"Tabbed",
+	"TextEdit"
+};
+#endif
+
 namespace wz {
 
 Widget::Widget()
@@ -157,6 +186,7 @@ void Widget::setRect(Rect rect)
 	{
 		userRect_ = rect;
 		setRectDirty();
+		debugPrintf("user rect set (%i %i %i %i)", rect.x, rect.y, rect.w, rect.h);
 	}
 }
 
@@ -442,6 +472,8 @@ void Widget::setRectInternal(Rect rect)
 
 	// Still call this even if the rect hasn't actually changed.
 	onRectChanged();
+
+	debugPrintf("internal rect set (%i %i %i %i)", rect_.x, rect_.y, rect_.w, rect_.h);
 }
 
 const Widget *Widget::findClosestAncestor(WidgetType::Enum type) const
@@ -854,5 +886,77 @@ void Widget::setMainWindowAndWindowRecursive(MainWindow *mainWindow, Window *win
 		child->setMainWindowAndWindowRecursive(mainWindow, window);
 	}
 }
+
+#ifdef NDEBUG
+void Widget::debugPrintf(const char *, ...) const
+{
+}
+#else
+static void DebugVPrint(const char *format, va_list args)
+{
+	char buffer[128];
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+
+#ifdef _MSC_VER
+	OutputDebugString(buffer);
+#else
+	printf("%s", buffer);	
+#endif
+}
+
+static void DebugPrintf(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	DebugVPrint(format, args);
+}
+
+void Widget::debugPrintf(const char *format, ...) const
+{
+	debugPrintWidgetDetailsRecursive();
+
+	DebugPrintf(": ");
+
+	va_list args;
+	va_start(args, format);
+	DebugVPrint(format, args);
+
+	DebugPrintf("\n");
+}
+
+void Widget::debugPrintWidgetDetailsRecursive() const
+{
+	if (parent_)
+	{
+		parent_->debugPrintWidgetDetailsRecursive();
+		DebugPrintf(" -> ");
+	}
+
+	DebugPrintf(widgetTypeNames[(int)type_]);
+
+	// Try to print a description for the widget too.
+	if (type_ == WidgetType::Window && ((Window *)this)->getTitle()[0])
+	{
+		DebugPrintf(" \"%s\"", ((Window *)this)->getTitle());
+	}
+	else if ((type_ == WidgetType::Button || type_ == WidgetType::RadioButton) && ((Button *)this)->getLabel()[0])
+	{
+		DebugPrintf(" \"%s\"", ((Button *)this)->getLabel());
+	}
+	else if (type_ == WidgetType::GroupBox && ((GroupBox *)this)->getLabel()[0])
+	{
+		DebugPrintf(" \"%s\"", ((GroupBox *)this)->getLabel());
+	}
+	else if (type_ == WidgetType::Label && !((Label *)this)->getMultiline())
+	{
+		DebugPrintf(" \"%s\"", ((Label *)this)->getText());
+	}
+	else if (type_ == WidgetType::MenuBarButton && ((MenuBarButton *)this)->getLabel()[0])
+	{
+		DebugPrintf(" \"%s\"", ((MenuBarButton *)this)->getLabel());
+	}
+}
+#endif
 
 } // namespace wz

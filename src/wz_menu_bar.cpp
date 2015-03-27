@@ -36,7 +36,7 @@ MENU BAR BUTTON
 
 MenuBarButton::MenuBarButton(MenuBar *menuBar)
 {
-	type_ = WidgetType::Button;
+	type_ = WidgetType::MenuBarButton;
 	isPressed_ = isSet_ = false;
 	menuBar_ = menuBar;
 }

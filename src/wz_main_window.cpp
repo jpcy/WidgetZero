@@ -754,14 +754,18 @@ void MainWindow::doMeasureAndLayoutPasses()
 {
 	if (flags_ & MainWindowFlags::AnyWidgetMeasureDirty)
 	{
+		debugPrintf("***** BEGIN MEASURE PASS *****");
 		doMeasurePassRecursive(isMeasureDirty());
 		setAnyWidgetMeasureDirty(false);
+		debugPrintf("***** END MEASURE PASS *****");
 	}
 
 	if (flags_ & MainWindowFlags::AnyWidgetRectDirty)
 	{
+		debugPrintf("***** BEGIN LAYOUT PASS *****");
 		doLayoutPassRecursive(isRectDirty());
 		setAnyWidgetRectDirty(false);
+		debugPrintf("***** END LAYOUT PASS *****");
 	}
 }
 
