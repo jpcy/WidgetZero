@@ -28,6 +28,7 @@ namespace wz {
 
 CheckBox::CheckBox(const std::string &label) : Button(label)
 {
+	type_ = WidgetType::CheckBox;
 	setSetBehavior(ButtonSetBehavior::Toggle);
 }
 

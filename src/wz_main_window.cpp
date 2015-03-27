@@ -28,6 +28,7 @@ namespace wz {
 
 DockIcon::DockIcon()
 {
+	type_ = WidgetType::DockIcon;
 	setSize(48, 48);
 }
 

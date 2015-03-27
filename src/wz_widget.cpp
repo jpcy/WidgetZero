@@ -35,7 +35,9 @@ static const char *widgetTypeNames[] =
 	"MainWindow",
 	"Window",
 	"Button",
+	"CheckBox",
 	"Combo",
+	"DockIcon",
 	"Frame",
 	"GroupBox",
 	"Label",
@@ -940,7 +942,7 @@ void Widget::debugPrintWidgetDetailsRecursive() const
 	{
 		DebugPrintf(" \"%s\"", ((Window *)this)->getTitle());
 	}
-	else if ((type_ == WidgetType::Button || type_ == WidgetType::RadioButton) && ((Button *)this)->getLabel()[0])
+	else if ((type_ == WidgetType::Button || type_ == WidgetType::CheckBox || type_ == WidgetType::RadioButton) && ((Button *)this)->getLabel()[0])
 	{
 		DebugPrintf(" \"%s\"", ((Button *)this)->getLabel());
 	}
