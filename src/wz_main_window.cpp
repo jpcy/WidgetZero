@@ -94,7 +94,8 @@ MainWindow::MainWindow(IRenderer *renderer, MainWindowFlags::Enum flags)
 	{
 		// Create menu bar.
 		menuBar_ = new MenuBar;
-		setMenuBar(menuBar_);
+		menuBar_->setStretch(Stretch::Width);
+		addChildWidget(menuBar_);
 	}
 }
 
@@ -399,19 +400,6 @@ void MainWindow::drawFrame()
 	renderer_->beginFrame(rect_.w, rect_.h);
 	draw();
 	renderer_->endFrame();
-}
-
-void MainWindow::setMenuBar(MenuBar *menuBar)
-{
-	if (!isMenuEnabled())
-	{
-		WZ_ASSERT("menu not enabled" && false);
-		return;
-	}
-
-	menuBar_ = menuBar;
-	menuBar->setWidth(rect_.w);
-	addChildWidget(menuBar);
 }
 
 void MainWindow::add(Widget *widget)
@@ -740,12 +728,6 @@ void MainWindow::setAnyWidgetRectDirty(bool value)
 
 void MainWindow::onRectChanged()
 {
-	// Match the menu bar width to the main window width.
-	if (isMenuEnabled())
-	{
-		menuBar_->setWidth(rect_.w);
-	}
-
 	updateDockIconPositions();
 	updateDockingRects();
 	updateContentRect();

@@ -925,7 +925,6 @@ public:
 	void textInput(const char *text);
 	void draw();
 	void drawFrame();
-	void setMenuBar(MenuBar *menuBar);
 	void add(Widget *widget);
 	void remove(Widget *widget);
 	bool isTextCursorVisible() const;

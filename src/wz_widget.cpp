@@ -471,11 +471,10 @@ Size Widget::getUserOrMeasuredSize() const
 void Widget::setRectInternal(Rect rect)
 {
 	rect_ = rect;
+	debugPrintf("internal rect set (%i %i %i %i)", rect_.x, rect_.y, rect_.w, rect_.h);
 
 	// Still call this even if the rect hasn't actually changed.
 	onRectChanged();
-
-	debugPrintf("internal rect set (%i %i %i %i)", rect_.x, rect_.y, rect_.w, rect_.h);
 }
 
 const Widget *Widget::findClosestAncestor(WidgetType::Enum type) const
