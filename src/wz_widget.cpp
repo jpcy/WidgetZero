@@ -693,6 +693,7 @@ void Widget::doLayoutPassRecursive(bool dirty)
 	{
 		// Calculate new size.
 		const Rect parentRect = parent_ ? parent_->getRect() : Rect();
+		const Border parentPadding = parent_ ? parent_->getPadding() : Border();
 		Rect newRect = rect_;
 
 		if (userRect_.w != 0)
@@ -704,7 +705,7 @@ void Widget::doLayoutPassRecursive(bool dirty)
 		{
 			// Width is stretched to parent rect.
 			const float scale = (stretchWidthScale_ < 0.01f) ? 1 : stretchWidthScale_;
-			newRect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right);
+			newRect.w = (int)(parentRect.w * scale) - (margin_.left + margin_.right) - (parentPadding.left + parentPadding.right);
 		}
 		else
 		{
@@ -721,7 +722,7 @@ void Widget::doLayoutPassRecursive(bool dirty)
 		{
 			// Height is stretched to parent rect.
 			const float scale = (stretchHeightScale_ < 0.01f) ? 1 : stretchHeightScale_;
-			newRect.h = (int)(parentRect.h * scale) - (margin_.top + margin_.bottom);
+			newRect.h = (int)(parentRect.h * scale) - (margin_.top + margin_.bottom) - (parentPadding.top + parentPadding.bottom);
 		}
 		else
 		{

@@ -1447,7 +1447,6 @@ public:
 protected:
 	virtual void onRendererChanged();
 	virtual void onFontChanged(const char *fontFace, float fontSize);
-	virtual void onRectChanged();
 	virtual void onMouseButtonDown(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseButtonUp(int mouseButton, int mouseX, int mouseY);
 	virtual void onMouseMove(int mouseX, int mouseY, int mouseDeltaX, int mouseDeltaY);
@@ -1455,7 +1454,7 @@ protected:
 	virtual void draw(Rect clip);
 	virtual Size measure();
 
-	void refreshHeaderHeight();
+	void refreshHeaderHeightAndPadding();
 
 	// rects parameter size should be Compass::NumPoints
 	void calculateBorderRects(Rect *rects);

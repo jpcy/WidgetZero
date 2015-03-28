@@ -38,6 +38,7 @@ Window::Window(const std::string &title)
 	title_ = title;
 
 	content_ = new Widget;
+	content_->setStretch(Stretch::All);
 	addChildWidget(content_);
 }
 
@@ -111,23 +112,13 @@ void Window::remove(Widget *widget)
 
 void Window::onRendererChanged()
 {
-	refreshHeaderHeight();
+	refreshHeaderHeightAndPadding();
 }
 
 void Window::onFontChanged(const char * /*fontFace*/, float /*fontSize*/)
 {
-	refreshHeaderHeight();
+	refreshHeaderHeightAndPadding();
 	setRectDirty();
-}
-
-void Window::onRectChanged()
-{
-	Rect contentRect;
-	contentRect.x = borderSize_;
-	contentRect.y = borderSize_ + headerHeight_;
-	contentRect.w = rect_.w - borderSize_ * 2;
-	contentRect.h = rect_.h - (headerHeight_ + borderSize_ * 2);
-	content_->setRect(contentRect);
 }
 
 void Window::onMouseButtonDown(int mouseButton, int mouseX, int mouseY)
@@ -355,9 +346,10 @@ Size Window::measure()
 	return renderer_->measureWindow(this);
 }
 
-void Window::refreshHeaderHeight()
+void Window::refreshHeaderHeightAndPadding()
 {
 	headerHeight_ = getLineHeight() + 6; // Padding.
+	padding_ = Border(borderSize_ + headerHeight_, borderSize_, borderSize_, borderSize_);
 }
 
 void Window::calculateBorderRects(Rect *rects)
