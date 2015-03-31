@@ -66,7 +66,7 @@ void StackLayout::remove(Widget *widget)
 	removeChildWidget(widget);
 }
 
-void StackLayout::onRectChanged()
+void StackLayout::doLayout()
 {
 	if (direction_ == StackLayoutDirection::Vertical)
 	{

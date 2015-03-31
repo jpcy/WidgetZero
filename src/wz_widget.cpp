@@ -578,6 +578,8 @@ LineBreakResult Widget::lineBreakText(const char *text, int n, int lineWidth) co
 	return renderer_->lineBreakText(fontFace_, fontSize_, text, n, lineWidth);
 }
 
+void Widget::doLayout() {}
+
 void Widget::onParented(Widget * /*parent*/) {}
 
 void Widget::onRendererChanged() {}
@@ -790,6 +792,12 @@ void Widget::doLayoutPassRecursive(bool dirty)
 
 	// Done, rect is no longer dirty.
 	setRectDirty(false);
+
+	// Have layout widgets run their layout logic.
+	if (isLayoutWidget())
+	{
+		doLayout();
+	}
 
 	// Recurse into children.
 	for (size_t i = 0; i < children_.size(); i++)

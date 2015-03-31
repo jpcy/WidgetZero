@@ -529,6 +529,8 @@ public:
 	LineBreakResult lineBreakText(const char *text, int n, int lineWidth) const;
 
 protected:
+	virtual void doLayout();
+
 	// The widget was added to a parent widget (see Widget::addChildWidget).
 	virtual void onParented(Widget *parent);
 
@@ -1199,8 +1201,8 @@ public:
 	void remove(Widget *widget);
 
 protected:
+	virtual void doLayout();
 	virtual Size measure();
-	virtual void onRectChanged();
 	void layoutVertical();
 	void layoutHorizontal();
 
