@@ -64,7 +64,6 @@ Widget::Widget()
 	stretchWidthScale_ = 0;
 	stretchHeightScale_ = 0;
 	align_ = Align::None;
-	internalMetadata_ = NULL;
 	metadata_ = NULL;
 	flags_ = WidgetFlags::MeasureDirty | WidgetFlags::RectDirty;
 	hover_ = false;
@@ -805,16 +804,6 @@ void Widget::doLayoutPassRecursive(bool dirty)
 	{
 		children_[i]->doLayoutPassRecursive(dirty || children_[i]->isRectDirty());
 	}
-}
-
-void Widget::setInternalMetadata(void *metadata)
-{
-	internalMetadata_ = metadata;
-}
-
-void *Widget::getInternalMetadata()
-{
-	return internalMetadata_;
 }
 
 void Widget::drawIfVisible()

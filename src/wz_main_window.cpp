@@ -26,6 +26,17 @@ SOFTWARE.
 
 namespace wz {
 
+class WindowTabButton : public TabButton
+{
+public:
+	WindowTabButton(Window *window) : TabButton(window->getTitle())
+	{
+		this->window = window;
+	}
+
+	Window *window;
+};
+
 DockIcon::DockIcon()
 {
 	type_ = WidgetType::DockIcon;
@@ -1057,7 +1068,7 @@ void MainWindow::onDockTabBarTabChanged(Event e)
 	WZ_ASSERT(dockPosition != DockPosition::None);
 
 	// Get the window corresponding to the tab.
-	Window *window = (Window *)e.tabBar.tab->getInternalMetadata();
+	Window *window = ((WindowTabButton *)e.tabBar.tab)->window;
 
 	// Internal metadata won't be set yet when first adding a tab.
 	if (window == NULL)
@@ -1108,11 +1119,8 @@ void MainWindow::refreshDockTabBar(DockPosition::Enum dockPosition)
 			Window *window = dockedWindows_[dockPosition][i];
 
 			// Create a new tab.
-			TabButton *tab = new TabButton(window->getTitle());
+			WindowTabButton *tab = new WindowTabButton(window);
 			tabBar->addTab(tab);
-
-			// Set the tab internal metadata to the window.
-			tab->setInternalMetadata(window);
 
 			// If this window is selected (visible), select the corresponding tab.
 			if (window->isVisible())

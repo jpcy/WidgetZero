@@ -566,9 +566,6 @@ protected:
 	void doMeasurePassRecursive(bool dirty);
 	void doLayoutPassRecursive(bool dirty);
 
-	void setInternalMetadata(void *metadata);
-	void *getInternalMetadata();
-
 	// Draw without clipping if visible.
 	void drawIfVisible();
 
@@ -604,9 +601,6 @@ protected:
 	Border padding_;
 
 	Size measuredSize_;
-
-	// Like metadata, but used internally.
-	void *internalMetadata_;
 
 	// User-set metadata.
 	void *metadata_;
