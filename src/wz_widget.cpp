@@ -470,10 +470,11 @@ Size Widget::getUserOrMeasuredSize() const
 
 void Widget::setRectInternal(Rect rect)
 {
+	if (rect == rect_)
+		return;
+
 	rect_ = rect;
 	debugPrintf("internal rect set (%i %i %i %i)", rect_.x, rect_.y, rect_.w, rect_.h);
-
-	// Still call this even if the rect hasn't actually changed.
 	onRectChanged();
 }
 
