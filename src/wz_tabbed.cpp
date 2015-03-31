@@ -106,9 +106,18 @@ Tabbed::Tabbed()
 {
 	type_ = WidgetType::Tabbed;
 
+	layout_ = new StackLayout(StackLayoutDirection::Vertical);
+	layout_->setStretch(Stretch::All);
+	addChildWidget(layout_);
+
 	tabBar_ = new TabBar;
+	tabBar_->setStretch(Stretch::Width);
 	tabBar_->addEventHandler(EventType::TabBarTabChanged, this, &Tabbed::onTabChanged);
-	addChildWidget(tabBar_);
+	layout_->add(tabBar_);
+
+	pageContainer_ = new Widget;
+	pageContainer_->setStretch(Stretch::All);
+	layout_->add(pageContainer_);
 }
 
 Tab *Tabbed::getSelectedTab()
@@ -132,32 +141,12 @@ void Tabbed::add(Tab *tab)
 	tabBar_->addTab(tab->button_);
 
 	// Add the page widget.
+	tab->page_->setStretch(Stretch::All);
 	tab->page_->setVisible(tabBar_->getSelectedTab() == tab->button_);
-	addChildWidget(tab->page_);
-
-	// Set the page widget rect.
-	int tabBarHeight = tabBar_->getMeasuredSize().h;
-	tab->page_->setRect(0, tabBarHeight, rect_.w, rect_.h - tabBarHeight);
+	pageContainer_->addChildWidget(tab->page_);
 
 	// Store this tab.
 	tabs_.push_back(tab);
-}
-
-void Tabbed::onRectChanged()
-{
-	// Set the tab bar width to match.
-	tabBar_->setWidth(rect_.w);
-
-	// Resize the pages to take up the remaining space.
-	Rect pageRect;
-	pageRect.y = tabBar_->getMeasuredSize().h;
-	pageRect.w = rect_.w;
-	pageRect.h = rect_.h - tabBar_->getMeasuredSize().h;
-
-	for (size_t i = 0; i < tabs_.size(); i++)
-	{
-		tabs_[i]->page_->setRect(pageRect);
-	}
 }
 
 void Tabbed::draw(Rect clip)

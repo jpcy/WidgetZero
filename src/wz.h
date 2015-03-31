@@ -1293,12 +1293,13 @@ public:
 	void add(Tab *tab);
 
 protected:
-	virtual void onRectChanged();
 	virtual void draw(Rect clip);
 	virtual Size measure();
 	void onTabChanged(Event e);
 
+	StackLayout *layout_;
 	TabBar *tabBar_;
+	Widget *pageContainer_;
 	std::vector<Tab *> tabs_;
 };
 
